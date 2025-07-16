@@ -1,63 +1,63 @@
-// 10. src/CompleteWritingPlatform.tsx
+// src/CompleteWritingPlatform.tsx
 import React, { useState } from 'react';
-import Navigation from './components/Navigation/Navigation';
-import ProjectDashboard from './components/Dashboard/ProjectDashboard';
-import WritingInterface from './components/Panels/WritingInterface';
-import TimelineInterface from './components/Panels/TimelineInterface';
-import AnalysisInterface from './components/Panels/AnalysisInterface';
-import CreateProjectModal from './components/Modals/CreateProjectModal';
+import { useWritingPlatform } from './context/WritingPlatformProvider';
+import ClaudeAssistant from './components/Claude/ClaudeAssistant';
+
+// Panels
+import DashboardPanel from './components/Panels/DashboardPanel';
+import WritingPanel from './components/Panels/WritingPanel';
+import TimelinePanel from './components/Panels/TimelinePanel';
+import AnalysisPanel from './components/Panels/AnalysisPanel';
+
+// Common props interface for panels
+interface PanelProps {
+  onTextSelect?: () => void;
+  selectedText?: string;
+}
 
 const CompleteWritingPlatform: React.FC = () => {
-  const [activeView, setActiveView] = useState<'dashboard' | 'writing' | 'timeline' | 'analysis'>('dashboard');
-  const [currentProject, setCurrentProject] = useState<{ project: { title: string } } | null>(null);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { activeView } = useWritingPlatform();
+  const [selectedText, setSelectedText] = useState<string>('');
 
-  const toggleTheme = () => {
-    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
-    document.documentElement.classList.toggle('dark');
+  // Handle text selection for Claude integration
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim()) {
+      setSelectedText(selection.toString().trim());
+    } else {
+      setSelectedText('');
+    }
   };
 
-  const handleProjectCreate = (title: string) => {
-    setCurrentProject({ project: { title } });
-    setActiveView('writing');
+  const renderPanel = () => {
+    const panelProps: PanelProps = {
+      onTextSelect: handleTextSelection,
+      selectedText
+    };
+
+    switch (activeView) {
+      case 'dashboard':
+        return <DashboardPanel />;
+      case 'writing':
+        return <WritingPanel {...panelProps} />;
+      case 'timeline':
+        return <TimelinePanel />;
+      case 'analysis':
+        return <AnalysisPanel />;
+      default:
+        return <DashboardPanel />;
+    }
   };
 
   return (
-    <div className={`${theme} min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white`}>
-      <Navigation
-        activeView={activeView}
-        onViewChange={setActiveView}
-        currentProject={currentProject}
-        theme={theme}
-        onThemeToggle={toggleTheme}
-      />
-
-      <main className="p-6">
-        {!currentProject && (
-          <div className="text-center mt-20">
-            <h2 className="text-2xl mb-4">Welcome to Your Writing Assistant</h2>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Create Your First Project
-            </button>
-          </div>
-        )}
-
-        {currentProject && activeView === 'dashboard' && <ProjectDashboard />}
-        {currentProject && activeView === 'writing' && <WritingInterface />}
-        {currentProject && activeView === 'timeline' && <TimelineInterface />}
-        {currentProject && activeView === 'analysis' && <AnalysisInterface />}
-      </main>
-
-      <CreateProjectModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onCreate={handleProjectCreate}
-      />
-    </div>
+    <main 
+      className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300"
+      onMouseUp={handleTextSelection}
+      onKeyUp={handleTextSelection}
+    >
+      {renderPanel()}
+      <ClaudeAssistant selectedText={selectedText} />
+    </main>
   );
 };
 
