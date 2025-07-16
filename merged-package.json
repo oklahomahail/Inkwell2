@@ -1,0 +1,33 @@
+{
+  "name": "writing-platform",
+  "version": "1.0.0",
+  "description": "Interactive writing and campaign assistant for Henry Hail and the Whittier Kids.",
+  "author": "Dave Hail",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^6.23.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.6.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
+    "vite": "^7.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oklahomahail/henry-hail-assistant.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oklahomahail/henry-hail-assistant/issues"
+  },
+  "homepage": "https://github.com/oklahomahail/henry-hail-assistant#readme",
+  "keywords": []
+}
