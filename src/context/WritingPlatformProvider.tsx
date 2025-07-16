@@ -9,6 +9,7 @@ interface WritingPlatformContextType {
   setCurrentProject: (project: { title: string } | null) => void;
   activeView: 'dashboard' | 'writing' | 'timeline' | 'analysis';
   setActiveView: (view: 'dashboard' | 'writing' | 'timeline' | 'analysis') => void;
+  resetApp: () => void;
 }
 
 // Create the context with default undefined
@@ -29,15 +30,50 @@ interface WritingPlatformProviderProps {
 }
 
 const WritingPlatformProvider: React.FC<WritingPlatformProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [currentProject, setCurrentProject] = useState<{ title: string } | null>(null);
-  const [activeView, setActiveView] = useState<'dashboard' | 'writing' | 'timeline' | 'analysis'>('dashboard');
+  const [theme, setThemeState] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
+  });
 
-  // Sync theme with body class for Tailwind
+  const [currentProject, setCurrentProjectState] = useState<{ title: string } | null>(() => {
+    const stored = localStorage.getItem('currentProject');
+    return stored ? JSON.parse(stored) : null;
+  });
+
+  const [activeView, setActiveViewState] = useState<'dashboard' | 'writing' | 'timeline' | 'analysis'>(() => {
+    return (localStorage.getItem('activeView') as 'dashboard' | 'writing' | 'timeline' | 'analysis') || 'dashboard';
+  });
+
+  // Persist theme
   useEffect(() => {
+    localStorage.setItem('theme', theme);
     document.body.classList.remove('light', 'dark');
     document.body.classList.add(theme);
   }, [theme]);
+
+  // Persist current project
+  useEffect(() => {
+    if (currentProject) {
+      localStorage.setItem('currentProject', JSON.stringify(currentProject));
+    } else {
+      localStorage.removeItem('currentProject');
+    }
+  }, [currentProject]);
+
+  // Persist active view
+  useEffect(() => {
+    localStorage.setItem('activeView', activeView);
+  }, [activeView]);
+
+  const setTheme = (newTheme: 'light' | 'dark') => setThemeState(newTheme);
+  const setCurrentProject = (project: { title: string } | null) => setCurrentProjectState(project);
+  const setActiveView = (view: 'dashboard' | 'writing' | 'timeline' | 'analysis') => setActiveViewState(view);
+
+  const resetApp = () => {
+    localStorage.clear();
+    setThemeState('light');
+    setCurrentProjectState(null);
+    setActiveViewState('dashboard');
+  };
 
   const value = {
     theme,
@@ -46,6 +82,7 @@ const WritingPlatformProvider: React.FC<WritingPlatformProviderProps> = ({ child
     setCurrentProject,
     activeView,
     setActiveView,
+    resetApp,
   };
 
   return (
