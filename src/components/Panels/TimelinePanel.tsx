@@ -1,84 +1,158 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useClaude } from "@/context/ClaudeProvider";
+
 
 interface Scene {
   id: string;
   title: string;
   description: string;
+  isLoading?: boolean;
 }
-
-const LOCAL_STORAGE_KEY = "timelineScenes";
 
 const TimelinePanel: React.FC = () => {
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [sceneSuggestions, setSceneSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // Load scenes from localStorage on mount
+  const { generatePlotIdeas, improveText, callClaude } = useClaude();
+
+  // Load from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (saved) {
+    const stored = localStorage.getItem("timeline_scenes");
+    if (stored) {
       try {
-        setScenes(JSON.parse(saved));
+        setScenes(JSON.parse(stored));
       } catch {
-        // fallback if JSON fails
-        setScenes([]);
+        console.warn("Failed to parse stored scenes.");
       }
-    } else {
-      setScenes([
-        { id: "1", title: "Opening Scene", description: "Introduce characters and setting" },
-        { id: "2", title: "Inciting Incident", description: "The event that changes everything" },
-        { id: "3", title: "First Turning Point", description: "A decision is made" }
-      ]);
     }
   }, []);
 
-  // Save scenes to localStorage on change
+  // Persist to localStorage on change
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(scenes));
+    localStorage.setItem("timeline_scenes", JSON.stringify(scenes));
   }, [scenes]);
 
-  const handleDragStart = (id: string) => setDraggedId(id);
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
-
-  const handleDrop = (targetId: string) => {
-    if (!draggedId || draggedId === targetId) return;
-
-    const draggedIndex = scenes.findIndex((scene) => scene.id === draggedId);
-    const targetIndex = scenes.findIndex((scene) => scene.id === targetId);
-    const newScenes = [...scenes];
-    const [moved] = newScenes.splice(draggedIndex, 1);
-    newScenes.splice(targetIndex, 0, moved);
-    setScenes(newScenes);
-    setDraggedId(null);
-  };
-
+  // Add a new scene
   const handleAddScene = () => {
     const newScene: Scene = {
       id: Date.now().toString(),
       title: "New Scene",
       description: "Describe the scene..."
     };
-    setScenes((prev) => [...prev, newScene]);
+    setScenes(prev => [...prev, newScene]);
   };
 
+  // Delete a scene
   const handleDeleteScene = (id: string) => {
-    setScenes((prev) => prev.filter((scene) => scene.id !== id));
+    setScenes(prev => prev.filter(scene => scene.id !== id));
+  };
+
+  // Reordering logic
+  const handleDragStart = (id: string) => setDraggedId(id);
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
+  const handleDrop = (targetId: string) => {
+    if (!draggedId || draggedId === targetId) return;
+
+    const draggedIndex = scenes.findIndex(s => s.id === draggedId);
+    const targetIndex = scenes.findIndex(s => s.id === targetId);
+
+    const reordered = [...scenes];
+    const [moved] = reordered.splice(draggedIndex, 1);
+    reordered.splice(targetIndex, 0, moved);
+
+    setScenes(reordered);
+    setDraggedId(null);
+  };
+
+  // Claude integrations
+  const handleSuggestScenes = async () => {
+    const response = await generatePlotIdeas();
+    const ideas = response
+      .split(/\n?\d[.)-]/)
+      .map((i: string) => i.trim())
+      .filter(Boolean);
+    setSceneSuggestions(ideas);
+    setShowSuggestions(true);
+  };
+
+  const handleImproveDescription = async (id: string) => {
+    setScenes(prev => prev.map(s => s.id === id ? { ...s, isLoading: true } : s));
+    const scene = scenes.find(s => s.id === id);
+    if (!scene) return;
+    const improved = await improveText(scene.description);
+    setScenes(prev =>
+      prev.map(s =>
+        s.id === id ? { ...s, description: improved, isLoading: false } : s
+      )
+    );
+  };
+
+  const handleSuggestTransition = async (scene: Scene, next?: Scene) => {
+    const prompt = `Suggest a smooth narrative transition from:\n\n"${scene.title}: ${scene.description}"\n\nto:\n"${next?.title ?? "[next scene not defined]"}"`;
+    const response = await callClaude(prompt);
+    alert(`Suggested transition:\n\n${response}`);
+  };
+
+  const handleAnalyzeTension = async (scene: Scene) => {
+    const prompt = `Analyze the dramatic tension of this scene:\n\n"${scene.title}: ${scene.description}"\n\nWhat’s at stake, how strong is the conflict, and how can it be improved?`;
+    const response = await callClaude(prompt);
+    alert(`Tension analysis:\n\n${response}`);
   };
 
   return (
     <div className="p-6 text-gray-800 dark:text-gray-200">
       <h1 className="text-3xl font-bold mb-4">Timeline</h1>
       <p className="mb-4 text-gray-600 dark:text-gray-400">
-        Drag to reorder scenes. Click to edit. Add or remove as needed.
+        Drag to reorder scenes. Edit as needed. Use Claude to improve or analyze your structure.
       </p>
-      <button
-        onClick={handleAddScene}
-        className="mb-4 px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-      >
-        + Add Scene
-      </button>
+
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={handleAddScene}
+          className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+        >
+          + Add Scene
+        </button>
+        <button
+          onClick={handleSuggestScenes}
+          className="px-4 py-2 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
+        >
+          ✨ Suggest Scene Ideas
+        </button>
+      </div>
+
+      {showSuggestions && (
+        <div className="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded shadow">
+          <h3 className="font-semibold mb-2">Suggested Scenes</h3>
+          <ul className="space-y-2">
+            {sceneSuggestions.map((idea, idx) => (
+              <li key={idx}>
+                <button
+                  onClick={() => {
+                    setScenes(prev => [
+                      ...prev,
+                      {
+                        id: Date.now().toString(),
+                        title: `Scene ${scenes.length + 1}`,
+                        description: idea
+                      }
+                    ]);
+                    setShowSuggestions(false);
+                  }}
+                  className="w-full text-left px-3 py-1 text-sm rounded hover:bg-blue-100 dark:hover:bg-gray-600"
+                >
+                  {idea}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="space-y-4">
-        {scenes.map((scene) => (
+        {scenes.map((scene, index) => (
           <div
             key={scene.id}
             draggable
@@ -92,8 +166,8 @@ const TimelinePanel: React.FC = () => {
                 type="text"
                 value={scene.title}
                 onChange={(e) =>
-                  setScenes((prev) =>
-                    prev.map((s) =>
+                  setScenes(prev =>
+                    prev.map(s =>
                       s.id === scene.id ? { ...s, title: e.target.value } : s
                     )
                   )
@@ -110,16 +184,39 @@ const TimelinePanel: React.FC = () => {
             <textarea
               value={scene.description}
               onChange={(e) =>
-                setScenes((prev) =>
-                  prev.map((s) =>
-                    s.id === scene.id ? { ...s, description: e.target.value } : s
+                setScenes(prev =>
+                  prev.map(s =>
+                    s.id === scene.id
+                      ? { ...s, description: e.target.value }
+                      : s
                   )
                 )
               }
               rows={3}
-              className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 text-sm resize-none"
+              className="w-full bg-transparent border-none outline-none text-sm text-gray-700 dark:text-gray-300 resize-none"
               placeholder="Scene description..."
             />
+            <div className="mt-2 flex justify-end gap-2">
+              <button
+                onClick={() => handleImproveDescription(scene.id)}
+                disabled={scene.isLoading}
+                className="text-xs px-3 py-1 border rounded text-blue-600 border-blue-600 hover:bg-blue-100 dark:hover:bg-gray-700 disabled:opacity-50"
+              >
+                {scene.isLoading ? "Improving..." : "✨ Improve"}
+              </button>
+              <button
+                onClick={() => handleSuggestTransition(scene, scenes[index + 1])}
+                className="text-xs px-3 py-1 border rounded text-green-600 border-green-600 hover:bg-green-100 dark:hover:bg-gray-700"
+              >
+                ➡ Suggest Transition
+              </button>
+              <button
+                onClick={() => handleAnalyzeTension(scene)}
+                className="text-xs px-3 py-1 border rounded text-yellow-600 border-yellow-600 hover:bg-yellow-100 dark:hover:bg-gray-700"
+              >
+                ⚡ Analyze Tension
+              </button>
+            </div>
           </div>
         ))}
       </div>
