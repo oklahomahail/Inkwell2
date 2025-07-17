@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useClaude } from "@/context/ClaudeProvider";
-
+import MDEditor from "@uiw/react-md-editor";
 
 interface Scene {
   id: string;
@@ -29,12 +29,11 @@ const TimelinePanel: React.FC = () => {
     }
   }, []);
 
-  // Persist to localStorage on change
+  // Save to localStorage on change
   useEffect(() => {
     localStorage.setItem("timeline_scenes", JSON.stringify(scenes));
   }, [scenes]);
 
-  // Add a new scene
   const handleAddScene = () => {
     const newScene: Scene = {
       id: Date.now().toString(),
@@ -44,14 +43,13 @@ const TimelinePanel: React.FC = () => {
     setScenes(prev => [...prev, newScene]);
   };
 
-  // Delete a scene
   const handleDeleteScene = (id: string) => {
     setScenes(prev => prev.filter(scene => scene.id !== id));
   };
 
-  // Reordering logic
   const handleDragStart = (id: string) => setDraggedId(id);
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
+
   const handleDrop = (targetId: string) => {
     if (!draggedId || draggedId === targetId) return;
 
@@ -66,39 +64,70 @@ const TimelinePanel: React.FC = () => {
     setDraggedId(null);
   };
 
-  // Claude integrations
   const handleSuggestScenes = async () => {
-    const response = await generatePlotIdeas();
-    const ideas = response
-      .split(/\n?\d[.)-]/)
-      .map((i: string) => i.trim())
-      .filter(Boolean);
-    setSceneSuggestions(ideas);
-    setShowSuggestions(true);
+    try {
+      const response = await generatePlotIdeas();
+      const ideas = response
+        .split(/\n?\d[.)-]/)
+        .map((i: string) => i.trim())
+        .filter(Boolean);
+      setSceneSuggestions(ideas);
+      setShowSuggestions(true);
+    } catch (error) {
+      console.error("Failed to generate scene suggestions:", error);
+    }
   };
 
   const handleImproveDescription = async (id: string) => {
     setScenes(prev => prev.map(s => s.id === id ? { ...s, isLoading: true } : s));
     const scene = scenes.find(s => s.id === id);
     if (!scene) return;
-    const improved = await improveText(scene.description);
-    setScenes(prev =>
-      prev.map(s =>
-        s.id === id ? { ...s, description: improved, isLoading: false } : s
-      )
-    );
+
+    try {
+      const improved = await improveText(scene.description);
+      setScenes(prev =>
+        prev.map(s =>
+          s.id === id ? { ...s, description: improved, isLoading: false } : s
+        )
+      );
+    } catch (error) {
+      console.error("Failed to improve description:", error);
+      setScenes(prev =>
+        prev.map(s => s.id === id ? { ...s, isLoading: false } : s)
+      );
+    }
   };
 
   const handleSuggestTransition = async (scene: Scene, next?: Scene) => {
-    const prompt = `Suggest a smooth narrative transition from:\n\n"${scene.title}: ${scene.description}"\n\nto:\n"${next?.title ?? "[next scene not defined]"}"`;
-    const response = await callClaude(prompt);
-    alert(`Suggested transition:\n\n${response}`);
+    try {
+      const prompt = `Suggest a smooth narrative transition from:
+
+"${scene.title}: ${scene.description}"
+
+to:
+
+"${next?.title ?? "[next scene not defined]"}"`;
+      
+      const response = await callClaude(prompt);
+      alert(`Suggested transition:\n\n${response}`);
+    } catch (error) {
+      console.error("Failed to suggest transition:", error);
+    }
   };
 
   const handleAnalyzeTension = async (scene: Scene) => {
-    const prompt = `Analyze the dramatic tension of this scene:\n\n"${scene.title}: ${scene.description}"\n\nWhat’s at stake, how strong is the conflict, and how can it be improved?`;
-    const response = await callClaude(prompt);
-    alert(`Tension analysis:\n\n${response}`);
+    try {
+      const prompt = `Analyze the dramatic tension of this scene:
+
+"${scene.title}: ${scene.description}"
+
+What's at stake, how strong is the conflict, and how can it be improved?`;
+      
+      const response = await callClaude(prompt);
+      alert(`Tension analysis:\n\n${response}`);
+    } catch (error) {
+      console.error("Failed to analyze tension:", error);
+    }
   };
 
   return (
@@ -181,21 +210,22 @@ const TimelinePanel: React.FC = () => {
                 ✕
               </button>
             </div>
-            <textarea
-              value={scene.description}
-              onChange={(e) =>
-                setScenes(prev =>
-                  prev.map(s =>
-                    s.id === scene.id
-                      ? { ...s, description: e.target.value }
-                      : s
+
+            <div data-color-mode="light" className="mb-2">
+              <MDEditor
+                value={scene.description}
+                onChange={(value) =>
+                  setScenes(prev =>
+                    prev.map(s =>
+                      s.id === scene.id ? { ...s, description: value || "" } : s
+                    )
                   )
-                )
-              }
-              rows={3}
-              className="w-full bg-transparent border-none outline-none text-sm text-gray-700 dark:text-gray-300 resize-none"
-              placeholder="Scene description..."
-            />
+                }
+                preview="edit"
+                height={150}
+              />
+            </div>
+
             <div className="mt-2 flex justify-end gap-2">
               <button
                 onClick={() => handleImproveDescription(scene.id)}

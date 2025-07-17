@@ -11,6 +11,7 @@
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
+    "@uiw/react-md-editor": "^4.0.7",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^6.23.0"
