@@ -1,15 +1,14 @@
-// src/CompleteWritingPlatform.tsx
-import React, { useState } from 'react';
-import { useWritingPlatform } from './context/WritingPlatformProvider';
-import ClaudeAssistant from './components/Claude/ClaudeAssistant';
+import React, { useState } from "react";
+import Sidebar from "./components/Sidebar";
+import ClaudeAssistant from "./components/Claude/ClaudeAssistant";
+import { useWritingPlatform } from "./context/WritingPlatformProvider";
 
-// Panels
-import DashboardPanel from './components/Panels/DashboardPanel';
-import WritingPanel from './components/Panels/WritingPanel';
-import TimelinePanel from './components/Panels/TimelinePanel';
-import AnalysisPanel from './components/Panels/AnalysisPanel';
+import DashboardPanel from "./components/Panels/DashboardPanel";
+import WritingPanel from "./components/Panels/WritingPanel";
+import TimelinePanel from "./components/Panels/TimelinePanel";
+import AnalysisPanel from "./components/Panels/AnalysisPanel";
 
-// Common props interface for panels
+// Panel props interface
 interface PanelProps {
   onTextSelect?: () => void;
   selectedText?: string;
@@ -17,47 +16,54 @@ interface PanelProps {
 
 const CompleteWritingPlatform: React.FC = () => {
   const { activeView } = useWritingPlatform();
-  const [selectedText, setSelectedText] = useState<string>('');
+  const [selectedText, setSelectedText] = useState<string>("");
 
-  // Handle text selection for Claude integration
+  // Handle text selection
   const handleTextSelection = () => {
     const selection = window.getSelection();
     if (selection && selection.toString().trim()) {
       setSelectedText(selection.toString().trim());
     } else {
-      setSelectedText('');
+      setSelectedText("");
     }
   };
 
   const renderPanel = () => {
     const panelProps: PanelProps = {
       onTextSelect: handleTextSelection,
-      selectedText
+      selectedText,
     };
 
     switch (activeView) {
-      case 'dashboard':
+      case "dashboard":
         return <DashboardPanel />;
-      case 'writing':
+      case "writing":
         return <WritingPanel {...panelProps} />;
-      case 'timeline':
+      case "timeline":
         return <TimelinePanel />;
-      case 'analysis':
+      case "analysis":
         return <AnalysisPanel />;
       default:
-        return <DashboardPanel />;
+        return <div className="p-4">Unknown view: {activeView}</div>;
     }
   };
 
   return (
-    <main 
-      className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300"
+    <div
+      className="h-screen w-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
       onMouseUp={handleTextSelection}
       onKeyUp={handleTextSelection}
     >
-      {renderPanel()}
+      <div className="flex flex-1 overflow-hidden">
+        <aside className="w-64 bg-white dark:bg-gray-800 shadow-md overflow-y-auto">
+          <Sidebar />
+        </aside>
+        <main className="flex-1 overflow-y-auto p-4">
+          {renderPanel()}
+        </main>
+      </div>
       <ClaudeAssistant selectedText={selectedText} />
-    </main>
+    </div>
   );
 };
 
