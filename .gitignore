@@ -1,5 +1,46 @@
+# Node modules and build outputs
 node_modules/
 dist/
-.env
-.DS_Store
+build/
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Cache and temporary files
+.vite/
+.cache/
+.tmp/
+*.tmp
+*.swp
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Editor and OS junk
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Testing and coverage
+coverage/
+playwright-report/
+cypress/videos/
+cypress/screenshots/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Optional: lock files (uncomment if you don’t want to track them)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Misc
+*.local
