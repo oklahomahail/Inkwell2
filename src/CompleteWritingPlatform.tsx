@@ -109,6 +109,7 @@ const CompleteWritingPlatform: React.FC = () => {
       <header className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#1B2735] to-[#0073E6] text-white shadow-md">
         <h1 className="text-xl font-semibold tracking-wide">{currentProject}</h1>
         <div className="flex items-center space-x-4">
+          {/* Project Selector (Stub) */}
           <select
             value={currentProject}
             onChange={(e) => setCurrentProject(e.target.value)}
