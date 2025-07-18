@@ -1,131 +1,153 @@
-import React, { useEffect, useState, useMemo } from "react";
-import Sidebar from "./components/Sidebar";
-import ClaudeAssistant from "./components/Claude/ClaudeAssistant";
-import { useWritingPlatform } from "./context/WritingPlatformProvider";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
+import Sidebar from "@/components/Sidebar";
+import ClaudeAssistant from "@/components/Claude/ClaudeAssistant";
+import { useWritingPlatform, View } from "@/context/WritingPlatformProvider";
 
-import DashboardPanel from "./components/Panels/DashboardPanel";
-import WritingPanel from "./components/Panels/WritingPanel";
-import TimelinePanel from "./components/Panels/TimelinePanel";
-import AnalysisPanel from "./components/Panels/AnalysisPanel";
+import DashboardPanel from "@/components/Panels/DashboardPanel";
+import WritingPanel from "@/components/Panels/WritingPanel";
+import TimelinePanel from "@/components/Panels/TimelinePanel";
+import AnalysisPanel from "@/components/Panels/AnalysisPanel";
 
-// Types
-export type ActiveView = "dashboard" | "writing" | "timeline" | "analysis";
+// Inline debounce (self-contained, no external import)
+function debounce<T extends (...args: any[]) => void>(
+  fn: T,
+  delay: number
+): T & { cancel?: () => void } {
+  let timeoutId: ReturnType<typeof setTimeout>;
+
+  const debounced = function (this: any, ...args: Parameters<T>) {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn.apply(this, args), delay);
+  } as T & { cancel?: () => void };
+
+  debounced.cancel = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  };
+
+  return debounced;
+}
 
 interface PanelProps {
   onTextSelect: () => void;
   selectedText: string;
 }
 
-type Theme = "light" | "dark";
-
 const CompleteWritingPlatform: React.FC = () => {
-  const { activeView } = useWritingPlatform();
+  const {
+    activeView,
+    theme,
+    toggleTheme,
+    currentProject,
+    setCurrentProject,
+  } = useWritingPlatform();
+
   const [selectedText, setSelectedText] = useState<string>("");
-  const [theme, setTheme] = useState<Theme>("light");
-  const [currentProject, setCurrentProject] = useState<string>("My First Project");
 
-  // Load persisted theme & project on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
-    const savedProject = localStorage.getItem("currentProject");
-    if (savedTheme) {
-      setTheme(savedTheme);
-      if (savedTheme === "dark") {
-        document.documentElement.classList.add("dark");
-      }
-    }
-    if (savedProject) setCurrentProject(savedProject);
-  }, []);
-
-  // Persist changes
-  useEffect(() => {
-    localStorage.setItem("theme", theme);
-    localStorage.setItem("currentProject", currentProject);
-  }, [theme, currentProject]);
-
-  const handleTextSelection = () => {
+  const updateSelection = useCallback(() => {
     const selection = window.getSelection();
     if (selection && selection.toString().trim()) {
       setSelectedText(selection.toString().trim());
     } else {
       setSelectedText("");
     }
-  };
+  }, []);
 
-  // Fixed theme toggle (explicitly add/remove class)
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
+  const debouncedHandleTextSelection = useMemo(
+    () => debounce(updateSelection, 150),
+    [updateSelection]
+  );
 
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  };
+  useEffect(() => {
+    return () => {
+      debouncedHandleTextSelection.cancel?.();
+    };
+  }, [debouncedHandleTextSelection]);
 
-  // Memoize props for WritingPanel (avoid re-renders)
   const panelProps: PanelProps = useMemo(
     () => ({
-      onTextSelect: handleTextSelection,
+      onTextSelect: debouncedHandleTextSelection,
       selectedText,
     }),
-    [selectedText]
+    [debouncedHandleTextSelection, selectedText]
   );
 
   const renderPanel = () => {
-    switch (activeView) {
+    switch (activeView as View) {
       case "dashboard":
         return <DashboardPanel />;
       case "writing":
-        return <WritingPanel {...panelProps} />;
+        return (
+          <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md h-full">
+            <WritingPanel {...panelProps} />
+          </div>
+        );
       case "timeline":
-        return <TimelinePanel />;
+        return (
+          <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md h-full">
+            <TimelinePanel />
+          </div>
+        );
       case "analysis":
-        return <AnalysisPanel />;
+        return (
+          <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md h-full">
+            <AnalysisPanel />
+          </div>
+        );
       default:
-        return <div className="p-4">Unknown view: {activeView}</div>;
+        return (
+          <div className="p-4 text-gray-700 dark:text-gray-300">
+            Unknown view: {activeView}
+          </div>
+        );
     }
   };
 
   return (
     <div
-      className={`h-screen w-screen flex flex-col ${theme === "dark" ? "dark" : ""}`}
-      onMouseUp={handleTextSelection}
-      onKeyUp={handleTextSelection}
+      className={`h-screen w-screen flex flex-col ${
+        theme === "dark" ? "dark bg-[#1B2735]" : "bg-[#F5F7FA]"
+      }`}
+      onMouseUp={debouncedHandleTextSelection}
+      onKeyUp={debouncedHandleTextSelection}
     >
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{currentProject}</h1>
+      <header className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#1B2735] to-[#0073E6] text-white shadow-md">
+        <h1 className="text-xl font-semibold tracking-wide">{currentProject}</h1>
         <div className="flex items-center space-x-4">
-          {/* Project Selector (Stub) */}
           <select
             value={currentProject}
             onChange={(e) => setCurrentProject(e.target.value)}
-            className="px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200"
+            className="px-3 py-1.5 rounded-lg bg-white text-gray-800 text-sm font-medium shadow-sm focus:ring-2 focus:ring-[#0073E6] focus:outline-none"
           >
             <option value="My First Project">My First Project</option>
-            <option value="New Project (Placeholder)">New Project (Placeholder)</option>
+            <option value="New Project (Placeholder)">
+              New Project (Placeholder)
+            </option>
           </select>
-          {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-            className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500"
+            aria-label={`Switch to ${
+              theme === "light" ? "dark" : "light"
+            } mode`}
+            className="px-4 py-1.5 rounded-lg bg-white text-gray-800 text-sm font-medium shadow-sm hover:bg-gray-100 transition"
           >
-            {theme === "light" ? "🌙 Dark" : "☀️ Light"}
+            {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
           </button>
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-60 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
+        {/* Sidebar */}
+        <aside className="w-60 bg-gray-100 dark:bg-gray-900 border-r border-gray-300 dark:border-gray-700 overflow-y-auto">
           <Sidebar />
         </aside>
+
+        {/* Main Content */}
         <main
-          className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4"
+          className="flex-1 overflow-y-auto p-6 bg-[#F5F7FA] dark:bg-[#1B2735]"
           role="region"
           aria-label="Main content area"
         >
@@ -134,12 +156,14 @@ const CompleteWritingPlatform: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <footer className="px-4 py-2 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 flex justify-between">
+      <footer className="px-6 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400 flex justify-between">
         <span>Active View: {activeView}</span>
-        <span>{selectedText ? `Selected: ${selectedText.length} chars` : "No selection"}</span>
+        <span>
+          {selectedText ? `Selected: ${selectedText.length} chars` : "No text selected"}
+        </span>
       </footer>
 
-      {/* Claude Assistant */}
+      {/* Claude Assistant (Floating) */}
       <ClaudeAssistant selectedText={selectedText} />
     </div>
   );
