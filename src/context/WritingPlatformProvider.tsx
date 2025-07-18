@@ -1,7 +1,7 @@
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 // Define valid view types
-export type View = "dashboard" | "writing" | "timeline" | "analysis";
+export type View = 'dashboard' | 'writing' | 'timeline' | 'analysis';
 
 // Context type definition
 interface WritingPlatformContextType {
@@ -11,7 +11,7 @@ interface WritingPlatformContextType {
 
 // Default context (to prevent undefined errors if accessed outside provider)
 export const WritingPlatformContext = createContext<WritingPlatformContextType>({
-  activeView: "dashboard",
+  activeView: 'dashboard',
   setActiveView: () => {},
 });
 
@@ -25,7 +25,7 @@ interface WritingPlatformProviderProps {
 
 // The provider component
 export const WritingPlatformProvider: React.FC<WritingPlatformProviderProps> = ({ children }) => {
-  const [activeView, setActiveView] = useState<View>("dashboard");
+  const [activeView, setActiveView] = useState<View>('dashboard');
 
   return (
     <WritingPlatformContext.Provider value={{ activeView, setActiveView }}>

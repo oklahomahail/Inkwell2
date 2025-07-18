@@ -16,14 +16,30 @@ const WritingStats: React.FC<WritingStatsProps> = ({ content, title, storageQuot
     <aside className="w-64 p-4 border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
       <h3 className="text-lg font-semibold mb-3">Document Stats</h3>
       <ul className="space-y-2 text-sm">
-        <li><strong>Title:</strong> {title || 'Untitled'}</li>
-        <li><strong>Words:</strong> {stats.wordCount.toLocaleString()}</li>
-        <li><strong>Characters:</strong> {stats.characterCount.toLocaleString()}</li>
-        <li><strong>Paragraphs:</strong> {stats.paragraphCount}</li>
-        <li><strong>Sentences:</strong> {stats.sentenceCount}</li>
-        <li><strong>Avg. Words/Sentence:</strong> {stats.averageWordsPerSentence}</li>
-        <li><strong>Reading Time:</strong> {stats.readingTime} min</li>
-        <li><strong>Length:</strong> {stats.lengthCategory}</li>
+        <li>
+          <strong>Title:</strong> {title || 'Untitled'}
+        </li>
+        <li>
+          <strong>Words:</strong> {stats.wordCount.toLocaleString()}
+        </li>
+        <li>
+          <strong>Characters:</strong> {stats.characterCount.toLocaleString()}
+        </li>
+        <li>
+          <strong>Paragraphs:</strong> {stats.paragraphCount}
+        </li>
+        <li>
+          <strong>Sentences:</strong> {stats.sentenceCount}
+        </li>
+        <li>
+          <strong>Avg. Words/Sentence:</strong> {stats.averageWordsPerSentence}
+        </li>
+        <li>
+          <strong>Reading Time:</strong> {stats.readingTime} min
+        </li>
+        <li>
+          <strong>Length:</strong> {stats.lengthCategory}
+        </li>
       </ul>
 
       {storageQuota && (

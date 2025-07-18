@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useClaude } from "@/context/ClaudeProvider";
-import MDEditor from "@uiw/react-md-editor";
+import React, { useEffect, useState, useCallback } from 'react';
+import { useClaude } from '@/context/ClaudeProvider';
+import MDEditor from '@uiw/react-md-editor';
 
 interface Scene {
   id: string;
@@ -15,36 +15,67 @@ const TimelinePanel: React.FC = () => {
   const [sceneSuggestions, setSceneSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  const [history, setHistory] = useState<Scene[][]>([[]]);
+  const [redoStack, setRedoStack] = useState<Scene[][]>([]);
+
   const { generatePlotIdeas, improveText, callClaude } = useClaude();
 
-  // Load from localStorage on mount
+  // Load from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem("timeline_scenes");
+    const stored = localStorage.getItem('timeline_scenes');
     if (stored) {
       try {
-        setScenes(JSON.parse(stored));
+        const parsed: Scene[] = JSON.parse(stored);
+        setScenes(parsed);
+        setHistory([parsed]);
       } catch {
-        console.warn("Failed to parse stored scenes.");
+        console.warn('Failed to parse stored scenes.');
       }
     }
   }, []);
 
-  // Save to localStorage on change
+  // Save to localStorage
   useEffect(() => {
-    localStorage.setItem("timeline_scenes", JSON.stringify(scenes));
+    localStorage.setItem('timeline_scenes', JSON.stringify(scenes));
   }, [scenes]);
+
+  const pushHistory = useCallback((newScenes: Scene[]) => {
+    const safeScenes: Scene[] = Array.isArray(newScenes) ? newScenes : [];
+    setHistory((prev) => [...prev.slice(-20), safeScenes]); // Keep 20 undo levels
+    setRedoStack([]); // Clear redo stack
+    setScenes(safeScenes);
+  }, []);
+
+  const handleUndo = () => {
+    if (history.length > 1) {
+      const current = history[history.length - 1] ?? [];
+      const newHistory = history.slice(0, -1);
+      const lastScenes = newHistory[newHistory.length - 1] ?? [];
+      setRedoStack((prev) => [...prev, current]);
+      setScenes(lastScenes);
+      setHistory(newHistory);
+    }
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length > 0) {
+      const restored: Scene[] = redoStack[redoStack.length - 1] ?? [];
+      setRedoStack((prev) => prev.slice(0, -1));
+      pushHistory(restored);
+    }
+  };
 
   const handleAddScene = () => {
     const newScene: Scene = {
       id: Date.now().toString(),
-      title: "New Scene",
-      description: "Describe the scene..."
+      title: 'New Scene',
+      description: 'Describe the scene...',
     };
-    setScenes(prev => [...prev, newScene]);
+    pushHistory([...scenes, newScene]);
   };
 
   const handleDeleteScene = (id: string) => {
-    setScenes(prev => prev.filter(scene => scene.id !== id));
+    pushHistory(scenes.filter((scene) => scene.id !== id));
   };
 
   const handleDragStart = (id: string) => setDraggedId(id);
@@ -53,14 +84,18 @@ const TimelinePanel: React.FC = () => {
   const handleDrop = (targetId: string) => {
     if (!draggedId || draggedId === targetId) return;
 
-    const draggedIndex = scenes.findIndex(s => s.id === draggedId);
-    const targetIndex = scenes.findIndex(s => s.id === targetId);
+    const draggedIndex = scenes.findIndex((s) => s.id === draggedId);
+    const targetIndex = scenes.findIndex((s) => s.id === targetId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
 
     const reordered = [...scenes];
     const [moved] = reordered.splice(draggedIndex, 1);
-    reordered.splice(targetIndex, 0, moved);
 
-    setScenes(reordered);
+    if (!moved) return; // Guard: moved should never be undefined, but TS needs assurance.
+
+    reordered.splice(targetIndex, 0, moved);
+    pushHistory(reordered);
     setDraggedId(null);
   };
 
@@ -74,27 +109,22 @@ const TimelinePanel: React.FC = () => {
       setSceneSuggestions(ideas);
       setShowSuggestions(true);
     } catch (error) {
-      console.error("Failed to generate scene suggestions:", error);
+      console.error('Failed to generate scene suggestions:', error);
     }
   };
 
   const handleImproveDescription = async (id: string) => {
-    setScenes(prev => prev.map(s => s.id === id ? { ...s, isLoading: true } : s));
-    const scene = scenes.find(s => s.id === id);
+    pushHistory(scenes.map((s) => (s.id === id ? { ...s, isLoading: true } : s)));
+    const scene = scenes.find((s) => s.id === id);
     if (!scene) return;
 
     try {
       const improved = await improveText(scene.description);
-      setScenes(prev =>
-        prev.map(s =>
-          s.id === id ? { ...s, description: improved, isLoading: false } : s
-        )
+      pushHistory(
+        scenes.map((s) => (s.id === id ? { ...s, description: improved, isLoading: false } : s)),
       );
-    } catch (error) {
-      console.error("Failed to improve description:", error);
-      setScenes(prev =>
-        prev.map(s => s.id === id ? { ...s, isLoading: false } : s)
-      );
+    } catch {
+      pushHistory(scenes.map((s) => (s.id === id ? { ...s, isLoading: false } : s)));
     }
   };
 
@@ -106,12 +136,12 @@ const TimelinePanel: React.FC = () => {
 
 to:
 
-"${next?.title ?? "[next scene not defined]"}"`;
-      
+"${next ? `${next.title}: ${next.description}` : '[no next scene]'}"`;
+
       const response = await callClaude(prompt);
       alert(`Suggested transition:\n\n${response}`);
     } catch (error) {
-      console.error("Failed to suggest transition:", error);
+      console.error('Failed to suggest transition:', error);
     }
   };
 
@@ -122,11 +152,11 @@ to:
 "${scene.title}: ${scene.description}"
 
 What's at stake, how strong is the conflict, and how can it be improved?`;
-      
+
       const response = await callClaude(prompt);
       alert(`Tension analysis:\n\n${response}`);
     } catch (error) {
-      console.error("Failed to analyze tension:", error);
+      console.error('Failed to analyze tension:', error);
     }
   };
 
@@ -137,6 +167,7 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
         Drag to reorder scenes. Edit as needed. Use Claude to improve or analyze your structure.
       </p>
 
+      {/* Controls */}
       <div className="flex gap-2 mb-4">
         <button
           onClick={handleAddScene}
@@ -150,8 +181,23 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
         >
           ✨ Suggest Scene Ideas
         </button>
+        <button
+          onClick={handleUndo}
+          disabled={history.length <= 1}
+          className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-sm rounded hover:bg-gray-400 disabled:opacity-50"
+        >
+          ↩ Undo
+        </button>
+        <button
+          onClick={handleRedo}
+          disabled={redoStack.length === 0}
+          className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-sm rounded hover:bg-gray-400 disabled:opacity-50"
+        >
+          ↪ Redo
+        </button>
       </div>
 
+      {/* Suggestions */}
       {showSuggestions && (
         <div className="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded shadow">
           <h3 className="font-semibold mb-2">Suggested Scenes</h3>
@@ -160,13 +206,13 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
               <li key={idx}>
                 <button
                   onClick={() => {
-                    setScenes(prev => [
-                      ...prev,
+                    pushHistory([
+                      ...scenes,
                       {
                         id: Date.now().toString(),
                         title: `Scene ${scenes.length + 1}`,
-                        description: idea
-                      }
+                        description: idea,
+                      },
                     ]);
                     setShowSuggestions(false);
                   }}
@@ -180,6 +226,7 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
         </div>
       )}
 
+      {/* Scene List */}
       <div className="space-y-4">
         {scenes.map((scene, index) => (
           <div
@@ -188,17 +235,17 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
             onDragStart={() => handleDragStart(scene.id)}
             onDragOver={handleDragOver}
             onDrop={() => handleDrop(scene.id)}
-            className="p-4 bg-white dark:bg-gray-800 rounded shadow border border-gray-200 dark:border-gray-700 cursor-move"
+            className={`p-4 bg-white dark:bg-gray-800 rounded shadow border border-gray-200 dark:border-gray-700 cursor-move transition-transform duration-200 ${
+              draggedId === scene.id ? 'opacity-50 scale-105' : ''
+            }`}
           >
             <div className="flex justify-between items-center mb-2">
               <input
                 type="text"
                 value={scene.title}
                 onChange={(e) =>
-                  setScenes(prev =>
-                    prev.map(s =>
-                      s.id === scene.id ? { ...s, title: e.target.value } : s
-                    )
+                  pushHistory(
+                    scenes.map((s) => (s.id === scene.id ? { ...s, title: e.target.value } : s)),
                   )
                 }
                 className="text-lg font-semibold w-full bg-transparent border-none outline-none text-gray-900 dark:text-white"
@@ -215,10 +262,8 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
               <MDEditor
                 value={scene.description}
                 onChange={(value) =>
-                  setScenes(prev =>
-                    prev.map(s =>
-                      s.id === scene.id ? { ...s, description: value || "" } : s
-                    )
+                  pushHistory(
+                    scenes.map((s) => (s.id === scene.id ? { ...s, description: value || '' } : s)),
                   )
                 }
                 preview="edit"
@@ -232,7 +277,7 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
                 disabled={scene.isLoading}
                 className="text-xs px-3 py-1 border rounded text-blue-600 border-blue-600 hover:bg-blue-100 dark:hover:bg-gray-700 disabled:opacity-50"
               >
-                {scene.isLoading ? "Improving..." : "✨ Improve"}
+                {scene.isLoading ? 'Improving...' : '✨ Improve'}
               </button>
               <button
                 onClick={() => handleSuggestTransition(scene, scenes[index + 1])}

@@ -27,7 +27,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText }) => {
     clearMessages,
     toggleVisibility,
     suggestContinuation,
-    improveText
+    improveText,
   } = useClaude();
 
   const { currentProject, activeView } = useWritingPlatform() as {
@@ -97,7 +97,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText }) => {
       // Optionally: Could push this to the Claude context state directly if supported
       await sendMessage(
         `${action === 'continue' ? 'Continue this text' : 'Improve this text'}: "${selectedText}"`,
-        context
+        context,
       );
     } catch (err) {
       console.error('Quick action error:', err);
@@ -144,7 +144,12 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText }) => {
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {isExpanded ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               ) : (
                 <path
                   strokeLinecap="round"
@@ -177,7 +182,12 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText }) => {
             aria-label="Close assistant"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -209,7 +219,10 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText }) => {
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ height: 'calc(100% - 120px)' }}>
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-3"
+        style={{ height: 'calc(100% - 120px)' }}
+      >
         {messages.length === 0 && (
           <div className="text-center text-gray-500 dark:text-gray-400 text-sm">
             <p>👋 Hi! I'm Claude, your writing assistant.</p>
@@ -218,7 +231,10 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText }) => {
         )}
 
         {messages.map((message) => (
-          <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+          <div
+            key={message.id}
+            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
             <div
               className={`max-w-[80%] p-3 rounded-lg ${
                 message.role === 'user'
@@ -238,8 +254,14 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText }) => {
             <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: '0.1s' }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: '0.2s' }}
+                ></div>
               </div>
             </div>
           </div>
@@ -266,7 +288,12 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText }) => {
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+              />
             </svg>
           </button>
         </div>

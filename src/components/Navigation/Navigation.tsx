@@ -15,10 +15,16 @@ const Navigation: React.FC = () => {
               <span className="text-gray-400">•</span>
               <span className="text-gray-600 dark:text-gray-400">{currentProject.title}</span>
               <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                {[{ id: 'writing', icon: Edit3 }, { id: 'timeline', icon: Clock }, { id: 'analysis', icon: BarChart3 }].map(view => (
+                {[
+                  { id: 'writing', icon: Edit3 },
+                  { id: 'timeline', icon: Clock },
+                  { id: 'analysis', icon: BarChart3 },
+                ].map((view) => (
                   <button
                     key={view.id}
-                    onClick={() => setActiveView(view.id as 'dashboard' | 'writing' | 'timeline' | 'analysis')}
+                    onClick={() =>
+                      setActiveView(view.id as 'dashboard' | 'writing' | 'timeline' | 'analysis')
+                    }
                     className={`px-3 py-1 text-sm rounded flex items-center gap-1 ${
                       activeView === view.id
                         ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow'
@@ -39,7 +45,10 @@ const Navigation: React.FC = () => {
               <Home size={18} />
             </button>
           )}
-          <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} title="Toggle Theme">
+          <button
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            title="Toggle Theme"
+          >
             {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
           </button>
         </div>

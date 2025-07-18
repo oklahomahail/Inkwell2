@@ -1,17 +1,17 @@
-import React, { useMemo, useState, useCallback, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
-import ClaudeAssistant from "@/components/Claude/ClaudeAssistant";
-import { useWritingPlatform, View } from "@/context/WritingPlatformProvider";
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import Sidebar from '@/components/Sidebar';
+import ClaudeAssistant from '@/components/Claude/ClaudeAssistant';
+import { useWritingPlatform, View } from '@/context/WritingPlatformProvider';
 
-import DashboardPanel from "@/components/Panels/DashboardPanel";
-import WritingPanel from "@/components/Panels/WritingPanel";
-import TimelinePanel from "@/components/Panels/TimelinePanel";
-import AnalysisPanel from "@/components/Panels/AnalysisPanel";
+import DashboardPanel from '@/components/Panels/DashboardPanel';
+import WritingPanel from '@/components/Panels/WritingPanel';
+import TimelinePanel from '@/components/Panels/TimelinePanel';
+import AnalysisPanel from '@/components/Panels/AnalysisPanel';
 
 // Inline debounce (self-contained, no external import)
 function debounce<T extends (...args: any[]) => void>(
   fn: T,
-  delay: number
+  delay: number,
 ): T & { cancel?: () => void } {
   let timeoutId: ReturnType<typeof setTimeout>;
 
@@ -35,28 +35,23 @@ interface PanelProps {
 }
 
 const CompleteWritingPlatform: React.FC = () => {
-  const {
-    activeView,
-    theme,
-    toggleTheme,
-    currentProject,
-    setCurrentProject,
-  } = useWritingPlatform();
+  const { activeView, theme, toggleTheme, currentProject, setCurrentProject } =
+    useWritingPlatform();
 
-  const [selectedText, setSelectedText] = useState<string>("");
+  const [selectedText, setSelectedText] = useState<string>('');
 
   const updateSelection = useCallback(() => {
     const selection = window.getSelection();
     if (selection && selection.toString().trim()) {
       setSelectedText(selection.toString().trim());
     } else {
-      setSelectedText("");
+      setSelectedText('');
     }
   }, []);
 
   const debouncedHandleTextSelection = useMemo(
     () => debounce(updateSelection, 150),
-    [updateSelection]
+    [updateSelection],
   );
 
   useEffect(() => {
@@ -70,26 +65,26 @@ const CompleteWritingPlatform: React.FC = () => {
       onTextSelect: debouncedHandleTextSelection,
       selectedText,
     }),
-    [debouncedHandleTextSelection, selectedText]
+    [debouncedHandleTextSelection, selectedText],
   );
 
   const renderPanel = () => {
     switch (activeView as View) {
-      case "dashboard":
+      case 'dashboard':
         return <DashboardPanel />;
-      case "writing":
+      case 'writing':
         return (
           <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md h-full">
             <WritingPanel {...panelProps} />
           </div>
         );
-      case "timeline":
+      case 'timeline':
         return (
           <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md h-full">
             <TimelinePanel />
           </div>
         );
-      case "analysis":
+      case 'analysis':
         return (
           <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md h-full">
             <AnalysisPanel />
@@ -97,9 +92,7 @@ const CompleteWritingPlatform: React.FC = () => {
         );
       default:
         return (
-          <div className="p-4 text-gray-700 dark:text-gray-300">
-            Unknown view: {activeView}
-          </div>
+          <div className="p-4 text-gray-700 dark:text-gray-300">Unknown view: {activeView}</div>
         );
     }
   };
@@ -107,7 +100,7 @@ const CompleteWritingPlatform: React.FC = () => {
   return (
     <div
       className={`h-screen w-screen flex flex-col ${
-        theme === "dark" ? "dark bg-[#1B2735]" : "bg-[#F5F7FA]"
+        theme === 'dark' ? 'dark bg-[#1B2735]' : 'bg-[#F5F7FA]'
       }`}
       onMouseUp={debouncedHandleTextSelection}
       onKeyUp={debouncedHandleTextSelection}
@@ -122,18 +115,14 @@ const CompleteWritingPlatform: React.FC = () => {
             className="px-3 py-1.5 rounded-lg bg-white text-gray-800 text-sm font-medium shadow-sm focus:ring-2 focus:ring-[#0073E6] focus:outline-none"
           >
             <option value="My First Project">My First Project</option>
-            <option value="New Project (Placeholder)">
-              New Project (Placeholder)
-            </option>
+            <option value="New Project (Placeholder)">New Project (Placeholder)</option>
           </select>
           <button
             onClick={toggleTheme}
-            aria-label={`Switch to ${
-              theme === "light" ? "dark" : "light"
-            } mode`}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
             className="px-4 py-1.5 rounded-lg bg-white text-gray-800 text-sm font-medium shadow-sm hover:bg-gray-100 transition"
           >
-            {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
+            {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
           </button>
         </div>
       </header>
@@ -158,9 +147,7 @@ const CompleteWritingPlatform: React.FC = () => {
       {/* Footer */}
       <footer className="px-6 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400 flex justify-between">
         <span>Active View: {activeView}</span>
-        <span>
-          {selectedText ? `Selected: ${selectedText.length} chars` : "No text selected"}
-        </span>
+        <span>{selectedText ? `Selected: ${selectedText.length} chars` : 'No text selected'}</span>
       </footer>
 
       {/* Claude Assistant (Floating) */}

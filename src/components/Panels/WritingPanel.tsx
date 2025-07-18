@@ -15,7 +15,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [exportFormat, setExportFormat] = useState<'markdown' | 'txt'>('markdown');
-  
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const previousDataRef = useRef({ content: '', title: '' });
@@ -29,7 +29,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
 
       setContent(savedContent);
       setTitle(savedTitle);
-      
+
       if (savedTimestamp) {
         setLastSaved(new Date(savedTimestamp));
       }
@@ -63,7 +63,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
   // Save work function
   const handleSaveWork = useCallback(async () => {
     if (isSaving) return; // Prevent concurrent saves
-    
+
     setIsSaving(true);
     try {
       // Check storage availability
@@ -88,7 +88,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
 
       // Type-safe error handling
       const error = err instanceof Error ? err : new Error('Unknown error occurred');
-      
+
       // Provide specific error messages
       if (error.name === 'QuotaExceededError') {
         alert('Storage quota exceeded. Please export your work and clear some data.');
@@ -101,10 +101,9 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
   // Auto-save effect
   useEffect(() => {
     const autoSaveInterval = setInterval(() => {
-      const hasChanges = 
-        content !== previousDataRef.current.content || 
-        title !== previousDataRef.current.title;
-      
+      const hasChanges =
+        content !== previousDataRef.current.content || title !== previousDataRef.current.title;
+
       const hasContent = content.trim() || title.trim();
 
       if (hasChanges && hasContent) {
@@ -149,7 +148,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
       const timestamp = new Date().toISOString().split('T')[0];
       const exportTitle = title || DEFAULT_TITLE;
       const filename = `${exportTitle.replace(/[^a-zA-Z0-9]/g, '-')}-${timestamp}.${exportFormat}`;
-      
+
       let exportContent = '';
       if (exportFormat === 'markdown') {
         exportContent = `# ${exportTitle}\n\n${content}`;
@@ -161,7 +160,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
       const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      
+
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
@@ -180,7 +179,10 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
 
   // Utility functions
   const getWordCount = useCallback(() => {
-    return content.trim().split(/\s+/).filter(word => word.length > 0).length;
+    return content
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
   }, [content]);
 
   const getCharacterCount = useCallback(() => {
@@ -188,7 +190,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
   }, [content]);
 
   const getParagraphCount = useCallback(() => {
-    return content.split('\n\n').filter(paragraph => paragraph.trim().length > 0).length;
+    return content.split('\n\n').filter((paragraph) => paragraph.trim().length > 0).length;
   }, [content]);
 
   const formatLastSaved = useCallback(() => {
@@ -223,7 +225,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
               className="w-full text-2xl font-bold bg-transparent border-none outline-none text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
-          
+
           <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
             <span>{getWordCount()} words</span>
             <span>{getCharacterCount()} chars</span>
@@ -241,9 +243,11 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
         {/* Quick actions bar */}
         <div className="mt-3 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Paragraphs: {getParagraphCount()}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              Paragraphs: {getParagraphCount()}
+            </span>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <select
               value={exportFormat}
@@ -253,7 +257,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
               <option value="markdown">Markdown</option>
               <option value="txt">Text</option>
             </select>
-            
+
             <button
               onClick={handleSaveWork}
               disabled={isSaving}
@@ -261,7 +265,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
             >
               {isSaving ? 'Saving...' : 'Save'}
             </button>
-            
+
             <button
               onClick={handleExport}
               className="text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
@@ -275,7 +279,8 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
         {selectedText && (
           <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
             <span className="text-sm text-blue-800 dark:text-blue-200">
-              Selected: "{selectedText.substring(0, 60)}{selectedText.length > 60 ? '...' : ''}"
+              Selected: "{selectedText.substring(0, 60)}
+              {selectedText.length > 60 ? '...' : ''}"
             </span>
           </div>
         )}

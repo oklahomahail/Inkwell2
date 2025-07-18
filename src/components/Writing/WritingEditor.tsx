@@ -15,7 +15,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({
   onContentChange,
   onTextSelect,
   onScroll,
-  textareaRef
+  textareaRef,
 }) => {
   // Trigger onTextSelect when the selection changes
   useEffect(() => {

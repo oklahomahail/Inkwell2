@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 export const useWritingPlatform = () => {
-  const [data, setData] = useState<string>("Loading project...");
+  const [data, setData] = useState<string>('Loading project...');
 
   useEffect(() => {
     // Simulate loading
     setTimeout(() => {
-      setData("Writing platform ready!");
+      setData('Writing platform ready!');
     }, 1000);
   }, []);
 

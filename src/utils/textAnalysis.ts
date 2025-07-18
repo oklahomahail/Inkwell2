@@ -37,4 +37,3 @@ export function analyzeText(content: string): TextStats {
     lengthCategory,
   };
 }
- 
