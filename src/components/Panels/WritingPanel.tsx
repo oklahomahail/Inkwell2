@@ -1,66 +1,212 @@
 // src/components/Panels/WritingPanel.tsx
-import React, { useState, useRef } from 'react';
-import { useClaude } from '../../context/ClaudeProvider';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 interface WritingPanelProps {
   onTextSelect?: () => void;
   selectedText?: string;
 }
 
+const DEFAULT_TITLE = 'Untitled Chapter';
+const AUTO_SAVE_INTERVAL = 30000; // 30 seconds
+
 const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText }) => {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'markdown' | 'txt'>('markdown');
+  
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { suggestContinuation, improveText, isLoading } = useClaude();
+  const titleRef = useRef<HTMLInputElement>(null);
+  const previousDataRef = useRef({ content: '', title: '' });
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
-    // Auto-resize textarea
+  // Load saved content on mount
+  useEffect(() => {
+    try {
+      const savedContent = localStorage.getItem('writing_content') || '';
+      const savedTitle = localStorage.getItem('writing_title') || '';
+      const savedTimestamp = localStorage.getItem('writing_last_saved');
+
+      setContent(savedContent);
+      setTitle(savedTitle);
+      
+      if (savedTimestamp) {
+        setLastSaved(new Date(savedTimestamp));
+      }
+
+      // Focus title if no content exists
+      if (!savedTitle && titleRef.current) {
+        titleRef.current.focus();
+      }
+
+      // Set initial previous data
+      previousDataRef.current = { content: savedContent, title: savedTitle };
+    } catch (err) {
+      console.error('Failed to load saved content:', err);
+      // Continue with default empty state if loading fails
+    }
+  }, []);
+
+  // Auto-resize textarea
+  const adjustTextareaHeight = useCallback(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
     }
-  };
+  }, []);
 
-  const handleQuickAction = async (action: 'continue' | 'improve') => {
-    if (!selectedText || isLoading) return;
+  // Adjust height when content changes
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [content, adjustTextareaHeight]);
 
+  // Save work function
+  const handleSaveWork = useCallback(async () => {
+    if (isSaving) return; // Prevent concurrent saves
+    
+    setIsSaving(true);
     try {
-      let result: string;
+      // Check storage availability
+      if (typeof Storage === 'undefined') {
+        throw new Error('Local storage not available');
+      }
+
+      localStorage.setItem('writing_content', content);
+      localStorage.setItem('writing_title', title);
+      const now = new Date();
+      localStorage.setItem('writing_last_saved', now.toISOString());
+      setLastSaved(now);
+
+      // Update previous data to prevent unnecessary future saves
+      previousDataRef.current = { content, title };
+
+      // Show saving feedback briefly
+      setTimeout(() => setIsSaving(false), 1000);
+    } catch (err) {
+      console.error('Save failed:', err);
+      setIsSaving(false);
+
+      // Type-safe error handling
+      const error = err instanceof Error ? err : new Error('Unknown error occurred');
       
-      if (action === 'continue') {
-        result = await suggestContinuation(selectedText);
+      // Provide specific error messages
+      if (error.name === 'QuotaExceededError') {
+        alert('Storage quota exceeded. Please export your work and clear some data.');
       } else {
-        result = await improveText(selectedText);
+        alert('Failed to save. Please try again or export your work as backup.');
       }
-
-      // Insert the result at the current cursor position or replace selected text
-      if (textareaRef.current) {
-        const textarea = textareaRef.current;
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        
-        const newContent = content.substring(0, start) + '\n\n' + result + '\n\n' + content.substring(end);
-        setContent(newContent);
-        
-        // Move cursor to end of inserted text
-        setTimeout(() => {
-          textarea.focus();
-          textarea.setSelectionRange(start + result.length + 4, start + result.length + 4);
-        }, 0);
-      }
-    } catch (error) {
-      console.error('Quick action error:', error);
     }
+  }, [content, title, isSaving]);
+
+  // Auto-save effect
+  useEffect(() => {
+    const autoSaveInterval = setInterval(() => {
+      const hasChanges = 
+        content !== previousDataRef.current.content || 
+        title !== previousDataRef.current.title;
+      
+      const hasContent = content.trim() || title.trim();
+
+      if (hasChanges && hasContent) {
+        handleSaveWork();
+      }
+    }, AUTO_SAVE_INTERVAL);
+
+    return () => clearInterval(autoSaveInterval);
+  }, [handleSaveWork]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyboard = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 's':
+            e.preventDefault();
+            handleSaveWork();
+            break;
+          case 'e':
+            e.preventDefault();
+            handleExport();
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyboard);
+    return () => document.removeEventListener('keydown', handleKeyboard);
+  }, [handleSaveWork]);
+
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(e.target.value);
   };
 
-  const getWordCount = () => {
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
+  };
+
+  const handleExport = useCallback(() => {
+    try {
+      const timestamp = new Date().toISOString().split('T')[0];
+      const exportTitle = title || DEFAULT_TITLE;
+      const filename = `${exportTitle.replace(/[^a-zA-Z0-9]/g, '-')}-${timestamp}.${exportFormat}`;
+      
+      let exportContent = '';
+      if (exportFormat === 'markdown') {
+        exportContent = `# ${exportTitle}\n\n${content}`;
+      } else {
+        const titleLine = '='.repeat(exportTitle.length);
+        exportContent = `${exportTitle}\n${titleLine}\n\n${content}`;
+      }
+
+      const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Success feedback
+      alert(`Successfully exported as ${exportFormat.toUpperCase()}!`);
+    } catch (err) {
+      console.error('Export failed:', err);
+      const error = err instanceof Error ? err : new Error('Export failed');
+      alert(`Export failed: ${error.message}. Please try again.`);
+    }
+  }, [title, content, exportFormat]);
+
+  // Utility functions
+  const getWordCount = useCallback(() => {
     return content.trim().split(/\s+/).filter(word => word.length > 0).length;
-  };
+  }, [content]);
 
-  const getCharacterCount = () => {
+  const getCharacterCount = useCallback(() => {
     return content.length;
-  };
+  }, [content]);
+
+  const getParagraphCount = useCallback(() => {
+    return content.split('\n\n').filter(paragraph => paragraph.trim().length > 0).length;
+  }, [content]);
+
+  const formatLastSaved = useCallback(() => {
+    if (isSaving) return 'Saving...';
+    if (!lastSaved) return 'Never saved';
+
+    const now = new Date();
+    const diffMs = now.getTime() - lastSaved.getTime();
+    const diffMinutes = Math.floor(diffMs / 60000);
+
+    if (diffMinutes < 1) return 'Just saved';
+    if (diffMinutes < 60) return `Saved ${diffMinutes}m ago`;
+
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `Saved ${diffHours}h ago`;
+
+    return `Saved ${lastSaved.toLocaleDateString()}`;
+  }, [isSaving, lastSaved]);
 
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
@@ -69,9 +215,10 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
         <div className="flex items-center justify-between">
           <div className="flex-1 mr-4">
             <input
+              ref={titleRef}
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={handleTitleChange}
               placeholder="Chapter Title"
               className="w-full text-2xl font-bold bg-transparent border-none outline-none text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             />
@@ -79,154 +226,72 @@ const WritingPanel: React.FC<WritingPanelProps> = ({ onTextSelect, selectedText 
           
           <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
             <span>{getWordCount()} words</span>
-            <span>{getCharacterCount()} characters</span>
+            <span>{getCharacterCount()} chars</span>
+            <span className={`text-xs ${isSaving ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+              {formatLastSaved()}
+            </span>
           </div>
         </div>
-        
-        {/* Quick Actions Bar */}
+
+        {/* Keyboard shortcuts hint */}
+        <div className="mt-2 text-xs text-gray-500 dark:text-gray-500">
+          Shortcuts: Ctrl+S (Save) • Ctrl+E (Export)
+        </div>
+
+        {/* Quick actions bar */}
+        <div className="mt-3 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Paragraphs: {getParagraphCount()}</span>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <select
+              value={exportFormat}
+              onChange={(e) => setExportFormat(e.target.value as 'markdown' | 'txt')}
+              className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+            >
+              <option value="markdown">Markdown</option>
+              <option value="txt">Text</option>
+            </select>
+            
+            <button
+              onClick={handleSaveWork}
+              disabled={isSaving}
+              className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            >
+              {isSaving ? 'Saving...' : 'Save'}
+            </button>
+            
+            <button
+              onClick={handleExport}
+              className="text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+            >
+              Export
+            </button>
+          </div>
+        </div>
+
+        {/* Selected text indicator */}
         {selectedText && (
-          <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-blue-800 dark:text-blue-200">
-                Selected: "{selectedText.substring(0, 60)}..."
-              </span>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handleQuickAction('continue')}
-                  disabled={isLoading}
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                >
-                  {isLoading ? (
-                    <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  )}
-                  <span>Continue</span>
-                </button>
-                <button
-                  onClick={() => handleQuickAction('improve')}
-                  disabled={isLoading}
-                  className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                >
-                  {isLoading ? (
-                    <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  )}
-                  <span>Improve</span>
-                </button>
-              </div>
-            </div>
+          <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+            <span className="text-sm text-blue-800 dark:text-blue-200">
+              Selected: "{selectedText.substring(0, 60)}{selectedText.length > 60 ? '...' : ''}"
+            </span>
           </div>
         )}
       </div>
 
       {/* Writing Area */}
       <div className="flex-1 flex">
-        {/* Main Editor */}
-        <div className="flex-1 p-6">
-          <textarea
-            ref={textareaRef}
-            value={content}
-            onChange={handleContentChange}
-            onSelect={onTextSelect}
-            placeholder="Start writing your story..."
-            className="w-full h-full resize-none border-none outline-none bg-transparent text-gray-900 dark:text-gray-100 text-lg leading-relaxed placeholder-gray-500 dark:placeholder-gray-400 font-serif"
-            style={{ minHeight: 'calc(100vh - 200px)' }}
-          />
-        </div>
-
-        {/* Sidebar - Writing Tools */}
-        <div className="w-64 border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 overflow-y-auto">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Writing Tools</h3>
-          
-          {/* Writing Stats */}
-          <div className="mb-6">
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Statistics</h4>
-            <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <div className="flex justify-between">
-                <span>Words:</span>
-                <span className="font-medium">{getWordCount()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Characters:</span>
-                <span className="font-medium">{getCharacterCount()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Paragraphs:</span>
-                <span className="font-medium">{content.split('\n\n').filter(p => p.trim()).length}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="mb-6">
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quick Actions</h4>
-            <div className="space-y-2">
-              <button 
-                className="w-full text-left p-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
-                onClick={() => {
-                  // Focus the textarea and open Claude
-                  textareaRef.current?.focus();
-                }}
-              >
-                💡 Get Writing Ideas
-              </button>
-              <button 
-                className="w-full text-left p-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
-                onClick={() => {
-                  // Save current work
-                  console.log('Saving work...');
-                }}
-              >
-                💾 Save Chapter
-              </button>
-              <button 
-                className="w-full text-left p-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
-                onClick={() => {
-                  // Export options
-                  console.log('Export options...');
-                }}
-              >
-                📄 Export
-              </button>
-            </div>
-          </div>
-
-          {/* Writing Goals */}
-          <div className="mb-6">
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Daily Goal</h4>
-            <div className="bg-white dark:bg-gray-700 p-3 rounded border border-gray-200 dark:border-gray-600">
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600 dark:text-gray-400">Progress</span>
-                <span className="text-gray-600 dark:text-gray-400">{Math.min(getWordCount(), 500)}/500</span>
-              </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${Math.min((getWordCount() / 500) * 100, 100)}%` }}
-                ></div>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {getWordCount() >= 500 ? '🎉 Goal achieved!' : `${500 - getWordCount()} words to go`}
-              </p>
-            </div>
-          </div>
-
-          {/* Recent Characters */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Characters</h4>
-            <div className="space-y-1 text-sm">
-              <div className="p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-gray-600 dark:text-gray-400 text-center italic">
-                No characters yet
-              </div>
-            </div>
-          </div>
-        </div>
+        <textarea
+          ref={textareaRef}
+          value={content}
+          onChange={handleContentChange}
+          onSelect={onTextSelect}
+          placeholder="Start writing your story..."
+          className="w-full h-full resize-none border-none outline-none bg-transparent text-gray-900 dark:text-gray-100 text-lg leading-relaxed placeholder-gray-500 dark:placeholder-gray-400 font-serif p-6"
+          style={{ minHeight: 'calc(100vh - 200px)' }}
+        />
       </div>
     </div>
   );
