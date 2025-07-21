@@ -1,25 +1,18 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-
-import CompleteWritingPlatform from "@/components/CompleteWritingPlatform";
-import { WritingPlatformProvider } from "@/context/WritingPlatformProvider";
-import { ClaudeProvider } from "@/context/ClaudeProvider"; // Now a named export
+import App from "./App";
 import { ToastProvider } from "@/context/ToastContext";
+import { ClaudeProvider } from "@/context/ClaudeProvider";
+import { WritingPlatformProvider } from "@/context/WritingPlatformProvider";
 
-// Optional: If you want routing support later
-// import { BrowserRouter } from "react-router-dom";
-
-ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    {/* <BrowserRouter> */}
-    <WritingPlatformProvider>
+    <ToastProvider>
       <ClaudeProvider>
-        <ToastProvider>
-          <CompleteWritingPlatform />
-        </ToastProvider>
+        <WritingPlatformProvider>
+          <App />
+        </WritingPlatformProvider>
       </ClaudeProvider>
-    </WritingPlatformProvider>
-    {/* </BrowserRouter> */}
+    </ToastProvider>
   </React.StrictMode>
 );
