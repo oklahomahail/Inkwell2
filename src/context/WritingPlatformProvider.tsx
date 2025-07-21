@@ -1,38 +1,47 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
-// Define valid view types
 export type View = 'dashboard' | 'writing' | 'timeline' | 'analysis';
 
-// Context type definition
 interface WritingPlatformContextType {
   activeView: View;
   setActiveView: (view: View) => void;
+
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
+
+  currentProject: string;
+  setCurrentProject: (project: string) => void;
 }
 
-// Default context (to prevent undefined errors if accessed outside provider)
-export const WritingPlatformContext = createContext<WritingPlatformContextType>({
-  activeView: 'dashboard',
-  setActiveView: () => {},
-});
+const WritingPlatformContext = createContext<WritingPlatformContextType | undefined>(undefined);
 
-// Hook for easy context access
-export const useWritingPlatform = () => useContext(WritingPlatformContext);
-
-// Props for the provider
-interface WritingPlatformProviderProps {
-  children: ReactNode;
-}
-
-// The provider component
-export const WritingPlatformProvider: React.FC<WritingPlatformProviderProps> = ({ children }) => {
+export const WritingPlatformProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeView, setActiveView] = useState<View>('dashboard');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [currentProject, setCurrentProject] = useState<string>('My First Project');
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
 
   return (
-    <WritingPlatformContext.Provider value={{ activeView, setActiveView }}>
+    <WritingPlatformContext.Provider
+      value={{
+        activeView,
+        setActiveView,
+        theme,
+        toggleTheme,
+        currentProject,
+        setCurrentProject,
+      }}
+    >
       {children}
     </WritingPlatformContext.Provider>
   );
 };
 
-// Add a default export so App.tsx can import it directly
-export default WritingPlatformProvider;
+export const useWritingPlatform = (): WritingPlatformContextType => {
+  const ctx = useContext(WritingPlatformContext);
+  if (!ctx) throw new Error('useWritingPlatform must be used within a WritingPlatformProvider');
+  return ctx;
+};

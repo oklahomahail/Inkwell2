@@ -1,20 +1,15 @@
-// src/App.tsx
-import React, { Suspense } from 'react';
-import CompleteWritingPlatform from './CompleteWritingPlatform';
-import WritingPlatformProvider from './context/WritingPlatformProvider';
-import ClaudeProvider from './context/ClaudeProvider';
-import ErrorBoundary from './components/Shared/ErrorBoundary';
-import LoadingScreen from './components/Shared/LoadingScreen';
+import React from "react";
+import CompleteWritingPlatform from "@/components/CompleteWritingPlatform";
+import ClaudeProvider from "@/context/ClaudeProvider";
+import { WritingPlatformProvider } from "@/context/WritingPlatformProvider";
 
 const App: React.FC = () => {
   return (
     <WritingPlatformProvider>
       <ClaudeProvider>
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingScreen />}>
-            <CompleteWritingPlatform />
-          </Suspense>
-        </ErrorBoundary>
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+          <CompleteWritingPlatform />
+        </div>
       </ClaudeProvider>
     </WritingPlatformProvider>
   );

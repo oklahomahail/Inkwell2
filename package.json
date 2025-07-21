@@ -1,59 +1,25 @@
 {
-  "name": "writing-platform",
+  "name": "inkwell",
   "version": "1.0.0",
-  "description": "Interactive writing and campaign assistant for Henry Hail and the Whittier Kids.",
-  "author": "Dave Hail",
   "private": true,
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "prepare": "husky install",
-    "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}' --quiet",
-    "format": "prettier --write 'src/**/*.{ts,tsx,js,jsx,json,css,md}'"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,css,md}": [
-      "prettier --write"
-    ]
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@uiw/react-md-editor": "^4.0.7",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router-dom": "^6.23.0"
+    "@uiw/react-markdown-preview": "^5.1.4",
+    "@uiw/react-md-editor": "^4.0.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@types/react": "^19.1.8",
-    "@vitejs/plugin-react": "^4.6.0",
-    "@typescript-eslint/parser": "^7.14.1",
-    "@typescript-eslint/eslint-plugin": "^7.14.1",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.1.3",
-    "eslint-plugin-react": "^7.34.1",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^3.2.5",
-    "lint-staged": "^15.2.0",
-    "husky": "^9.0.10",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.11",
-    "typescript": "5.3.3",
-    "vite": "^7.0.2"
+    "@vitejs/plugin-react": "^4.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^7.0.5"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/oklahomahail/henry-hail-assistant.git"
-  },
-  "bugs": {
-    "url": "https://github.com/oklahomahail/henry-hail-assistant/issues"
-  },
-  "homepage": "https://github.com/oklahomahail/henry-hail-assistant#readme",
-  "keywords": []
+  "description": "Inkwell - AI-assisted writing platform (cleaned Stage 1 version)"
 }

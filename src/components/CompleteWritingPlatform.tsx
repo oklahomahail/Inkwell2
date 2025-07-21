@@ -2,30 +2,21 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import ClaudeAssistant from '@/components/Claude/ClaudeAssistant';
 import { useWritingPlatform, View } from '@/context/WritingPlatformProvider';
+import { useClaude } from '@/context/ClaudeProvider';
 
 import DashboardPanel from '@/components/Panels/DashboardPanel';
 import WritingPanel from '@/components/Panels/WritingPanel';
 import TimelinePanel from '@/components/Panels/TimelinePanel';
 import AnalysisPanel from '@/components/Panels/AnalysisPanel';
 
-// Inline debounce (self-contained, no external import)
-function debounce<T extends (...args: any[]) => void>(
-  fn: T,
-  delay: number,
-): T & { cancel?: () => void } {
+// Debounce utility
+function debounce<T extends (...args: any[]) => void>(fn: T, delay: number): T & { cancel?: () => void } {
   let timeoutId: ReturnType<typeof setTimeout>;
-
   const debounced = function (this: any, ...args: Parameters<T>) {
     if (timeoutId) clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn.apply(this, args), delay);
   } as T & { cancel?: () => void };
-
-  debounced.cancel = () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-  };
-
+  debounced.cancel = () => { if (timeoutId) clearTimeout(timeoutId); };
   return debounced;
 }
 
@@ -35,8 +26,8 @@ interface PanelProps {
 }
 
 const CompleteWritingPlatform: React.FC = () => {
-  const { activeView, theme, toggleTheme, currentProject, setCurrentProject } =
-    useWritingPlatform();
+  const { activeView, theme, toggleTheme, currentProject, setCurrentProject } = useWritingPlatform();
+  const { isVisible, toggleVisibility } = useClaude();
 
   const [selectedText, setSelectedText] = useState<string>('');
 
@@ -49,10 +40,7 @@ const CompleteWritingPlatform: React.FC = () => {
     }
   }, []);
 
-  const debouncedHandleTextSelection = useMemo(
-    () => debounce(updateSelection, 150),
-    [updateSelection],
-  );
+  const debouncedHandleTextSelection = useMemo(() => debounce(updateSelection, 150), [updateSelection]);
 
   useEffect(() => {
     return () => {
@@ -61,11 +49,8 @@ const CompleteWritingPlatform: React.FC = () => {
   }, [debouncedHandleTextSelection]);
 
   const panelProps: PanelProps = useMemo(
-    () => ({
-      onTextSelect: debouncedHandleTextSelection,
-      selectedText,
-    }),
-    [debouncedHandleTextSelection, selectedText],
+    () => ({ onTextSelect: debouncedHandleTextSelection, selectedText }),
+    [debouncedHandleTextSelection, selectedText]
   );
 
   const renderPanel = () => {
@@ -73,35 +58,19 @@ const CompleteWritingPlatform: React.FC = () => {
       case 'dashboard':
         return <DashboardPanel />;
       case 'writing':
-        return (
-          <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md h-full">
-            <WritingPanel {...panelProps} />
-          </div>
-        );
+        return <WritingPanel {...panelProps} />;
       case 'timeline':
-        return (
-          <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md h-full">
-            <TimelinePanel />
-          </div>
-        );
+        return <TimelinePanel />;
       case 'analysis':
-        return (
-          <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md h-full">
-            <AnalysisPanel />
-          </div>
-        );
+        return <AnalysisPanel />;
       default:
-        return (
-          <div className="p-4 text-gray-700 dark:text-gray-300">Unknown view: {activeView}</div>
-        );
+        return <div className="p-4 text-gray-700 dark:text-gray-300">Unknown view: {activeView}</div>;
     }
   };
 
   return (
     <div
-      className={`h-screen w-screen flex flex-col ${
-        theme === 'dark' ? 'dark bg-[#1B2735]' : 'bg-[#F5F7FA]'
-      }`}
+      className={`h-screen w-screen flex flex-col ${theme === 'dark' ? 'dark bg-[#1B2735]' : 'bg-[#F5F7FA]'}`}
       onMouseUp={debouncedHandleTextSelection}
       onKeyUp={debouncedHandleTextSelection}
     >
@@ -109,7 +78,6 @@ const CompleteWritingPlatform: React.FC = () => {
       <header className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#1B2735] to-[#0073E6] text-white shadow-md">
         <h1 className="text-xl font-semibold tracking-wide">{currentProject}</h1>
         <div className="flex items-center space-x-4">
-          {/* Project Selector (Stub) */}
           <select
             value={currentProject}
             onChange={(e) => setCurrentProject(e.target.value)}
@@ -118,6 +86,7 @@ const CompleteWritingPlatform: React.FC = () => {
             <option value="My First Project">My First Project</option>
             <option value="New Project (Placeholder)">New Project (Placeholder)</option>
           </select>
+
           <button
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
@@ -125,34 +94,35 @@ const CompleteWritingPlatform: React.FC = () => {
           >
             {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
           </button>
+
+          {/* Claude toggle */}
+          <button
+            onClick={toggleVisibility}
+            className="px-4 py-1.5 rounded-lg bg-purple-600 text-white text-sm font-medium shadow-sm hover:bg-purple-700 transition"
+          >
+            {isVisible ? 'Hide Claude' : 'Show Claude'}
+          </button>
         </div>
       </header>
 
       {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
         <aside className="w-60 bg-gray-100 dark:bg-gray-900 border-r border-gray-300 dark:border-gray-700 overflow-y-auto">
           <Sidebar />
         </aside>
 
-        {/* Main Content */}
-        <main
-          className="flex-1 overflow-y-auto p-6 bg-[#F5F7FA] dark:bg-[#1B2735]"
-          role="region"
-          aria-label="Main content area"
-        >
+        <main className="flex-1 overflow-y-auto p-6 bg-[#F5F7FA] dark:bg-[#1B2735]" role="region" aria-label="Main content area">
           {renderPanel()}
         </main>
       </div>
 
-      {/* Footer */}
       <footer className="px-6 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400 flex justify-between">
         <span>Active View: {activeView}</span>
         <span>{selectedText ? `Selected: ${selectedText.length} chars` : 'No text selected'}</span>
       </footer>
 
-      {/* Claude Assistant (Floating) */}
-      <ClaudeAssistant selectedText={selectedText} />
+      {/* Claude Assistant */}
+      {isVisible && <ClaudeAssistant selectedText={selectedText} />}
     </div>
   );
 };

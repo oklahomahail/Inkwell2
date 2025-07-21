@@ -1,4 +1,4 @@
-# ✍️ Writing Platform
+# ✍️ Inkwell
 
 A modern, offline-first fiction writing app built with React, TypeScript, Tailwind CSS, and Vite. This platform helps writers plan, write, and organize novels with powerful features including timeline management, character bibles, AI-powered assistance, and writing progress analytics.
 
