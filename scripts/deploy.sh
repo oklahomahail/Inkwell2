@@ -1,26 +1,25 @@
 #!/bin/bash
 
-# Kill anything on port 3000
+# Kill any process running on port 3000
 kill -9 $(lsof -ti :3000) 2>/dev/null || true
 
-# Clear old build cache
+# Clean old Vite cache
 rm -rf node_modules/.vite
 
-# Reinstall, build, and commit
+# Reinstall dependencies and build
 npm install
 npm run build
 
-# Commit changes
+# Stage and commit all changes automatically
 git add -A
-git commit -m "Auto-build & push"
+git commit -m "Auto-build & push" || echo "No changes to commit"
 
-# Create a timestamped tag
+# Tag the commit with a timestamp
 TAG="v1.0.1-$(date +%Y%m%d%H%M%S)"
 git tag $TAG
 
-# Push changes and tags to GitHub
+# Push commits and tags to GitHub
 git push origin main --tags
 
-# Start the dev server
+# Start the development server
 npm run dev
-
