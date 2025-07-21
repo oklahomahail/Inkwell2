@@ -1,22 +1,19 @@
 import React, { useState } from "react";
-import DashboardPanel from "./Panels/DashboardPanel";
-import TimelinePanel from "./Panels/TimelinePanel";
-import WritingPanel from "./Panels/WritingPanel";
-import ClaudeAssistant from "./Claude/ClaudeAssistant";
+import DashboardPanel from "@/components/Panels/DashboardPanel";
+import TimelinePanel from "@/components/Panels/TimelinePanel";
+import WritingPanel from "@/components/Panels/WritingPanel";
+import ClaudeAssistant from "@/components/Claude/ClaudeAssistant";
 
 type PanelType = "dashboard" | "timeline" | "writing";
 
 const AppContent: React.FC = () => {
   const [activePanel, setActivePanel] = useState<PanelType>("dashboard");
-  const [draftText, setDraftText] = useState<string>("");
   const [selectedText, setSelectedText] = useState<string>("");
 
-  const handleTextSelect = (text: string) => {
-    setSelectedText(text);
-  };
-
   const handleInsertText = (newText: string) => {
-    setDraftText((prev) => `${prev}\n${newText}`);
+    // Dispatch a custom event so WritingPanel can handle text insertion
+    const event = new CustomEvent("claude-insert-text", { detail: newText });
+    window.dispatchEvent(event);
   };
 
   return (
@@ -42,21 +39,15 @@ const AppContent: React.FC = () => {
       <main className="flex-1 p-6">
         {activePanel === "dashboard" && <DashboardPanel />}
         {activePanel === "timeline" && <TimelinePanel />}
-        {activePanel === "writing" && (
-          <WritingPanel
-            draftText={draftText}
-            onChangeText={setDraftText}
-            onTextSelect={() => handleTextSelect(draftText)}
-            selectedText={selectedText}
-          />
-        )}
+        {activePanel === "writing" && <WritingPanel draftText={""} onChangeText={function (value: string): void {
+          throw new Error("Function not implemented.");
+        } } onTextSelect={function (): void {
+          throw new Error("Function not implemented.");
+        } } selectedText={""} />}
       </main>
 
-      {/* Floating Claude Assistant (active across all panels) */}
-      <ClaudeAssistant
-        selectedText={selectedText}
-        onInsertText={handleInsertText}
-      />
+      {/* Floating Claude Assistant */}
+      <ClaudeAssistant selectedText={selectedText} onInsertText={handleInsertText} />
     </div>
   );
 };

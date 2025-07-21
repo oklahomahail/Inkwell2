@@ -45,3 +45,4 @@ export const useWritingPlatform = (): WritingPlatformContextType => {
   if (!ctx) throw new Error('useWritingPlatform must be used within a WritingPlatformProvider');
   return ctx;
 };
+export default WritingPlatformProvider;

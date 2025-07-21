@@ -4,22 +4,23 @@ import ClaudeToolbar from "../Writing/ClaudeToolbar";
 import WritingEditor from "../Writing/WritingEditor";
 import WritingStats from "../Writing/WritingStats";
 import { ExportFormat } from "../../types/writing";
+import { useToastContext } from "@/context/ToastContext";
 
 interface WritingPanelProps {
-  draftText?: string;
-  onChangeText?: (value: string) => void;
-  onTextSelect?: () => void;
-  selectedText?: string;
+  draftText: string;
+  onChangeText: (value: string) => void;
+  onTextSelect: () => void;
+  selectedText: string;
 }
 
 const DEFAULT_TITLE = "Untitled Chapter";
-const AUTO_SAVE_INTERVAL = 30000; // 30 seconds
+const AUTO_SAVE_INTERVAL = 30000;
 
 const WritingPanel: React.FC<WritingPanelProps> = ({
-  draftText = "",
+  draftText,
   onChangeText,
   onTextSelect,
-  selectedText = "",
+  selectedText,
 }) => {
   const [content, setContent] = useState(draftText);
   const [title, setTitle] = useState(DEFAULT_TITLE);
@@ -28,28 +29,38 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
   const [isDirty, setIsDirty] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat>("markdown");
 
+  const { showToast } = useToastContext();
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
   const titleRef = useRef<HTMLInputElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Autosave draft every 30 seconds
+  // Sync with parent state
+  useEffect(() => {
+    setContent(draftText);
+  }, [draftText]);
+
+  // Listen for Claude-inserted text
+  useEffect(() => {
+    const handleInsert = (e: Event) => {
+      const custom = e as CustomEvent<string>;
+      if (custom.detail) {
+        setContent((prev) => `${prev}\n${custom.detail}`);
+        onChangeText(`${content}\n${custom.detail}`);
+        showToast({ message: "Claude inserted text", type: "success" });
+      }
+    };
+    window.addEventListener("claude-insert-text", handleInsert as EventListener);
+    return () => {
+      window.removeEventListener("claude-insert-text", handleInsert as EventListener);
+    };
+  }, [onChangeText, content, showToast]);
+
+  // Auto-save every 30 seconds
   useEffect(() => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     setIsDirty(true);
     saveTimer.current = setTimeout(() => {
-      try {
-        setIsSaving(true);
-        localStorage.setItem(
-          "writing_content",
-          JSON.stringify({ title, content })
-        );
-        setLastSaved(new Date().toLocaleTimeString());
-        setIsDirty(false);
-      } catch (error) {
-        console.warn("Failed to save writing content", error);
-      } finally {
-        setIsSaving(false);
-      }
+      handleSave(true);
     }, AUTO_SAVE_INTERVAL);
 
     return () => {
@@ -57,44 +68,50 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     };
   }, [title, content]);
 
-  // Load saved draft on mount
+  // Load saved draft
   useEffect(() => {
     try {
       const stored = localStorage.getItem("writing_content");
       if (stored) {
         const { title: savedTitle, content: savedContent } = JSON.parse(stored);
         if (savedTitle) setTitle(savedTitle);
-        if (savedContent) setContent(savedContent);
+        if (savedContent) {
+          setContent(savedContent);
+          onChangeText(savedContent);
+        }
       }
-    } catch (error) {
-      console.warn("Failed to load writing content", error);
+    } catch {
+      console.warn("Failed to load writing content");
     }
-  }, []);
+  }, [onChangeText]);
 
   const handleContentChange = (text: string) => {
     setContent(text);
-    if (onChangeText) onChangeText(text);
+    onChangeText(text);
   };
 
-  const handleSave = () => {
+  const handleSave = (auto = false) => {
     try {
       setIsSaving(true);
-      localStorage.setItem(
-        "writing_content",
-        JSON.stringify({ title, content })
-      );
+      localStorage.setItem("writing_content", JSON.stringify({ title, content }));
       setLastSaved(new Date().toLocaleTimeString());
       setIsDirty(false);
-    } catch (error) {
-      console.warn("Manual save failed", error);
+      showToast({
+        message: auto ? "Draft autosaved" : "Draft saved",
+        type: "info",
+      });
+    } catch {
+      showToast({
+        message: "Failed to save draft",
+        type: "error",
+      });
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <div className="p-4 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg shadow-md flex flex-col space-y-4">
-      {/* Toolbar for title, save, export */}
+    <div className="p-4 bg-[#0A0F1C] text-gray-100 rounded-lg shadow-lg flex flex-col space-y-4">
       <WritingToolbar
         title={title}
         onTitleChange={setTitle}
@@ -102,20 +119,18 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
         content={content}
         lastSaved={lastSaved}
         isSaving={isSaving}
-        onSave={handleSave}
+        onSave={() => handleSave(false)}
         exportFormat={exportFormat}
         onExportFormatChange={setExportFormat}
         defaultTitle={DEFAULT_TITLE}
         isDirty={isDirty}
       />
 
-      {/* Claude AI inline toolbar */}
       <ClaudeToolbar
         selectedText={selectedText}
-        onInsertText={(text: any) => setContent((prev) => `${prev}\n${text}`)}
+        onInsertText={(text) => handleContentChange(`${content}\n${text}`)}
       />
 
-      {/* Main text editor */}
       <WritingEditor
         content={content}
         onContentChange={handleContentChange}
@@ -123,8 +138,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
         textareaRef={textareaRef}
       />
 
-      {/* Stats display */}
-      <WritingStats draftText={content} />
+      <WritingStats content={content} title={title} />
     </div>
   );
 };

@@ -1,80 +1,82 @@
-// src/components/Panels/TimelinePanel.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import { useToastContext } from "@/context/ToastContext";
 
-interface TimelineEvent {
+interface Scene {
   id: string;
-  date: string;
+  title: string;
   description: string;
 }
 
 const TimelinePanel: React.FC = () => {
-  const [events, setEvents] = useState<TimelineEvent[]>([
-    { id: '1', date: 'Chapter 1', description: 'Henry finds the Roosevelt artifact.' },
-    { id: '2', date: 'Chapter 3', description: 'Eleanor uncovers a hidden clue at school.' },
-  ]);
-  const [newDate, setNewDate] = useState('');
-  const [newDescription, setNewDescription] = useState('');
+  const [scenes, setScenes] = useState<Scene[]>([]);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const { showToast } = useToastContext();
 
-  const addEvent = () => {
-    if (!newDate || !newDescription) return;
-    setEvents((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        date: newDate,
-        description: newDescription,
-      },
-    ]);
-    setNewDate('');
-    setNewDescription('');
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("timeline_scenes");
+      if (stored) setScenes(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("timeline_scenes", JSON.stringify(scenes));
+  }, [scenes]);
+
+  const handleAddScene = () => {
+    const newScene: Scene = {
+      id: Date.now().toString(),
+      title: `New Scene ${scenes.length + 1}`,
+      description: "",
+    };
+    setScenes((prev) => [...prev, newScene]);
+    showToast({ message: "Scene added", type: "success" });
   };
 
-  const deleteEvent = (id: string) => {
-    setEvents((prev) => prev.filter((e) => e.id !== id));
+  const handleRemoveScene = (id: string) => {
+    setScenes((prev) => prev.filter((scene) => scene.id !== id));
+    showToast({ message: "Scene removed", type: "info" });
   };
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-900 rounded-xl shadow-md flex flex-col h-full">
-      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Timeline</h2>
-
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          value={newDate}
-          onChange={(e) => setNewDate(e.target.value)}
-          placeholder="Scene / Chapter"
-          className="flex-1 p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700 text-gray-900 dark:text-gray-100"
-        />
-        <textarea
-          value={newDescription}
-          onChange={(e) => setNewDescription(e.target.value)}
-          placeholder="Description"
-          rows={1}
-          className="flex-1 p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700 text-gray-900 dark:text-gray-100"
-        />
-        <button
-          onClick={addEvent}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-        >
-          Add
-        </button>
-      </div>
-
-      <ul className="space-y-2 overflow-y-auto flex-1">
-        {events.map((event) => (
-          <li
-            key={event.id}
-            className="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg"
-          >
-            <div>
-              <p className="font-semibold text-gray-900 dark:text-gray-100">{event.date}</p>
-              <p className="text-gray-700 dark:text-gray-300">{event.description}</p>
-            </div>
+    <div className="p-4 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg shadow-md">
+      <h2 className="text-lg font-bold mb-4">Timeline</h2>
+      <button
+        onClick={handleAddScene}
+        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-500"
+      >
+        + Add Scene
+      </button>
+      <ul className="mt-4 space-y-3">
+        {scenes.map((scene) => (
+          <li key={scene.id} className="p-3 bg-white dark:bg-gray-800 rounded shadow-sm">
+            <input
+              type="text"
+              value={scene.title}
+              onChange={(e) =>
+                setScenes((prev) =>
+                  prev.map((s) => (s.id === scene.id ? { ...s, title: e.target.value } : s))
+                )
+              }
+              className="w-full text-lg font-semibold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none"
+            />
+            <textarea
+              value={scene.description}
+              onChange={(e) =>
+                setScenes((prev) =>
+                  prev.map((s) =>
+                    s.id === scene.id ? { ...s, description: e.target.value } : s
+                  )
+                )
+              }
+              placeholder="Scene description..."
+              className="w-full mt-2 bg-transparent border border-gray-300 dark:border-gray-600 rounded p-2 focus:outline-none"
+            />
             <button
-              onClick={() => deleteEvent(event.id)}
-              className="text-red-500 hover:text-red-700"
+              onClick={() => handleRemoveScene(scene.id)}
+              className="mt-2 text-sm text-red-500 hover:underline"
             >
-              ✕
+              Remove
             </button>
           </li>
         ))}

@@ -3,7 +3,7 @@
     "target": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
-    "moduleResolution": "Node",            // <- FIX: Use Node-style module resolution
+    "moduleResolution": "Node",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -13,10 +13,12 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "noEmit": true,
-    "baseUrl": "./src",
-    "paths": {},                            // <- Disable alias paths for now
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "types": ["node", "vite/client"]
   },
-  "include": ["src/**/*", "src/types/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "build"]
 }

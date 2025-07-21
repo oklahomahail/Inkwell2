@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
-import { useClaude } from '@/context/ClaudeProvider';
+import React, { useState } from "react";
+import { useClaude } from "@/context/ClaudeProvider";
+import { useToastContext } from "@/context/ToastContext";
 
 interface ClaudeAssistantProps {
   selectedText?: string;
-  onInsertText?: (text: string) => void; // New prop to push AI results into WritingPanel
+  onInsertText?: (text: string) => void;
 }
 
-const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', onInsertText }) => {
+const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
+  selectedText = "",
+  onInsertText,
+}) => {
   const {
     messages,
     sendMessage,
@@ -17,121 +21,134 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
     generatePlotIdeas,
   } = useClaude();
 
-  const [input, setInput] = useState('');
-  const [lastResult, setLastResult] = useState<string>(''); // Track last AI output for insertion
+  const { showToast } = useToastContext();
+  const [input, setInput] = useState("");
+  const [lastResult, setLastResult] = useState<string>("");
 
   const handleSend = async () => {
     if (!input.trim()) return;
     await sendMessage(input, { selectedText });
-    setInput('');
+    setInput("");
   };
 
-  // AI tool handlers
   const handleSuggestContinuation = async () => {
-    const targetText = selectedText || messages[messages.length - 1]?.content || '';
-    if (!targetText) return;
-    const result = await suggestContinuation(targetText);
+    const target = selectedText || messages[messages.length - 1]?.content || "";
+    if (!target) return;
+    const result = await suggestContinuation(target);
     setLastResult(result);
-    await sendMessage(`Suggested continuation for: "${targetText.slice(0, 60)}..."`, {
-      selectedText: targetText,
-    });
+    await sendMessage(`Continuation suggestion for: "${target.slice(0, 60)}..."`);
     await sendMessage(result);
+    showToast({ message: "Claude suggested a continuation", type: "info" });
   };
 
   const handleImproveText = async () => {
-    const targetText = selectedText || messages[messages.length - 1]?.content || '';
-    if (!targetText) return;
-    const result = await improveText(targetText, 'Make it flow naturally and tighten clarity.');
+    const target = selectedText || messages[messages.length - 1]?.content || "";
+    if (!target) return;
+    const result = await improveText(
+      target,
+      "Make it flow naturally and improve clarity without losing style."
+    );
     setLastResult(result);
-    await sendMessage(`Improved version of: "${targetText.slice(0, 60)}..."`, {
-      selectedText: targetText,
-    });
+    await sendMessage(`Improved version for: "${target.slice(0, 60)}..."`);
     await sendMessage(result);
+    showToast({ message: "Claude improved your text", type: "success" });
   };
 
   const handleGeneratePlotIdeas = async () => {
-    const result = await generatePlotIdeas(selectedText || '');
+    const result = await generatePlotIdeas(selectedText || "");
     setLastResult(result);
-    await sendMessage('Here are some plot ideas:', { selectedText });
+    await sendMessage("Here are some plot ideas:");
     await sendMessage(result);
+    showToast({ message: "Claude generated plot ideas", type: "info" });
   };
 
   const handleInsert = () => {
     if (onInsertText && lastResult) {
       onInsertText(lastResult);
+      showToast({ message: "Text inserted into your draft", type: "success" });
     }
   };
 
   return (
     <div
-      aria-label="Claude AI assistant panel"
-      className="fixed bottom-6 right-6 w-96 max-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg p-4 z-50 flex flex-col"
+      aria-label="Claude AI Assistant"
+      className="fixed bottom-6 right-6 w-96 max-w-full bg-[#0F1522] border border-[#0073E6] rounded-xl shadow-2xl p-5 z-50 flex flex-col space-y-4 text-gray-100"
     >
-      <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white flex justify-between">
-        Claude Assistant
-        <button onClick={toggleVisibility} className="text-red-500 hover:text-red-700 text-sm">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-[#0073E6]">Claude Assistant</h2>
+        <button
+          onClick={toggleVisibility}
+          className="text-red-400 hover:text-red-500 text-sm"
+        >
           ✕
         </button>
-      </h2>
+      </div>
 
-      {/* AI Tools */}
-      <div className="flex flex-wrap gap-2 mb-3">
+      {/* AI Action Buttons */}
+      <div className="flex flex-wrap gap-2">
         <button
           onClick={handleSuggestContinuation}
-          className="flex-1 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 transition"
+          className="flex-1 px-3 py-1 text-xs bg-[#0073E6] text-white rounded hover:bg-blue-500 transition"
         >
-          Suggest Continuation
+          Continue
         </button>
         <button
           onClick={handleImproveText}
-          className="flex-1 px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition"
+          className="flex-1 px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-500 transition"
         >
-          Improve Text
+          Improve
         </button>
         <button
           onClick={handleGeneratePlotIdeas}
-          className="flex-1 px-2 py-1 bg-purple-500 text-white text-xs rounded hover:bg-purple-600 transition"
+          className="flex-1 px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-500 transition"
         >
           Plot Ideas
         </button>
         {lastResult && onInsertText && (
           <button
             onClick={handleInsert}
-            className="flex-1 px-2 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600 transition"
+            className="flex-1 px-3 py-1 text-xs bg-yellow-500 text-white rounded hover:bg-yellow-400 transition"
           >
-            Insert into Draft
+            Insert
           </button>
         )}
       </div>
 
-      {/* Message History */}
-      <div className="flex-1 overflow-y-auto mb-2 space-y-2">
+      {/* Chat History */}
+      <div className="flex-1 overflow-y-auto max-h-56 space-y-3 bg-[#1A2233] rounded p-3 border border-gray-700">
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`text-sm p-2 rounded ${
-              msg.role === 'user'
-                ? 'bg-blue-100 dark:bg-blue-900 text-gray-900 dark:text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
+            className={`p-2 rounded text-sm ${
+              msg.role === "user"
+                ? "bg-[#0073E6]/20 text-white"
+                : "bg-gray-700 text-gray-200"
             }`}
           >
             {msg.content}
           </div>
         ))}
-        {isLoading && <p className="text-xs text-gray-500 italic">Thinking...</p>}
+        {isLoading && (
+          <p className="text-xs text-gray-400 italic">Claude is thinking…</p>
+        )}
       </div>
 
-      {/* Freeform Input */}
+      {/* User Input */}
       <div className="flex gap-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          className="flex-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-          placeholder={selectedText ? `Ask about "${selectedText.slice(0, 20)}..."` : 'Ask Claude...'}
+          placeholder={
+            selectedText
+              ? `Ask about: "${selectedText.slice(0, 20)}..."`
+              : "Ask Claude something..."
+          }
+          className="flex-1 px-3 py-2 rounded-md bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none"
         />
         <button
           onClick={handleSend}
-          className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          className="px-4 py-2 bg-[#0073E6] text-white rounded hover:bg-blue-500 transition"
         >
           Send
         </button>
