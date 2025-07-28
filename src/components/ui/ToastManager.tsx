@@ -1,43 +1,62 @@
-import React, { useEffect } from "react";
-import { useToastContext } from "@/context/ToastContext";
+import React, { useEffect, useState } from "react";
 
-const ToastManager: React.FC = () => {
-  const { toasts, removeToast } = useToastContext();
+export interface Toast {
+  id: string;
+  message: string;
+  duration?: number; // milliseconds
+}
+
+interface ToastManagerProps {
+  toasts: Toast[];
+  removeToast: (id: string) => void;
+}
+
+const ToastManager: React.FC<ToastManagerProps> = ({ toasts, removeToast }) => {
+  return (
+    <div className="fixed bottom-4 right-4 flex flex-col gap-3 z-50">
+      {toasts.map((toast) => (
+        <ToastItem
+          key={toast.id}
+          toast={toast}
+          onDismiss={() => removeToast(toast.id)}
+        />
+      ))}
+    </div>
+  );
+};
+
+interface ToastItemProps {
+  toast: Toast;
+  onDismiss: () => void;
+}
+
+const ToastItem: React.FC<ToastItemProps> = ({ toast, onDismiss }) => {
+  const [fadeOut, setFadeOut] = useState(false);
+  const duration = toast.duration ?? 3000;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFadeOut(true);
+      // Wait for fade-out animation before removing
+      setTimeout(onDismiss, 300);
+    }, duration);
+
+    return () => clearTimeout(timer);
+  }, [duration, onDismiss]);
+
+  const handleClick = () => {
+    setFadeOut(true);
+    setTimeout(onDismiss, 300);
+  };
 
   return (
-    <div className="fixed top-6 right-6 space-y-3 z-50">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className={`w-80 max-w-full p-4 rounded-lg shadow-lg border-l-4 animate-fade-slide 
-            ${toast.type === "success" ? "border-green-500 bg-[#0A0F1C]" : ""}
-            ${toast.type === "error" ? "border-red-500 bg-[#0A0F1C]" : ""}
-            ${toast.type === "info" ? "border-[#0073E6] bg-[#0A0F1C]" : ""}
-          `}
-        >
-          <p className="text-gray-200 text-sm">{toast.message}</p>
-          <div className="w-full h-1 mt-2 bg-gray-700 rounded-full overflow-hidden">
-            <div className="h-full bg-[#0073E6] animate-progress-bar"></div>
-          </div>
-        </div>
-      ))}
-
-      <style>{`
-        @keyframes fadeSlide {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-slide {
-          animation: fadeSlide 0.3s ease-out forwards;
-        }
-        @keyframes progress {
-          from { width: 100%; }
-          to { width: 0%; }
-        }
-        .animate-progress-bar {
-          animation: progress 3s linear forwards;
-        }
-      `}</style>
+    <div
+      onClick={handleClick}
+      className={`cursor-pointer px-4 py-2 rounded shadow-md bg-gray-800 text-white transition-opacity ${
+        fadeOut ? "animate-fade-out" : "animate-fade-in"
+      }`}
+    >
+      {toast.message}
     </div>
   );
 };
