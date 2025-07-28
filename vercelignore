@@ -1,0 +1,13 @@
+# Ignore dependencies (Vercel reinstalls from package.json)
+node_modules
+
+# Ignore build output (Vercel builds fresh)
+dist
+
+# Ignore local caches
+.cache
+.DS_Store
+
+# Ignore test and log files
+*.log
+coverage/
