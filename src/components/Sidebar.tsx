@@ -1,40 +1,37 @@
 import React from "react";
-import { useWritingPlatform, View } from "@/context/WritingPlatformProvider";
+import { useAppContext, View } from "@/context/AppContext";
 
 const Sidebar: React.FC = () => {
-  const { activeView, setActiveView } = useWritingPlatform();
+  const { state, dispatch } = useAppContext();
 
-  const navItems: { id: View; label: string }[] = [
-    { id: "dashboard", label: "Dashboard" },
-    { id: "writing", label: "Writing" },
-    { id: "timeline", label: "Timeline" },
-    { id: "analysis", label: "Analysis" },
+  const menuItems = [
+    { label: "Dashboard", view: View.Dashboard },
+    { label: "Writing", view: View.Writing },
+    { label: "Timeline", view: View.Timeline },
+    { label: "Analysis", view: View.Analysis },
+    { label: "Settings", view: View.Settings },
   ];
 
   return (
-    <nav className="flex flex-col h-full bg-[#0A0F1C] text-gray-300 p-4 space-y-2 shadow-md border-r border-gray-800">
-      <h1 className="text-lg font-semibold text-white tracking-wide mb-4">Inkwell</h1>
-
-      {navItems.map((item) => (
-        <button
-          key={item.id}
-          onClick={() => setActiveView(item.id)}
-          className={`px-4 py-2 rounded-lg text-left transition-all duration-200 font-medium
-            ${
-              activeView === item.id
-                ? "bg-[#0073E6] text-white shadow-lg"
-                : "hover:bg-gray-800 hover:text-white"
-            }`}
-        >
-          {item.label}
-        </button>
-      ))}
-
-      {/* Footer */}
-      <div className="mt-auto pt-4 border-t border-gray-800 text-xs text-gray-500">
-        Track15 Inspired • Dark Mode Ready
-      </div>
-    </nav>
+    <aside className="w-64 bg-gray-200 dark:bg-gray-800 p-4 space-y-4">
+      <h2 className="text-lg font-bold">Navigation</h2>
+      <ul className="space-y-2">
+        {menuItems.map((item) => (
+          <li key={item.view}>
+            <button
+              onClick={() => dispatch({ type: "SET_VIEW", payload: item.view })}
+              className={`block w-full text-left px-4 py-2 rounded ${
+                state.view === item.view
+                  ? "bg-blue-500 text-white"
+                  : "hover:bg-gray-300 dark:hover:bg-gray-700"
+              }`}
+            >
+              {item.label}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </aside>
   );
 };
 
