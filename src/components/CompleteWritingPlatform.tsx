@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import ClaudeAssistant from "./ClaudeAssistant"; // Uses index.ts for clean import
-import { useWritingPlatform, useClaude, View } from "@/context/AppContext";
+import { useAppContext, useClaude, View } from "@/context/AppContext";
 import ToastManager from "./ui/ToastManager";
 
 import DashboardPanel from "./Panels/DashboardPanel";
@@ -26,7 +26,7 @@ function debounce<T extends (...args: any[]) => void>(
 
 const CompleteWritingPlatform: React.FC = () => {
   const { activeView, theme, toggleTheme, currentProject, setCurrentProject } =
-    useWritingPlatform();
+    useAppContext();
   const { isVisible, toggleVisibility } = useClaude();
 
   const [draftText, setDraftText] = useState<string>("");

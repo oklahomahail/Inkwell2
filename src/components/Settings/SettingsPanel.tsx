@@ -1,9 +1,9 @@
 // src/components/Settings/SettingsPanel.tsx
 import React from 'react';
-import { useWritingPlatform } from '../../context/WritingPlatformProvider';
+import { useAppContext } from '../../context/AppContext';
 
 const SettingsPanel: React.FC = () => {
-  const { resetApp, theme, setTheme } = useWritingPlatform();
+  const { resetApp, theme, setTheme } = useAppContext();
 
   return (
     <div className="p-6 space-y-6">

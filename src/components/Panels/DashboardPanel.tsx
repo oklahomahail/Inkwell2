@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { useWritingPlatform } from "@/context/WritingPlatformProvider";
+import { useAppContext } from "@/context/AppContext";
 
 interface ProjectStats {
   wordCount: number;
@@ -226,7 +226,7 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({ stats }) => (
 
 // Main DashboardPanel Component
 const DashboardPanel: React.FC = () => {
-  const { setActiveView } = useWritingPlatform();
+  const { dispatch({ type: "SET_VIEW", payload: View.Writing }) } = useAppContext();
   const [stats, setStats] = useState<ProjectStats>({
     wordCount: 0,
     charCount: 0,
@@ -347,7 +347,7 @@ const DashboardPanel: React.FC = () => {
 
   // Enhanced navigation with activity logging
   const navigateWithLogging = (view: string, activityDescription: string) => {
-    setActiveView(view as any);
+    dispatch({ type: "SET_VIEW", payload: View.Writing })(view as any);
     logActivity(view, activityDescription);
   };
 

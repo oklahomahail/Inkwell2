@@ -1,62 +1,94 @@
-import React, { useEffect, useState } from "react";
-
-export interface Toast {
-  id: string;
-  message: string;
-  duration?: number; // milliseconds
-}
-
-interface ToastManagerProps {
-  toasts: Toast[];
-  removeToast: (id: string) => void;
-}
-
-const ToastManager: React.FC<ToastManagerProps> = ({ toasts, removeToast }) => {
-  return (
-    <div className="fixed bottom-4 right-4 flex flex-col gap-3 z-50">
-      {toasts.map((toast) => (
-        <ToastItem
-          key={toast.id}
-          toast={toast}
-          onDismiss={() => removeToast(toast.id)}
-        />
-      ))}
-    </div>
-  );
-};
+import React, { memo } from "react";
+import { useToast } from "@/context/ToastContext";
 
 interface ToastItemProps {
-  toast: Toast;
+  id: string;
+  message: string;
+  type: "info" | "success" | "error";
   onDismiss: () => void;
 }
 
-const ToastItem: React.FC<ToastItemProps> = ({ toast, onDismiss }) => {
-  const [fadeOut, setFadeOut] = useState(false);
-  const duration = toast.duration ?? 3000;
+const ToastItem = memo<ToastItemProps>(({ message, type, onDismiss }) => {
+  const getToastStyles = () => {
+    const base =
+      "px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium cursor-pointer transition-all duration-300 transform hover:scale-105";
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFadeOut(true);
-      // Wait for fade-out animation before removing
-      setTimeout(onDismiss, 300);
-    }, duration);
+    switch (type) {
+      case "success":
+        return `${base} bg-green-600 hover:bg-green-700`;
+      case "error":
+        return `${base} bg-red-600 hover:bg-red-700`;
+      default:
+        return `${base} bg-blue-600 hover:bg-blue-700`;
+    }
+  };
 
-    return () => clearTimeout(timer);
-  }, [duration, onDismiss]);
-
-  const handleClick = () => {
-    setFadeOut(true);
-    setTimeout(onDismiss, 300);
+  const getIcon = () => {
+    switch (type) {
+      case "success":
+        return (
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        );
+      case "error":
+        return (
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        );
+      default:
+        return (
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        );
+    }
   };
 
   return (
-    <div
-      onClick={handleClick}
-      className={`cursor-pointer px-4 py-2 rounded shadow-md bg-gray-800 text-white transition-opacity ${
-        fadeOut ? "animate-fade-out" : "animate-fade-in"
-      }`}
-    >
-      {toast.message}
+    <div onClick={onDismiss} className={getToastStyles()} role="alert" aria-live="polite">
+      <div className="flex items-center">
+        {getIcon()}
+        <span>{message}</span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDismiss();
+          }}
+          className="ml-3 text-white/70 hover:text-white"
+          aria-label="Dismiss notification"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+});
+
+ToastItem.displayName = "ToastItem";
+
+const ToastManager: React.FC = () => {
+  const { toasts, removeToast } = useToast();
+
+  if (toasts.length === 0) return null;
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 space-y-2" role="region" aria-label="Notifications">
+      {toasts.map((toast) => {
+        const id = String(toast.id ?? Date.now()); // normalize id as string
+        return (
+          <ToastItem
+            key={id}
+            id={id}
+            message={toast.message}
+            type={(toast.type as "info" | "success" | "error") ?? "info"}
+            onDismiss={() => removeToast(id)}
+          />
+        );
+      })}
     </div>
   );
 };
