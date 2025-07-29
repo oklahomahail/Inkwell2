@@ -1,3 +1,4 @@
+// src/context/ToastContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface Toast {
@@ -30,13 +31,12 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   return (
     <ToastContext.Provider value={{ toasts, showToast, removeToast }}>
       {children}
-      {/* Toast display logic goes here, or use a ToastManager component */}
     </ToastContext.Provider>
   );
 };
 
-export const useToastContext = () => {
+export function useToast() {
   const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error("useToastContext must be used within ToastProvider");
+  if (!ctx) throw new Error("useToast must be used within ToastProvider");
   return ctx;
-};
+}

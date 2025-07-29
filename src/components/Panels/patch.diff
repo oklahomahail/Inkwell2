@@ -1,0 +1,80 @@
+diff --git a/src/components/Panels/DashboardPanel.tsx b/src/components/Panels/DashboardPanel.tsx
+index abc123..def456 100644
+--- a/src/components/Panels/DashboardPanel.tsx
++++ b/src/components/Panels/DashboardPanel.tsx
+@@
+-    const { dispatch({ type: "SET_VIEW", payload: View.Writing }) } = useAppContext();
++    const { dispatch } = useAppContext();
+
+@@
+-      const totalSize = backups.reduce((acc: any, b: { size: any; }) => acc + b.size, 0);
++      interface BackupEntry { size: number }
++      const totalSize = backups.reduce((acc: number, b: BackupEntry) => acc + b.size, 0);
+
+@@
+-      <button
+-        onClick={() => dispatch({ type: "SET_VIEW", payload: View.Writing })}
++      <button
++        onClick={() => dispatch({ type: "SET_VIEW", payload: View.Writing })}
+         className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+       >
+
+diff --git a/src/components/ui/ToastManager.tsx b/src/components/ui/ToastManager.tsx
+index 123abc..456def 100644
+--- a/src/components/ui/ToastManager.tsx
++++ b/src/components/ui/ToastManager.tsx
+@@
+-      {toasts.map((toast: { id: React.Key | null | undefined; message: string; type: string; }) => (
+-        <ToastItem
+-          key={toast.id}
+-          id={toast.id}
++      {toasts.map((toast) => (
++        <ToastItem
++          key={String(toast.id)}
++          id={String(toast.id)}
+           message={toast.message}
+           type={toast.type as "info" | "success" | "error"}
+-          onDismiss={() => removeToast(toast.id)}
++          onDismiss={() => removeToast(String(toast.id))}
+         />
+       ))}
+
+diff --git a/src/components/Panels/TimelinePanel.tsx b/src/components/Panels/TimelinePanel.tsx
+index 234bcd..678efg 100644
+--- a/src/components/Panels/TimelinePanel.tsx
++++ b/src/components/Panels/TimelinePanel.tsx
+@@
+-import { useToast } from "@/context/AppContext";
++import { useToast } from "@/context/ToastContext";
+
+diff --git a/src/components/Panels/WritingPanel.tsx b/src/components/Panels/WritingPanel.tsx
+index 345cde..789ghi 100644
+--- a/src/components/Panels/WritingPanel.tsx
++++ b/src/components/Panels/WritingPanel.tsx
+@@
+-import { useToast } from "@/context/AppContext";
++import { useToast } from "@/context/ToastContext";
+
+diff --git a/src/context/AppContext.tsx b/src/context/AppContext.tsx
+index 456def..890hij 100644
+--- a/src/context/AppContext.tsx
++++ b/src/context/AppContext.tsx
+@@
+-  | { type: "SET_VIEW"; payload: View }
+-  | { type: "ADD_NOTIFICATION"; payload: string }
+-  | { type: "REMOVE_NOTIFICATION"; payload: string }
+-  | { type: "SET_CAMPAIGN_DATA"; payload: any }
+-  | { type: "TOGGLE_CLAUDE" };
++  | { type: "SET_VIEW"; payload: View }
++  | { type: "SET_THEME"; payload: "light" | "dark" }
++  | { type: "ADD_NOTIFICATION"; payload: string }
++  | { type: "REMOVE_NOTIFICATION"; payload: string }
++  | { type: "SET_CAMPAIGN_DATA"; payload: any }
++  | { type: "TOGGLE_CLAUDE" };
+
+@@
+-      default:
++      case "SET_THEME":
++        return { ...state, theme: action.payload };
++      default:
+         return state;

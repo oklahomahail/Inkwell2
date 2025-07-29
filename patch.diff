@@ -1,0 +1,22 @@
+index 456def..890hij 100644
+--- a/src/context/AppContext.tsx
++++ b/src/context/AppContext.tsx
+@@
+-  | { type: "SET_VIEW"; payload: View }
+-  | { type: "ADD_NOTIFICATION"; payload: string }
+-  | { type: "REMOVE_NOTIFICATION"; payload: string }
+-  | { type: "SET_CAMPAIGN_DATA"; payload: any }
+-  | { type: "TOGGLE_CLAUDE" };
++  | { type: "SET_VIEW"; payload: View }
++  | { type: "SET_THEME"; payload: "light" | "dark" }
++  | { type: "ADD_NOTIFICATION"; payload: string }
++  | { type: "REMOVE_NOTIFICATION"; payload: string }
++  | { type: "SET_CAMPAIGN_DATA"; payload: any }
++  | { type: "TOGGLE_CLAUDE" };
+
+@@
+-      default:
++      case "SET_THEME":
++        return { ...state, theme: action.payload };
++      default:
+         return state;
