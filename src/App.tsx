@@ -3,17 +3,32 @@ import React, { useEffect } from "react";
 import { AppProvider } from "@/context/AppContext";
 import { ToastProvider } from "@/context/ToastContext";
 import CompleteWritingPlatform from "@/components/CompleteWritingPlatform";
-import { initializeBackupSystem } from "@/services/backupSetup";
-import { backupService } from "@/services/backupCore";
+import { initializeBackupSystem, cleanupBackupSystem } from "@/services/backupSetup";
 
 const App: React.FC = () => {
   useEffect(() => {
-    // Initialize backups when the app starts
-    initializeBackupSystem();
+    // Initialize backup system when the app starts
+    const initializeApp = async () => {
+      try {
+        // Initialize backups with default configuration
+        await initializeBackupSystem({
+          autoBackupEnabled: true,
+          autoBackupInterval: 5, // 5 minutes
+          includeSettings: false, // Don't include sensitive settings in auto-backups
+          maxBackups: 10
+        });
+        
+        console.log('✅ Backup system initialized successfully');
+      } catch (error) {
+        console.error('❌ Failed to initialize backup system:', error);
+      }
+    };
 
-    // Clean up on unmount (stop timers, release resources)
+    initializeApp();
+
+    // Clean up when the app unmounts
     return () => {
-      backupService.cleanup();
+      cleanupBackupSystem();
     };
   }, []);
 
