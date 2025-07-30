@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { useToastContext } from "@/context/ToastContext";
-import { logActivity } from "../Panels/DashboardPanel";
+import { useToast } from "@/context/ToastContext";
+import { logActivity } from "@/utils/activityLogger";
 
 interface Scene {
   id: number;
@@ -13,7 +13,7 @@ const TimelinePanel: React.FC = () => {
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
-  const { showToast } = useToastContext();
+  const { showToast } = useToast();
 
   const totalScenes = useMemo(() => scenes.length, [scenes]);
 

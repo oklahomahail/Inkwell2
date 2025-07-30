@@ -7,8 +7,8 @@ import React, {
   forwardRef,
 } from "react";
 import { ExportFormat } from "../../types/writing";
-import { useToastContext } from "@/context/ToastContext";
-import { logActivity } from "../Panels/DashboardPanel";
+import { useToast } from "@/context/ToastContext";
+import { logActivity } from "@/utils/activityLogger";
 
 const DEFAULT_TITLE = "Untitled Chapter";
 
@@ -146,7 +146,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
   const [saveQueue, setSaveQueue] = useState<SaveQueueItem[]>([]);
   const [claudeResponse, setClaudeResponse] = useState<string>("");
 
-  const { showToast } = useToastContext();
+  const { showToast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const initialLoadRef = useRef(false);
 
