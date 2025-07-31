@@ -1,6 +1,15 @@
 // src/context/AppContext.tsx
-import React, { createContext, useReducer, useContext, ReactNode, useState, useCallback } from "react";
-import { claudeService, ClaudeMessage, ClaudeError } from "@/services/claudeService";
+import React, {
+  createContext,
+  useReducer,
+  useContext,
+  ReactNode,
+  useState,
+  useCallback,
+} from "react";
+
+import claudeService from "@/services/claudeService";
+import type { ClaudeMessage, ClaudeError } from "@/services/claudeService";
 
 export enum View {
   Dashboard = "dashboard",
@@ -45,7 +54,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case "ADD_NOTIFICATION":
       return { ...state, notifications: [...state.notifications, action.payload] };
     case "REMOVE_NOTIFICATION":
-      return { ...state, notifications: state.notifications.filter((n) => n !== action.payload) };
+      return {
+        ...state,
+        notifications: state.notifications.filter((n) => n !== action.payload),
+      };
     case "SET_CAMPAIGN_DATA":
       return { ...state, campaignData: action.payload };
     default:
@@ -53,7 +65,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
   }
 }
 
-// Claude-specific state interface
 interface ClaudeState {
   messages: ClaudeMessage[];
   isLoading: boolean;
@@ -63,21 +74,18 @@ interface ClaudeState {
 }
 
 interface AppContextValue {
-  // App state
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
-  
-  // Convenience getters/setters
+
   activeView: View;
   theme: "light" | "dark";
   currentProject: string;
   setCurrentProject: (project: string) => void;
   toggleTheme: () => void;
-  
-  // Claude integration
+
   claude: ClaudeState;
   claudeActions: {
-    sendMessage: (content: string, selectedText?: string) => Promise<void>;
+    sendMessage: (content: string, selectedText?: string) => Promise<string>;
     clearMessages: () => void;
     toggleVisibility: () => void;
     configureApiKey: (apiKey: string) => void;
@@ -90,148 +98,208 @@ interface AppContextValue {
   };
 }
 
+// Mock Claude service fallback for safety
+const createMockClaudeService = () => ({
+  isConfigured: () => false,
+  getMessages: () => [],
+  generateMessageId: () =>
+    `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+  initialize: (apiKey: string) => {
+    console.warn("Claude service not available - API key stored locally");
+    localStorage.setItem("claude_api_key_pending", apiKey);
+  },
+  clearMessages: () => {
+    localStorage.removeItem("claude_messages");
+  },
+  saveMessage: (message: ClaudeMessage) => {
+    const messages = JSON.parse(localStorage.getItem("claude_messages") || "[]");
+    messages.push(message);
+    localStorage.setItem("claude_messages", JSON.stringify(messages));
+  },
+  sendMessage: async () => {
+    throw new Error("Claude service not available.");
+  },
+  continueText: async () => {
+    throw new Error("Claude service not available.");
+  },
+  improveText: async () => {
+    throw new Error("Claude service not available.");
+  },
+  analyzeWritingStyle: async () => {
+    throw new Error("Claude service not available.");
+  },
+  generatePlotIdeas: async () => {
+    throw new Error("Claude service not available.");
+  },
+  analyzeCharacter: async () => {
+    throw new Error("Claude service not available.");
+  },
+  brainstormIdeas: async () => {
+    throw new Error("Claude service not available.");
+  },
+});
+
+// Use named export directly — no default export
+let realClaudeService = claudeService ?? createMockClaudeService();
+
 const AppContext = createContext<AppContextValue | null>(null);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
-  
-  // Claude state management
-  const [claudeState, setClaudeState] = useState<ClaudeState>({
-    messages: claudeService.getMessages(),
-    isLoading: false,
-    error: null,
-    isVisible: false,
-    isConfigured: claudeService.isConfigured(),
+
+  const [claudeState, setClaudeState] = useState<ClaudeState>(() => {
+    try {
+      return {
+        messages: realClaudeService.getMessages(),
+        isLoading: false,
+        error: null,
+        isVisible: false,
+        isConfigured: realClaudeService.isConfigured(),
+      };
+    } catch {
+      return {
+        messages: [],
+        isLoading: false,
+        error: null,
+        isVisible: false,
+        isConfigured: false,
+      };
+    }
   });
 
-  // App convenience methods
   const setCurrentProject = useCallback((project: string) => {
     dispatch({ type: "SET_CURRENT_PROJECT", payload: project });
   }, []);
 
   const toggleTheme = useCallback(() => {
-    const newTheme = state.theme === "light" ? "dark" : "light";
-    dispatch({ type: "SET_THEME", payload: newTheme });
+    dispatch({
+      type: "SET_THEME",
+      payload: state.theme === "light" ? "dark" : "light",
+    });
   }, [state.theme]);
 
-  // Claude action methods
-  const sendMessage = useCallback(async (content: string, selectedText?: string) => {
-    if (!claudeService.isConfigured()) {
-      setClaudeState(prev => ({ 
-        ...prev, 
-        error: "Claude API key not configured. Please set your API key in settings." 
-      }));
-      return;
-    }
-
-    setClaudeState(prev => ({ ...prev, isLoading: true, error: null }));
-
-    try {
-      // Add user message immediately
-      const userMessage: ClaudeMessage = {
-        id: claudeService.generateMessageId(),
-        role: 'user',
-        content: content,
-        timestamp: new Date(),
-      };
-
-      // Get current project context
-      const projectContext = `Current project: ${state.currentProject}`;
-
-      // Send to Claude with context
-      const response = await claudeService.sendMessage(content, {
-        selectedText,
-        projectContext,
-        conversationHistory: claudeState.messages,
-      });
-
-      // Create assistant message
-      const assistantMessage: ClaudeMessage = {
-        id: claudeService.generateMessageId(),
-        role: 'assistant',
-        content: response.content,
-        timestamp: new Date(),
-      };
-
-      // Save both messages
-      claudeService.saveMessage(userMessage);
-      claudeService.saveMessage(assistantMessage);
-
-      // Update state
-      setClaudeState(prev => ({
-        ...prev,
-        messages: [...prev.messages, userMessage, assistantMessage],
-        isLoading: false,
-      }));
-
-    } catch (error) {
-      const claudeError = error as ClaudeError;
-      setClaudeState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: claudeError.message || "Failed to send message to Claude",
-      }));
-    }
-  }, [state.currentProject, claudeState.messages]);
+  const sendMessage = useCallback(
+    async (content: string, selectedText?: string): Promise<string> => {
+      if (!realClaudeService.isConfigured()) {
+        setClaudeState((prev) => ({
+          ...prev,
+          error: "Claude API key not configured. Please set your API key in settings.",
+        }));
+        return "";
+      }
+      setClaudeState((prev) => ({ ...prev, isLoading: true, error: null }));
+      try {
+        const userMessage: ClaudeMessage = {
+          id: realClaudeService.generateMessageId(),
+          role: "user",
+          content,
+          timestamp: new Date(),
+        };
+        const projectContext = `Current project: ${state.currentProject}`;
+        const response = await realClaudeService.sendMessage(content, {
+          selectedText,
+          projectContext,
+          conversationHistory: claudeState.messages,
+        });
+        const assistantMessage: ClaudeMessage = {
+          id: realClaudeService.generateMessageId(),
+          role: "assistant",
+          content: response.content,
+          timestamp: new Date(),
+        };
+        realClaudeService.saveMessage(userMessage);
+        realClaudeService.saveMessage(assistantMessage);
+        setClaudeState((prev) => ({
+          ...prev,
+          messages: [...prev.messages, userMessage, assistantMessage],
+          isLoading: false,
+        }));
+        return response.content;
+      } catch (error) {
+        setClaudeState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to send message to Claude",
+        }));
+        return "";
+      }
+    },
+    [state.currentProject, claudeState.messages]
+  );
 
   const clearMessages = useCallback(() => {
-    claudeService.clearMessages();
-    setClaudeState(prev => ({ ...prev, messages: [] }));
+    try {
+      realClaudeService.clearMessages();
+      setClaudeState((prev) => ({ ...prev, messages: [] }));
+    } catch {
+      setClaudeState((prev) => ({ ...prev, messages: [] }));
+    }
   }, []);
 
   const toggleVisibility = useCallback(() => {
-    setClaudeState(prev => ({ ...prev, isVisible: !prev.isVisible }));
+    setClaudeState((prev) => ({ ...prev, isVisible: !prev.isVisible }));
   }, []);
 
   const configureApiKey = useCallback((apiKey: string) => {
-    claudeService.initialize(apiKey);
-    setClaudeState(prev => ({ 
-      ...prev, 
-      isConfigured: true,
-      error: null 
-    }));
+    try {
+      realClaudeService.initialize(apiKey);
+      setClaudeState((prev) => ({ ...prev, isConfigured: true, error: null }));
+    } catch {
+      setClaudeState((prev) => ({ ...prev, error: "Failed to configure API key" }));
+    }
   }, []);
 
-  // Quick action methods
-  const suggestContinuation = useCallback(async (selectedText: string): Promise<string> => {
-    const projectContext = `Current project: ${state.currentProject}`;
-    return await claudeService.continueText(selectedText, projectContext);
-  }, [state.currentProject]);
+  const suggestContinuation = useCallback(
+    async (selectedText: string): Promise<string> => {
+      const projectContext = `Current project: ${state.currentProject}`;
+      return realClaudeService.continueText(selectedText, projectContext);
+    },
+    [state.currentProject]
+  );
 
-  const improveText = useCallback(async (selectedText: string): Promise<string> => {
-    return await claudeService.improveText(selectedText);
-  }, []);
+  const improveText = useCallback(
+    async (selectedText: string): Promise<string> =>
+      realClaudeService.improveText(selectedText),
+    []
+  );
 
-  const analyzeWritingStyle = useCallback(async (selectedText: string): Promise<string> => {
-    return await claudeService.analyzeWritingStyle(selectedText);
-  }, []);
+  const analyzeWritingStyle = useCallback(
+    async (selectedText: string): Promise<string> =>
+      realClaudeService.analyzeWritingStyle(selectedText),
+    []
+  );
 
-  const generatePlotIdeas = useCallback(async (context?: string): Promise<string> => {
-    return await claudeService.generatePlotIdeas(context);
-  }, []);
+  const generatePlotIdeas = useCallback(
+    async (context?: string): Promise<string> =>
+      realClaudeService.generatePlotIdeas(context),
+    []
+  );
 
-  const analyzeCharacter = useCallback(async (characterName: string): Promise<string> => {
-    const projectContext = `Current project: ${state.currentProject}`;
-    return await claudeService.analyzeCharacter(characterName, projectContext);
-  }, [state.currentProject]);
+  const analyzeCharacter = useCallback(
+    async (characterName: string): Promise<string> => {
+      const projectContext = `Current project: ${state.currentProject}`;
+      return realClaudeService.analyzeCharacter(characterName, projectContext);
+    },
+    [state.currentProject]
+  );
 
-  const brainstormIdeas = useCallback(async (topic: string): Promise<string> => {
-    return await claudeService.brainstormIdeas(topic);
-  }, []);
+  const brainstormIdeas = useCallback(
+    async (topic: string): Promise<string> =>
+      realClaudeService.brainstormIdeas(topic),
+    []
+  );
 
   const contextValue: AppContextValue = {
-    // App state
     state,
     dispatch,
-    
-    // Convenience getters/setters
     activeView: state.view,
     theme: state.theme,
     currentProject: state.currentProject,
     setCurrentProject,
     toggleTheme,
-    
-    // Claude integration
     claude: claudeState,
     claudeActions: {
       sendMessage,
@@ -256,7 +324,7 @@ export function useAppContext() {
   return context;
 }
 
-// Legacy exports for compatibility with existing components
+// Legacy convenience hook for Claude actions & state
 export function useClaude() {
   const { claude, claudeActions } = useAppContext();
   return {

@@ -10,13 +10,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        await initializeBackupSystem({
-          autoBackupEnabled: true,
-          autoBackupInterval: 5, // 5 minutes
-          includeSettings: false,
-          maxBackups: 10,
-        });
-        console.log("✅ Backup system initialized successfully");
+        await initializeBackupSystem();        console.log("✅ Backup system initialized successfully");
       } catch (error) {
         console.error("❌ Failed to initialize backup system:", error);
       }

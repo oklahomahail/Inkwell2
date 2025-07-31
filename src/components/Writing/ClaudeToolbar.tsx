@@ -1,5 +1,6 @@
+// src/components/Writing/ClaudeToolbar.tsx
 import React, { useState } from "react";
-import { useClaude } from "../../context/ClaudeProvider"; // <- Relative import
+import { useClaude } from "../../context/AppContext"; // Use AppContext instead
 
 interface ClaudeToolbarProps {
   selectedText?: string;
@@ -18,38 +19,62 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
   } = useClaude();
 
   const [lastResult, setLastResult] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSuggestContinuation = async (): Promise<void> => {
     const target = selectedText || "";
-    if (!target) return;
-    const result = await suggestContinuation(target);
-    setLastResult(result);
-    await sendMessage(`Claude continuation for: "${target.slice(0, 50)}..."`);
-    await sendMessage(result);
+    if (!target || isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const result = await suggestContinuation(target);
+      setLastResult(result);
+      console.log(`Claude continuation for: "${target.slice(0, 50)}..."`);
+      console.log(result);
+    } catch (error) {
+      console.error("Failed to suggest continuation:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleImproveText = async (): Promise<void> => {
     const target = selectedText || "";
-    if (!target) return;
-    const result = await improveText(
-      target,
-      "Make it flow naturally and tighten clarity."
-    );
-    setLastResult(result);
-    await sendMessage(`Claude improved: "${target.slice(0, 50)}..."`);
-    await sendMessage(result);
+    if (!target || isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const result = await improveText(target);
+      setLastResult(result);
+      console.log(`Claude improved: "${target.slice(0, 50)}..."`);
+      console.log(result);
+    } catch (error) {
+      console.error("Failed to improve text:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGeneratePlotIdeas = async (): Promise<void> => {
-    const result = await generatePlotIdeas(selectedText || "");
-    setLastResult(result);
-    await sendMessage("Claude plot ideas:");
-    await sendMessage(result);
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const result = await generatePlotIdeas(selectedText || "");
+      setLastResult(result);
+      console.log("Claude plot ideas:");
+      console.log(result);
+    } catch (error) {
+      console.error("Failed to generate plot ideas:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInsert = (): void => {
     if (onInsertText && lastResult) {
       onInsertText(lastResult);
+      setLastResult(""); // Clear after inserting
     }
   };
 
@@ -57,29 +82,42 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
     <div className="flex flex-wrap gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded shadow-sm">
       <button
         onClick={handleSuggestContinuation}
-        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-500 transition"
+        disabled={!selectedText || isLoading}
+        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Continue
+        {isLoading ? "..." : "Continue"}
       </button>
       <button
         onClick={handleImproveText}
-        className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-500 transition"
+        disabled={!selectedText || isLoading}
+        className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Improve
+        {isLoading ? "..." : "Improve"}
       </button>
       <button
         onClick={handleGeneratePlotIdeas}
-        className="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-500 transition"
+        disabled={isLoading}
+        className="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Plot Ideas
+        {isLoading ? "..." : "Plot Ideas"}
       </button>
       {lastResult && onInsertText && (
         <button
           onClick={handleInsert}
           className="px-3 py-1 text-xs bg-yellow-600 text-white rounded hover:bg-yellow-500 transition"
         >
-          Insert
+          Insert Result
         </button>
+      )}
+      {lastResult && (
+        <div className="w-full mt-2 p-2 text-xs bg-gray-200 dark:bg-gray-700 rounded">
+          <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Claude's suggestion:
+          </div>
+          <div className="text-gray-600 dark:text-gray-400 max-h-20 overflow-y-auto">
+            {lastResult}
+          </div>
+        </div>
       )}
     </div>
   );

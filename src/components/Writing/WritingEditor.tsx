@@ -1,55 +1,35 @@
 // src/components/Writing/WritingEditor.tsx
-import React, { useEffect } from 'react';
+import React, { forwardRef } from "react";
 
-// src/components/Writing/WritingEditor.tsx
-interface WritingEditorProps {
-  content: string;
-  onContentChange: (content: string) => void;
-  onTextSelect?: () => void;
-  onScroll?: () => void;
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>; // <-- allow null
+export interface WritingEditorProps {
+  value: string;
+  onChange: (val: string) => void;
+  onTextSelect: () => void;
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
 }
 
-const WritingEditor: React.FC<WritingEditorProps> = ({
-  content,
-  onContentChange,
-  onTextSelect,
-  onScroll,
-  textareaRef,
-}) => {
-  // Trigger onTextSelect when the selection changes
-  useEffect(() => {
-    const handleSelection = () => {
-      if (onTextSelect) onTextSelect();
-    };
-
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.addEventListener('mouseup', handleSelection);
-      textarea.addEventListener('keyup', handleSelection);
-    }
-
-    return () => {
-      if (textarea) {
-        textarea.removeEventListener('mouseup', handleSelection);
-        textarea.removeEventListener('keyup', handleSelection);
-      }
-    };
-  }, [onTextSelect, textareaRef]);
-
-  return (
-    <div className="flex-1 p-4 overflow-auto">
+const WritingEditor = forwardRef<HTMLTextAreaElement, WritingEditorProps>(
+  ({ value, onChange, onTextSelect, placeholder = "Start writing...", disabled = false, className }, ref) => {
+    return (
       <textarea
-        ref={textareaRef}
-        value={content}
-        onChange={(e) => onContentChange(e.target.value)}
-        onScroll={onScroll}
-        className="w-full h-full resize-none border-none outline-none text-lg leading-relaxed text-gray-900 dark:text-gray-100 bg-transparent font-serif"
-        placeholder="Start writing your chapter here..."
-        spellCheck={true}
+        ref={ref}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onSelect={onTextSelect}
+        placeholder={placeholder}
+        disabled={disabled}
+        className={`w-full h-full p-4 border border-gray-300 dark:border-gray-600 rounded-lg resize-none 
+          bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+          disabled:opacity-50 disabled:cursor-not-allowed
+          transition-colors duration-200 ${className || ''}`}
+        style={{ minHeight: '400px' }}
       />
-    </div>
-  );
-};
+    );
+  }
+);
 
+WritingEditor.displayName = "WritingEditor";
 export default WritingEditor;

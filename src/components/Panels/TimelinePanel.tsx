@@ -19,7 +19,7 @@ const TimelinePanel: React.FC = () => {
 
   const handleAddScene = useCallback(() => {
     if (!newTitle.trim()) {
-      showToast("Scene title cannot be empty", 2500);
+      showToast("Scene title cannot be empty", "error");
       return;
     }
     const newScene: Scene = {
@@ -32,7 +32,7 @@ const TimelinePanel: React.FC = () => {
     setNewTitle("");
     setNewDescription("");
     logActivity(`Scene added: ${newScene.title}`, "timeline");
-    showToast("Scene added to timeline", 2000);
+    showToast("Scene added to timeline", "success");
   }, [newTitle, newDescription, showToast]);
 
   const handleRemoveScene = useCallback(
@@ -40,7 +40,7 @@ const TimelinePanel: React.FC = () => {
       const scene = scenes.find((s) => s.id === id);
       setScenes((prev) => prev.filter((s) => s.id !== id));
       logActivity(`Scene removed: ${scene?.title ?? "Untitled"}`, "timeline");
-      showToast("Scene removed from timeline", 2000);
+      showToast("Scene removed from timeline", "success");
     },
     [scenes, showToast]
   );

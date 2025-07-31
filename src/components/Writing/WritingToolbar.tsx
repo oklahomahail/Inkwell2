@@ -1,97 +1,114 @@
-import React, { useCallback } from 'react';
-import { ExportFormat } from '../../types/writing';
-import { exportFormats } from '../../utils/exportFormats';
+// src/components/Writing/WritingToolbar.tsx
+import React from "react";
+import { ExportFormat } from "../../types/writing";
+import { Save, Download, Sparkles, FileText, FileDown, File } from "lucide-react";
 
-interface WritingToolbarProps {
+export interface WritingToolbarProps {
   title: string;
-  onTitleChange: (title: string) => void;
-  titleRef: React.RefObject<HTMLInputElement | null>; // <-- allow null here
-  content: string;
-  lastSaved: string;
-  isSaving: boolean;
-  onSave: () => void;
+  onTitleChange: (value: string) => void;
+  onManualSave: () => void;
+  onExport: () => void;
   exportFormat: ExportFormat;
-  onExportFormatChange: (format: ExportFormat) => void;
-  defaultTitle: string;
-  isDirty: boolean;
+  setExportFormat: (format: ExportFormat) => void;
+  onClaudeAssist: () => void;
+  isSaving?: boolean;
+  isExporting?: boolean;
+  lastSaved?: Date | null;
 }
 
 const WritingToolbar: React.FC<WritingToolbarProps> = ({
   title,
   onTitleChange,
-  titleRef,
-  content,
-  lastSaved,
-  isSaving,
-  onSave,
+  onManualSave,
+  onExport,
   exportFormat,
-  onExportFormatChange,
-  defaultTitle,
-  isDirty,
+  setExportFormat,
+  onClaudeAssist,
+  isSaving = false,
+  isExporting = false,
+  lastSaved,
 }) => {
-  const handleExport = useCallback(async () => {
-    try {
-      const timestamp = new Date().toISOString().split('T')[0];
-      const exportTitle = title || defaultTitle;
-      const sanitizedTitle = exportTitle.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-');
-      const config = exportFormats[exportFormat];
-      const filename = `${sanitizedTitle}-${timestamp}.${config.ext}`;
-
-      const exportContent = config.formatter(exportTitle, content);
-      const blob = new Blob([exportContent], { type: `${config.mime};charset=utf-8` });
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Export failed:', err);
-      alert('Export failed. Please try again.');
+  const getExportIcon = () => {
+    switch (exportFormat) {
+      case "markdown":
+        return <FileText className="w-4 h-4" />;
+      case "docx":
+        return <FileDown className="w-4 h-4" />;
+      default:
+        return <File className="w-4 h-4" />;
     }
-  }, [title, content, exportFormat, defaultTitle]);
+  };
 
   return (
-    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex justify-between items-center">
+    <div className="flex flex-col gap-3 p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      {/* Title and Primary Actions */}
+      <div className="flex items-center gap-3">
         <input
-          ref={titleRef}
+          type="text"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
-          placeholder="Chapter Title"
-          className="flex-1 text-2xl font-bold bg-transparent outline-none text-gray-900 dark:text-gray-100"
+          placeholder="Document title..."
+          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm 
+            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+            transition-colors duration-200"
         />
-        <div className="text-sm text-gray-500 dark:text-gray-400 ml-4">
-          {isSaving ? 'Saving...' : isDirty ? 'Unsaved changes' : lastSaved}
-        </div>
-      </div>
-      <div className="flex justify-end space-x-2 mt-3">
-        <select
-          value={exportFormat}
-          onChange={(e) => onExportFormatChange(e.target.value as ExportFormat)}
-          className="px-2 py-1 border rounded text-sm"
-        >
-          <option value="markdown">Markdown</option>
-          <option value="txt">Plain Text</option>
-          <option value="docx">Word</option>
-        </select>
+        
         <button
-          onClick={onSave}
+          onClick={onManualSave}
           disabled={isSaving}
-          className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg 
+            hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed
+            transition-colors duration-200"
         >
-          Save
+          <Save className="w-4 h-4" />
+          {isSaving ? "Saving..." : "Save"}
         </button>
+
         <button
-          onClick={handleExport}
-          disabled={!content.trim() && !title.trim()}
-          className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+          onClick={onClaudeAssist}
+          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg 
+            hover:bg-purple-700 transition-colors duration-200"
         >
-          Export
+          <Sparkles className="w-4 h-4" />
+          Claude Assist
         </button>
+      </div>
+
+      {/* Export Controls and Status */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <select
+            value={exportFormat}
+            onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm
+              bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+              transition-colors duration-200"
+          >
+            <option value="markdown">Markdown (.md)</option>
+            <option value="txt">Plain Text (.txt)</option>
+            <option value="docx">Word Document (.docx)</option>
+          </select>
+
+          <button
+            onClick={onExport}
+            disabled={isExporting}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg 
+              hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed
+              transition-colors duration-200"
+          >
+            {getExportIcon()}
+            {isExporting ? "Exporting..." : "Export"}
+          </button>
+        </div>
+
+        {/* Last Saved Indicator */}
+        {lastSaved && (
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            Last saved: {lastSaved.toLocaleTimeString()}
+          </div>
+        )}
       </div>
     </div>
   );

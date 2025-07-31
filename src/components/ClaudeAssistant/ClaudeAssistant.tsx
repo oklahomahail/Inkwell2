@@ -1,16 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useClaude, useToast } from "../../context/AppContext"; // adjust relative path if needed
+import { useClaude } from "../../context/AppContext";
+import { useToast } from "../../context/ToastContext"; // adjust relative path if needed
 import AccessibleTabs from "../AccessibleTabs";
 import MessageBubble from "../MessageBubble";
-import { ChatIcon, BoltIcon, SearchIcon } from "lucide-react";
-import AccessibleTabs from "../AccessibleTabs";
-import MessageBubble from "../MessageBubble";
-
+import { MessageCircle, Zap, Search } from "lucide-react";
 interface ClaudeAssistantProps {
   selectedText?: string;
   onInsertText?: (text: string) => void;
 }
-
 const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
   selectedText = "",
   onInsertText,
@@ -175,7 +172,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
     {
       id: "chat",
       label: "Chat",
-      icon: <ChatIcon size={14} />,
+      icon: <MessageCircle size={14} />,
       content: (
         <>
           <div
@@ -241,7 +238,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
     {
       id: "quick-actions",
       label: "Quick",
-      icon: <BoltIcon size={14} />,
+      icon: <Zap size={14} />,
       content: (
         <div className="p-4 space-y-3">
           <div className="grid grid-cols-2 gap-2 mb-4">
@@ -309,7 +306,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
     {
       id: "analysis",
       label: "Analysis",
-      icon: <SearchIcon size={14} />,
+      icon: <Search size={14} />,
       content: (
         <div className="p-4 space-y-4">
           <div>
@@ -421,7 +418,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
       </div>
 
       {/* Tabs */}
-      <AccessibleTabs tabs={tabs} initialSelectedId={activeMode} onChange={setActiveMode} />
+      <AccessibleTabs tabs={tabs} initialSelectedId={activeMode} onChange={(id: string) => setActiveMode(id as "chat" | "quick-actions" | "analysis")} />
     </div>
   );
 };
