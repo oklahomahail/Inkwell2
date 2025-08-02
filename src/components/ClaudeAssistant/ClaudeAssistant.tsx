@@ -1,13 +1,15 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useClaude } from "../../context/AppContext";
-import { useToast } from "../../context/ToastContext"; // adjust relative path if needed
+import { useClaude } from "@/context/AppContext";
+import { useToast } from "@/context/ToastContext";
 import AccessibleTabs from "../AccessibleTabs";
 import MessageBubble from "../MessageBubble";
-import { MessageCircle, Zap, Search } from "lucide-react";
+import { MessageCircle, Zap, Search, BoltIcon, CatIcon, SearchIcon } from "lucide-react";
+
 interface ClaudeAssistantProps {
   selectedText?: string;
   onInsertText?: (text: string) => void;
 }
+
 const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
   selectedText = "",
   onInsertText,
@@ -34,16 +36,19 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const insertButtonRef = useRef<HTMLButtonElement>(null);
 
+  // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Auto-focus chat input when active
   useEffect(() => {
     if (!isMinimized && activeMode === "chat") {
       inputRef.current?.focus();
     }
   }, [isMinimized, activeMode]);
 
+  // Focus insert button when lastResult changes
   useEffect(() => {
     if (lastResult && onInsertText) {
       insertButtonRef.current?.focus();
@@ -60,78 +65,81 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
     }
   }, [input, isLoading, sendMessage, showToast]);
 
-  const handleQuickAction = useCallback(async (action: string) => {
-    if (isLoading) return;
+  const handleQuickAction = useCallback(
+    async (action: string) => {
+      if (isLoading) return;
 
-    try {
-      let result = "";
-      let description = "";
+      try {
+        let result = "";
+        let description = "";
 
-      switch (action) {
-        case "continue":
-          if (!selectedText) {
-            showToast("Please select some text to continue", "error");
+        switch (action) {
+          case "continue":
+            if (!selectedText) {
+              showToast("Please select some text to continue", "error");
+              return;
+            }
+            description = `Continue text: "${selectedText.slice(0, 40)}..."`;
+            result = await sendMessage(description);
+            break;
+
+          case "improve":
+            if (!selectedText) {
+              showToast("Please select some text to improve", "error");
+              return;
+            }
+            description = `Improve text: "${selectedText.slice(0, 40)}..."`;
+            result = await sendMessage(description);
+            break;
+
+          case "analyze-style":
+            if (!selectedText) {
+              showToast("Please select some text to analyze", "error");
+              return;
+            }
+            description = `Analyze style: "${selectedText.slice(0, 40)}..."`;
+            result = await sendMessage(description);
+            break;
+
+          case "plot-ideas":
+            description = selectedText
+              ? `Plot ideas for: "${selectedText.slice(0, 40)}..."`
+              : "Generate plot ideas";
+            result = await sendMessage(description);
+            break;
+
+          case "character-analysis":
+            if (!characterName.trim()) {
+              showToast("Please enter a character name", "error");
+              return;
+            }
+            description = `Analyze character: ${characterName}`;
+            result = await sendMessage(description);
+            setCharacterName("");
+            break;
+
+          case "brainstorm":
+            if (!brainstormTopic.trim()) {
+              showToast("Please enter a topic to brainstorm", "error");
+              return;
+            }
+            description = `Brainstorm: ${brainstormTopic}`;
+            result = await sendMessage(description);
+            setBrainstormTopic("");
+            break;
+
+          default:
             return;
-          }
-          description = `Continue text: "${selectedText.slice(0, 40)}..."`;
-          result = await sendMessage(description);
-          break;
+        }
 
-        case "improve":
-          if (!selectedText) {
-            showToast("Please select some text to improve", "error");
-            return;
-          }
-          description = `Improve text: "${selectedText.slice(0, 40)}..."`;
-          result = await sendMessage(description);
-          break;
-
-        case "analyze-style":
-          if (!selectedText) {
-            showToast("Please select some text to analyze", "error");
-            return;
-          }
-          description = `Analyze style: "${selectedText.slice(0, 40)}..."`;
-          result = await sendMessage(description);
-          break;
-
-        case "plot-ideas":
-          description = selectedText
-            ? `Plot ideas for: "${selectedText.slice(0, 40)}..."`
-            : "Generate plot ideas";
-          result = await sendMessage(description);
-          break;
-
-        case "character-analysis":
-          if (!characterName.trim()) {
-            showToast("Please enter a character name", "error");
-            return;
-          }
-          description = `Analyze character: ${characterName}`;
-          result = await sendMessage(description);
-          setCharacterName("");
-          break;
-
-        case "brainstorm":
-          if (!brainstormTopic.trim()) {
-            showToast("Please enter a topic to brainstorm", "error");
-            return;
-          }
-          description = `Brainstorm: ${brainstormTopic}`;
-          result = await sendMessage(description);
-          setBrainstormTopic("");
-          break;
-
-        default:
-          return;
+        setLastResult(result);
+        showToast("Claude provided suggestions", "success");
+      } catch {
+        showToast("Action failed. Please try again.", "error");
       }
-
-      setLastResult(result);
-      showToast("Claude provided suggestions", "success");
-    } catch {
-      showToast("Action failed. Please try again.", "error");
-    }
-  }, [isLoading, selectedText, characterName, brainstormTopic, sendMessage, showToast]);
+    },
+    [isLoading, selectedText, characterName, brainstormTopic, sendMessage, showToast]
+  );
 
   const handleInsert = () => {
     if (onInsertText && lastResult) {
@@ -168,11 +176,17 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
     );
   }
 
+  const handleTabChange = (id: string) => {
+    if (id === "chat" || id === "quick-actions" || id === "analysis") {
+      setActiveMode(id);
+    }
+  };
+
   const tabs = [
     {
       id: "chat",
       label: "Chat",
-      icon: <MessageCircle size={14} />,
+      icon: <CatIcon size={14} />,
       content: (
         <>
           <div
@@ -238,7 +252,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
     {
       id: "quick-actions",
       label: "Quick",
-      icon: <Zap size={14} />,
+      icon: <BoltIcon size={14} />,
       content: (
         <div className="p-4 space-y-3">
           <div className="grid grid-cols-2 gap-2 mb-4">
@@ -306,7 +320,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
     {
       id: "analysis",
       label: "Analysis",
-      icon: <Search size={14} />,
+      icon: <SearchIcon size={14} />,
       content: (
         <div className="p-4 space-y-4">
           <div>
@@ -418,7 +432,11 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
       </div>
 
       {/* Tabs */}
-      <AccessibleTabs tabs={tabs} initialSelectedId={activeMode} onChange={(id: string) => setActiveMode(id as "chat" | "quick-actions" | "analysis")} />
+      <AccessibleTabs
+        tabs={tabs}
+        initialSelectedId={activeMode}
+        onChange={handleTabChange}
+      />
     </div>
   );
 };

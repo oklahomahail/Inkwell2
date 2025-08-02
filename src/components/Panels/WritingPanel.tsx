@@ -168,16 +168,6 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     setSession((prev) => ({ ...prev, lastActivityTime: new Date() }));
   }, [content]);
 
-  // Auto-save interval
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (autoSaveState.isDirty) {
-        handleAutoSave();
-      }
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [autoSaveState.isDirty, content]);
-
   const handleAutoSave = useCallback(() => {
     const newItem: SaveQueueItem = {
       content,
@@ -195,6 +185,19 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     logActivity("Auto-saved draft", "writing");
     showToast("Draft auto-saved", "info");
   }, [content, title, showToast]);
+
+  // Auto-save interval - Fixed dependency array
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (autoSaveState.isDirty) {
+        handleAutoSave();
+      }
+    }, 10000);
+    
+    return () => {
+      clearInterval(interval);
+    };
+  }, [autoSaveState.isDirty, handleAutoSave]); // Include handleAutoSave in dependencies
 
   const handleManualSave = useCallback(() => {
     const newItem: SaveQueueItem = {

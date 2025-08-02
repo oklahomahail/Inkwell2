@@ -8,6 +8,7 @@ import React, {
   useCallback,
 } from "react";
 
+// Fix: Change to default import (remove curly braces)
 import claudeService from "@/services/claudeService";
 import type { ClaudeMessage, ClaudeError } from "@/services/claudeService";
 
@@ -139,7 +140,7 @@ const createMockClaudeService = () => ({
   },
 });
 
-// Use named export directly — no default export
+// Use the default export from claudeService
 let realClaudeService = claudeService ?? createMockClaudeService();
 
 const AppContext = createContext<AppContextValue | null>(null);

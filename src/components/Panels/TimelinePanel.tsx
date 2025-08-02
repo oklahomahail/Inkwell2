@@ -1,3 +1,4 @@
+// src/components/Panels/TimelinePanel.tsx
 import React, { useState, useCallback, useMemo } from "react";
 import { useToast } from "@/context/ToastContext";
 import { logActivity } from "@/utils/activityLogger";
@@ -31,6 +32,7 @@ const TimelinePanel: React.FC = () => {
     setScenes((prev) => [...prev, newScene]);
     setNewTitle("");
     setNewDescription("");
+
     logActivity(`Scene added: ${newScene.title}`, "timeline");
     showToast("Scene added to timeline", "success");
   }, [newTitle, newDescription, showToast]);
@@ -39,8 +41,9 @@ const TimelinePanel: React.FC = () => {
     (id: number) => {
       const scene = scenes.find((s) => s.id === id);
       setScenes((prev) => prev.filter((s) => s.id !== id));
+
       logActivity(`Scene removed: ${scene?.title ?? "Untitled"}`, "timeline");
-      showToast("Scene removed from timeline", "success");
+      showToast("Scene removed from timeline", "info");
     },
     [scenes, showToast]
   );

@@ -1,5 +1,5 @@
 // src/utils/backupUtils.ts
-import CryptoJS from 'crypto-js'; // npm install crypto-js @types/crypto-js
+import CryptoJS from 'crypto-js';
 
 export interface StorageInfo {
   used: number;
@@ -114,7 +114,7 @@ export async function checkStorageInfo(): Promise<StorageInfo> {
 /**
  * Validate backup data structure and integrity
  */
-export function validateBackupData(backup: any, useSecureChecksum = false): BackupValidationResult {
+export function validateBackupData(backup: any, useSecureChecksum: boolean = false): BackupValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -125,53 +125,39 @@ export function validateBackupData(backup: any, useSecureChecksum = false): Back
       return { isValid: false, errors, warnings };
     }
 
-    if (!backup.metadata) errors.push('Missing metadata');
-    if (!backup.version) errors.push('Missing version');
-    if (!backup.createdAt) errors.push('Missing creation date');
-
-    // Metadata validation
-    if (backup.metadata) {
-      if (!backup.metadata.id) errors.push('Missing backup ID');
-      if (!backup.metadata.timestamp) errors.push('Missing timestamp');
-      if (typeof backup.metadata.size !== 'number') errors.push('Invalid size field');
-      if (!backup.metadata.checksum) errors.push('Missing checksum');
-    }
+    if (!backup.id) errors.push('Missing backup ID');
+    if (!backup.timestamp) errors.push('Missing timestamp');
+    if (typeof backup.size !== 'number') errors.push('Invalid size field');
+    if (!backup.checksum) errors.push('Missing checksum');
 
     // Data structure validation
-    if (backup.documents && !Array.isArray(backup.documents)) {
-      errors.push('Documents must be an array');
-    }
-    if (backup.sessions && !Array.isArray(backup.sessions)) {
-      errors.push('Sessions must be an array');
-    }
-    if (backup.goals && !Array.isArray(backup.goals)) {
-      errors.push('Goals must be an array');
+    if (backup.data) {
+      if (backup.data.documents && !Array.isArray(backup.data.documents)) {
+        errors.push('Documents must be an array');
+      }
+      if (backup.data.sessions && !Array.isArray(backup.data.sessions)) {
+        errors.push('Sessions must be an array');
+      }
+      if (backup.data.goals && !Array.isArray(backup.data.goals)) {
+        errors.push('Goals must be an array');
+      }
     }
 
     // Checksum verification
-    if (backup.metadata?.checksum && errors.length === 0) {
-      const dataToVerify = {
-        documents: backup.documents,
-        sessions: backup.sessions,
-        goals: backup.goals,
-        settings: backup.settings,
-        version: backup.version,
-        createdAt: backup.createdAt,
-      };
-
+    if (backup.checksum && backup.data && errors.length === 0) {
       const expectedChecksum = useSecureChecksum 
-        ? calculateSecureChecksum(dataToVerify)
-        : calculateLightChecksum(dataToVerify);
+        ? calculateSecureChecksum(backup.data)
+        : calculateLightChecksum(backup.data);
 
-      if (expectedChecksum !== backup.metadata.checksum) {
+      if (expectedChecksum !== backup.checksum) {
         errors.push('Checksum verification failed - backup may be corrupted');
       }
     }
 
     // Size validation
-    if (backup.metadata?.size) {
+    if (backup.size) {
       const actualSize = calculateDataSize(backup);
-      const sizeDifference = Math.abs(actualSize - backup.metadata.size);
+      const sizeDifference = Math.abs(actualSize - backup.size);
       
       if (sizeDifference > actualSize * 0.1) { // 10% tolerance
         warnings.push('Backup size differs significantly from metadata');
@@ -179,8 +165,8 @@ export function validateBackupData(backup: any, useSecureChecksum = false): Back
     }
 
     // Age warnings
-    if (backup.metadata?.timestamp) {
-      const age = Date.now() - new Date(backup.metadata.timestamp).getTime();
+    if (backup.timestamp) {
+      const age = Date.now() - backup.timestamp;
       const daysOld = age / (1000 * 60 * 60 * 24);
       
       if (daysOld > 30) {
@@ -344,7 +330,7 @@ export function createBackupMetadata(
   data: any,
   type: 'manual' | 'auto' | 'emergency',
   description?: string,
-  useSecureChecksum = false
+  useSecureChecksum: boolean = false
 ): any {
   const size = calculateDataSize(data);
   const checksum = useSecureChecksum 

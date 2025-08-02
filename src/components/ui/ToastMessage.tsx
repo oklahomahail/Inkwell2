@@ -1,19 +1,19 @@
-// src/components/UI/ToastProvider.tsx
+// src/components/UI/ToastMessage.tsx
 import React from "react";
-import { ToastOptions } from "@/hooks/useToast";
+import { Toast } from "@/context/ToastContext"; // or define Toast interface here too
 
-interface ToastProviderProps {
-  toast: ToastOptions | null;
+interface ToastMessageProps {
+  toast: Toast;
 }
 
-const ToastProvider: React.FC<ToastProviderProps> = ({ toast }) => {
-  if (!toast) return null;
-
+const ToastMessage: React.FC<ToastMessageProps> = ({ toast }) => {
   const bgColor =
     toast.type === "success"
       ? "bg-green-600"
       : toast.type === "error"
       ? "bg-red-600"
+      : toast.type === "warning"
+      ? "bg-yellow-600"
       : "bg-blue-600";
 
   return (
@@ -38,4 +38,4 @@ const ToastProvider: React.FC<ToastProviderProps> = ({ toast }) => {
   );
 };
 
-export default ToastProvider;
+export default ToastMessage;

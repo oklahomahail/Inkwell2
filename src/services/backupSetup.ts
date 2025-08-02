@@ -1,40 +1,52 @@
 // src/services/backupSetup.ts
-import { BackupManager, saveBackup, type Backup } from "./backupService";
+// Try importing everything as a namespace first
+import * as BackupService from "./backupServices";
 
+// Then destructure what we need
+const { BackupManager, saveBackup } = BackupService;
+type Backup = BackupService.Backup;
+
+/**
+ * Real backup function that creates and saves a backup.
+ */
 async function performActualBackup(): Promise<void> {
+  // Construct a Backup object with proper type literals
   const backup: Backup = {
     id: crypto.randomUUID(),
-    type: "manual",
+    type: "manual", // Must be one of the literal union: "manual" | "auto" | "emergency"
     title: `Backup ${new Date().toLocaleString()}`,
     description: "Manual backup from user",
     data: JSON.parse(localStorage.getItem("writing_content") || "{}"),
     timestamp: Date.now(),
-    size: undefined,
-    isCorrupted: false,
+    size: undefined,       // Optional: calculate if you want
+    isCorrupted: false,    // Optional flag
   };
+
+  // Save the backup using the consolidated backupService
   await saveBackup(backup);
 }
 
+/**
+ * Simple notification function — replace with your UI toast/snackbar
+ */
 function notifyUser(message: string, type: "info" | "success" | "error" = "info") {
   console.log(`[${type.toUpperCase()}] Backup: ${message}`);
 }
 
+// Create and export the singleton BackupManager instance
 export const backupManager = new BackupManager(performActualBackup, notifyUser);
 
+// Manual backup trigger for UI
 export async function triggerBackup() {
   await backupManager.backup();
 }
 
-export function initializeBackupSystem() {
-  console.log("Backup system initialized");
-}
-
-export function cleanupBackupSystem() {
-  console.log("Backup system cleaned up");
-}
-
+// Auto-backup interval ID holder
 let autoBackupInterval: ReturnType<typeof setInterval> | null = null;
 
+/**
+ * Enable auto backup every intervalMs milliseconds (default 1 minute)
+ */
 export function setupAutoBackup(intervalMs = 60000) {
   if (autoBackupInterval) clearInterval(autoBackupInterval);
   autoBackupInterval = setInterval(() => {
@@ -43,6 +55,9 @@ export function setupAutoBackup(intervalMs = 60000) {
   notifyUser("Auto-backup enabled", "success");
 }
 
+/**
+ * Disable auto backup
+ */
 export function stopAutoBackup() {
   if (autoBackupInterval) {
     clearInterval(autoBackupInterval);
@@ -51,7 +66,8 @@ export function stopAutoBackup() {
   }
 }
 
-export {
+// Re-export useful functions from backupService for convenience
+export const {
   getBackups,
   restoreBackup,
   deleteBackup,
@@ -61,5 +77,5 @@ export {
   getBackupStatus,
   createManualBackup,
   startAutoBackup,
-  stopAutoBackup as stopAutoBackupService
-} from "./backupService";
+  stopAutoBackup: stopAutoBackupService
+} = BackupService;

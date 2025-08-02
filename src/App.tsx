@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { AppProvider } from "@/context/AppContext";
 import { ToastProvider } from "@/context/ToastContext";
 import ToastManager from "@/components/ui/ToastManager";
-import ModernWritingPlatform from "@/components/CompleteWritingPlatform";
+import CompleteWritingPlatform from "@/components/CompleteWritingPlatform";
 
 // Optional backup system imports - will work if they exist
 let initializeBackupSystem: (() => Promise<void>) | undefined;
@@ -45,7 +45,7 @@ const App: React.FC = () => {
     <AppProvider>
       <ToastProvider>
         <div className="min-h-screen bg-gray-50">
-          <ModernWritingPlatform />
+          <CompleteWritingPlatform />
           <ToastManager />
         </div>
       </ToastProvider>

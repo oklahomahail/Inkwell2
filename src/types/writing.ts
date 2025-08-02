@@ -1,4 +1,4 @@
-export type ExportFormat = 'markdown' | 'txt' | 'docx';
+export type ExportFormat = 'markdown' | 'txt' | 'docx' | 'json';
 
 export interface WritingPanelState {
   content: string;

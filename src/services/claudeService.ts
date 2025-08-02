@@ -63,6 +63,9 @@ Guidelines:
       systemPrompt: this.DEFAULT_SYSTEM_PROMPT,
       ...config
     };
+    
+    // Initialize from stored config
+    this.loadConfig();
   }
 
   /**
@@ -434,16 +437,7 @@ Make suggestions specific and usable.`;
   generateMessageId(): string {
     return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
-
-  /**
-   * Initialize from stored config on construction
-   */
-  private constructor_init() {
-    this.loadConfig();
-  }
 }
-
-
 
 // Create and export the service instance
 const claudeService = new ClaudeService();

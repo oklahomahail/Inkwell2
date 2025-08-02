@@ -5,57 +5,34 @@ import { useAppContext, View } from "@/context/AppContext";
 const Sidebar: React.FC = () => {
   const { state, dispatch } = useAppContext();
 
-  const handleChangeView = (view: View) => {
-    dispatch({ type: "SET_VIEW", payload: view });
-  };
+  const menuItems = [
+    { view: View.Dashboard, label: "Dashboard" },
+    { view: View.Writing, label: "Writing" },
+    { view: View.Timeline, label: "Timeline" },
+    { view: View.Settings, label: "Settings" },
+  ];
 
   return (
-    <div className="w-64 bg-gray-800 text-white flex flex-col min-h-screen p-4 space-y-4">
-      <h1 className="text-xl font-bold">Inkwell</h1>
-
-      <nav className="flex flex-col space-y-2">
-        <button
-          onClick={() => handleChangeView(View.Dashboard)}
-          className={`px-3 py-2 rounded ${
-            state.view === View.Dashboard ? "bg-gray-600" : "hover:bg-gray-700"
-          }`}
-        >
-          Dashboard
-        </button>
-        <button
-          onClick={() => handleChangeView(View.Writing)}
-          className={`px-3 py-2 rounded ${
-            state.view === View.Writing ? "bg-gray-600" : "hover:bg-gray-700"
-          }`}
-        >
-          Writing
-        </button>
-        <button
-          onClick={() => handleChangeView(View.Timeline)}
-          className={`px-3 py-2 rounded ${
-            state.view === View.Timeline ? "bg-gray-600" : "hover:bg-gray-700"
-          }`}
-        >
-          Timeline
-        </button>
-        <button
-          onClick={() => handleChangeView(View.Analysis)}
-          className={`px-3 py-2 rounded ${
-            state.view === View.Analysis ? "bg-gray-600" : "hover:bg-gray-700"
-          }`}
-        >
-          Analysis
-        </button>
-        <button
-          onClick={() => handleChangeView(View.Settings)}
-          className={`px-3 py-2 rounded ${
-            state.view === View.Settings ? "bg-gray-600" : "hover:bg-gray-700"
-          }`}
-        >
-          Settings
-        </button>
+    <aside className="w-56 bg-gray-100 dark:bg-gray-800 p-4 border-r border-gray-300 dark:border-gray-700">
+      <h1 className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100">
+        Inkwell
+      </h1>
+      <nav className="space-y-2">
+        {menuItems.map((item) => (
+          <button
+            key={item.view}
+            onClick={() => dispatch({ type: "SET_VIEW", payload: item.view })}
+            className={`block w-full text-left px-3 py-2 rounded-md transition ${
+              state.view === item.view
+                ? "bg-blue-600 text-white"
+                : "text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
       </nav>
-    </div>
+    </aside>
   );
 };
 

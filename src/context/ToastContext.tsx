@@ -1,7 +1,6 @@
-// src/context/ToastContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-interface Toast {
+export interface Toast {
   id: string;
   message: string;
   type: "success" | "error" | "warning" | "info";
