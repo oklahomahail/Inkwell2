@@ -1,0 +1,24 @@
+/* Cards */
+.card {
+  @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+}
+
+.card-hover:hover {
+  @apply shadow-md transition-shadow;
+}
+
+.card-header {
+  @apply px-6 py-4 border-b border-gray-200;
+}
+
+.card-header-row {
+  @apply flex items-center justify-between;
+}
+
+.card-content {
+  @apply px-6 py-4;
+}
+
+.card-title {
+  @apply text-lg font-semibold text-gray-900;
+}

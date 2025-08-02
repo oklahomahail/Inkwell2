@@ -36,4 +36,19 @@ const Sidebar: React.FC = () => {
   );
 };
 
+interface SidebarItemProps {
+  icon: React.ReactNode;
+  label: string;
+  collapsed: boolean;
+}
+
+const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, collapsed }) => (
+  <button
+    className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
+  >
+    <span className="text-gray-500">{icon}</span>
+    {!collapsed && <span className="truncate">{label}</span>}
+  </button>
+);
+
 export default Sidebar;

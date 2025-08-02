@@ -17,24 +17,19 @@ const ToastMessage: React.FC<ToastMessageProps> = ({ toast }) => {
       : "bg-blue-600";
 
   return (
-    <>
-      <div
-        className={`${bgColor} fixed bottom-6 right-6 px-4 py-2 text-white rounded shadow-lg animate-fade-in-out z-[9999]`}
-      >
-        {toast.message}
-      </div>
-      <style>{`
-        @keyframes fadeInOut {
-          0% { opacity: 0; transform: translateY(20px); }
-          20% { opacity: 1; transform: translateY(0); }
-          80% { opacity: 1; transform: translateY(0); }
-          100% { opacity: 0; transform: translateY(20px); }
-        }
-        .animate-fade-in-out {
-          animation: fadeInOut 2s ease forwards;
-        }
-      `}</style>
-    </>
+    <div
+      className={cn(
+        'fixed bottom-6 right-6 z-[9999] px-4 py-2 rounded shadow-lg text-white text-sm animate-fade-in-out',
+        toast.type === 'success' && 'bg-green-600',
+        toast.type === 'error' && 'bg-red-600',
+        toast.type === 'warning' && 'bg-yellow-600',
+        toast.type === 'info' && 'bg-blue-600'
+      )}
+      role="alert"
+      aria-live="assertive"
+    >
+      {toast.message}
+    </div>
   );
 };
 
