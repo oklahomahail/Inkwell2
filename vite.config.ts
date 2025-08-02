@@ -16,13 +16,7 @@ export default defineConfig({
     port: 3000,
     open: true, // Auto-open browser
     watch: {
-      ignored: [
-        '**/node_modules/**',
-        '**/.git/**',
-        '**/dist/**',
-        '**/build/**',
-        '**/public/**',
-      ],
+      ignored: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/build/**', '**/public/**'],
     },
   },
   build: {

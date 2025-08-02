@@ -1,2 +1,4 @@
 /* This will force Tailwind to recognize it needs to build */
-.test-red { @apply bg-red-500; }
+.test-red {
+  @apply bg-red-500;
+}

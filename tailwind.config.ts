@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './index.html',
-    './src/**/*.{js,ts,jsx,tsx}',
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -28,8 +25,8 @@ module.exports = {
   },
   plugins: [
     // Add official or custom plugins here
-    require('@tailwindcss/forms'),       // Optional: Better form defaults
-    require('@tailwindcss/typography'),  // Optional: Prose formatting
-    require('@tailwindcss/aspect-ratio') // Optional: Responsive media
+    require('@tailwindcss/forms'), // Optional: Better form defaults
+    require('@tailwindcss/typography'), // Optional: Prose formatting
+    require('@tailwindcss/aspect-ratio'), // Optional: Responsive media
   ],
-}
+};

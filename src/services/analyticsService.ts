@@ -6,11 +6,11 @@ export interface AnalyticsData {
 }
 
 export function trackEvent(event: string, data?: any) {
-  console.log("Analytics event:", event, data);
+  console.log('Analytics event:', event, data);
 }
 
 export function initializeAnalytics() {
-  console.log("Analytics initialized");
+  console.log('Analytics initialized');
 }
 
 export function getAnalyticsData(): AnalyticsData[] {

@@ -1,6 +1,17 @@
 // src/components/TestComponents.tsx
 import React, { useState } from 'react';
-import { Plus, BookOpen, Users, Calendar, BarChart3, Settings, Search, AlertCircle, Info, Check } from 'lucide-react';
+import {
+  Plus,
+  BookOpen,
+  Users,
+  Calendar,
+  BarChart3,
+  Settings,
+  Search,
+  AlertCircle,
+  Info,
+  Check,
+} from 'lucide-react';
 
 // Utility function to combine class names
 const cn = (...classes: (string | undefined)[]) => classes.filter(Boolean).join(' ');
@@ -12,35 +23,35 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-const Button: React.FC<ButtonProps> = ({ 
-  variant = 'primary', 
-  size = 'md', 
-  children, 
-  className = '', 
+const Button: React.FC<ButtonProps> = ({
+  variant = 'primary',
+  size = 'md',
+  children,
+  className = '',
   disabled = false,
-  ...props 
+  ...props
 }) => {
   const variants = {
     primary: 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm border-transparent',
     secondary: 'bg-white hover:bg-gray-50 text-gray-900 border-gray-300 shadow-sm',
     ghost: 'bg-transparent hover:bg-gray-100 text-gray-700 border-transparent',
     danger: 'bg-red-600 hover:bg-red-700 text-white shadow-sm border-transparent',
-    outline: 'bg-transparent hover:bg-gray-50 text-gray-700 border-gray-300'
+    outline: 'bg-transparent hover:bg-gray-50 text-gray-700 border-gray-300',
   };
-  
+
   const sizes = {
     sm: 'px-3 py-1.5 text-sm h-8',
     md: 'px-4 py-2 text-sm h-10',
-    lg: 'px-6 py-3 text-base h-12'
+    lg: 'px-6 py-3 text-base h-12',
   };
-  
+
   return (
     <button
       className={cn(
         'inline-flex items-center justify-center rounded-lg border font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
         variants[variant],
         sizes[size],
-        className
+        className,
       )}
       disabled={disabled}
       {...props}
@@ -57,13 +68,13 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   hint?: string;
 }
 
-const Input: React.FC<InputProps> = ({ 
-  label, 
-  error, 
-  hint, 
-  className = '', 
+const Input: React.FC<InputProps> = ({
+  label,
+  error,
+  hint,
+  className = '',
   required = false,
-  ...props 
+  ...props
 }) => {
   return (
     <div className="space-y-1">
@@ -78,13 +89,11 @@ const Input: React.FC<InputProps> = ({
           'block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 shadow-sm transition-colors duration-200',
           'focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500',
           error && 'border-red-300 focus:border-red-500 focus:ring-red-500',
-          className
+          className,
         )}
         {...props}
       />
-      {hint && !error && (
-        <p className="text-xs text-gray-500">{hint}</p>
-      )}
+      {hint && !error && <p className="text-xs text-gray-500">{hint}</p>}
       {error && (
         <p className="text-xs text-red-600 flex items-center gap-1">
           <AlertCircle className="w-3 h-3" />
@@ -107,7 +116,7 @@ const Card: React.FC<CardProps> = ({ children, className = '', hover = false, ..
       className={cn(
         'bg-white rounded-xl border border-gray-200 shadow-sm',
         hover ? 'hover:shadow-md transition-shadow duration-200 cursor-pointer' : '',
-        className
+        className,
       )}
       {...props}
     >
@@ -116,27 +125,19 @@ const Card: React.FC<CardProps> = ({ children, className = '', hover = false, ..
   );
 };
 
-const CardHeader: React.FC<{ children: React.ReactNode; className?: string }> = ({ 
-  children, 
-  className = '' 
-}) => (
-  <div className={cn('px-6 py-4 border-b border-gray-200', className)}>
-    {children}
-  </div>
-);
+const CardHeader: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className = '',
+}) => <div className={cn('px-6 py-4 border-b border-gray-200', className)}>{children}</div>;
 
-const CardContent: React.FC<{ children: React.ReactNode; className?: string }> = ({ 
-  children, 
-  className = '' 
-}) => (
-  <div className={cn('px-6 py-4', className)}>
-    {children}
-  </div>
-);
+const CardContent: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className = '',
+}) => <div className={cn('px-6 py-4', className)}>{children}</div>;
 
-const CardFooter: React.FC<{ children: React.ReactNode; className?: string }> = ({ 
-  children, 
-  className = '' 
+const CardFooter: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className = '',
 }) => (
   <div className={cn('px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl', className)}>
     {children}
@@ -156,15 +157,17 @@ const Badge: React.FC<BadgeProps> = ({ children, variant = 'default', className 
     primary: 'bg-indigo-100 text-indigo-800',
     success: 'bg-green-100 text-green-800',
     warning: 'bg-yellow-100 text-yellow-800',
-    danger: 'bg-red-100 text-red-800'
+    danger: 'bg-red-100 text-red-800',
   };
-  
+
   return (
-    <span className={cn(
-      'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-      variants[variant],
-      className
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+        variants[variant],
+        className,
+      )}
+    >
       {children}
     </span>
   );
@@ -178,9 +181,14 @@ interface ProgressProps {
   showLabel?: boolean;
 }
 
-const Progress: React.FC<ProgressProps> = ({ value = 0, max = 100, className = '', showLabel = false }) => {
+const Progress: React.FC<ProgressProps> = ({
+  value = 0,
+  max = 100,
+  className = '',
+  showLabel = false,
+}) => {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
-  
+
   return (
     <div className={cn('space-y-1', className)}>
       {showLabel && (
@@ -190,7 +198,7 @@ const Progress: React.FC<ProgressProps> = ({ value = 0, max = 100, className = '
         </div>
       )}
       <div className="w-full bg-gray-200 rounded-full h-2">
-        <div 
+        <div
           className="bg-indigo-600 h-2 rounded-full transition-all duration-300 ease-out"
           style={{ width: `${percentage}%` }}
         />
@@ -215,7 +223,7 @@ const Alert: React.FC<AlertProps> = ({ type = 'info', title, children, className
       icon: Info,
       iconColor: 'text-blue-400',
       titleColor: 'text-blue-800',
-      textColor: 'text-blue-700'
+      textColor: 'text-blue-700',
     },
     success: {
       bg: 'bg-green-50',
@@ -223,7 +231,7 @@ const Alert: React.FC<AlertProps> = ({ type = 'info', title, children, className
       icon: Check,
       iconColor: 'text-green-400',
       titleColor: 'text-green-800',
-      textColor: 'text-green-700'
+      textColor: 'text-green-700',
     },
     warning: {
       bg: 'bg-yellow-50',
@@ -231,7 +239,7 @@ const Alert: React.FC<AlertProps> = ({ type = 'info', title, children, className
       icon: AlertCircle,
       iconColor: 'text-yellow-400',
       titleColor: 'text-yellow-800',
-      textColor: 'text-yellow-700'
+      textColor: 'text-yellow-700',
     },
     error: {
       bg: 'bg-red-50',
@@ -239,31 +247,20 @@ const Alert: React.FC<AlertProps> = ({ type = 'info', title, children, className
       icon: AlertCircle,
       iconColor: 'text-red-400',
       titleColor: 'text-red-800',
-      textColor: 'text-red-700'
-    }
+      textColor: 'text-red-700',
+    },
   };
-  
+
   const config = types[type];
   const IconComponent = config.icon;
-  
+
   return (
-    <div className={cn(
-      'rounded-lg border p-4',
-      config.bg,
-      config.border,
-      className
-    )}>
+    <div className={cn('rounded-lg border p-4', config.bg, config.border, className)}>
       <div className="flex">
         <IconComponent className={cn('w-5 h-5 mt-0.5 mr-3', config.iconColor)} />
         <div className="flex-1">
-          {title && (
-            <h3 className={cn('text-sm font-medium mb-1', config.titleColor)}>
-              {title}
-            </h3>
-          )}
-          <div className={cn('text-sm', config.textColor)}>
-            {children}
-          </div>
+          {title && <h3 className={cn('text-sm font-medium mb-1', config.titleColor)}>{title}</h3>}
+          <div className={cn('text-sm', config.textColor)}>{children}</div>
         </div>
       </div>
     </div>
@@ -274,7 +271,7 @@ const Alert: React.FC<AlertProps> = ({ type = 'info', title, children, className
 export const TestComponents: React.FC = () => {
   const [formData, setFormData] = useState({
     title: '',
-    description: ''
+    description: '',
   });
 
   return (
@@ -283,7 +280,9 @@ export const TestComponents: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Inkwell Component Library Test</h1>
-          <p className="text-gray-600">Testing modern, accessible components for your writing platform</p>
+          <p className="text-gray-600">
+            Testing modern, accessible components for your writing platform
+          </p>
         </div>
 
         {/* Buttons Section */}
@@ -300,19 +299,27 @@ export const TestComponents: React.FC = () => {
                 <Button variant="outline">Outline</Button>
                 <Button variant="danger">Danger</Button>
               </div>
-              
+
               <div className="flex gap-3 items-center flex-wrap">
-                <Button variant="primary" size="sm">Small</Button>
-                <Button variant="primary" size="md">Medium</Button>
-                <Button variant="primary" size="lg">Large</Button>
+                <Button variant="primary" size="sm">
+                  Small
+                </Button>
+                <Button variant="primary" size="md">
+                  Medium
+                </Button>
+                <Button variant="primary" size="lg">
+                  Large
+                </Button>
               </div>
-              
+
               <div className="flex gap-3 items-center flex-wrap">
                 <Button variant="primary">
                   <Plus className="w-4 h-4 mr-2" />
                   With Icon
                 </Button>
-                <Button variant="primary" disabled>Disabled</Button>
+                <Button variant="primary" disabled>
+                  Disabled
+                </Button>
               </div>
             </div>
           </CardContent>
@@ -329,7 +336,7 @@ export const TestComponents: React.FC = () => {
                 label="Story Title"
                 placeholder="Enter your story title..."
                 value={formData.title}
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
               />
               <Input
@@ -344,11 +351,7 @@ export const TestComponents: React.FC = () => {
                 error="Please enter a valid number"
               />
               <div className="relative">
-                <Input
-                  label="Search Characters"
-                  placeholder="Search..."
-                  className="pl-10"
-                />
+                <Input label="Search Characters" placeholder="Search..." className="pl-10" />
                 <Search className="w-4 h-4 text-gray-400 absolute left-3 top-[34px]" />
               </div>
             </div>
@@ -373,11 +376,13 @@ export const TestComponents: React.FC = () => {
             <CardFooter>
               <div className="flex items-center justify-between w-full">
                 <span className="text-sm text-gray-500">2,500 words</span>
-                <Button variant="ghost" size="sm">Edit</Button>
+                <Button variant="ghost" size="sm">
+                  Edit
+                </Button>
               </div>
             </CardFooter>
           </Card>
-          
+
           <Card hover>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -394,11 +399,13 @@ export const TestComponents: React.FC = () => {
             <CardFooter>
               <div className="flex items-center justify-between w-full">
                 <span className="text-sm text-gray-500">1,200 words</span>
-                <Button variant="ghost" size="sm">Continue</Button>
+                <Button variant="ghost" size="sm">
+                  Continue
+                </Button>
               </div>
             </CardFooter>
           </Card>
-          
+
           <Card hover>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -415,7 +422,9 @@ export const TestComponents: React.FC = () => {
             <CardFooter>
               <div className="flex items-center justify-between w-full">
                 <span className="text-sm text-gray-500">0 words</span>
-                <Button variant="ghost" size="sm">Start</Button>
+                <Button variant="ghost" size="sm">
+                  Start
+                </Button>
               </div>
             </CardFooter>
           </Card>
@@ -426,13 +435,15 @@ export const TestComponents: React.FC = () => {
           <Alert type="success" title="Chapter Saved">
             Your progress has been automatically saved to local storage.
           </Alert>
-          
+
           <Alert type="warning" title="Timeline Conflict Detected">
-            Chapter 3 events occur before Chapter 2 timeline. Consider reviewing your story structure.
+            Chapter 3 events occur before Chapter 2 timeline. Consider reviewing your story
+            structure.
           </Alert>
-          
+
           <Alert type="info">
-            <strong>Pro tip:</strong> Use the Timeline view to visualize your story structure and catch potential plot holes.
+            <strong>Pro tip:</strong> Use the Timeline view to visualize your story structure and
+            catch potential plot holes.
           </Alert>
         </div>
 
@@ -443,11 +454,12 @@ export const TestComponents: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <p className="text-gray-600">
-                These components are working! Now you can:
-              </p>
+              <p className="text-gray-600">These components are working! Now you can:</p>
               <ul className="list-disc list-inside space-y-2 text-gray-600">
-                <li>Create individual component files in <code className="bg-gray-100 px-2 py-1 rounded">src/components/ui/</code></li>
+                <li>
+                  Create individual component files in{' '}
+                  <code className="bg-gray-100 px-2 py-1 rounded">src/components/ui/</code>
+                </li>
                 <li>Replace existing buttons, inputs, and cards in your app</li>
                 <li>Add more components like sidebars and navigation</li>
                 <li>Customize colors and spacing to match your brand</li>

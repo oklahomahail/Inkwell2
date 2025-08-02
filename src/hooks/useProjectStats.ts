@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 /**
  * Hook: useProjectStats
@@ -15,14 +15,14 @@ export function useProjectStats(initialWordCount: number = 0) {
   // Update stats whenever wordCount changes
   useEffect(() => {
     const today = new Date().toDateString();
-    const storedDate = localStorage.getItem("lastActiveDate");
+    const storedDate = localStorage.getItem('lastActiveDate');
 
     if (!storedDate || storedDate !== today) {
       // Reset streak if no activity today
       if (storedDate) {
         setStreak(1); // Start new streak
       }
-      localStorage.setItem("lastActiveDate", today);
+      localStorage.setItem('lastActiveDate', today);
     } else {
       // Increment streak if already active today
       setStreak((prev) => prev + 1);

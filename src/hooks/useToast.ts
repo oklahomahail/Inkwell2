@@ -1,9 +1,9 @@
 // src/hooks/useToast.ts
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 export interface ToastOptions {
   message: string;
-  type?: "success" | "error" | "info";
+  type?: 'success' | 'error' | 'info';
   duration?: number; // in ms (default 2000)
 }
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const ChatPanel: React.FC<{
   messages: any[];
@@ -11,10 +11,10 @@ const ChatPanel: React.FC<{
   inputRef: React.RefObject<HTMLInputElement>;
 }> = ({ messages, input, setInput, onSend, isLoading, selectedText, messagesEndRef, inputRef }) => {
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
       onSend();
-    } else if (e.key === "Enter" && !e.shiftKey) {
+    } else if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       onSend();
     }
@@ -35,13 +35,13 @@ const ChatPanel: React.FC<{
             <div
               key={msg.id}
               className={`p-3 rounded-lg text-sm ${
-                msg.role === "user"
-                  ? "bg-[#0073E6]/20 text-white ml-6"
-                  : "bg-gray-700 text-gray-200 mr-6"
+                msg.role === 'user'
+                  ? 'bg-[#0073E6]/20 text-white ml-6'
+                  : 'bg-gray-700 text-gray-200 mr-6'
               }`}
             >
               <div className="text-xs opacity-60 mb-1 font-medium">
-                {msg.role === "user" ? "You" : "Claude"}
+                {msg.role === 'user' ? 'You' : 'Claude'}
               </div>
               <div className="whitespace-pre-wrap">{msg.content}</div>
             </div>
@@ -61,7 +61,7 @@ const ChatPanel: React.FC<{
             placeholder={
               selectedText
                 ? `Ask about: "${selectedText.slice(0, 20)}..."`
-                : "Ask Claude about your writing... (Ctrl+Enter to send)"
+                : 'Ask Claude about your writing... (Ctrl+Enter to send)'
             }
             className="flex-1 px-3 py-2 rounded-md bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6] disabled:opacity-50 transition-colors text-sm"
           />
@@ -70,7 +70,7 @@ const ChatPanel: React.FC<{
             disabled={isLoading || !input.trim()}
             className="px-4 py-2 bg-[#0073E6] text-white rounded-md hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
           >
-            {isLoading ? "..." : "Send"}
+            {isLoading ? '...' : 'Send'}
           </button>
         </div>
       </div>

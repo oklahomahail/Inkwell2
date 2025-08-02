@@ -23,7 +23,7 @@ const ToastMessage: React.FC<ToastMessageProps> = ({ toast }) => {
         toast.type === 'success' && 'bg-green-600',
         toast.type === 'error' && 'bg-red-600',
         toast.type === 'warning' && 'bg-yellow-600',
-        toast.type === 'info' && 'bg-blue-600'
+        toast.type === 'info' && 'bg-blue-600',
       )}
       role="alert"
       aria-live="assertive"

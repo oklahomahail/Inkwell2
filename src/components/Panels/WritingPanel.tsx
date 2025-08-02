@@ -1,16 +1,9 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-  useCallback,
-  forwardRef,
-} from "react";
-import { ExportFormat } from "../../types/writing";
-import { useToast } from "@/context/ToastContext";
-import { logActivity } from "@/utils/activityLogger";
+import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
+import { ExportFormat } from '../../types/writing';
+import { useToast } from '@/context/ToastContext';
+import { logActivity } from '@/utils/activityLogger';
 
-const DEFAULT_TITLE = "Untitled Chapter";
+const DEFAULT_TITLE = 'Untitled Chapter';
 
 interface WritingPanelProps {
   draftText: string;
@@ -37,7 +30,7 @@ interface SaveQueueItem {
   content: string;
   title: string;
   timestamp: number;
-  type: "auto" | "manual" | "claude";
+  type: 'auto' | 'manual' | 'claude';
 }
 
 /* ---------------- Toolbar Subcomponent ---------------- */
@@ -117,9 +110,9 @@ const WritingEditor = forwardRef<HTMLTextAreaElement, WritingEditorProps>(
         className="w-full h-full p-3 border rounded resize-none dark:bg-gray-800 dark:text-gray-200"
       />
     );
-  }
+  },
 );
-WritingEditor.displayName = "WritingEditor";
+WritingEditor.displayName = 'WritingEditor';
 
 /* ---------------- Main Panel ---------------- */
 const WritingPanel: React.FC<WritingPanelProps> = ({
@@ -130,7 +123,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
 }) => {
   const [content, setContent] = useState(draftText);
   const [title, setTitle] = useState(DEFAULT_TITLE);
-  const [exportFormat, setExportFormat] = useState<ExportFormat>("markdown");
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('markdown');
   const [autoSaveState, setAutoSaveState] = useState<AutoSaveState>({
     isSaving: false,
     lastSaved: null,
@@ -144,7 +137,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     lastActivityTime: new Date(),
   });
   const [saveQueue, setSaveQueue] = useState<SaveQueueItem[]>([]);
-  const [claudeResponse, setClaudeResponse] = useState<string>("");
+  const [claudeResponse, setClaudeResponse] = useState<string>('');
 
   const { showToast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -173,7 +166,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
       content,
       title,
       timestamp: Date.now(),
-      type: "auto",
+      type: 'auto',
     };
     setSaveQueue((prev) => [...prev, newItem]);
     setAutoSaveState((prev) => ({
@@ -182,8 +175,8 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
       lastSaved: new Date(),
       saveCount: prev.saveCount + 1,
     }));
-    logActivity("Auto-saved draft", "writing");
-    showToast("Draft auto-saved", "info");
+    logActivity('Auto-saved draft', 'writing');
+    showToast('Draft auto-saved', 'info');
   }, [content, title, showToast]);
 
   // Auto-save interval - Fixed dependency array
@@ -193,7 +186,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
         handleAutoSave();
       }
     }, 10000);
-    
+
     return () => {
       clearInterval(interval);
     };
@@ -204,7 +197,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
       content,
       title,
       timestamp: Date.now(),
-      type: "manual",
+      type: 'manual',
     };
     setSaveQueue((prev) => [...prev, newItem]);
     setAutoSaveState((prev) => ({
@@ -213,36 +206,36 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
       lastSaved: new Date(),
       saveCount: prev.saveCount + 1,
     }));
-    logActivity("Manual save", "writing");
-    showToast("Draft saved!", "success");
+    logActivity('Manual save', 'writing');
+    showToast('Draft saved!', 'success');
   }, [content, title, showToast]);
 
   const handleClaudeAssist = useCallback(() => {
     const mockReply =
-      selectedText.trim() === ""
-        ? "Claude suggests tightening this section for clarity and flow."
+      selectedText.trim() === ''
+        ? 'Claude suggests tightening this section for clarity and flow.'
         : `Claude suggestion for "${selectedText}": simplify and make more engaging.`;
     setClaudeResponse(mockReply);
-    logActivity("Claude generated suggestion", "ai");
-    showToast("Claude provided a suggestion", "info");
+    logActivity('Claude generated suggestion', 'ai');
+    showToast('Claude provided a suggestion', 'info');
   }, [selectedText, showToast]);
 
   const handleExport = useCallback(() => {
     let blob: Blob;
-    if (exportFormat === "markdown" || exportFormat === "txt") {
-      blob = new Blob([content], { type: "text/plain" });
+    if (exportFormat === 'markdown' || exportFormat === 'txt') {
+      blob = new Blob([content], { type: 'text/plain' });
     } else {
       blob = new Blob([content], {
-        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       });
     }
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `${title}.${exportFormat === "markdown" ? "md" : exportFormat === "txt" ? "txt" : "docx"}`;
+    link.download = `${title}.${exportFormat === 'markdown' ? 'md' : exportFormat === 'txt' ? 'txt' : 'docx'}`;
     link.click();
     URL.revokeObjectURL(url);
-    showToast(`Exported as ${exportFormat}`, "success");
+    showToast(`Exported as ${exportFormat}`, 'success');
   }, [content, exportFormat, title, showToast]);
 
   return (
@@ -270,10 +263,8 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
       <div className="flex justify-between items-center text-sm mt-2 text-gray-600 dark:text-gray-400">
         <div>Words: {wordCount}</div>
         <div>
-          Last saved:{" "}
-          {autoSaveState.lastSaved
-            ? autoSaveState.lastSaved.toLocaleTimeString()
-            : "Not yet"}
+          Last saved:{' '}
+          {autoSaveState.lastSaved ? autoSaveState.lastSaved.toLocaleTimeString() : 'Not yet'}
         </div>
         <div>Session start: {session.startTime.toLocaleTimeString()}</div>
       </div>

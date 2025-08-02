@@ -1,6 +1,6 @@
 // src/components/Layout.tsx
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,11 +10,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
 
   const tabs = [
-    { path: "/dashboard", label: "Dashboard" },
-    { path: "/writing", label: "Writing" },
-    { path: "/timeline", label: "Timeline" },
-    { path: "/analysis", label: "Analysis" },
-    { path: "/settings", label: "Settings" },
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/writing', label: 'Writing' },
+    { path: '/timeline', label: 'Timeline' },
+    { path: '/analysis', label: 'Analysis' },
+    { path: '/settings', label: 'Settings' },
   ];
 
   return (
@@ -26,8 +26,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             to={tab.path}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               location.pathname === tab.path
-                ? "bg-blue-600 text-white"
-                : "hover:bg-gray-200 dark:hover:bg-gray-700"
+                ? 'bg-blue-600 text-white'
+                : 'hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
             {tab.label}

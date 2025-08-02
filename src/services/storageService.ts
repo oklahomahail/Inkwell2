@@ -59,7 +59,7 @@ class StorageService {
   getWritingContent(): WritingData | null {
     const data = this.getItem<any>(this.KEYS.WRITING_CONTENT, null);
     if (!data) return null;
-    
+
     return {
       ...data,
       lastUpdated: new Date(data.lastUpdated),
@@ -70,9 +70,9 @@ class StorageService {
   saveWritingSession(session: WritingSession): boolean {
     const sessions = this.getWritingSessions();
     const today = new Date().toISOString().split('T')[0];
-    
+
     // Update or add today's session
-    const existingIndex = sessions.findIndex(s => s.date === today);
+    const existingIndex = sessions.findIndex((s) => s.date === today);
     if (existingIndex >= 0) {
       sessions[existingIndex] = {
         ...sessions[existingIndex],
@@ -85,7 +85,7 @@ class StorageService {
     // Keep only last 90 days
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - 90);
-    const filtered = sessions.filter(s => new Date(s.date) >= cutoffDate);
+    const filtered = sessions.filter((s) => new Date(s.date) >= cutoffDate);
 
     return this.setItem(this.KEYS.WRITING_SESSIONS, filtered);
   }
@@ -109,13 +109,13 @@ class StorageService {
 
   // Batch operations for better performance
   batchSave(operations: Array<() => boolean>): boolean {
-    return operations.every(op => op());
+    return operations.every((op) => op());
   }
 
   // Clear all data (for export/reset)
   clearAllData(): boolean {
     try {
-      Object.values(this.KEYS).forEach(key => {
+      Object.values(this.KEYS).forEach((key) => {
         localStorage.removeItem(key);
       });
       return true;
@@ -129,7 +129,7 @@ class StorageService {
   getStorageInfo(): { used: number; available: number; percentage: number } {
     try {
       let used = 0;
-      Object.values(this.KEYS).forEach(key => {
+      Object.values(this.KEYS).forEach((key) => {
         const item = localStorage.getItem(key);
         if (item) used += item.length;
       });

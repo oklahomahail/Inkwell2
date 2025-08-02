@@ -6,60 +6,60 @@ import React, {
   ReactNode,
   useState,
   useCallback,
-} from "react";
+} from 'react';
 
 // Fix: Change to default import (remove curly braces)
-import claudeService from "@/services/claudeService";
-import type { ClaudeMessage, ClaudeError } from "@/services/claudeService";
+import claudeService from '@/services/claudeService';
+import type { ClaudeMessage, ClaudeError } from '@/services/claudeService';
 
 export enum View {
-  Dashboard = "dashboard",
-  Writing = "writing",
-  Timeline = "timeline",
-  Analysis = "analysis",
-  Settings = "settings",
+  Dashboard = 'dashboard',
+  Writing = 'writing',
+  Timeline = 'timeline',
+  Analysis = 'analysis',
+  Settings = 'settings',
 }
 
 interface AppState {
   view: View;
-  theme: "light" | "dark";
+  theme: 'light' | 'dark';
   notifications: string[];
   campaignData: any;
   currentProject: string;
 }
 
 type AppAction =
-  | { type: "SET_VIEW"; payload: View }
-  | { type: "SET_THEME"; payload: "light" | "dark" }
-  | { type: "SET_CURRENT_PROJECT"; payload: string }
-  | { type: "ADD_NOTIFICATION"; payload: string }
-  | { type: "REMOVE_NOTIFICATION"; payload: string }
-  | { type: "SET_CAMPAIGN_DATA"; payload: any };
+  | { type: 'SET_VIEW'; payload: View }
+  | { type: 'SET_THEME'; payload: 'light' | 'dark' }
+  | { type: 'SET_CURRENT_PROJECT'; payload: string }
+  | { type: 'ADD_NOTIFICATION'; payload: string }
+  | { type: 'REMOVE_NOTIFICATION'; payload: string }
+  | { type: 'SET_CAMPAIGN_DATA'; payload: any };
 
 const initialState: AppState = {
   view: View.Dashboard,
-  theme: "dark",
+  theme: 'dark',
   notifications: [],
   campaignData: null,
-  currentProject: "My First Project",
+  currentProject: 'My First Project',
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
-    case "SET_VIEW":
+    case 'SET_VIEW':
       return { ...state, view: action.payload };
-    case "SET_THEME":
+    case 'SET_THEME':
       return { ...state, theme: action.payload };
-    case "SET_CURRENT_PROJECT":
+    case 'SET_CURRENT_PROJECT':
       return { ...state, currentProject: action.payload };
-    case "ADD_NOTIFICATION":
+    case 'ADD_NOTIFICATION':
       return { ...state, notifications: [...state.notifications, action.payload] };
-    case "REMOVE_NOTIFICATION":
+    case 'REMOVE_NOTIFICATION':
       return {
         ...state,
         notifications: state.notifications.filter((n) => n !== action.payload),
       };
-    case "SET_CAMPAIGN_DATA":
+    case 'SET_CAMPAIGN_DATA':
       return { ...state, campaignData: action.payload };
     default:
       return state;
@@ -79,7 +79,7 @@ interface AppContextValue {
   dispatch: React.Dispatch<AppAction>;
 
   activeView: View;
-  theme: "light" | "dark";
+  theme: 'light' | 'dark';
   currentProject: string;
   setCurrentProject: (project: string) => void;
   toggleTheme: () => void;
@@ -103,40 +103,39 @@ interface AppContextValue {
 const createMockClaudeService = () => ({
   isConfigured: () => false,
   getMessages: () => [],
-  generateMessageId: () =>
-    `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+  generateMessageId: () => `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
   initialize: (apiKey: string) => {
-    console.warn("Claude service not available - API key stored locally");
-    localStorage.setItem("claude_api_key_pending", apiKey);
+    console.warn('Claude service not available - API key stored locally');
+    localStorage.setItem('claude_api_key_pending', apiKey);
   },
   clearMessages: () => {
-    localStorage.removeItem("claude_messages");
+    localStorage.removeItem('claude_messages');
   },
   saveMessage: (message: ClaudeMessage) => {
-    const messages = JSON.parse(localStorage.getItem("claude_messages") || "[]");
+    const messages = JSON.parse(localStorage.getItem('claude_messages') || '[]');
     messages.push(message);
-    localStorage.setItem("claude_messages", JSON.stringify(messages));
+    localStorage.setItem('claude_messages', JSON.stringify(messages));
   },
   sendMessage: async () => {
-    throw new Error("Claude service not available.");
+    throw new Error('Claude service not available.');
   },
   continueText: async () => {
-    throw new Error("Claude service not available.");
+    throw new Error('Claude service not available.');
   },
   improveText: async () => {
-    throw new Error("Claude service not available.");
+    throw new Error('Claude service not available.');
   },
   analyzeWritingStyle: async () => {
-    throw new Error("Claude service not available.");
+    throw new Error('Claude service not available.');
   },
   generatePlotIdeas: async () => {
-    throw new Error("Claude service not available.");
+    throw new Error('Claude service not available.');
   },
   analyzeCharacter: async () => {
-    throw new Error("Claude service not available.");
+    throw new Error('Claude service not available.');
   },
   brainstormIdeas: async () => {
-    throw new Error("Claude service not available.");
+    throw new Error('Claude service not available.');
   },
 });
 
@@ -169,13 +168,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const setCurrentProject = useCallback((project: string) => {
-    dispatch({ type: "SET_CURRENT_PROJECT", payload: project });
+    dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
   }, []);
 
   const toggleTheme = useCallback(() => {
     dispatch({
-      type: "SET_THEME",
-      payload: state.theme === "light" ? "dark" : "light",
+      type: 'SET_THEME',
+      payload: state.theme === 'light' ? 'dark' : 'light',
     });
   }, [state.theme]);
 
@@ -184,15 +183,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       if (!realClaudeService.isConfigured()) {
         setClaudeState((prev) => ({
           ...prev,
-          error: "Claude API key not configured. Please set your API key in settings.",
+          error: 'Claude API key not configured. Please set your API key in settings.',
         }));
-        return "";
+        return '';
       }
       setClaudeState((prev) => ({ ...prev, isLoading: true, error: null }));
       try {
         const userMessage: ClaudeMessage = {
           id: realClaudeService.generateMessageId(),
-          role: "user",
+          role: 'user',
           content,
           timestamp: new Date(),
         };
@@ -204,7 +203,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         });
         const assistantMessage: ClaudeMessage = {
           id: realClaudeService.generateMessageId(),
-          role: "assistant",
+          role: 'assistant',
           content: response.content,
           timestamp: new Date(),
         };
@@ -220,15 +219,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setClaudeState((prev) => ({
           ...prev,
           isLoading: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to send message to Claude",
+          error: error instanceof Error ? error.message : 'Failed to send message to Claude',
         }));
-        return "";
+        return '';
       }
     },
-    [state.currentProject, claudeState.messages]
+    [state.currentProject, claudeState.messages],
   );
 
   const clearMessages = useCallback(() => {
@@ -249,7 +245,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       realClaudeService.initialize(apiKey);
       setClaudeState((prev) => ({ ...prev, isConfigured: true, error: null }));
     } catch {
-      setClaudeState((prev) => ({ ...prev, error: "Failed to configure API key" }));
+      setClaudeState((prev) => ({ ...prev, error: 'Failed to configure API key' }));
     }
   }, []);
 
@@ -258,25 +254,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const projectContext = `Current project: ${state.currentProject}`;
       return realClaudeService.continueText(selectedText, projectContext);
     },
-    [state.currentProject]
+    [state.currentProject],
   );
 
   const improveText = useCallback(
-    async (selectedText: string): Promise<string> =>
-      realClaudeService.improveText(selectedText),
-    []
+    async (selectedText: string): Promise<string> => realClaudeService.improveText(selectedText),
+    [],
   );
 
   const analyzeWritingStyle = useCallback(
     async (selectedText: string): Promise<string> =>
       realClaudeService.analyzeWritingStyle(selectedText),
-    []
+    [],
   );
 
   const generatePlotIdeas = useCallback(
-    async (context?: string): Promise<string> =>
-      realClaudeService.generatePlotIdeas(context),
-    []
+    async (context?: string): Promise<string> => realClaudeService.generatePlotIdeas(context),
+    [],
   );
 
   const analyzeCharacter = useCallback(
@@ -284,13 +278,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const projectContext = `Current project: ${state.currentProject}`;
       return realClaudeService.analyzeCharacter(characterName, projectContext);
     },
-    [state.currentProject]
+    [state.currentProject],
   );
 
   const brainstormIdeas = useCallback(
-    async (topic: string): Promise<string> =>
-      realClaudeService.brainstormIdeas(topic),
-    []
+    async (topic: string): Promise<string> => realClaudeService.brainstormIdeas(topic),
+    [],
   );
 
   const contextValue: AppContextValue = {
@@ -321,7 +314,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
 export function useAppContext() {
   const context = useContext(AppContext);
-  if (!context) throw new Error("useAppContext must be used within AppProvider");
+  if (!context) throw new Error('useAppContext must be used within AppProvider');
   return context;
 }
 

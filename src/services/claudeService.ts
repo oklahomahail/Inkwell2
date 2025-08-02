@@ -36,7 +36,7 @@ class ClaudeService {
   private baseUrl = 'https://api.anthropic.com/v1/messages';
   private readonly STORAGE_KEY = 'claude_messages';
   private readonly RATE_LIMIT_KEY = 'claude_rate_limit';
-  
+
   // Default system prompt for writing assistance
   private readonly DEFAULT_SYSTEM_PROMPT = `You are Claude, an AI writing assistant integrated into Inkwell, a sophisticated writing platform. You help authors with:
 
@@ -61,9 +61,9 @@ Guidelines:
       maxTokens: 1000,
       temperature: 0.7,
       systemPrompt: this.DEFAULT_SYSTEM_PROMPT,
-      ...config
+      ...config,
     };
-    
+
     // Initialize from stored config
     this.loadConfig();
   }
@@ -86,37 +86,44 @@ Guidelines:
   /**
    * Send a message to Claude
    */
-  async sendMessage(content: string, context?: {
-    selectedText?: string;
-    projectContext?: string;
-    conversationHistory?: ClaudeMessage[];
-  }): Promise<ClaudeResponse> {
+  async sendMessage(
+    content: string,
+    context?: {
+      selectedText?: string;
+      projectContext?: string;
+      conversationHistory?: ClaudeMessage[];
+    },
+  ): Promise<ClaudeResponse> {
     if (!this.isConfigured()) {
       throw this.createError('Claude API key not configured', 'auth_error', false);
     }
 
     // Check rate limiting
     if (this.isRateLimited()) {
-      throw this.createError('Rate limit exceeded. Please wait before sending another message.', 'rate_limit', true);
+      throw this.createError(
+        'Rate limit exceeded. Please wait before sending another message.',
+        'rate_limit',
+        true,
+      );
     }
 
     try {
       const messages = this.buildMessageHistory(content, context);
-      
+
       const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': this.config.apiKey!,
-          'anthropic-version': '2023-06-01'
+          'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
           model: this.config.model,
           max_tokens: this.config.maxTokens,
           temperature: this.config.temperature,
           system: this.config.systemPrompt,
-          messages
-        })
+          messages,
+        }),
       });
 
       if (!response.ok) {
@@ -125,25 +132,26 @@ Guidelines:
 
       const data = await response.json();
       this.updateRateLimit();
-      
+
       return {
         content: data.content[0]?.text || '',
-        usage: data.usage ? {
-          inputTokens: data.usage.input_tokens,
-          outputTokens: data.usage.output_tokens
-        } : undefined
+        usage: data.usage
+          ? {
+              inputTokens: data.usage.input_tokens,
+              outputTokens: data.usage.output_tokens,
+            }
+          : undefined,
       };
-
     } catch (error) {
       if (error instanceof Error && error.name === 'ClaudeError') {
         throw error;
       }
-      
+
       // Handle network and other errors
       throw this.createError(
         `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'network_error',
-        true
+        true,
       );
     }
   }
@@ -193,7 +201,7 @@ Keep analysis concise and actionable.`;
   }
 
   async generatePlotIdeas(context?: string): Promise<string> {
-    const prompt = context 
+    const prompt = context
       ? `Generate 3-5 plot development ideas based on this context:\n\n"${context}"\n\nProvide creative but realistic plot directions that build on the existing story.`
       : `Generate 5 creative plot ideas for a story. Include brief descriptions of potential conflicts, character arcs, and story directions.`;
 
@@ -239,10 +247,10 @@ Make suggestions specific and usable.`;
   saveMessage(message: ClaudeMessage): void {
     const messages = this.getMessages();
     messages.push(message);
-    
+
     // Keep only recent messages to avoid storage bloat
     const recentMessages = messages.slice(-MESSAGE_LIMIT);
-    
+
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(recentMessages));
     } catch (error) {
@@ -254,12 +262,14 @@ Make suggestions specific and usable.`;
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (!stored) return [];
-      
+
       const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? parsed.map(msg => ({
-        ...msg,
-        timestamp: new Date(msg.timestamp)
-      })) : [];
+      return Array.isArray(parsed)
+        ? parsed.map((msg) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          }))
+        : [];
     } catch (error) {
       console.warn('Failed to load Claude messages:', error);
       return [];
@@ -307,38 +317,41 @@ Make suggestions specific and usable.`;
   /**
    * Private helper methods
    */
-  private buildMessageHistory(content: string, context?: {
-    selectedText?: string;
-    projectContext?: string;
-    conversationHistory?: ClaudeMessage[];
-  }): Array<{ role: 'user' | 'assistant'; content: string }> {
+  private buildMessageHistory(
+    content: string,
+    context?: {
+      selectedText?: string;
+      projectContext?: string;
+      conversationHistory?: ClaudeMessage[];
+    },
+  ): Array<{ role: 'user' | 'assistant'; content: string }> {
     const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
 
     // Add conversation history (last 10 messages to stay within token limits)
     if (context?.conversationHistory) {
       const recentHistory = context.conversationHistory.slice(-10);
-      recentHistory.forEach(msg => {
+      recentHistory.forEach((msg) => {
         messages.push({
           role: msg.role,
-          content: msg.content
+          content: msg.content,
         });
       });
     }
 
     // Build current message with context
     let messageContent = content;
-    
+
     if (context?.selectedText) {
       messageContent = `Selected text: "${context.selectedText}"\n\nRequest: ${content}`;
     }
-    
+
     if (context?.projectContext) {
       messageContent += `\n\nProject context: ${context.projectContext}`;
     }
 
     messages.push({
       role: 'user',
-      content: messageContent
+      content: messageContent,
     });
 
     return messages;
@@ -352,7 +365,7 @@ Make suggestions specific and usable.`;
     try {
       const errorData = await response.json();
       errorMessage = errorData.error?.message || errorMessage;
-      
+
       switch (response.status) {
         case 401:
           errorType = 'auth_error';
@@ -394,18 +407,17 @@ Make suggestions specific and usable.`;
     try {
       const stored = localStorage.getItem(this.RATE_LIMIT_KEY);
       if (!stored) return false;
-      
+
       const data = JSON.parse(stored);
       const now = Date.now();
-      
+
       // Simple rate limiting: 10 requests per minute
       const timeWindow = 60 * 1000; // 1 minute
       const maxRequests = 10;
-      
-      const recentRequests = data.requests?.filter((timestamp: number) => 
-        now - timestamp < timeWindow
-      ) || [];
-      
+
+      const recentRequests =
+        data.requests?.filter((timestamp: number) => now - timestamp < timeWindow) || [];
+
       return recentRequests.length >= maxRequests;
     } catch {
       return false;
@@ -417,13 +429,13 @@ Make suggestions specific and usable.`;
       const stored = localStorage.getItem(this.RATE_LIMIT_KEY);
       const data = stored ? JSON.parse(stored) : { requests: [] };
       const now = Date.now();
-      
+
       // Keep only recent requests
       const timeWindow = 60 * 1000;
-      data.requests = (data.requests || []).filter((timestamp: number) => 
-        now - timestamp < timeWindow
+      data.requests = (data.requests || []).filter(
+        (timestamp: number) => now - timestamp < timeWindow,
       );
-      
+
       data.requests.push(now);
       localStorage.setItem(this.RATE_LIMIT_KEY, JSON.stringify(data));
     } catch (error) {

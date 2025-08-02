@@ -1,18 +1,8 @@
 {
   "extends": [
     "stylelint-config-standard",
-    "stylelint-config-prettier",
-    "stylelint-config-tailwindcss"
+    "stylelint-config-tailwindcss",
+    "stylelint-config-prettier"
   ],
-  "rules": {
-    "at-rule-no-unknown": [true, {
-      "ignoreAtRules": [
-        "tailwind",
-        "apply",
-        "variants",
-        "responsive",
-        "screen"
-      ]
-    }]
-  }
+  "rules": {}
 }

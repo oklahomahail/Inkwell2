@@ -1,16 +1,16 @@
 // src/App.tsx
-import React, { useEffect } from "react";
-import { AppProvider } from "@/context/AppContext";
-import { ToastProvider } from "@/context/ToastContext";
-import ToastManager from "@/components/ui/ToastManager";
-import CompleteWritingPlatform from "@/components/CompleteWritingPlatform";
+import React, { useEffect } from 'react';
+import { AppProvider } from '@/context/AppContext';
+import { ToastProvider } from '@/context/ToastContext';
+import ToastManager from '@/components/ui/ToastManager';
+import CompleteWritingPlatform from '@/components/CompleteWritingPlatform';
 
 // Optional backup system imports - will work if they exist
 let initializeBackupSystem: (() => Promise<void>) | undefined;
 let cleanupBackupSystem: (() => void) | undefined;
 
 try {
-  const backupModule = require("@/services/backupSetup");
+  const backupModule = require('@/services/backupSetup');
   initializeBackupSystem = backupModule.initializeBackupSystem;
   cleanupBackupSystem = backupModule.cleanupBackupSystem;
 } catch (error) {
@@ -23,12 +23,12 @@ const App: React.FC = () => {
       try {
         if (initializeBackupSystem) {
           await initializeBackupSystem();
-          console.log("✅ Backup system initialized successfully");
+          console.log('✅ Backup system initialized successfully');
         } else {
-          console.log("📝 Running without backup system");
+          console.log('📝 Running without backup system');
         }
       } catch (error) {
-        console.error("❌ Failed to initialize backup system:", error);
+        console.error('❌ Failed to initialize backup system:', error);
       }
     };
 

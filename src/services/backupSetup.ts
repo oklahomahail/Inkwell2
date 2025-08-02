@@ -1,6 +1,6 @@
 // src/services/backupSetup.ts
 // Try importing everything as a namespace first
-import * as BackupService from "./backupServices";
+import * as BackupService from './backupServices';
 
 // Then destructure what we need
 const { BackupManager, saveBackup } = BackupService;
@@ -13,13 +13,13 @@ async function performActualBackup(): Promise<void> {
   // Construct a Backup object with proper type literals
   const backup: Backup = {
     id: crypto.randomUUID(),
-    type: "manual", // Must be one of the literal union: "manual" | "auto" | "emergency"
+    type: 'manual', // Must be one of the literal union: "manual" | "auto" | "emergency"
     title: `Backup ${new Date().toLocaleString()}`,
-    description: "Manual backup from user",
-    data: JSON.parse(localStorage.getItem("writing_content") || "{}"),
+    description: 'Manual backup from user',
+    data: JSON.parse(localStorage.getItem('writing_content') || '{}'),
     timestamp: Date.now(),
-    size: undefined,       // Optional: calculate if you want
-    isCorrupted: false,    // Optional flag
+    size: undefined, // Optional: calculate if you want
+    isCorrupted: false, // Optional flag
   };
 
   // Save the backup using the consolidated backupService
@@ -29,7 +29,7 @@ async function performActualBackup(): Promise<void> {
 /**
  * Simple notification function — replace with your UI toast/snackbar
  */
-function notifyUser(message: string, type: "info" | "success" | "error" = "info") {
+function notifyUser(message: string, type: 'info' | 'success' | 'error' = 'info') {
   console.log(`[${type.toUpperCase()}] Backup: ${message}`);
 }
 
@@ -52,7 +52,7 @@ export function setupAutoBackup(intervalMs = 60000) {
   autoBackupInterval = setInterval(() => {
     backupManager.backup();
   }, intervalMs);
-  notifyUser("Auto-backup enabled", "success");
+  notifyUser('Auto-backup enabled', 'success');
 }
 
 /**
@@ -62,7 +62,7 @@ export function stopAutoBackup() {
   if (autoBackupInterval) {
     clearInterval(autoBackupInterval);
     autoBackupInterval = null;
-    notifyUser("Auto-backup disabled", "info");
+    notifyUser('Auto-backup disabled', 'info');
   }
 }
 
@@ -77,5 +77,5 @@ export const {
   getBackupStatus,
   createManualBackup,
   startAutoBackup,
-  stopAutoBackup: stopAutoBackupService
+  stopAutoBackup: stopAutoBackupService,
 } = BackupService;

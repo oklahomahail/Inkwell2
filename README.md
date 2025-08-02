@@ -7,13 +7,13 @@ It helps writers plan, write, and organize novels with features like **timeline 
 
 ## 🚀 Features
 
-* 📝 **Chapter Tracker** — Manage chapters with metadata, word counts, and draft status.
-* 🧠 **Claude AI Assistant** — Integrated AI chat for plotting, dialogue, worldbuilding, and revision (API key required).
-* 🧍‍♀️ **Character Bible** — Create detailed character profiles with arcs and relationships.
-* 📅 **Timeline Checker** — Track story events and detect logical or continuity conflicts.
-* 📊 **Analytics Dashboard** — View progress metrics, streaks, and writing goals.
-* 💾 **Offline Support** — IndexedDB local storage for seamless offline writing.
-* 🎨 **Dark Mode Ready** — Clean Track15-inspired theme for immersive focus.
+- 📝 **Chapter Tracker** — Manage chapters with metadata, word counts, and draft status.
+- 🧠 **Claude AI Assistant** — Integrated AI chat for plotting, dialogue, worldbuilding, and revision (API key required).
+- 🧍‍♀️ **Character Bible** — Create detailed character profiles with arcs and relationships.
+- 📅 **Timeline Checker** — Track story events and detect logical or continuity conflicts.
+- 📊 **Analytics Dashboard** — View progress metrics, streaks, and writing goals.
+- 💾 **Offline Support** — IndexedDB local storage for seamless offline writing.
+- 🎨 **Dark Mode Ready** — Clean Track15-inspired theme for immersive focus.
 
 ---
 
@@ -34,3 +34,4 @@ src/
 ├── contexts/              # (Planned) global React contexts
 ├── utils/                 # (Planned) utility functions
 └── assets/                # Static images and icons
+```

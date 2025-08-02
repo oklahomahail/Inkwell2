@@ -1,35 +1,25 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useClaude } from "@/context/AppContext";
-import { useToast } from "@/context/ToastContext";
-import AccessibleTabs from "../AccessibleTabs";
-import MessageBubble from "../MessageBubble";
-import { MessageCircle, Zap, Search, BoltIcon, CatIcon, SearchIcon } from "lucide-react";
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useClaude } from '@/context/AppContext';
+import { useToast } from '@/context/ToastContext';
+import AccessibleTabs from '../AccessibleTabs';
+import MessageBubble from '../MessageBubble';
+import { MessageCircle, Zap, Search, BoltIcon, CatIcon, SearchIcon } from 'lucide-react';
 
 interface ClaudeAssistantProps {
   selectedText?: string;
   onInsertText?: (text: string) => void;
 }
 
-const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
-  selectedText = "",
-  onInsertText,
-}) => {
-  const {
-    messages,
-    sendMessage,
-    isLoading,
-    error,
-    toggleVisibility,
-    clearMessages,
-  } = useClaude();
+const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', onInsertText }) => {
+  const { messages, sendMessage, isLoading, error, toggleVisibility, clearMessages } = useClaude();
 
   const { showToast } = useToast();
 
-  const [input, setInput] = useState("");
-  const [activeMode, setActiveMode] = useState<"chat" | "quick-actions" | "analysis">("chat");
-  const [lastResult, setLastResult] = useState<string>("");
-  const [characterName, setCharacterName] = useState("");
-  const [brainstormTopic, setBrainstormTopic] = useState("");
+  const [input, setInput] = useState('');
+  const [activeMode, setActiveMode] = useState<'chat' | 'quick-actions' | 'analysis'>('chat');
+  const [lastResult, setLastResult] = useState<string>('');
+  const [characterName, setCharacterName] = useState('');
+  const [brainstormTopic, setBrainstormTopic] = useState('');
   const [isMinimized, setIsMinimized] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -38,12 +28,12 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
 
   // Scroll to bottom on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   // Auto-focus chat input when active
   useEffect(() => {
-    if (!isMinimized && activeMode === "chat") {
+    if (!isMinimized && activeMode === 'chat') {
       inputRef.current?.focus();
     }
   }, [isMinimized, activeMode]);
@@ -59,9 +49,9 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
     if (!input.trim() || isLoading) return;
     try {
       await sendMessage(input);
-      setInput("");
+      setInput('');
     } catch {
-      showToast("Failed to send message", "error");
+      showToast('Failed to send message', 'error');
     }
   }, [input, isLoading, sendMessage, showToast]);
 
@@ -70,62 +60,62 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
       if (isLoading) return;
 
       try {
-        let result = "";
-        let description = "";
+        let result = '';
+        let description = '';
 
         switch (action) {
-          case "continue":
+          case 'continue':
             if (!selectedText) {
-              showToast("Please select some text to continue", "error");
+              showToast('Please select some text to continue', 'error');
               return;
             }
             description = `Continue text: "${selectedText.slice(0, 40)}..."`;
             result = await sendMessage(description);
             break;
 
-          case "improve":
+          case 'improve':
             if (!selectedText) {
-              showToast("Please select some text to improve", "error");
+              showToast('Please select some text to improve', 'error');
               return;
             }
             description = `Improve text: "${selectedText.slice(0, 40)}..."`;
             result = await sendMessage(description);
             break;
 
-          case "analyze-style":
+          case 'analyze-style':
             if (!selectedText) {
-              showToast("Please select some text to analyze", "error");
+              showToast('Please select some text to analyze', 'error');
               return;
             }
             description = `Analyze style: "${selectedText.slice(0, 40)}..."`;
             result = await sendMessage(description);
             break;
 
-          case "plot-ideas":
+          case 'plot-ideas':
             description = selectedText
               ? `Plot ideas for: "${selectedText.slice(0, 40)}..."`
-              : "Generate plot ideas";
+              : 'Generate plot ideas';
             result = await sendMessage(description);
             break;
 
-          case "character-analysis":
+          case 'character-analysis':
             if (!characterName.trim()) {
-              showToast("Please enter a character name", "error");
+              showToast('Please enter a character name', 'error');
               return;
             }
             description = `Analyze character: ${characterName}`;
             result = await sendMessage(description);
-            setCharacterName("");
+            setCharacterName('');
             break;
 
-          case "brainstorm":
+          case 'brainstorm':
             if (!brainstormTopic.trim()) {
-              showToast("Please enter a topic to brainstorm", "error");
+              showToast('Please enter a topic to brainstorm', 'error');
               return;
             }
             description = `Brainstorm: ${brainstormTopic}`;
             result = await sendMessage(description);
-            setBrainstormTopic("");
+            setBrainstormTopic('');
             break;
 
           default:
@@ -133,19 +123,19 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
         }
 
         setLastResult(result);
-        showToast("Claude provided suggestions", "success");
+        showToast('Claude provided suggestions', 'success');
       } catch {
-        showToast("Action failed. Please try again.", "error");
+        showToast('Action failed. Please try again.', 'error');
       }
     },
-    [isLoading, selectedText, characterName, brainstormTopic, sendMessage, showToast]
+    [isLoading, selectedText, characterName, brainstormTopic, sendMessage, showToast],
   );
 
   const handleInsert = () => {
     if (onInsertText && lastResult) {
       onInsertText(lastResult);
-      showToast("Text inserted into your draft", "success");
-      setLastResult("");
+      showToast('Text inserted into your draft', 'success');
+      setLastResult('');
     }
   };
 
@@ -177,15 +167,15 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
   }
 
   const handleTabChange = (id: string) => {
-    if (id === "chat" || id === "quick-actions" || id === "analysis") {
+    if (id === 'chat' || id === 'quick-actions' || id === 'analysis') {
       setActiveMode(id);
     }
   };
 
   const tabs = [
     {
-      id: "chat",
-      label: "Chat",
+      id: 'chat',
+      label: 'Chat',
       icon: <CatIcon size={14} />,
       content: (
         <>
@@ -219,10 +209,10 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                     e.preventDefault();
                     handleSend();
-                  } else if (e.key === "Enter" && !e.shiftKey) {
+                  } else if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSend();
                   }
@@ -231,7 +221,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
                 placeholder={
                   selectedText
                     ? `Ask about: "${selectedText.slice(0, 20)}..."`
-                    : "Ask Claude about your writing... (Ctrl+Enter to send)"
+                    : 'Ask Claude about your writing... (Ctrl+Enter to send)'
                 }
                 className="flex-1 px-3 py-2 rounded-md bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6] disabled:opacity-50 transition-colors text-sm"
                 aria-label="Chat input"
@@ -242,7 +232,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
                 className="px-4 py-2 bg-[#0073E6] text-white rounded-md hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                 aria-label="Send message"
               >
-                {isLoading ? "..." : "Send"}
+                {isLoading ? '...' : 'Send'}
               </button>
             </div>
           </div>
@@ -250,14 +240,14 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
       ),
     },
     {
-      id: "quick-actions",
-      label: "Quick",
+      id: 'quick-actions',
+      label: 'Quick',
       icon: <BoltIcon size={14} />,
       content: (
         <div className="p-4 space-y-3">
           <div className="grid grid-cols-2 gap-2 mb-4">
             <button
-              onClick={() => handleQuickAction("continue")}
+              onClick={() => handleQuickAction('continue')}
               disabled={isLoading || !selectedText}
               className="px-3 py-2 text-xs bg-[#0073E6] text-white rounded hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-disabled={isLoading || !selectedText}
@@ -265,7 +255,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
               📝 Continue Text
             </button>
             <button
-              onClick={() => handleQuickAction("improve")}
+              onClick={() => handleQuickAction('improve')}
               disabled={isLoading || !selectedText}
               className="px-3 py-2 text-xs bg-green-600 text-white rounded hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-disabled={isLoading || !selectedText}
@@ -273,7 +263,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
               ✨ Improve Text
             </button>
             <button
-              onClick={() => handleQuickAction("analyze-style")}
+              onClick={() => handleQuickAction('analyze-style')}
               disabled={isLoading || !selectedText}
               className="px-3 py-2 text-xs bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-disabled={isLoading || !selectedText}
@@ -281,7 +271,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
               🎨 Analyze Style
             </button>
             <button
-              onClick={() => handleQuickAction("plot-ideas")}
+              onClick={() => handleQuickAction('plot-ideas')}
               disabled={isLoading}
               className="px-3 py-2 text-xs bg-yellow-600 text-white rounded hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-disabled={isLoading}
@@ -310,7 +300,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
                 </button>
               </div>
               <div className="text-xs text-gray-300 max-h-20 overflow-y-auto whitespace-pre-wrap">
-                {lastResult.length > 200 ? lastResult.slice(0, 200) + "..." : lastResult}
+                {lastResult.length > 200 ? lastResult.slice(0, 200) + '...' : lastResult}
               </div>
             </div>
           )}
@@ -318,8 +308,8 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
       ),
     },
     {
-      id: "analysis",
-      label: "Analysis",
+      id: 'analysis',
+      label: 'Analysis',
       icon: <SearchIcon size={14} />,
       content: (
         <div className="p-4 space-y-4">
@@ -340,7 +330,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
                 aria-label="Character name for analysis"
               />
               <button
-                onClick={() => handleQuickAction("character-analysis")}
+                onClick={() => handleQuickAction('character-analysis')}
                 disabled={isLoading || !characterName.trim()}
                 className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-500 disabled:opacity-50 transition-colors"
                 aria-disabled={isLoading || !characterName.trim()}
@@ -367,7 +357,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
                 aria-label="Topic to brainstorm ideas for"
               />
               <button
-                onClick={() => handleQuickAction("brainstorm")}
+                onClick={() => handleQuickAction('brainstorm')}
                 disabled={isLoading || !brainstormTopic.trim()}
                 className="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50 transition-colors"
                 aria-disabled={isLoading || !brainstormTopic.trim()}
@@ -432,11 +422,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({
       </div>
 
       {/* Tabs */}
-      <AccessibleTabs
-        tabs={tabs}
-        initialSelectedId={activeMode}
-        onChange={handleTabChange}
-      />
+      <AccessibleTabs tabs={tabs} initialSelectedId={activeMode} onChange={handleTabChange} />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 // src/components/Panels/SettingsPanel.tsx
-import React, { useState, useEffect } from "react";
-import { useAppContext } from "@/context/AppContext";
-import { useToast } from "@/context/ToastContext";
+import React, { useState, useEffect } from 'react';
+import { useAppContext } from '@/context/AppContext';
+import { useToast } from '@/context/ToastContext';
 import claudeService from '@/services/claudeService';
 
 const SettingsPanel: React.FC = () => {
@@ -9,13 +9,13 @@ const SettingsPanel: React.FC = () => {
   const { showToast } = useToast();
 
   // API Key Management
-  const [apiKey, setApiKey] = useState("");
+  const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
   const [isUpdatingKey, setIsUpdatingKey] = useState(false);
 
   // Claude Configuration
   const [claudeConfig, setClaudeConfig] = useState({
-    model: "claude-sonnet-4-20250514",
+    model: 'claude-sonnet-4-20250514',
     maxTokens: 1000,
     temperature: 0.7,
   });
@@ -24,7 +24,7 @@ const SettingsPanel: React.FC = () => {
   const [appSettings, setAppSettings] = useState({
     autoSave: true,
     autoSaveInterval: 30,
-    darkMode: state.theme === "dark",
+    darkMode: state.theme === 'dark',
     showWordCount: true,
     showReadingTime: true,
   });
@@ -39,23 +39,23 @@ const SettingsPanel: React.FC = () => {
         temperature: config.temperature,
       });
     } catch (error) {
-      console.warn("Could not load Claude configuration:", error);
+      console.warn('Could not load Claude configuration:', error);
     }
   }, []);
 
   const handleApiKeyUpdate = async () => {
     if (!apiKey.trim()) {
-      showToast("Please enter a valid API key", "error");
+      showToast('Please enter a valid API key', 'error');
       return;
     }
 
     setIsUpdatingKey(true);
     try {
       claudeActions.configureApiKey(apiKey.trim());
-      setApiKey("");
-      showToast("Claude API key updated successfully!", "success");
+      setApiKey('');
+      showToast('Claude API key updated successfully!', 'success');
     } catch (error) {
-      showToast("Failed to update API key", "error");
+      showToast('Failed to update API key', 'error');
     } finally {
       setIsUpdatingKey(false);
     }
@@ -64,29 +64,29 @@ const SettingsPanel: React.FC = () => {
   const handleClaudeConfigUpdate = () => {
     try {
       claudeService.updateConfig(claudeConfig);
-      showToast("Claude configuration updated", "success");
+      showToast('Claude configuration updated', 'success');
     } catch (error) {
-      showToast("Failed to update Claude configuration", "error");
+      showToast('Failed to update Claude configuration', 'error');
     }
   };
 
   const handleTestConnection = async () => {
     if (!claude.isConfigured) {
-      showToast("Please configure your API key first", "error");
+      showToast('Please configure your API key first', 'error');
       return;
     }
 
     try {
-      await claudeActions.sendMessage("Hello! This is a test message to verify the connection.");
-      showToast("Connection test successful!", "success");
+      await claudeActions.sendMessage('Hello! This is a test message to verify the connection.');
+      showToast('Connection test successful!', 'success');
     } catch (error) {
-      showToast("Connection test failed. Please check your API key.", "error");
+      showToast('Connection test failed. Please check your API key.', 'error');
     }
   };
 
   const handleClearMessages = () => {
     claudeActions.clearMessages();
-    showToast("Claude conversation history cleared", "success");
+    showToast('Claude conversation history cleared', 'success');
   };
 
   const handleExportSettings = () => {
@@ -94,19 +94,19 @@ const SettingsPanel: React.FC = () => {
       claudeConfig,
       appSettings,
       exportedAt: new Date().toISOString(),
-      version: "1.0.0"
+      version: '1.0.0',
     };
 
     const blob = new Blob([JSON.stringify(settings, null, 2)], {
-      type: "application/json",
+      type: 'application/json',
     });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
     link.download = `inkwell-settings-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    showToast("Settings exported successfully", "success");
+    showToast('Settings exported successfully', 'success');
   };
 
   return (
@@ -127,11 +127,11 @@ const SettingsPanel: React.FC = () => {
             <div className="flex items-center space-x-2">
               <div
                 className={`w-2 h-2 rounded-full ${
-                  claude.isConfigured ? "bg-green-400" : "bg-red-400"
+                  claude.isConfigured ? 'bg-green-400' : 'bg-red-400'
                 }`}
               />
               <span className="text-sm text-gray-400">
-                {claude.isConfigured ? "Connected" : "Not configured"}
+                {claude.isConfigured ? 'Connected' : 'Not configured'}
               </span>
             </div>
           </div>
@@ -139,24 +139,20 @@ const SettingsPanel: React.FC = () => {
           {/* API Key Section */}
           <div className="space-y-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                API Key
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">API Key</label>
               <div className="flex gap-3">
                 <div className="flex-1">
                   <input
-                    type={showApiKey ? "text" : "password"}
+                    type={showApiKey ? 'text' : 'password'}
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
                     placeholder={
-                      claude.isConfigured
-                        ? "Enter new API key to update..."
-                        : "sk-ant-api03-..."
+                      claude.isConfigured ? 'Enter new API key to update...' : 'sk-ant-api03-...'
                     }
                     className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6] transition-colors"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Get your API key from{" "}
+                    Get your API key from{' '}
                     <a
                       href="https://console.anthropic.com/"
                       target="_blank"
@@ -170,16 +166,16 @@ const SettingsPanel: React.FC = () => {
                 <button
                   onClick={() => setShowApiKey(!showApiKey)}
                   className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors"
-                  title={showApiKey ? "Hide API key" : "Show API key"}
+                  title={showApiKey ? 'Hide API key' : 'Show API key'}
                 >
-                  {showApiKey ? "👁️‍🗨️" : "👁️"}
+                  {showApiKey ? '👁️‍🗨️' : '👁️'}
                 </button>
                 <button
                   onClick={handleApiKeyUpdate}
                   disabled={!apiKey.trim() || isUpdatingKey}
                   className="px-4 py-2 bg-[#0073E6] text-white rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {isUpdatingKey ? "Updating..." : "Update"}
+                  {isUpdatingKey ? 'Updating...' : 'Update'}
                 </button>
               </div>
             </div>
@@ -207,14 +203,10 @@ const SettingsPanel: React.FC = () => {
             <h4 className="text-lg font-medium text-white mb-4">Model Configuration</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Model
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Model</label>
                 <select
                   value={claudeConfig.model}
-                  onChange={(e) =>
-                    setClaudeConfig({ ...claudeConfig, model: e.target.value })
-                  }
+                  onChange={(e) => setClaudeConfig({ ...claudeConfig, model: e.target.value })}
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6]"
                 >
                   <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
@@ -222,9 +214,7 @@ const SettingsPanel: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Max Tokens
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Max Tokens</label>
                 <input
                   type="number"
                   value={claudeConfig.maxTokens}
@@ -240,9 +230,7 @@ const SettingsPanel: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Temperature
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Temperature</label>
                 <input
                   type="number"
                   value={claudeConfig.temperature}
@@ -271,7 +259,7 @@ const SettingsPanel: React.FC = () => {
         {/* App Settings */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
           <h3 className="text-xl font-semibold text-white mb-4">Application Settings</h3>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -281,9 +269,7 @@ const SettingsPanel: React.FC = () => {
               <input
                 type="checkbox"
                 checked={appSettings.autoSave}
-                onChange={(e) =>
-                  setAppSettings({ ...appSettings, autoSave: e.target.checked })
-                }
+                onChange={(e) => setAppSettings({ ...appSettings, autoSave: e.target.checked })}
                 className="w-4 h-4 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"
               />
             </div>
@@ -344,7 +330,7 @@ const SettingsPanel: React.FC = () => {
         {/* Data Management */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
           <h3 className="text-xl font-semibold text-white mb-4">Data Management</h3>
-          
+
           <div className="space-y-4">
             <div>
               <h4 className="text-sm font-medium text-gray-300 mb-2">Export & Backup</h4>
@@ -356,7 +342,7 @@ const SettingsPanel: React.FC = () => {
                   Export Settings
                 </button>
                 <button
-                  onClick={() => showToast("Full backup system coming soon!", "info")}
+                  onClick={() => showToast('Full backup system coming soon!', 'info')}
                   className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors"
                 >
                   Export All Data
@@ -383,7 +369,11 @@ const SettingsPanel: React.FC = () => {
               <div className="space-y-2">
                 <button
                   onClick={() => {
-                    if (window.confirm("Are you sure you want to clear all Claude conversation history? This cannot be undone.")) {
+                    if (
+                      window.confirm(
+                        'Are you sure you want to clear all Claude conversation history? This cannot be undone.',
+                      )
+                    ) {
                       handleClearMessages();
                     }
                   }}
@@ -393,9 +383,13 @@ const SettingsPanel: React.FC = () => {
                 </button>
                 <button
                   onClick={() => {
-                    if (window.confirm("Are you sure you want to reset all settings to defaults? This cannot be undone.")) {
+                    if (
+                      window.confirm(
+                        'Are you sure you want to reset all settings to defaults? This cannot be undone.',
+                      )
+                    ) {
                       setClaudeConfig({
-                        model: "claude-sonnet-4-20250514",
+                        model: 'claude-sonnet-4-20250514',
                         maxTokens: 1000,
                         temperature: 0.7,
                       });
@@ -406,7 +400,7 @@ const SettingsPanel: React.FC = () => {
                         showWordCount: true,
                         showReadingTime: true,
                       });
-                      showToast("Settings reset to defaults", "success");
+                      showToast('Settings reset to defaults', 'success');
                     }
                   }}
                   className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors"
@@ -421,7 +415,7 @@ const SettingsPanel: React.FC = () => {
         {/* About */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
           <h3 className="text-xl font-semibold text-white mb-4">About Inkwell</h3>
-          
+
           <div className="space-y-3 text-sm text-gray-300">
             <div className="flex justify-between">
               <span>Version</span>
@@ -433,20 +427,20 @@ const SettingsPanel: React.FC = () => {
             </div>
             <div className="flex justify-between">
               <span>Claude API</span>
-              <span className={claude.isConfigured ? "text-green-400" : "text-red-400"}>
-                {claude.isConfigured ? "Connected" : "Not configured"}
+              <span className={claude.isConfigured ? 'text-green-400' : 'text-red-400'}>
+                {claude.isConfigured ? 'Connected' : 'Not configured'}
               </span>
             </div>
           </div>
 
           <div className="mt-4 pt-4 border-t border-gray-600 text-xs text-gray-500">
             <p>
-              Inkwell is an AI-assisted writing platform built with React, TypeScript, and Tailwind CSS.
-              It integrates with Claude AI to provide intelligent writing assistance.
+              Inkwell is an AI-assisted writing platform built with React, TypeScript, and Tailwind
+              CSS. It integrates with Claude AI to provide intelligent writing assistance.
             </p>
             <p className="mt-2">
-              Your API key and writing data are stored locally in your browser.
-              We don't collect or store any of your personal information.
+              Your API key and writing data are stored locally in your browser. We don't collect or
+              store any of your personal information.
             </p>
           </div>
 
@@ -473,36 +467,41 @@ const SettingsPanel: React.FC = () => {
         {/* Claude Usage Tips */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
           <h3 className="text-xl font-semibold text-white mb-4">Claude Usage Tips</h3>
-          
+
           <div className="space-y-3 text-sm text-gray-300">
             <div className="flex items-start space-x-3">
               <span className="text-[#0073E6] mt-0.5">💡</span>
               <div>
-                <strong>Quick Actions:</strong> Select text in your document and use the Quick Actions tab for instant improvements and continuations.
+                <strong>Quick Actions:</strong> Select text in your document and use the Quick
+                Actions tab for instant improvements and continuations.
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <span className="text-[#0073E6] mt-0.5">⚡</span>
               <div>
-                <strong>Keyboard Shortcuts:</strong> Use Ctrl+1/2/3 to switch between Claude tabs, Ctrl+Enter to send messages.
+                <strong>Keyboard Shortcuts:</strong> Use Ctrl+1/2/3 to switch between Claude tabs,
+                Ctrl+Enter to send messages.
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <span className="text-[#0073E6] mt-0.5">🎯</span>
               <div>
-                <strong>Context Aware:</strong> Claude automatically receives context about your current project and selected text.
+                <strong>Context Aware:</strong> Claude automatically receives context about your
+                current project and selected text.
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <span className="text-[#0073E6] mt-0.5">🔒</span>
               <div>
-                <strong>Privacy:</strong> Your API key is stored locally and only used to communicate with Anthropic's servers.
+                <strong>Privacy:</strong> Your API key is stored locally and only used to
+                communicate with Anthropic's servers.
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <span className="text-[#0073E6] mt-0.5">📊</span>
               <div>
-                <strong>Rate Limits:</strong> The app automatically manages rate limiting to prevent API errors.
+                <strong>Rate Limits:</strong> The app automatically manages rate limiting to prevent
+                API errors.
               </div>
             </div>
           </div>

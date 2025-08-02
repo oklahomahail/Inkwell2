@@ -35,7 +35,7 @@ export interface Backup {
 
 type NotifyFn = (message: string, type?: 'info' | 'success' | 'error') => void;
 
-const BACKUPS_KEY = "app_backups";
+const BACKUPS_KEY = 'app_backups';
 
 // Utility functions
 export async function getBackups(): Promise<Backup[]> {
@@ -54,92 +54,119 @@ export async function saveBackup(backup: Backup): Promise<void> {
   localStorage.setItem(BACKUPS_KEY, JSON.stringify(backups));
 }
 
-export async function restoreBackup(id: string): Promise<{ success: boolean; message?: string; error?: string }> {
+export async function restoreBackup(
+  id: string,
+): Promise<{ success: boolean; message?: string; error?: string }> {
   try {
     const backups = await getBackups();
-    const backup = backups.find(b => b.id === id);
+    const backup = backups.find((b) => b.id === id);
     if (!backup) {
-      return { success: false, error: "Backup not found" };
+      return { success: false, error: 'Backup not found' };
     }
-    
+
     // TODO: Implement actual restore logic based on your app's needs
     // This would typically involve restoring the backup.data to your app state
     console.log('Restoring backup:', backup);
-    
-    return { success: true, message: "Backup restored successfully" };
+
+    return { success: true, message: 'Backup restored successfully' };
   } catch (error) {
-    return { success: false, error: `Failed to restore backup: ${error instanceof Error ? error.message : 'Unknown error'}` };
+    return {
+      success: false,
+      error: `Failed to restore backup: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    };
   }
 }
 
-export async function deleteBackup(id: string): Promise<{ success: boolean; message?: string; error?: string }> {
+export async function deleteBackup(
+  id: string,
+): Promise<{ success: boolean; message?: string; error?: string }> {
   try {
     let backups = await getBackups();
     const initialLength = backups.length;
-    backups = backups.filter(b => b.id !== id);
-    
+    backups = backups.filter((b) => b.id !== id);
+
     if (backups.length === initialLength) {
-      return { success: false, error: "Backup not found" };
+      return { success: false, error: 'Backup not found' };
     }
-    
+
     localStorage.setItem(BACKUPS_KEY, JSON.stringify(backups));
-    return { success: true, message: "Backup deleted successfully" };
+    return { success: true, message: 'Backup deleted successfully' };
   } catch (error) {
-    return { success: false, error: `Failed to delete backup: ${error instanceof Error ? error.message : 'Unknown error'}` };
+    return {
+      success: false,
+      error: `Failed to delete backup: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    };
   }
 }
 
-export async function exportBackup(id: string): Promise<{ success: boolean; message?: string; error?: string }> {
+export async function exportBackup(
+  id: string,
+): Promise<{ success: boolean; message?: string; error?: string }> {
   try {
     const backups = await getBackups();
-    const backup = backups.find(b => b.id === id);
-    if (!backup) return { success: false, error: "Backup not found" };
+    const backup = backups.find((b) => b.id === id);
+    if (!backup) return { success: false, error: 'Backup not found' };
 
     const dataStr = JSON.stringify(backup, null, 2);
-    const blob = new Blob([dataStr], { type: "application/json" });
+    const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `backup_${backup.id}_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
 
-    return { success: true, message: "Backup exported successfully" };
+    return { success: true, message: 'Backup exported successfully' };
   } catch (error) {
-    return { success: false, error: `Failed to export backup: ${error instanceof Error ? error.message : 'Unknown error'}` };
+    return {
+      success: false,
+      error: `Failed to export backup: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    };
   }
 }
 
-export async function importBackup(file: File): Promise<{ success: boolean; message?: string; error?: string }> {
+export async function importBackup(
+  file: File,
+): Promise<{ success: boolean; message?: string; error?: string }> {
   try {
     const text = await file.text();
     const backup: Backup = JSON.parse(text);
-    
+
     // Validate backup structure
     if (!backup.id || !backup.timestamp || backup.data === undefined) {
-      return { success: false, error: "Invalid backup file format" };
+      return { success: false, error: 'Invalid backup file format' };
     }
-    
+
     // Check if backup already exists
     const existingBackups = await getBackups();
-    if (existingBackups.some(b => b.id === backup.id)) {
-      return { success: false, error: "Backup with this ID already exists" };
+    if (existingBackups.some((b) => b.id === backup.id)) {
+      return { success: false, error: 'Backup with this ID already exists' };
     }
-    
+
     await saveBackup(backup);
-    return { success: true, message: "Backup imported successfully" };
+    return { success: true, message: 'Backup imported successfully' };
   } catch (error) {
-    return { success: false, error: `Failed to import backup: ${error instanceof Error ? error.message : 'Invalid file format'}` };
+    return {
+      success: false,
+      error: `Failed to import backup: ${error instanceof Error ? error.message : 'Invalid file format'}`,
+    };
   }
 }
 
-export async function clearAllBackups(): Promise<{ success: boolean; message?: string; error?: string }> {
+export async function clearAllBackups(): Promise<{
+  success: boolean;
+  message?: string;
+  error?: string;
+}> {
   try {
     localStorage.removeItem(BACKUPS_KEY);
-    return { success: true, message: "All backups cleared successfully" };
+    return { success: true, message: 'All backups cleared successfully' };
   } catch (error) {
-    return { success: false, error: `Failed to clear backups: ${error instanceof Error ? error.message : 'Unknown error'}` };
+    return {
+      success: false,
+      error: `Failed to clear backups: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    };
   }
 }
 
@@ -169,7 +196,7 @@ let autoBackupInterval: ReturnType<typeof setInterval> | null = null;
 export function startAutoBackup(
   getAppData: () => string,
   getTitle: () => string,
-  intervalMs: number = 300000 // Default 5 minutes
+  intervalMs: number = 300000, // Default 5 minutes
 ): void {
   if (autoBackupInterval) {
     stopAutoBackup();
@@ -185,7 +212,7 @@ export function startAutoBackup(
         data: getAppData(),
         timestamp: Date.now(),
       };
-      
+
       await saveBackup(backup);
       console.log('Auto-backup created successfully');
     } catch (error) {
@@ -204,7 +231,7 @@ export function stopAutoBackup(): void {
 export async function createManualBackup(
   data: unknown,
   title?: string,
-  description?: string
+  description?: string,
 ): Promise<{ success: boolean; backup?: Backup; error?: string }> {
   try {
     const backup: Backup = {
@@ -216,13 +243,13 @@ export async function createManualBackup(
       timestamp: Date.now(),
       size: new Blob([JSON.stringify(data)]).size,
     };
-    
+
     await saveBackup(backup);
     return { success: true, backup };
   } catch (error) {
-    return { 
-      success: false, 
-      error: `Failed to create backup: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    return {
+      success: false,
+      error: `Failed to create backup: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
 }
@@ -242,7 +269,7 @@ export class BackupManager {
 
   constructor(
     private backupFn: () => Promise<void>,
-    private notify: NotifyFn
+    private notify: NotifyFn,
   ) {}
 
   public getState(): BackupManagerState {
@@ -282,7 +309,7 @@ export class BackupManager {
       this.notify('Backup already in progress. Please wait.', 'info');
       return;
     }
-    
+
     this.isSaving = true;
     this.updateStatus('saving');
     this.notify('Starting backup...', 'info');
@@ -310,11 +337,14 @@ export class BackupManager {
       this.notify('Maximum backup retry attempts reached. Please try again later.', 'error');
       return;
     }
-    
+
     this.state.retryCount++;
     this.updateStatus('retrying');
-    this.notify(`Retrying backup (#${this.state.retryCount}) in ${this.state.retryDelayMs / 1000} seconds...`, 'info');
-    
+    this.notify(
+      `Retrying backup (#${this.state.retryCount}) in ${this.state.retryDelayMs / 1000} seconds...`,
+      'info',
+    );
+
     await this.delay(this.state.retryDelayMs);
     this.state.retryDelayMs *= 2;
     await this.backup();
@@ -325,12 +355,15 @@ export class BackupManager {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
 // Create and export the service instance
-const backupService = new BackupManager(() => Promise.resolve(), () => {});
+const backupService = new BackupManager(
+  () => Promise.resolve(),
+  () => {},
+);
 
 // Export as default
 export default backupService;

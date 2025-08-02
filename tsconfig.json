@@ -1,17 +1,32 @@
 {
   "compilerOptions": {
+    /* Language & Environment */
     "target": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
+<<<<<<< Updated upstream
+=======
+
+    /* Modules & Resolution */
+>>>>>>> Stashed changes
     "module": "ESNext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+<<<<<<< Updated upstream
     "jsx": "react-jsx",
+=======
+
+    /* React */
+    "jsx": "react-jsx",
+
+    /* Type Safety & Strictness */
+>>>>>>> Stashed changes
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
+<<<<<<< Updated upstream
     "noEmit": true,
     "baseUrl": "src",
     "paths": {
@@ -20,5 +35,26 @@
     "types": ["node", "vite/client"]
   },
   "include": ["src/**/*"],
+=======
+    "noUncheckedIndexedAccess": true,
+
+    /* Output & JS Handling */
+    "allowJs": false,
+    "noEmit": true,
+
+    /* Aliases (matches your `vite.config.ts`) */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/components/*": ["src/components/*"],
+      "@/context/*": ["src/context/*"],
+      "@/utils/*": ["src/utils/*"]
+    },
+
+    /* Type Declarations */
+    "types": ["node", "vite/client"]
+  },
+  "include": ["src"],
+>>>>>>> Stashed changes
   "exclude": ["node_modules", "dist", "build"]
 }

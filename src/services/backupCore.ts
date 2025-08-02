@@ -16,8 +16,8 @@ export interface BackupManagerState {
 export interface Backup {
   [x: string]: any;
   id: string;
-  data: unknown;      // Replace 'unknown' with your actual data type
-  timestamp: number;  // Unix timestamp ms when backup was created
+  data: unknown; // Replace 'unknown' with your actual data type
+  timestamp: number; // Unix timestamp ms when backup was created
 }
 
 /** Notify function type for sending user messages */
@@ -36,7 +36,10 @@ export class BackupManager {
   private isSaving = false;
   private maxRetries = 5;
 
-  constructor(private backupFn: () => Promise<void>, private notify: NotifyFn) {}
+  constructor(
+    private backupFn: () => Promise<void>,
+    private notify: NotifyFn,
+  ) {}
 
   /** Get current backup state snapshot */
   public getState() {
@@ -80,7 +83,10 @@ export class BackupManager {
     }
     this.state.retryCount++;
     this.updateStatus('retrying');
-    this.notify(`Retrying backup (#${this.state.retryCount}) in ${this.state.retryDelayMs / 1000} seconds...`, 'info');
+    this.notify(
+      `Retrying backup (#${this.state.retryCount}) in ${this.state.retryDelayMs / 1000} seconds...`,
+      'info',
+    );
     await this.delay(this.state.retryDelayMs);
     this.state.retryDelayMs *= 2; // double the retry delay for exponential backoff
     await this.backup();
@@ -93,6 +99,6 @@ export class BackupManager {
 
   /** Utility: delay helper */
   private delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

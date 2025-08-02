@@ -1,30 +1,22 @@
 // src/components/Writing/ClaudeToolbar.tsx
-import React, { useState } from "react";
-import { useClaude } from "../../context/AppContext"; // Use AppContext instead
+import React, { useState } from 'react';
+import { useClaude } from '../../context/AppContext'; // Use AppContext instead
 
 interface ClaudeToolbarProps {
   selectedText?: string;
   onInsertText?: (text: string) => void;
 }
 
-const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
-  selectedText = "",
-  onInsertText,
-}) => {
-  const {
-    suggestContinuation,
-    improveText,
-    generatePlotIdeas,
-    sendMessage,
-  } = useClaude();
+const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({ selectedText = '', onInsertText }) => {
+  const { suggestContinuation, improveText, generatePlotIdeas, sendMessage } = useClaude();
 
-  const [lastResult, setLastResult] = useState<string>("");
+  const [lastResult, setLastResult] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSuggestContinuation = async (): Promise<void> => {
-    const target = selectedText || "";
+    const target = selectedText || '';
     if (!target || isLoading) return;
-    
+
     setIsLoading(true);
     try {
       const result = await suggestContinuation(target);
@@ -32,16 +24,16 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       console.log(`Claude continuation for: "${target.slice(0, 50)}..."`);
       console.log(result);
     } catch (error) {
-      console.error("Failed to suggest continuation:", error);
+      console.error('Failed to suggest continuation:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleImproveText = async (): Promise<void> => {
-    const target = selectedText || "";
+    const target = selectedText || '';
     if (!target || isLoading) return;
-    
+
     setIsLoading(true);
     try {
       const result = await improveText(target);
@@ -49,7 +41,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       console.log(`Claude improved: "${target.slice(0, 50)}..."`);
       console.log(result);
     } catch (error) {
-      console.error("Failed to improve text:", error);
+      console.error('Failed to improve text:', error);
     } finally {
       setIsLoading(false);
     }
@@ -57,15 +49,15 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
 
   const handleGeneratePlotIdeas = async (): Promise<void> => {
     if (isLoading) return;
-    
+
     setIsLoading(true);
     try {
-      const result = await generatePlotIdeas(selectedText || "");
+      const result = await generatePlotIdeas(selectedText || '');
       setLastResult(result);
-      console.log("Claude plot ideas:");
+      console.log('Claude plot ideas:');
       console.log(result);
     } catch (error) {
-      console.error("Failed to generate plot ideas:", error);
+      console.error('Failed to generate plot ideas:', error);
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +66,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
   const handleInsert = (): void => {
     if (onInsertText && lastResult) {
       onInsertText(lastResult);
-      setLastResult(""); // Clear after inserting
+      setLastResult(''); // Clear after inserting
     }
   };
 
@@ -85,21 +77,21 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
         disabled={!selectedText || isLoading}
         className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isLoading ? "..." : "Continue"}
+        {isLoading ? '...' : 'Continue'}
       </button>
       <button
         onClick={handleImproveText}
         disabled={!selectedText || isLoading}
         className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isLoading ? "..." : "Improve"}
+        {isLoading ? '...' : 'Improve'}
       </button>
       <button
         onClick={handleGeneratePlotIdeas}
         disabled={isLoading}
         className="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isLoading ? "..." : "Plot Ideas"}
+        {isLoading ? '...' : 'Plot Ideas'}
       </button>
       {lastResult && onInsertText && (
         <button

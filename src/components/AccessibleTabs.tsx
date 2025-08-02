@@ -1,5 +1,5 @@
 // src/components/AccessibleTabs.tsx
-import React from "react";
+import React from 'react';
 
 interface Tab {
   id: string;
@@ -14,11 +14,7 @@ interface AccessibleTabsProps {
   onChange: (id: string) => void;
 }
 
-const AccessibleTabs: React.FC<AccessibleTabsProps> = ({ 
-  tabs, 
-  initialSelectedId, 
-  onChange 
-}) => {
+const AccessibleTabs: React.FC<AccessibleTabsProps> = ({ tabs, initialSelectedId, onChange }) => {
   const [selectedId, setSelectedId] = React.useState(initialSelectedId);
 
   const handleTabChange = (id: string) => {
@@ -26,7 +22,7 @@ const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
     onChange(id);
   };
 
-  const selectedTab = tabs.find(tab => tab.id === selectedId);
+  const selectedTab = tabs.find((tab) => tab.id === selectedId);
 
   return (
     <div className="accessible-tabs">
@@ -38,8 +34,8 @@ const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
             aria-selected={tab.id === selectedId}
             onClick={() => handleTabChange(tab.id)}
             className={`px-4 py-2 flex items-center ${
-              tab.id === selectedId 
-                ? 'border-b-2 border-blue-500 text-blue-600' 
+              tab.id === selectedId
+                ? 'border-b-2 border-blue-500 text-blue-600'
                 : 'text-gray-600 hover:text-gray-800'
             }`}
           >

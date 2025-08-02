@@ -8,9 +8,14 @@ interface BackupPanelProps {
 }
 
 export default function BackupPanel({ performBackup }: BackupPanelProps) {
-  const [message, setMessage] = useState<{ text: string; type: string }>({ text: '', type: 'info' });
+  const [message, setMessage] = useState<{ text: string; type: string }>({
+    text: '',
+    type: 'info',
+  });
   const backupManagerRef = useRef<BackupManager | null>(null);
-  const [backupStatus, setBackupStatus] = useState<'idle' | 'saving' | 'success' | 'error' | 'retrying'>('idle');
+  const [backupStatus, setBackupStatus] = useState<
+    'idle' | 'saving' | 'success' | 'error' | 'retrying'
+  >('idle');
 
   // Notification callback for BackupManager
   const notify = (text: string, type: 'info' | 'success' | 'error' = 'info') => {
@@ -33,7 +38,7 @@ export default function BackupPanel({ performBackup }: BackupPanelProps) {
   const debouncedBackup = useRef(
     debounce(() => {
       backupManagerRef.current?.backup();
-    }, 3000)
+    }, 3000),
   ).current;
 
   // Call this in your text change handler:
@@ -63,8 +68,8 @@ export default function BackupPanel({ performBackup }: BackupPanelProps) {
           message.type === 'success'
             ? 'text-green-600'
             : message.type === 'error'
-            ? 'text-red-600'
-            : 'text-gray-700'
+              ? 'text-red-600'
+              : 'text-gray-700'
         }`}
         role="status"
         aria-live="polite"

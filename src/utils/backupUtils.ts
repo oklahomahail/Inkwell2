@@ -36,7 +36,7 @@ export function calculateLightChecksum(data: any): string {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(16);
@@ -78,15 +78,15 @@ export async function checkStorageInfo(): Promise<StorageInfo> {
       const used = estimate.usage || 0;
       const available = estimate.quota || 0;
       const percentage = available > 0 ? Math.round((used / available) * 100) : 0;
-      
+
       return {
         used,
         available,
         percentage,
-        nearLimit: percentage > 85
+        nearLimit: percentage > 85,
       };
     }
-    
+
     // Fallback: estimate localStorage usage
     let localStorageSize = 0;
     for (let key in localStorage) {
@@ -94,16 +94,16 @@ export async function checkStorageInfo(): Promise<StorageInfo> {
         localStorageSize += localStorage.getItem(key)?.length || 0;
       }
     }
-    
+
     // Rough estimate: most browsers allow 5-10MB for localStorage
     const estimatedQuota = 5 * 1024 * 1024; // 5MB
     const percentage = Math.round((localStorageSize / estimatedQuota) * 100);
-    
+
     return {
       used: localStorageSize,
       available: estimatedQuota,
       percentage,
-      nearLimit: percentage > 85
+      nearLimit: percentage > 85,
     };
   } catch (error) {
     console.error('Failed to check storage info:', error);
@@ -114,7 +114,10 @@ export async function checkStorageInfo(): Promise<StorageInfo> {
 /**
  * Validate backup data structure and integrity
  */
-export function validateBackupData(backup: any, useSecureChecksum: boolean = false): BackupValidationResult {
+export function validateBackupData(
+  backup: any,
+  useSecureChecksum: boolean = false,
+): BackupValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -145,7 +148,7 @@ export function validateBackupData(backup: any, useSecureChecksum: boolean = fal
 
     // Checksum verification
     if (backup.checksum && backup.data && errors.length === 0) {
-      const expectedChecksum = useSecureChecksum 
+      const expectedChecksum = useSecureChecksum
         ? calculateSecureChecksum(backup.data)
         : calculateLightChecksum(backup.data);
 
@@ -158,8 +161,9 @@ export function validateBackupData(backup: any, useSecureChecksum: boolean = fal
     if (backup.size) {
       const actualSize = calculateDataSize(backup);
       const sizeDifference = Math.abs(actualSize - backup.size);
-      
-      if (sizeDifference > actualSize * 0.1) { // 10% tolerance
+
+      if (sizeDifference > actualSize * 0.1) {
+        // 10% tolerance
         warnings.push('Backup size differs significantly from metadata');
       }
     }
@@ -168,7 +172,7 @@ export function validateBackupData(backup: any, useSecureChecksum: boolean = fal
     if (backup.timestamp) {
       const age = Date.now() - backup.timestamp;
       const daysOld = age / (1000 * 60 * 60 * 24);
-      
+
       if (daysOld > 30) {
         warnings.push(`Backup is ${Math.round(daysOld)} days old`);
       }
@@ -176,10 +180,10 @@ export function validateBackupData(backup: any, useSecureChecksum: boolean = fal
 
     return { isValid: errors.length === 0, errors, warnings };
   } catch (error) {
-    return { 
-      isValid: false, 
-      errors: ['Validation process failed'], 
-      warnings: [] 
+    return {
+      isValid: false,
+      errors: ['Validation process failed'],
+      warnings: [],
     };
   }
 }
@@ -201,8 +205,8 @@ export function compressBackupData(data: any): string {
  * Create differential backup (only changes since last backup)
  */
 export function createDifferentialBackup(
-  currentData: any, 
-  lastBackupData: any
+  currentData: any,
+  lastBackupData: any,
 ): { isDifferential: boolean; changes: any; size: number } {
   try {
     // This is a simplified diff - in production, you might use a library like 'deep-diff'
@@ -211,12 +215,13 @@ export function createDifferentialBackup(
 
     // Compare documents
     if (currentData.documents && lastBackupData.documents) {
-      const newDocs = currentData.documents.filter((doc: any) => 
-        !lastBackupData.documents.some((oldDoc: any) => 
-          oldDoc.id === doc.id && oldDoc.content === doc.content
-        )
+      const newDocs = currentData.documents.filter(
+        (doc: any) =>
+          !lastBackupData.documents.some(
+            (oldDoc: any) => oldDoc.id === doc.id && oldDoc.content === doc.content,
+          ),
       );
-      
+
       if (newDocs.length > 0) {
         changes.documents = newDocs;
         hasChanges = true;
@@ -228,11 +233,11 @@ export function createDifferentialBackup(
 
     // Compare sessions (always include recent sessions)
     if (currentData.sessions) {
-      const cutoffTime = Date.now() - (24 * 60 * 60 * 1000); // Last 24 hours
-      const recentSessions = currentData.sessions.filter((session: any) => 
-        new Date(session.date).getTime() > cutoffTime
+      const cutoffTime = Date.now() - 24 * 60 * 60 * 1000; // Last 24 hours
+      const recentSessions = currentData.sessions.filter(
+        (session: any) => new Date(session.date).getTime() > cutoffTime,
       );
-      
+
       if (recentSessions.length > 0) {
         changes.sessions = recentSessions;
         hasChanges = true;
@@ -250,14 +255,14 @@ export function createDifferentialBackup(
     return {
       isDifferential: hasChanges,
       changes: hasChanges ? changes : currentData,
-      size: calculateDataSize(hasChanges ? changes : currentData)
+      size: calculateDataSize(hasChanges ? changes : currentData),
     };
   } catch (error) {
     console.error('Failed to create differential backup:', error);
     return {
       isDifferential: false,
       changes: currentData,
-      size: calculateDataSize(currentData)
+      size: calculateDataSize(currentData),
     };
   }
 }
@@ -265,14 +270,11 @@ export function createDifferentialBackup(
 /**
  * Generate backup filename with timestamp
  */
-export function generateBackupFilename(
-  projectName?: string, 
-  backupType?: string
-): string {
+export function generateBackupFilename(projectName?: string, backupType?: string): string {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
   const project = projectName ? `${projectName.replace(/[^a-zA-Z0-9]/g, '_')}_` : '';
   const type = backupType ? `_${backupType}` : '';
-  
+
   return `${project}backup${type}_${timestamp}.json`;
 }
 
@@ -283,12 +285,13 @@ export function estimateBackupTime(sizeInBytes: number): { seconds: number; desc
   // Rough estimates based on localStorage write speeds
   const bytesPerSecond = 50000; // ~50KB/s average for localStorage operations
   const seconds = Math.ceil(sizeInBytes / bytesPerSecond);
-  
+
   let description = '';
   if (seconds < 1) description = 'Less than a second';
   else if (seconds < 60) description = `About ${seconds} second${seconds !== 1 ? 's' : ''}`;
-  else description = `About ${Math.ceil(seconds / 60)} minute${Math.ceil(seconds / 60) !== 1 ? 's' : ''}`;
-  
+  else
+    description = `About ${Math.ceil(seconds / 60)} minute${Math.ceil(seconds / 60) !== 1 ? 's' : ''}`;
+
   return { seconds, description };
 }
 
@@ -307,7 +310,7 @@ export function cleanupCorruptedBackups(backups: Record<string, any>): {
   for (const [id, backup] of Object.entries(backups)) {
     try {
       const validation = validateBackupData(backup);
-      
+
       if (validation.isValid) {
         cleaned[id] = backup;
       } else {
@@ -330,12 +333,10 @@ export function createBackupMetadata(
   data: any,
   type: 'manual' | 'auto' | 'emergency',
   description?: string,
-  useSecureChecksum: boolean = false
+  useSecureChecksum: boolean = false,
 ): any {
   const size = calculateDataSize(data);
-  const checksum = useSecureChecksum 
-    ? calculateSecureChecksum(data) 
-    : calculateLightChecksum(data);
+  const checksum = useSecureChecksum ? calculateSecureChecksum(data) : calculateLightChecksum(data);
 
   return {
     id: generateBackupId(),
@@ -347,7 +348,7 @@ export function createBackupMetadata(
     checksum,
     isCorrupted: false,
     restoreCount: 0,
-    useSecureChecksum
+    useSecureChecksum,
   };
 }
 
@@ -372,7 +373,9 @@ export async function getStorageRecommendations(): Promise<{
 
   if (storageInfo.percentage > 90) {
     needsCleanup = true;
-    recommendations.push('Critical: Storage almost full. Export and delete old backups immediately.');
+    recommendations.push(
+      'Critical: Storage almost full. Export and delete old backups immediately.',
+    );
   } else if (storageInfo.percentage > 75) {
     needsCleanup = true;
     recommendations.push('Warning: Storage is getting full. Consider exporting old backups.');

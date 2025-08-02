@@ -1,22 +1,22 @@
-import React, { memo } from "react";
-import { useToast } from "@/context/ToastContext";
+import React, { memo } from 'react';
+import { useToast } from '@/context/ToastContext';
 
 interface ToastItemProps {
   id: string;
   message: string;
-  type: "info" | "success" | "error";
+  type: 'info' | 'success' | 'error';
   onDismiss: () => void;
 }
 
 const ToastItem = memo<ToastItemProps>(({ message, type, onDismiss }) => {
   const getToastStyles = () => {
     const base =
-      "px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium cursor-pointer transition-all duration-300 transform hover:scale-105";
+      'px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium cursor-pointer transition-all duration-300 transform hover:scale-105';
 
     switch (type) {
-      case "success":
+      case 'success':
         return `${base} bg-green-600 hover:bg-green-700`;
-      case "error":
+      case 'error':
         return `${base} bg-red-600 hover:bg-red-700`;
       default:
         return `${base} bg-blue-600 hover:bg-blue-700`;
@@ -25,22 +25,32 @@ const ToastItem = memo<ToastItemProps>(({ message, type, onDismiss }) => {
 
   const getIcon = () => {
     switch (type) {
-      case "success":
+      case 'success':
         return (
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         );
-      case "error":
+      case 'error':
         return (
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         );
       default:
         return (
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
         );
     }
@@ -60,7 +70,12 @@ const ToastItem = memo<ToastItemProps>(({ message, type, onDismiss }) => {
           aria-label="Dismiss notification"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -68,7 +83,7 @@ const ToastItem = memo<ToastItemProps>(({ message, type, onDismiss }) => {
   );
 });
 
-ToastItem.displayName = "ToastItem";
+ToastItem.displayName = 'ToastItem';
 
 const ToastManager: React.FC = () => {
   const { toasts, removeToast } = useToast();
@@ -84,7 +99,7 @@ const ToastManager: React.FC = () => {
             key={id}
             id={id}
             message={toast.message}
-            type={(toast.type as "info" | "success" | "error") ?? "info"}
+            type={(toast.type as 'info' | 'success' | 'error') ?? 'info'}
             onDismiss={() => removeToast(id)}
           />
         );

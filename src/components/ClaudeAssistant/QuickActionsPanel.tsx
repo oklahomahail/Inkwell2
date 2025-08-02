@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 
 const QuickActionsPanel: React.FC<{
   selectedText: string;
@@ -8,7 +8,15 @@ const QuickActionsPanel: React.FC<{
   onInsert: () => void;
   onInsertText?: (text: string) => void;
   insertButtonRef: React.RefObject<HTMLButtonElement>;
-}> = ({ selectedText, onQuickAction, isLoading, lastResult, onInsert, onInsertText, insertButtonRef }) => {
+}> = ({
+  selectedText,
+  onQuickAction,
+  isLoading,
+  lastResult,
+  onInsert,
+  onInsertText,
+  insertButtonRef,
+}) => {
   useEffect(() => {
     if (lastResult && onInsertText) {
       insertButtonRef.current?.focus();
@@ -19,28 +27,28 @@ const QuickActionsPanel: React.FC<{
     <div className="p-4 space-y-3">
       <div className="grid grid-cols-2 gap-2 mb-4">
         <button
-          onClick={() => onQuickAction("continue")}
+          onClick={() => onQuickAction('continue')}
           disabled={isLoading || !selectedText}
           className="px-3 py-2 text-xs bg-[#0073E6] text-white rounded hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           📝 Continue Text
         </button>
         <button
-          onClick={() => onQuickAction("improve")}
+          onClick={() => onQuickAction('improve')}
           disabled={isLoading || !selectedText}
           className="px-3 py-2 text-xs bg-green-600 text-white rounded hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           ✨ Improve Text
         </button>
         <button
-          onClick={() => onQuickAction("analyze-style")}
+          onClick={() => onQuickAction('analyze-style')}
           disabled={isLoading || !selectedText}
           className="px-3 py-2 text-xs bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           🎨 Analyze Style
         </button>
         <button
-          onClick={() => onQuickAction("plot-ideas")}
+          onClick={() => onQuickAction('plot-ideas')}
           disabled={isLoading}
           className="px-3 py-2 text-xs bg-yellow-600 text-white rounded hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
@@ -57,9 +65,7 @@ const QuickActionsPanel: React.FC<{
       {lastResult && onInsertText && (
         <div className="border border-gray-600 rounded p-3">
           <div className="flex justify-between items-start mb-2">
-            <span className="text-xs font-medium text-[#0073E6]">
-              Claude's Suggestion:
-            </span>
+            <span className="text-xs font-medium text-[#0073E6]">Claude's Suggestion:</span>
             <button
               ref={insertButtonRef}
               onClick={onInsert}

@@ -1,8 +1,8 @@
 // src/components/Platform/PlatformLayout.tsx
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { PanelConfig } from "./panelRegistry";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { PanelConfig } from './panelRegistry';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface LayoutProps {
   panels: PanelConfig[];
@@ -13,12 +13,8 @@ interface LayoutProps {
 
 /** Group panels into sections for better organization */
 const groupPanels = (panels: PanelConfig[]) => ({
-  core: panels.filter((p) =>
-    ["dashboard", "writing", "timeline", "analysis"].includes(p.id)
-  ),
-  tools: panels.filter(
-    (p) => !["dashboard", "writing", "timeline", "analysis"].includes(p.id)
-  ),
+  core: panels.filter((p) => ['dashboard', 'writing', 'timeline', 'analysis'].includes(p.id)),
+  tools: panels.filter((p) => !['dashboard', 'writing', 'timeline', 'analysis'].includes(p.id)),
 });
 
 const PlatformLayout: React.FC<LayoutProps> = ({
@@ -30,7 +26,7 @@ const PlatformLayout: React.FC<LayoutProps> = ({
   const [sectionsOpen, setSectionsOpen] = useState({ core: true, tools: true });
   const groups = groupPanels(panels);
 
-  const toggleSection = (key: "core" | "tools") => {
+  const toggleSection = (key: 'core' | 'tools') => {
     setSectionsOpen((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -41,7 +37,7 @@ const PlatformLayout: React.FC<LayoutProps> = ({
         {/* Core Section */}
         <div>
           <button
-            onClick={() => toggleSection("core")}
+            onClick={() => toggleSection('core')}
             className="flex items-center justify-between w-full text-gray-700 dark:text-gray-300 font-semibold mb-2"
           >
             Core
@@ -55,7 +51,7 @@ const PlatformLayout: React.FC<LayoutProps> = ({
             {sectionsOpen.core && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
+                animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 className="space-y-2"
               >
@@ -65,8 +61,8 @@ const PlatformLayout: React.FC<LayoutProps> = ({
                     onClick={() => onSwitchPanel(panel.id)}
                     className={`flex items-center w-full text-left px-3 py-2 rounded transition ${
                       activePanelId === panel.id
-                        ? "bg-blue-500 text-white"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                        ? 'bg-blue-500 text-white'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                     }`}
                   >
                     {panel.icon}
@@ -82,7 +78,7 @@ const PlatformLayout: React.FC<LayoutProps> = ({
         {groups.tools.length > 0 && (
           <div>
             <button
-              onClick={() => toggleSection("tools")}
+              onClick={() => toggleSection('tools')}
               className="flex items-center justify-between w-full text-gray-700 dark:text-gray-300 font-semibold mb-2"
             >
               Tools
@@ -96,7 +92,7 @@ const PlatformLayout: React.FC<LayoutProps> = ({
               {sectionsOpen.tools && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
+                  animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   className="space-y-2"
                 >
@@ -106,8 +102,8 @@ const PlatformLayout: React.FC<LayoutProps> = ({
                       onClick={() => onSwitchPanel(panel.id)}
                       className={`flex items-center w-full text-left px-3 py-2 rounded transition ${
                         activePanelId === panel.id
-                          ? "bg-blue-500 text-white"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                          ? 'bg-blue-500 text-white'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                       }`}
                     >
                       {panel.icon}

@@ -1,7 +1,7 @@
 // src/components/Writing/WritingToolbar.tsx
-import React from "react";
-import { ExportFormat } from "../../types/writing";
-import { Save, Download, Sparkles, FileText, FileDown, File } from "lucide-react";
+import React from 'react';
+import { ExportFormat } from '../../types/writing';
+import { Save, Download, Sparkles, FileText, FileDown, File } from 'lucide-react';
 
 export interface WritingToolbarProps {
   title: string;
@@ -30,9 +30,9 @@ const WritingToolbar: React.FC<WritingToolbarProps> = ({
 }) => {
   const getExportIcon = () => {
     switch (exportFormat) {
-      case "markdown":
+      case 'markdown':
         return <FileText className="w-4 h-4" />;
-      case "docx":
+      case 'docx':
         return <FileDown className="w-4 h-4" />;
       default:
         return <File className="w-4 h-4" />;
@@ -53,7 +53,7 @@ const WritingToolbar: React.FC<WritingToolbarProps> = ({
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
             transition-colors duration-200"
         />
-        
+
         <button
           onClick={onManualSave}
           disabled={isSaving}
@@ -62,7 +62,7 @@ const WritingToolbar: React.FC<WritingToolbarProps> = ({
             transition-colors duration-200"
         >
           <Save className="w-4 h-4" />
-          {isSaving ? "Saving..." : "Save"}
+          {isSaving ? 'Saving...' : 'Save'}
         </button>
 
         <button
@@ -99,7 +99,7 @@ const WritingToolbar: React.FC<WritingToolbarProps> = ({
               transition-colors duration-200"
           >
             {getExportIcon()}
-            {isExporting ? "Exporting..." : "Export"}
+            {isExporting ? 'Exporting...' : 'Export'}
           </button>
         </div>
 
