@@ -34,6 +34,12 @@ const DashboardPanel: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const { showToast } = useToast();
 
+  // 🔍 DEBUG: Add these lines right here to diagnose the issue
+  console.log('DashboardPanel mounted');
+  console.log('AppContext state:', state);
+  console.log('Current view:', state?.view);
+  console.log('Current project:', state?.currentProject);
+
   const [stats, setStats] = useState<ProjectStats>({
     wordCount: 0,
     backups: 0,
@@ -131,10 +137,8 @@ const DashboardPanel: React.FC = () => {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold font-bold font-bold font-bold font-bold text-gray-900 dark:text-white">
-          Dashboard
-        </h1>
-        <div className="text-sm text-gray-600 text-gray-500 dark:text-gray-400">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           Project: {state.currentProject}
         </div>
       </div>
@@ -142,37 +146,25 @@ const DashboardPanel: React.FC = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="text-sm text-gray-600 font-medium text-gray-500 dark:text-gray-400">
-            Word Count
-          </div>
-          <div className="text-2xl font-bold font-bold font-bold font-bold font-bold text-gray-900 dark:text-white">
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Word Count</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">
             {stats.wordCount.toLocaleString()}
           </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="text-sm text-gray-600 font-medium text-gray-500 dark:text-gray-400">
-            Backups
-          </div>
-          <div className="text-2xl font-bold font-bold font-bold font-bold font-bold text-gray-900 dark:text-white">
-            {stats.backups}
-          </div>
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Backups</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.backups}</div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="text-sm text-gray-600 font-medium text-gray-500 dark:text-gray-400">
-            Backup Size
-          </div>
-          <div className="text-2xl font-bold font-bold font-bold font-bold font-bold text-gray-900 dark:text-white">
-            {stats.backupSize}
-          </div>
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Backup Size</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.backupSize}</div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="text-sm text-gray-600 font-medium text-gray-500 dark:text-gray-400">
-            Last Backup
-          </div>
-          <div className="text-sm text-gray-600 font-medium text-gray-900 dark:text-white">
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Last Backup</div>
+          <div className="text-sm font-medium text-gray-900 dark:text-white">
             {formatDate(stats.lastBackup)}
           </div>
         </div>
@@ -182,7 +174,7 @@ const DashboardPanel: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold font-semibold font-semibold font-medium font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               Backup Management
             </h2>
             <button
@@ -211,13 +203,13 @@ const DashboardPanel: React.FC = () => {
                     <div className="font-medium text-gray-900 dark:text-white">
                       {backup.title || 'Untitled Backup'}
                     </div>
-                    <div className="text-sm text-gray-600 text-gray-500 dark:text-gray-400">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
                       {formatDate(backup.timestamp)} • {formatSize(backup.size)}
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <span
-                      className={`px-2 py-1 text-xs text-gray-500 rounded-full ${
+                      className={`px-2 py-1 text-xs rounded-full ${
                         backup.type === 'auto'
                           ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                           : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
@@ -242,9 +234,7 @@ const DashboardPanel: React.FC = () => {
       {/* Quick Actions */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold font-semibold font-semibold font-medium font-semibold text-gray-900 dark:text-white">
-            Quick Actions
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Quick Actions</h2>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -253,7 +243,7 @@ const DashboardPanel: React.FC = () => {
               className="p-3 text-left bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
             >
               <div className="font-medium text-gray-900 dark:text-white">Continue Writing</div>
-              <div className="text-sm text-gray-600 text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-gray-500 dark:text-gray-400">
                 Resume your current project
               </div>
             </button>
@@ -263,7 +253,7 @@ const DashboardPanel: React.FC = () => {
               className="p-3 text-left bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
             >
               <div className="font-medium text-gray-900 dark:text-white">View Timeline</div>
-              <div className="text-sm text-gray-600 text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-gray-500 dark:text-gray-400">
                 Check your story progress
               </div>
             </button>
@@ -273,9 +263,7 @@ const DashboardPanel: React.FC = () => {
               className="p-3 text-left bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
             >
               <div className="font-medium text-gray-900 dark:text-white">Analytics</div>
-              <div className="text-sm text-gray-600 text-gray-500 dark:text-gray-400">
-                View writing analytics
-              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">View writing analytics</div>
             </button>
           </div>
         </div>

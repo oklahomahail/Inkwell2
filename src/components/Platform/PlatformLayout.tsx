@@ -1,4 +1,5 @@
 import React from 'react';
+import Sidebar from '@/components/Sidebar';
 
 interface PlatformLayoutProps {
   children: React.ReactNode;
@@ -26,9 +27,16 @@ const PlatformLayout: React.FC<PlatformLayoutProps> = ({ children }) => {
         </nav>
       </header>
 
-      <main className="bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 p-6 sm:p-8 shadow-md rounded-xl mx-auto max-w-7xl">
-        {children}
-      </main>
+      {/* Main content area with sidebar */}
+      <div className="flex flex-1">
+        {/* Add the Sidebar here */}
+        <Sidebar />
+
+        {/* Main content */}
+        <main className="flex-1 bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 p-6 sm:p-8 shadow-md rounded-xl mx-auto max-w-7xl">
+          {children}
+        </main>
+      </div>
 
       <footer className="text-center text-xs text-gray-500 dark:text-gray-400 py-6">
         &copy; {new Date().getFullYear()} Inkwell. All rights reserved.
