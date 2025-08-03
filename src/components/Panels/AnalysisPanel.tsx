@@ -149,7 +149,7 @@ const StatCard: React.FC<StatCardProps> = ({
 }) => (
   <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-colors">
     <div className="flex items-center justify-between mb-4">
-      <h3 className="text-lg font-medium font-semibold text-white">{title}</h3>
+      <h3 className="text-lg font-semibold font-semibold font-semibold font-medium font-semibold text-white">{title}</h3>
       <div className="flex items-center space-x-2">
         {icon}
         {trend && (
@@ -165,7 +165,7 @@ const StatCard: React.FC<StatCardProps> = ({
     </div>
     <div className="space-y-2">
       <p
-        className={`text-2xl font-bold font-bold font-bold ${color.includes('text-') ? color : `text-${color}`}`}
+        className={`text-2xl font-bold font-bold font-bold font-bold font-bold font-bold ${color.includes('text-') ? color : `text-${color}`}`}
       >
         {typeof value === 'number' ? value.toLocaleString() : value}
       </p>
@@ -214,7 +214,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ sessions, className =
   return (
     <div className={`bg-[#1A2233] rounded-xl p-6 border border-gray-700 ${className}`}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium font-semibold text-white">
+        <h3 className="text-lg font-semibold font-semibold font-semibold font-medium font-semibold text-white">
           Writing Activity (Last 30 Days)
         </h3>
         <span className="text-sm text-gray-600 text-gray-400">{sessions.length} sessions</span>
@@ -257,7 +257,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ sessions, className =
 // GoalSettings Component
 const GoalSettings: React.FC<GoalSettingsProps> = ({ targetWordCount, onTargetChange }) => (
   <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-    <h3 className="text-lg font-medium font-semibold text-white mb-4">Goal Settings</h3>
+    <h3 className="text-lg font-semibold font-semibold font-semibold font-medium font-semibold text-white mb-4">Goal Settings</h3>
     <div className="space-y-4">
       <div>
         <label className="block text-sm text-gray-600 font-medium text-gray-300 mb-2">
@@ -525,7 +525,7 @@ const AnalysisPanel: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-3xl font-bold text-white mb-2">Project Analytics</h2>
+          <h2 className="text-3xl font-extrabold leading-tight font-bold text-white mb-2">Project Analytics</h2>
           <p className="text-gray-400 text-sm text-gray-600">
             {stats.lastUpdated
               ? `Last updated: ${stats.lastUpdated.toLocaleTimeString()}`
@@ -693,7 +693,7 @@ const AnalysisPanel: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Writing Quality Metrics */}
           <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-            <h3 className="text-lg font-medium font-semibold text-white mb-4">Writing Quality</h3>
+            <h3 className="text-lg font-semibold font-semibold font-semibold font-medium font-semibold text-white mb-4">Writing Quality</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-300">Sentences</span>

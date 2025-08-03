@@ -42,7 +42,7 @@ const Button: React.FC<ButtonProps> = ({
   const sizes = {
     sm: 'px-3 py-1.5 text-sm text-gray-600 h-8',
     md: 'px-4 py-2 text-sm text-gray-600 h-10',
-    lg: 'px-6 py-3 text-base h-12',
+    lg: 'px-6 py-3 text-base leading-normal leading-normal h-12',
   };
 
   return (
@@ -283,7 +283,7 @@ export const TestComponents: React.FC = () => {
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Inkwell Component Library Test</h1>
+          <h1 className="text-3xl font-extrabold leading-tight font-bold text-gray-900 mb-2">Inkwell Component Library Test</h1>
           <p className="text-gray-600">
             Testing modern, accessible components for your writing platform
           </p>
@@ -292,7 +292,7 @@ export const TestComponents: React.FC = () => {
         {/* Buttons Section */}
         <Card className="mb-8">
           <CardHeader>
-            <h2 className="text-xl font-semibold leading-snug font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold text-gray-900">
               Buttons
             </h2>
           </CardHeader>
@@ -334,7 +334,7 @@ export const TestComponents: React.FC = () => {
         {/* Form Components */}
         <Card className="mb-8">
           <CardHeader>
-            <h2 className="text-xl font-semibold leading-snug font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold text-gray-900">
               Form Components
             </h2>
           </CardHeader>
@@ -458,7 +458,7 @@ export const TestComponents: React.FC = () => {
         {/* Integration Instructions */}
         <Card>
           <CardHeader>
-            <h2 className="text-xl font-semibold leading-snug font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold text-gray-900">
               Next Steps
             </h2>
           </CardHeader>

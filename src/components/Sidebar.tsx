@@ -13,7 +13,7 @@ const links = [
 export default function Sidebar() {
   return (
     <aside className="h-full w-60 bg-white border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200 font-semibold text-gray-900 text-lg font-medium">
+      <div className="p-4 border-b border-gray-200 font-semibold text-gray-900 text-lg font-semibold font-semibold font-semibold font-medium">
         App Menu
       </div>
       <nav className="p-4 flex-1 space-y-1">

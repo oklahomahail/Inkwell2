@@ -45,7 +45,7 @@ class ErrorBoundary extends Component<Props, State> {
               </svg>
             </div>
 
-            <h2 className="text-xl font-semibold leading-snug font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <h2 className="text-xl font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold text-gray-900 dark:text-gray-100 mb-2">
               Something went wrong
             </h2>
 

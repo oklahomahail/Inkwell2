@@ -114,7 +114,7 @@ const SettingsPanel: React.FC = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div>
-          <h2 className="text-3xl font-bold text-white mb-2">Settings</h2>
+          <h2 className="text-3xl font-extrabold leading-tight font-bold text-white mb-2">Settings</h2>
           <p className="text-gray-400">
             Configure your writing environment and Claude AI assistant
           </p>
@@ -123,7 +123,7 @@ const SettingsPanel: React.FC = () => {
         {/* Claude AI Configuration */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold leading-snug font-semibold text-white">
+            <h3 className="text-xl font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold text-white">
               Claude AI Assistant
             </h3>
             <div className="flex items-center space-x-2">
@@ -204,7 +204,7 @@ const SettingsPanel: React.FC = () => {
 
           {/* Claude Model Configuration */}
           <div className="border-t border-gray-600 pt-6">
-            <h4 className="text-lg font-medium font-medium text-white mb-4">Model Configuration</h4>
+            <h4 className="text-lg font-semibold font-semibold font-semibold font-medium font-medium text-white mb-4">Model Configuration</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm text-gray-600 font-medium text-gray-300 mb-2">
@@ -268,7 +268,7 @@ const SettingsPanel: React.FC = () => {
 
         {/* App Settings */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
+          <h3 className="text-xl font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold text-white mb-4">
             Application Settings
           </h3>
 
@@ -349,7 +349,7 @@ const SettingsPanel: React.FC = () => {
 
         {/* Data Management */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
+          <h3 className="text-xl font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold text-white mb-4">
             Data Management
           </h3>
 
@@ -442,7 +442,7 @@ const SettingsPanel: React.FC = () => {
 
         {/* About */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
+          <h3 className="text-xl font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold text-white mb-4">
             About Inkwell
           </h3>
 
@@ -496,7 +496,7 @@ const SettingsPanel: React.FC = () => {
 
         {/* Claude Usage Tips */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
+          <h3 className="text-xl font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold leading-snug font-semibold text-white mb-4">
             Claude Usage Tips
           </h3>
 

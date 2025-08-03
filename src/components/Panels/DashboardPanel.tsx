@@ -131,7 +131,7 @@ const DashboardPanel: React.FC = () => {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <h1 className="text-2xl font-bold font-bold font-bold font-bold font-bold text-gray-900 dark:text-white">Dashboard</h1>
         <div className="text-sm text-gray-600 text-gray-500 dark:text-gray-400">
           Project: {state.currentProject}
         </div>
@@ -143,7 +143,7 @@ const DashboardPanel: React.FC = () => {
           <div className="text-sm text-gray-600 font-medium text-gray-500 dark:text-gray-400">
             Word Count
           </div>
-          <div className="text-2xl font-bold font-bold text-gray-900 dark:text-white">
+          <div className="text-2xl font-bold font-bold font-bold font-bold font-bold text-gray-900 dark:text-white">
             {stats.wordCount.toLocaleString()}
           </div>
         </div>
@@ -152,7 +152,7 @@ const DashboardPanel: React.FC = () => {
           <div className="text-sm text-gray-600 font-medium text-gray-500 dark:text-gray-400">
             Backups
           </div>
-          <div className="text-2xl font-bold font-bold text-gray-900 dark:text-white">
+          <div className="text-2xl font-bold font-bold font-bold font-bold font-bold text-gray-900 dark:text-white">
             {stats.backups}
           </div>
         </div>
@@ -161,7 +161,7 @@ const DashboardPanel: React.FC = () => {
           <div className="text-sm text-gray-600 font-medium text-gray-500 dark:text-gray-400">
             Backup Size
           </div>
-          <div className="text-2xl font-bold font-bold text-gray-900 dark:text-white">
+          <div className="text-2xl font-bold font-bold font-bold font-bold font-bold text-gray-900 dark:text-white">
             {stats.backupSize}
           </div>
         </div>
@@ -180,7 +180,7 @@ const DashboardPanel: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-lg font-semibold font-semibold font-semibold font-medium font-semibold text-gray-900 dark:text-white">
               Backup Management
             </h2>
             <button
@@ -240,7 +240,7 @@ const DashboardPanel: React.FC = () => {
       {/* Quick Actions */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-medium font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-lg font-semibold font-semibold font-semibold font-medium font-semibold text-gray-900 dark:text-white">
             Quick Actions
           </h2>
         </div>
