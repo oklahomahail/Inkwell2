@@ -25,13 +25,13 @@ export interface ClaudeResponse {
   };
 }
 
-export interface ClaudeError {
-  message: string;
+export interface ClaudeError extends Error {
   type: 'api_error' | 'network_error' | 'rate_limit' | 'auth_error' | 'invalid_request';
   retryable: boolean;
 }
 
 class ClaudeService {
+  [x: string]: any;
   private config: ClaudeServiceConfig;
   private baseUrl = 'https://api.anthropic.com/v1/messages';
   private readonly STORAGE_KEY = 'claude_messages';
@@ -106,7 +106,7 @@ class ClaudeService {
       this.updateRateLimit();
 
       return {
-        content: data.content[0]?.text || '',
+        content: data.content?.[0]?.text || '',
         usage: data.usage
           ? {
               inputTokens: data.usage.input_tokens,
@@ -115,18 +115,16 @@ class ClaudeService {
           : undefined,
       };
     } catch (error) {
-      if (error instanceof Error && error.name === 'ClaudeError') {
+      if ((error as Error)?.name === 'ClaudeError') {
         throw error;
       }
       throw this.createError(
-        `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Network error: ${(error as Error)?.message || 'Unknown error'}`,
         'network_error',
         true,
       );
     }
   }
-
-  // Writing tools (same as before — you can copy/paste yours or let me know to regenerate)
 
   saveMessage(message: ClaudeMessage): void {
     const messages = this.getMessages().slice(-MESSAGE_LIMIT + 1);
@@ -168,7 +166,6 @@ class ClaudeService {
   private saveConfig(): void {
     try {
       const { apiKey, ...rest } = this.config;
-      void apiKey; // avoid unused var warning
       localStorage.setItem('claude_config', JSON.stringify(rest));
     } catch (e) {
       console.warn('Failed to save config:', e);
@@ -246,12 +243,8 @@ class ClaudeService {
     throw this.createError(message, errorType, retryable);
   }
 
-  private createError(
-    message: string,
-    type: ClaudeError['type'],
-    retryable: boolean,
-  ): Error & ClaudeError {
-    const error = new Error(message) as Error & ClaudeError;
+  private createError(message: string, type: ClaudeError['type'], retryable: boolean): ClaudeError {
+    const error = new Error(message) as ClaudeError;
     error.name = 'ClaudeError';
     error.type = type;
     error.retryable = retryable;

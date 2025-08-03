@@ -47,3 +47,4 @@ cypress/screenshots/
 reset-dev.sh
 .DS_Store
 __MACOSX/
+.vercel
