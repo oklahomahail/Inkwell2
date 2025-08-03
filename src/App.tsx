@@ -1,6 +1,6 @@
 import React from 'react';
 import PlatformLayout from './components/Platform/PlatformLayout';
-import DashboardPanel from './components/Panels/DashboardPanel'; // or your main panel component
+import DashboardPanel from './components/Panels/DashboardPanel';
 
 const App: React.FC = () => {
   return (
