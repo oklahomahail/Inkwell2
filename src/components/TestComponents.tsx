@@ -283,7 +283,9 @@ export const TestComponents: React.FC = () => {
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-extrabold leading-tight font-bold text-gray-900 mb-2">Inkwell Component Library Test</h1>
+          <h1 className="text-3xl font-extrabold leading-tight font-bold text-gray-900 mb-2">
+            Inkwell Component Library Test
+          </h1>
           <p className="text-gray-600">
             Testing modern, accessible components for your writing platform
           </p>

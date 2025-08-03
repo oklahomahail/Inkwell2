@@ -393,7 +393,9 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-700">
         <div className="flex items-center space-x-3">
-          <h2 className="text-lg font-semibold font-semibold font-semibold font-medium font-semibold text-[#0073E6]">Claude</h2>
+          <h2 className="text-lg font-semibold font-semibold font-semibold font-medium font-semibold text-[#0073E6]">
+            Claude
+          </h2>
           {isLoading && (
             <div
               className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#0073E6]"

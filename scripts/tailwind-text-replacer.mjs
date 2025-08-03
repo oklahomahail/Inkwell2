@@ -18,7 +18,7 @@ const replacements = {
   // Extend here:
   'heading-xl': 'text-3xl font-bold leading-tight',
   'text-base': 'text-base leading-normal',
-   'text-3xl': 'text-3xl font-extrabold leading-tight',
+  'text-3xl': 'text-3xl font-extrabold leading-tight',
   'text-muted': 'text-gray-500 italic',
   // etc...
 };
@@ -49,10 +49,7 @@ function walk(dir) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       walk(fullPath);
-    } else if (
-      entry.isFile() &&
-      validExtensions.includes(path.extname(entry.name))
-    ) {
+    } else if (entry.isFile() && validExtensions.includes(path.extname(entry.name))) {
       replaceInFile(fullPath);
     }
   }

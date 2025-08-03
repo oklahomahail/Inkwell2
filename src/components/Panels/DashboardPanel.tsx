@@ -131,7 +131,9 @@ const DashboardPanel: React.FC = () => {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold font-bold font-bold font-bold font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <h1 className="text-2xl font-bold font-bold font-bold font-bold font-bold text-gray-900 dark:text-white">
+          Dashboard
+        </h1>
         <div className="text-sm text-gray-600 text-gray-500 dark:text-gray-400">
           Project: {state.currentProject}
         </div>

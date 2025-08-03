@@ -28,8 +28,12 @@ class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-red-50 text-red-800 dark:bg-red-900 dark:text-red-200 p-8">
-          <h1 className="text-3xl font-extrabold leading-tight font-bold mb-4">Something went wrong.</h1>
-          <p className="text-lg font-semibold font-semibold font-semibold font-medium mb-2">{this.state.error?.message}</p>
+          <h1 className="text-3xl font-extrabold leading-tight font-bold mb-4">
+            Something went wrong.
+          </h1>
+          <p className="text-lg font-semibold font-semibold font-semibold font-medium mb-2">
+            {this.state.error?.message}
+          </p>
           <p className="text-sm text-gray-600">
             Please refresh the page or contact support if the issue continues.
           </p>
