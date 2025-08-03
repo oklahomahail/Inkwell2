@@ -1,5 +1,14 @@
-/* Typography Utility Aliases (Semantic only) */
-/* Avoid redefining Tailwind classes like `.text-xl` */
+/* src/styles/typography.css */
+
+/* 
+  Typography Utility Aliases (Semantic Only)
+  ------------------------------------------
+  These classes provide consistent, reusable typography styles
+  for common UI roles (e.g., headings, labels, muted text).
+  
+  ⚠️ Do NOT redefine core Tailwind utility class names like `.text-xl`, `.text-sm`, etc.
+  Use semantic names that reflect actual usage or intent.
+*/
 
 .heading-2xl {
   @apply text-2xl font-bold;

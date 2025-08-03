@@ -1,5 +1,6 @@
 // .eslintrc.cjs
 
+/** @type {import('eslint').Linter.Config} */
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
@@ -32,11 +33,28 @@ module.exports = {
     },
   },
   rules: {
-    'react/react-in-jsx-scope': 'off',
+    // General JS/TS rules
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': ['warn'],
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
-    'prettier/prettier': ['error'],
+
+    // React-specific
+    'react/react-in-jsx-scope': 'off', // Not needed in React 17+
+
+    // Formatting
+    'prettier/prettier': [
+      'error',
+      {
+        singleQuote: false,
+        jsxSingleQuote: false,
+        trailingComma: 'es5',
+        printWidth: 100,
+        semi: true,
+      },
+    ],
+
+    // Enforce consistent double quotes
+    quotes: ['error', 'double', { avoidEscape: true }],
   },
 };

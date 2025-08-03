@@ -50,7 +50,7 @@ class ErrorBoundary extends Component<Props, State> {
             </h2>
 
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Don't worry - your work has been saved automatically.
+              Don&apos;t worry - your work has been saved automatically.
             </p>
 
             <button

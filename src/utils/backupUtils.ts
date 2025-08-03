@@ -14,10 +14,43 @@ export interface BackupValidationResult {
   warnings: string[];
 }
 
+export interface BackupData {
+  documents?: Document[];
+  sessions?: Session[];
+  goals?: Goal[];
+  settings?: Record<string, unknown>;
+}
+
+export interface BackupMetadata {
+  id: string;
+  timestamp: Date;
+  version: string;
+  size: number;
+  type: 'manual' | 'auto' | 'emergency';
+  description: string;
+  checksum: string;
+  isCorrupted: boolean;
+  restoreCount: number;
+  useSecureChecksum: boolean;
+}
+
+interface Document {
+  id: string;
+  content: string;
+}
+
+interface Session {
+  date: string;
+}
+
+interface Goal {
+  id: string;
+}
+
 /**
  * Calculate secure checksum using SHA-256
  */
-export function calculateSecureChecksum(data: any): string {
+export function calculateSecureChecksum(data: BackupData): string {
   try {
     const jsonString = JSON.stringify(data, Object.keys(data).sort());
     return CryptoJS.SHA256(jsonString).toString();
@@ -30,7 +63,7 @@ export function calculateSecureChecksum(data: any): string {
 /**
  * Calculate lightweight checksum (faster, less secure)
  */
-export function calculateLightChecksum(data: any): string {
+export function calculateLightChecksum(data: BackupData): string {
   try {
     const str = JSON.stringify(data, Object.keys(data).sort());
     let hash = 0;
@@ -49,7 +82,7 @@ export function calculateLightChecksum(data: any): string {
 /**
  * Calculate size of data in bytes
  */
-export function calculateDataSize(data: any): number {
+export function calculateDataSize(data: BackupData): number {
   try {
     return new Blob([JSON.stringify(data)]).size;
   } catch (error) {
@@ -89,8 +122,8 @@ export async function checkStorageInfo(): Promise<StorageInfo> {
 
     // Fallback: estimate localStorage usage
     let localStorageSize = 0;
-    for (let key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
+    for (const key in localStorage) {
+      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
         localStorageSize += localStorage.getItem(key)?.length || 0;
       }
     }
@@ -115,7 +148,7 @@ export async function checkStorageInfo(): Promise<StorageInfo> {
  * Validate backup data structure and integrity
  */
 export function validateBackupData(
-  backup: any,
+  backup: Record<string, unknown>,
   useSecureChecksum: boolean = false,
 ): BackupValidationResult {
   const errors: string[] = [];
@@ -135,22 +168,24 @@ export function validateBackupData(
 
     // Data structure validation
     if (backup.data) {
-      if (backup.data.documents && !Array.isArray(backup.data.documents)) {
+      const data = backup.data as BackupData;
+      if (data.documents && !Array.isArray(data.documents)) {
         errors.push('Documents must be an array');
       }
-      if (backup.data.sessions && !Array.isArray(backup.data.sessions)) {
+      if (data.sessions && !Array.isArray(data.sessions)) {
         errors.push('Sessions must be an array');
       }
-      if (backup.data.goals && !Array.isArray(backup.data.goals)) {
+      if (data.goals && !Array.isArray(data.goals)) {
         errors.push('Goals must be an array');
       }
     }
 
     // Checksum verification
     if (backup.checksum && backup.data && errors.length === 0) {
+      const data = backup.data as BackupData;
       const expectedChecksum = useSecureChecksum
-        ? calculateSecureChecksum(backup.data)
-        : calculateLightChecksum(backup.data);
+        ? calculateSecureChecksum(data)
+        : calculateLightChecksum(data);
 
       if (expectedChecksum !== backup.checksum) {
         errors.push('Checksum verification failed - backup may be corrupted');
@@ -158,9 +193,10 @@ export function validateBackupData(
     }
 
     // Size validation
-    if (backup.size) {
-      const actualSize = calculateDataSize(backup);
-      const sizeDifference = Math.abs(actualSize - backup.size);
+    if (backup.size && backup.data) {
+      const data = backup.data as BackupData;
+      const actualSize = calculateDataSize(data);
+      const sizeDifference = Math.abs(actualSize - (backup.size as number));
 
       if (sizeDifference > actualSize * 0.1) {
         // 10% tolerance
@@ -170,7 +206,8 @@ export function validateBackupData(
 
     // Age warnings
     if (backup.timestamp) {
-      const age = Date.now() - backup.timestamp;
+      const timestamp = backup.timestamp as number;
+      const age = Date.now() - timestamp;
       const daysOld = age / (1000 * 60 * 60 * 24);
 
       if (daysOld > 30) {
@@ -191,7 +228,7 @@ export function validateBackupData(
 /**
  * Compress backup data (simple JSON compression)
  */
-export function compressBackupData(data: any): string {
+export function compressBackupData(data: BackupData): string {
   try {
     // Simple compression: remove unnecessary whitespace and sort keys
     return JSON.stringify(data, Object.keys(data).sort());
@@ -205,20 +242,20 @@ export function compressBackupData(data: any): string {
  * Create differential backup (only changes since last backup)
  */
 export function createDifferentialBackup(
-  currentData: any,
-  lastBackupData: any,
-): { isDifferential: boolean; changes: any; size: number } {
+  currentData: BackupData,
+  lastBackupData: BackupData,
+): { isDifferential: boolean; changes: BackupData; size: number } {
   try {
     // This is a simplified diff - in production, you might use a library like 'deep-diff'
-    const changes: any = {};
+    const changes: BackupData = {};
     let hasChanges = false;
 
     // Compare documents
     if (currentData.documents && lastBackupData.documents) {
       const newDocs = currentData.documents.filter(
-        (doc: any) =>
-          !lastBackupData.documents.some(
-            (oldDoc: any) => oldDoc.id === doc.id && oldDoc.content === doc.content,
+        (doc: Document) =>
+          !lastBackupData.documents?.some(
+            (oldDoc: Document) => oldDoc.id === doc.id && oldDoc.content === doc.content,
           ),
       );
 
@@ -235,7 +272,7 @@ export function createDifferentialBackup(
     if (currentData.sessions) {
       const cutoffTime = Date.now() - 24 * 60 * 60 * 1000; // Last 24 hours
       const recentSessions = currentData.sessions.filter(
-        (session: any) => new Date(session.date).getTime() > cutoffTime,
+        (session: Session) => new Date(session.date).getTime() > cutoffTime,
       );
 
       if (recentSessions.length > 0) {
@@ -298,12 +335,12 @@ export function estimateBackupTime(sizeInBytes: number): { seconds: number; desc
 /**
  * Clean up corrupted or invalid backup entries
  */
-export function cleanupCorruptedBackups(backups: Record<string, any>): {
-  cleaned: Record<string, any>;
+export function cleanupCorruptedBackups(backups: Record<string, Record<string, unknown>>): {
+  cleaned: Record<string, Record<string, unknown>>;
   removedCount: number;
   errors: string[];
 } {
-  const cleaned: Record<string, any> = {};
+  const cleaned: Record<string, Record<string, unknown>> = {};
   const errors: string[] = [];
   let removedCount = 0;
 
@@ -329,14 +366,16 @@ export function cleanupCorruptedBackups(backups: Record<string, any>): {
 /**
  * Create backup metadata with all required fields
  */
-export function createBackupMetadata(
-  data: any,
+export async function createBackupMetadata(
+  data: BackupData,
   type: 'manual' | 'auto' | 'emergency',
   description?: string,
   useSecureChecksum: boolean = false,
-): any {
+): Promise<BackupMetadata> {
   const size = calculateDataSize(data);
-  const checksum = useSecureChecksum ? calculateSecureChecksum(data) : calculateLightChecksum(data);
+  const checksum = useSecureChecksum
+    ? await calculateSecureChecksum(data)
+    : calculateLightChecksum(data);
 
   return {
     id: generateBackupId(),

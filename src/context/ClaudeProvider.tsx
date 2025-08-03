@@ -34,7 +34,7 @@ interface AppState {
   view: View;
   theme: 'light' | 'dark';
   notifications: string[];
-  campaignData: any;
+  campaignData: unknown;
   currentProject: string;
 }
 
@@ -44,7 +44,7 @@ type AppAction =
   | { type: 'SET_CURRENT_PROJECT'; payload: string }
   | { type: 'ADD_NOTIFICATION'; payload: string }
   | { type: 'REMOVE_NOTIFICATION'; payload: string }
-  | { type: 'SET_CAMPAIGN_DATA'; payload: any };
+  | { type: 'SET_CAMPAIGN_DATA'; payload: unknown };
 
 const initialState: AppState = {
   view: View.Dashboard,
@@ -81,6 +81,22 @@ interface ClaudeState {
   isConfigured: boolean;
 }
 
+interface ClaudeServiceType {
+  isConfigured: () => boolean;
+  getMessages: () => ClaudeMessage[];
+  generateMessageId: () => string;
+  initialize: (apiKey: string) => void;
+  clearMessages: () => void;
+  saveMessage: (message: ClaudeMessage) => void;
+  sendMessage: (content: string, options?: Record<string, unknown>) => Promise<{ content: string }>;
+  continueText: (text: string, context?: string) => Promise<string>;
+  improveText: (text: string) => Promise<string>;
+  analyzeWritingStyle: (text: string) => Promise<string>;
+  generatePlotIdeas: (context?: string) => Promise<string>;
+  analyzeCharacter: (name: string, context?: string) => Promise<string>;
+  brainstormIdeas: (topic: string) => Promise<string>;
+}
+
 interface AppContextValue {
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
@@ -107,7 +123,7 @@ interface AppContextValue {
 }
 
 // Mock Claude service fallback
-const createMockClaudeService = () => ({
+const createMockClaudeService = (): ClaudeServiceType => ({
   isConfigured: () => false,
   getMessages: () => [],
   generateMessageId: () => `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -147,9 +163,11 @@ const createMockClaudeService = () => ({
 });
 
 // Import real Claude service or fallback to mock
-let claudeService: any;
+let claudeService: ClaudeServiceType;
 try {
-  claudeService = require('@/services/claudeService').claudeService;
+  // Use dynamic import instead of require
+  const claudeServiceModule = await import('@/services/claudeService');
+  claudeService = claudeServiceModule.claudeService;
 } catch (error) {
   console.warn('Claude service not found, using mock service:', error);
   claudeService = createMockClaudeService();

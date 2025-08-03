@@ -1,4 +1,5 @@
-// src/context/AppContext.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React, {
   createContext,
   useReducer,
@@ -8,9 +9,8 @@ import React, {
   useCallback,
 } from 'react';
 
-// Fix: Change to default import (remove curly braces)
 import claudeService from '@/services/claudeService';
-import type { ClaudeMessage, ClaudeError } from '@/services/claudeService';
+import type { ClaudeMessage } from '@/services/claudeService';
 
 export enum View {
   Dashboard = 'dashboard',
@@ -20,11 +20,34 @@ export enum View {
   Settings = 'settings',
 }
 
+interface CampaignData {
+  id: string;
+  name: string;
+  slug?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  goalAmount?: number;
+  amountRaised?: number;
+  donorCount?: number;
+  isActive?: boolean;
+  tags?: string[];
+  stats?: {
+    openRate?: number;
+    clickRate?: number;
+    conversionRate?: number;
+    emailCount?: number;
+    volunteerSignups?: number;
+    monthlyGivers?: number;
+  };
+  lastUpdated?: string;
+}
+
 interface AppState {
   view: View;
   theme: 'light' | 'dark';
   notifications: string[];
-  campaignData: any;
+  campaignData: CampaignData | null;
   currentProject: string;
 }
 
@@ -34,7 +57,7 @@ type AppAction =
   | { type: 'SET_CURRENT_PROJECT'; payload: string }
   | { type: 'ADD_NOTIFICATION'; payload: string }
   | { type: 'REMOVE_NOTIFICATION'; payload: string }
-  | { type: 'SET_CAMPAIGN_DATA'; payload: any };
+  | { type: 'SET_CAMPAIGN_DATA'; payload: CampaignData | null };
 
 const initialState: AppState = {
   view: View.Dashboard,
@@ -77,13 +100,11 @@ interface ClaudeState {
 interface AppContextValue {
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
-
   activeView: View;
   theme: 'light' | 'dark';
   currentProject: string;
   setCurrentProject: (project: string) => void;
   toggleTheme: () => void;
-
   claude: ClaudeState;
   claudeActions: {
     sendMessage: (content: string, selectedText?: string) => Promise<string>;
@@ -99,7 +120,6 @@ interface AppContextValue {
   };
 }
 
-// Mock Claude service fallback for safety
 const createMockClaudeService = () => ({
   isConfigured: () => false,
   getMessages: () => [],
@@ -139,8 +159,7 @@ const createMockClaudeService = () => ({
   },
 });
 
-// Use the default export from claudeService
-let realClaudeService = claudeService ?? createMockClaudeService();
+const realClaudeService = claudeService ?? createMockClaudeService();
 
 const AppContext = createContext<AppContextValue | null>(null);
 
@@ -318,7 +337,6 @@ export function useAppContext() {
   return context;
 }
 
-// Legacy convenience hook for Claude actions & state
 export function useClaude() {
   const { claude, claudeActions } = useAppContext();
   return {

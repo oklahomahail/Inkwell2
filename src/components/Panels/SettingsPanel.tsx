@@ -473,8 +473,8 @@ const SettingsPanel: React.FC = () => {
               CSS. It integrates with Claude AI to provide intelligent writing assistance.
             </p>
             <p className="mt-2">
-              Your API key and writing data are stored locally in your browser. We don't collect or
-              store any of your personal information.
+              Your API key and writing data are stored locally in your browser. We don&apos;t
+              collect or store any of your personal information.
             </p>
           </div>
 
@@ -530,7 +530,7 @@ const SettingsPanel: React.FC = () => {
               <span className="text-[#0073E6] mt-0.5">🔒</span>
               <div>
                 <strong>Privacy:</strong> Your API key is stored locally and only used to
-                communicate with Anthropic's servers.
+                communicate with Anthropic servers.
               </div>
             </div>
             <div className="flex items-start space-x-3">
