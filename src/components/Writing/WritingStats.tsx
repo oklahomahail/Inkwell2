@@ -11,7 +11,7 @@ const WritingStats: React.FC<WritingStatsProps> = ({ content, title }) => {
   const chars = content.length;
 
   return (
-    <div className="text-xs text-gray-500 mt-2">
+    <div className="text-xs text-gray-500 text-gray-500 mt-2">
       <p>
         <strong>{title || 'Untitled'}</strong>: {words} words • {chars} characters
       </p>

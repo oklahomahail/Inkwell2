@@ -29,13 +29,10 @@ export const ToastMessage: React.FC<ToastMessageProps> = ({ type = 'info', messa
 
   return (
     <div
-      className={cn(
-        'flex items-center gap-2 border-l-4 p-3 rounded-md shadow-sm',
-        styleMap[type]
-      )}
+      className={cn('flex items-center gap-2 border-l-4 p-3 rounded-md shadow-sm', styleMap[type])}
     >
       <Icon className="w-5 h-5" />
-      <span className="text-sm">{message}</span>
+      <span className="text-sm text-gray-600">{message}</span>
     </div>
   );
 };

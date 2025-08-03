@@ -45,3 +45,5 @@ cypress/screenshots/
 # Misc
 *.local
 reset-dev.sh
+.DS_Store
+__MACOSX/

@@ -19,7 +19,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="space-y-1">
         {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor={inputId}
+            className="block text-sm text-gray-600 font-medium text-gray-700"
+          >
             {label}
             {required && <span className="text-red-500 ml-1">*</span>}
           </label>
@@ -30,7 +33,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           aria-invalid={!!error}
           aria-describedby={errorId || hintId}
           className={cn(
-            'block w-full rounded-lg border px-3 py-2 text-sm placeholder-gray-400 shadow-sm transition-colors duration-200',
+            'block w-full rounded-lg border px-3 py-2 text-sm text-gray-600 placeholder-gray-400 shadow-sm transition-colors duration-200',
             'focus:outline-none focus:ring-1',
             error
               ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
@@ -40,19 +43,19 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {hint && !error && (
-          <p id={hintId} className="text-xs text-gray-500">
+          <p id={hintId} className="text-xs text-gray-500 text-gray-500">
             {hint}
           </p>
         )}
         {error && (
-          <p id={errorId} className="text-xs text-red-600 flex items-center gap-1">
+          <p id={errorId} className="text-xs text-gray-500 text-red-600 flex items-center gap-1">
             <AlertCircle className="w-3 h-3" />
             {error}
           </p>
         )}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = 'Input';

@@ -1,13 +1,19 @@
+/* All @import statements MUST come first */
+@import './styles/forms/inputs.css';
+@import './styles/forms/textareas.css';
+@import './styles/forms/selects.css';
+@import './styles/forms/checkboxes.css';
+@import './styles/forms/radios.css';
+@import './styles/forms/labels.css';
+@import './styles/buttons.css';
+@import './styles/cards.css';
+@import './styles/typography.css';
+@import './styles/layout.css';
+@import './styles/animations.css';
+
+/* Then Tailwind directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom global styles */
-@import './styles/buttons.css';
-@import './styles/cards.css';
-@import './styles/forms.css';
-@import './styles/animations.css';
-
-body {
-  @apply font-sans bg-gray-50 text-gray-900 leading-relaxed;
-}
+/* Then any other CSS rules */

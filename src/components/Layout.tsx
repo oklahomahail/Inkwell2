@@ -18,15 +18,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <nav className="flex gap-4 p-4 border-b bg-gray-100 dark:bg-gray-800">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <nav className="flex gap-4 px-6 py-4 border-b bg-gray-100 dark:bg-gray-800">
         {tabs.map((tab) => (
           <Link
             key={tab.path}
             to={tab.path}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-lg text-sm text-gray-600 font-medium transition-all ${
               location.pathname === tab.path
-                ? 'bg-blue-600 text-white'
+                ? 'bg-primary text-white'
                 : 'hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
@@ -34,7 +34,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Link>
         ))}
       </nav>
-      <main className="p-6">{children}</main>
+      <main className="flex-1 p-6">{children}</main>
     </div>
   );
 };

@@ -123,14 +123,16 @@ const SettingsPanel: React.FC = () => {
         {/* Claude AI Configuration */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-white">Claude AI Assistant</h3>
+            <h3 className="text-xl font-semibold leading-snug font-semibold text-white">
+              Claude AI Assistant
+            </h3>
             <div className="flex items-center space-x-2">
               <div
                 className={`w-2 h-2 rounded-full ${
                   claude.isConfigured ? 'bg-green-400' : 'bg-red-400'
                 }`}
               />
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-gray-600 text-gray-400">
                 {claude.isConfigured ? 'Connected' : 'Not configured'}
               </span>
             </div>
@@ -139,7 +141,9 @@ const SettingsPanel: React.FC = () => {
           {/* API Key Section */}
           <div className="space-y-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">API Key</label>
+              <label className="block text-sm text-gray-600 font-medium text-gray-300 mb-2">
+                API Key
+              </label>
               <div className="flex gap-3">
                 <div className="flex-1">
                   <input
@@ -151,7 +155,7 @@ const SettingsPanel: React.FC = () => {
                     }
                     className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6] transition-colors"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 text-gray-500 mt-1">
                     Get your API key from{' '}
                     <a
                       href="https://console.anthropic.com/"
@@ -200,10 +204,12 @@ const SettingsPanel: React.FC = () => {
 
           {/* Claude Model Configuration */}
           <div className="border-t border-gray-600 pt-6">
-            <h4 className="text-lg font-medium text-white mb-4">Model Configuration</h4>
+            <h4 className="text-lg font-medium font-medium text-white mb-4">Model Configuration</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Model</label>
+                <label className="block text-sm text-gray-600 font-medium text-gray-300 mb-2">
+                  Model
+                </label>
                 <select
                   value={claudeConfig.model}
                   onChange={(e) => setClaudeConfig({ ...claudeConfig, model: e.target.value })}
@@ -214,7 +220,9 @@ const SettingsPanel: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Max Tokens</label>
+                <label className="block text-sm text-gray-600 font-medium text-gray-300 mb-2">
+                  Max Tokens
+                </label>
                 <input
                   type="number"
                   value={claudeConfig.maxTokens}
@@ -230,7 +238,9 @@ const SettingsPanel: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Temperature</label>
+                <label className="block text-sm text-gray-600 font-medium text-gray-300 mb-2">
+                  Temperature
+                </label>
                 <input
                   type="number"
                   value={claudeConfig.temperature}
@@ -258,13 +268,15 @@ const SettingsPanel: React.FC = () => {
 
         {/* App Settings */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold text-white mb-4">Application Settings</h3>
+          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
+            Application Settings
+          </h3>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <label className="text-sm font-medium text-gray-300">Auto-save</label>
-                <p className="text-xs text-gray-500">Automatically save your work</p>
+                <label className="text-sm text-gray-600 font-medium text-gray-300">Auto-save</label>
+                <p className="text-xs text-gray-500 text-gray-500">Automatically save your work</p>
               </div>
               <input
                 type="checkbox"
@@ -276,7 +288,7 @@ const SettingsPanel: React.FC = () => {
 
             {appSettings.autoSave && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm text-gray-600 font-medium text-gray-300 mb-2">
                   Auto-save interval (seconds)
                 </label>
                 <input
@@ -297,8 +309,12 @@ const SettingsPanel: React.FC = () => {
 
             <div className="flex items-center justify-between">
               <div>
-                <label className="text-sm font-medium text-gray-300">Show word count</label>
-                <p className="text-xs text-gray-500">Display word count in the editor</p>
+                <label className="text-sm text-gray-600 font-medium text-gray-300">
+                  Show word count
+                </label>
+                <p className="text-xs text-gray-500 text-gray-500">
+                  Display word count in the editor
+                </p>
               </div>
               <input
                 type="checkbox"
@@ -312,8 +328,12 @@ const SettingsPanel: React.FC = () => {
 
             <div className="flex items-center justify-between">
               <div>
-                <label className="text-sm font-medium text-gray-300">Show reading time</label>
-                <p className="text-xs text-gray-500">Display estimated reading time</p>
+                <label className="text-sm text-gray-600 font-medium text-gray-300">
+                  Show reading time
+                </label>
+                <p className="text-xs text-gray-500 text-gray-500">
+                  Display estimated reading time
+                </p>
               </div>
               <input
                 type="checkbox"
@@ -329,11 +349,15 @@ const SettingsPanel: React.FC = () => {
 
         {/* Data Management */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold text-white mb-4">Data Management</h3>
+          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
+            Data Management
+          </h3>
 
           <div className="space-y-4">
             <div>
-              <h4 className="text-sm font-medium text-gray-300 mb-2">Export & Backup</h4>
+              <h4 className="text-sm text-gray-600 font-medium text-gray-300 mb-2">
+                Export & Backup
+              </h4>
               <div className="flex gap-3">
                 <button
                   onClick={handleExportSettings}
@@ -351,13 +375,15 @@ const SettingsPanel: React.FC = () => {
             </div>
 
             <div className="border-t border-gray-600 pt-4">
-              <h4 className="text-sm font-medium text-gray-300 mb-2">Storage Usage</h4>
+              <h4 className="text-sm text-gray-600 font-medium text-gray-300 mb-2">
+                Storage Usage
+              </h4>
               <div className="space-y-2">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm text-gray-600">
                   <span className="text-gray-400">Claude Messages</span>
                   <span className="text-gray-300">{claude.messages.length} messages</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm text-gray-600">
                   <span className="text-gray-400">Local Storage</span>
                   <span className="text-gray-300">Calculating...</span>
                 </div>
@@ -365,7 +391,9 @@ const SettingsPanel: React.FC = () => {
             </div>
 
             <div className="border-t border-gray-600 pt-4">
-              <h4 className="text-sm font-medium text-gray-300 mb-2 text-red-400">Danger Zone</h4>
+              <h4 className="text-sm text-gray-600 font-medium text-gray-300 mb-2 text-red-400">
+                Danger Zone
+              </h4>
               <div className="space-y-2">
                 <button
                   onClick={() => {
@@ -414,9 +442,11 @@ const SettingsPanel: React.FC = () => {
 
         {/* About */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold text-white mb-4">About Inkwell</h3>
+          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
+            About Inkwell
+          </h3>
 
-          <div className="space-y-3 text-sm text-gray-300">
+          <div className="space-y-3 text-sm text-gray-600 text-gray-300">
             <div className="flex justify-between">
               <span>Version</span>
               <span className="text-[#0073E6]">1.0.0</span>
@@ -433,7 +463,7 @@ const SettingsPanel: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-gray-600 text-xs text-gray-500">
+          <div className="mt-4 pt-4 border-t border-gray-600 text-xs text-gray-500 text-gray-500">
             <p>
               Inkwell is an AI-assisted writing platform built with React, TypeScript, and Tailwind
               CSS. It integrates with Claude AI to provide intelligent writing assistance.
@@ -449,7 +479,7 @@ const SettingsPanel: React.FC = () => {
               href="https://github.com/oklahomahail/Inkwell2"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-xs hover:bg-gray-600 transition-colors"
+              className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-xs text-gray-500 hover:bg-gray-600 transition-colors"
             >
               GitHub
             </a>
@@ -457,7 +487,7 @@ const SettingsPanel: React.FC = () => {
               href="https://docs.anthropic.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-xs hover:bg-gray-600 transition-colors"
+              className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-xs text-gray-500 hover:bg-gray-600 transition-colors"
             >
               Claude API Docs
             </a>
@@ -466,9 +496,11 @@ const SettingsPanel: React.FC = () => {
 
         {/* Claude Usage Tips */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold text-white mb-4">Claude Usage Tips</h3>
+          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
+            Claude Usage Tips
+          </h3>
 
-          <div className="space-y-3 text-sm text-gray-300">
+          <div className="space-y-3 text-sm text-gray-600 text-gray-300">
             <div className="flex items-start space-x-3">
               <span className="text-[#0073E6] mt-0.5">💡</span>
               <div>

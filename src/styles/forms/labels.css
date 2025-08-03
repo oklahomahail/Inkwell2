@@ -1,0 +1,12 @@
+/* Labels, helper text, and error messages */
+.label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.hint {
+  @apply text-xs text-gray-500;
+}
+
+.error {
+  @apply text-xs text-red-600 flex items-center gap-1;
+}

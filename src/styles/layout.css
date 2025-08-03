@@ -1,0 +1,13 @@
+/* Vertical spacing helpers */
+.space-y-6 > * + * {
+  @apply mt-6;
+}
+
+.space-y-4 > * + * {
+  @apply mt-4;
+}
+
+/* Global layout baseline */
+body {
+  @apply font-sans bg-gray-50 text-gray-900 leading-relaxed;
+}

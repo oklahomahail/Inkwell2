@@ -210,7 +210,7 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
 
   return (
     <div className="flex flex-col h-full p-4 bg-gray-50 dark:bg-gray-900">
-      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+      <h2 className="text-lg font-medium font-semibold text-gray-800 dark:text-gray-100 mb-4">
         Timeline Manager
       </h2>
 
@@ -222,13 +222,13 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
           placeholder="Scene title"
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
-          className="px-3 py-2 border rounded text-sm dark:bg-gray-800 dark:text-gray-200"
+          className="px-3 py-2 border rounded text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-200"
         />
         <textarea
           placeholder="Scene description (optional)"
           value={newDescription}
           onChange={(e) => setNewDescription(e.target.value)}
-          className="px-3 py-2 border rounded text-sm dark:bg-gray-800 dark:text-gray-200"
+          className="px-3 py-2 border rounded text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-200"
           rows={3}
         />
 =======
@@ -244,14 +244,14 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
         <button
           onClick={handleUndo}
           disabled={history.length <= 1}
-          className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-sm rounded hover:bg-gray-400 disabled:opacity-50"
+          className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-sm text-gray-600 rounded hover:bg-gray-400 disabled:opacity-50"
         >
           ↩ Undo
         </button>
         <button
           onClick={handleRedo}
           disabled={redoStack.length === 0}
-          className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-sm rounded hover:bg-gray-400 disabled:opacity-50"
+          className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-sm text-gray-600 rounded hover:bg-gray-400 disabled:opacity-50"
         >
           ↪ Redo
         </button>
@@ -261,7 +261,7 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
       {/* Scene list */}
       <div className="flex-1 overflow-y-auto space-y-2">
         {scenes.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400 text-sm">
+          <p className="text-gray-500 dark:text-gray-400 text-sm text-gray-600">
             No scenes in the timeline yet. Add your first one above.
           </p>
         ) : (
@@ -271,15 +271,15 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
               className="flex items-start justify-between border rounded p-3 bg-white dark:bg-gray-800 shadow-sm"
             >
               <div>
-                <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">
+                <h3 className="text-sm text-gray-600 font-bold text-gray-800 dark:text-gray-100">
                   {scene.title}
                 </h3>
                 {scene.description && (
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                  <p className="text-xs text-gray-500 text-gray-600 dark:text-gray-300 mt-1">
                     {scene.description}
                   </p>
                 )}
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-gray-500 text-gray-400 mt-1">
                   Added at: {scene.timestamp}
                 </p>
               </div>
@@ -303,7 +303,7 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
                     ]);
                     setShowSuggestions(false);
                   }}
-                  className="w-full text-left px-3 py-1 text-sm rounded hover:bg-blue-100 dark:hover:bg-gray-600"
+                  className="w-full text-left px-3 py-1 text-sm text-gray-600 rounded hover:bg-blue-100 dark:hover:bg-gray-600"
                 >
                   {idea}
                 </button>
@@ -337,12 +337,12 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
                     )
                   )
                 }
-                className="text-lg font-semibold w-full bg-transparent border-none outline-none text-gray-900 dark:text-white"
+                className="text-lg font-medium font-semibold w-full bg-transparent border-none outline-none text-gray-900 dark:text-white"
               />
 >>>>>>> Stashed changes
               <button
                 onClick={() => handleRemoveScene(scene.id)}
-                className="ml-4 text-xs text-red-500 hover:underline"
+                className="ml-4 text-xs text-gray-500 text-red-500 hover:underline"
               >
                 Remove
               </button>
@@ -353,7 +353,7 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
 
 <<<<<<< Updated upstream
       {/* Footer */}
-      <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+      <div className="mt-4 text-xs text-gray-500 text-gray-500 dark:text-gray-400">
         Total scenes: {totalScenes}
 =======
             <div data-color-mode="light" className="mb-2">
@@ -377,7 +377,7 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
               <button
                 onClick={() => handleImproveDescription(scene.id)}
                 disabled={scene.isLoading}
-                className="text-xs px-3 py-1 border rounded text-blue-600 border-blue-600 hover:bg-blue-100 dark:hover:bg-gray-700 disabled:opacity-50"
+                className="text-xs text-gray-500 px-3 py-1 border rounded text-blue-600 border-blue-600 hover:bg-blue-100 dark:hover:bg-gray-700 disabled:opacity-50"
               >
                 {scene.isLoading ? "Improving..." : "✨ Improve"}
               </button>
@@ -385,13 +385,13 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
                 onClick={() =>
                   handleSuggestTransition(scene, scenes[index + 1])
                 }
-                className="text-xs px-3 py-1 border rounded text-green-600 border-green-600 hover:bg-green-100 dark:hover:bg-gray-700"
+                className="text-xs text-gray-500 px-3 py-1 border rounded text-green-600 border-green-600 hover:bg-green-100 dark:hover:bg-gray-700"
               >
                 ➡ Suggest Transition
               </button>
               <button
                 onClick={() => handleAnalyzeTension(scene)}
-                className="text-xs px-3 py-1 border rounded text-yellow-600 border-yellow-600 hover:bg-yellow-100 dark:hover:bg-gray-700"
+                className="text-xs text-gray-500 px-3 py-1 border rounded text-yellow-600 border-yellow-600 hover:bg-yellow-100 dark:hover:bg-gray-700"
               >
                 ⚡ Analyze Tension
               </button>

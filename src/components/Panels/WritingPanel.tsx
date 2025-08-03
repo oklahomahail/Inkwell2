@@ -59,7 +59,7 @@ const WritingToolbar: React.FC<WritingToolbarProps> = ({
         type="text"
         value={title}
         onChange={(e) => onTitleChange(e.target.value)}
-        className="px-3 py-1 border rounded text-sm dark:bg-gray-800 dark:text-gray-200"
+        className="px-3 py-1 border rounded text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-200"
       />
       <button
         onClick={onManualSave}
@@ -70,7 +70,7 @@ const WritingToolbar: React.FC<WritingToolbarProps> = ({
       <select
         value={exportFormat}
         onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
-        className="px-2 py-1 border rounded text-sm dark:bg-gray-800 dark:text-gray-200"
+        className="px-2 py-1 border rounded text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-200"
       >
         <option value="markdown">Markdown</option>
         <option value="txt">Text</option>
@@ -260,7 +260,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
           onTextSelect={onTextSelect}
         />
       </div>
-      <div className="flex justify-between items-center text-sm mt-2 text-gray-600 dark:text-gray-400">
+      <div className="flex justify-between items-center text-sm text-gray-600 mt-2 text-gray-600 dark:text-gray-400">
         <div>Words: {wordCount}</div>
         <div>
           Last saved:{' '}

@@ -11,7 +11,7 @@ interface ToastItemProps {
 const ToastItem = memo<ToastItemProps>(({ message, type, onDismiss }) => {
   const getToastStyles = () => {
     const base =
-      'px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium cursor-pointer transition-all duration-300 transform hover:scale-105';
+      'px-4 py-3 rounded-lg shadow-lg text-white text-sm text-gray-600 font-medium cursor-pointer transition-all duration-300 transform hover:scale-105';
 
     switch (type) {
       case 'success':

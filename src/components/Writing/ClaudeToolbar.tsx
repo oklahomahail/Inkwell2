@@ -75,34 +75,34 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({ selectedText = '', onInse
       <button
         onClick={handleSuggestContinuation}
         disabled={!selectedText || isLoading}
-        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-3 py-1 text-xs text-gray-500 bg-blue-600 text-white rounded hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? '...' : 'Continue'}
       </button>
       <button
         onClick={handleImproveText}
         disabled={!selectedText || isLoading}
-        className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-3 py-1 text-xs text-gray-500 bg-green-600 text-white rounded hover:bg-green-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? '...' : 'Improve'}
       </button>
       <button
         onClick={handleGeneratePlotIdeas}
         disabled={isLoading}
-        className="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-3 py-1 text-xs text-gray-500 bg-purple-600 text-white rounded hover:bg-purple-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? '...' : 'Plot Ideas'}
       </button>
       {lastResult && onInsertText && (
         <button
           onClick={handleInsert}
-          className="px-3 py-1 text-xs bg-yellow-600 text-white rounded hover:bg-yellow-500 transition"
+          className="px-3 py-1 text-xs text-gray-500 bg-yellow-600 text-white rounded hover:bg-yellow-500 transition"
         >
           Insert Result
         </button>
       )}
       {lastResult && (
-        <div className="w-full mt-2 p-2 text-xs bg-gray-200 dark:bg-gray-700 rounded">
+        <div className="w-full mt-2 p-2 text-xs text-gray-500 bg-gray-200 dark:bg-gray-700 rounded">
           <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
             Claude's suggestion:
           </div>

@@ -1,0 +1,26 @@
+/* Typography Utility Aliases (Semantic only) */
+/* Avoid redefining Tailwind classes like `.text-xl` */
+
+.heading-2xl {
+  @apply text-2xl font-bold;
+}
+
+.heading-lg {
+  @apply text-lg font-semibold;
+}
+
+.text-muted {
+  @apply text-sm text-gray-500;
+}
+
+.text-error {
+  @apply text-sm text-red-600 font-medium;
+}
+
+.text-label {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.text-hint {
+  @apply text-xs text-gray-500;
+}

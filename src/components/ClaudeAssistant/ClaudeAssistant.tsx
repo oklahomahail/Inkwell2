@@ -186,13 +186,17 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
             aria-relevant="additions"
           >
             {messages.length === 0 ? (
-              <div className="text-center py-8 text-gray-400 text-sm select-none">
+              <div className="text-center py-8 text-gray-400 text-sm text-gray-600 select-none">
                 <div className="mb-2" aria-hidden="true">
                   👋
                 </div>
                 <p>Start a conversation with Claude!</p>
-                <p className="text-xs mt-1">I have full context of your writing project.</p>
-                <p className="text-xs mt-2 opacity-75">💡 Tip: Use Ctrl+Enter to send messages</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  I have full context of your writing project.
+                </p>
+                <p className="text-xs text-gray-500 mt-2 opacity-75">
+                  💡 Tip: Use Ctrl+Enter to send messages
+                </p>
               </div>
             ) : (
               messages.map((msg) => (
@@ -223,13 +227,13 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
                     ? `Ask about: "${selectedText.slice(0, 20)}..."`
                     : 'Ask Claude about your writing... (Ctrl+Enter to send)'
                 }
-                className="flex-1 px-3 py-2 rounded-md bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6] disabled:opacity-50 transition-colors text-sm"
+                className="flex-1 px-3 py-2 rounded-md bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6] disabled:opacity-50 transition-colors text-sm text-gray-600"
                 aria-label="Chat input"
               />
               <button
                 onClick={handleSend}
                 disabled={isLoading || !input.trim()}
-                className="px-4 py-2 bg-[#0073E6] text-white rounded-md hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                className="px-4 py-2 bg-[#0073E6] text-white rounded-md hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm text-gray-600"
                 aria-label="Send message"
               >
                 {isLoading ? '...' : 'Send'}
@@ -249,7 +253,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
             <button
               onClick={() => handleQuickAction('continue')}
               disabled={isLoading || !selectedText}
-              className="px-3 py-2 text-xs bg-[#0073E6] text-white rounded hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-2 text-xs text-gray-500 bg-[#0073E6] text-white rounded hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-disabled={isLoading || !selectedText}
             >
               📝 Continue Text
@@ -257,7 +261,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
             <button
               onClick={() => handleQuickAction('improve')}
               disabled={isLoading || !selectedText}
-              className="px-3 py-2 text-xs bg-green-600 text-white rounded hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-2 text-xs text-gray-500 bg-green-600 text-white rounded hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-disabled={isLoading || !selectedText}
             >
               ✨ Improve Text
@@ -265,7 +269,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
             <button
               onClick={() => handleQuickAction('analyze-style')}
               disabled={isLoading || !selectedText}
-              className="px-3 py-2 text-xs bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-2 text-xs text-gray-500 bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-disabled={isLoading || !selectedText}
             >
               🎨 Analyze Style
@@ -273,7 +277,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
             <button
               onClick={() => handleQuickAction('plot-ideas')}
               disabled={isLoading}
-              className="px-3 py-2 text-xs bg-yellow-600 text-white rounded hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-2 text-xs text-gray-500 bg-yellow-600 text-white rounded hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-disabled={isLoading}
             >
               💡 Plot Ideas
@@ -281,7 +285,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
           </div>
 
           {!selectedText && (
-            <div className="text-xs text-gray-400 bg-gray-800 p-2 rounded select-none">
+            <div className="text-xs text-gray-500 text-gray-400 bg-gray-800 p-2 rounded select-none">
               💡 Select text in your document to enable text-specific actions
             </div>
           )}
@@ -289,17 +293,19 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
           {lastResult && onInsertText && (
             <div className="border border-gray-600 rounded p-3">
               <div className="flex justify-between items-start mb-2">
-                <span className="text-xs font-medium text-[#0073E6]">Claude's Suggestion:</span>
+                <span className="text-xs text-gray-500 font-medium text-[#0073E6]">
+                  Claude's Suggestion:
+                </span>
                 <button
                   ref={insertButtonRef}
                   onClick={handleInsert}
-                  className="px-2 py-1 text-xs bg-yellow-500 text-white rounded hover:bg-yellow-400 transition-colors focus:ring-2 focus:ring-yellow-300"
+                  className="px-2 py-1 text-xs text-gray-500 bg-yellow-500 text-white rounded hover:bg-yellow-400 transition-colors focus:ring-2 focus:ring-yellow-300"
                   aria-label="Insert Claude's suggestion into draft"
                 >
                   Insert
                 </button>
               </div>
-              <div className="text-xs text-gray-300 max-h-20 overflow-y-auto whitespace-pre-wrap">
+              <div className="text-xs text-gray-500 text-gray-300 max-h-20 overflow-y-auto whitespace-pre-wrap">
                 {lastResult.length > 200 ? lastResult.slice(0, 200) + '...' : lastResult}
               </div>
             </div>
@@ -316,7 +322,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
           <div>
             <label
               htmlFor="character-name-input"
-              className="block text-xs font-medium text-gray-300 mb-2 select-none"
+              className="block text-xs text-gray-500 font-medium text-gray-300 mb-2 select-none"
             >
               Character Analysis
             </label>
@@ -326,13 +332,13 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
                 value={characterName}
                 onChange={(e) => setCharacterName(e.target.value)}
                 placeholder="Character name..."
-                className="flex-1 px-2 py-1 text-xs rounded bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6]"
+                className="flex-1 px-2 py-1 text-xs text-gray-500 rounded bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6]"
                 aria-label="Character name for analysis"
               />
               <button
                 onClick={() => handleQuickAction('character-analysis')}
                 disabled={isLoading || !characterName.trim()}
-                className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-500 disabled:opacity-50 transition-colors"
+                className="px-3 py-1 text-xs text-gray-500 bg-blue-600 text-white rounded hover:bg-blue-500 disabled:opacity-50 transition-colors"
                 aria-disabled={isLoading || !characterName.trim()}
               >
                 Analyze
@@ -343,7 +349,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
           <div>
             <label
               htmlFor="brainstorm-topic-input"
-              className="block text-xs font-medium text-gray-300 mb-2 select-none"
+              className="block text-xs text-gray-500 font-medium text-gray-300 mb-2 select-none"
             >
               Brainstorm Ideas
             </label>
@@ -353,13 +359,13 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
                 value={brainstormTopic}
                 onChange={(e) => setBrainstormTopic(e.target.value)}
                 placeholder="Topic to explore..."
-                className="flex-1 px-2 py-1 text-xs rounded bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6]"
+                className="flex-1 px-2 py-1 text-xs text-gray-500 rounded bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6]"
                 aria-label="Topic to brainstorm ideas for"
               />
               <button
                 onClick={() => handleQuickAction('brainstorm')}
                 disabled={isLoading || !brainstormTopic.trim()}
-                className="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50 transition-colors"
+                className="px-3 py-1 text-xs text-gray-500 bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50 transition-colors"
                 aria-disabled={isLoading || !brainstormTopic.trim()}
               >
                 💭 Ideas
@@ -367,7 +373,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
             </div>
           </div>
 
-          <div className="text-xs text-gray-400 bg-gray-800 p-2 rounded select-none">
+          <div className="text-xs text-gray-500 text-gray-400 bg-gray-800 p-2 rounded select-none">
             🔍 Advanced analysis tools that understand your full project context
             <br />
             💡 Tip: Use Ctrl+← → to switch tabs, or Ctrl+1/2/3
@@ -387,7 +393,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-700">
         <div className="flex items-center space-x-3">
-          <h2 className="text-lg font-semibold text-[#0073E6]">Claude</h2>
+          <h2 className="text-lg font-medium font-semibold text-[#0073E6]">Claude</h2>
           {isLoading && (
             <div
               className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#0073E6]"
@@ -399,21 +405,21 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setIsMinimized(true)}
-            className="text-gray-400 hover:text-white text-sm transition-colors"
+            className="text-gray-400 hover:text-white text-sm text-gray-600 transition-colors"
             aria-label="Minimize assistant"
           >
             —
           </button>
           <button
             onClick={clearMessages}
-            className="text-gray-400 hover:text-white text-sm transition-colors"
+            className="text-gray-400 hover:text-white text-sm text-gray-600 transition-colors"
             aria-label="Clear chat messages"
           >
             🗑️
           </button>
           <button
             onClick={toggleVisibility}
-            className="text-red-400 hover:text-red-500 text-sm transition-colors"
+            className="text-red-400 hover:text-red-500 text-sm text-gray-600 transition-colors"
             aria-label="Close assistant"
           >
             ✕

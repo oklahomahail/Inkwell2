@@ -12,8 +12,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles =
       'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
     const sizeStyles = {
-      sm: 'px-3 py-1 text-sm',
-      md: 'px-4 py-2 text-sm',
+      sm: 'px-3 py-1 text-sm text-gray-600',
+      md: 'px-4 py-2 text-sm text-gray-600',
       lg: 'px-5 py-3 text-base',
     };
     const variantStyles = {
@@ -32,7 +32,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = 'Button';

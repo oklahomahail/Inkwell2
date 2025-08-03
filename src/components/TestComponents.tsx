@@ -40,8 +40,8 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm h-8',
-    md: 'px-4 py-2 text-sm h-10',
+    sm: 'px-3 py-1.5 text-sm text-gray-600 h-8',
+    md: 'px-4 py-2 text-sm text-gray-600 h-10',
     lg: 'px-6 py-3 text-base h-12',
   };
 
@@ -79,23 +79,23 @@ const Input: React.FC<InputProps> = ({
   return (
     <div className="space-y-1">
       {label && (
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm text-gray-600 font-medium text-gray-700">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <input
         className={cn(
-          'block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 shadow-sm transition-colors duration-200',
+          'block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 placeholder-gray-400 shadow-sm transition-colors duration-200',
           'focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500',
           error && 'border-red-300 focus:border-red-500 focus:ring-red-500',
           className,
         )}
         {...props}
       />
-      {hint && !error && <p className="text-xs text-gray-500">{hint}</p>}
+      {hint && !error && <p className="text-xs text-gray-500 text-gray-500">{hint}</p>}
       {error && (
-        <p className="text-xs text-red-600 flex items-center gap-1">
+        <p className="text-xs text-gray-500 text-red-600 flex items-center gap-1">
           <AlertCircle className="w-3 h-3" />
           {error}
         </p>
@@ -163,7 +163,7 @@ const Badge: React.FC<BadgeProps> = ({ children, variant = 'default', className 
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs text-gray-500 font-medium',
         variants[variant],
         className,
       )}
@@ -192,7 +192,7 @@ const Progress: React.FC<ProgressProps> = ({
   return (
     <div className={cn('space-y-1', className)}>
       {showLabel && (
-        <div className="flex justify-between text-sm text-gray-600">
+        <div className="flex justify-between text-sm text-gray-600 text-gray-600">
           <span>Progress</span>
           <span>{Math.round(percentage)}%</span>
         </div>
@@ -259,8 +259,12 @@ const Alert: React.FC<AlertProps> = ({ type = 'info', title, children, className
       <div className="flex">
         <IconComponent className={cn('w-5 h-5 mt-0.5 mr-3', config.iconColor)} />
         <div className="flex-1">
-          {title && <h3 className={cn('text-sm font-medium mb-1', config.titleColor)}>{title}</h3>}
-          <div className={cn('text-sm', config.textColor)}>{children}</div>
+          {title && (
+            <h3 className={cn('text-sm text-gray-600 font-medium mb-1', config.titleColor)}>
+              {title}
+            </h3>
+          )}
+          <div className={cn('text-sm text-gray-600', config.textColor)}>{children}</div>
         </div>
       </div>
     </div>
@@ -288,7 +292,9 @@ export const TestComponents: React.FC = () => {
         {/* Buttons Section */}
         <Card className="mb-8">
           <CardHeader>
-            <h2 className="text-xl font-semibold text-gray-900">Buttons</h2>
+            <h2 className="text-xl font-semibold leading-snug font-semibold text-gray-900">
+              Buttons
+            </h2>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -328,7 +334,9 @@ export const TestComponents: React.FC = () => {
         {/* Form Components */}
         <Card className="mb-8">
           <CardHeader>
-            <h2 className="text-xl font-semibold text-gray-900">Form Components</h2>
+            <h2 className="text-xl font-semibold leading-snug font-semibold text-gray-900">
+              Form Components
+            </h2>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -368,14 +376,14 @@ export const TestComponents: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 text-sm mb-4">
+              <p className="text-gray-600 text-sm text-gray-600 mb-4">
                 The opening chapter where our protagonist discovers the mysterious letter.
               </p>
               <Progress value={2500} max={3000} showLabel />
             </CardContent>
             <CardFooter>
               <div className="flex items-center justify-between w-full">
-                <span className="text-sm text-gray-500">2,500 words</span>
+                <span className="text-sm text-gray-600 text-gray-500">2,500 words</span>
                 <Button variant="ghost" size="sm">
                   Edit
                 </Button>
@@ -391,14 +399,14 @@ export const TestComponents: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 text-sm mb-4">
+              <p className="text-gray-600 text-sm text-gray-600 mb-4">
                 Character development and world building continue as tensions rise.
               </p>
               <Progress value={1200} max={3000} showLabel />
             </CardContent>
             <CardFooter>
               <div className="flex items-center justify-between w-full">
-                <span className="text-sm text-gray-500">1,200 words</span>
+                <span className="text-sm text-gray-600 text-gray-500">1,200 words</span>
                 <Button variant="ghost" size="sm">
                   Continue
                 </Button>
@@ -414,14 +422,14 @@ export const TestComponents: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 text-sm mb-4">
+              <p className="text-gray-600 text-sm text-gray-600 mb-4">
                 The plot thickens as new characters are introduced to the story.
               </p>
               <Progress value={0} max={3000} showLabel />
             </CardContent>
             <CardFooter>
               <div className="flex items-center justify-between w-full">
-                <span className="text-sm text-gray-500">0 words</span>
+                <span className="text-sm text-gray-600 text-gray-500">0 words</span>
                 <Button variant="ghost" size="sm">
                   Start
                 </Button>
@@ -450,7 +458,9 @@ export const TestComponents: React.FC = () => {
         {/* Integration Instructions */}
         <Card>
           <CardHeader>
-            <h2 className="text-xl font-semibold text-gray-900">Next Steps</h2>
+            <h2 className="text-xl font-semibold leading-snug font-semibold text-gray-900">
+              Next Steps
+            </h2>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
