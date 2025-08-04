@@ -1,6 +1,6 @@
 // src/components/Writing/ClaudeToolbar.tsx
 import React, { useState } from 'react';
-import { useClaude } from '../../context/AppContext'; // Use AppContext instead
+import { useClaude } from '@/context/ClaudeProvider';
 
 interface ClaudeToolbarProps {
   selectedText?: string;
@@ -8,7 +8,7 @@ interface ClaudeToolbarProps {
 }
 
 const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({ selectedText = '', onInsertText }) => {
-  const { suggestContinuation, improveText, generatePlotIdeas, sendMessage } = useClaude();
+  const { suggestContinuation, improveText, generatePlotIdeas } = useClaude();
 
   const [lastResult, setLastResult] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -104,7 +104,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({ selectedText = '', onInse
       {lastResult && (
         <div className="w-full mt-2 p-2 text-xs text-gray-500 bg-gray-200 dark:bg-gray-700 rounded">
           <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Claude's suggestion:
+            Claude&apos;s suggestion:
           </div>
           <div className="text-gray-600 dark:text-gray-400 max-h-20 overflow-y-auto">
             {lastResult}

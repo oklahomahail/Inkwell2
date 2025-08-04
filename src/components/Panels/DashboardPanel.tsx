@@ -1,17 +1,10 @@
-// src/components/Panels/DashboardPanel.tsx
+// src/components/Panels/DashboardPanel.tsx - Fixed ESLint issues
 import React, { useEffect, useState, useCallback } from 'react';
-
-// Contexts
-import { useAppContext, View } from '@/context/AppContext';
+import { useAppContext, View, Project } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
+import ProjectModal from '@/components/ProjectModal';
 
-// Backup services and types
-import {
-  backupManager,
-  triggerBackup,
-  setupAutoBackup,
-  stopAutoBackup,
-} from '@/services/backupSetup';
+import { backupManager, triggerBackup } from '@/services/backupSetup';
 import type { Backup } from '@/services/backupService';
 import { getBackups, getBackupStatus } from '@/services/backupService';
 
@@ -31,14 +24,9 @@ interface BackupStatus {
 }
 
 const DashboardPanel: React.FC = () => {
-  const { state, dispatch } = useAppContext();
+  const { projects, currentProject, addProject, updateProject, setCurrentProjectId, setView } =
+    useAppContext();
   const { showToast } = useToast();
-
-  // 🔍 DEBUG: Add these lines right here to diagnose the issue
-  console.log('DashboardPanel mounted');
-  console.log('AppContext state:', state);
-  console.log('Current view:', state?.view);
-  console.log('Current project:', state?.currentProject);
 
   const [stats, setStats] = useState<ProjectStats>({
     wordCount: 0,
@@ -48,15 +36,12 @@ const DashboardPanel: React.FC = () => {
   });
 
   const [backups, setBackups] = useState<Backup[]>([]);
-  const [backupStatus, setBackupStatus] = useState<BackupStatus>({
-    totalBackups: 0,
-    totalSize: '0 B',
-    lastBackup: null,
-    autoBackupEnabled: false,
-    storageWarning: false,
-  });
-
+  // Removed unused backupStatus variable
   const [isCreatingBackup, setIsCreatingBackup] = useState(false);
+
+  // Project modal state for create/edit
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   // Refresh backups data and stats
   const refreshBackups = useCallback(async () => {
@@ -65,7 +50,6 @@ const DashboardPanel: React.FC = () => {
       const status = await getBackupStatus();
 
       setBackups(backupList);
-      setBackupStatus(status);
       setStats((prev) => ({
         ...prev,
         backups: status.totalBackups,
@@ -77,12 +61,10 @@ const DashboardPanel: React.FC = () => {
     }
   }, []);
 
-  // Load initial data
   useEffect(() => {
     refreshBackups();
   }, [refreshBackups]);
 
-  // Create backup handler
   const handleCreateBackup = useCallback(async () => {
     if (isCreatingBackup) return;
 
@@ -99,7 +81,6 @@ const DashboardPanel: React.FC = () => {
     }
   }, [isCreatingBackup, showToast, refreshBackups]);
 
-  // Delete backup handler
   const handleDeleteBackup = useCallback(
     async (backupId: string) => {
       try {
@@ -118,7 +99,6 @@ const DashboardPanel: React.FC = () => {
     [showToast, refreshBackups],
   );
 
-  // Format file size
   const formatSize = (bytes?: number): string => {
     if (!bytes || bytes === 0) return '0 B';
     const k = 1024;
@@ -127,10 +107,59 @@ const DashboardPanel: React.FC = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  // Format date
   const formatDate = (timestamp: number | null): string => {
     if (!timestamp) return 'Never';
     return new Date(timestamp).toLocaleString();
+  };
+
+  // Modal open/close handlers
+  const openNewProjectModal = () => {
+    setEditingProject(null);
+    setIsModalOpen(true);
+  };
+  const openEditProjectModal = (project: Project) => {
+    setEditingProject(project);
+    setIsModalOpen(true);
+  };
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingProject(null);
+  };
+
+  // Create or update project handler
+  const handleCreateOrUpdateProject = (name: string, description: string) => {
+    if (editingProject) {
+      // Update existing
+      const updated = {
+        ...editingProject,
+        name,
+        description,
+        updatedAt: Date.now(),
+      };
+      updateProject(updated);
+      setCurrentProjectId(updated.id);
+      showToast(`Updated project: ${name}`, 'success');
+    } else {
+      // Create new
+      const newProject: Project = {
+        id: crypto.randomUUID(),
+        name,
+        description,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      addProject(newProject);
+      setCurrentProjectId(newProject.id);
+      showToast(`Created new project: ${name}`, 'success');
+    }
+    setView(View.Writing);
+    closeModal();
+  };
+
+  // Handle selecting a project from list
+  const handleSelectProject = (projectId: string) => {
+    setCurrentProjectId(projectId);
+    setView(View.Writing);
   };
 
   return (
@@ -138,13 +167,67 @@ const DashboardPanel: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Project: {state.currentProject}
-        </div>
+        <button
+          onClick={openNewProjectModal}
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+          type="button"
+        >
+          + New Project
+        </button>
       </div>
 
+      {/* Project List */}
+      <div className="mb-6">
+        {projects.length === 0 ? (
+          <p className="text-gray-600 dark:text-gray-400">No projects yet. Start a new one!</p>
+        ) : (
+          <ul className="space-y-2 max-w-md">
+            {projects.map((project) => (
+              <li
+                key={project.id}
+                className={`p-3 rounded border cursor-pointer select-none ${
+                  currentProject?.id === project.id
+                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900'
+                    : 'border-gray-300 dark:border-gray-700'
+                } flex justify-between items-center`}
+                onClick={() => handleSelectProject(project.id)}
+                onDoubleClick={() => openEditProjectModal(project)}
+              >
+                <div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{project.name}</div>
+                  {project.description && (
+                    <div className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-xs">
+                      {project.description}
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="text-indigo-600 hover:underline ml-4"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEditProjectModal(project);
+                  }}
+                >
+                  Edit
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* New/Edit Project Modal */}
+      <ProjectModal
+        isOpen={isModalOpen}
+        initialName={editingProject?.name}
+        initialDescription={editingProject?.description}
+        onClose={closeModal}
+        onCreate={handleCreateOrUpdateProject}
+      />
+
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Word Count</div>
           <div className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -171,20 +254,16 @@ const DashboardPanel: React.FC = () => {
       </div>
 
       {/* Backup Section */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Backup Management
-            </h2>
-            <button
-              onClick={handleCreateBackup}
-              disabled={isCreatingBackup}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isCreatingBackup ? 'Creating...' : 'Create Backup'}
-            </button>
-          </div>
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Backup Management</h2>
+          <button
+            onClick={handleCreateBackup}
+            disabled={isCreatingBackup}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isCreatingBackup ? 'Creating...' : 'Create Backup'}
+          </button>
         </div>
 
         <div className="p-4">
@@ -193,7 +272,7 @@ const DashboardPanel: React.FC = () => {
               No backups found. Create your first backup to get started.
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 max-w-md">
               {backups.slice(0, 5).map((backup) => (
                 <div
                   key={backup.id}
@@ -239,7 +318,7 @@ const DashboardPanel: React.FC = () => {
         <div className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <button
-              onClick={() => dispatch({ type: 'SET_VIEW', payload: View.Writing })}
+              onClick={() => setView(View.Writing)}
               className="p-3 text-left bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
             >
               <div className="font-medium text-gray-900 dark:text-white">Continue Writing</div>
@@ -249,7 +328,7 @@ const DashboardPanel: React.FC = () => {
             </button>
 
             <button
-              onClick={() => dispatch({ type: 'SET_VIEW', payload: View.Timeline })}
+              onClick={() => setView(View.Timeline)}
               className="p-3 text-left bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
             >
               <div className="font-medium text-gray-900 dark:text-white">View Timeline</div>
@@ -259,7 +338,7 @@ const DashboardPanel: React.FC = () => {
             </button>
 
             <button
-              onClick={() => dispatch({ type: 'SET_VIEW', payload: View.Analysis })}
+              onClick={() => setView(View.Analysis)}
               className="p-3 text-left bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
             >
               <div className="font-medium text-gray-900 dark:text-white">Analytics</div>

@@ -1,77 +1,7 @@
-// src/context/AppContext.tsx
-import React, {
-  createContext,
-  useReducer,
-  useContext,
-  ReactNode,
-  useState,
-  useCallback,
-} from 'react';
-
-// Define interfaces locally to avoid import issues
-export interface ClaudeMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
-
-export interface ClaudeError {
-  message: string;
-  type: 'api_error' | 'network_error' | 'rate_limit' | 'auth_error' | 'invalid_request';
-  retryable: boolean;
-}
-
-export enum View {
-  Dashboard = 'dashboard',
-  Writing = 'writing',
-  Timeline = 'timeline',
-  Analysis = 'analysis',
-  Settings = 'settings',
-}
-
-interface AppState {
-  view: View;
-  theme: 'light' | 'dark';
-  notifications: string[];
-  campaignData: unknown;
-  currentProject: string;
-}
-
-type AppAction =
-  | { type: 'SET_VIEW'; payload: View }
-  | { type: 'SET_THEME'; payload: 'light' | 'dark' }
-  | { type: 'SET_CURRENT_PROJECT'; payload: string }
-  | { type: 'ADD_NOTIFICATION'; payload: string }
-  | { type: 'REMOVE_NOTIFICATION'; payload: string }
-  | { type: 'SET_CAMPAIGN_DATA'; payload: unknown };
-
-const initialState: AppState = {
-  view: View.Dashboard,
-  theme: 'dark',
-  notifications: [],
-  campaignData: null,
-  currentProject: 'My First Project',
-};
-
-function appReducer(state: AppState, action: AppAction): AppState {
-  switch (action.type) {
-    case 'SET_VIEW':
-      return { ...state, view: action.payload };
-    case 'SET_THEME':
-      return { ...state, theme: action.payload };
-    case 'SET_CURRENT_PROJECT':
-      return { ...state, currentProject: action.payload };
-    case 'ADD_NOTIFICATION':
-      return { ...state, notifications: [...state.notifications, action.payload] };
-    case 'REMOVE_NOTIFICATION':
-      return { ...state, notifications: state.notifications.filter((n) => n !== action.payload) };
-    case 'SET_CAMPAIGN_DATA':
-      return { ...state, campaignData: action.payload };
-    default:
-      return state;
-  }
-}
+// src/context/ClaudeProvider.tsx - Fixed
+import React, { createContext, useState, useCallback, useContext, ReactNode } from 'react';
+import claudeService from '@/services/claudeService';
+import type { ClaudeMessage } from '@/services/claudeService';
 
 interface ClaudeState {
   messages: ClaudeMessage[];
@@ -81,132 +11,31 @@ interface ClaudeState {
   isConfigured: boolean;
 }
 
-interface ClaudeServiceType {
-  isConfigured: () => boolean;
-  getMessages: () => ClaudeMessage[];
-  generateMessageId: () => string;
-  initialize: (apiKey: string) => void;
+interface ClaudeContextValue {
+  claude: ClaudeState;
+  sendMessage: (content: string, selectedText?: string) => Promise<string>;
   clearMessages: () => void;
-  saveMessage: (message: ClaudeMessage) => void;
-  sendMessage: (content: string, options?: Record<string, unknown>) => Promise<{ content: string }>;
-  continueText: (text: string, context?: string) => Promise<string>;
-  improveText: (text: string) => Promise<string>;
-  analyzeWritingStyle: (text: string) => Promise<string>;
+  toggleVisibility: () => void;
+  configureApiKey: (apiKey: string) => void;
+  suggestContinuation: (selectedText: string) => Promise<string>;
+  improveText: (selectedText: string) => Promise<string>;
+  analyzeWritingStyle: (selectedText: string) => Promise<string>;
   generatePlotIdeas: (context?: string) => Promise<string>;
-  analyzeCharacter: (name: string, context?: string) => Promise<string>;
+  analyzeCharacter: (characterName: string) => Promise<string>;
   brainstormIdeas: (topic: string) => Promise<string>;
 }
 
-interface AppContextValue {
-  state: AppState;
-  dispatch: React.Dispatch<AppAction>;
+const ClaudeContext = createContext<ClaudeContextValue | null>(null);
 
-  activeView: View;
-  theme: 'light' | 'dark';
-  currentProject: string;
-  setCurrentProject: (project: string) => void;
-  toggleTheme: () => void;
+export const ClaudeProvider = ({ children }: { children: ReactNode }) => {
+  const [claudeState, setClaudeState] = useState<ClaudeState>(() => ({
+    messages: claudeService.getMessages(),
+    isLoading: false,
+    error: null,
+    isVisible: false,
+    isConfigured: claudeService.isConfigured(),
+  }));
 
-  claude: ClaudeState;
-  claudeActions: {
-    sendMessage: (content: string, selectedText?: string) => Promise<string>;
-    clearMessages: () => void;
-    toggleVisibility: () => void;
-    configureApiKey: (apiKey: string) => void;
-    suggestContinuation: (selectedText: string) => Promise<string>;
-    improveText: (selectedText: string) => Promise<string>;
-    analyzeWritingStyle: (selectedText: string) => Promise<string>;
-    generatePlotIdeas: (context?: string) => Promise<string>;
-    analyzeCharacter: (characterName: string) => Promise<string>;
-    brainstormIdeas: (topic: string) => Promise<string>;
-  };
-}
-
-// Mock Claude service fallback
-const createMockClaudeService = (): ClaudeServiceType => ({
-  isConfigured: () => false,
-  getMessages: () => [],
-  generateMessageId: () => `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-  initialize: (apiKey: string) => {
-    console.warn('Claude service not available - API key stored locally');
-    localStorage.setItem('claude_api_key_pending', apiKey);
-  },
-  clearMessages: () => {
-    localStorage.removeItem('claude_messages');
-  },
-  saveMessage: (message: ClaudeMessage) => {
-    const messages = JSON.parse(localStorage.getItem('claude_messages') || '[]');
-    messages.push(message);
-    localStorage.setItem('claude_messages', JSON.stringify(messages));
-  },
-  sendMessage: async () => {
-    throw new Error('Claude service not available.');
-  },
-  continueText: async () => {
-    throw new Error('Claude service not available.');
-  },
-  improveText: async () => {
-    throw new Error('Claude service not available.');
-  },
-  analyzeWritingStyle: async () => {
-    throw new Error('Claude service not available.');
-  },
-  generatePlotIdeas: async () => {
-    throw new Error('Claude service not available.');
-  },
-  analyzeCharacter: async () => {
-    throw new Error('Claude service not available.');
-  },
-  brainstormIdeas: async () => {
-    throw new Error('Claude service not available.');
-  },
-});
-
-// Import real Claude service or fallback to mock
-let claudeService: ClaudeServiceType;
-try {
-  // Use dynamic import instead of require
-  const claudeServiceModule = await import('@/services/claudeService');
-  claudeService = claudeServiceModule.claudeService;
-} catch (error) {
-  console.warn('Claude service not found, using mock service:', error);
-  claudeService = createMockClaudeService();
-}
-
-const AppContext = createContext<AppContextValue | null>(null);
-
-export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(appReducer, initialState);
-
-  const [claudeState, setClaudeState] = useState<ClaudeState>(() => {
-    try {
-      return {
-        messages: claudeService.getMessages(),
-        isLoading: false,
-        error: null,
-        isVisible: false,
-        isConfigured: claudeService.isConfigured(),
-      };
-    } catch {
-      return {
-        messages: [],
-        isLoading: false,
-        error: null,
-        isVisible: false,
-        isConfigured: false,
-      };
-    }
-  });
-
-  const setCurrentProject = useCallback((project: string) => {
-    dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
-  }, []);
-
-  const toggleTheme = useCallback(() => {
-    dispatch({ type: 'SET_THEME', payload: state.theme === 'light' ? 'dark' : 'light' });
-  }, [state.theme]);
-
-  // UPDATED sendMessage returns Promise<string>
   const sendMessage = useCallback(
     async (content: string, selectedText?: string): Promise<string> => {
       if (!claudeService.isConfigured()) {
@@ -216,7 +45,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }));
         return '';
       }
+
       setClaudeState((prev) => ({ ...prev, isLoading: true, error: null }));
+
       try {
         const userMessage: ClaudeMessage = {
           id: claudeService.generateMessageId(),
@@ -224,36 +55,44 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           content,
           timestamp: new Date(),
         };
-        const projectContext = `Current project: ${state.currentProject}`;
+
+        // Get fresh messages on each call
+        const freshMessages = claudeService.getMessages();
+
         const response = await claudeService.sendMessage(content, {
           selectedText,
-          projectContext,
-          conversationHistory: claudeState.messages,
+          conversationHistory: freshMessages,
         });
+
         const assistantMessage: ClaudeMessage = {
           id: claudeService.generateMessageId(),
           role: 'assistant',
           content: response.content,
           timestamp: new Date(),
         };
+
         claudeService.saveMessage(userMessage);
         claudeService.saveMessage(assistantMessage);
+
         setClaudeState((prev) => ({
           ...prev,
           messages: [...prev.messages, userMessage, assistantMessage],
           isLoading: false,
         }));
+
         return response.content;
       } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to send message to Claude';
         setClaudeState((prev) => ({
           ...prev,
           isLoading: false,
-          error: error instanceof Error ? error.message : 'Failed to send message to Claude',
+          error: errorMessage,
         }));
         return '';
       }
     },
-    [state.currentProject, claudeState.messages],
+    [],
   );
 
   const clearMessages = useCallback(() => {
@@ -278,84 +117,103 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const suggestContinuation = useCallback(
-    async (selectedText: string): Promise<string> => {
-      const projectContext = `Current project: ${state.currentProject}`;
-      return claudeService.continueText(selectedText, projectContext);
-    },
-    [state.currentProject],
-  );
+  const suggestContinuation = useCallback(async (selectedText: string): Promise<string> => {
+    try {
+      const response = await claudeService.sendMessage(
+        `Please continue this text naturally, maintaining the same tone and style:\n\n"${selectedText}"`,
+      );
+      return response.content;
+    } catch (error) {
+      console.error('Failed to suggest continuation:', error);
+      throw error;
+    }
+  }, []);
 
-  const improveText = useCallback(
-    async (selectedText: string): Promise<string> => claudeService.improveText(selectedText),
-    [],
-  );
+  const improveText = useCallback(async (selectedText: string): Promise<string> => {
+    try {
+      const response = await claudeService.sendMessage(
+        `Please improve this text for clarity, flow, and engagement while maintaining the original meaning:\n\n"${selectedText}"`,
+      );
+      return response.content;
+    } catch (error) {
+      console.error('Failed to improve text:', error);
+      throw error;
+    }
+  }, []);
 
-  const analyzeWritingStyle = useCallback(
-    async (selectedText: string): Promise<string> =>
-      claudeService.analyzeWritingStyle(selectedText),
-    [],
-  );
+  const analyzeWritingStyle = useCallback(async (selectedText: string): Promise<string> => {
+    try {
+      const response = await claudeService.sendMessage(
+        `Please analyze the writing style of this text, including tone, voice, pacing, and literary techniques used:\n\n"${selectedText}"`,
+      );
+      return response.content;
+    } catch (error) {
+      console.error('Failed to analyze writing style:', error);
+      throw error;
+    }
+  }, []);
 
-  const generatePlotIdeas = useCallback(
-    async (context?: string): Promise<string> => claudeService.generatePlotIdeas(context),
-    [],
-  );
+  const generatePlotIdeas = useCallback(async (context?: string): Promise<string> => {
+    try {
+      const prompt = context
+        ? `Based on this context: "${context}", generate 5 creative plot ideas or story developments.`
+        : 'Generate 5 creative plot ideas for a story. Make them diverse in genre and tone.';
 
-  const analyzeCharacter = useCallback(
-    async (characterName: string): Promise<string> => {
-      const projectContext = `Current project: ${state.currentProject}`;
-      return claudeService.analyzeCharacter(characterName, projectContext);
-    },
-    [state.currentProject],
-  );
+      const response = await claudeService.sendMessage(prompt);
+      return response.content;
+    } catch (error) {
+      console.error('Failed to generate plot ideas:', error);
+      throw error;
+    }
+  }, []);
 
-  const brainstormIdeas = useCallback(
-    async (topic: string): Promise<string> => claudeService.brainstormIdeas(topic),
-    [],
-  );
+  const analyzeCharacter = useCallback(async (characterName: string): Promise<string> => {
+    try {
+      const response = await claudeService.sendMessage(
+        `Provide a character analysis framework for "${characterName}". Suggest personality traits, backstory elements, and potential character arcs.`,
+      );
+      return response.content;
+    } catch (error) {
+      console.error('Failed to analyze character:', error);
+      throw error;
+    }
+  }, []);
 
-  const contextValue: AppContextValue = {
-    state,
-    dispatch,
-    activeView: state.view,
-    theme: state.theme,
-    currentProject: state.currentProject,
-    setCurrentProject,
-    toggleTheme,
+  const brainstormIdeas = useCallback(async (topic: string): Promise<string> => {
+    try {
+      const response = await claudeService.sendMessage(
+        `Let's brainstorm creative ideas around the topic: "${topic}". Provide various angles, themes, and approaches to explore.`,
+      );
+      return response.content;
+    } catch (error) {
+      console.error('Failed to brainstorm ideas:', error);
+      throw error;
+    }
+  }, []);
+
+  const contextValue: ClaudeContextValue = {
     claude: claudeState,
-    claudeActions: {
-      sendMessage,
-      clearMessages,
-      toggleVisibility,
-      configureApiKey,
-      suggestContinuation,
-      improveText,
-      analyzeWritingStyle,
-      generatePlotIdeas,
-      analyzeCharacter,
-      brainstormIdeas,
-    },
+    sendMessage,
+    clearMessages,
+    toggleVisibility,
+    configureApiKey,
+    suggestContinuation,
+    improveText,
+    analyzeWritingStyle,
+    generatePlotIdeas,
+    analyzeCharacter,
+    brainstormIdeas,
   };
 
-  return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
+  return <ClaudeContext.Provider value={contextValue}>{children}</ClaudeContext.Provider>;
 };
 
-export function useAppContext() {
-  const context = useContext(AppContext);
-  if (!context) throw new Error('useAppContext must be used within AppProvider');
+ClaudeProvider.displayName = 'ClaudeProvider';
+
+export function useClaude() {
+  const context = useContext(ClaudeContext);
+  if (!context) throw new Error('useClaude must be used within ClaudeProvider');
   return context;
 }
 
-// Legacy hook for convenience
-export function useClaude() {
-  const { claude, claudeActions } = useAppContext();
-  return {
-    messages: claude.messages,
-    isLoading: claude.isLoading,
-    error: claude.error,
-    isVisible: claude.isVisible,
-    isConfigured: claude.isConfigured,
-    ...claudeActions,
-  };
-}
+export { ClaudeContext };

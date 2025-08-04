@@ -1,6 +1,8 @@
+// src/components/Panels/WritingPanel.tsx - Enhanced with Claude Integration
 import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
 import { ExportFormat } from '../../types/writing';
 import { useToast } from '@/context/ToastContext';
+import { useAppContext } from '@/context/AppContext';
 import { logActivity } from '@/utils/activityLogger';
 
 const DEFAULT_TITLE = 'Untitled Chapter';
@@ -42,6 +44,8 @@ interface WritingToolbarProps {
   exportFormat: ExportFormat;
   setExportFormat: (format: ExportFormat) => void;
   onClaudeAssist: () => void;
+  lastSaved?: Date | null;
+  isSaving?: boolean;
 }
 
 const WritingToolbar: React.FC<WritingToolbarProps> = ({
@@ -52,42 +56,62 @@ const WritingToolbar: React.FC<WritingToolbarProps> = ({
   exportFormat,
   setExportFormat,
   onClaudeAssist,
+  lastSaved,
+  isSaving = false,
 }) => {
   return (
-    <div className="flex items-center gap-3 mb-3">
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => onTitleChange(e.target.value)}
-        className="px-3 py-1 border rounded text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-200"
-      />
-      <button
-        onClick={onManualSave}
-        className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-      >
-        Save
-      </button>
-      <select
-        value={exportFormat}
-        onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
-        className="px-2 py-1 border rounded text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-200"
-      >
-        <option value="markdown">Markdown</option>
-        <option value="txt">Text</option>
-        <option value="docx">DOCX</option>
-      </select>
-      <button
-        onClick={onExport}
-        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        Export
-      </button>
-      <button
-        onClick={onClaudeAssist}
-        className="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
-      >
-        Claude Assist
-      </button>
+    <div className="flex flex-col gap-3 p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center gap-3">
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => onTitleChange(e.target.value)}
+          placeholder="Document title..."
+          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm
+            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <button
+          onClick={onManualSave}
+          disabled={isSaving}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+        >
+          {isSaving ? 'Saving...' : 'Save'}
+        </button>
+        <button
+          onClick={onClaudeAssist}
+          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+        >
+          Claude Assist
+        </button>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <select
+            value={exportFormat}
+            onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm
+              bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          >
+            <option value="markdown">Markdown (.md)</option>
+            <option value="txt">Plain Text (.txt)</option>
+            <option value="docx">Word Document (.docx)</option>
+          </select>
+          <button
+            onClick={onExport}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Export
+          </button>
+        </div>
+
+        {lastSaved && (
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            Last saved: {lastSaved.toLocaleTimeString()}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -107,7 +131,10 @@ const WritingEditor = forwardRef<HTMLTextAreaElement, WritingEditorProps>(
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onSelect={onTextSelect}
-        className="w-full h-full p-3 border rounded resize-none dark:bg-gray-800 dark:text-gray-200"
+        placeholder="Start writing your story..."
+        className="w-full h-full p-4 border-0 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+          focus:outline-none transition-colors duration-200"
+        style={{ minHeight: '500px' }}
       />
     );
   },
@@ -136,10 +163,9 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     wordsAtStart: draftText.trim().split(/\s+/).length,
     lastActivityTime: new Date(),
   });
-  const [saveQueue, setSaveQueue] = useState<SaveQueueItem[]>([]);
-  const [claudeResponse, setClaudeResponse] = useState<string>('');
 
   const { showToast } = useToast();
+  const { claude, currentProject } = useAppContext();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const initialLoadRef = useRef(false);
 
@@ -147,28 +173,30 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     return content.trim() ? content.trim().split(/\s+/).length : 0;
   }, [content]);
 
+  const readingTime = useMemo(() => {
+    const wordsPerMinute = 200;
+    return Math.ceil(wordCount / wordsPerMinute);
+  }, [wordCount]);
+
   // Initialize draft on mount
   useEffect(() => {
     if (!initialLoadRef.current) {
       setContent(draftText);
+      if (currentProject?.name) {
+        setTitle(currentProject.name);
+      }
       initialLoadRef.current = true;
     }
-  }, [draftText]);
+  }, [draftText, currentProject]);
 
   // Track edits for autosave
   useEffect(() => {
     setAutoSaveState((prev) => ({ ...prev, isDirty: true }));
     setSession((prev) => ({ ...prev, lastActivityTime: new Date() }));
-  }, [content]);
+    onChangeText(content);
+  }, [content, onChangeText]);
 
   const handleAutoSave = useCallback(() => {
-    const newItem: SaveQueueItem = {
-      content,
-      title,
-      timestamp: Date.now(),
-      type: 'auto',
-    };
-    setSaveQueue((prev) => [...prev, newItem]);
     setAutoSaveState((prev) => ({
       isSaving: false,
       isDirty: false,
@@ -177,69 +205,92 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     }));
     logActivity('Auto-saved draft', 'writing');
     showToast('Draft auto-saved', 'info');
-  }, [content, title, showToast]);
+  }, [showToast]);
 
-  // Auto-save interval - Fixed dependency array
+  // Auto-save interval
   useEffect(() => {
     const interval = setInterval(() => {
-      if (autoSaveState.isDirty) {
+      if (autoSaveState.isDirty && content.trim()) {
         handleAutoSave();
       }
-    }, 10000);
+    }, 30000); // Auto-save every 30 seconds
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, [autoSaveState.isDirty, handleAutoSave]); // Include handleAutoSave in dependencies
+    return () => clearInterval(interval);
+  }, [autoSaveState.isDirty, content, handleAutoSave]);
 
   const handleManualSave = useCallback(() => {
-    const newItem: SaveQueueItem = {
-      content,
-      title,
-      timestamp: Date.now(),
-      type: 'manual',
-    };
-    setSaveQueue((prev) => [...prev, newItem]);
     setAutoSaveState((prev) => ({
       isSaving: false,
       isDirty: false,
       lastSaved: new Date(),
       saveCount: prev.saveCount + 1,
     }));
+
+    // Save session data for analytics
+    const sessionData = {
+      date: new Date().toLocaleDateString(),
+      wordCount: wordCount,
+      duration: Date.now() - session.startTime.getTime(),
+    };
+
+    const existingSessions = JSON.parse(
+      localStorage.getItem(`sessions-${currentProject?.id}`) || '[]',
+    );
+    existingSessions.push(sessionData);
+    localStorage.setItem(`sessions-${currentProject?.id}`, JSON.stringify(existingSessions));
+
     logActivity('Manual save', 'writing');
-    showToast('Draft saved!', 'success');
-  }, [content, title, showToast]);
+    showToast('Draft saved successfully!', 'success');
+  }, [wordCount, session.startTime, currentProject?.id, showToast]);
 
   const handleClaudeAssist = useCallback(() => {
-    const mockReply =
-      selectedText.trim() === ''
-        ? 'Claude suggests tightening this section for clarity and flow.'
-        : `Claude suggestion for "${selectedText}": simplify and make more engaging.`;
-    setClaudeResponse(mockReply);
-    logActivity('Claude generated suggestion', 'ai');
-    showToast('Claude provided a suggestion', 'info');
-  }, [selectedText, showToast]);
+    claude.toggleVisibility();
+    showToast('Claude Assistant opened', 'info');
+  }, [claude, showToast]);
 
   const handleExport = useCallback(() => {
-    let blob: Blob;
-    if (exportFormat === 'markdown' || exportFormat === 'txt') {
-      blob = new Blob([content], { type: 'text/plain' });
-    } else {
-      blob = new Blob([content], {
-        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      });
+    try {
+      let blob: Blob;
+      let filename: string;
+
+      switch (exportFormat) {
+        case 'markdown':
+          blob = new Blob([`# ${title}\n\n${content}`], { type: 'text/markdown' });
+          filename = `${title}.md`;
+          break;
+        case 'txt':
+          blob = new Blob([content], { type: 'text/plain' });
+          filename = `${title}.txt`;
+          break;
+        case 'docx':
+          // For now, export as plain text - you could integrate a library like docx for real DOCX
+          blob = new Blob([content], { type: 'text/plain' });
+          filename = `${title}.docx`;
+          break;
+        default:
+          blob = new Blob([content], { type: 'text/plain' });
+          filename = `${title}.txt`;
+      }
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast(`Exported as ${exportFormat.toUpperCase()}`, 'success');
+      logActivity(`Exported document as ${exportFormat}`, 'writing');
+    } catch (error) {
+      showToast('Export failed. Please try again.', 'error');
+      console.error('Export error:', error);
     }
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${title}.${exportFormat === 'markdown' ? 'md' : exportFormat === 'txt' ? 'txt' : 'docx'}`;
-    link.click();
-    URL.revokeObjectURL(url);
-    showToast(`Exported as ${exportFormat}`, 'success');
   }, [content, exportFormat, title, showToast]);
 
   return (
-    <div className="flex flex-col h-full p-4 bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
       <WritingToolbar
         title={title}
         onTitleChange={setTitle}
@@ -248,31 +299,33 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
         exportFormat={exportFormat}
         setExportFormat={setExportFormat}
         onClaudeAssist={handleClaudeAssist}
+        lastSaved={autoSaveState.lastSaved}
+        isSaving={autoSaveState.isSaving}
       />
-      <div className="flex-1">
+
+      <div className="flex-1 overflow-hidden">
         <WritingEditor
           ref={textareaRef}
           value={content}
-          onChange={(val) => {
-            setContent(val);
-            onChangeText(val);
-          }}
+          onChange={setContent}
           onTextSelect={onTextSelect}
         />
       </div>
-      <div className="flex justify-between items-center text-sm text-gray-600 mt-2 text-gray-600 dark:text-gray-400">
-        <div>Words: {wordCount}</div>
-        <div>
-          Last saved:{' '}
-          {autoSaveState.lastSaved ? autoSaveState.lastSaved.toLocaleTimeString() : 'Not yet'}
+
+      {/* Status Bar */}
+      <div className="flex justify-between items-center px-4 py-2 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex items-center space-x-4">
+          <span>Words: {wordCount.toLocaleString()}</span>
+          <span>Reading time: ~{readingTime} min</span>
+          {selectedText && <span>Selected: {selectedText.length} chars</span>}
         </div>
-        <div>Session start: {session.startTime.toLocaleTimeString()}</div>
+        <div className="flex items-center space-x-4">
+          <span>Session: {session.startTime.toLocaleTimeString()}</span>
+          {autoSaveState.isDirty && (
+            <span className="text-yellow-600 dark:text-yellow-400">Unsaved changes</span>
+          )}
+        </div>
       </div>
-      {claudeResponse && (
-        <div className="mt-3 p-2 border rounded bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-          {claudeResponse}
-        </div>
-      )}
     </div>
   );
 };

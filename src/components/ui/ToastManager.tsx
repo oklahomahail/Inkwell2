@@ -1,10 +1,12 @@
+/* eslint-disable react/prop-types */
+// src/components/ui/ToastManager.tsx
 import React, { memo } from 'react';
 import { useToast } from '@/context/ToastContext';
 
 interface ToastItemProps {
   id: string;
   message: string;
-  type: 'info' | 'success' | 'error';
+  type: 'info' | 'success' | 'error' | 'warning';
   onDismiss: () => void;
 }
 
@@ -18,6 +20,8 @@ const ToastItem = memo<ToastItemProps>(({ message, type, onDismiss }) => {
         return `${base} bg-green-600 hover:bg-green-700`;
       case 'error':
         return `${base} bg-red-600 hover:bg-red-700`;
+      case 'warning':
+        return `${base} bg-yellow-600 hover:bg-yellow-700`;
       default:
         return `${base} bg-blue-600 hover:bg-blue-700`;
     }
@@ -27,13 +31,25 @@ const ToastItem = memo<ToastItemProps>(({ message, type, onDismiss }) => {
     switch (type) {
       case 'success':
         return (
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         );
       case 'error':
         return (
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -42,9 +58,32 @@ const ToastItem = memo<ToastItemProps>(({ message, type, onDismiss }) => {
             />
           </svg>
         );
+      case 'warning':
+        return (
+          <svg
+            className="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        );
       default:
         return (
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -99,7 +138,7 @@ const ToastManager: React.FC = () => {
             key={id}
             id={id}
             message={toast.message}
-            type={(toast.type as 'info' | 'success' | 'error') ?? 'info'}
+            type={(toast.type as 'info' | 'success' | 'error' | 'warning') ?? 'info'}
             onDismiss={() => removeToast(id)}
           />
         );

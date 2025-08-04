@@ -1,11 +1,14 @@
 import React from 'react';
 import Sidebar from '@/components/Sidebar';
+import { useAppContext, View } from '@/context/AppContext';
 
 interface PlatformLayoutProps {
   children: React.ReactNode;
 }
 
 const PlatformLayout: React.FC<PlatformLayoutProps> = ({ children }) => {
+  const { setView } = useAppContext();
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors">
       <header className="flex items-center justify-between py-6 px-6 sm:px-8 border-b border-gray-200 dark:border-gray-700">
@@ -18,18 +21,26 @@ const PlatformLayout: React.FC<PlatformLayoutProps> = ({ children }) => {
           <span className="text-3xl font-bold tracking-tight">Inkwell</span>
         </div>
         <nav className="space-x-6">
-          <a href="#" className="text-sm font-medium hover:underline">
+          <button
+            type="button"
+            onClick={() => setView(View.Dashboard)}
+            className="text-sm font-medium hover:underline"
+          >
             Dashboard
-          </a>
-          <a href="#" className="text-sm font-medium hover:underline">
+          </button>
+          <button
+            type="button"
+            onClick={() => setView(View.Settings)}
+            className="text-sm font-medium hover:underline"
+          >
             Settings
-          </a>
+          </button>
         </nav>
       </header>
 
       {/* Main content area with sidebar */}
       <div className="flex flex-1">
-        {/* Add the Sidebar here */}
+        {/* Sidebar */}
         <Sidebar />
 
         {/* Main content */}

@@ -8,7 +8,7 @@ module.exports = {
         // Custom color palette
         primary: {
           DEFAULT: '#4f46e5', // Indigo-600
-          dark: '#4338ca',    // Indigo-700
+          dark: '#4338ca', // Indigo-700
         },
         gray: {
           50: '#f9fafb',
@@ -30,8 +30,8 @@ module.exports = {
     },
   },
   plugins: [
-    require('@tailwindcss/forms'),        // For consistent form elements
-    require('@tailwindcss/typography'),   // For prose/content styling
+    require('@tailwindcss/forms'), // For consistent form elements
+    require('@tailwindcss/typography'), // For prose/content styling
     require('@tailwindcss/aspect-ratio'), // For responsive media
   ],
 };

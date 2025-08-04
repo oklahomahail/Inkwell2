@@ -66,7 +66,7 @@ const QuickActionsPanel: React.FC<{
         <div className="border border-gray-600 rounded p-3">
           <div className="flex justify-between items-start mb-2">
             <span className="text-xs text-gray-500 font-medium text-[#0073E6]">
-              Claude's Suggestion:
+              Claude&apos;s Suggestion:
             </span>
             <button
               ref={insertButtonRef}

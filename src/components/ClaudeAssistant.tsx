@@ -1,9 +1,11 @@
+// src/components/ClaudeAssistant.tsx
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { useClaude } from '@/context/AppContext';
+import { useClaude } from '@/context/ClaudeProvider';
 import { useToast } from '@/context/ToastContext';
-import AccessibleTabs from '../AccessibleTabs';
-import MessageBubble from '../MessageBubble';
-import { MessageCircle, Zap, Search, BoltIcon, CatIcon, SearchIcon } from 'lucide-react';
+import AccessibleTabs from './AccessibleTabs';
+import MessageBubble from './MessageBubble';
+import { StatusBadge, LoadingIndicator, TypingIndicator } from './Claude';
+import { BoltIcon, MessageCircleIcon, SearchIcon } from 'lucide-react';
 
 interface ClaudeAssistantProps {
   selectedText?: string;
@@ -11,13 +13,18 @@ interface ClaudeAssistantProps {
 }
 
 const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', onInsertText }) => {
-  const { messages, sendMessage, isLoading, error, toggleVisibility, clearMessages } = useClaude();
+  const {
+    claude: { messages, isLoading, error, isConfigured },
+    sendMessage,
+    toggleVisibility,
+    clearMessages,
+  } = useClaude();
 
   const { showToast } = useToast();
 
   const [input, setInput] = useState('');
   const [activeMode, setActiveMode] = useState<'chat' | 'quick-actions' | 'analysis'>('chat');
-  const [lastResult, setLastResult] = useState<string>('');
+  const [lastResult, setLastResult] = useState('');
   const [characterName, setCharacterName] = useState('');
   const [brainstormTopic, setBrainstormTopic] = useState('');
   const [isMinimized, setIsMinimized] = useState(false);
@@ -26,19 +33,16 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
   const inputRef = useRef<HTMLInputElement>(null);
   const insertButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Auto-focus chat input when active
   useEffect(() => {
     if (!isMinimized && activeMode === 'chat') {
       inputRef.current?.focus();
     }
   }, [isMinimized, activeMode]);
 
-  // Focus insert button when lastResult changes
   useEffect(() => {
     if (lastResult && onInsertText) {
       insertButtonRef.current?.focus();
@@ -47,88 +51,87 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || isLoading) return;
+
+    if (!isConfigured) {
+      showToast('Please configure your Claude API key in Settings first', 'error');
+      return;
+    }
+
     try {
       await sendMessage(input);
       setInput('');
-    } catch {
-      showToast('Failed to send message', 'error');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to send message';
+      showToast(errorMessage, 'error');
     }
-  }, [input, isLoading, sendMessage, showToast]);
+  }, [input, isLoading, isConfigured, sendMessage, showToast]);
 
   const handleQuickAction = useCallback(
     async (action: string) => {
       if (isLoading) return;
 
-      try {
-        let result = '';
-        let description = '';
+      if (!isConfigured) {
+        showToast('Please configure your Claude API key in Settings first', 'error');
+        return;
+      }
 
+      try {
+        let description = '';
         switch (action) {
           case 'continue':
-            if (!selectedText) {
-              showToast('Please select some text to continue', 'error');
-              return;
-            }
-            description = `Continue text: "${selectedText.slice(0, 40)}..."`;
-            result = await sendMessage(description);
+            if (!selectedText) return showToast('Please select text to continue', 'error');
+            description = `Continue this text naturally: "${selectedText.slice(
+              0,
+              100,
+            )}${selectedText.length > 100 ? '...' : ''}"`;
             break;
-
           case 'improve':
-            if (!selectedText) {
-              showToast('Please select some text to improve', 'error');
-              return;
-            }
-            description = `Improve text: "${selectedText.slice(0, 40)}..."`;
-            result = await sendMessage(description);
+            if (!selectedText) return showToast('Please select text to improve', 'error');
+            description = `Improve this text for clarity and engagement: "${selectedText.slice(
+              0,
+              100,
+            )}${selectedText.length > 100 ? '...' : ''}"`;
             break;
-
           case 'analyze-style':
-            if (!selectedText) {
-              showToast('Please select some text to analyze', 'error');
-              return;
-            }
-            description = `Analyze style: "${selectedText.slice(0, 40)}..."`;
-            result = await sendMessage(description);
+            if (!selectedText) return showToast('Please select text to analyze', 'error');
+            description = `Analyze the writing style of this text: "${selectedText.slice(
+              0,
+              100,
+            )}${selectedText.length > 100 ? '...' : ''}"`;
             break;
-
           case 'plot-ideas':
             description = selectedText
-              ? `Plot ideas for: "${selectedText.slice(0, 40)}..."`
-              : 'Generate plot ideas';
-            result = await sendMessage(description);
+              ? `Generate plot ideas based on this text: "${selectedText.slice(
+                  0,
+                  100,
+                )}${selectedText.length > 100 ? '...' : ''}"`
+              : 'Generate creative plot ideas for a story';
             break;
-
           case 'character-analysis':
-            if (!characterName.trim()) {
-              showToast('Please enter a character name', 'error');
-              return;
-            }
-            description = `Analyze character: ${characterName}`;
-            result = await sendMessage(description);
+            if (!characterName.trim()) return showToast('Please enter character name', 'error');
+            description = `Analyze the character "${characterName}" and suggest development ideas`;
             setCharacterName('');
             break;
-
           case 'brainstorm':
-            if (!brainstormTopic.trim()) {
-              showToast('Please enter a topic to brainstorm', 'error');
-              return;
-            }
-            description = `Brainstorm: ${brainstormTopic}`;
-            result = await sendMessage(description);
+            if (!brainstormTopic.trim())
+              return showToast('Please enter topic to brainstorm', 'error');
+            description = `Brainstorm creative ideas about: ${brainstormTopic}`;
             setBrainstormTopic('');
             break;
-
           default:
             return;
         }
 
+        const result = await sendMessage(description);
         setLastResult(result);
         showToast('Claude provided suggestions', 'success');
-      } catch {
-        showToast('Action failed. Please try again.', 'error');
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Action failed. Please try again.';
+        showToast(errorMessage, 'error');
       }
     },
-    [isLoading, selectedText, characterName, brainstormTopic, sendMessage, showToast],
+    [isLoading, isConfigured, selectedText, characterName, brainstormTopic, sendMessage, showToast],
   );
 
   const handleInsert = () => {
@@ -144,23 +147,13 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
       <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={() => setIsMinimized(false)}
-          className="w-14 h-14 bg-[#0073E6] text-white rounded-full shadow-2xl hover:bg-blue-500 transition-colors flex items-center justify-center"
+          className="w-14 h-14 bg-[#0073E6] text-white rounded-full shadow-2xl hover:bg-blue-500 transition-colors flex items-center justify-center relative"
           aria-label="Open Claude Assistant"
         >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.013 8.013 0 01-2.319-.371l-6.104 2.103a.5.5 0 01-.65-.65l2.103-6.104A8.013 8.013 0 014 12c0-4.418 3.582-8 8-8s8 3.582 8 8z"
-            />
-          </svg>
+          <MessageCircleIcon size={24} />
+          {!isConfigured && (
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+          )}
         </button>
       </div>
     );
@@ -176,7 +169,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
     {
       id: 'chat',
       label: 'Chat',
-      icon: <CatIcon size={14} />,
+      icon: <MessageCircleIcon size={14} />,
       content: (
         <>
           <div
@@ -186,7 +179,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
             aria-relevant="additions"
           >
             {messages.length === 0 ? (
-              <div className="text-center py-8 text-gray-400 text-sm text-gray-600 select-none">
+              <div className="text-center py-8 text-gray-600 select-none">
                 <div className="mb-2" aria-hidden="true">
                   👋
                 </div>
@@ -197,11 +190,19 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
                 <p className="text-xs text-gray-500 mt-2 opacity-75">
                   💡 Tip: Use Ctrl+Enter to send messages
                 </p>
+                {!isConfigured && (
+                  <p className="text-xs text-red-400 mt-3 bg-red-900/20 p-2 rounded">
+                    ⚠️ API key not configured. Go to Settings to set up Claude.
+                  </p>
+                )}
               </div>
             ) : (
-              messages.map((msg) => (
-                <MessageBubble key={msg.id} role={msg.role} content={msg.content} />
-              ))
+              <>
+                {messages.map((msg) => (
+                  <MessageBubble key={msg.id} role={msg.role} content={msg.content} />
+                ))}
+                {isLoading && <TypingIndicator />}
+              </>
             )}
             <div ref={messagesEndRef} />
           </div>
@@ -221,22 +222,24 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
                     handleSend();
                   }
                 }}
-                disabled={isLoading}
+                disabled={isLoading || !isConfigured}
                 placeholder={
-                  selectedText
-                    ? `Ask about: "${selectedText.slice(0, 20)}..."`
-                    : 'Ask Claude about your writing... (Ctrl+Enter to send)'
+                  !isConfigured
+                    ? 'Configure API key in Settings first...'
+                    : selectedText
+                      ? `Ask about: "${selectedText.slice(0, 20)}..."`
+                      : 'Ask Claude about your writing... (Ctrl+Enter to send)'
                 }
-                className="flex-1 px-3 py-2 rounded-md bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6] disabled:opacity-50 transition-colors text-sm text-gray-600"
+                className="flex-1 px-3 py-2 rounded-md bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6] disabled:opacity-50 transition-colors text-sm"
                 aria-label="Chat input"
               />
               <button
                 onClick={handleSend}
-                disabled={isLoading || !input.trim()}
-                className="px-4 py-2 bg-[#0073E6] text-white rounded-md hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm text-gray-600"
+                disabled={isLoading || !input.trim() || !isConfigured}
+                className="px-4 py-2 bg-[#0073E6] text-white rounded-md hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                 aria-label="Send message"
               >
-                {isLoading ? '...' : 'Send'}
+                {isLoading ? <LoadingIndicator size="sm" message="" /> : 'Send'}
               </button>
             </div>
           </div>
@@ -249,43 +252,49 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
       icon: <BoltIcon size={14} />,
       content: (
         <div className="p-4 space-y-3">
+          {!isConfigured && (
+            <div className="text-xs text-red-400 bg-red-900/20 p-2 rounded mb-4">
+              ⚠️ Configure your Claude API key in Settings to use Quick Actions.
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-2 mb-4">
             <button
               onClick={() => handleQuickAction('continue')}
-              disabled={isLoading || !selectedText}
-              className="px-3 py-2 text-xs text-gray-500 bg-[#0073E6] text-white rounded hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              aria-disabled={isLoading || !selectedText}
+              disabled={isLoading || !selectedText || !isConfigured}
+              className="px-3 py-2 text-xs bg-[#0073E6] text-white rounded hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              aria-disabled={isLoading || !selectedText || !isConfigured}
             >
               📝 Continue Text
             </button>
             <button
               onClick={() => handleQuickAction('improve')}
-              disabled={isLoading || !selectedText}
-              className="px-3 py-2 text-xs text-gray-500 bg-green-600 text-white rounded hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              aria-disabled={isLoading || !selectedText}
+              disabled={isLoading || !selectedText || !isConfigured}
+              className="px-3 py-2 text-xs bg-green-600 text-white rounded hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              aria-disabled={isLoading || !selectedText || !isConfigured}
             >
               ✨ Improve Text
             </button>
             <button
               onClick={() => handleQuickAction('analyze-style')}
-              disabled={isLoading || !selectedText}
-              className="px-3 py-2 text-xs text-gray-500 bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              aria-disabled={isLoading || !selectedText}
+              disabled={isLoading || !selectedText || !isConfigured}
+              className="px-3 py-2 text-xs bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              aria-disabled={isLoading || !selectedText || !isConfigured}
             >
               🎨 Analyze Style
             </button>
             <button
               onClick={() => handleQuickAction('plot-ideas')}
-              disabled={isLoading}
-              className="px-3 py-2 text-xs text-gray-500 bg-yellow-600 text-white rounded hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              aria-disabled={isLoading}
+              disabled={isLoading || !isConfigured}
+              className="px-3 py-2 text-xs bg-yellow-600 text-white rounded hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              aria-disabled={isLoading || !isConfigured}
             >
               💡 Plot Ideas
             </button>
           </div>
 
-          {!selectedText && (
-            <div className="text-xs text-gray-500 text-gray-400 bg-gray-800 p-2 rounded select-none">
+          {!selectedText && isConfigured && (
+            <div className="text-xs text-gray-500 bg-gray-800 p-2 rounded select-none">
               💡 Select text in your document to enable text-specific actions
             </div>
           )}
@@ -293,19 +302,19 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
           {lastResult && onInsertText && (
             <div className="border border-gray-600 rounded p-3">
               <div className="flex justify-between items-start mb-2">
-                <span className="text-xs text-gray-500 font-medium text-[#0073E6]">
-                  Claude's Suggestion:
+                <span className="text-xs font-medium text-[#0073E6]">
+                  Claude&apos;s Suggestion:
                 </span>
                 <button
                   ref={insertButtonRef}
                   onClick={handleInsert}
-                  className="px-2 py-1 text-xs text-gray-500 bg-yellow-500 text-white rounded hover:bg-yellow-400 transition-colors focus:ring-2 focus:ring-yellow-300"
-                  aria-label="Insert Claude's suggestion into draft"
+                  className="px-2 py-1 text-xs bg-yellow-500 text-white rounded hover:bg-yellow-400 transition-colors focus:ring-2 focus:ring-yellow-300"
+                  aria-label="Insert Claude&aposs suggestion into draft"
                 >
                   Insert
                 </button>
               </div>
-              <div className="text-xs text-gray-500 text-gray-300 max-h-20 overflow-y-auto whitespace-pre-wrap">
+              <div className="text-xs text-gray-300 max-h-20 overflow-y-auto whitespace-pre-wrap">
                 {lastResult.length > 200 ? lastResult.slice(0, 200) + '...' : lastResult}
               </div>
             </div>
@@ -319,10 +328,16 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
       icon: <SearchIcon size={14} />,
       content: (
         <div className="p-4 space-y-4">
+          {!isConfigured && (
+            <div className="text-xs text-red-400 bg-red-900/20 p-2 rounded mb-4">
+              ⚠️ Configure your Claude API key in Settings to use Analysis tools.
+            </div>
+          )}
+
           <div>
             <label
               htmlFor="character-name-input"
-              className="block text-xs text-gray-500 font-medium text-gray-300 mb-2 select-none"
+              className="block text-xs font-medium text-gray-300 mb-2 select-none"
             >
               Character Analysis
             </label>
@@ -332,14 +347,15 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
                 value={characterName}
                 onChange={(e) => setCharacterName(e.target.value)}
                 placeholder="Character name..."
-                className="flex-1 px-2 py-1 text-xs text-gray-500 rounded bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6]"
+                disabled={!isConfigured}
+                className="flex-1 px-2 py-1 text-xs rounded bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6] disabled:opacity-50"
                 aria-label="Character name for analysis"
               />
               <button
                 onClick={() => handleQuickAction('character-analysis')}
-                disabled={isLoading || !characterName.trim()}
-                className="px-3 py-1 text-xs text-gray-500 bg-blue-600 text-white rounded hover:bg-blue-500 disabled:opacity-50 transition-colors"
-                aria-disabled={isLoading || !characterName.trim()}
+                disabled={isLoading || !characterName.trim() || !isConfigured}
+                className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-500 disabled:opacity-50 transition-colors"
+                aria-disabled={isLoading || !characterName.trim() || !isConfigured}
               >
                 Analyze
               </button>
@@ -349,7 +365,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
           <div>
             <label
               htmlFor="brainstorm-topic-input"
-              className="block text-xs text-gray-500 font-medium text-gray-300 mb-2 select-none"
+              className="block text-xs font-medium text-gray-300 mb-2 select-none"
             >
               Brainstorm Ideas
             </label>
@@ -359,21 +375,22 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
                 value={brainstormTopic}
                 onChange={(e) => setBrainstormTopic(e.target.value)}
                 placeholder="Topic to explore..."
-                className="flex-1 px-2 py-1 text-xs text-gray-500 rounded bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6]"
+                disabled={!isConfigured}
+                className="flex-1 px-2 py-1 text-xs rounded bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6] disabled:opacity-50"
                 aria-label="Topic to brainstorm ideas for"
               />
               <button
                 onClick={() => handleQuickAction('brainstorm')}
-                disabled={isLoading || !brainstormTopic.trim()}
-                className="px-3 py-1 text-xs text-gray-500 bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50 transition-colors"
-                aria-disabled={isLoading || !brainstormTopic.trim()}
+                disabled={isLoading || !brainstormTopic.trim() || !isConfigured}
+                className="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50 transition-colors"
+                aria-disabled={isLoading || !brainstormTopic.trim() || !isConfigured}
               >
                 💭 Ideas
               </button>
             </div>
           </div>
 
-          <div className="text-xs text-gray-500 text-gray-400 bg-gray-800 p-2 rounded select-none">
+          <div className="text-xs text-gray-500 bg-gray-800 p-2 rounded select-none">
             🔍 Advanced analysis tools that understand your full project context
             <br />
             💡 Tip: Use Ctrl+← → to switch tabs, or Ctrl+1/2/3
@@ -393,35 +410,27 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-700">
         <div className="flex items-center space-x-3">
-          <h2 className="text-lg font-semibold font-semibold font-semibold font-medium font-semibold text-[#0073E6]">
-            Claude
-          </h2>
-          {isLoading && (
-            <div
-              className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#0073E6]"
-              aria-label="Loading"
-              role="status"
-            />
-          )}
+          <h2 className="text-lg font-semibold text-[#0073E6]">Claude</h2>
+          <StatusBadge isConfigured={isConfigured} isLoading={isLoading} error={error} />
         </div>
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setIsMinimized(true)}
-            className="text-gray-400 hover:text-white text-sm text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-white text-sm transition-colors"
             aria-label="Minimize assistant"
           >
             —
           </button>
           <button
             onClick={clearMessages}
-            className="text-gray-400 hover:text-white text-sm text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-white text-sm transition-colors"
             aria-label="Clear chat messages"
           >
             🗑️
           </button>
           <button
             onClick={toggleVisibility}
-            className="text-red-400 hover:text-red-500 text-sm text-gray-600 transition-colors"
+            className="text-red-400 hover:text-red-500 text-sm transition-colors"
             aria-label="Close assistant"
           >
             ✕
