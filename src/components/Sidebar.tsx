@@ -46,7 +46,7 @@ export default function Sidebar() {
       <div className="p-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500">
         Current: {state.view}
         <br />
-        Project: {state.currentProject}
+        Project: {state.currentProjectId ?? 'None'}
       </div>
     </aside>
   );

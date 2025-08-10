@@ -1,0 +1,38 @@
+import { useEffect, useRef } from 'react';
+
+export interface UseAutoSaveOptions<T> {
+  value: T;
+  delay?: number; // ms
+  onSave: (value: T) => void | Promise<void>;
+  enabled?: boolean;
+}
+
+/**
+ * Debounced auto-save hook. Calls onSave(value) after `delay` when value changes.
+ */
+export default function useAutoSave<T>({
+  value,
+  delay = 800,
+  onSave,
+  enabled = true,
+}: UseAutoSaveOptions<T>) {
+  const timer = useRef<number | null>(null);
+  const lastValueRef = useRef<T>(value);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    // only trigger when value actually changes (shallow compare)
+    if (value === lastValueRef.current) return;
+    lastValueRef.current = value;
+
+    if (timer.current) window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => {
+      void onSave(value);
+    }, delay);
+
+    return () => {
+      if (timer.current) window.clearTimeout(timer.current);
+    };
+  }, [value, delay, onSave, enabled]);
+}

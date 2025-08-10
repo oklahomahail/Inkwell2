@@ -244,7 +244,8 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
   }, [wordCount, session.startTime, currentProject?.id, showToast]);
 
   const handleClaudeAssist = useCallback(() => {
-    claude.toggleVisibility();
+    // TODO: Fix claudeActions - check if exported from context
+    // claudeActions.toggleVisibility();
     showToast('Claude Assistant opened', 'info');
   }, [claude, showToast]);
 

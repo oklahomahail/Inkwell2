@@ -184,7 +184,7 @@ export async function getBackupStatus(): Promise<BackupStats> {
   return {
     totalBackups: backups.length,
     totalSize: formatSize(totalSizeBytes),
-    lastBackup: backups.length ? backups[backups.length - 1].timestamp : null,
+    lastBackup: backups.length > 0 ? backups[backups.length - 1]!.timestamp : null,
     autoBackupEnabled: false, // TODO: Implement auto-backup functionality
     storageWarning: totalSizeBytes > 4 * 1024 * 1024, // Warn if over 4MB
   };

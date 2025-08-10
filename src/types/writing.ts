@@ -1,39 +1,26 @@
-// src/types/writing.ts
-export type ExportFormat = 'markdown' | 'txt' | 'docx';
-
-export interface WritingSession {
-  id: string;
-  projectId: string;
-  startTime: Date;
-  endTime?: Date;
+export interface WritingPanelState {
+  content: string;
   wordCount: number;
-  charactersTyped: number;
-  backspacesUsed: number;
-  timeActive: number; // milliseconds
+  isVisible: boolean;
+  title: string;
+  isDirty: boolean;
+  isSaving: boolean;
+  lastSaved: Date | null;
+  exportFormat: string;
+  error: string | null;
 }
 
-export interface WritingStats {
-  totalWords: number;
-  totalCharacters: number;
-  averageWordsPerSession: number;
-  totalWritingTime: number; // milliseconds
-  longestSession: number; // milliseconds
-  currentStreak: number; // days
-  longestStreak: number; // days
-}
+export type WritingAction =
+  | { type: 'SET_CONTENT'; payload: string }
+  | { type: 'SET_TITLE'; payload: string }
+  | { type: 'SET_IS_SAVING'; payload: boolean }
+  | { type: 'SET_LAST_SAVED'; payload: Date | null }
+  | { type: 'SET_EXPORT_FORMAT'; payload: string }
+  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'CLEAR_DIRTY' }
+  | { type: 'RESET' }
+  | { type: 'UPDATE_WORD_COUNT'; payload: number }
+  | { type: 'TOGGLE_VISIBILITY' }
+  | { type: string; payload?: any };
 
-export interface AutoSaveConfig {
-  enabled: boolean;
-  intervalMs: number;
-  maxBackups: number;
-}
-
-export interface WritingPreferences {
-  fontSize: number;
-  fontFamily: string;
-  lineHeight: number;
-  theme: 'light' | 'dark' | 'auto';
-  autoSave: AutoSaveConfig;
-  wordCountGoal?: number;
-  dailyWordGoal?: number;
-}
+export type ExportFormat = 'markdown' | 'txt' | 'docx' | 'pdf' | 'html';

@@ -74,9 +74,11 @@ class StorageService {
     // Update or add today's session
     const existingIndex = sessions.findIndex((s) => s.date === today);
     if (existingIndex >= 0) {
+      const existingSession = sessions[existingIndex]!;
       sessions[existingIndex] = {
+        ...existingSession,
         ...sessions[existingIndex],
-        wordCount: sessions[existingIndex].wordCount + session.wordCount,
+        wordCount: sessions[existingIndex]!.wordCount + session.wordCount,
       };
     } else {
       sessions.push(session);

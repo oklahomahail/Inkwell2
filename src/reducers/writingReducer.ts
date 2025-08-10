@@ -16,7 +16,7 @@ export function writingReducer(state: WritingPanelState, action: WritingAction):
       return { ...state, error: action.payload, isSaving: false };
     case 'CLEAR_DIRTY':
       return { ...state, isDirty: false };
-    case 'RESET_STATE':
+    case 'RESET':
       return {
         content: '',
         title: '',
@@ -25,6 +25,8 @@ export function writingReducer(state: WritingPanelState, action: WritingAction):
         exportFormat: 'markdown',
         error: null,
         isDirty: false,
+        wordCount: 0,
+        isVisible: true,
       };
     default:
       return state;

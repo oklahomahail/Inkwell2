@@ -9,11 +9,13 @@ interface WritingSession {
 }
 
 const AnalysisPanel: React.FC = () => {
-  const { state } = useAppContext();
+  const { state, currentProject } = useAppContext();
   const [sessions, setSessions] = useState<WritingSession[]>([]);
 
   useEffect(() => {
-    const savedSessions = localStorage.getItem(`sessions-${state.currentProject}`);
+    const savedSessions = localStorage.getItem(
+      `sessions-${currentProject?.id ?? state.currentProjectId ?? 'default'}`,
+    );
     if (savedSessions) {
       try {
         const parsed: WritingSession[] = JSON.parse(savedSessions);
@@ -25,7 +27,7 @@ const AnalysisPanel: React.FC = () => {
         setSessions([]);
       }
     }
-  }, [state.currentProject]);
+  }, [currentProject?.id, state.currentProjectId]);
 
   const totalWords = sessions.reduce((acc, session) => acc + (session.wordCount || 0), 0);
   const totalDays = sessions.length;
@@ -40,7 +42,7 @@ const AnalysisPanel: React.FC = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Writing Analytics</h1>
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          Project: {state.currentProject}
+          Project: {currentProject?.name ?? state.currentProjectId ?? 'None selected'}
         </div>
       </div>
 

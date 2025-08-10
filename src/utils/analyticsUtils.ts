@@ -121,6 +121,7 @@ export function calculateWeeklyTrend(
     const weekStart = new Date(date.getTime() - date.getDay() * 24 * 60 * 60 * 1000);
     const weekKey = weekStart.toISOString().split('T')[0];
 
+    if (!weekKey) return;
     weeklyData.set(weekKey, (weeklyData.get(weekKey) || 0) + session.wordsWritten);
   });
 
@@ -143,8 +144,9 @@ export function analyzeTimeOfDayPatterns(
     const hour = session.startTime.getHours();
     const productivity = session.timeSpent > 0 ? session.wordsWritten / session.timeSpent : 0;
 
-    hourlyData[hour].productivity += productivity;
-    hourlyData[hour].count++;
+    if (!hourlyData[hour]) hourlyData[hour] = { hour, productivity: 0, count: 0 };
+    hourlyData[hour]!.productivity += productivity;
+    hourlyData[hour]!.count++;
   });
 
   return hourlyData.map((data) => ({
@@ -166,8 +168,10 @@ export function analyzeDayOfWeekPatterns(
     const dayIndex = session.startTime.getDay();
     const productivity = session.timeSpent > 0 ? session.wordsWritten / session.timeSpent : 0;
 
-    dailyData[dayIndex].productivity += productivity;
-    dailyData[dayIndex].count++;
+    if (!dailyData[dayIndex])
+      dailyData[dayIndex] = { day: days[dayIndex] || `day-${dayIndex}`, productivity: 0, count: 0 };
+    dailyData[dayIndex]!.productivity += productivity;
+    dailyData[dayIndex]!.count++;
   });
 
   return dailyData.map((data) => ({
@@ -228,7 +232,9 @@ export function analyzeWordCountDistribution(
     if (range) {
       const distIndex = distribution.findIndex((d) => d.range === range.range);
       if (distIndex !== -1) {
-        distribution[distIndex].frequency++;
+        if (!distribution[distIndex])
+          distribution[distIndex] = { range: ranges[distIndex]?.range ?? 'unknown', frequency: 0 };
+        distribution[distIndex]!.frequency++;
       }
     }
   });
@@ -458,7 +464,10 @@ export function splitIntoSentences(text: string): string[] {
 export function calculateReadabilityScore(text: string): number {
   const sentences = splitIntoSentences(text);
   const words = text.match(/\b\w+\b/g) || [];
-  const syllables = words.reduce((total, word) => total + countSyllables(word), 0);
+  const syllables = (words as string[]).reduce<number>(
+    (total: number, word: string) => total + countSyllables(word),
+    0,
+  );
 
   if (sentences.length === 0 || words.length === 0) return 0;
 
