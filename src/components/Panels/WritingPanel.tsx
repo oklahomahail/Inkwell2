@@ -1,11 +1,15 @@
 // src/components/Panels/WritingPanel.tsx - Enhanced with Claude Integration
 import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
+import { WritingSession, AutoSaveState } from "../../types/writing";
 import { ExportFormat } from '../../types/writing';
 import { useToast } from '@/context/ToastContext';
 import { useAppContext } from '@/context/AppContext';
 import { logActivity } from '@/utils/activityLogger';
 
 const DEFAULT_TITLE = 'Untitled Chapter';
+
+// Move these interfaces to writing.ts or keep them local
+
 
 interface WritingPanelProps {
   draftText: string;
@@ -14,26 +18,8 @@ interface WritingPanelProps {
   selectedText: string;
 }
 
-interface WritingSession {
-  date: string;
-  startTime: Date;
-  wordsAtStart: number;
-  lastActivityTime: Date;
-}
 
-interface AutoSaveState {
-  isSaving: boolean;
-  lastSaved: Date | null;
-  isDirty: boolean;
-  saveCount: number;
-}
 
-interface SaveQueueItem {
-  content: string;
-  title: string;
-  timestamp: number;
-  type: 'auto' | 'manual' | 'claude';
-}
 
 /* ---------------- Toolbar Subcomponent ---------------- */
 interface WritingToolbarProps {

@@ -16,19 +16,26 @@ export function writingReducer(state: WritingPanelState, action: WritingAction):
       return { ...state, error: action.payload, isSaving: false };
     case 'CLEAR_DIRTY':
       return { ...state, isDirty: false };
-    case 'RESET':
+    case "RESET":
       return {
-        content: '',
-        title: '',
-        lastSaved: null,
-        isSaving: false,
-        exportFormat: 'markdown',
-        error: null,
-        isDirty: false,
+        content: "",
+        title: "",
         wordCount: 0,
+        readingTime: 0,
+        exportFormat: "markdown",
         isVisible: true,
+        isDirty: false,
+        isSaving: false,
+        lastSaved: null,
+        saveCount: 0,
+        error: null,
+        session: {
+          date: new Date().toLocaleDateString(),
+          startTime: new Date(),
+          wordsAtStart: 0,
+          lastActivityTime: new Date(),
+        },
       };
-    default:
-      return state;
+    default:      return state;
   }
 }

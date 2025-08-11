@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   BookOpen,
   Users,
@@ -15,7 +15,9 @@ import {
   Target,
   Clock,
   TrendingUp,
+  Command as CommandIcon,
 } from 'lucide-react';
+import { useAppContext } from '@/context/AppContext';
 
 // Button Component
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -43,7 +45,7 @@ const Button: React.FC<ButtonProps> = ({
   );
 };
 
-// Card Components
+// Card Components (same as before)
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   hover?: boolean;
@@ -109,12 +111,13 @@ const Progress: React.FC<ProgressProps> = ({
   );
 };
 
-// Sidebar Component
+// Enhanced Sidebar Component
 interface SidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onOpenCommandPalette: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -122,13 +125,16 @@ const Sidebar: React.FC<SidebarProps> = ({
   onToggleCollapse,
   activeTab,
   onTabChange,
+  onOpenCommandPalette,
 }) => {
+  const { currentProject } = useAppContext();
+
   const navItems = [
-    { id: 'dashboard', icon: BarChart3, label: 'Dashboard' },
-    { id: 'writing', icon: Edit3, label: 'Writing' },
-    { id: 'timeline', icon: Calendar, label: 'Timeline' },
-    { id: 'analysis', icon: TrendingUp, label: 'Analysis' },
-    { id: 'settings', icon: Settings, label: 'Settings' },
+    { id: 'dashboard', icon: BarChart3, label: 'Dashboard', shortcut: 'Cmd+1' },
+    { id: 'writing', icon: Edit3, label: 'Writing', shortcut: 'Cmd+2' },
+    { id: 'timeline', icon: Calendar, label: 'Timeline', shortcut: 'Cmd+3' },
+    { id: 'analysis', icon: TrendingUp, label: 'Analysis', shortcut: 'Cmd+4' },
+    { id: 'settings', icon: Settings, label: 'Settings', shortcut: 'Cmd+,' },
   ];
 
   return (
@@ -142,7 +148,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           {!isCollapsed && (
             <div className="sidebar-title">
               <h1>Inkwell</h1>
-              <p>My First Project</p>
+              <p>{currentProject?.name || 'No Project Selected'}</p>
             </div>
           )}
           <button onClick={onToggleCollapse} className="sidebar-toggle">
@@ -150,6 +156,21 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Command Palette Trigger */}
+      {!isCollapsed && (
+        <div className="sidebar-command-palette">
+          <button
+            onClick={onOpenCommandPalette}
+            className="command-palette-trigger"
+            title="Open Command Palette (Cmd+K)"
+          >
+            <CommandIcon className="command-icon" />
+            <span>Search commands...</span>
+            <kbd className="keyboard-shortcut">⌘K</kbd>
+          </button>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="sidebar-nav">
@@ -162,19 +183,44 @@ const Sidebar: React.FC<SidebarProps> = ({
               key={item.id}
               onClick={() => onTabChange(item.id)}
               className={`nav-item ${isActive ? 'active' : ''}`}
+              title={isCollapsed ? `${item.label} (${item.shortcut})` : undefined}
             >
               <IconComponent className="nav-icon" />
-              {!isCollapsed && <span>{item.label}</span>}
+              {!isCollapsed && (
+                <div className="nav-item-content">
+                  <span>{item.label}</span>
+                  <kbd className="nav-shortcut">{item.shortcut}</kbd>
+                </div>
+              )}
             </button>
           );
         })}
       </nav>
+
+      {/* Quick Actions */}
+      {!isCollapsed && (
+        <div className="sidebar-quick-actions">
+          <div className="quick-actions-header">
+            <h3>Quick Actions</h3>
+          </div>
+          <button className="quick-action-btn">
+            <Plus className="quick-action-icon" />
+            <span>New Chapter</span>
+          </button>
+          <button className="quick-action-btn">
+            <Edit3 className="quick-action-icon" />
+            <span>Continue Writing</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
-// Dashboard Content
-const DashboardContent: React.FC = () => {
+// Enhanced Dashboard Content
+const DashboardContent: React.FC<{ onOpenCommandPalette: () => void }> = ({ onOpenCommandPalette }) => {
+  const { currentProject } = useAppContext();
+  
   const chapters = [
     { title: 'Chapter 1: The Beginning', words: 2500, target: 3000, status: 'complete' },
     { title: 'Chapter 2: Rising Action', words: 1200, target: 3000, status: 'in-progress' },
@@ -182,10 +228,38 @@ const DashboardContent: React.FC = () => {
   ];
 
   const quickActions = [
-    { icon: Edit3, label: 'Continue Writing', description: 'Resume your current chapter' },
-    { icon: Calendar, label: 'View Timeline', description: 'Check your story progress' },
-    { icon: BarChart3, label: 'Analytics', description: 'View writing analytics' },
+    { 
+      icon: Edit3, 
+      label: 'Continue Writing', 
+      description: 'Resume your current chapter',
+      command: 'nav-writing'
+    },
+    { 
+      icon: Calendar, 
+      label: 'View Timeline', 
+      description: 'Check your story progress',
+      command: 'nav-timeline'
+    },
+    { 
+      icon: BarChart3, 
+      label: 'Analytics', 
+      description: 'View writing analytics',
+      command: 'nav-analysis'
+    },
+    {
+      icon: CommandIcon,
+      label: 'Command Palette',
+      description: 'Quick access to all features',
+      command: 'open-palette'
+    }
   ];
+
+  const handleQuickAction = (command: string) => {
+    if (command === 'open-palette') {
+      onOpenCommandPalette();
+    }
+    // Other commands would be handled by the command system
+  };
 
   return (
     <div className="dashboard-content">
@@ -193,15 +267,32 @@ const DashboardContent: React.FC = () => {
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Dashboard</h1>
-          <p className="dashboard-subtitle">Welcome back to your writing journey</p>
+          <p className="dashboard-subtitle">
+            Welcome back to your writing journey
+            {currentProject && ` - ${currentProject.name}`}
+          </p>
         </div>
-        <Button variant="primary">
-          <Plus className="btn-icon" />
-          New Chapter
-        </Button>
+        <div className="dashboard-header-actions">
+          <Button variant="ghost" onClick={onOpenCommandPalette}>
+            <CommandIcon className="btn-icon" />
+            Commands
+          </Button>
+          <Button variant="primary">
+            <Plus className="btn-icon" />
+            New Chapter
+          </Button>
+        </div>
       </div>
 
-      {/* Stats Overview */}
+      {/* Command Palette Hint */}
+      <div className="command-hint">
+        <div className="command-hint-content">
+          <CommandIcon className="command-hint-icon" />
+          <span>Press <kbd>⌘K</kbd> to open the command palette for quick access to all features</span>
+        </div>
+      </div>
+
+      {/* Rest of dashboard content (same as before) */}
       <div className="stats-grid">
         <Card>
           <CardContent>
@@ -270,7 +361,11 @@ const DashboardContent: React.FC = () => {
             {quickActions.map((action) => {
               const IconComponent = action.icon;
               return (
-                <button key={action.label} className="quick-action">
+                <button 
+                  key={action.label} 
+                  className="quick-action"
+                  onClick={() => handleQuickAction(action.command)}
+                >
                   <div className="quick-action-content">
                     <IconComponent className="quick-action-icon" />
                     <div>
@@ -336,22 +431,51 @@ const DashboardContent: React.FC = () => {
   );
 };
 
-// Main Component
+// Main Component (Simplified)
 export default function CompleteWritingPlatform() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
+  const openCommandPalette = useCallback(() => {
+    setCommandPaletteOpen(true);
+  }, []);
+
+  const closeCommandPalette = useCallback(() => {
+    setCommandPaletteOpen(false);
+  }, []);
+
+  // Simple keyboard shortcut for command palette
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+      if (e.key === 'Escape') {
+        setCommandPaletteOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardContent />;
+        return <DashboardContent onOpenCommandPalette={openCommandPalette} />;
       case 'writing':
         return (
           <div className="placeholder-content">
             <BookOpen className="placeholder-icon" />
             <h2 className="placeholder-title">Writing Interface</h2>
             <p className="placeholder-text">Your existing writing components will go here</p>
+            <Button onClick={openCommandPalette} variant="outline">
+              <CommandIcon className="btn-icon" />
+              Open Command Palette
+            </Button>
           </div>
         );
       case 'timeline':
@@ -379,7 +503,7 @@ export default function CompleteWritingPlatform() {
           </div>
         );
       default:
-        return <DashboardContent />;
+        return <DashboardContent onOpenCommandPalette={openCommandPalette} />;
     }
   };
 
@@ -391,6 +515,7 @@ export default function CompleteWritingPlatform() {
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        onOpenCommandPalette={openCommandPalette}
       />
 
       {/* Main Content */}
@@ -401,11 +526,25 @@ export default function CompleteWritingPlatform() {
             <div className="header-left">
               <div className="search-container">
                 <Search className="search-icon" />
-                <input type="text" placeholder="Search..." className="search-input" />
+                <input 
+                  type="text" 
+                  placeholder="Search... (or press ⌘K for commands)" 
+                  className="search-input"
+                  onFocus={openCommandPalette}
+                  readOnly
+                />
               </div>
             </div>
 
             <div className="header-right">
+              <button 
+                onClick={openCommandPalette}
+                className="header-button"
+                title="Command Palette (⌘K)"
+              >
+                <CommandIcon className="header-button-icon" />
+              </button>
+
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="header-button">
                 {isDarkMode ? (
                   <Sun className="header-button-icon" />
@@ -424,6 +563,36 @@ export default function CompleteWritingPlatform() {
         {/* Content */}
         <main className="content">{renderContent()}</main>
       </div>
+
+      {/* Simple Command Palette Placeholder */}
+      {commandPaletteOpen && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-start justify-center pt-32">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-2xl mx-4 p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Command Palette</h2>
+              <button 
+                onClick={closeCommandPalette}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Command palette functionality coming soon! 
+              <br />
+              For now, use the navigation and buttons in the UI.
+            </p>
+            <div className="mt-4 flex gap-2">
+              <Button onClick={() => { setActiveTab('writing'); closeCommandPalette(); }}>
+                Go to Writing
+              </Button>
+              <Button onClick={() => { setActiveTab('analysis'); closeCommandPalette(); }} variant="outline">
+                Go to Analysis
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,18 @@
-import { EnhancedProject, WritingSession } from "@/types/project";
+import { EnhancedProject } from '@/types/project';
+
+export interface WritingSession {
+  id: string;
+  projectId: string;
+  chapterId?: string;
+  startTime: Date;
+  endTime?: Date;
+  wordCount: number;
+  wordsAdded: number;
+  productivity: number;
+  focusTime: number;
+  notes?: string;
+}
+
 export class EnhancedStorageService {
   private static PROJECTS_KEY = 'inkwell_enhanced_projects';
   
@@ -47,7 +61,6 @@ export class EnhancedStorageService {
   static updateProjectContent(projectId: string, content: string): void {
     const project = this.loadProject(projectId);
     if (project) {
-      // Update recent content (keep last 1000 words)
       const words = content.split(' ');
       project.recentContent = words.slice(-1000).join(' ');
       project.currentWordCount = words.length;
@@ -65,6 +78,7 @@ export class EnhancedStorageService {
         projectId
       };
       
+      project.sessions = project.sessions || [];
       project.sessions.push(newSession);
       this.saveProject(project);
     }
