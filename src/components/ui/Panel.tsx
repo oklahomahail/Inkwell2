@@ -55,9 +55,9 @@ const Panel: React.FC<PanelProps> = ({
   };
 
   const titleSizeClasses = {
-    sm: 'text-lg',
-    md: 'text-xl',
-    lg: 'text-2xl',
+    sm: 'text-lg font-semibold',
+    md: 'text-xl font-semibold leading-snug',
+    lg: 'text-2xl font-bold',
   };
 
   const textColorClasses = {

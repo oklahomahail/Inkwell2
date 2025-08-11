@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
     /* Language & Environment */
-    "target": "ESNext",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
 
     /* Modules & Resolution */
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

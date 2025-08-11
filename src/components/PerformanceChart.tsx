@@ -19,7 +19,7 @@ interface PerformanceChartProps {
 }
 
 // Mock data builder to avoid buildChartData dependency
-function buildChartData(chartType: string, rawData: any) {
+function buildChartData(chartType: string, _rawData: any) {
   // Simple mock data structure
   const mockData = [
     { name: 'Jan', value: 400, growth: 12 },
@@ -84,7 +84,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   height = 300,
 }) => {
   // Build chart data from props
-  const { data: rows, xKey, yKeys, kind } = buildChartData(type, data);
+  const { data: rows, xKey, yKeys: _yKeys, kind: _kind } = buildChartData(type, data);
 
   const chartTitle =
     type === 'comparison'
@@ -103,7 +103,9 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
     <div className={`card-base p-6 ${className}`}>
       {/* Chart Header */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-slate-200 mb-2">Performance Analytics</h3>
+        <h3 className="text-lg font-semibold font-semibold text-slate-200 mb-2">
+          Performance Analytics
+        </h3>
         <p className="text-sm text-slate-400">{chartTitle}</p>
       </div>
 
@@ -166,7 +168,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
         <div className="mt-4 grid grid-cols-2 gap-4">
           <div className="bg-slate-800/50 rounded-lg p-3">
             <div className="text-xs text-slate-400 mb-1">Average Growth</div>
-            <div className="text-lg font-semibold text-slate-200">
+            <div className="text-lg font-semibold font-semibold text-slate-200">
               {rows.length > 0
                 ? `${(rows.reduce((sum: number, item: any) => sum + (item.growth || 0), 0) / rows.length).toFixed(1)}%`
                 : '0%'}
@@ -174,7 +176,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
           </div>
           <div className="bg-slate-800/50 rounded-lg p-3">
             <div className="text-xs text-slate-400 mb-1">Best Month</div>
-            <div className="text-lg font-semibold text-slate-200">
+            <div className="text-lg font-semibold font-semibold text-slate-200">
               {rows.length > 0
                 ? rows.reduce(
                     (max: any, item: any) => ((item.growth || 0) > (max.growth || 0) ? item : max),

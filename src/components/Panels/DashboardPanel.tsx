@@ -15,7 +15,7 @@ interface ProjectStats {
   lastBackup: number | null;
 }
 
-interface BackupStatus {
+interface _BackupStatus {
   totalBackups: number;
   totalSize: string;
   lastBackup: number | null;
@@ -166,7 +166,7 @@ const DashboardPanel: React.FC = () => {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <h1 className="text-2xl font-bold font-bold text-gray-900 dark:text-white">Dashboard</h1>
         <button
           onClick={openNewProjectModal}
           className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
@@ -230,19 +230,23 @@ const DashboardPanel: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Word Count</div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="text-2xl font-bold font-bold text-gray-900 dark:text-white">
             {stats.wordCount.toLocaleString()}
           </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Backups</div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.backups}</div>
+          <div className="text-2xl font-bold font-bold text-gray-900 dark:text-white">
+            {stats.backups}
+          </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Backup Size</div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.backupSize}</div>
+          <div className="text-2xl font-bold font-bold text-gray-900 dark:text-white">
+            {stats.backupSize}
+          </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
@@ -256,7 +260,9 @@ const DashboardPanel: React.FC = () => {
       {/* Backup Section */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Backup Management</h2>
+          <h2 className="text-lg font-semibold font-semibold text-gray-900 dark:text-white">
+            Backup Management
+          </h2>
           <button
             onClick={handleCreateBackup}
             disabled={isCreatingBackup}
@@ -313,7 +319,9 @@ const DashboardPanel: React.FC = () => {
       {/* Quick Actions */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Quick Actions</h2>
+          <h2 className="text-lg font-semibold font-semibold text-gray-900 dark:text-white">
+            Quick Actions
+          </h2>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

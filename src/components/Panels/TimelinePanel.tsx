@@ -185,7 +185,7 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
 
   return (
     <div className="flex flex-col h-full p-4 bg-gray-50 dark:bg-gray-900">
-      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+      <h2 className="text-lg font-semibold font-semibold text-gray-800 dark:text-gray-100 mb-4">
         Timeline Manager
       </h2>
 
@@ -285,7 +285,7 @@ What's at stake, how strong is the conflict, and how can it be improved?`;
                       scenes.map((s) => (s.id === scene.id ? { ...s, title: e.target.value } : s)),
                     )
                   }
-                  className="text-lg font-semibold w-full bg-transparent border-none outline-none text-gray-900 dark:text-white"
+                  className="text-lg font-semibold font-semibold w-full bg-transparent border-none outline-none text-gray-900 dark:text-white"
                 />
                 <button
                   onClick={() => handleDeleteScene(scene.id)}

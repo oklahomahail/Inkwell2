@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 // src/components/ui/ToastManager.tsx
 import React, { memo } from 'react';
 import { useToast } from '@/context/ToastContext';

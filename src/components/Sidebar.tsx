@@ -1,6 +1,6 @@
 // src/components/Sidebar.tsx
 import React from 'react';
-import { Home, Book, Settings, BarChart3, Clock, PenTool } from 'lucide-react';
+import { Home, Book as _Book, Settings, BarChart3, Clock, PenTool } from 'lucide-react';
 import { useAppContext, View } from '@/context/AppContext';
 import { cn } from '@/utils/cn';
 
@@ -21,7 +21,7 @@ export default function Sidebar() {
 
   return (
     <aside className="h-full w-60 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 font-semibold text-gray-900 dark:text-white text-lg">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 font-semibold text-gray-900 dark:text-white text-lg font-semibold">
         Navigation
       </div>
       <nav className="p-4 flex-1 space-y-1">

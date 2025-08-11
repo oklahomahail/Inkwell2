@@ -40,8 +40,8 @@ const SettingsPanel: React.FC = () => {
         maxTokens: config.maxTokens,
         temperature: config.temperature,
       });
-    } catch (error) {
-      console.warn('Could not load Claude configuration:', error);
+    } catch (_error) {
+      console.warn('Could not load Claude configuration:', _error);
     }
   }, []);
 
@@ -65,8 +65,8 @@ const SettingsPanel: React.FC = () => {
       claudeActions.configureApiKey(apiKey.trim());
       setApiKey('');
       showToast('Claude API key updated successfully!', 'success');
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update API key';
+    } catch (_error) {
+      const errorMessage = _error instanceof Error ? _error.message : 'Failed to update API key';
       showToast(errorMessage, 'error');
     } finally {
       setIsUpdatingKey(false);
@@ -77,7 +77,7 @@ const SettingsPanel: React.FC = () => {
     try {
       claudeService.updateConfig(claudeConfig);
       showToast('Claude configuration updated', 'success');
-    } catch (error) {
+    } catch (_error) {
       showToast('Failed to update Claude configuration', 'error');
     }
   };
@@ -94,8 +94,8 @@ const SettingsPanel: React.FC = () => {
         'Hello! This is a test message to verify the connection works properly.',
       );
       showToast('Connection test successful! Claude is ready to assist.', 'success');
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Connection test failed';
+    } catch (_error) {
+      const errorMessage = _error instanceof Error ? _error.message : 'Connection test failed';
       showToast(`Connection test failed: ${errorMessage}`, 'error');
     } finally {
       setIsTestingConnection(false);
@@ -173,7 +173,9 @@ const SettingsPanel: React.FC = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div>
-          <h2 className="text-3xl font-bold text-white mb-2">Settings</h2>
+          <h2 className="text-3xl font-extrabold leading-tight font-bold text-white mb-2">
+            Settings
+          </h2>
           <p className="text-gray-400">
             Configure your writing environment and Claude AI assistant
           </p>
@@ -182,7 +184,9 @@ const SettingsPanel: React.FC = () => {
         {/* Claude AI Configuration */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-white">Claude AI Assistant</h3>
+            <h3 className="text-xl font-semibold leading-snug font-semibold text-white">
+              Claude AI Assistant
+            </h3>
             <div
               className={`flex items-center space-x-3 px-3 py-2 rounded-lg border ${status.bg} ${status.border}`}
             >
@@ -194,7 +198,9 @@ const SettingsPanel: React.FC = () => {
           {/* Quick Setup Guide */}
           {!claude.isConfigured && (
             <div className="mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
-              <h4 className="text-lg font-medium text-blue-200 mb-3">Quick Setup Guide</h4>
+              <h4 className="text-lg font-semibold font-medium text-blue-200 mb-3">
+                Quick Setup Guide
+              </h4>
               <ol className="text-sm text-blue-300 space-y-2 list-decimal list-inside">
                 <li>
                   Visit{' '}
@@ -304,7 +310,9 @@ const SettingsPanel: React.FC = () => {
 
           {/* Claude Model Configuration */}
           <div className="border-t border-gray-600 pt-6">
-            <h4 className="text-lg font-medium text-white mb-4">Model Configuration</h4>
+            <h4 className="text-lg font-semibold font-medium text-white mb-4">
+              Model Configuration
+            </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Model</label>
@@ -362,7 +370,9 @@ const SettingsPanel: React.FC = () => {
 
         {/* App Settings */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold text-white mb-4">Application Settings</h3>
+          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
+            Application Settings
+          </h3>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -433,7 +443,9 @@ const SettingsPanel: React.FC = () => {
 
         {/* Data Management */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold text-white mb-4">Data Management</h3>
+          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
+            Data Management
+          </h3>
 
           <div className="space-y-4">
             <div>
@@ -518,7 +530,9 @@ const SettingsPanel: React.FC = () => {
 
         {/* About */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold text-white mb-4">About Inkwell</h3>
+          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
+            About Inkwell
+          </h3>
 
           <div className="space-y-3 text-sm text-gray-300">
             <div className="flex justify-between">
@@ -572,7 +586,9 @@ const SettingsPanel: React.FC = () => {
 
         {/* Claude Usage Tips */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold text-white mb-4">Claude Usage Tips</h3>
+          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
+            Claude Usage Tips
+          </h3>
 
           <div className="space-y-3 text-sm text-gray-300">
             <div className="flex items-start space-x-3">

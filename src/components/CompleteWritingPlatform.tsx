@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
   BookOpen,
-  Users,
+  Users as _Users,
   Calendar,
   BarChart3,
   Settings,
@@ -218,9 +218,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 };
 
 // Enhanced Dashboard Content
-const DashboardContent: React.FC<{ onOpenCommandPalette: () => void }> = ({ onOpenCommandPalette }) => {
+const DashboardContent: React.FC<{ onOpenCommandPalette: () => void }> = ({
+  onOpenCommandPalette,
+}) => {
   const { currentProject } = useAppContext();
-  
+
   const chapters = [
     { title: 'Chapter 1: The Beginning', words: 2500, target: 3000, status: 'complete' },
     { title: 'Chapter 2: Rising Action', words: 1200, target: 3000, status: 'in-progress' },
@@ -228,30 +230,30 @@ const DashboardContent: React.FC<{ onOpenCommandPalette: () => void }> = ({ onOp
   ];
 
   const quickActions = [
-    { 
-      icon: Edit3, 
-      label: 'Continue Writing', 
+    {
+      icon: Edit3,
+      label: 'Continue Writing',
       description: 'Resume your current chapter',
-      command: 'nav-writing'
+      command: 'nav-writing',
     },
-    { 
-      icon: Calendar, 
-      label: 'View Timeline', 
+    {
+      icon: Calendar,
+      label: 'View Timeline',
       description: 'Check your story progress',
-      command: 'nav-timeline'
+      command: 'nav-timeline',
     },
-    { 
-      icon: BarChart3, 
-      label: 'Analytics', 
+    {
+      icon: BarChart3,
+      label: 'Analytics',
       description: 'View writing analytics',
-      command: 'nav-analysis'
+      command: 'nav-analysis',
     },
     {
       icon: CommandIcon,
       label: 'Command Palette',
       description: 'Quick access to all features',
-      command: 'open-palette'
-    }
+      command: 'open-palette',
+    },
   ];
 
   const handleQuickAction = (command: string) => {
@@ -288,7 +290,9 @@ const DashboardContent: React.FC<{ onOpenCommandPalette: () => void }> = ({ onOp
       <div className="command-hint">
         <div className="command-hint-content">
           <CommandIcon className="command-hint-icon" />
-          <span>Press <kbd>⌘K</kbd> to open the command palette for quick access to all features</span>
+          <span>
+            Press <kbd>⌘K</kbd> to open the command palette for quick access to all features
+          </span>
         </div>
       </div>
 
@@ -361,8 +365,8 @@ const DashboardContent: React.FC<{ onOpenCommandPalette: () => void }> = ({ onOp
             {quickActions.map((action) => {
               const IconComponent = action.icon;
               return (
-                <button 
-                  key={action.label} 
+                <button
+                  key={action.label}
                   className="quick-action"
                   onClick={() => handleQuickAction(action.command)}
                 >
@@ -526,9 +530,9 @@ export default function CompleteWritingPlatform() {
             <div className="header-left">
               <div className="search-container">
                 <Search className="search-icon" />
-                <input 
-                  type="text" 
-                  placeholder="Search... (or press ⌘K for commands)" 
+                <input
+                  type="text"
+                  placeholder="Search... (or press ⌘K for commands)"
                   className="search-input"
                   onFocus={openCommandPalette}
                   readOnly
@@ -537,7 +541,7 @@ export default function CompleteWritingPlatform() {
             </div>
 
             <div className="header-right">
-              <button 
+              <button
                 onClick={openCommandPalette}
                 className="header-button"
                 title="Command Palette (⌘K)"
@@ -569,24 +573,32 @@ export default function CompleteWritingPlatform() {
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-start justify-center pt-32">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-2xl mx-4 p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Command Palette</h2>
-              <button 
-                onClick={closeCommandPalette}
-                className="text-gray-500 hover:text-gray-700"
-              >
+              <h2 className="text-lg font-semibold font-semibold">Command Palette</h2>
+              <button onClick={closeCommandPalette} className="text-gray-500 hover:text-gray-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <p className="text-gray-600 dark:text-gray-400">
-              Command palette functionality coming soon! 
+              Command palette functionality coming soon!
               <br />
               For now, use the navigation and buttons in the UI.
             </p>
             <div className="mt-4 flex gap-2">
-              <Button onClick={() => { setActiveTab('writing'); closeCommandPalette(); }}>
+              <Button
+                onClick={() => {
+                  setActiveTab('writing');
+                  closeCommandPalette();
+                }}
+              >
                 Go to Writing
               </Button>
-              <Button onClick={() => { setActiveTab('analysis'); closeCommandPalette(); }} variant="outline">
+              <Button
+                onClick={() => {
+                  setActiveTab('analysis');
+                  closeCommandPalette();
+                }}
+                variant="outline"
+              >
                 Go to Analysis
               </Button>
             </div>

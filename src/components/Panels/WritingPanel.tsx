@@ -1,6 +1,6 @@
 // src/components/Panels/WritingPanel.tsx - Enhanced with Claude Integration
 import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
-import { WritingSession, AutoSaveState } from "../../types/writing";
+import { WritingSession, AutoSaveState } from '../../types/writing';
 import { ExportFormat } from '../../types/writing';
 import { useToast } from '@/context/ToastContext';
 import { useAppContext } from '@/context/AppContext';
@@ -10,16 +10,12 @@ const DEFAULT_TITLE = 'Untitled Chapter';
 
 // Move these interfaces to writing.ts or keep them local
 
-
 interface WritingPanelProps {
   draftText: string;
   onChangeText: (value: string) => void;
   onTextSelect: () => void;
   selectedText: string;
 }
-
-
-
 
 /* ---------------- Toolbar Subcomponent ---------------- */
 interface WritingToolbarProps {
@@ -151,7 +147,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
   });
 
   const { showToast } = useToast();
-  const { claude, currentProject } = useAppContext();
+  const { claude: _claude, currentProject } = useAppContext();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const initialLoadRef = useRef(false);
 
@@ -229,12 +225,6 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     showToast('Draft saved successfully!', 'success');
   }, [wordCount, session.startTime, currentProject?.id, showToast]);
 
-  const handleClaudeAssist = useCallback(() => {
-    // TODO: Fix claudeActions - check if exported from context
-    // claudeActions.toggleVisibility();
-    showToast('Claude Assistant opened', 'info');
-  }, [claude, showToast]);
-
   const handleExport = useCallback(() => {
     try {
       let blob: Blob;
@@ -275,6 +265,10 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
       console.error('Export error:', error);
     }
   }, [content, exportFormat, title, showToast]);
+
+  function handleClaudeAssist(): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">

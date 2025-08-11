@@ -4,7 +4,7 @@ import PlatformLayout from './components/Platform/PlatformLayout';
 import ViewSwitcher from './components/ViewSwitcher';
 import ToastContainer from './components/ToastContainer';
 import ClaudeAssistant from './components/ClaudeAssistant';
-import ClaudeErrorBoundary from './components/ClaudeErrorBoundry';
+import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
 import { useAppContext } from './context/AppContext';
 
 const App: React.FC = () => {

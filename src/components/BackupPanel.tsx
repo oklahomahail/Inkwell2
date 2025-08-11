@@ -52,7 +52,7 @@ export default function BackupPanel({ performBackup }: BackupPanelProps) {
 
   return (
     <div className="p-4 border rounded shadow-md max-w-md mx-auto">
-      <h2 className="text-lg font-semibold font-semibold font-semibold font-medium font-semibold mb-2">
+      <h2 className="text-lg font-semibold font-semibold font-semibold font-semibold font-medium font-semibold mb-2">
         Backup & Auto-Save
       </h2>
 

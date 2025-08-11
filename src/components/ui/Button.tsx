@@ -14,7 +14,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const sizeStyles = {
       sm: 'px-3 py-1 text-sm text-gray-600',
       md: 'px-4 py-2 text-sm text-gray-600',
-      lg: 'px-5 py-3 text-base leading-normal leading-normal',
+      lg: 'px-5 py-3 text-base leading-normal leading-normal leading-normal',
     };
     const variantStyles = {
       primary: 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500',

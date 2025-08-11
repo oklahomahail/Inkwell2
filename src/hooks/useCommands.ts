@@ -1,22 +1,14 @@
 import { useMemo } from 'react';
 import { Command } from '@/types/commands';
-import { useAppContext } from '@/context/AppContext';
+import { useAppContext, View } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 
 export function useCommands(
   selectedText?: string,
-  onCommandExecute?: (commandId: string) => void
+  onCommandExecute?: (commandId: string) => void,
 ): Command[] {
-  const { 
-    state,
-    setView, 
-    addProject, 
-    updateProject,
-    currentProject, 
-    claudeActions,
-    setTheme
-  } = useAppContext();
-  
+  const { setView, addProject, currentProject, claudeActions, setTheme } = useAppContext();
+
   const { showToast } = useToast();
 
   return useMemo(() => {
@@ -31,67 +23,62 @@ export function useCommands(
         icon: '🏠',
         category: 'navigation',
         keywords: ['dashboard', 'home', 'projects'],
-        shortcut: 'Cmd+1',
         action: () => {
-          setView('dashboard' as any);
-          showToast('Switched to Dashboard', 'info');
+          setView(View.Dashboard);
           onCommandExecute?.('nav-dashboard');
+          showToast('Switched to Dashboard', 'success');
         },
       },
       {
         id: 'nav-writing',
         label: 'Go to Writing',
-        description: 'Switch to writing panel',
+        description: 'Switch to writing workspace',
         icon: '✍️',
         category: 'navigation',
-        keywords: ['writing', 'editor', 'compose'],
-        shortcut: 'Cmd+2',
+        keywords: ['writing', 'write', 'editor'],
         action: () => {
-          setView('writing' as any);
-          showToast('Switched to Writing', 'info');
+          setView(View.Writing);
           onCommandExecute?.('nav-writing');
+          showToast('Switched to Writing', 'success');
         },
       },
       {
         id: 'nav-timeline',
         label: 'Go to Timeline',
-        description: 'Switch to timeline view',
+        description: 'View project timeline',
         icon: '📅',
         category: 'navigation',
-        keywords: ['timeline', 'schedule', 'progress'],
-        shortcut: 'Cmd+3',
+        keywords: ['timeline', 'schedule', 'calendar'],
         action: () => {
-          setView('timeline' as any);
-          showToast('Switched to Timeline', 'info');
+          setView(View.Timeline);
           onCommandExecute?.('nav-timeline');
+          showToast('Switched to Timeline', 'success');
         },
       },
       {
         id: 'nav-analysis',
         label: 'Go to Analysis',
-        description: 'Switch to writing analysis',
+        description: 'View writing analytics',
         icon: '📊',
         category: 'navigation',
-        keywords: ['analysis', 'stats', 'metrics'],
-        shortcut: 'Cmd+4',
+        keywords: ['analysis', 'analytics', 'stats'],
         action: () => {
-          setView('analysis' as any);
-          showToast('Switched to Analysis', 'info');
+          setView(View.Analysis);
           onCommandExecute?.('nav-analysis');
+          showToast('Switched to Analysis', 'success');
         },
       },
       {
         id: 'nav-settings',
         label: 'Go to Settings',
-        description: 'Open application settings',
+        description: 'Access application settings',
         icon: '⚙️',
         category: 'navigation',
         keywords: ['settings', 'preferences', 'config'],
-        shortcut: 'Cmd+,',
         action: () => {
-          setView('settings' as any);
-          showToast('Switched to Settings', 'info');
+          setView(View.Settings);
           onCommandExecute?.('nav-settings');
+          showToast('Switched to Settings', 'success');
         },
       },
 
@@ -102,93 +89,23 @@ export function useCommands(
         id: 'project-new',
         label: 'New Project',
         description: 'Create a new writing project',
-        icon: '📝',
-        category: 'project',
-        keywords: ['new', 'create', 'project', 'start'],
-        shortcut: 'Cmd+N',
-        action: () => {
-          const projectName = prompt('Enter project name:') || `New Project ${state.projects.length + 1}`;
-          const description = prompt('Enter project description:') || '';
-          
-          const newProject = {
-            id: `project_${Date.now()}`,
-            name: projectName,
-            description,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          };
-          
-          addProject(newProject);
-          showToast(`Created project: ${projectName}`, 'success');
-          onCommandExecute?.('project-new');
-        },
-      },
-
-      // ========================================
-      // CLAUDE AI COMMANDS
-      // ========================================
-      {
-        id: 'claude-toggle',
-        label: 'Toggle Claude Assistant',
-        description: 'Show or hide Claude AI panel',
-        icon: '🤖',
-        category: 'claude',
-        keywords: ['claude', 'ai', 'assistant', 'toggle'],
-        shortcut: 'Cmd+Shift+K',
-        action: () => {
-          claudeActions.toggleVisibility();
-          showToast('Toggled Claude Assistant', 'info');
-          onCommandExecute?.('claude-toggle');
-        },
-      },
-      {
-        id: 'claude-clear',
-        label: 'Clear Claude History',
-        description: 'Clear conversation history with Claude',
-        icon: '🗑️',
-        category: 'claude',
-        keywords: ['clear', 'history', 'reset', 'claude'],
-        action: () => {
-          const confirmed = confirm('Clear Claude conversation history?');
-          if (confirmed) {
-            claudeActions.clearMessages();
-            showToast('Cleared Claude history', 'success');
-            onCommandExecute?.('claude-clear');
-          }
-        },
-      },
-
-      // ========================================
-      // WRITING COMMANDS
-      // ========================================
-      {
-        id: 'writing-save',
-        label: 'Save Current Work',
-        description: 'Save your current writing',
-        icon: '💾',
-        category: 'writing',
-        keywords: ['save', 'backup', 'persist'],
-        shortcut: 'Cmd+S',
-        action: () => {
-          showToast('Work saved!', 'success');
-          onCommandExecute?.('writing-save');
-        },
-      },
-
-      // ========================================
-      // EXPORT COMMANDS
-      // ========================================
-      {
-        id: 'export-markdown',
-        label: 'Export as Markdown',
-        description: 'Export current document as Markdown',
         icon: '📄',
-        category: 'export',
-        keywords: ['export', 'markdown', 'download'],
-        shortcut: 'Cmd+E',
+        category: 'project',
+        keywords: ['new', 'create', 'project'],
         action: () => {
-          showToast('Exporting as Markdown...', 'info');
-          onCommandExecute?.('export-markdown');
+          const projectName = prompt('Enter project name:');
+          if (projectName) {
+            addProject({
+              id: crypto.randomUUID(),
+              name: projectName,
+              description: '',
+              content: '',
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            });
+            onCommandExecute?.('project-new');
+            showToast(`Created project: ${projectName}`, 'success');
+          }
         },
       },
 
@@ -196,143 +113,157 @@ export function useCommands(
       // THEME COMMANDS
       // ========================================
       {
-        id: 'theme-toggle',
-        label: 'Toggle Dark/Light Mode',
-        description: `Switch to ${state.theme === 'dark' ? 'light' : 'dark'} mode`,
-        icon: state.theme === 'dark' ? '☀️' : '🌙',
+        id: 'theme-light',
+        label: 'Light Theme',
+        description: 'Switch to light theme',
+        icon: '☀️',
         category: 'navigation',
-        keywords: ['theme', 'dark', 'light', 'mode'],
-        shortcut: 'Cmd+Shift+L',
+        keywords: ['light', 'theme', 'bright'],
         action: () => {
-          const newTheme = state.theme === 'dark' ? 'light' : 'dark';
-          setTheme(newTheme);
-          showToast(`Switched to ${newTheme} mode`, 'info');
-          onCommandExecute?.('theme-toggle');
+          setTheme('light');
+          onCommandExecute?.('theme-light');
+          showToast('Switched to Light Theme', 'success');
+        },
+      },
+      {
+        id: 'theme-dark',
+        label: 'Dark Theme',
+        description: 'Switch to dark theme',
+        icon: '🌙',
+        category: 'navigation',
+        keywords: ['dark', 'theme', 'night'],
+        action: () => {
+          setTheme('dark');
+          onCommandExecute?.('theme-dark');
+          showToast('Switched to Dark Theme', 'success');
         },
       },
     ];
 
     // ========================================
-    // CONDITIONAL COMMANDS (TEXT SELECTION)
+    // CLAUDE AI COMMANDS (only if current project exists)
     // ========================================
-    if (selectedText && selectedText.trim().length > 0) {
-      const textPreview = selectedText.length > 30 
-        ? `"${selectedText.slice(0, 30)}..."` 
-        : `"${selectedText}"`;
-
+    if (currentProject && claudeActions) {
       commands.push(
         {
-          id: 'claude-improve-selection',
-          label: 'Improve Selected Text',
-          description: `Improve ${textPreview} with Claude`,
+          id: 'claude-improve',
+          label: 'Improve Writing',
+          description: selectedText
+            ? 'Improve selected text with Claude AI'
+            : 'Improve current writing with Claude AI',
           icon: '✨',
           category: 'claude',
-          keywords: ['improve', 'enhance', 'claude', 'selected'],
-          shortcut: 'Cmd+I',
+          keywords: ['improve', 'enhance', 'claude', 'ai'],
+          enabled: !!currentProject?.content || !!selectedText,
           action: async () => {
             try {
-              await claudeActions.improveText(selectedText);
-              showToast('Improving selected text', 'info');
               onCommandExecute?.('claude-improve');
-            } catch (error) {
+              const textToImprove = selectedText || currentProject?.content || '';
+              if (textToImprove) {
+                await claudeActions.improveText(textToImprove);
+                showToast('Text improvement requested', 'success');
+              } else {
+                showToast('No text to improve', 'error');
+              }
+            } catch (_error) {
               showToast('Failed to improve text', 'error');
             }
           },
         },
         {
-          id: 'claude-continue-selection',
-          label: 'Continue from Selection',
-          description: `Continue writing from ${textPreview}`,
+          id: 'claude-continue',
+          label: 'Continue Writing',
+          description: 'Continue writing from current position',
           icon: '➡️',
           category: 'claude',
-          keywords: ['continue', 'extend', 'claude'],
-          shortcut: 'Cmd+Shift+C',
+          keywords: ['continue', 'extend', 'claude', 'ai'],
+          enabled: !!currentProject?.content,
           action: async () => {
             try {
-              await claudeActions.suggestContinuation(selectedText);
-              showToast('Generating continuation', 'info');
               onCommandExecute?.('claude-continue');
-            } catch (error) {
-              showToast('Failed to continue text', 'error');
+              const content = currentProject?.content || '';
+              if (content) {
+                await claudeActions.suggestContinuation(content);
+                showToast('Continuation requested', 'success');
+              } else {
+                showToast('No text to continue from', 'error');
+              }
+            } catch (_error) {
+              showToast('Failed to continue writing', 'error');
             }
           },
         },
         {
-          id: 'claude-analyze-selection',
-          label: 'Analyze Writing Style',
-          description: `Analyze the style of ${textPreview}`,
+          id: 'claude-analyze',
+          label: 'Analyze Writing',
+          description: 'Get AI analysis of your writing',
           icon: '🔍',
           category: 'claude',
-          keywords: ['analyze', 'style', 'claude'],
-          shortcut: 'Cmd+Shift+A',
+          keywords: ['analyze', 'analysis', 'claude', 'ai'],
+          enabled: !!currentProject.content,
           action: async () => {
             try {
-              await claudeActions.analyzeWritingStyle(selectedText);
-              showToast('Analyzing writing style', 'info');
               onCommandExecute?.('claude-analyze');
-            } catch (error) {
+              const content = currentProject?.content || '';
+              if (content) {
+                await claudeActions.analyzeWritingStyle(content);
+                showToast('Analysis requested', 'success');
+              } else {
+                showToast('No text to analyze', 'error');
+              }
+            } catch (_error) {
               showToast('Failed to analyze text', 'error');
             }
           },
-        }
-      );
-    }
-
-    // ========================================
-    // PROJECT-SPECIFIC COMMANDS
-    // ========================================
-    if (currentProject) {
-      commands.push(
+        },
         {
-          id: 'claude-character-ideas',
-          label: 'Generate Character Ideas',
-          description: `Character ideas for "${currentProject.name}"`,
-          icon: '👥',
+          id: 'claude-brainstorm',
+          label: 'Brainstorm Ideas',
+          description: 'Generate creative ideas for your project',
+          icon: '💡',
           category: 'claude',
-          keywords: ['character', 'ideas', 'claude', 'generate'],
+          keywords: ['brainstorm', 'ideas', 'creative', 'claude'],
           action: async () => {
             try {
-              const prompt = `Generate character ideas for a story titled "${currentProject.name}". ${currentProject.description ? `Context: ${currentProject.description}` : ''}`;
-              await claudeActions.brainstormIdeas(prompt);
-              showToast('Generating character ideas', 'info');
-              onCommandExecute?.('claude-character-ideas');
-            } catch (error) {
-              showToast('Failed to generate character ideas', 'error');
+              onCommandExecute?.('claude-brainstorm');
+              const context = currentProject?.content || 'New creative writing project';
+              await claudeActions.brainstormIdeas(context);
+              showToast('Brainstorming session started', 'success');
+            } catch (_error) {
+              showToast('Failed to generate ideas', 'error');
             }
           },
         },
         {
           id: 'claude-plot-ideas',
           label: 'Generate Plot Ideas',
-          description: `Plot developments for "${currentProject.name}"`,
+          description: 'Get plot suggestions for your story',
           icon: '📖',
           category: 'claude',
-          keywords: ['plot', 'ideas', 'claude', 'story'],
+          keywords: ['plot', 'story', 'narrative', 'claude'],
           action: async () => {
             try {
-              const context = currentProject.description || currentProject.name;
-              await claudeActions.generatePlotIdeas(context);
-              showToast('Generating plot ideas', 'info');
               onCommandExecute?.('claude-plot-ideas');
-            } catch (error) {
+              const context = currentProject?.content || 'Story development';
+              await claudeActions.generatePlotIdeas(context);
+              showToast('Plot ideas generated', 'success');
+            } catch (_error) {
               showToast('Failed to generate plot ideas', 'error');
             }
           },
-        }
+        },
       );
     }
 
-    return commands.filter(cmd => cmd.enabled !== false);
+    return commands.filter((cmd) => cmd.enabled !== false);
   }, [
-    state, 
-    selectedText, 
-    currentProject, 
-    setView, 
-    addProject, 
-    updateProject, 
-    claudeActions, 
-    setTheme, 
-    showToast, 
-    onCommandExecute
+    selectedText,
+    currentProject,
+    setView,
+    addProject,
+    claudeActions,
+    setTheme,
+    showToast,
+    onCommandExecute,
   ]);
 }

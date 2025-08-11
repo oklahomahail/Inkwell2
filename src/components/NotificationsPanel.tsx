@@ -98,7 +98,7 @@ const NotificationsPanel: React.FC<NotificationsPanelProps> = ({
     <div className="bg-slate-900/70 backdrop-blur-md border border-slate-800 rounded-xl p-6 max-w-md text-white">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center space-x-2">
-          <h3 className="text-lg font-semibold">Notifications</h3>
+          <h3 className="text-lg font-semibold font-semibold">Notifications</h3>
           {unread > 0 && (
             <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full">
               {unread}

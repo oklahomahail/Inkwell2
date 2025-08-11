@@ -18,7 +18,9 @@ const PlatformLayout: React.FC<PlatformLayoutProps> = ({ children }) => {
             alt="Inkwell Logo"
             className="h-12 w-auto transition-all hover:drop-shadow-lg"
           />
-          <span className="text-3xl font-bold tracking-tight">Inkwell</span>
+          <span className="text-3xl font-extrabold leading-tight font-bold tracking-tight">
+            Inkwell
+          </span>
         </div>
         <nav className="space-x-6">
           <button
