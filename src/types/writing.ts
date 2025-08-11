@@ -1,72 +1,79 @@
-export interface WritingPanelState {
-  content: string;
+// src/types/writing.ts
+export enum SceneStatus {
+  DRAFT = 'draft',
+  REVISION = 'revision',
+  COMPLETE = 'complete'
+}
+
+export interface Scene {
+  id: string;
   title: string;
+  content: string;
+  summary?: string;
   wordCount: number;
-  readingTime: number;
-  exportFormat: ExportFormat;
-  isVisible: boolean;
-  // Auto-save state
-  isDirty: boolean;
-  isSaving: boolean;
-  lastSaved: Date | null;
-  saveCount: number;
-  // Error handling
-  error: string | null;
-  // Session tracking
-  session: WritingSession;
+  wordCountGoal?: number;
+  status: SceneStatus;
+  notes?: string;
+  tags?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+  order: number;
+}
+
+export interface Chapter {
+  id: string;
+  title: string;
+  summary?: string;
+  scenes: Scene[];
+  totalWordCount: number;
+  targetWordCount?: number;
+  status: SceneStatus;
+  createdAt: Date;
+  updatedAt: Date;
+  order: number;
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  description?: string;
+  chapters: Chapter[];
+  totalWordCount: number;
+  targetWordCount?: number;
+  genre?: string;
+  tags?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+  lastEditedAt: Date;
 }
 
 export interface WritingSession {
-  date: string;
+  id: string;
+  projectId: string;
+  sceneId?: string;
   startTime: Date;
-  wordsAtStart: number;
-  lastActivityTime: Date;
+  endTime?: Date;
+  wordsWritten: number;
+  timeSpent: number; // in minutes
 }
 
-export interface AutoSaveState {
-  isSaving: boolean;
-  lastSaved: Date | null;
-  isDirty: boolean;
-  saveCount: number;
+export interface WritingGoal {
+  id: string;
+  projectId?: string;
+  type: 'daily' | 'weekly' | 'monthly' | 'project';
+  targetWords: number;
+  currentWords: number;
+  deadline?: Date;
+  isActive: boolean;
 }
 
-export type WritingAction =
-  | { type: 'SET_CONTENT'; payload: string }
-  | { type: 'SET_TITLE'; payload: string }
-  | { type: 'SET_WORD_COUNT'; payload: number }
-  | { type: 'SET_READING_TIME'; payload: number }
-  | { type: 'SET_EXPORT_FORMAT'; payload: ExportFormat }
-  | { type: 'SET_IS_SAVING'; payload: boolean }
-  | { type: 'SET_LAST_SAVED'; payload: Date | null }
-  | { type: 'SET_SAVE_COUNT'; payload: number }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'SET_DIRTY'; payload: boolean }
-  | { type: 'CLEAR_DIRTY' }
-  | { type: 'UPDATE_SESSION'; payload: Partial<WritingSession> }
-  | { type: 'RESET' }
-  | { type: 'TOGGLE_VISIBILITY' }
-  | { type: string; payload?: any };
-
-export type ExportFormat = 'markdown' | 'txt' | 'docx' | 'pdf' | 'html';
-
-// Additional interfaces for better type safety
-export interface SaveQueueItem {
-  content: string;
-  title: string;
-  timestamp: number;
-  type: 'auto' | 'manual' | 'claude';
-}
-
-export interface WritingMetrics {
-  wordsPerMinute: number;
-  productivity: number;
-  focusTime: number;
-  sessionsToday: number;
-}
-
-export interface ProjectAnalytics {
+export interface WritingStats {
   totalWords: number;
-  sessionsCount: number;
+  totalSessions: number;
   averageSessionLength: number;
-  lastModified: Date;
+  currentStreak: number;
+  longestStreak: number;
+  wordsToday: number;
+  wordsThisWeek: number;
+  wordsThisMonth: number;
 }

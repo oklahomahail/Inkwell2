@@ -31,21 +31,30 @@
     ]
   },
   "dependencies": {
+    "@tiptap/extension-character-count": "^3.1.0",
+    "@tiptap/extension-placeholder": "^3.1.0",
+    "@tiptap/extension-typography": "^3.1.0",
+    "@tiptap/pm": "^3.1.0",
+    "@tiptap/react": "^3.1.0",
+    "@tiptap/starter-kit": "^3.1.0",
+    "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.536.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "^7.7.1",
-    "recharts": "^3.1.2"
+    "recharts": "^3.1.2",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.33.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
     "@types/crypto-js": "^4.2.2",
     "@types/lodash": "^4.17.20",
-    "@types/node": "^24.1.0",
+    "@types/node": "^24.2.1",
     "@types/react": "18.3.23",
     "@types/react-dom": "18.3.0",
     "@types/react-router-dom": "^5.3.3",
