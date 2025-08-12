@@ -1,6 +1,6 @@
 // src/components/Panels/WritingPanel.tsx - Enhanced with Claude Integration
 import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
-import { WritingSession, AutoSaveState } from '../../types/writing';
+import { UIWritingSession, AutoSaveState } from '../../types/writing';
 import { ExportFormat } from '../../types/writing';
 import { useToast } from '@/context/ToastContext';
 import { useAppContext } from '@/context/AppContext';
@@ -132,14 +132,14 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
 }) => {
   const [content, setContent] = useState(draftText);
   const [title, setTitle] = useState(DEFAULT_TITLE);
-  const [exportFormat, setExportFormat] = useState<ExportFormat>('markdown');
+  const [exportFormat, setExportFormat] = useState<ExportFormat>(ExportFormat.MARKDOWN);
   const [autoSaveState, setAutoSaveState] = useState<AutoSaveState>({
     isSaving: false,
     lastSaved: null,
     isDirty: false,
     saveCount: 0,
   });
-  const [session, setSession] = useState<WritingSession>({
+  const [session, setSession] = useState<UIWritingSession>({
     date: new Date().toLocaleDateString(),
     startTime: new Date(),
     wordsAtStart: draftText.trim().split(/\s+/).length,
@@ -173,13 +173,13 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
 
   // Track edits for autosave
   useEffect(() => {
-    setAutoSaveState((prev) => ({ ...prev, isDirty: true }));
-    setSession((prev) => ({ ...prev, lastActivityTime: new Date() }));
+    setAutoSaveState((prev: AutoSaveState) => ({ ...prev, isDirty: true }));
+    setSession((prev: any) => ({ ...prev, lastActivityTime: new Date() }));
     onChangeText(content);
   }, [content, onChangeText]);
 
   const handleAutoSave = useCallback(() => {
-    setAutoSaveState((prev) => ({
+    setAutoSaveState((prev: { saveCount: number }) => ({
       isSaving: false,
       isDirty: false,
       lastSaved: new Date(),
@@ -201,7 +201,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
   }, [autoSaveState.isDirty, content, handleAutoSave]);
 
   const handleManualSave = useCallback(() => {
-    setAutoSaveState((prev) => ({
+    setAutoSaveState((prev: { saveCount: number }) => ({
       isSaving: false,
       isDirty: false,
       lastSaved: new Date(),

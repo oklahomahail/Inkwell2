@@ -1,3 +1,4 @@
+// src/components/Writing/WritingPanel.tsx
 import React, { useEffect } from 'react';
 import useWriting from '@/hooks/useWriting';
 import { Chapter, Scene, SceneStatus, ChapterStatus } from '@/types/writing';
@@ -46,6 +47,8 @@ export const WritingPanel: React.FC = () => {
       status: SceneStatus.DRAFT,
       order: 0,
       wordCount: 0,
+      wordCountGoal: undefined, // ✅ Added missing property
+      summary: undefined, // ✅ Added missing property
       createdAt: new Date(),
       updatedAt: new Date(),
     };

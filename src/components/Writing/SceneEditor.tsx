@@ -1,17 +1,9 @@
 // src/components/Writing/SceneEditor.tsx
 import React, { useCallback, useState } from 'react';
-import { TipTapEditor } from './WorkingTipTapV3Editor';
+import TipTapEditor from './TipTapEditor';
 import { Scene, SceneStatus } from '../../types/writing';
 import { cn } from '../../utils/cn';
-import { 
-  Save, 
-  Settings, 
-  Tag, 
-  Target,
-  Clock,
-  FileText,
-  ChevronDown
-} from 'lucide-react';
+import { Save, Settings, Tag, Target, Clock, FileText, ChevronDown } from 'lucide-react';
 
 interface SceneEditorProps {
   scene: Scene;
@@ -24,57 +16,63 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({
   scene,
   onSceneUpdate,
   onSave,
-  className
+  className,
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [localTitle, setLocalTitle] = useState(scene.title);
   const [localSummary, setLocalSummary] = useState(scene.summary || '');
   const [localGoal, setLocalGoal] = useState(scene.wordCountGoal || 0);
 
-  const handleContentChange = useCallback((content: string) => {
-    onSceneUpdate(scene.id, { 
-      content,
-      updatedAt: new Date()
-    });
-  }, [scene.id, onSceneUpdate]);
+  const handleContentChange = useCallback(
+    (content: string) => {
+      onSceneUpdate(scene.id, {
+        content,
+        updatedAt: new Date(),
+      });
+    },
+    [scene.id, onSceneUpdate],
+  );
 
-  const handleWordCountChange = useCallback((wordCount: number) => {
-    onSceneUpdate(scene.id, { 
-      wordCount,
-      updatedAt: new Date()
-    });
-  }, [scene.id, onSceneUpdate]);
+  const handleWordCountChange = useCallback(
+    (wordCount: number) => {
+      onSceneUpdate(scene.id, {
+        wordCount,
+        updatedAt: new Date(),
+      });
+    },
+    [scene.id, onSceneUpdate],
+  );
 
   const handleStatusChange = (status: SceneStatus) => {
-    onSceneUpdate(scene.id, { 
+    onSceneUpdate(scene.id, {
       status,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   };
 
   const handleTitleBlur = () => {
     if (localTitle !== scene.title) {
-      onSceneUpdate(scene.id, { 
+      onSceneUpdate(scene.id, {
         title: localTitle,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
     }
   };
 
   const handleSummaryBlur = () => {
     if (localSummary !== scene.summary) {
-      onSceneUpdate(scene.id, { 
+      onSceneUpdate(scene.id, {
         summary: localSummary,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
     }
   };
 
   const handleGoalUpdate = () => {
     if (localGoal !== scene.wordCountGoal) {
-      onSceneUpdate(scene.id, { 
+      onSceneUpdate(scene.id, {
         wordCountGoal: localGoal,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
     }
   };
@@ -106,7 +104,7 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({
   };
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn('space-y-4', className)}>
       {/* Scene Header */}
       <div className="bg-white dark:bg-gray-900 rounded-lg border p-4 space-y-4">
         {/* Title and Status Row */}
@@ -119,7 +117,7 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({
             className="text-xl font-bold bg-transparent border-none outline-none flex-1 mr-4"
             placeholder="Scene title..."
           />
-          
+
           <div className="flex items-center space-x-2">
             {/* Status Selector */}
             <div className="relative">
@@ -127,13 +125,11 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({
                 value={scene.status}
                 onChange={(e) => handleStatusChange(e.target.value as SceneStatus)}
                 className={cn(
-                  "appearance-none px-3 py-1 rounded-full text-sm font-medium border cursor-pointer",
-                  getStatusColor(scene.status)
+                  'appearance-none px-3 py-1 rounded-full text-sm font-medium border cursor-pointer',
+                  getStatusColor(scene.status),
                 )}
               >
-                <option value={SceneStatus.DRAFT}>
-                  {getStatusIcon(SceneStatus.DRAFT)} Draft
-                </option>
+                <option value={SceneStatus.DRAFT}>{getStatusIcon(SceneStatus.DRAFT)} Draft</option>
                 <option value={SceneStatus.REVISION}>
                   {getStatusIcon(SceneStatus.REVISION)} Revision
                 </option>
@@ -228,12 +224,10 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({
 
       {/* TipTap Editor */}
       <TipTapEditor
-        content={scene.content}
+        value={scene.content}
         onChange={handleContentChange}
         onWordCountChange={handleWordCountChange}
         placeholder={`Start writing "${scene.title}"...`}
-        sceneId={scene.id}
-        wordCountGoal={scene.wordCountGoal}
         className="bg-white dark:bg-gray-900"
       />
     </div>

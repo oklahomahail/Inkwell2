@@ -13,6 +13,8 @@ type Props = {
   placeholder?: string;
   readOnly?: boolean;
   className?: string;
+  sceneId?: string; // Add this
+  wordCountGoal?: number; // Add this
 };
 
 export default function TipTapEditor({
