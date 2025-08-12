@@ -1,193 +1,94 @@
-// src/components/Writing/WritingPanel.tsx - Complete integration example
-import React, { useEffect, useReducer, useState } from 'react';
-import { SceneEditor } from './SceneEditor';
-import { SceneList } from './SceneList';
-import { Scene, SceneStatus } from '../../types/writing';
-import { writingReducer, WritingState } from '../../reducers/writingReducer';
-import { storageService } from '../../services/storageService';
-import { useFocusMode } from '../../hooks/useFocusMode';
-import { cn } from '../../utils/cn';
-import { Plus, BookOpen } from 'lucide-react';
-import { generateId } from '../../utils/id';
-
-const initialState: WritingState = {
-  currentProject: null,
-  chapters: [],
-  currentScene: null,
-  isLoading: false,
-  error: null,
-};
+import React, { useEffect } from 'react';
+import useWriting from '@/hooks/useWriting';
+import { Chapter, Scene, SceneStatus, ChapterStatus } from '@/types/writing';
+import { storageService } from '@/services/storageService';
+import { generateId } from '@/utils/idUtils';
 
 export const WritingPanel: React.FC = () => {
-  const [state, dispatch] = useReducer(writingReducer, initialState);
-  const { isFocusMode } = useFocusMode();
-  const [showSceneList, setShowSceneList] = useState(true);
+  const { state, dispatch } = useWriting();
 
-  // Load initial data
+  // Load chapters from the writing store when a project is selected/available
   useEffect(() => {
-    const loadData = async () => {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      try {
-        await storageService.init();
-        // Load chapters and scenes
-        // This would be your actual data loading logic
-        dispatch({ type: 'SET_LOADING', payload: false });
-      } catch (error) {
-        dispatch({ type: 'SET_ERROR', payload: 'Failed to load writing data' });
-        dispatch({ type: 'SET_LOADING', payload: false });
-      }
-    };
-
-    loadData();
-  }, []);
-
-  const handleSceneUpdate = async (sceneId: string, updates: Partial<Scene>) => {
-    dispatch({ type: 'UPDATE_SCENE', payload: { sceneId, updates } });
-    
-    try {
-      await storageService.updateScene(sceneId, updates);
-    } catch (error) {
-      console.error('Failed to save scene:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to save scene changes' });
+    if (!state.currentProject) return;
+    const chapters = storageService.loadWritingChapters(state.currentProject);
+    if (chapters.length) {
+      dispatch({ type: 'SET_CHAPTERS', payload: chapters });
     }
+  }, [state.currentProject, dispatch]);
+
+  const persistChapters = (chapters: Chapter[]) => {
+    if (!state.currentProject) return;
+    storageService.saveWritingChapters(state.currentProject, chapters);
   };
 
-  const handleSceneSelect = (scene: Scene) => {
-    dispatch({ type: 'SET_CURRENT_SCENE', payload: scene });
-  };
-
-  const handleCreateNewScene = () => {
-    const newScene: Scene = {
-      id: generateId(),
-      title: 'New Scene',
-      content: '',
-      wordCount: 0,
-      wordCountGoal: 500,
-      status: SceneStatus.DRAFT,
+  const addChapter = () => {
+    const newChapter: Chapter = {
+      id: generateId('chap'),
+      title: 'Untitled Chapter',
+      order: state.chapters.length,
+      scenes: [],
+      totalWordCount: 0,
+      status: ChapterStatus.DRAFT,
       createdAt: new Date(),
       updatedAt: new Date(),
-      order: state.chapters[0]?.scenes.length || 0,
     };
 
-    // Add to first chapter or create one
-    if (state.chapters.length === 0) {
-      // Create first chapter logic here
-    } else {
-      dispatch({ 
-        type: 'ADD_SCENE', 
-        payload: { chapterId: state.chapters[0].id, scene: newScene }
-      });
-    }
-
-    dispatch({ type: 'SET_CURRENT_SCENE', payload: newScene });
+    const chapters = [...state.chapters, newChapter];
+    dispatch({ type: 'ADD_CHAPTER', payload: newChapter });
+    persistChapters(chapters);
   };
 
-  const handleSave = async () => {
-    if (!state.currentScene) return;
-    
-    try {
-      await storageService.saveScene(state.currentScene);
-      // Show success notification
-    } catch (error) {
-      console.error('Failed to save:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to save scene' });
-    }
-  };
+  const addScene = (chapterId: string) => {
+    const newScene: Scene = {
+      id: generateId('scene'),
+      title: 'Untitled Scene',
+      content: '',
+      status: SceneStatus.DRAFT,
+      order: 0,
+      wordCount: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-  // Get all scenes from all chapters
-  const allScenes = state.chapters.flatMap(chapter => chapter.scenes);
+    dispatch({ type: 'ADD_SCENE', payload: { chapterId, scene: newScene } });
 
-  if (state.isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading your writing...</p>
-        </div>
-      </div>
+    // Persist after state update
+    const chapters = state.chapters.map((c) =>
+      c.id === chapterId ? { ...c, scenes: [...c.scenes, newScene] } : c,
     );
-  }
+    persistChapters(chapters);
+  };
 
   return (
-    <div className={cn(
-      "h-full flex",
-      isFocusMode ? "fixed inset-0 z-50 bg-white dark:bg-gray-900" : ""
-    )}>
-      {/* Scene List Sidebar */}
-      {!isFocusMode && showSceneList && (
-        <div className="w-80 border-r bg-gray-50 dark:bg-gray-800 flex flex-col">
-          <div className="p-4 border-b">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold flex items-center">
-                <BookOpen className="w-5 h-5 mr-2" />
-                Scenes
-              </h2>
-              <button
-                onClick={handleCreateNewScene}
-                className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                title="Create new scene"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto p-4">
-            <SceneList
-              scenes={allScenes}
-              currentSceneId={state.currentScene?.id}
-              onSceneSelect={handleSceneSelect}
-              onSceneDelete={(sceneId) => {
-                // Implement delete logic
-                console.log('Delete scene:', sceneId);
-              }}
-            />
-          </div>
-        </div>
-      )}
+    <div className="p-4">
+      <h1 className="text-xl font-bold mb-4">Writing Panel</h1>
 
-      {/* Main Editor Area */}
-      <div className="flex-1 flex flex-col">
-        {state.currentScene ? (
-          <SceneEditor
-            scene={state.currentScene}
-            onSceneUpdate={handleSceneUpdate}
-            onSave={handleSave}
-            className="flex-1 p-4"
-          />
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-2">
-                Welcome to Inkwell
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Select a scene from the sidebar or create a new one to start writing.
-              </p>
-              <button
-                onClick={handleCreateNewScene}
-                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                Create Your First Scene
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      <button onClick={addChapter} className="bg-blue-600 text-white px-4 py-2 rounded mb-4">
+        Add Chapter
+      </button>
 
-      {/* Error Display */}
-      {state.error && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg">
-          {state.error}
-          <button
-            onClick={() => dispatch({ type: 'SET_ERROR', payload: null })}
-            className="ml-2 underline"
-          >
-            Dismiss
-          </button>
+      {state.chapters.map((chapter) => (
+        <div key={chapter.id} className="mb-4 p-3 border rounded">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold">{chapter.title}</h2>
+            <button
+              onClick={() => addScene(chapter.id)}
+              className="bg-green-600 text-white px-3 py-1 rounded"
+            >
+              Add Scene
+            </button>
+          </div>
+
+          <ul className="ml-4 mt-2 list-disc">
+            {chapter.scenes.map((scene) => (
+              <li key={scene.id} className="text-sm">
+                {scene.title || 'Untitled Scene'}{' '}
+                <span className="text-xs text-slate-500">({scene.status})</span>
+              </li>
+            ))}
+          </ul>
         </div>
-      )}
+      ))}
     </div>
   );
 };

@@ -1,39 +1,36 @@
-import { EnhancedProject, WritingSession } from "@/types/project";
+// src/services/storageService.ts
+import { EnhancedProject, WritingSession } from '@/types/project';
+import { Scene, Chapter as WritingChapter, ChapterStatus } from '@/types/writing';
+
 export class EnhancedStorageService {
   private static PROJECTS_KEY = 'inkwell_enhanced_projects';
-  
+  private static writingChaptersKey = (projectId: string) =>
+    `inkwell_writing_chapters_${projectId}`;
+
+  // ---------- EnhancedProject (unchanged shape) ----------
   static saveProject(project: EnhancedProject): void {
     try {
       const projects = this.loadAllProjects();
-      const existingIndex = projects.findIndex(p => p.id === project.id);
-      
-      const updatedProject = {
-        ...project,
-        updatedAt: Date.now()
-      };
-      
-      if (existingIndex >= 0) {
-        projects[existingIndex] = updatedProject;
-      } else {
-        projects.push(updatedProject);
-      }
-      
+      const idx = projects.findIndex((p) => p.id === project.id);
+      const updated = { ...project, updatedAt: Date.now() };
+      if (idx >= 0) projects[idx] = updated;
+      else projects.push(updated);
       localStorage.setItem(this.PROJECTS_KEY, JSON.stringify(projects));
     } catch (error) {
       console.error('Failed to save project:', error);
     }
   }
-  
+
   static loadProject(projectId: string): EnhancedProject | null {
     try {
       const projects = this.loadAllProjects();
-      return projects.find(p => p.id === projectId) || null;
+      return projects.find((p) => p.id === projectId) || null;
     } catch (error) {
       console.error('Failed to load project:', error);
       return null;
     }
   }
-  
+
   static loadAllProjects(): EnhancedProject[] {
     try {
       const stored = localStorage.getItem(this.PROJECTS_KEY);
@@ -43,30 +40,154 @@ export class EnhancedStorageService {
       return [];
     }
   }
-  
+
   static updateProjectContent(projectId: string, content: string): void {
     const project = this.loadProject(projectId);
     if (project) {
-      // Update recent content (keep last 1000 words)
       const words = content.split(' ');
-      project.recentContent = words.slice(-1000).join(' ');
-      project.currentWordCount = words.length;
-      
+      (project as any).recentContent = words.slice(-1000).join(' ');
+      (project as any).currentWordCount = words.length;
       this.saveProject(project);
     }
   }
-  
-  static addWritingSession(projectId: string, session: Omit<WritingSession, 'id' | 'projectId'>): void {
+
+  static addWritingSession(
+    projectId: string,
+    session: Omit<WritingSession, 'id' | 'projectId'>,
+  ): void {
     const project = this.loadProject(projectId);
     if (project) {
       const newSession: WritingSession = {
         ...session,
         id: `session_${Date.now()}`,
-        projectId
+        projectId,
       };
-      
-      project.sessions.push(newSession);
+      (project as any).sessions = Array.isArray((project as any).sessions)
+        ? [...(project as any).sessions, newSession]
+        : [newSession];
       this.saveProject(project);
     }
   }
+
+  // ---------- Local-first storage for writing chapters (editor shape) ----------
+  static saveWritingChapters(projectId: string, chapters: WritingChapter[]): void {
+    try {
+      localStorage.setItem(this.writingChaptersKey(projectId), JSON.stringify(chapters));
+    } catch (error) {
+      console.error('Failed to save writing chapters:', error);
+    }
+  }
+
+  static loadWritingChapters(projectId: string): WritingChapter[] {
+    try {
+      const raw = localStorage.getItem(this.writingChaptersKey(projectId));
+      return raw ? (JSON.parse(raw) as WritingChapter[]) : [];
+    } catch (error) {
+      console.error('Failed to load writing chapters:', error);
+      return [];
+    }
+  }
+
+  // ---------- Scene-level helpers on writing chapters ----------
+  static updateSceneInWritingChapters(
+    projectId: string,
+    sceneId: string,
+    updates: Partial<Scene>,
+  ): void {
+    const chapters = this.loadWritingChapters(projectId);
+    const newChapters: WritingChapter[] = chapters.map((ch) => {
+      const nextScenes = ch.scenes.map((s) =>
+        s.id === sceneId ? { ...s, ...updates, updatedAt: new Date() } : s,
+      );
+      return {
+        ...ch,
+        scenes: nextScenes,
+        totalWordCount: nextScenes.reduce((sum, s) => sum + (s.wordCount || 0), 0),
+        updatedAt: new Date(),
+      };
+    });
+    this.saveWritingChapters(projectId, newChapters);
+  }
+
+  static upsertSceneInWritingChapters(projectId: string, scene: Scene): void {
+    const chapters = this.loadWritingChapters(projectId);
+
+    // Try replace existing scene if found
+    let found = false;
+    const newChapters: WritingChapter[] = chapters.map((ch) => {
+      const idx = ch.scenes.findIndex((s) => s.id === scene.id);
+      if (idx >= 0) {
+        found = true;
+        const nextScenes = [...ch.scenes];
+        nextScenes[idx] = { ...scene, updatedAt: new Date() };
+        return {
+          ...ch,
+          scenes: nextScenes,
+          totalWordCount: nextScenes.reduce((sum, s) => sum + (s.wordCount || 0), 0),
+          updatedAt: new Date(),
+        };
+      }
+      return ch;
+    });
+
+    if (!found) {
+      if (newChapters.length === 0) {
+        // Create first chapter if none exist
+        const firstChapter: WritingChapter = {
+          id: `chap_${Date.now()}`,
+          title: 'Chapter 1',
+          order: 0,
+          scenes: [{ ...scene, updatedAt: new Date() }],
+          totalWordCount: scene.wordCount ?? 0,
+          status: ChapterStatus.DRAFT, // ✅ real enum, not any
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        newChapters.push(firstChapter);
+      } else {
+        // Safe access since length > 0
+        const first = newChapters[0]!;
+        const nextScenes = [...first.scenes, { ...scene, updatedAt: new Date() }];
+        newChapters[0] = {
+          ...first,
+          scenes: nextScenes,
+          totalWordCount: nextScenes.reduce((sum, s) => sum + (s.wordCount || 0), 0),
+          updatedAt: new Date(),
+        };
+      }
+    }
+
+    this.saveWritingChapters(projectId, newChapters);
+  }
 }
+
+// -------- Facade for UI code (friendly API) --------
+export const storageService = {
+  init() {
+    return Promise.resolve();
+  },
+
+  // Projects (unchanged)
+  loadAllProjects: (): EnhancedProject[] => EnhancedStorageService.loadAllProjects(),
+  loadProject: (projectId: string): EnhancedProject | null =>
+    EnhancedStorageService.loadProject(projectId),
+
+  // Writing chapters (editor shape)
+  loadWritingChapters: (projectId: string): WritingChapter[] =>
+    EnhancedStorageService.loadWritingChapters(projectId),
+
+  saveWritingChapters: (projectId: string, chapters: WritingChapter[]) => {
+    EnhancedStorageService.saveWritingChapters(projectId, chapters);
+    return Promise.resolve();
+  },
+
+  updateScene(projectId: string, sceneId: string, updates: Partial<Scene>) {
+    EnhancedStorageService.updateSceneInWritingChapters(projectId, sceneId, updates);
+    return Promise.resolve();
+  },
+
+  saveScene(projectId: string, scene: Scene) {
+    EnhancedStorageService.upsertSceneInWritingChapters(projectId, scene);
+    return Promise.resolve();
+  },
+};

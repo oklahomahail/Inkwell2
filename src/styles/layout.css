@@ -11,3 +11,11 @@
 body {
   @apply font-sans bg-gray-50 text-gray-900 leading-relaxed;
 }
+
+.focus-mode .Sidebar,
+.focus-mode .Topbar {
+  display: none;
+}
+.focus-mode .WritingArea {
+  padding: 1rem;
+}

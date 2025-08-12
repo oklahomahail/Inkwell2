@@ -1,42 +1,72 @@
 // src/components/Layout.tsx
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import Sidebar from '@/components/Sidebar';
+import Topbar from '@/components/Topbar';
+import { useFocusMode } from '@/hooks/useFocusMode';
+import { cn } from '@/utils/cn';
 
-interface LayoutProps {
+type LayoutProps = {
   children: React.ReactNode;
-}
-
-const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const location = useLocation();
-
-  const tabs = [
-    { path: '/dashboard', label: 'Dashboard' },
-    { path: '/writing', label: 'Writing' },
-    { path: '/timeline', label: 'Timeline' },
-    { path: '/analysis', label: 'Analysis' },
-    { path: '/settings', label: 'Settings' },
-  ];
-
-  return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <nav className="flex gap-4 px-6 py-4 border-b bg-gray-100 dark:bg-gray-800">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.path}
-            to={tab.path}
-            className={`px-4 py-2 rounded-lg text-sm text-gray-600 font-medium transition-all ${
-              location.pathname === tab.path
-                ? 'bg-primary text-white'
-                : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-            }`}
-          >
-            {tab.label}
-          </Link>
-        ))}
-      </nav>
-      <main className="flex-1 p-6">{children}</main>
-    </div>
-  );
+  projectName?: string;
+  theme?: 'light' | 'dark';
+  onToggleTheme?: () => void;
+  onToggleClaude?: () => void;
+  onOpenNotifications?: () => void;
 };
 
-export default Layout;
+export default function Layout({
+  children,
+  projectName,
+  theme,
+  onToggleTheme,
+  onToggleClaude,
+  onOpenNotifications,
+}: LayoutProps) {
+  const { isFocusMode } = useFocusMode();
+
+  return (
+    <div
+      className={cn(
+        isFocusMode ? 'focus-mode' : '',
+        'min-h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100',
+      )}
+    >
+      <div className="flex h-screen w-full overflow-hidden">
+        {/* Sidebar */}
+        <aside
+          className={cn(
+            'Sidebar h-full w-64 shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur',
+            isFocusMode && 'hidden',
+          )}
+        >
+          <Sidebar />
+        </aside>
+
+        {/* Main column */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Topbar */}
+          <div className={cn('Topbar', isFocusMode && 'hidden')}>
+            <Topbar
+              projectName={projectName}
+              theme={theme}
+              onToggleTheme={onToggleTheme}
+              onToggleClaude={onToggleClaude}
+              onOpenNotifications={onOpenNotifications}
+            />
+          </div>
+
+          {/* Content */}
+          <main
+            className={cn(
+              'WritingArea relative flex-1 overflow-auto',
+              // comfortable padding; reduced when chrome is hidden
+              isFocusMode ? 'p-4 md:p-6 lg:p-8' : 'p-4 md:p-6',
+            )}
+          >
+            {children}
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}

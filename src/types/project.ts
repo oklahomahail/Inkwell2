@@ -104,6 +104,7 @@ export interface WorldBuildingNote {
 }
 
 export interface Chapter {
+  scenes: any;
   id: string;
   title: string;
   summary?: string;
