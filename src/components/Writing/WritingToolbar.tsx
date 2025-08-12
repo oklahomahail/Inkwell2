@@ -1,7 +1,7 @@
 // src/components/Writing/WritingToolbar.tsx
 import React from 'react';
 import { ExportFormat } from '../../types/writing';
-import { Save, Download, Sparkles, FileText, FileDown, File } from 'lucide-react';
+import { Save, Sparkles, FileText, FileDown, File } from 'lucide-react';
 
 export interface WritingToolbarProps {
   title: string;

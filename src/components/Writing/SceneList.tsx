@@ -2,14 +2,7 @@
 import React from 'react';
 import { Scene, SceneStatus } from '../../types/writing';
 import { cn } from '../../utils/cn';
-import { 
-  FileText, 
-  Target, 
-  Clock,
-  MoreVertical,
-  Edit3,
-  Trash2
-} from 'lucide-react';
+import { FileText, Target, Clock, _MoreVertical, _Edit3, Trash2 } from 'lucide-react';
 
 interface SceneListProps {
   scenes: Scene[];
@@ -24,7 +17,7 @@ export const SceneList: React.FC<SceneListProps> = ({
   currentSceneId,
   onSceneSelect,
   onSceneDelete,
-  className
+  className,
 }) => {
   const getStatusColor = (status: SceneStatus) => {
     switch (status) {
@@ -58,7 +51,7 @@ export const SceneList: React.FC<SceneListProps> = ({
   };
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn('space-y-2', className)}>
       {scenes.length === 0 ? (
         <div className="text-center py-8 text-gray-500 dark:text-gray-400">
           <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -69,26 +62,30 @@ export const SceneList: React.FC<SceneListProps> = ({
         scenes.map((scene) => {
           const isActive = scene.id === currentSceneId;
           const progressPercentage = getProgressPercentage(scene);
-          
+
           return (
             <div
               key={scene.id}
               className={cn(
-                "group relative p-4 rounded-lg border cursor-pointer transition-all",
-                "hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600",
+                'group relative p-4 rounded-lg border cursor-pointer transition-all',
+                'hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600',
                 isActive
-                  ? "bg-blue-50 border-blue-500 dark:bg-blue-900/20 dark:border-blue-500"
-                  : "bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700"
+                  ? 'bg-blue-50 border-blue-500 dark:bg-blue-900/20 dark:border-blue-500'
+                  : 'bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700',
               )}
               onClick={() => onSceneSelect(scene)}
             >
               {/* Scene Header */}
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1 min-w-0">
-                  <h4 className={cn(
-                    "font-medium truncate",
-                    isActive ? "text-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-gray-100"
-                  )}>
+                  <h4
+                    className={cn(
+                      'font-medium truncate',
+                      isActive
+                        ? 'text-blue-900 dark:text-blue-100'
+                        : 'text-gray-900 dark:text-gray-100',
+                    )}
+                  >
                     {scene.title || 'Untitled Scene'}
                   </h4>
                   {scene.summary && (
@@ -99,10 +96,12 @@ export const SceneList: React.FC<SceneListProps> = ({
                 </div>
 
                 {/* Status Badge */}
-                <div className={cn(
-                  "ml-3 px-2 py-1 rounded-full text-xs font-medium border flex-shrink-0",
-                  getStatusColor(scene.status)
-                )}>
+                <div
+                  className={cn(
+                    'ml-3 px-2 py-1 rounded-full text-xs font-medium border flex-shrink-0',
+                    getStatusColor(scene.status),
+                  )}
+                >
                   <span className="mr-1">{getStatusIcon(scene.status)}</span>
                   {scene.status.charAt(0).toUpperCase() + scene.status.slice(1)}
                 </div>
@@ -125,15 +124,13 @@ export const SceneList: React.FC<SceneListProps> = ({
                         <div className="w-16 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                           <div
                             className={cn(
-                              "h-full transition-all duration-300",
-                              progressPercentage >= 100 ? "bg-green-500" : "bg-blue-500"
+                              'h-full transition-all duration-300',
+                              progressPercentage >= 100 ? 'bg-green-500' : 'bg-blue-500',
                             )}
                             style={{ width: `${progressPercentage}%` }}
                           />
                         </div>
-                        <span className="text-xs">
-                          {Math.round(progressPercentage)}%
-                        </span>
+                        <span className="text-xs">{Math.round(progressPercentage)}%</span>
                       </div>
                     </div>
                   )}

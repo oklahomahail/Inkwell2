@@ -271,7 +271,7 @@ Context: You have access to the user's current project and any selected text. Al
 
   private saveConfig(): void {
     try {
-      const { apiKey, ...rest } = this.config;
+      const { apiKey: _apiKey, ...rest } = this.config;
       localStorage.setItem('claude_config', JSON.stringify(rest));
     } catch (e) {
       console.warn('Failed to save config:', e);

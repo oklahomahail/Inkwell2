@@ -39,12 +39,12 @@ function buildChartData(chartType: string, _rawData: any) {
 }
 
 // Mock data types to avoid import issues
-interface ComparisonData {
+interface _ComparisonData {
   current: number;
   previous: number;
 }
 
-interface CampaignSuccessData {
+interface _CampaignSuccessData {
   successful: number;
   total: number;
   rate: number;

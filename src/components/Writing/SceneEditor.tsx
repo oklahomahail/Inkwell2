@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import TipTapEditor from './TipTapEditor';
 import { Scene, SceneStatus } from '../../types/writing';
 import { cn } from '../../utils/cn';
-import { Save, Settings, Tag, Target, Clock, FileText, ChevronDown } from 'lucide-react';
+import { Save, Settings, Target, Clock, FileText, ChevronDown } from 'lucide-react';
 
 interface SceneEditorProps {
   scene: Scene;

@@ -54,8 +54,8 @@ export function calculateSecureChecksum(data: BackupData): string {
   try {
     const jsonString = JSON.stringify(data, Object.keys(data).sort());
     return CryptoJS.SHA256(jsonString).toString();
-  } catch (error) {
-    console.error('Failed to calculate checksum:', error);
+  } catch (_error) {
+    console.error('Failed to calculate checksum:', _error);
     return '';
   }
 }
@@ -73,8 +73,8 @@ export function calculateLightChecksum(data: BackupData): string {
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(16);
-  } catch (error) {
-    console.error('Failed to calculate light checksum:', error);
+  } catch (_error) {
+    console.error('Failed to calculate light checksum:', _error);
     return '';
   }
 }
@@ -85,7 +85,7 @@ export function calculateLightChecksum(data: BackupData): string {
 export function calculateDataSize(data: BackupData): number {
   try {
     return new Blob([JSON.stringify(data)]).size;
-  } catch (error) {
+  } catch (_error) {
     return 0;
   }
 }
@@ -138,8 +138,8 @@ export async function checkStorageInfo(): Promise<StorageInfo> {
       percentage,
       nearLimit: percentage > 85,
     };
-  } catch (error) {
-    console.error('Failed to check storage info:', error);
+  } catch (_error) {
+    console.error('Failed to check storage info:', _error);
     return { used: 0, available: 0, percentage: 0, nearLimit: false };
   }
 }
@@ -216,7 +216,7 @@ export function validateBackupData(
     }
 
     return { isValid: errors.length === 0, errors, warnings };
-  } catch (error) {
+  } catch (_error) {
     return {
       isValid: false,
       errors: ['Validation process failed'],
@@ -232,8 +232,8 @@ export function compressBackupData(data: BackupData): string {
   try {
     // Simple compression: remove unnecessary whitespace and sort keys
     return JSON.stringify(data, Object.keys(data).sort());
-  } catch (error) {
-    console.error('Failed to compress backup data:', error);
+  } catch (_error) {
+    console.error('Failed to compress backup data:', _error);
     return JSON.stringify(data);
   }
 }
@@ -294,8 +294,8 @@ export function createDifferentialBackup(
       changes: hasChanges ? changes : currentData,
       size: calculateDataSize(hasChanges ? changes : currentData),
     };
-  } catch (error) {
-    console.error('Failed to create differential backup:', error);
+  } catch (_error) {
+    console.error('Failed to create differential backup:', _error);
     return {
       isDifferential: false,
       changes: currentData,
@@ -354,7 +354,7 @@ export function cleanupCorruptedBackups(backups: Record<string, Record<string, u
         removedCount++;
         errors.push(`Removed corrupted backup ${id}: ${validation.errors.join(', ')}`);
       }
-    } catch (error) {
+    } catch (_error) {
       removedCount++;
       errors.push(`Removed invalid backup ${id}: parsing failed`);
     }
