@@ -1,9 +1,29 @@
-// src/hooks/useFocusMode.ts
-import { useEffect, useState } from 'react';
+// src/hooks/useFocusMode.ts - Clean, comprehensive focus mode hook
+import { useState, useCallback, useEffect } from 'react';
 
-export const useFocusMode = () => {
+interface FocusModeState {
+  isFocusMode: boolean;
+  toggleFocusMode: () => void;
+  enableFocusMode: () => void;
+  disableFocusMode: () => void;
+}
+
+export function useFocusMode(): FocusModeState {
   const [isFocusMode, setIsFocusMode] = useState(false);
 
+  const toggleFocusMode = useCallback(() => {
+    setIsFocusMode((prev) => !prev);
+  }, []);
+
+  const enableFocusMode = useCallback(() => {
+    setIsFocusMode(true);
+  }, []);
+
+  const disableFocusMode = useCallback(() => {
+    setIsFocusMode(false);
+  }, []);
+
+  // Keyboard shortcuts for focus mode
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Toggle focus mode with F11 or Cmd/Ctrl + Shift + F
@@ -12,39 +32,61 @@ export const useFocusMode = () => {
         ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'F')
       ) {
         event.preventDefault();
-        setIsFocusMode(prev => !prev);
+        toggleFocusMode();
       }
 
       // Exit focus mode with Escape
       if (event.key === 'Escape' && isFocusMode) {
-        setIsFocusMode(false);
+        event.preventDefault();
+        disableFocusMode();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isFocusMode]);
+  }, [isFocusMode, toggleFocusMode, disableFocusMode]);
 
+  // Apply focus mode styles and behavior
   useEffect(() => {
-    // Add/remove body class for global focus mode styles
     if (isFocusMode) {
+      // Add focus mode class to body
       document.body.classList.add('focus-mode');
-      // Prevent scrolling on the body when in focus mode
+
+      // Prevent body scrolling in focus mode
       document.body.style.overflow = 'hidden';
+
+      // Store original title and update it
+      const originalTitle = document.title;
+      document.title = `${originalTitle} - Focus Mode`;
+
+      // Cleanup function
+      return () => {
+        document.body.classList.remove('focus-mode');
+        document.body.style.overflow = '';
+        document.title = originalTitle;
+      };
     } else {
+      // Ensure cleanup when focus mode is disabled
       document.body.classList.remove('focus-mode');
       document.body.style.overflow = '';
     }
+  }, [isFocusMode]);
 
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
       document.body.classList.remove('focus-mode');
       document.body.style.overflow = '';
     };
-  }, [isFocusMode]);
+  }, []);
 
   return {
     isFocusMode,
-    setIsFocusMode,
-    toggleFocusMode: () => setIsFocusMode(prev => !prev),
+    toggleFocusMode,
+    enableFocusMode,
+    disableFocusMode,
   };
-};
+}
+
+// Export as default for convenience
+export default useFocusMode;

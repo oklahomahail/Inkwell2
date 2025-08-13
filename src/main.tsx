@@ -1,11 +1,17 @@
+// src/main.tsx - Complete setup with all providers
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import App from './App';
-import { AppProvider } from './context/AppContext';
-import { ToastProvider } from './context/ToastContext';
-import './App.css';
+import { AppProvider } from '@/context/AppContext';
+import { ToastProvider } from '@/context/ToastContext';
+import './index.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const container = document.getElementById('root');
+if (!container) throw new Error('Failed to find the root element');
+
+const root = createRoot(container);
+
+root.render(
   <React.StrictMode>
     <ToastProvider>
       <AppProvider>
@@ -14,3 +20,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </ToastProvider>
   </React.StrictMode>,
 );
+
+// Note: AppProvider already includes ClaudeProvider internally
+// Order: ToastProvider > AppProvider (includes ClaudeProvider) > App

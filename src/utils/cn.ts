@@ -1,11 +1,9 @@
-// src/utils/cn.ts
-export function cn(...classes: (string | undefined | null | boolean)[]): string {
-  return classes
-    .filter((cls): cls is string => Boolean(cls) && typeof cls === 'string')
-    .join(' ')
-    .trim();
-}
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 // Usage examples:
 // cn('base-class', condition && 'conditional-class')
 // cn('text-lg', isActive ? 'text-blue-500' : 'text-gray-500', 'font-bold')
