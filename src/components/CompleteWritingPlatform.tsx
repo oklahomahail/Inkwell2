@@ -1,14 +1,12 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   BookOpen,
-  Users as _Users,
   Calendar,
   BarChart3,
   Settings,
   Plus,
   Search,
   Menu,
-  X,
   Sun,
   Moon,
   Edit3,
@@ -18,8 +16,10 @@ import {
   Command as CommandIcon,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
+import { useCommandPalette } from '@/components/CommandPalette/CommandPaletteProvider';
+import { useViewCommands } from '@/hooks/useViewCommands';
 
-// Button Component
+// Button Component (same as before)
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
   size?: 'sm' | 'md' | 'lg';
@@ -69,7 +69,7 @@ const CardContent: React.FC<{ children: React.ReactNode; className?: string }> =
   className = '',
 }) => <div className={`card-content ${className}`}>{children}</div>;
 
-// Badge Component
+// Badge Component (same as before)
 interface BadgeProps {
   children: React.ReactNode;
   variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
@@ -80,7 +80,7 @@ const Badge: React.FC<BadgeProps> = ({ children, variant = 'default', className 
   return <span className={`badge badge-${variant} ${className}`}>{children}</span>;
 };
 
-// Progress Component
+// Progress Component (same as before)
 interface ProgressProps {
   value?: number;
   max?: number;
@@ -117,7 +117,6 @@ interface SidebarProps {
   onToggleCollapse: () => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
-  onOpenCommandPalette: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -125,9 +124,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   onToggleCollapse,
   activeTab,
   onTabChange,
-  onOpenCommandPalette,
 }) => {
   const { currentProject } = useAppContext();
+  const { openPalette } = useCommandPalette(); // Use the real command palette
 
   const navItems = [
     { id: 'dashboard', icon: BarChart3, label: 'Dashboard', shortcut: 'Cmd+1' },
@@ -161,7 +160,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {!isCollapsed && (
         <div className="sidebar-command-palette">
           <button
-            onClick={onOpenCommandPalette}
+            onClick={openPalette}
             className="command-palette-trigger"
             title="Open Command Palette (Cmd+K)"
           >
@@ -218,10 +217,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 };
 
 // Enhanced Dashboard Content
-const DashboardContent: React.FC<{ onOpenCommandPalette: () => void }> = ({
-  onOpenCommandPalette,
-}) => {
+const DashboardContent: React.FC = () => {
   const { currentProject } = useAppContext();
+  const { openPalette } = useCommandPalette(); // Use the real command palette
 
   const chapters = [
     { title: 'Chapter 1: The Beginning', words: 2500, target: 3000, status: 'complete' },
@@ -258,7 +256,7 @@ const DashboardContent: React.FC<{ onOpenCommandPalette: () => void }> = ({
 
   const handleQuickAction = (command: string) => {
     if (command === 'open-palette') {
-      onOpenCommandPalette();
+      openPalette();
     }
     // Other commands would be handled by the command system
   };
@@ -275,7 +273,7 @@ const DashboardContent: React.FC<{ onOpenCommandPalette: () => void }> = ({
           </p>
         </div>
         <div className="dashboard-header-actions">
-          <Button variant="ghost" onClick={onOpenCommandPalette}>
+          <Button variant="ghost" onClick={openPalette}>
             <CommandIcon className="btn-icon" />
             Commands
           </Button>
@@ -435,48 +433,29 @@ const DashboardContent: React.FC<{ onOpenCommandPalette: () => void }> = ({
   );
 };
 
-// Main Component (Simplified)
+// Main Component (Updated)
 export default function CompleteWritingPlatform() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
-  const openCommandPalette = useCallback(() => {
-    setCommandPaletteOpen(true);
-  }, []);
+  // Register view commands and shortcuts
+  useViewCommands();
 
-  const closeCommandPalette = useCallback(() => {
-    setCommandPaletteOpen(false);
-  }, []);
-
-  // Simple keyboard shortcut for command palette
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setCommandPaletteOpen(true);
-      }
-      if (e.key === 'Escape') {
-        setCommandPaletteOpen(false);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  // Remove local command palette state - now handled by provider
+  const { openPalette } = useCommandPalette();
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardContent onOpenCommandPalette={openCommandPalette} />;
+        return <DashboardContent />;
       case 'writing':
         return (
           <div className="placeholder-content">
             <BookOpen className="placeholder-icon" />
             <h2 className="placeholder-title">Writing Interface</h2>
             <p className="placeholder-text">Your existing writing components will go here</p>
-            <Button onClick={openCommandPalette} variant="outline">
+            <Button onClick={openPalette} variant="outline">
               <CommandIcon className="btn-icon" />
               Open Command Palette
             </Button>
@@ -507,7 +486,7 @@ export default function CompleteWritingPlatform() {
           </div>
         );
       default:
-        return <DashboardContent onOpenCommandPalette={openCommandPalette} />;
+        return <DashboardContent />;
     }
   };
 
@@ -519,7 +498,6 @@ export default function CompleteWritingPlatform() {
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        onOpenCommandPalette={openCommandPalette}
       />
 
       {/* Main Content */}
@@ -534,18 +512,14 @@ export default function CompleteWritingPlatform() {
                   type="text"
                   placeholder="Search... (or press ⌘K for commands)"
                   className="search-input"
-                  onFocus={openCommandPalette}
+                  onFocus={openPalette}
                   readOnly
                 />
               </div>
             </div>
 
             <div className="header-right">
-              <button
-                onClick={openCommandPalette}
-                className="header-button"
-                title="Command Palette (⌘K)"
-              >
+              <button onClick={openPalette} className="header-button" title="Command Palette (⌘K)">
                 <CommandIcon className="header-button-icon" />
               </button>
 
@@ -568,43 +542,7 @@ export default function CompleteWritingPlatform() {
         <main className="content">{renderContent()}</main>
       </div>
 
-      {/* Simple Command Palette Placeholder */}
-      {commandPaletteOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-start justify-center pt-32">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-2xl mx-4 p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold font-semibold">Command Palette</h2>
-              <button onClick={closeCommandPalette} className="text-gray-500 hover:text-gray-700">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <p className="text-gray-600 dark:text-gray-400">
-              Command palette functionality coming soon!
-              <br />
-              For now, use the navigation and buttons in the UI.
-            </p>
-            <div className="mt-4 flex gap-2">
-              <Button
-                onClick={() => {
-                  setActiveTab('writing');
-                  closeCommandPalette();
-                }}
-              >
-                Go to Writing
-              </Button>
-              <Button
-                onClick={() => {
-                  setActiveTab('analysis');
-                  closeCommandPalette();
-                }}
-                variant="outline"
-              >
-                Go to Analysis
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Command Palette is now handled by CommandPaletteUI component */}
     </div>
   );
 }
