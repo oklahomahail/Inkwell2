@@ -1,4 +1,4 @@
-// src/context/AppContext.tsx - Clean version with no export conflicts
+// src/context/AppContext.tsx - Updated with auto-save state
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
 import { ClaudeProvider, useClaude } from './ClaudeProvider';
 
@@ -21,12 +21,19 @@ export interface Project {
 }
 
 export interface AppState {
+  claude: any;
   view: View;
   theme: 'light' | 'dark';
   projects: Project[];
   currentProjectId: string | null;
   isLoading: boolean;
   error: string | null;
+  // 🆕 AUTO-SAVE STATE
+  autoSave: {
+    isSaving: boolean;
+    lastSaved: Date | null;
+    error: string | null;
+  };
 }
 
 // ===== ACTIONS =====
@@ -39,7 +46,11 @@ type AppAction =
   | { type: 'SET_CURRENT_PROJECT'; payload: string | null }
   | { type: 'SET_PROJECTS'; payload: Project[] }
   | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null };
+  | { type: 'SET_ERROR'; payload: string | null }
+  // 🆕 AUTO-SAVE ACTIONS
+  | { type: 'SET_AUTO_SAVE_SAVING'; payload: boolean }
+  | { type: 'SET_AUTO_SAVE_SUCCESS'; payload: Date }
+  | { type: 'SET_AUTO_SAVE_ERROR'; payload: string | null };
 
 // ===== INITIAL STATE =====
 const initialState: AppState = {
@@ -49,6 +60,13 @@ const initialState: AppState = {
   currentProjectId: null,
   isLoading: false,
   error: null,
+  // 🆕 AUTO-SAVE INITIAL STATE
+  autoSave: {
+    isSaving: false,
+    lastSaved: null,
+    error: null,
+  },
+  claude: undefined,
 };
 
 // ===== REDUCER =====
@@ -81,6 +99,26 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, isLoading: action.payload };
     case 'SET_ERROR':
       return { ...state, error: action.payload };
+    // 🆕 AUTO-SAVE REDUCER CASES
+    case 'SET_AUTO_SAVE_SAVING':
+      return {
+        ...state,
+        autoSave: { ...state.autoSave, isSaving: action.payload },
+      };
+    case 'SET_AUTO_SAVE_SUCCESS':
+      return {
+        ...state,
+        autoSave: {
+          isSaving: false,
+          lastSaved: action.payload,
+          error: null,
+        },
+      };
+    case 'SET_AUTO_SAVE_ERROR':
+      return {
+        ...state,
+        autoSave: { ...state.autoSave, isSaving: false, error: action.payload },
+      };
     default:
       return state;
   }
@@ -98,6 +136,10 @@ export interface AppContextValue {
   updateProject: (project: Project) => void;
   deleteProject: (id: string) => void;
   setCurrentProjectId: (id: string | null) => void;
+  // 🆕 AUTO-SAVE ACTIONS
+  setAutoSaveSaving: (saving: boolean) => void;
+  setAutoSaveSuccess: (date: Date) => void;
+  setAutoSaveError: (error: string | null) => void;
   claude: ReturnType<typeof useClaude>['claude'];
   claudeActions: {
     sendMessage: (message: string) => Promise<string>;
@@ -183,6 +225,10 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     updateProject: (project) => dispatch({ type: 'UPDATE_PROJECT', payload: project }),
     deleteProject: (id) => dispatch({ type: 'DELETE_PROJECT', payload: id }),
     setCurrentProjectId: (id) => dispatch({ type: 'SET_CURRENT_PROJECT', payload: id }),
+    // 🆕 AUTO-SAVE ACTION CREATORS
+    setAutoSaveSaving: (saving) => dispatch({ type: 'SET_AUTO_SAVE_SAVING', payload: saving }),
+    setAutoSaveSuccess: (date) => dispatch({ type: 'SET_AUTO_SAVE_SUCCESS', payload: date }),
+    setAutoSaveError: (error) => dispatch({ type: 'SET_AUTO_SAVE_ERROR', payload: error }),
     claude: claudeContext.claude,
     claudeActions: {
       sendMessage: claudeContext.sendMessage,

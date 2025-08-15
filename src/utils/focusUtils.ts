@@ -1,0 +1,10 @@
+// src/utils/focusUtils.ts - Helper utilities for focus management
+export const focusWritingEditor = () => {
+  // Dispatch a custom event that the editor listens for
+  window.dispatchEvent(new CustomEvent('focusWritingEditor'));
+};
+
+// Optional: Create a hook for focus management
+export const useFocusWritingEditor = () => {
+  return focusWritingEditor;
+};

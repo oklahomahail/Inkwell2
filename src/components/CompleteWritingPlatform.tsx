@@ -18,6 +18,7 @@ import {
 import { useAppContext } from '@/context/AppContext';
 import { useCommandPalette } from '@/components/CommandPalette/CommandPaletteProvider';
 import { useViewCommands } from '@/hooks/useViewCommands';
+import { focusWritingEditor } from '@/utils/focusUtils';
 
 // Button Component (same as before)
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -118,6 +119,13 @@ interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
+const handleTabChange = (tab: string) => {
+  setActiveTab(tab);
+
+  if (tab === 'writing') {
+    setTimeout(focusWritingEditor, 100);
+  }
+};
 
 const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed,
@@ -545,4 +553,7 @@ export default function CompleteWritingPlatform() {
       {/* Command Palette is now handled by CommandPaletteUI component */}
     </div>
   );
+}
+function setActiveTab(tab: string) {
+  throw new Error('Function not implemented.');
 }

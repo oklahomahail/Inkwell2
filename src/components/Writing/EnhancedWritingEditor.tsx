@@ -1,4 +1,4 @@
-// src/components/Writing/EnhancedWritingEditor.tsx
+// src/components/Writing/EnhancedWritingEditor.tsx - Complete with full auto-focus
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -17,7 +17,7 @@ import {
   Target,
   Clock,
 } from 'lucide-react';
-import { useAppContext } from '@/context/AppContext';
+import { useAppContext, View } from '@/context/AppContext';
 import { useCommandPalette } from '../CommandPalette/CommandPaletteProvider';
 import { Scene, SceneStatus } from '@/types/writing';
 import { storageService } from '@/services/storageService';
@@ -40,7 +40,8 @@ export const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({
   onSceneUpdate,
   projectId,
 }) => {
-  const { claudeActions } = useAppContext();
+  const { claudeActions, setAutoSaveSaving, setAutoSaveSuccess, setAutoSaveError, state } =
+    useAppContext();
   const { registerCommand, unregisterCommand } = useCommandPalette();
   const [isLoading, setIsLoading] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -111,7 +112,64 @@ export const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({
     },
   });
 
-  // Save scene function
+  // 🆕 AUTO-FOCUS HELPER FUNCTION
+  const focusEditor = useCallback(() => {
+    if (editor && !editor.isDestroyed) {
+      try {
+        editor.commands.focus();
+      } catch (error) {
+        // Silently handle focus errors
+        console.debug('Editor focus failed:', error);
+      }
+    }
+  }, [editor]);
+
+  // 🆕 AUTO-FOCUS ON EDITOR READY
+  useEffect(() => {
+    if (editor && state.view === View.Writing) {
+      const timer = setTimeout(focusEditor, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [editor, focusEditor, state.view]);
+
+  // 🆕 AUTO-FOCUS ON VIEW CHANGE TO WRITING
+  useEffect(() => {
+    if (state.view === View.Writing && editor) {
+      const timer = setTimeout(focusEditor, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [state.view, editor, focusEditor]);
+
+  // 🆕 AUTO-FOCUS ON PROJECT CHANGE (if in writing view)
+  useEffect(() => {
+    if (state.view === View.Writing && editor && projectId) {
+      const timer = setTimeout(focusEditor, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [projectId, state.view, editor, focusEditor]);
+
+  // 🆕 LISTEN FOR GLOBAL FOCUS EVENTS
+  useEffect(() => {
+    const handleFocusEvent = () => {
+      if (state.view === View.Writing) {
+        focusEditor();
+      }
+    };
+
+    window.addEventListener('focusWritingEditor', handleFocusEvent);
+    return () => window.removeEventListener('focusWritingEditor', handleFocusEvent);
+  }, [state.view, focusEditor]);
+
+  // 🆕 RESTORE FOCUS AFTER CLAUDE INTERACTIONS
+  useEffect(() => {
+    // If Claude was just closed/hidden and we're in writing view, restore focus
+    if (!state.claude?.isVisible && state.view === View.Writing && editor) {
+      const timer = setTimeout(focusEditor, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [state.claude?.isVisible, state.view, editor, focusEditor]);
+
+  // Enhanced save scene function with focus restoration
   const saveScene = useCallback(
     async (content?: string, wordCount?: number) => {
       if (!editor) return;
@@ -133,18 +191,36 @@ export const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({
       };
 
       try {
+        setAutoSaveSaving(true);
         await storageService.saveScene(projectId, updatedScene);
-        setLastSaved(new Date());
+
+        const savedTime = new Date();
+        setAutoSaveSuccess(savedTime);
+        setLastSaved(savedTime);
         setHasUnsavedChanges(false);
         onSceneUpdate?.(updatedScene);
+
+        // 🆕 RESTORE FOCUS AFTER SAVE
+        setTimeout(focusEditor, 50);
       } catch (error) {
         console.error('Failed to save scene:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Failed to save';
+        setAutoSaveError(errorMsg);
       }
     },
-    [editor, scene, projectId, onSceneUpdate],
+    [
+      editor,
+      scene,
+      projectId,
+      onSceneUpdate,
+      setAutoSaveSaving,
+      setAutoSaveSuccess,
+      setAutoSaveError,
+      focusEditor,
+    ],
   );
 
-  // Claude AI integration functions
+  // Enhanced AI assist with focus restoration
   const handleAIAssist = useCallback(
     async (action: 'continue' | 'improve' | 'analyze') => {
       if (!editor || !selectedText) return;
@@ -162,23 +238,26 @@ export const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({
             break;
           case 'analyze':
             result = await claudeActions.analyzeWritingStyle(selectedText);
-            // For analysis, show in a modal or sidebar instead of inserting
-            alert(result); // Temporary - replace with proper modal
+            alert(result);
+            // 🆕 RESTORE FOCUS AFTER ALERT
+            setTimeout(focusEditor, 100);
             return;
         }
 
-        // Insert the result for continue and improve actions
         if (result) {
           const { from, to } = editor.state.selection;
           editor.chain().focus().deleteRange({ from, to }).insertContent(result).run();
+          // Focus is maintained through .focus() in the chain
         }
       } catch (error) {
         console.error('AI assist failed:', error);
       } finally {
         setIsLoading(false);
+        // 🆕 ENSURE FOCUS IS RESTORED
+        setTimeout(focusEditor, 100);
       }
     },
-    [editor, selectedText, claudeActions],
+    [editor, selectedText, claudeActions, focusEditor],
   );
 
   // Register editor-specific commands
@@ -230,7 +309,19 @@ Scene Stats:
 • Paragraphs: ${writingStats.paragraphs}
 • Reading time: ~${writingStats.readingTime} min
           `);
+          // 🆕 RESTORE FOCUS AFTER ALERT
+          setTimeout(focusEditor, 100);
         },
+      },
+      // 🆕 NEW FOCUS COMMAND
+      {
+        id: 'editor-focus',
+        label: 'Focus Editor',
+        description: 'Focus the writing editor',
+        category: 'writing' as const,
+        shortcut: 'F',
+        action: focusEditor,
+        condition: () => !!editor,
       },
     ];
 
@@ -248,6 +339,7 @@ Scene Stats:
     unregisterCommand,
     saveScene,
     handleAIAssist,
+    focusEditor,
   ]);
 
   // Global keyboard shortcuts
@@ -258,11 +350,16 @@ Scene Stats:
         e.preventDefault();
         saveScene();
       }
+      // 🆕 FOCUS SHORTCUT
+      if ((e.metaKey || e.ctrlKey) && e.key === 'f' && e.shiftKey) {
+        e.preventDefault();
+        focusEditor();
+      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [saveScene]);
+  }, [saveScene, focusEditor]);
 
   // Cleanup auto-save timer
   useEffect(() => {
@@ -364,31 +461,38 @@ Scene Stats:
         <EditorContent editor={editor} />
       </div>
 
-      {/* Status Bar */}
+      {/* Enhanced Status Bar */}
       <div className="writing-status-bar">
         <div className="status-section">
           <div className="status-item">
             <Type className="w-4 h-4" />
-            <span>{writingStats.words.toLocaleString()} words</span>
+            <span className="font-medium">{writingStats.words.toLocaleString()}</span>
+            <span className="text-slate-500">words</span>
           </div>
 
           <div className="status-item">
             <Target className="w-4 h-4" />
-            <span>{writingStats.characters.toLocaleString()} characters</span>
+            <span>{writingStats.characters.toLocaleString()}</span>
+            <span className="text-slate-500">chars</span>
           </div>
 
           <div className="status-item">
             <Clock className="w-4 h-4" />
-            <span>~{writingStats.readingTime} min read</span>
+            <span>~{writingStats.readingTime}</span>
+            <span className="text-slate-500">min read</span>
           </div>
         </div>
 
+        {/* Enhanced word goal progress */}
         {scene?.wordCountGoal && (
           <div className="status-section">
             <div className="word-goal-progress">
-              <span>
-                Goal: {writingStats.words} / {scene.wordCountGoal.toLocaleString()}
-              </span>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-slate-600 dark:text-slate-400">Goal Progress</span>
+                <span className="text-xs font-medium">
+                  {writingStats.words} / {scene.wordCountGoal.toLocaleString()}
+                </span>
+              </div>
               <div className="progress-bar">
                 <div
                   className="progress-fill"
@@ -397,10 +501,14 @@ Scene Stats:
                   }}
                 />
               </div>
+              <div className="text-xs text-slate-500 mt-1">
+                {Math.round((writingStats.words / scene.wordCountGoal) * 100)}% complete
+              </div>
             </div>
           </div>
         )}
 
+        {/* Selected text info */}
         {selectedText && (
           <div className="status-section">
             <span className="selected-text-info">

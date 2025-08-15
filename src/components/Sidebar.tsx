@@ -3,6 +3,7 @@ import React from 'react';
 import { Home, Book as _Book, Settings, BarChart3, Clock, PenTool } from 'lucide-react';
 import { useAppContext, View } from '@/context/AppContext';
 import { cn } from '@/utils/cn';
+import { focusWritingEditor } from '@/utils/focusUtils';
 
 const sidebarLinks = [
   { view: View.Dashboard, label: 'Dashboard', icon: Home },
@@ -17,6 +18,10 @@ export default function Sidebar() {
 
   const handleViewChange = (view: View) => {
     dispatch({ type: 'SET_VIEW', payload: view });
+
+    if (view === View.Writing) {
+      setTimeout(focusWritingEditor, 100);
+    }
   };
 
   return (
