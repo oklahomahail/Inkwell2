@@ -6,6 +6,7 @@ import WritingPanel from './Panels/WritingPanel';
 import TimelinePanel from './Panels/TimelinePanel';
 import AnalysisPanel from './Panels/AnalysisPanel';
 import SettingsPanel from './Panels/SettingsPanel';
+import StoryPlanningView from './Views/StoryPlanningView';
 
 const ViewSwitcher: React.FC = () => {
   const { state, currentProject, updateProject } = useAppContext();
@@ -41,26 +42,29 @@ const ViewSwitcher: React.FC = () => {
   const currentView = state.view;
 
   switch (currentView) {
-    case View.Dashboard:
-      return <DashboardPanel />;
-    case View.Writing:
-      return (
-        <WritingPanel
-          draftText={draftText}
-          onChangeText={handleTextChange}
-          onTextSelect={handleTextSelect}
-          selectedText={selectedText}
-        />
-      );
-    case View.Timeline:
-      return <TimelinePanel />;
-    case View.Analysis:
-      return <AnalysisPanel />;
-    case View.Settings:
-      return <SettingsPanel />;
-    default:
-      return <DashboardPanel />;
-  }
+  case View.Dashboard:
+    return <DashboardPanel />;
+  case View.Writing:
+    return (
+      <WritingPanel
+        draftText={draftText}
+        onChangeText={handleTextChange}
+        onTextSelect={handleTextSelect}
+        selectedText={selectedText}
+      />
+    );
+  case View.Timeline:
+    return <TimelinePanel />;
+  case View.Analysis:
+    return <AnalysisPanel />;
+  // ✅ ADD THIS NEW CASE
+  case View.Planning:
+    return <StoryPlanningView />;
+  case View.Settings:
+    return <SettingsPanel />;
+  default:
+    return <DashboardPanel />;
+}
 };
 
 export default ViewSwitcher;

@@ -119,13 +119,6 @@ interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
-const handleTabChange = (tab: string) => {
-  setActiveTab(tab);
-
-  if (tab === 'writing') {
-    setTimeout(focusWritingEditor, 100);
-  }
-};
 
 const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed,
@@ -134,7 +127,17 @@ const Sidebar: React.FC<SidebarProps> = ({
   onTabChange,
 }) => {
   const { currentProject } = useAppContext();
-  const { openPalette } = useCommandPalette(); // Use the real command palette
+  const { openPalette } = useCommandPalette();
+
+  // ✅ FIX: Properly handle tab change with focus
+  const handleTabChange = (tab: string) => {
+    onTabChange(tab);
+    
+    // Auto-focus writing editor when switching to writing tab
+    if (tab === 'writing') {
+      setTimeout(focusWritingEditor, 100);
+    }
+  };
 
   const navItems = [
     { id: 'dashboard', icon: BarChart3, label: 'Dashboard', shortcut: 'Cmd+1' },
@@ -188,7 +191,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           return (
             <button
               key={item.id}
-              onClick={() => onTabChange(item.id)}
+              onClick={() => handleTabChange(item.id)}
               className={`nav-item ${isActive ? 'active' : ''}`}
               title={isCollapsed ? `${item.label} (${item.shortcut})` : undefined}
             >
@@ -227,7 +230,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 // Enhanced Dashboard Content
 const DashboardContent: React.FC = () => {
   const { currentProject } = useAppContext();
-  const { openPalette } = useCommandPalette(); // Use the real command palette
+  const { openPalette } = useCommandPalette();
 
   const chapters = [
     { title: 'Chapter 1: The Beginning', words: 2500, target: 3000, status: 'complete' },
@@ -450,8 +453,17 @@ export default function CompleteWritingPlatform() {
   // Register view commands and shortcuts
   useViewCommands();
 
-  // Remove local command palette state - now handled by provider
   const { openPalette } = useCommandPalette();
+
+  // ✅ FIX: Properly connected handleTabChange
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+
+    // Auto-focus writing editor when switching to writing tab
+    if (tab === 'writing') {
+      setTimeout(focusWritingEditor, 100);
+    }
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -505,7 +517,7 @@ export default function CompleteWritingPlatform() {
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
       />
 
       {/* Main Content */}
@@ -549,11 +561,6 @@ export default function CompleteWritingPlatform() {
         {/* Content */}
         <main className="content">{renderContent()}</main>
       </div>
-
-      {/* Command Palette is now handled by CommandPaletteUI component */}
     </div>
   );
-}
-function setActiveTab(tab: string) {
-  throw new Error('Function not implemented.');
 }

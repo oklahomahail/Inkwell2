@@ -8,6 +8,7 @@ export enum View {
   Writing = 'writing',
   Timeline = 'timeline',
   Analysis = 'analysis',
+  Planning = 'planning',
   Settings = 'settings',
 }
 
