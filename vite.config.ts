@@ -28,9 +28,9 @@ export default defineConfig({
     sourcemap: false,
   },
 
-  // Fix for 'process' is not defined errors
+  // FIXED: Remove quotes around process.env
   define: {
-    'process.env': 'process.env',
+    'process.env': process.env, // ← Changed from 'process.env' to process.env
     global: 'globalThis',
   },
 
