@@ -1,5 +1,3 @@
-# Inkwell – Offline-First Fiction Writing Platform
-
 # ✍️ Inkwell — The AI-Powered Writing Platform
 
 **Inkwell** is a professional, local-first writing platform designed for novelists, screenwriters, and storytellers.  
