@@ -1,16 +1,18 @@
-// src/components/Views/StoryPlanningView.tsx
+// src/components/Views/StoryPlanningView.tsx - Enhanced with Story Structure Visualizer
 import React, { useState } from 'react';
-import { BookOpen, Users, Map, FileText } from 'lucide-react';
+import { BookOpen, Users, Map, FileText, BarChart3 } from 'lucide-react';
 import BeatSheetPlanner from '../Planning/BeatSheetPlanner';
 import CharacterManager from '../Planning/CharacterManager';
+import StoryStructureVisualizer from '../Planning/StoryStructureVisualizer';
 
-type PlanningTab = 'overview' | 'beats' | 'characters' | 'world';
+type PlanningTab = 'overview' | 'beats' | 'characters' | 'world' | 'health'; // Added 'health'
 
 const StoryPlanningView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<PlanningTab>('overview');
 
   const tabs = [
     { id: 'overview' as const, label: 'Overview', icon: FileText },
+    { id: 'health' as const, label: 'Story Health', icon: BarChart3 }, // NEW TAB
     { id: 'beats' as const, label: 'Beat Sheet', icon: BookOpen },
     { id: 'characters' as const, label: 'Characters', icon: Users },
     { id: 'world' as const, label: 'World Building', icon: Map },
@@ -19,7 +21,9 @@ const StoryPlanningView: React.FC = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <OverviewTab />;
+        return <OverviewTab onNavigateToTab={setActiveTab} />;
+      case 'health':
+        return <StoryHealthTab />; // NEW TAB CONTENT
       case 'beats':
         return <BeatSheetPlanner />;
       case 'characters':
@@ -27,7 +31,7 @@ const StoryPlanningView: React.FC = () => {
       case 'world':
         return <WorldBuildingTab />;
       default:
-        return <OverviewTab />;
+        return <OverviewTab onNavigateToTab={setActiveTab} />;
     }
   };
 
@@ -39,21 +43,28 @@ const StoryPlanningView: React.FC = () => {
           {tabs.map((tab) => {
             const IconComponent = tab.icon;
             const isActive = activeTab === tab.id;
-            
+
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                  flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm
-                  ${isActive
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+                  flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                  ${
+                    isActive
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
                   }
                 `}
               >
                 <IconComponent className="w-5 h-5" />
                 <span>{tab.label}</span>
+                {/* NEW badge for Story Health tab */}
+                {tab.id === 'health' && (
+                  <span className="ml-1 px-2 py-0.5 text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full">
+                    New
+                  </span>
+                )}
               </button>
             );
           })}
@@ -61,62 +72,99 @@ const StoryPlanningView: React.FC = () => {
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-hidden">
-        {renderTabContent()}
-      </div>
+      <div className="flex-1 overflow-hidden">{renderTabContent()}</div>
     </div>
   );
 };
 
-// Overview Tab Component
-const OverviewTab: React.FC = () => {
+// Enhanced Overview Tab with Story Health preview
+const OverviewTab: React.FC<{ onNavigateToTab: (tab: PlanningTab) => void }> = ({
+  onNavigateToTab,
+}) => {
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Story Planning</h1>
-        
+
         <div className="grid md:grid-cols-2 gap-8">
           {/* Quick Start */}
           <div className="space-y-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Quick Start</h2>
-            
+
             <div className="space-y-4">
-              <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
-                <h3 className="font-medium text-gray-900 dark:text-white mb-2">1. Create Your Beat Sheet</h3>
+              {/* NEW: Story Health card */}
+              <div className="p-4 border border-purple-200 dark:border-purple-600 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-purple-600" />
+                  Check Your Story Health
+                  <span className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-0.5 rounded-full">
+                    New
+                  </span>
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                  Structure your story with proven templates like Save the Cat! or Three-Act Structure.
+                  Get professional insights on your story's structure, pacing, and character
+                  development.
                 </p>
-                <button className="text-blue-600 dark:text-blue-400 text-sm hover:underline">
+                <button
+                  onClick={() => onNavigateToTab('health')}
+                  className="text-purple-600 dark:text-purple-400 text-sm hover:underline font-medium"
+                >
+                  View Story Health Dashboard →
+                </button>
+              </div>
+
+              <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-2">
+                  1. Create Your Beat Sheet
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                  Structure your story with proven templates like Save the Cat! or Three-Act
+                  Structure.
+                </p>
+                <button
+                  onClick={() => onNavigateToTab('beats')}
+                  className="text-blue-600 dark:text-blue-400 text-sm hover:underline"
+                >
                   Start with Beat Sheet →
                 </button>
               </div>
 
               <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
-                <h3 className="font-medium text-gray-900 dark:text-white mb-2">2. Develop Your Characters</h3>
+                <h3 className="font-medium text-gray-900 dark:text-white mb-2">
+                  2. Develop Your Characters
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
                   Create detailed character profiles with motivations, conflicts, and arcs.
                 </p>
-                <button className="text-blue-600 dark:text-blue-400 text-sm hover:underline">
+                <button
+                  onClick={() => onNavigateToTab('characters')}
+                  className="text-blue-600 dark:text-blue-400 text-sm hover:underline"
+                >
                   Manage Characters →
                 </button>
               </div>
 
               <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
-                <h3 className="font-medium text-gray-900 dark:text-white mb-2">3. Build Your World</h3>
+                <h3 className="font-medium text-gray-900 dark:text-white mb-2">
+                  3. Build Your World
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
                   Define settings, rules, and background details that bring your story to life.
                 </p>
-                <button className="text-blue-600 dark:text-blue-400 text-sm hover:underline">
+                <button
+                  onClick={() => onNavigateToTab('world')}
+                  className="text-blue-600 dark:text-blue-400 text-sm hover:underline"
+                >
                   Start World Building →
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Planning Tips */}
+          {/* Planning Tips - Enhanced with Story Health info */}
           <div className="space-y-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Planning Tips</h2>
-            
+
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
               <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Story Structure</h3>
               <ul className="text-blue-700 dark:text-blue-300 text-sm space-y-1">
@@ -128,7 +176,9 @@ const OverviewTab: React.FC = () => {
             </div>
 
             <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-              <h3 className="font-medium text-green-900 dark:text-green-100 mb-2">Character Development</h3>
+              <h3 className="font-medium text-green-900 dark:text-green-100 mb-2">
+                Character Development
+              </h3>
               <ul className="text-green-700 dark:text-green-300 text-sm space-y-1">
                 <li>• Give characters clear external goals and internal needs</li>
                 <li>• Create believable flaws that generate conflict</li>
@@ -138,13 +188,32 @@ const OverviewTab: React.FC = () => {
             </div>
 
             <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-              <h3 className="font-medium text-purple-900 dark:text-purple-100 mb-2">World Building</h3>
+              <h3 className="font-medium text-purple-900 dark:text-purple-100 mb-2">
+                Pacing & Flow
+              </h3>
               <ul className="text-purple-700 dark:text-purple-300 text-sm space-y-1">
-                <li>• Establish clear rules and stick to them</li>
-                <li>• Show don't tell - reveal through character interactions</li>
-                <li>• Consider how your world affects the plot</li>
-                <li>• Don't over-explain - leave room for mystery</li>
+                <li>• Balance dialogue with narrative description</li>
+                <li>• Vary sentence and scene lengths for rhythm</li>
+                <li>• Use the Story Health tab to analyze your pacing</li>
+                <li>• Fast scenes for action, slower for character moments</li>
               </ul>
+            </div>
+
+            {/* NEW: Compact Story Health Preview */}
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-4 rounded-lg">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-purple-600" />
+                  Story Health Preview
+                </h3>
+                <button
+                  onClick={() => onNavigateToTab('health')}
+                  className="text-xs text-purple-600 dark:text-purple-400 hover:underline"
+                >
+                  View Full →
+                </button>
+              </div>
+              <StoryStructureVisualizer compact={true} />
             </div>
           </div>
         </div>
@@ -153,14 +222,27 @@ const OverviewTab: React.FC = () => {
   );
 };
 
-// World Building Tab (placeholder)
+// NEW: Story Health Tab Component
+const StoryHealthTab: React.FC = () => {
+  return (
+    <div className="h-full overflow-y-auto p-6">
+      <div className="max-w-7xl mx-auto">
+        <StoryStructureVisualizer />
+      </div>
+    </div>
+  );
+};
+
+// World Building Tab (unchanged)
 const WorldBuildingTab: React.FC = () => {
   return (
     <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
       <div className="text-center">
         <Map className="w-12 h-12 mx-auto mb-4 opacity-50" />
         <h3 className="text-lg font-medium mb-2">World Building</h3>
-        <p className="text-sm">Coming soon - Create locations, cultures, and rules for your story world</p>
+        <p className="text-sm">
+          Coming soon - Create locations, cultures, and rules for your story world
+        </p>
       </div>
     </div>
   );
