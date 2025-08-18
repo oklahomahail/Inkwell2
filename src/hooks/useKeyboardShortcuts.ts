@@ -31,7 +31,7 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled = tr
         matchingShortcut.action();
       }
     },
-    [shortcuts, enabled]
+    [shortcuts, enabled],
   );
 
   useEffect(() => {

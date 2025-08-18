@@ -103,7 +103,7 @@ const WritingAnalyticsView: React.FC = () => {
       };
     }
 
-    const project = currentProject as EnhancedProject;
+    const project = currentProject as unknown as EnhancedProject;
     const sessions = project.sessions || [];
     const chapters = storageService.loadWritingChapters(project.id);
 

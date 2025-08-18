@@ -4,7 +4,7 @@ import { AlertTriangle, Download, Trash2, RefreshCw, X } from 'lucide-react';
 import { quotaAwareStorage, StorageQuotaInfo, StorageError } from '../../utils/quotaAwareStorage';
 import { exportService } from '../../services/exportService';
 import { snapshotService } from '../../services/snapshotService';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '@/context/ToastContext';
 
 interface StorageRecoveryBannerProps {
   onDismiss?: () => void;

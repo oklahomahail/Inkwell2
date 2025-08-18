@@ -1,17 +1,6 @@
 // src/components/Planning/CharacterManager.tsx
 import React, { useState } from 'react';
-import { 
-  Users, 
-  Plus, 
-  Edit3, 
-  Trash2, 
-  Save,
-  User,
-  Heart,
-  Target,
-  Zap,
-  Eye
-} from 'lucide-react';
+import { Users, Plus, Edit3, Trash2, Save, User, Heart, Target, Zap, Eye } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 
@@ -31,7 +20,7 @@ interface Character {
 const CharacterManager: React.FC = () => {
   const { currentProject } = useAppContext();
   const { showToast } = useToast();
-  
+
   const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -65,9 +54,7 @@ const CharacterManager: React.FC = () => {
       setCharacters([...characters, selectedCharacter]);
       setShowNewCharacterForm(false);
     } else {
-      setCharacters(characters.map(c => 
-        c.id === selectedCharacter.id ? selectedCharacter : c
-      ));
+      setCharacters(characters.map((c) => (c.id === selectedCharacter.id ? selectedCharacter : c)));
     }
 
     setIsEditing(false);
@@ -77,7 +64,7 @@ const CharacterManager: React.FC = () => {
   // Delete character
   const deleteCharacter = (characterId: string) => {
     if (confirm('Delete this character? This cannot be undone.')) {
-      setCharacters(characters.filter(c => c.id !== characterId));
+      setCharacters(characters.filter((c) => c.id !== characterId));
       if (selectedCharacter?.id === characterId) {
         setSelectedCharacter(null);
       }
@@ -88,7 +75,7 @@ const CharacterManager: React.FC = () => {
   // Update selected character
   const updateCharacter = (updates: Partial<Character>) => {
     if (!selectedCharacter) return;
-    
+
     setSelectedCharacter({
       ...selectedCharacter,
       ...updates,
@@ -104,7 +91,10 @@ const CharacterManager: React.FC = () => {
       case 'antagonist':
         return { color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/20' };
       case 'supporting':
-        return { color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/20' };
+        return {
+          color: 'text-green-600 dark:text-green-400',
+          bg: 'bg-green-100 dark:bg-green-900/20',
+        };
       case 'minor':
         return { color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-100 dark:bg-gray-700' };
     }
@@ -148,9 +138,7 @@ const CharacterManager: React.FC = () => {
           {characters.length === 0 ? (
             <div className="p-4 text-center">
               <User className="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" />
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                No characters yet
-              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">No characters yet</p>
               <button
                 onClick={createCharacter}
                 className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded"
@@ -174,9 +162,10 @@ const CharacterManager: React.FC = () => {
                     }}
                     className={`
                       p-3 rounded-lg cursor-pointer transition-colors
-                      ${isSelected 
-                        ? 'bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500' 
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800 border-2 border-transparent'
+                      ${
+                        isSelected
+                          ? 'bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800 border-2 border-transparent'
                       }
                     `}
                   >
@@ -185,7 +174,9 @@ const CharacterManager: React.FC = () => {
                         <h3 className="font-medium text-gray-900 dark:text-white">
                           {character.name || 'Unnamed Character'}
                         </h3>
-                        <span className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${roleStyle.bg} ${roleStyle.color}`}>
+                        <span
+                          className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${roleStyle.bg} ${roleStyle.color}`}
+                        >
                           {character.role}
                         </span>
                         {character.description && (
@@ -223,12 +214,14 @@ const CharacterManager: React.FC = () => {
                     {selectedCharacter.name || 'Unnamed Character'}
                   </h1>
                   <div className="flex items-center space-x-2 mt-1">
-                    <span className={`px-2 py-1 text-sm rounded-full ${getRoleStyle(selectedCharacter.role).bg} ${getRoleStyle(selectedCharacter.role).color}`}>
+                    <span
+                      className={`px-2 py-1 text-sm rounded-full ${getRoleStyle(selectedCharacter.role).bg} ${getRoleStyle(selectedCharacter.role).color}`}
+                    >
                       {selectedCharacter.role}
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   {isEditing ? (
                     <button
@@ -285,7 +278,9 @@ const CharacterManager: React.FC = () => {
                     </label>
                     <select
                       value={selectedCharacter.role}
-                      onChange={(e) => updateCharacter({ role: e.target.value as Character['role'] })}
+                      onChange={(e) =>
+                        updateCharacter({ role: e.target.value as Character['role'] })
+                      }
                       disabled={!isEditing}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:bg-gray-50 dark:disabled:bg-gray-700"
                     >
@@ -378,7 +373,9 @@ const CharacterManager: React.FC = () => {
                 {/* Quick Tips */}
                 {isEditing && (
                   <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Character Development Tips</h4>
+                    <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                      Character Development Tips
+                    </h4>
                     <ul className="text-blue-700 dark:text-blue-300 text-sm space-y-1">
                       <li>• Give each character a clear want (external) and need (internal)</li>
                       <li>• Create believable flaws that create conflict</li>

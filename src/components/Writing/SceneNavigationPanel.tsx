@@ -1,17 +1,17 @@
 // src/components/Writing/SceneNavigationPanel.tsx
 import React, { useState, useEffect } from 'react';
-import { 
-  BookOpen, 
-  Plus, 
-  Edit3, 
-  MoreVertical, 
-  ChevronDown, 
+import {
+  BookOpen,
+  Plus,
+  Edit3,
+  MoreVertical,
+  ChevronDown,
   ChevronRight,
   Circle,
   CheckCircle,
   Clock,
   Trash2,
-  Copy
+  Copy,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
@@ -53,7 +53,7 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
 
       try {
         const loadedChapters = await storageService.loadWritingChapters(currentProject.id);
-        const chaptersWithExpanded = loadedChapters.map(chapter => ({
+        const chaptersWithExpanded = loadedChapters.map((chapter) => ({
           ...chapter,
           isExpanded: true, // Start with all chapters expanded
         }));
@@ -94,11 +94,11 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
 
   // Toggle chapter expansion
   const toggleChapter = (chapterId: string) => {
-    setChapters(prev => prev.map(chapter => 
-      chapter.id === chapterId 
-        ? { ...chapter, isExpanded: !chapter.isExpanded }
-        : chapter
-    ));
+    setChapters((prev) =>
+      prev.map((chapter) =>
+        chapter.id === chapterId ? { ...chapter, isExpanded: !chapter.isExpanded } : chapter,
+      ),
+    );
   };
 
   // Create new scene
@@ -109,7 +109,7 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
     }
 
     try {
-      const chapter = chapters.find(c => c.id === chapterId);
+      const chapter = chapters.find((c) => c.id === chapterId);
       if (!chapter) {
         showToast('Chapter not found', 'error');
         return;
@@ -127,12 +127,12 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
       };
 
       await storageService.saveScene(currentProject.id, newScene);
-      
+
       // Refresh chapters
       const updatedChapters = await storageService.loadWritingChapters(currentProject.id);
-      const chaptersWithExpanded = updatedChapters.map(ch => ({
+      const chaptersWithExpanded = updatedChapters.map((ch) => ({
         ...ch,
-        isExpanded: chapters.find(c => c.id === ch.id)?.isExpanded ?? true,
+        isExpanded: chapters.find((c) => c.id === ch.id)?.isExpanded ?? true,
       }));
       setChapters(chaptersWithExpanded);
 
@@ -163,8 +163,14 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
         updatedAt: new Date(),
       };
 
-      const updatedChapters = [...chapters.map(c => ({ ...c, isExpanded: c.isExpanded })), newChapter];
-      await storageService.saveWritingChapters(currentProject.id, updatedChapters.map(c => ({ ...c, isExpanded: undefined })));
+      const updatedChapters = [
+        ...chapters.map((c) => ({ ...c, isExpanded: c.isExpanded })),
+        newChapter,
+      ];
+      await storageService.saveWritingChapters(
+        currentProject.id,
+        updatedChapters.map((c) => ({ ...c, isExpanded: undefined })),
+      );
 
       // Update local state
       setChapters([...chapters, { ...newChapter, isExpanded: true }]);
@@ -192,12 +198,12 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
           };
 
           await storageService.saveScene(currentProject!.id, duplicatedScene);
-          
+
           // Refresh chapters
           const updatedChapters = await storageService.loadWritingChapters(currentProject!.id);
-          const chaptersWithExpanded = updatedChapters.map(ch => ({
+          const chaptersWithExpanded = updatedChapters.map((ch) => ({
             ...ch,
-            isExpanded: chapters.find(c => c.id === ch.id)?.isExpanded ?? true,
+            isExpanded: chapters.find((c) => c.id === ch.id)?.isExpanded ?? true,
           }));
           setChapters(chaptersWithExpanded);
 
@@ -251,11 +257,9 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
             <Plus size={16} />
           </button>
         </div>
-        
+
         {/* Project info */}
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          {currentProject.name}
-        </p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{currentProject.name}</p>
       </div>
 
       {/* Chapter and Scene List */}
@@ -263,9 +267,7 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
         {chapters.length === 0 ? (
           <div className="p-4 text-center">
             <BookOpen size={32} className="mx-auto mb-2 text-gray-300 dark:text-gray-600" />
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-              No chapters yet
-            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">No chapters yet</p>
             <button
               onClick={handleCreateChapter}
               className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded"
@@ -279,23 +281,23 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
               <div key={chapter.id} className="space-y-1">
                 {/* Chapter Header */}
                 <div className="flex items-center space-x-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded group">
-                  <button
-                    onClick={() => toggleChapter(chapter.id)}
-                    className="flex-shrink-0"
-                  >
+                  <button onClick={() => toggleChapter(chapter.id)} className="flex-shrink-0">
                     {chapter.isExpanded ? (
                       <ChevronDown size={16} className="text-gray-400" />
                     ) : (
                       <ChevronRight size={16} className="text-gray-400" />
                     )}
                   </button>
-                  
+
                   <div className="flex-1 min-w-0">
-                    <h4 className={`text-sm font-medium truncate ${getChapterStatusColor(chapter.status)}`}>
+                    <h4
+                      className={`text-sm font-medium truncate ${getChapterStatusColor(chapter.status)}`}
+                    >
                       {chapter.title}
                     </h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {chapter.scenes.length} scenes • {chapter.totalWordCount.toLocaleString()} words
+                      {chapter.scenes.length} scenes • {chapter.totalWordCount.toLocaleString()}{' '}
+                      words
                     </p>
                   </div>
 
@@ -316,15 +318,16 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
                         key={scene.id}
                         className={`
                           flex items-center space-x-2 p-2 rounded cursor-pointer group relative
-                          ${currentSceneId === scene.id 
-                            ? 'bg-blue-50 dark:bg-blue-900/20 border-l-2 border-blue-500' 
-                            : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                          ${
+                            currentSceneId === scene.id
+                              ? 'bg-blue-50 dark:bg-blue-900/20 border-l-2 border-blue-500'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                           }
                         `}
                         onClick={() => onSceneSelect(scene, chapter)}
                       >
                         {getStatusIcon(scene.status)}
-                        
+
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-gray-900 dark:text-white truncate">
                             {scene.title}
@@ -408,7 +411,9 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
           </div>
           <div className="flex justify-between">
             <span>Total Words:</span>
-            <span>{chapters.reduce((total, ch) => total + ch.totalWordCount, 0).toLocaleString()}</span>
+            <span>
+              {chapters.reduce((total, ch) => total + ch.totalWordCount, 0).toLocaleString()}
+            </span>
           </div>
         </div>
       </div>

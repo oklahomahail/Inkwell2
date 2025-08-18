@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import PlatformLayout from './components/Platform/PlatformLayout';
 import ViewSwitcher from './components/ViewSwitcher';
-import ToastContainer from './components/ToastContainer';
+import { ToastContainer } from './components/ToastContainer';
 import ClaudeAssistant from './components/ClaudeAssistant';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
 import ExportDialog from './components/ExportDialog';

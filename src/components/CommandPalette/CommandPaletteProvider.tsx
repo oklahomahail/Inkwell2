@@ -67,7 +67,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       try {
         const existingChapters = await storageService.loadWritingChapters(currentProject.id);
         const nextChapterNumber = existingChapters.length + 1;
-        
+
         const newChapter = {
           id: generateId('chapter'),
           title: `Chapter ${nextChapterNumber}`,
@@ -81,7 +81,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
 
         const updatedChapters = [...existingChapters, newChapter];
         await storageService.saveWritingChapters(currentProject.id, updatedChapters);
-        
+
         showToast(`Created ${newChapter.title}`, 'success');
         setView(View.Writing);
       } catch (error) {
@@ -98,7 +98,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
 
       try {
         const chapters = await storageService.loadWritingChapters(currentProject.id);
-        
+
         if (chapters.length === 0) {
           await createNewChapter();
           return;
@@ -139,9 +139,12 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       try {
         const chapters = await storageService.loadWritingChapters(currentProject.id);
         const totalWords = chapters.reduce((total, chapter) => {
-          return total + chapter.scenes.reduce((chapterTotal, scene) => {
-            return chapterTotal + (scene.wordCount || 0);
-          }, 0);
+          return (
+            total +
+            chapter.scenes.reduce((chapterTotal, scene) => {
+              return chapterTotal + (scene.wordCount || 0);
+            }, 0)
+          );
         }, 0);
 
         const chapterCount = chapters.length;
@@ -150,7 +153,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         showToast(
           `📊 Project Stats: ${totalWords.toLocaleString()} words, ${chapterCount} chapters, ${sceneCount} scenes`,
           'success',
-          5000
+          5000,
         );
       } catch (error) {
         console.error('Failed to calculate word count:', error);
@@ -184,7 +187,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       try {
         showToast('Exporting to Markdown...', 'info');
         const result = await exportService.exportProject(currentProject.id, ExportFormat.MARKDOWN);
-        
+
         if (result.success) {
           showToast(`Successfully exported ${result.filename}`, 'success');
         } else {
@@ -205,7 +208,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       try {
         showToast('Opening PDF export...', 'info');
         const result = await exportService.exportProject(currentProject.id, ExportFormat.PDF);
-        
+
         if (result.success) {
           showToast('PDF export window opened', 'success');
         } else {
@@ -233,15 +236,15 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         };
 
         const dataStr = JSON.stringify(backupData, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-        
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
         const exportFileDefaultName = `${currentProject.name.replace(/[^a-z0-9]/gi, '_')}_backup_${new Date().toISOString().split('T')[0]}.json`;
-        
+
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
         linkElement.setAttribute('download', exportFileDefaultName);
         linkElement.click();
-        
+
         showToast('Project backup downloaded', 'success');
       } catch (error) {
         console.error('Failed to backup project:', error);
@@ -400,15 +403,17 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
           }
 
           const projectList = projects
-            .filter(p => p.id !== currentProject?.id)
+            .filter((p) => p.id !== currentProject?.id)
             .map((p, i) => `${i + 1}. ${p.name}`)
             .join('\n');
 
           if (projectList) {
             const choice = prompt(`Select project:\n${projectList}\n\nEnter number:`);
             const projectIndex = parseInt(choice || '0') - 1;
-            const selectedProject = projects.filter(p => p.id !== currentProject?.id)[projectIndex];
-            
+            const selectedProject = projects.filter((p) => p.id !== currentProject?.id)[
+              projectIndex
+            ];
+
             if (selectedProject) {
               showToast(`Switched to ${selectedProject.name}`, 'success');
               setView(View.Dashboard);
@@ -471,7 +476,9 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         description: 'Information about this application',
         category: 'settings',
         action: () => {
-          alert('Inkwell - Local-first Fiction Writing Platform\nVersion 1.0.0\n\nBuilt with React, TypeScript, and Claude AI');
+          alert(
+            'Inkwell - Local-first Fiction Writing Platform\nVersion 1.0.0\n\nBuilt with React, TypeScript, and Claude AI',
+          );
         },
       },
     ];

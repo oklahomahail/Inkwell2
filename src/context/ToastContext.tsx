@@ -1,67 +1,62 @@
-// src/context/ToastContext.tsx - Enhanced with better typing
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+// src/context/ToastContext.tsx
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
+export type ToastType = 'info' | 'success' | 'error' | 'warning';
+export type Toast = { id: string; message: string; type: ToastType };
 
-export interface Toast {
-  id: string;
-  message: string;
-  type: ToastType;
-  duration?: number;
-}
-
-interface ToastContextValue {
+export type ToastContextValue = {
   toasts: Toast[];
-  showToast: (message: string, type?: ToastType, duration?: number) => void;
+  showToast: (message: string, type?: ToastType, timeoutMs?: number) => void;
   removeToast: (id: string) => void;
   clearToasts: () => void;
-}
+};
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
-export const useToast = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within ToastProvider');
-  }
-  return context;
-};
+export function useToast(): ToastContextValue {
+  const ctx = useContext(ToastContext);
+  if (!ctx) throw new Error('useToast must be used within a ToastProvider');
+  return ctx;
+}
 
-export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const showToast = (message: string, type: ToastType = 'info', duration: number = 3000) => {
-    const id = `toast_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-    const newToast: Toast = { id, message, type, duration };
-    
-    setToasts(prev => [...prev, newToast]);
+  const removeToast = useCallback((id: string) => {
+    setToasts((t) => t.filter((x) => x.id !== id));
+  }, []);
 
-    // Auto-remove after duration
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
-    }
-  };
+  const clearToasts = useCallback(() => setToasts([]), []);
 
-  const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  };
+  const showToast = useCallback(
+    (message: string, type: ToastType = 'info', timeoutMs = 3000) => {
+      const id = globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2);
+      setToasts((t) => [...t, { id, message, type }]);
+      window.setTimeout(() => removeToast(id), timeoutMs);
+    },
+    [removeToast],
+  );
 
-  const clearToasts = () => {
-    setToasts([]);
-  };
-
-  const contextValue: ToastContextValue = {
-    toasts,
-    showToast,
-    removeToast,
-    clearToasts,
-  };
+  const value = useMemo<ToastContextValue>(
+    () => ({ toasts, showToast, removeToast, clearToasts }),
+    [toasts, showToast, removeToast, clearToasts],
+  );
 
   return (
-    <ToastContext.Provider value={contextValue}>
+    <ToastContext.Provider value={value}>
       {children}
+      {/* Optional built-in container — remove if you render your own */}
+      {/* <ToastContainer /> */}
     </ToastContext.Provider>
   );
-};
+}
+
+// Optional presentational container if you want it here:
+// export function ToastContainer() { ... }

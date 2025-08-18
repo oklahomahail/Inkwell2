@@ -1,14 +1,14 @@
 // src/components/Planning/BeatSheetPlanner.tsx
 import React, { useState, useEffect } from 'react';
-import { 
-  BookOpen, 
-  Plus, 
-  Edit3, 
-  Save, 
+import {
+  BookOpen,
+  Plus,
+  Edit3,
+  Save,
   RotateCcw,
   CheckCircle,
   Circle,
-  Lightbulb
+  Lightbulb,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
@@ -35,33 +35,67 @@ interface BeatSheet {
 const BeatSheetPlanner: React.FC = () => {
   const { currentProject } = useAppContext();
   const { showToast } = useToast();
-  
+
   const [currentBeatSheet, setCurrentBeatSheet] = useState<BeatSheet | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<'save-the-cat' | 'three-act' | 'custom'>('save-the-cat');
+  const [selectedTemplate, setSelectedTemplate] = useState<'save-the-cat' | 'three-act' | 'custom'>(
+    'save-the-cat',
+  );
   const [editingBeat, setEditingBeat] = useState<string | null>(null);
 
   // Beat sheet templates
   const templates = {
     'save-the-cat': [
-      { title: 'Opening Image', description: 'A visual that represents the struggle & tone', pageTarget: 1 },
-      { title: 'Theme Stated', description: 'What your story is about; the message', pageTarget: 5 },
+      {
+        title: 'Opening Image',
+        description: 'A visual that represents the struggle & tone',
+        pageTarget: 1,
+      },
+      {
+        title: 'Theme Stated',
+        description: 'What your story is about; the message',
+        pageTarget: 5,
+      },
       { title: 'Set-Up', description: 'Introduce characters, stakes, and goal', pageTarget: 10 },
       { title: 'Catalyst', description: 'The inciting incident', pageTarget: 12 },
       { title: 'Debate', description: 'Should I go? Do I dare?', pageTarget: 25 },
-      { title: 'Break into Two', description: 'Choosing to act; leaving the comfort zone', pageTarget: 25 },
+      {
+        title: 'Break into Two',
+        description: 'Choosing to act; leaving the comfort zone',
+        pageTarget: 25,
+      },
       { title: 'B Story', description: 'The love story/new world', pageTarget: 30 },
       { title: 'Fun and Games', description: 'Promise of the premise delivered', pageTarget: 55 },
       { title: 'Midpoint', description: 'False victory or defeat; stakes raised', pageTarget: 55 },
-      { title: 'Bad Guys Close In', description: 'Doubt, jealousy, fear, foes regroup', pageTarget: 75 },
+      {
+        title: 'Bad Guys Close In',
+        description: 'Doubt, jealousy, fear, foes regroup',
+        pageTarget: 75,
+      },
       { title: 'All Is Lost', description: 'The opposite of opening image', pageTarget: 75 },
-      { title: 'Dark Night of the Soul', description: 'The crisis within the crisis', pageTarget: 85 },
-      { title: 'Break into Three', description: 'The solution; choosing to try again', pageTarget: 85 },
+      {
+        title: 'Dark Night of the Soul',
+        description: 'The crisis within the crisis',
+        pageTarget: 85,
+      },
+      {
+        title: 'Break into Three',
+        description: 'The solution; choosing to try again',
+        pageTarget: 85,
+      },
       { title: 'Finale', description: 'Applying the lesson and succeeding', pageTarget: 110 },
-      { title: 'Final Image', description: 'Opposite of opening; proof of change', pageTarget: 110 },
+      {
+        title: 'Final Image',
+        description: 'Opposite of opening; proof of change',
+        pageTarget: 110,
+      },
     ],
     'three-act': [
       { title: 'Hook', description: 'Grab the reader immediately', pageTarget: 1 },
-      { title: 'Inciting Incident', description: 'The event that sets everything in motion', pageTarget: 15 },
+      {
+        title: 'Inciting Incident',
+        description: 'The event that sets everything in motion',
+        pageTarget: 15,
+      },
       { title: 'Plot Point 1', description: 'Enter the new world/situation', pageTarget: 25 },
       { title: 'Pinch Point 1', description: 'Pressure from the antagonist', pageTarget: 40 },
       { title: 'Midpoint', description: 'Major revelation or reversal', pageTarget: 50 },
@@ -70,7 +104,7 @@ const BeatSheetPlanner: React.FC = () => {
       { title: 'Climax', description: 'The final confrontation', pageTarget: 90 },
       { title: 'Resolution', description: 'Wrap up loose ends', pageTarget: 100 },
     ],
-    'custom': []
+    custom: [],
   };
 
   // Initialize beat sheet from template
@@ -88,7 +122,7 @@ const BeatSheetPlanner: React.FC = () => {
 
     const newBeatSheet: BeatSheet = {
       id: `beatsheet_${Date.now()}`,
-      name: `${template.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} - ${currentProject?.name || 'Untitled'}`,
+      name: `${template.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())} - ${currentProject?.name || 'Untitled'}`,
       template,
       beats,
       createdAt: new Date(),
@@ -111,8 +145,8 @@ const BeatSheetPlanner: React.FC = () => {
   const updateBeat = (beatId: string, updates: Partial<Beat>) => {
     if (!currentBeatSheet) return;
 
-    const updatedBeats = currentBeatSheet.beats.map(beat =>
-      beat.id === beatId ? { ...beat, ...updates } : beat
+    const updatedBeats = currentBeatSheet.beats.map((beat) =>
+      beat.id === beatId ? { ...beat, ...updates } : beat,
     );
 
     setCurrentBeatSheet({
@@ -125,13 +159,13 @@ const BeatSheetPlanner: React.FC = () => {
   // Save beat sheet (would integrate with storage)
   const saveBeatSheet = () => {
     if (!currentBeatSheet) return;
-    
+
     // Here you'd save to your storage service
     showToast('Beat sheet saved', 'success');
   };
 
   // Calculate completion
-  const completedBeats = currentBeatSheet?.beats.filter(b => b.completed).length || 0;
+  const completedBeats = currentBeatSheet?.beats.filter((b) => b.completed).length || 0;
   const totalBeats = currentBeatSheet?.beats.length || 0;
   const completionPercentage = totalBeats > 0 ? Math.round((completedBeats / totalBeats) * 100) : 0;
 
@@ -158,7 +192,7 @@ const BeatSheetPlanner: React.FC = () => {
               Structure your story with proven templates
             </p>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             {currentBeatSheet && (
               <div className="text-right">
@@ -170,7 +204,7 @@ const BeatSheetPlanner: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             <button
               onClick={saveBeatSheet}
               disabled={!currentBeatSheet}
@@ -186,7 +220,7 @@ const BeatSheetPlanner: React.FC = () => {
         {currentBeatSheet && (
           <div className="mt-4">
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div 
+              <div
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${completionPercentage}%` }}
               />
@@ -203,7 +237,7 @@ const BeatSheetPlanner: React.FC = () => {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Choose a Beat Sheet Template
             </h2>
-            
+
             <div className="grid md:grid-cols-2 gap-6">
               {/* Save the Cat */}
               <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-6 hover:border-blue-500 transition-colors">
@@ -250,8 +284,8 @@ const BeatSheetPlanner: React.FC = () => {
                 <div>
                   <h4 className="font-medium text-blue-900 dark:text-blue-100">Tip</h4>
                   <p className="text-blue-700 dark:text-blue-300 text-sm mt-1">
-                    Beat sheets help you plot before you write, saving time and preventing writer's block. 
-                    Fill out each beat with a few sentences describing what happens.
+                    Beat sheets help you plot before you write, saving time and preventing writer's
+                    block. Fill out each beat with a few sentences describing what happens.
                   </p>
                 </div>
               </div>
@@ -306,7 +340,7 @@ const BeatSheetPlanner: React.FC = () => {
                           )}
                         </div>
                       </div>
-                      
+
                       <button
                         onClick={() => setEditingBeat(editingBeat === beat.id ? null : beat.id)}
                         className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"

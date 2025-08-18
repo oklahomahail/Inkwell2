@@ -1,4 +1,4 @@
-// src/context/AppContext.tsx - Updated with auto-save state
+// File: src/context/AppContext.tsx - Updated with auto-save state
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
 import { ClaudeProvider, useClaude } from './ClaudeProvider';
 
@@ -13,6 +13,9 @@ export enum View {
 }
 
 export interface Project {
+  chapters: any;
+  characters: never[];
+  beatSheet: never[];
   id: string;
   name: string;
   description: string;
@@ -168,6 +171,13 @@ export function useAppContext(): AppContextValue {
   return context;
 }
 
+// Convenience hook used by several components (Topbar, BackupControls, etc.)
+export function useCurrentProject() {
+  const { state } = useAppContext();
+  const project = state.projects.find((p) => p.id === state.currentProjectId) || null;
+  return { project };
+}
+
 // ===== INNER PROVIDER COMPONENT =====
 function AppProviderInner({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
@@ -239,13 +249,17 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       suggestContinuation: claudeContext.suggestContinuation,
       improveText: async (text: string, goal?: string) => {
         if (goal) {
-          const prompt = `Please improve this text with the goal of ${goal}:\n\n${text}`;
+          const prompt = `Please improve this text with the goal of ${goal}:
+
+${text}`;
           return claudeContext.sendMessage(prompt);
         }
         if (claudeContext.improveText) {
           return claudeContext.improveText(text);
         }
-        const prompt = `Please improve this text:\n\n${text}`;
+        const prompt = `Please improve this text:
+
+${text}`;
         return claudeContext.sendMessage(prompt);
       },
       analyzeWritingStyle: claudeContext.analyzeWritingStyle,
@@ -253,7 +267,9 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       analyzeCharacter:
         claudeContext.analyzeCharacter ||
         (async (character: string) => {
-          const prompt = `Please analyze this character:\n\n${character}`;
+          const prompt = `Please analyze this character:
+
+${character}`;
           return claudeContext.sendMessage(prompt);
         }),
       brainstormIdeas: claudeContext.brainstormIdeas,

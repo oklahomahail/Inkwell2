@@ -1,9 +1,12 @@
-// src/components/Panels/SettingsPanel.tsx - Enhanced Claude Setup
+// File: src/components/Panels/SettingsPanel.tsx - Enhanced Claude Setup
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 import claudeService from '@/services/claudeService';
 import { Eye, EyeOff, ExternalLink, CheckCircle, AlertCircle, Info } from 'lucide-react';
+import BackupControls from '@/components/Settings/BackupControls';
+import SnapshotHistoryDialog from '@/components/Settings/SnapshotHistoryDialog';
+import { Button } from '@/components/ui/button';
 
 const SettingsPanel: React.FC = () => {
   const { state, claudeActions, claude } = useAppContext();
@@ -31,38 +34,40 @@ const SettingsPanel: React.FC = () => {
     showReadingTime: true,
   });
 
+  // Snapshots dialog
+  const [openHistory, setOpenHistory] = useState(false);
+
   useEffect(() => {
     // Load Claude configuration if service is available
     try {
-      const config = claudeService.getConfig();
-      setClaudeConfig({
-        model: config.model,
-        maxTokens: config.maxTokens,
-        temperature: config.temperature,
-      });
+      const config = claudeService.getConfig?.();
+      if (config) {
+        setClaudeConfig({
+          model: config.model,
+          maxTokens: config.maxTokens,
+          temperature: config.temperature,
+        });
+      }
     } catch (_error) {
       console.warn('Could not load Claude configuration:', _error);
     }
   }, []);
 
-  const validateApiKey = (key: string): boolean => {
-    return key.startsWith('sk-ant-') && key.length > 20;
-  };
+  const validateApiKey = (key: string): boolean => key.startsWith('sk-ant-') && key.length > 20;
 
   const handleApiKeyUpdate = async () => {
-    if (!apiKey.trim()) {
+    const trimmed = apiKey.trim();
+    if (!trimmed) {
       showToast('Please enter an API key', 'error');
       return;
     }
-
-    if (!validateApiKey(apiKey.trim())) {
+    if (!validateApiKey(trimmed)) {
       showToast('Invalid API key format. Should start with "sk-ant-"', 'error');
       return;
     }
-
     setIsUpdatingKey(true);
     try {
-      claudeActions.configureApiKey(apiKey.trim());
+      claudeActions.configureApiKey(trimmed);
       setApiKey('');
       showToast('Claude API key updated successfully!', 'success');
     } catch (_error) {
@@ -75,7 +80,7 @@ const SettingsPanel: React.FC = () => {
 
   const handleClaudeConfigUpdate = () => {
     try {
-      claudeService.updateConfig(claudeConfig);
+      claudeService.updateConfig?.(claudeConfig);
       showToast('Claude configuration updated', 'success');
     } catch (_error) {
       showToast('Failed to update Claude configuration', 'error');
@@ -87,7 +92,6 @@ const SettingsPanel: React.FC = () => {
       showToast('Please configure your API key first', 'error');
       return;
     }
-
     setIsTestingConnection(true);
     try {
       await claudeActions.sendMessage(
@@ -114,10 +118,7 @@ const SettingsPanel: React.FC = () => {
       exportedAt: new Date().toISOString(),
       version: '1.0.0',
     };
-
-    const blob = new Blob([JSON.stringify(settings, null, 2)], {
-      type: 'application/json',
-    });
+    const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -135,7 +136,7 @@ const SettingsPanel: React.FC = () => {
         color: 'text-red-500',
         bg: 'bg-red-50 dark:bg-red-900/20',
         border: 'border-red-200 dark:border-red-800',
-      };
+      } as const;
     }
     if (claude.isLoading) {
       return {
@@ -146,7 +147,7 @@ const SettingsPanel: React.FC = () => {
         color: 'text-yellow-500',
         bg: 'bg-yellow-50 dark:bg-yellow-900/20',
         border: 'border-yellow-200 dark:border-yellow-800',
-      };
+      } as const;
     }
     if (claude.isConfigured) {
       return {
@@ -155,7 +156,7 @@ const SettingsPanel: React.FC = () => {
         color: 'text-green-500',
         bg: 'bg-green-50 dark:bg-green-900/20',
         border: 'border-green-200 dark:border-green-800',
-      };
+      } as const;
     }
     return {
       icon: <Info className="w-5 h-5 text-gray-500" />,
@@ -163,7 +164,7 @@ const SettingsPanel: React.FC = () => {
       color: 'text-gray-500',
       bg: 'bg-gray-50 dark:bg-gray-900/20',
       border: 'border-gray-200 dark:border-gray-800',
-    };
+    } as const;
   };
 
   const status = getConnectionStatus();
@@ -173,9 +174,7 @@ const SettingsPanel: React.FC = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div>
-          <h2 className="text-3xl font-extrabold leading-tight font-bold text-white mb-2">
-            Settings
-          </h2>
+          <h2 className="text-3xl font-extrabold leading-tight text-white mb-2">Settings</h2>
           <p className="text-gray-400">
             Configure your writing environment and Claude AI assistant
           </p>
@@ -184,9 +183,7 @@ const SettingsPanel: React.FC = () => {
         {/* Claude AI Configuration */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold leading-snug font-semibold text-white">
-              Claude AI Assistant
-            </h3>
+            <h3 className="text-xl font-semibold text-white">Claude AI Assistant</h3>
             <div
               className={`flex items-center space-x-3 px-3 py-2 rounded-lg border ${status.bg} ${status.border}`}
             >
@@ -198,9 +195,7 @@ const SettingsPanel: React.FC = () => {
           {/* Quick Setup Guide */}
           {!claude.isConfigured && (
             <div className="mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
-              <h4 className="text-lg font-semibold font-medium text-blue-200 mb-3">
-                Quick Setup Guide
-              </h4>
+              <h4 className="text-lg font-medium text-blue-200 mb-3">Quick Setup Guide</h4>
               <ol className="text-sm text-blue-300 space-y-2 list-decimal list-inside">
                 <li>
                   Visit{' '}
@@ -214,9 +209,9 @@ const SettingsPanel: React.FC = () => {
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </li>
-                <li>Create a new API key (if you don&apos;t have one)</li>
+                <li>Create a new API key (if you don't have one)</li>
                 <li>Copy the API key and paste it below</li>
-                <li>Click &quot;Update&quot; and test the connection</li>
+                <li>Click "Update" and test the connection</li>
               </ol>
             </div>
           )}
@@ -310,9 +305,7 @@ const SettingsPanel: React.FC = () => {
 
           {/* Claude Model Configuration */}
           <div className="border-t border-gray-600 pt-6">
-            <h4 className="text-lg font-semibold font-medium text-white mb-4">
-              Model Configuration
-            </h4>
+            <h4 className="text-lg font-medium text-white mb-4">Model Configuration</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Model</label>
@@ -336,8 +329,8 @@ const SettingsPanel: React.FC = () => {
                       maxTokens: parseInt(e.target.value) || 1000,
                     })
                   }
-                  min="100"
-                  max="4000"
+                  min={100}
+                  max={4000}
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6]"
                 />
               </div>
@@ -352,9 +345,9 @@ const SettingsPanel: React.FC = () => {
                       temperature: parseFloat(e.target.value) || 0.7,
                     })
                   }
-                  min="0"
-                  max="1"
-                  step="0.1"
+                  min={0}
+                  max={1}
+                  step={0.1}
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6]"
                 />
               </div>
@@ -370,10 +363,7 @@ const SettingsPanel: React.FC = () => {
 
         {/* App Settings */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
-            Application Settings
-          </h3>
-
+          <h3 className="text-xl font-semibold text-white mb-4">Application Settings</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -402,8 +392,8 @@ const SettingsPanel: React.FC = () => {
                       autoSaveInterval: parseInt(e.target.value) || 30,
                     })
                   }
-                  min="10"
-                  max="300"
+                  min={10}
+                  max={300}
                   className="w-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6]"
                 />
               </div>
@@ -443,27 +433,31 @@ const SettingsPanel: React.FC = () => {
 
         {/* Data Management */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
-            Data Management
-          </h3>
-
-          <div className="space-y-4">
+          <h3 className="text-xl font-semibold text-white mb-4">Data Management</h3>
+          <div className="space-y-6">
             <div>
               <h4 className="text-sm font-medium text-gray-300 mb-2">Export & Backup</h4>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <button
                   onClick={handleExportSettings}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors"
                 >
                   Export Settings
                 </button>
-                <button
-                  onClick={() => showToast('Full backup system coming soon!', 'info')}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors"
-                >
-                  Export All Data
-                </button>
+                {/* Full project backup controls */}
+                <BackupControls />
               </div>
+            </div>
+
+            <div className="border-t border-gray-600 pt-4">
+              <h4 className="text-sm font-medium text-gray-300 mb-2">
+                Snapshots & Version History
+              </h4>
+              <p className="text-sm text-gray-400 mb-2">
+                Create restore points for your project and roll back if needed.
+              </p>
+              <Button onClick={() => setOpenHistory(true)}>Open Snapshot History</Button>
+              <SnapshotHistoryDialog open={openHistory} onOpenChange={setOpenHistory} />
             </div>
 
             <div className="border-t border-gray-600 pt-4">
@@ -479,61 +473,12 @@ const SettingsPanel: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            <div className="border-t border-gray-600 pt-4">
-              <h4 className="text-sm font-medium text-red-400 mb-2">Danger Zone</h4>
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        'Are you sure you want to clear all Claude conversation history? This cannot be undone.',
-                      )
-                    ) {
-                      handleClearMessages();
-                    }
-                  }}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors"
-                >
-                  Clear All Claude Data
-                </button>
-                <button
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        'Are you sure you want to reset all settings to defaults? This cannot be undone.',
-                      )
-                    ) {
-                      setClaudeConfig({
-                        model: 'claude-sonnet-4-20250514',
-                        maxTokens: 1000,
-                        temperature: 0.7,
-                      });
-                      setAppSettings({
-                        autoSave: true,
-                        autoSaveInterval: 30,
-                        darkMode: true,
-                        showWordCount: true,
-                        showReadingTime: true,
-                      });
-                      showToast('Settings reset to defaults', 'success');
-                    }
-                  }}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors"
-                >
-                  Reset All Settings
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
         {/* About */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
-            About Inkwell
-          </h3>
-
+          <h3 className="text-xl font-semibold text-white mb-4">About Inkwell</h3>
           <div className="space-y-3 text-sm text-gray-300">
             <div className="flex justify-between">
               <span>Version</span>
@@ -550,18 +495,16 @@ const SettingsPanel: React.FC = () => {
               </span>
             </div>
           </div>
-
           <div className="mt-4 pt-4 border-t border-gray-600 text-xs text-gray-500">
             <p>
               Inkwell is an AI-assisted writing platform built with React, TypeScript, and Tailwind
               CSS. It integrates with Claude AI to provide intelligent writing assistance.
             </p>
             <p className="mt-2">
-              Your API key and writing data are stored locally in your browser. We don&apos;t
-              collect or store any of your personal information.
+              Your API key and writing data are stored locally in your browser. We don't collect or
+              store any of your personal information.
             </p>
           </div>
-
           <div className="mt-4 flex gap-3">
             <a
               href="https://github.com/yourusername/inkwell"
@@ -586,10 +529,7 @@ const SettingsPanel: React.FC = () => {
 
         {/* Claude Usage Tips */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold leading-snug font-semibold text-white mb-4">
-            Claude Usage Tips
-          </h3>
-
+          <h3 className="text-xl font-semibold text-white mb-4">Claude Usage Tips</h3>
           <div className="space-y-3 text-sm text-gray-300">
             <div className="flex items-start space-x-3">
               <span className="text-[#0073E6] mt-0.5">💡</span>
