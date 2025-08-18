@@ -4,23 +4,38 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+
   css: {
-    postcss: './postcss.config.js', // Ensure Tailwind works with PostCSS
+    postcss: './postcss.config.js',
   },
+
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'), // Supports "@/..." imports
+      '@': path.resolve(__dirname, 'src'),
     },
   },
+
   server: {
     port: 3000,
-    open: true, // Auto-open browser
+    open: true,
     watch: {
       ignored: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/build/**', '**/public/**'],
     },
   },
+
   build: {
     outDir: 'dist',
-    sourcemap: false, // Enable for debugging if needed
+    sourcemap: false,
+  },
+
+  // Fix for 'process' is not defined errors
+  define: {
+    'process.env': 'process.env',
+    global: 'globalThis',
+  },
+
+  // Ensure Node.js types are available
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
   },
 });

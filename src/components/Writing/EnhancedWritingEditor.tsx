@@ -5,16 +5,16 @@ import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import CharacterCount from '@tiptap/extension-character-count';
 import Typography from '@tiptap/extension-typography';
-import { 
-  Save, 
-  Eye, 
-  EyeOff, 
-  Target, 
+import {
+  Save,
+  Eye,
+  EyeOff,
+  Target,
   Clock,
   PanelLeftOpen,
   PanelLeftClose,
   Focus,
-  Bot
+  Bot,
 } from 'lucide-react';
 
 import ClaudeToolbar from './ClaudeToolbar'; // Using your existing component name
@@ -32,7 +32,7 @@ interface EnhancedWritingEditorProps {
 const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className = '' }) => {
   const { currentProject, state } = useAppContext();
   const { showToast } = useToast();
-  
+
   // State
   const [currentScene, setCurrentScene] = useState<Scene | null>(null);
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
@@ -55,7 +55,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
       Placeholder.configure({
         placeholder: ({ node }) => {
           if (node.type.name === 'heading') {
-            return 'What\'s the title?';
+            return "What's the title?";
           }
           return 'Start writing your scene...';
         },
@@ -69,7 +69,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
     onUpdate: ({ editor }) => {
       const content = editor.getHTML();
       const text = editor.getText();
-      const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+      const wordCount = text.split(/\s+/).filter((word) => word.length > 0).length;
 
       // Update current scene content
       if (currentScene) {
@@ -80,7 +80,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
           updatedAt: new Date(),
         };
         setCurrentScene(updatedScene);
-        
+
         // Auto-save
         debouncedSave(updatedScene);
       }
@@ -88,19 +88,19 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
     onSelectionUpdate: ({ editor }) => {
       const { from, to } = editor.state.selection;
       const text = editor.state.doc.textBetween(from, to, ' ');
-      
+
       if (text.trim() && text.length > 10) {
         setSelectedText(text);
-        
+
         // Get cursor position for popup toolbar
         const { view } = editor;
         const start = view.coordsAtPos(from);
-        
+
         setToolbarPosition({
           x: start.left,
           y: start.top - 80,
         });
-        
+
         // Show popup toolbar after a short delay to avoid flickering
         setTimeout(() => setShowPopupToolbar(true), 300);
       } else {
@@ -123,22 +123,25 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
   });
 
   // Auto-save functionality
-  const saveScene = useCallback(async (scene: Scene) => {
-    if (!currentProject) return;
+  const saveScene = useCallback(
+    async (scene: Scene) => {
+      if (!currentProject) return;
 
-    try {
-      await storageService.saveScene(currentProject.id, scene);
-      setLastSaved(new Date());
-    } catch (error) {
-      console.error('Failed to save scene:', error);
-      showToast('Failed to save scene', 'error');
-    }
-  }, [currentProject, showToast]);
+      try {
+        await storageService.saveScene(currentProject.id, scene);
+        setLastSaved(new Date());
+      } catch (error) {
+        console.error('Failed to save scene:', error);
+        showToast('Failed to save scene', 'error');
+      }
+    },
+    [currentProject, showToast],
+  );
 
   // Debounced save function
   const debouncedSave = useCallback(
     debounce((scene: Scene) => saveScene(scene), 2000),
-    [saveScene]
+    [saveScene],
   );
 
   // Load initial scene
@@ -174,7 +177,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
     if (currentScene && editor) {
       const content = editor.getHTML();
       const text = editor.getText();
-      const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+      const wordCount = text.split(/\s+/).filter((word) => word.length > 0).length;
 
       const updatedScene = {
         ...currentScene,
@@ -182,7 +185,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
         wordCount,
         updatedAt: new Date(),
       };
-      
+
       saveScene(updatedScene);
     }
 
@@ -190,7 +193,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
     setCurrentScene(scene);
     setCurrentChapter(chapter);
     editor?.commands.setContent(scene.content || '');
-    
+
     // Focus editor
     setTimeout(() => {
       focusWritingEditor();
@@ -215,7 +218,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
     } else {
       editor.chain().focus().insertContent(`\n\n${text}`).run();
     }
-    
+
     setShowPopupToolbar(false);
     setSelectedText('');
   };
@@ -226,7 +229,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
 
     const content = editor.getHTML();
     const text = editor.getText();
-    const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+    const wordCount = text.split(/\s+/).filter((word) => word.length > 0).length;
 
     const updatedScene = {
       ...currentScene,
@@ -326,7 +329,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
                   <div className="flex items-center space-x-2">
                     <Target size={14} />
                     <div className="w-16 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className="h-full bg-blue-500 transition-all duration-300"
                         style={{ width: `${wordGoalProgress}%` }}
                       />
@@ -381,16 +384,15 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
         <div className="flex-1 flex overflow-hidden">
           {/* Main Editor */}
           <div className={`flex-1 overflow-y-auto ${showAIPanel ? 'pr-4' : ''}`}>
-            <div className={`
+            <div
+              className={`
               max-w-none mx-auto p-8
               ${isFocusMode ? 'max-w-4xl pt-16' : 'max-w-4xl'}
-            `}>
+            `}
+            >
               {currentScene ? (
                 <div ref={editorRef} className="min-h-full">
-                  <EditorContent 
-                    editor={editor}
-                    className="min-h-full focus-within:outline-none"
-                  />
+                  <EditorContent editor={editor} className="min-h-full focus-within:outline-none" />
                 </div>
               ) : (
                 <div className="text-center py-16">
@@ -464,7 +466,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
 
 // Utility functions
 function debounce<T extends (...args: any[]) => any>(func: T, wait: number): T {
-  let timeout: NodeJS.Timeout;
+  let timeout: ReturnType<typeof setTimeout>; // ✅ Correct type
   return ((...args: any[]) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
@@ -476,11 +478,11 @@ function formatTime(date: Date): string {
   const diff = now.getTime() - date.getTime();
   const seconds = Math.floor(diff / 1000);
   const minutes = Math.floor(seconds / 60);
-  
+
   if (seconds < 30) return 'just now';
   if (seconds < 60) return `${seconds}s ago`;
   if (minutes < 60) return `${minutes}m ago`;
-  
+
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 

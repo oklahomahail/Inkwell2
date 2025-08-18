@@ -44,3 +44,227 @@ body {
     animation: logo-spin infinite 20s linear;
   }
 }
+
+/* Analytics Component Styles */
+
+/* Add this to src/styles/components.css or src/index.css */
+
+/* Analytics View Container */
+.analytics-view {
+  @apply max-w-full mx-auto p-6 space-y-8;
+}
+
+/* Analytics Header */
+.analytics-header {
+  @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4;
+}
+
+.analytics-title {
+  @apply text-3xl font-bold text-slate-900 dark:text-slate-100;
+}
+
+.analytics-subtitle {
+  @apply text-lg text-slate-600 dark:text-slate-400;
+}
+
+.analytics-controls {
+  @apply flex items-center gap-2;
+}
+
+.analytics-select {
+  @apply px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+/* Analytics Cards Grid */
+.analytics-metrics {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4;
+}
+
+.analytics-card {
+  @apply bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 transition-all duration-200 hover:shadow-md;
+}
+
+.analytics-card-header {
+  @apply flex items-center gap-3 mb-3;
+}
+
+.analytics-card-icon {
+  @apply p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400;
+}
+
+.analytics-card-title {
+  @apply text-sm font-medium text-slate-600 dark:text-slate-400;
+}
+
+.analytics-card-content {
+  @apply flex items-end justify-between;
+}
+
+.analytics-card-value {
+  @apply text-2xl font-bold text-slate-900 dark:text-slate-100;
+}
+
+.analytics-card-trend {
+  @apply flex items-center gap-1 text-sm;
+}
+
+.analytics-card-trend.positive {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.analytics-card-trend.negative {
+  @apply text-red-600 dark:text-red-400;
+}
+
+/* Special card styles */
+.streak-card {
+  @apply bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-orange-200 dark:border-orange-800;
+}
+
+.streak-card .analytics-card-icon {
+  @apply bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400;
+}
+
+.goal-complete {
+  @apply bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800;
+}
+
+.goal-complete .analytics-card-icon {
+  @apply bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400;
+}
+
+/* Charts Section */
+.analytics-charts {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-6;
+}
+
+.analytics-chart-card {
+  @apply bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6;
+}
+
+.chart-header {
+  @apply mb-6;
+}
+
+.chart-header h3 {
+  @apply text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1;
+}
+
+.chart-header p {
+  @apply text-sm text-slate-600 dark:text-slate-400;
+}
+
+.chart-container {
+  @apply w-full;
+}
+
+/* Analytics Sections */
+.analytics-section {
+  @apply space-y-4;
+}
+
+.section-header {
+  @apply mb-6;
+}
+
+.section-header h3 {
+  @apply text-xl font-semibold text-slate-900 dark:text-slate-100 mb-1;
+}
+
+.section-header p {
+  @apply text-slate-600 dark:text-slate-400;
+}
+
+/* Chapter Progress */
+.chapter-progress-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+.chapter-progress-card {
+  @apply bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4;
+}
+
+.chapter-progress-header {
+  @apply flex items-center justify-between mb-3;
+}
+
+.chapter-progress-header h4 {
+  @apply font-medium text-slate-900 dark:text-slate-100 truncate;
+}
+
+.chapter-progress-percentage {
+  @apply text-sm font-semibold text-blue-600 dark:text-blue-400;
+}
+
+.chapter-progress-bar {
+  @apply w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-3;
+}
+
+.chapter-progress-fill {
+  @apply bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-500;
+}
+
+.chapter-progress-stats {
+  @apply flex justify-between text-xs text-slate-600 dark:text-slate-400;
+}
+
+/* Writing Sessions */
+.sessions-list {
+  @apply space-y-3;
+}
+
+.session-item {
+  @apply bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between;
+}
+
+.session-date {
+  @apply flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400;
+}
+
+.session-stats {
+  @apply flex items-center gap-4;
+}
+
+.session-stat {
+  @apply flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400;
+}
+
+.session-productivity {
+  @apply flex items-center gap-1 text-sm font-medium text-green-600 dark:text-green-400;
+}
+
+/* Empty State */
+.analytics-empty {
+  @apply flex flex-col items-center justify-center py-16 text-center;
+}
+
+.analytics-empty-icon {
+  @apply w-16 h-16 text-slate-400 dark:text-slate-600 mb-4;
+}
+
+.analytics-empty h2 {
+  @apply text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2;
+}
+
+.analytics-empty p {
+  @apply text-slate-600 dark:text-slate-400;
+}
+
+/* Responsive Design */
+@media (width <= 640px) {
+  .analytics-view {
+    @apply p-4 space-y-6;
+  }
+
+  .analytics-metrics {
+    @apply grid-cols-1;
+  }
+
+  .analytics-charts {
+    @apply grid-cols-1;
+  }
+
+  .chapter-progress-grid {
+    @apply grid-cols-1;
+  }
+}

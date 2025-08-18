@@ -1,20 +1,20 @@
 // src/components/Writing/ClaudeToolbar.tsx - Fixed Lucide React icons
 import React, { useState, useEffect } from 'react';
-import { 
-  Sparkles, 
-  Brain, 
-  Eye, 
-  Zap, 
-  MessageSquare, 
-  Copy, 
-  Check, 
+import {
+  Sparkles,
+  Brain,
+  Eye,
+  Zap,
+  MessageSquare,
+  Copy,
+  Check,
   RotateCcw,
   Users,
   ChevronUp,
   ChevronDown,
   Pin,
   PinOff,
-  X
+  X,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
@@ -35,7 +35,7 @@ interface QuickPrompt {
   label: string;
   shortLabel?: string; // For popup mode
   icon: string; // Changed to string identifier
-  prompt: (text: string, context?: string) => string;
+  prompt: (text: string, _context?: string) => string;
   color: string;
   category: 'enhance' | 'generate' | 'analyze';
   needsSelection?: boolean;
@@ -53,7 +53,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
 }) => {
   const { claudeActions } = useAppContext();
   const { showToast } = useToast();
-  
+
   const [lastResult, setLastResult] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
@@ -163,13 +163,13 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
 
   const handlePromptClick = async (promptConfig: QuickPrompt): Promise<void> => {
     const targetText = selectedText || currentContent || '';
-    
+
     // Check if prompt needs selection but none exists
     if (promptConfig.needsSelection && !selectedText) {
       showToast('Please select text first for this action', 'error');
       return;
     }
-    
+
     if (!targetText && promptConfig.id !== 'brainstorm') {
       showToast('Please select some text or write content first', 'error');
       return;
@@ -177,11 +177,11 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
 
     setIsLoading(true);
     setActivePrompt(promptConfig.id);
-    
+
     try {
       const prompt = promptConfig.prompt(targetText, sceneTitle);
       let result: string;
-      
+
       // Use appropriate Claude action based on prompt type
       switch (promptConfig.id) {
         case 'improve':
@@ -195,7 +195,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
           result = await claudeActions.analyzeWritingStyle(targetText);
           break;
         case 'character':
-          result = claudeActions.analyzeCharacter 
+          result = claudeActions.analyzeCharacter
             ? await claudeActions.analyzeCharacter(targetText)
             : await claudeActions.sendMessage(prompt);
           break;
@@ -205,14 +205,13 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
         default:
           result = await claudeActions.sendMessage(prompt);
       }
-      
+
       setLastResult(result);
-      
+
       // For analysis actions, also show Claude panel
       if (promptConfig.category === 'analyze') {
         claudeActions.toggleVisibility();
       }
-      
     } catch (error) {
       console.error(`Failed to ${promptConfig.label.toLowerCase()}:`, error);
       setLastResult(`Error: Failed to ${promptConfig.label.toLowerCase()}. Please try again.`);
@@ -228,7 +227,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       onInsertText(lastResult, replaceSelection);
       setLastResult('');
       showToast(replaceSelection ? 'Text replaced' : 'Text inserted', 'success');
-      
+
       // Close popup after insert
       if (position === 'popup' && onClose) {
         onClose();
@@ -254,8 +253,8 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
   const getFilteredPrompts = () => {
     if (position === 'popup' && selectedText) {
       // In popup mode with selection, prioritize enhancement actions
-      return quickPrompts.filter(p => 
-        p.category === 'enhance' || (p.category === 'analyze' && selectedText.length > 50)
+      return quickPrompts.filter(
+        (p) => p.category === 'enhance' || (p.category === 'analyze' && selectedText.length > 50),
       );
     }
     return quickPrompts;
@@ -272,22 +271,28 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
     }
   }, [position, popupPosition]);
 
-  const toolbarClasses = position === 'popup' 
-    ? `fixed z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg ${className}`
-    : `bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg ${className}`;
+  const toolbarClasses =
+    position === 'popup'
+      ? `fixed z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg ${className}`
+      : `bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg ${className}`;
 
-  const buttonGrid = position === 'popup' 
-    ? 'grid grid-cols-2 gap-1'
-    : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2';
+  const buttonGrid =
+    position === 'popup'
+      ? 'grid grid-cols-2 gap-1'
+      : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2';
 
   return (
-    <div 
+    <div
       className={toolbarClasses}
-      style={position === 'popup' ? { 
-        left: popupPosition.x, 
-        top: popupPosition.y,
-        maxWidth: '320px'
-      } : undefined}
+      style={
+        position === 'popup'
+          ? {
+              left: popupPosition.x,
+              top: popupPosition.y,
+              maxWidth: '320px',
+            }
+          : undefined
+      }
     >
       <div className="p-4 space-y-4">
         {/* Header */}
@@ -303,7 +308,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
               </span>
             )}
           </div>
-          
+
           <div className="flex items-center gap-1">
             {position === 'panel' && (
               <>
@@ -338,9 +343,14 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
           <div className={buttonGrid}>
             {filteredPrompts.map((promptConfig) => {
               const IconComponent = getIcon(promptConfig.icon);
-              const isDisabled = promptConfig.needsSelection ? !hasSelectedText : (!hasSelectedText && !hasContent && promptConfig.id !== 'brainstorm');
+              const isDisabled = promptConfig.needsSelection
+                ? !hasSelectedText
+                : !hasSelectedText && !hasContent && promptConfig.id !== 'brainstorm';
               const isActive = activePrompt === promptConfig.id;
-              const buttonLabel = position === 'popup' ? (promptConfig.shortLabel || promptConfig.label) : promptConfig.label;
+              const buttonLabel =
+                position === 'popup'
+                  ? promptConfig.shortLabel || promptConfig.label
+                  : promptConfig.label;
 
               return (
                 <button
@@ -364,7 +374,9 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
                   ) : (
                     <IconComponent size={16} />
                   )}
-                  <span className={position === 'popup' ? 'hidden sm:inline' : ''}>{buttonLabel}</span>
+                  <span className={position === 'popup' ? 'hidden sm:inline' : ''}>
+                    {buttonLabel}
+                  </span>
                 </button>
               );
             })}
@@ -404,7 +416,9 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
                 )}
               </div>
             </div>
-            <div className={`p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 overflow-y-auto ${position === 'popup' ? 'max-h-32' : 'max-h-40'}`}>
+            <div
+              className={`p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 overflow-y-auto ${position === 'popup' ? 'max-h-32' : 'max-h-40'}`}
+            >
               {lastResult}
             </div>
           </div>
@@ -413,7 +427,8 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
         {/* Usage Tip */}
         {!hasSelectedText && !hasContent && isExpanded && (
           <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded">
-            💡 <strong>Tip:</strong> Select text in your scene or write some content to unlock AI assistance
+            💡 <strong>Tip:</strong> Select text in your scene or write some content to unlock AI
+            assistance
           </div>
         )}
       </div>

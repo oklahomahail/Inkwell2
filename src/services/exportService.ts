@@ -1,10 +1,8 @@
 // src/services/exportService.ts
 import { storageService } from './storageService';
-import { EnhancedProject } from '@/types/project';
-import { Chapter, Scene, ExportFormat } from '@/types/writing';
 
 export interface ExportOptions {
-  format: ExportFormat;
+  format: string;
   includeMetadata?: boolean;
   includeSynopsis?: boolean;
   includeCharacterNotes?: boolean;
@@ -18,6 +16,13 @@ export interface ExportResult {
   filename: string;
   downloadUrl?: string;
   error?: string;
+}
+
+export enum ExportFormat {
+  MARKDOWN = 'markdown',
+  TXT = 'txt',
+  PDF = 'pdf',
+  DOCX = 'docx',
 }
 
 class ExportService {
@@ -97,17 +102,17 @@ class ExportService {
     try {
       const content = await this.generateContent(projectId, options);
       const project = storageService.loadProject(projectId);
-      
+
       if (!project) {
         throw new Error('Project not found');
       }
 
       const filename = `${this.sanitizeFilename(options.customTitle || project.name)}.md`;
-      
+
       // Create download
       const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
       const url = URL.createObjectURL(blob);
-      
+
       // Trigger download
       const link = document.createElement('a');
       link.href = url;
@@ -115,7 +120,7 @@ class ExportService {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Cleanup
       setTimeout(() => URL.revokeObjectURL(url), 1000);
 
@@ -137,13 +142,13 @@ class ExportService {
   async exportPlainText(projectId: string, options: ExportOptions): Promise<ExportResult> {
     try {
       const rawContent = await this.generateContent(projectId, options);
-      
+
       // Convert markdown to plain text (basic conversion)
       let content = rawContent
         .replace(/^#{1,6}\s+/gm, '') // Remove markdown headers
         .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
         .replace(/\*(.*?)\*/g, '$1') // Remove italic
-        .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Convert links to text
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text - FIXED LINE 146
         .replace(/---+/g, '* * *') // Convert horizontal rules
         .replace(/\n{3,}/g, '\n\n'); // Normalize line breaks
 
@@ -153,17 +158,17 @@ class ExportService {
       }
 
       const filename = `${this.sanitizeFilename(options.customTitle || project.name)}.txt`;
-      
+
       const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       setTimeout(() => URL.revokeObjectURL(url), 1000);
 
       return {
@@ -185,7 +190,7 @@ class ExportService {
     try {
       const content = await this.generateContent(projectId, options);
       const project = storageService.loadProject(projectId);
-      
+
       if (!project) {
         throw new Error('Project not found');
       }
@@ -193,7 +198,7 @@ class ExportService {
       // Create a printable HTML version
       const htmlContent = this.markdownToHTML(content);
       const printWindow = window.open('', '_blank');
-      
+
       if (!printWindow) {
         throw new Error('Popup blocked - please allow popups for PDF export');
       }
@@ -247,9 +252,9 @@ class ExportService {
         </body>
         </html>
       `);
-      
+
       printWindow.document.close();
-      
+
       // Auto-trigger print dialog after a short delay
       setTimeout(() => {
         printWindow.print();
@@ -274,7 +279,7 @@ class ExportService {
     try {
       const content = await this.generateContent(projectId, options);
       const project = storageService.loadProject(projectId);
-      
+
       if (!project) {
         throw new Error('Project not found');
       }
@@ -282,17 +287,17 @@ class ExportService {
       // Convert markdown to RTF format
       const rtfContent = this.markdownToRTF(content);
       const filename = `${this.sanitizeFilename(options.customTitle || project.name)}.rtf`;
-      
+
       const blob = new Blob([rtfContent], { type: 'application/rtf' });
       const url = URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       setTimeout(() => URL.revokeObjectURL(url), 1000);
 
       return {
@@ -328,9 +333,9 @@ class ExportService {
   // Utility: Convert markdown to RTF
   private markdownToRTF(markdown: string): string {
     let rtf = '{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}\\f0\\fs24 ';
-    
+
     const lines = markdown.split('\n');
-    lines.forEach(line => {
+    lines.forEach((line) => {
       if (line.startsWith('# ')) {
         rtf += `\\fs32\\b ${line.substring(2)}\\b0\\fs24\\par `;
       } else if (line.startsWith('## ')) {
@@ -345,7 +350,7 @@ class ExportService {
         rtf += `${formatted}\\par `;
       }
     });
-    
+
     rtf += '}';
     return rtf;
   }
@@ -359,7 +364,11 @@ class ExportService {
   }
 
   // Main export method
-  async exportProject(projectId: string, format: ExportFormat, options: Partial<ExportOptions> = {}): Promise<ExportResult> {
+  async exportProject(
+    projectId: string,
+    format: string,
+    options: Partial<ExportOptions> = {},
+  ): Promise<ExportResult> {
     const fullOptions: ExportOptions = {
       format,
       includeMetadata: true,
