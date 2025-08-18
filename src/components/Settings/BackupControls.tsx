@@ -1,6 +1,6 @@
 // src/components/Settings/BackupControls.tsx
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { useCurrentProject } from '@/context/AppContext';
 import { performBackup, performImport } from '@/services/backupExport';
 

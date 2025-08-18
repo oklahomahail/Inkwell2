@@ -6,7 +6,7 @@ import claudeService from '@/services/claudeService';
 import { Eye, EyeOff, ExternalLink, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import BackupControls from '@/components/Settings/BackupControls';
 import SnapshotHistoryDialog from '@/components/Settings/SnapshotHistoryDialog';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 const SettingsPanel: React.FC = () => {
   const { state, claudeActions, claude } = useAppContext();
