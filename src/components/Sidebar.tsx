@@ -1,6 +1,6 @@
 // src/components/Sidebar.tsx
 import React from 'react';
-import { Home, Book as _Book, Settings, BarChart3, Clock, PenTool } from 'lucide-react';
+import { Home, Book as _Book, Settings, BarChart3, Clock, PenTool, BookOpen } from 'lucide-react';
 import { useAppContext, View } from '@/context/AppContext';
 import { cn } from '@/utils/cn';
 import { focusWritingEditor } from '@/utils/focusUtils';
@@ -8,6 +8,7 @@ import { focusWritingEditor } from '@/utils/focusUtils';
 const sidebarLinks = [
   { view: View.Dashboard, label: 'Dashboard', icon: Home },
   { view: View.Writing, label: 'Writing', icon: PenTool },
+  { view: View.Planning, label: 'Planning', icon: BookOpen }, // ✨ NEW: Added Planning
   { view: View.Timeline, label: 'Timeline', icon: Clock },
   { view: View.Analysis, label: 'Analytics', icon: BarChart3 },
   { view: View.Settings, label: 'Settings', icon: Settings },

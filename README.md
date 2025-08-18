@@ -21,12 +21,12 @@ Built with **React + TypeScript + Tailwind**, it combines a distraction-free wri
 ## 🛠️ Tech Stack
 
 - **React 18** + **TypeScript**
-- **TailwindCSS** for modern UI  
-- **TipTap** rich-text editor  
-- **Vite** for fast builds  
-- **Claude AI Service** (with encrypted keys)  
-- **IndexedDB / Local Storage** for persistence  
-- **Recharts** for analytics & data visualization  
+- **TailwindCSS** for modern UI
+- **TipTap** rich-text editor
+- **Vite** for fast builds
+- **Claude AI Service** (with encrypted keys)
+- **IndexedDB / Local Storage** for persistence
+- **Recharts** for analytics & data visualization
 
 ---
 
@@ -74,3 +74,4 @@ Edit
 ---
 
 **Happy writing! 📝**
+```

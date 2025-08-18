@@ -130,7 +130,7 @@ const ToastManager: React.FC = () => {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 space-y-2" role="region" aria-label="Notifications">
-      {toasts.map((toast) => {
+      {toasts.map((toast: any) => {
         const id = String(toast.id ?? Date.now()); // normalize id as string
         return (
           <ToastItem

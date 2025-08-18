@@ -17,7 +17,7 @@ const DashboardPanel: React.FC = () => {
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
-    addProject(newProject);
+    addProject({ ...newProject, chapters: [], characters: [], beatSheet: [] });
     setCurrentProjectId(newProject.id);
   };
 

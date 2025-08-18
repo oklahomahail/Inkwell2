@@ -102,6 +102,9 @@ export function useCommands(
               content: '',
               createdAt: Date.now(),
               updatedAt: Date.now(),
+              chapters: [],
+              characters: [],
+              beatSheet: [],
             });
             onCommandExecute?.('project-new');
             showToast(`Created project: ${projectName}`, 'success');

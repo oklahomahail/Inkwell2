@@ -17,7 +17,7 @@ class SnapshotService {
   private static readonly MAX_SNAPSHOTS = 15;
   private static readonly AUTO_SNAPSHOT_INTERVAL = 10 * 60 * 1000; // 10 minutes
 
-  private autoSnapshotTimer: number | null = null;
+  private autoSnapshotTimer: ReturnType<typeof setInterval> | null = null;
   private lastSnapshotTime: number = 0;
 
   /**
@@ -172,7 +172,9 @@ class SnapshotService {
   startAutoSnapshots(project: Project): void {
     this.stopAutoSnapshots();
 
-    this.autoSnapshotTimer = setInterval(async () => {
+    this.autoSnapshotTimer = (
+      window.setInterval as unknown as (h: (...args: any[]) => void, t?: number) => number
+    )(async () => {
       try {
         // Only create auto-snapshot if project has been modified
         const now = Date.now();

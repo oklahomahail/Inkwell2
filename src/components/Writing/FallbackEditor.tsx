@@ -15,7 +15,7 @@ export const FallbackEditor: React.FC<FallbackEditorProps> = ({
   content,
   onChange,
   onWordCountChange,
-  placeholder = "Start writing your scene...",
+  placeholder = 'Start writing your scene...',
   className,
   wordCountGoal = 0,
 }) => {
@@ -34,16 +34,19 @@ export const FallbackEditor: React.FC<FallbackEditorProps> = ({
   const textToHtml = (text: string): string => {
     return text
       .split('\n\n')
-      .map(paragraph => paragraph.trim())
-      .filter(paragraph => paragraph.length > 0)
-      .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
+      .map((paragraph) => paragraph.trim())
+      .filter((paragraph) => paragraph.length > 0)
+      .map((paragraph) => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
       .join('');
   };
 
   const [textContent, setTextContent] = useState(htmlToText(content));
 
   const countWords = (text: string): number => {
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    return text
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
   };
 
   const wordCount = countWords(textContent);
@@ -71,9 +74,12 @@ export const FallbackEditor: React.FC<FallbackEditorProps> = ({
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'F11' || ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'F')) {
+      if (
+        event.key === 'F11' ||
+        ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'F')
+      ) {
         event.preventDefault();
-        setIsFocusMode(prev => !prev);
+        setIsFocusMode((prev) => !prev);
       }
       if (event.key === 'Escape' && isFocusMode) {
         setIsFocusMode(false);
@@ -87,12 +93,12 @@ export const FallbackEditor: React.FC<FallbackEditorProps> = ({
   // Format text functions
   const formatText = (type: 'bold' | 'italic' | 'heading') => {
     if (!textareaRef.current) return;
-    
+
     const textarea = textareaRef.current;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = textContent.substring(start, end);
-    
+
     let replacement = '';
     switch (type) {
       case 'bold':
@@ -105,11 +111,11 @@ export const FallbackEditor: React.FC<FallbackEditorProps> = ({
         replacement = `## ${selectedText}`;
         break;
     }
-    
+
     const newText = textContent.substring(0, start) + replacement + textContent.substring(end);
     setTextContent(newText);
     onChange(textToHtml(newText));
-    
+
     // Restore focus and cursor position
     setTimeout(() => {
       textarea.focus();
@@ -118,7 +124,7 @@ export const FallbackEditor: React.FC<FallbackEditorProps> = ({
   };
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn('relative', className)}>
       {/* Toolbar */}
       {!isFocusMode && (
         <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
@@ -146,7 +152,7 @@ export const FallbackEditor: React.FC<FallbackEditorProps> = ({
                 H2
               </button>
             </div>
-            
+
             <div className="text-xs text-gray-500 dark:text-gray-400 hidden lg:block">
               Tip: Use **bold**, *italic*, ## heading for formatting
             </div>
@@ -184,10 +190,10 @@ export const FallbackEditor: React.FC<FallbackEditorProps> = ({
       {/* Editor Container */}
       <div
         className={cn(
-          "transition-all duration-300",
+          'transition-all duration-300',
           isFocusMode
-            ? "fixed inset-0 z-50 bg-white dark:bg-gray-900 p-8 overflow-y-auto"
-            : "relative"
+            ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 p-8 overflow-y-auto'
+            : 'relative',
         )}
       >
         <textarea
@@ -196,12 +202,12 @@ export const FallbackEditor: React.FC<FallbackEditorProps> = ({
           onChange={handleTextChange}
           placeholder={placeholder}
           className={cn(
-            "w-full min-h-[400px] p-4 border rounded-lg resize-none",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-            "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100",
-            "placeholder-gray-500 dark:placeholder-gray-400",
-            "font-mono text-base leading-relaxed",
-            isFocusMode && "max-w-4xl mx-auto pt-16 border-none focus:ring-0 bg-transparent"
+            'w-full min-h-[400px] p-4 border rounded-lg resize-none',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100',
+            'placeholder-gray-500 dark:placeholder-gray-400',
+            'font-mono text-base leading-relaxed',
+            isFocusMode && 'max-w-4xl mx-auto pt-16 border-none focus:ring-0 bg-transparent',
           )}
           style={{
             lineHeight: '1.6',
@@ -226,18 +232,21 @@ export const FallbackEditor: React.FC<FallbackEditorProps> = ({
                   <div className="w-24 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div
                       className={cn(
-                        "h-full transition-all duration-300",
-                        goalProgress >= 100 ? "bg-green-500" : "bg-blue-500"
+                        'h-full transition-all duration-300',
+                        goalProgress >= 100 ? 'bg-green-500' : 'bg-blue-500',
                       )}
                       style={{ width: `${Math.min(goalProgress, 100)}%` }}
                     />
                   </div>
-                  <span className={cn(
-                    "text-xs font-medium",
-                    goalProgress >= 100 ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"
-                  )}>
-                    {Math.round(goalProgress)}%
-                    {goalProgress >= 100 && " ✅"}
+                  <span
+                    className={cn(
+                      'text-xs font-medium',
+                      goalProgress >= 100
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-blue-600 dark:text-blue-400',
+                    )}
+                  >
+                    {Math.round(goalProgress)}%{goalProgress >= 100 && ' ✅'}
                   </span>
                 </div>
               )}
@@ -256,7 +265,7 @@ export const FallbackEditor: React.FC<FallbackEditorProps> = ({
                 <span className="opacity-60">|</span>
                 <span className="opacity-75">
                   🎯 {Math.round(goalProgress)}% of goal
-                  {goalProgress >= 100 && " ✅"}
+                  {goalProgress >= 100 && ' ✅'}
                 </span>
               </>
             )}
@@ -267,8 +276,8 @@ export const FallbackEditor: React.FC<FallbackEditorProps> = ({
       {/* Formatting Help */}
       {!isFocusMode && (
         <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          💡 Temporary fallback editor while TipTap is being fixed. 
-          Use **bold**, *italic*, ## heading for basic formatting.
+          💡 Temporary fallback editor while TipTap is being fixed. Use **bold**, *italic*, ##
+          heading for basic formatting.
         </div>
       )}
     </div>

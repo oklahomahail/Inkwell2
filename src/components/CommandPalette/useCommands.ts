@@ -6,20 +6,20 @@ import { useToast } from '@/context/ToastContext';
 
 export function useCommands(
   selectedText?: string,
-  onCommandExecute?: (commandId: string) => void
+  onCommandExecute?: (commandId: string) => void,
 ): Command[] {
-  const { 
+  const {
     state,
-    setView, 
-    addProject, 
+    setView,
+    addProject,
     updateProject,
     deleteProject,
     setCurrentProjectId,
-    currentProject, 
+    currentProject,
     claudeActions,
-    setTheme
+    setTheme,
   } = useAppContext();
-  
+
   const { showToast } = useToast();
 
   return useMemo(() => {
@@ -117,7 +117,7 @@ export function useCommands(
             createdAt: Date.now(),
             updatedAt: Date.now(),
           };
-          addProject(newProject);
+          addProject({ ...newProject, chapters: [], characters: [], beatSheet: [] });
           setCurrentProjectId(newProject.id);
           setView(View.Writing);
           showToast(`Created project: ${newProject.name}`, 'success');
@@ -127,14 +127,16 @@ export function useCommands(
       {
         id: 'project-rename',
         label: 'Rename Current Project',
-        description: currentProject ? `Rename "${currentProject.name}"` : 'Rename the current project',
+        description: currentProject
+          ? `Rename "${currentProject.name}"`
+          : 'Rename the current project',
         icon: '✏️',
         category: 'project',
         keywords: ['rename', 'edit', 'project', 'name', 'title'],
         enabled: !!currentProject,
         action: () => {
           if (!currentProject) return;
-          
+
           const newName = prompt('Enter new project name:', currentProject.name);
           if (newName && newName.trim() && newName !== currentProject.name) {
             const updatedProject = {
@@ -151,14 +153,16 @@ export function useCommands(
       {
         id: 'project-duplicate',
         label: 'Duplicate Current Project',
-        description: currentProject ? `Duplicate "${currentProject.name}"` : 'Duplicate the current project',
+        description: currentProject
+          ? `Duplicate "${currentProject.name}"`
+          : 'Duplicate the current project',
         icon: '📋',
         category: 'project',
         keywords: ['duplicate', 'copy', 'clone', 'project'],
         enabled: !!currentProject,
         action: () => {
           if (!currentProject) return;
-          
+
           const duplicatedProject = {
             ...currentProject,
             id: `project_${Date.now()}`,
@@ -175,15 +179,19 @@ export function useCommands(
       {
         id: 'project-delete',
         label: 'Delete Current Project',
-        description: currentProject ? `Delete "${currentProject.name}"` : 'Delete the current project',
+        description: currentProject
+          ? `Delete "${currentProject.name}"`
+          : 'Delete the current project',
         icon: '🗑️',
         category: 'project',
         keywords: ['delete', 'remove', 'project', 'destroy'],
         enabled: !!currentProject,
         action: () => {
           if (!currentProject) return;
-          
-          const confirmed = confirm(`Are you sure you want to delete "${currentProject.name}"? This cannot be undone.`);
+
+          const confirmed = confirm(
+            `Are you sure you want to delete "${currentProject.name}"? This cannot be undone.`,
+          );
           if (confirmed) {
             deleteProject(currentProject.id);
             showToast(`Deleted project: ${currentProject.name}`, 'success');
@@ -217,7 +225,9 @@ export function useCommands(
         category: 'claude',
         keywords: ['clear', 'history', 'reset', 'claude', 'conversation'],
         action: () => {
-          const confirmed = confirm('Are you sure you want to clear the Claude conversation history?');
+          const confirmed = confirm(
+            'Are you sure you want to clear the Claude conversation history?',
+          );
           if (confirmed) {
             claudeActions.clearMessages();
             showToast('Cleared Claude conversation history', 'success');
@@ -372,9 +382,8 @@ export function useCommands(
     // CONDITIONAL COMMANDS (TEXT SELECTION)
     // ========================================
     if (selectedText && selectedText.trim().length > 0) {
-      const textPreview = selectedText.length > 30 
-        ? `"${selectedText.slice(0, 30)}..."` 
-        : `"${selectedText}"`;
+      const textPreview =
+        selectedText.length > 30 ? `"${selectedText.slice(0, 30)}..."` : `"${selectedText}"`;
 
       commands.push(
         {
@@ -451,7 +460,7 @@ export function useCommands(
               console.error('Character analysis error:', error);
             }
           },
-        }
+        },
       );
     }
 
@@ -516,7 +525,7 @@ export function useCommands(
               console.error('World building error:', error);
             }
           },
-        }
+        },
       );
     }
 
@@ -525,9 +534,7 @@ export function useCommands(
     // ========================================
     if (state.projects.length > 0) {
       // Add recent projects as quick-switch commands
-      const recentProjects = state.projects
-        .sort((a, b) => b.updatedAt - a.updatedAt)
-        .slice(0, 5);
+      const recentProjects = state.projects.sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 5);
 
       recentProjects.forEach((project, index) => {
         commands.push({
@@ -550,19 +557,19 @@ export function useCommands(
     }
 
     // Filter out disabled commands and return
-    return commands.filter(cmd => cmd.enabled !== false);
+    return commands.filter((cmd) => cmd.enabled !== false);
   }, [
-    state, 
-    selectedText, 
-    currentProject, 
-    setView, 
-    addProject, 
-    updateProject, 
-    deleteProject, 
-    setCurrentProjectId, 
-    claudeActions, 
-    setTheme, 
-    showToast, 
-    onCommandExecute
+    state,
+    selectedText,
+    currentProject,
+    setView,
+    addProject,
+    updateProject,
+    deleteProject,
+    setCurrentProjectId,
+    claudeActions,
+    setTheme,
+    showToast,
+    onCommandExecute,
   ]);
 }

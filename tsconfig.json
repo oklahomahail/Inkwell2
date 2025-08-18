@@ -25,13 +25,15 @@
     "allowJs": false,
     "noEmit": true,
 
-    /* Aliases (matches vite.config.ts) */
+    /* Aliases (keep in sync with vite.config.ts) */
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
       "@/components/*": ["src/components/*"],
       "@/context/*": ["src/context/*"],
-      "@/utils/*": ["src/utils/*"]
+      "@/utils/*": ["src/utils/*"],
+      "@/services/*": ["src/services/*"],
+      "@/hooks/*": ["src/hooks/*"]
     },
 
     /* Type Declarations */

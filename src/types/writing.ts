@@ -1,5 +1,7 @@
+import type { Dispatch } from 'react';
 // src/types/writing.ts
 
+/* ========= Enums ========= */
 export enum SceneStatus {
   DRAFT = 'draft',
   REVISION = 'revision',
@@ -17,18 +19,19 @@ export enum ExportFormat {
   DOCX = 'docx',
   TXT = 'txt',
   HTML = 'html',
-  MARKDOWN = 'markdown', // Now 'markdown' will work
+  MARKDOWN = 'markdown',
 }
 
+/* ========= Auto-save ========= */
 export interface AutoSaveState {
   isDirty: boolean;
   isSaving: boolean;
   lastSaved: Date | null;
   error?: string | null;
-  saveCount: number; // ✅ Added this property that's used in WritingPanel
+  saveCount: number; // ✅ used in WritingPanel
 }
 
-// WritingSession for the service (from enhancedStorageService.ts)
+/* ========= Writing Sessions ========= */
 export interface WritingSession {
   id: string;
   projectId: string;
@@ -42,7 +45,6 @@ export interface WritingSession {
   notes?: string;
 }
 
-// WritingSession for the UI components (what WritingPanel uses)
 export interface UIWritingSession {
   date: string;
   startTime: Date;
@@ -56,6 +58,7 @@ export interface UIWritingSession {
   chapterId?: string;
 }
 
+/* ========= Core Models ========= */
 export interface Scene {
   id: string;
   title: string;
@@ -79,3 +82,23 @@ export interface Chapter {
   createdAt: Date;
   updatedAt: Date;
 }
+
+/* ========= Hook State / API ========= */
+export type WritingState = {
+  /** The active project ID (string) or null if nothing selected */
+  currentProject: string | null;
+  /** The active project’s chapters */
+  chapters: Chapter[];
+};
+
+export type WritingAction =
+  | { type: 'SET_CHAPTERS'; payload: Chapter[] }
+  | { type: 'ADD_CHAPTER'; payload: Chapter }
+  | { type: 'UPDATE_CHAPTER'; payload: Chapter }
+  | { type: 'DELETE_CHAPTER'; payload: { id: string } }
+  | { type: string; payload?: unknown }; // catch-all for now
+
+export type WritingAPI = {
+  state: WritingState;
+  dispatch: Dispatch<WritingAction>;
+};
