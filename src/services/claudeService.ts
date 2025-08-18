@@ -22,6 +22,7 @@ export interface ClaudeServiceConfig {
 }
 
 export interface ClaudeResponse {
+  trim(): unknown;
   content: string;
   usage?: {
     inputTokens: number;
