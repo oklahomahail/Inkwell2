@@ -16,6 +16,7 @@ body {
 .focus-mode .Topbar {
   display: none;
 }
+
 .focus-mode .WritingArea {
   padding: 1rem;
 }
