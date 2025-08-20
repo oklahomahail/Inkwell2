@@ -167,14 +167,13 @@ class SnapshotService {
   }
 
   /**
-   * Start automatic snapshot creation
-   */
+   /**
+ * Start automatic snapshot creation
+ */
   startAutoSnapshots(project: Project): void {
     this.stopAutoSnapshots();
 
-    this.autoSnapshotTimer = (
-      window.setInterval as unknown as (h: (...args: any[]) => void, t?: number) => number
-    )(async () => {
+    this.autoSnapshotTimer = setInterval(async () => {
       try {
         // Only create auto-snapshot if project has been modified
         const now = Date.now();
@@ -189,11 +188,10 @@ class SnapshotService {
       } catch (error) {
         console.error('Auto-snapshot failed:', error);
       }
-    }, SnapshotService.AUTO_SNAPSHOT_INTERVAL);
+    }, SnapshotService.AUTO_SNAPSHOT_INTERVAL) as any;
 
     console.log('Auto-snapshots started');
   }
-
   /**
    * Stop automatic snapshot creation
    */

@@ -22,6 +22,7 @@ export interface ClaudeServiceConfig {
 }
 
 export interface ClaudeResponse {
+  text: string;
   trim(): unknown;
   content: string;
   usage?: {
@@ -142,6 +143,8 @@ Context: You have access to the user's current project and any selected text. Al
 
       return {
         content: data.content[0]?.text || '',
+        text: data.content[0]?.text || '', // Add this line
+        trim: () => (data.content[0]?.text || '').trim(), // Add this line
         usage: data.usage
           ? {
               inputTokens: data.usage.input_tokens,

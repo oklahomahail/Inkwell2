@@ -1,4 +1,4 @@
-// src/components/Writing/EnhancedWritingEditor.tsx - Complete version
+// src/components/Writing/EnhancedWritingEditor.tsx - Fixed version
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -17,13 +17,13 @@ import {
   Bot,
 } from 'lucide-react';
 
-import ClaudeToolbar from './ClaudeToolbar'; // Using your existing component name
+import ClaudeToolbar from './ClaudeToolbar';
 import SceneNavigationPanel from './SceneNavigationPanel';
-import { useAppContext } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
-import { storageService } from '@/services/storageService';
-import { Scene, Chapter } from '@/types/writing';
-import { focusWritingEditor } from '@/utils/focusUtils';
+import { useAppContext } from '../../context/AppContext';
+import { useToast } from '../../context/ToastContext';
+import { storageService } from '../../services/storageService';
+import { Scene, Chapter } from '../../types/writing';
+import { focusWritingEditor } from '../../utils/focusUtils';
 
 interface EnhancedWritingEditorProps {
   className?: string;
@@ -169,7 +169,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
     };
 
     loadInitialScene();
-  }, [currentProject, editor]);
+  }, [currentProject, editor, showToast]);
 
   // Handle scene selection
   const handleSceneSelect = (scene: Scene, chapter: Chapter) => {
@@ -466,7 +466,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
 
 // Utility functions
 function debounce<T extends (...args: any[]) => any>(func: T, wait: number): T {
-  let timeout: ReturnType<typeof setTimeout>; // ✅ Correct type
+  let timeout: ReturnType<typeof setTimeout>;
   return ((...args: any[]) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
