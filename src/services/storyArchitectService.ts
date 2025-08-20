@@ -1,4 +1,4 @@
-// src/services/storyArchitectService.ts
+// src/services/storyArchitectService.ts - UPDATED WITH REAL API
 import claudeService from './claudeService';
 import type { Character, EnhancedProject } from '../types/project';
 
@@ -122,78 +122,113 @@ Your entire response must be valid JSON only. Do not include any text outside th
 
   async generateOutline(premise: StoryPremise): Promise<GeneratedOutline> {
     try {
-      console.log('Story Architect: Generating outline with real Claude API for:', premise.title);
+      console.log('🎯 Story Architect: Generating outline with real Claude API for:', premise.title);
+
+      // Validate Claude service is configured
+      if (!claudeService.isConfigured()) {
+        throw new Error('Claude API key not configured. Please check your settings.');
+      }
 
       // Build the comprehensive prompt
       const prompt = this.getPrompt(premise);
 
-      // Call the real Claude API
-      const claudeResponse = await claudeService.sendMessage(prompt);
+      // 🔧 Use the new dedicated story generation method
+      const claudeResponse = await claudeService.generateStoryOutline(prompt);
 
-      // Extract the actual text response (handle different response formats)
-      const responseText =
-        typeof claudeResponse === 'string'
-          ? claudeResponse
-          : claudeResponse?.content || claudeResponse?.text || '';
-
-      if (!responseText || !responseText.trim()) {
+      if (!claudeResponse || !claudeResponse.trim()) {
         throw new Error('Empty response from AI service');
       }
 
-      console.log('Story Architect: Received response from Claude API');
+      console.log('✅ Story Architect: Received response from Claude API');
 
-      // Parse the JSON response
-      let cleanResponse = responseText.trim();
+      // Parse the JSON response with better error handling
+      let cleanResponse = claudeResponse.trim();
 
-      // Remove any markdown formatting
+      // Remove markdown formatting if present
       if (cleanResponse.startsWith('```json')) {
-        cleanResponse = cleanResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+        cleanResponse = cleanResponse.replace(/```json\n?/g, '').replace(/```\n?$/g, '');
       }
       if (cleanResponse.startsWith('```')) {
         cleanResponse = cleanResponse.replace(/```\n?/g, '');
       }
 
-      const parsedOutline: GeneratedOutline = JSON.parse(cleanResponse);
+      // Additional cleanup for common Claude formatting
+      cleanResponse = cleanResponse.replace(/^[^{]*/, '').replace(/[^}]*$/, '');
+
+      let parsedOutline: GeneratedOutline;
+
+      try {
+        parsedOutline = JSON.parse(cleanResponse);
+      } catch (parseError) {
+        console.error('JSON Parse Error:', parseError);
+        console.log('Raw response:', claudeResponse);
+        console.log('Cleaned response:', cleanResponse);
+        
+        // Try to extract JSON from the response if it's embedded in text
+        const jsonMatch = cleanResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            parsedOutline = JSON.parse(jsonMatch[0]);
+            console.log('🔧 Successfully extracted JSON from response');
+          } catch (secondParseError) {
+            throw new Error('Could not parse JSON from Claude response. Please try again.');
+          }
+        } else {
+          throw new Error('No valid JSON found in Claude response. Please try again.');
+        }
+      }
 
       // Validate the structure
       if (!parsedOutline.title || !parsedOutline.chapters || !parsedOutline.characters) {
-        throw new Error('Invalid outline structure received from AI');
+        console.warn('Invalid outline structure:', parsedOutline);
+        throw new Error('Invalid outline structure received from AI. Please try again.');
       }
 
-      console.log('Story Architect: Successfully generated story outline');
+      // Additional validation
+      if (!Array.isArray(parsedOutline.chapters) || parsedOutline.chapters.length === 0) {
+        throw new Error('No chapters generated. Please try again.');
+      }
+
+      if (!Array.isArray(parsedOutline.characters) || parsedOutline.characters.length === 0) {
+        throw new Error('No characters generated. Please try again.');
+      }
+
+      console.log('🎉 Story Architect: Successfully generated story outline');
       console.log(
         `Generated ${parsedOutline.chapters.length} chapters with ${parsedOutline.characters.length} characters`,
       );
 
       return parsedOutline;
     } catch (error) {
-      console.error('Story Architect API Error:', error);
+      console.error('❌ Story Architect API Error:', error);
 
-      // Provide helpful error messages and fallbacks
+      // Provide helpful error messages based on error type
       if (error instanceof Error) {
         if (error.message.includes('API key')) {
-          throw new Error('Claude API key not configured. Please check your settings.');
+          throw new Error('Claude API key not configured. Please set your API key in settings.');
         }
-        if (error.message.includes('JSON') || error.message.includes('parse')) {
-          console.log('Story Architect: JSON parse error, falling back to mock...');
-          // Fall back to mock generation if API response can't be parsed
-          return this.generateMockOutline(premise);
+        if (error.message.includes('rate limit') || error.message.includes('429')) {
+          throw new Error('Rate limit exceeded. Please wait a moment and try again.');
         }
         if (error.message.includes('network') || error.message.includes('fetch')) {
           throw new Error('Network error. Please check your connection and try again.');
         }
+        if (error.message.includes('JSON') || error.message.includes('parse')) {
+          // For JSON errors, fall back to mock generation so users aren't stuck
+          console.log('⚠️ JSON parsing failed, falling back to mock generation');
+          return this.generateMockOutline(premise);
+        }
       }
 
       throw new Error(
-        `Story generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Story generation failed: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
       );
     }
   }
 
   private generateMockOutline(premise: StoryPremise): GeneratedOutline {
-    console.log('Using fallback mock generation for:', premise.title);
+    console.log('🔄 Using fallback mock generation for:', premise.title);
 
-    // Generate a mock outline based on the premise
     const mockOutline: GeneratedOutline = {
       title: premise.title,
       genre: premise.genre,
@@ -232,101 +267,53 @@ Your entire response must be valid JSON only. Do not include any text outside th
           arc: 'Either defeated or redeemed by story end',
         },
       ],
-      chapters: [
-        {
-          title: 'The Beginning',
-          summary: `Introduction to the world of ${premise.title} and its main character.`,
-          plotFunction: 'Setup',
-          wordTarget: Math.floor(
-            premise.targetLength === 'short'
-              ? 1500
-              : premise.targetLength === 'novella'
-                ? 2000
-                : 2500,
-          ),
-          scenes: [
-            {
-              title: 'Opening Scene',
-              summary: 'Establish the ordinary world and main character.',
-              characters: ['Protagonist'],
-              purpose: 'Character introduction and world-building',
-              conflict: 'Hints of underlying tension or dissatisfaction',
-              wordTarget: 800,
-            },
-            {
-              title: 'The Call to Adventure',
-              summary: 'Something disrupts the normal world.',
-              characters: ['Protagonist', 'Ally'],
-              purpose: 'Introduce the main conflict or opportunity',
-              conflict: 'Character must make a difficult choice',
-              wordTarget: 900,
-            },
-          ],
-        },
-        {
-          title: 'The Journey',
-          summary: 'Character embarks on their adventure and faces challenges.',
-          plotFunction: 'Rising Action',
-          wordTarget: Math.floor(
-            premise.targetLength === 'short'
-              ? 2000
-              : premise.targetLength === 'novella'
-                ? 2500
-                : 3000,
-          ),
-          scenes: [
-            {
-              title: 'First Steps',
-              summary: 'Character begins their journey with initial obstacles.',
-              characters: ['Protagonist', 'Ally'],
-              purpose: 'Show character growth and world exploration',
-              conflict: 'Learning to navigate new challenges',
-              wordTarget: 1000,
-            },
-            {
-              title: 'Major Obstacle',
-              summary: 'Character faces their biggest challenge yet.',
-              characters: ['Protagonist', 'Antagonist'],
-              purpose: 'Test character resolve and introduce main opposition',
-              conflict: 'Direct confrontation with antagonistic force',
-              wordTarget: 1200,
-            },
-          ],
-        },
-        {
-          title: 'The Resolution',
-          summary: 'Character overcomes the final challenge and finds resolution.',
-          plotFunction: 'Climax',
-          wordTarget: Math.floor(
-            premise.targetLength === 'short'
-              ? 1500
-              : premise.targetLength === 'novella'
-                ? 2000
-                : 2500,
-          ),
-          scenes: [
-            {
-              title: 'Final Confrontation',
-              summary: 'Character faces the ultimate test of their growth.',
-              characters: ['Protagonist', 'Antagonist', 'Ally'],
-              purpose: 'Resolve the main conflict',
-              conflict: 'Everything the character has learned is put to the test',
-              wordTarget: 1000,
-            },
-            {
-              title: 'New Beginning',
-              summary: 'Character returns to their world, transformed.',
-              characters: ['Protagonist', 'Ally'],
-              purpose: 'Show how the character has changed',
-              conflict: 'Integration of lessons learned',
-              wordTarget: 800,
-            },
-          ],
-        },
-      ],
+      chapters: this.generateMockChapters(premise),
     };
 
     return mockOutline;
+  }
+
+  private generateMockChapters(premise: StoryPremise): GeneratedChapter[] {
+    const chapterCount = premise.targetLength === 'short' ? 8 : premise.targetLength === 'novella' ? 15 : 25;
+    const chapters: GeneratedChapter[] = [];
+
+    for (let i = 0; i < chapterCount; i++) {
+      const isBeginning = i < 3;
+      const isMiddle = i >= 3 && i < chapterCount - 3;
+      const isEnd = i >= chapterCount - 3;
+
+      let plotFunction = 'Rising Action';
+      if (isBeginning) plotFunction = i === 0 ? 'Setup' : 'Inciting Incident';
+      if (isMiddle && i === Math.floor(chapterCount / 2)) plotFunction = 'Midpoint';
+      if (isEnd) plotFunction = i === chapterCount - 1 ? 'Resolution' : 'Climax';
+
+      chapters.push({
+        title: `Chapter ${i + 1}`,
+        summary: `Chapter ${i + 1} continues the story progression.`,
+        plotFunction,
+        wordTarget: premise.targetLength === 'short' ? 1500 : 2500,
+        scenes: [
+          {
+            title: `Scene ${i + 1}.1`,
+            summary: 'Opening scene of the chapter.',
+            characters: ['Protagonist'],
+            purpose: 'Advance the plot',
+            conflict: 'Character faces a challenge',
+            wordTarget: 800,
+          },
+          {
+            title: `Scene ${i + 1}.2`,
+            summary: 'Continuation of chapter events.',
+            characters: ['Protagonist', 'Ally'],
+            purpose: 'Character development',
+            conflict: 'Internal or interpersonal tension',
+            wordTarget: 700,
+          },
+        ],
+      });
+    }
+
+    return chapters;
   }
 
   // Convert generated outline to your existing project structure
@@ -334,19 +321,18 @@ Your entire response must be valid JSON only. Do not include any text outside th
     outline: GeneratedOutline,
     existingProject?: EnhancedProject,
   ): Partial<EnhancedProject> {
-    // Convert to your Character type structure
     const characters: Character[] = outline.characters.map((char) => ({
       id: `char-${char.name.toLowerCase().replace(/\s+/g, '-')}`,
       name: char.name,
       role: char.role,
       description: char.description,
-      personality: [char.motivation, 'determined'], // Extract personality traits from motivation
-      backstory: '', // Empty, user can fill in
+      personality: [char.motivation, 'determined'],
+      backstory: '',
       goals: char.motivation,
       conflicts: char.conflict,
-      appearance: '', // Empty, user can fill in
-      relationships: [], // Empty array, user can add relationships
-      appearsInChapters: [], // Will be populated when chapters are created
+      appearance: '',
+      relationships: [],
+      appearsInChapters: [],
       notes: `Character Arc: ${char.arc}\n\nGenerated by Story Architect`,
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -358,42 +344,8 @@ Your entire response must be valid JSON only. Do not include any text outside th
       genre: outline.genre,
       description: outline.summary,
       characters,
-      // Note: We'll create chapters/scenes in the next step
       updatedAt: Date.now(),
     };
-  }
-
-  private generateActs(outline: GeneratedOutline) {
-    const chapters = outline.chapters;
-    const totalChapters = chapters.length;
-
-    // Standard 3-act structure
-    const act1End = Math.floor(totalChapters * 0.25);
-    const act2End = Math.floor(totalChapters * 0.75);
-
-    return [
-      {
-        id: 'act-1',
-        title: 'Act I - Setup',
-        description: 'Introduce characters, world, and inciting incident',
-        chapters: chapters.slice(0, act1End).map((ch) => ch.title),
-        percentage: 25,
-      },
-      {
-        id: 'act-2',
-        title: 'Act II - Confrontation',
-        description: 'Rising action, obstacles, and midpoint revelation',
-        chapters: chapters.slice(act1End, act2End).map((ch) => ch.title),
-        percentage: 50,
-      },
-      {
-        id: 'act-3',
-        title: 'Act III - Resolution',
-        description: 'Climax, falling action, and resolution',
-        chapters: chapters.slice(act2End).map((ch) => ch.title),
-        percentage: 25,
-      },
-    ];
   }
 
   // Generate chapters and scenes for the writing editor
@@ -407,7 +359,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
       targetWordCount: chapter.wordTarget,
       status: 'planned' as const,
       order: index + 1,
-      charactersInChapter: [], // Will be populated based on scenes
+      charactersInChapter: [],
       plotPointsResolved: [],
       notes: `Generated by Story Architect\nPlot Function: ${chapter.plotFunction}\nTarget Words: ${chapter.wordTarget}`,
       createdAt: Date.now(),
@@ -467,6 +419,19 @@ Your entire response must be valid JSON only. Do not include any text outside th
       epic: 120, // 2 minutes
     };
     return times[length as keyof typeof times] || 60;
+  }
+
+  // Check if Claude is available for story generation
+  isAvailable(): boolean {
+    return claudeService.isConfigured();
+  }
+
+  // Get helpful error message for setup
+  getSetupMessage(): string {
+    if (!claudeService.isConfigured()) {
+      return 'To use Story Architect, please configure your Claude API key in Settings. You can get an API key from https://console.anthropic.com/';
+    }
+    return '';
   }
 }
 

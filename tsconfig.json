@@ -25,7 +25,7 @@
     "allowJs": false,
     "noEmit": true,
 
-    /* Aliases (keep in sync with vite.config.ts) */
+    /* Aliases (keep in sync with vite.config.ts / next.config.js) */
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],

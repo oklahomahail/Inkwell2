@@ -1,10 +1,9 @@
-// src/services/claudeService.ts - Improved version
-
+// src/services/claudeService.ts - FIXED VERSION
 import CryptoJS from 'crypto-js';
 
 const MESSAGE_LIMIT = 50;
 const API_KEY_STORAGE = 'claude_api_key_encrypted';
-const ENCRYPTION_KEY = 'inkwell_claude_key'; // In production, use environment variable
+const ENCRYPTION_KEY = 'inkwell_claude_key';
 
 export interface ClaudeMessage {
   id: string;
@@ -23,8 +22,8 @@ export interface ClaudeServiceConfig {
 
 export interface ClaudeResponse {
   text: string;
-  trim(): unknown;
   content: string;
+  trim(): string;
   usage?: {
     inputTokens: number;
     outputTokens: number;
@@ -56,7 +55,7 @@ Context: You have access to the user's current project and any selected text. Al
   constructor(config?: Partial<ClaudeServiceConfig>) {
     this.config = {
       model: 'claude-sonnet-4-20250514',
-      maxTokens: 1000,
+      maxTokens: 4000, // 🔧 Increased for Story Architect
       temperature: 0.7,
       systemPrompt: this.DEFAULT_SYSTEM_PROMPT,
       ...config,
@@ -87,6 +86,7 @@ Context: You have access to the user's current project and any selected text. Al
       selectedText?: string;
       projectContext?: string;
       conversationHistory?: ClaudeMessage[];
+      maxTokens?: number; // 🆕 Allow override for Story Architect
     },
   ): Promise<ClaudeResponse> {
     if (!this.isConfigured()) {
@@ -114,17 +114,24 @@ Context: You have access to the user's current project and any selected text. Al
 
       const requestBody = {
         model: this.config.model,
-        max_tokens: this.config.maxTokens,
+        max_tokens: context?.maxTokens || this.config.maxTokens,
         temperature: this.config.temperature,
         system: this.config.systemPrompt,
         messages,
       };
 
+      console.log('🚀 Sending request to Claude API...', {
+        model: requestBody.model,
+        maxTokens: requestBody.max_tokens,
+        messageCount: messages.length,
+        contentLength: content.length,
+      });
+
       const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': this.config.apiKey!,
+          'anthropic-api-key': this.config.apiKey!, // 🔧 FIXED: Correct header name
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify(requestBody),
@@ -137,14 +144,21 @@ Context: You have access to the user's current project and any selected text. Al
       const data = await response.json();
       this.updateRateLimit();
 
+      console.log('✅ Received response from Claude API', {
+        contentLength: data.content?.[0]?.text?.length || 0,
+        usage: data.usage,
+      });
+
       if (!data.content || !Array.isArray(data.content) || data.content.length === 0) {
         throw this.createError('Invalid response format from Claude API', 'api_error', false);
       }
 
+      const responseText = data.content[0]?.text || '';
+
       return {
-        content: data.content[0]?.text || '',
-        text: data.content[0]?.text || '', // Add this line
-        trim: () => (data.content[0]?.text || '').trim(), // Add this line
+        content: responseText,
+        text: responseText,
+        trim: () => responseText.trim(),
         usage: data.usage
           ? {
               inputTokens: data.usage.input_tokens,
@@ -153,6 +167,8 @@ Context: You have access to the user's current project and any selected text. Al
           : undefined,
       };
     } catch (error) {
+      console.error('❌ Claude API Error:', error);
+      
       if ((error as Error)?.name === 'ClaudeError') {
         throw error;
       }
@@ -162,6 +178,17 @@ Context: You have access to the user's current project and any selected text. Al
         true,
       );
     }
+  }
+
+  // 🆕 Story Architect specific method
+  async generateStoryOutline(prompt: string): Promise<string> {
+    console.log('🎯 Story Architect: Generating outline with Claude API');
+    
+    const response = await this.sendMessage(prompt, {
+      maxTokens: 4000, // Higher token limit for story generation
+    });
+    
+    return response.content;
   }
 
   // Convenience methods for specific writing tasks
@@ -289,7 +316,6 @@ Context: You have access to the user's current project and any selected text. Al
         const parsed = JSON.parse(stored);
         this.config = { ...this.config, ...parsed };
       }
-      // Load API key separately
       if (!this.config.apiKey) {
         this.config.apiKey = this.loadApiKey();
       }
@@ -308,13 +334,11 @@ Context: You have access to the user's current project and any selected text. Al
   ): Array<{ role: 'user' | 'assistant'; content: string }> {
     const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
 
-    // Include recent conversation history
     if (context?.conversationHistory) {
-      const recent = context.conversationHistory.slice(-10); // Last 10 messages
+      const recent = context.conversationHistory.slice(-10);
       messages.push(...recent.map((m) => ({ role: m.role, content: m.content })));
     }
 
-    // Build context-aware message
     let msgContent = content;
 
     if (context?.selectedText) {
@@ -382,8 +406,8 @@ Context: You have access to the user's current project and any selected text. Al
 
       const data = JSON.parse(stored);
       const now = Date.now();
-      const timeWindow = 60 * 1000; // 1 minute
-      const maxRequests = 10; // 10 requests per minute
+      const timeWindow = 60 * 1000;
+      const maxRequests = 10;
 
       const recent = (data.requests || []).filter(
         (timestamp: number) => now - timestamp < timeWindow,
@@ -400,7 +424,6 @@ Context: You have access to the user's current project and any selected text. Al
       const stored = localStorage.getItem(this.RATE_LIMIT_KEY);
       const data = stored ? JSON.parse(stored) : { requests: [] };
 
-      // Clean old entries and add new one
       data.requests = (data.requests || []).filter((timestamp: number) => now - timestamp < 60_000);
       data.requests.push(now);
 

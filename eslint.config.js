@@ -86,3 +86,16 @@ export default [
   // Defer formatting to Prettier
   prettier,
 ];
+
+export default [
+  // ... your existing config
+  {
+    ignores: [
+      'archive/',
+      'fix.eslint.js',
+      'node_modules/',
+      'dist/',
+      'build/'
+    ]
+  }
+];
