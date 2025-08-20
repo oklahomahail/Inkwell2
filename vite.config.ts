@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-export default defineConfig(() => ({
+export default defineConfig({
   plugins: [react()],
 
   css: { postcss: './postcss.config.js' },
@@ -22,13 +22,15 @@ export default defineConfig(() => ({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    // Optional: chunking to reduce bundle size warnings
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          tiptap: ['@tiptap/core', '@tiptap/react', '@tiptap/starter-kit'],
-          charts: ['recharts'],
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom'))
+            return 'react-vendor';
+          if (id.includes('node_modules/@tiptap/')) return 'tiptap';
+          if (id.includes('node_modules/recharts')) return 'charts';
+          return;
         },
       },
     },
@@ -36,13 +38,9 @@ export default defineConfig(() => ({
   },
 
   define: {
-    // Keep for libs expecting `global`
     global: 'globalThis',
-    // Safe, explicit define for app version
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
-    // If you need a specific env var in the client, expose it explicitly:
-    // __API_BASE__: JSON.stringify(import.meta.env.VITE_API_BASE),
   },
 
   optimizeDeps: { include: ['react', 'react-dom'] },
-}));
+});
