@@ -1,0 +1,346 @@
+/* src/styles/focus-mode.css */
+
+/* Advanced Focus Mode Styles for Typewriter Mode, Zen Mode, and Enhanced Focus */
+
+/* Basic Focus Mode (base first) */
+.focus-mode {
+  --focus-bg: #fafafa;
+  --focus-text: #1f2937;
+  --focus-accent: #8b5cf6;
+
+  background-color: var(--focus-bg);
+  color: var(--focus-text);
+}
+
+/* Dark overrides after base */
+.dark .focus-mode {
+  --focus-bg: #0f172a;
+  --focus-text: #f1f5f9;
+  --focus-accent: #a855f7;
+}
+
+/* Typewriter container styles (containers first) */
+.typewriter-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.typewriter-container .ProseMirror {
+  max-width: 65ch;
+  margin: 0 auto;
+  font-size: 1.125rem;
+  line-height: 1.8;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+/* Zen Mode container (containers before specific/focus variants) */
+.zen-mode-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 4rem 2rem;
+}
+
+.zen-mode-container .ProseMirror {
+  max-width: 60ch;
+  margin: 0 auto;
+  font-size: 1.25rem;
+  line-height: 1.8;
+  font-family: Georgia, 'Times New Roman', serif;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+.zen-mode-container .ProseMirror p {
+  margin-bottom: 1.5em;
+  color: var(--focus-text);
+}
+
+.zen-mode-container .ProseMirror h1,
+.zen-mode-container .ProseMirror h2,
+.zen-mode-container .ProseMirror h3 {
+  color: var(--focus-accent);
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+}
+
+/* Focus Mode editor base (before any :focus variants) */
+.focus-mode .ProseMirror {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: Inter, system-ui, sans-serif;
+  color: var(--focus-text);
+}
+
+.focus-mode .ProseMirror p {
+  color: var(--focus-text);
+  margin-bottom: 1.25em;
+}
+
+.focus-mode .ProseMirror strong {
+  color: var(--focus-accent);
+  font-weight: 600;
+}
+
+.focus-mode .ProseMirror em {
+  color: var(--focus-text);
+  opacity: 0.8;
+}
+
+/* Typewriter Mode (specific mode styles) */
+.typewriter-mode .ProseMirror {
+  /* Center the current line being typed */
+  padding-top: 50vh;
+  padding-bottom: 50vh;
+  transform: translateY(-1.5em);
+  position: relative; /* for ::after cursor */
+}
+
+.typewriter-mode .ProseMirror p {
+  /* Ensure consistent line height for centering */
+  line-height: 1.75;
+  margin-bottom: 1.5em;
+}
+
+/* Specific/focus variants AFTER base and containers */
+.typewriter-mode .ProseMirror:focus {
+  /* Smooth scrolling to keep current line centered */
+  scroll-behavior: smooth;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--focus-accent);
+}
+
+/* Typewriter cursor effect */
+.typewriter-mode .ProseMirror::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 2px;
+  height: 1.5em;
+  background-color: var(--focus-accent);
+  animation: typewriter-blink 1s infinite;
+}
+
+@keyframes typewriter-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Zen Mode (minimal distractions) */
+.zen-mode {
+  overflow: hidden;
+}
+
+.zen-mode * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.zen-mode *::-webkit-scrollbar {
+  display: none;
+}
+
+/* Writing Sprint Progress Animations */
+.sprint-progress {
+  transition: width 1s ease-out;
+}
+
+.sprint-timer {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sprint Notification Animations */
+.sprint-notification {
+  animation: sprint-notification-appear 0.3s ease-out;
+}
+
+@keyframes sprint-notification-appear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Focus Mode Transitions */
+.focus-mode-enter {
+  animation: focus-mode-enter 0.5s ease-out;
+}
+
+@keyframes focus-mode-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.focus-mode-exit {
+  animation: focus-mode-exit 0.3s ease-in;
+}
+
+@keyframes focus-mode-exit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+}
+
+/* Ambient Sound Indicator */
+.ambient-indicator {
+  position: relative;
+}
+
+.ambient-indicator::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 6px;
+  height: 6px;
+  background-color: var(--focus-accent);
+  border-radius: 50%;
+  animation: ambient-pulse 2s infinite;
+}
+
+@keyframes ambient-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Settings Panel Animations */
+.settings-panel {
+  animation: settings-slide-in 0.2s ease-out;
+}
+
+@keyframes settings-slide-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive Design for Focus Mode */
+@media (width <= 768px) {
+  .typewriter-container .ProseMirror,
+  .zen-mode-container .ProseMirror {
+    max-width: 90%;
+    font-size: 1rem;
+    padding: 1rem;
+  }
+
+  .typewriter-mode .ProseMirror {
+    padding-top: 40vh;
+    padding-bottom: 40vh;
+  }
+}
+
+/* Dark Mode Enhancements */
+.dark .focus-mode .ProseMirror {
+  color: #e2e8f0;
+}
+
+.dark .focus-mode .ProseMirror p {
+  color: #cbd5e1;
+}
+
+.dark .focus-mode .ProseMirror strong {
+  color: #a855f7;
+}
+
+.dark .focus-mode .ProseMirror em {
+  color: #94a3b8;
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+  .typewriter-mode .ProseMirror::after {
+    animation: none;
+  }
+
+  .sprint-progress,
+  .focus-mode-enter,
+  .focus-mode-exit,
+  .settings-panel {
+    animation: none;
+    transition: none;
+  }
+
+  .typewriter-mode .ProseMirror {
+    scroll-behavior: auto;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .focus-mode {
+    --focus-bg: #fff;
+    --focus-text: #000;
+    --focus-accent: #06c;
+  }
+
+  .dark .focus-mode {
+    --focus-bg: #000;
+    --focus-text: #fff;
+    --focus-accent: #66b3ff;
+  }
+}
+
+/* Custom Scrollbar for Focus Mode */
+.focus-mode ::-webkit-scrollbar {
+  width: 6px;
+}
+
+.focus-mode ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.focus-mode ::-webkit-scrollbar-thumb {
+  background: var(--focus-accent);
+  border-radius: 3px;
+  opacity: 0.3;
+}
+
+.focus-mode ::-webkit-scrollbar-thumb:hover {
+  opacity: 0.6;
+}
