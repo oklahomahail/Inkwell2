@@ -15,7 +15,8 @@
     "format": "prettier --write .",
     "prepare": "husky",
     "typecheck": "tsc --noEmit",
-    "tailwind:replace": "node scripts/tailwind-text-replacer.mjs"
+    "tailwind:replace": "node scripts/tailwind-text-replacer.mjs",
+    "lint:ci": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=314"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
