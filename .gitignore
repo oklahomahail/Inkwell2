@@ -56,3 +56,5 @@ __MACOSX/
 *.rebind
 *.ts.rebind*
 *.tsx.rebind*
+
+eslint.config.js.backup
