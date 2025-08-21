@@ -1,6 +1,7 @@
 // src/components/Writing/FocusModeControls.tsx
 import React, { useState } from 'react';
 import { Play, Pause, Square, Settings, Volume2, VolumeX, Eye, EyeOff } from 'lucide-react';
+
 import { useAdvancedFocusMode } from '../../hooks/useAdvancedFocusMode';
 
 interface FocusModeControlsProps {

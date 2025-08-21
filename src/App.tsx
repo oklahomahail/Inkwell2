@@ -1,5 +1,6 @@
 // src/App.tsx - Enhanced with Safety UI Integration
 import React, { useState, useEffect } from 'react';
+
 import PlatformLayout from './components/Platform/PlatformLayout';
 import ViewSwitcher from './components/ViewSwitcher';
 import { ToastContainer } from './components/ToastContainer';

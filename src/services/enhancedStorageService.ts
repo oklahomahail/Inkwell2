@@ -1,7 +1,9 @@
 // src/services/enhancedStorageService.ts
 import { EnhancedProject } from '@/types/project';
+
 import { validateProject } from '../validation/projectSchema';
 import { quotaAwareStorage } from '../utils/quotaAwareStorage';
+
 import { connectivityService } from './connectivityService';
 import { snapshotService } from './snapshotService';
 

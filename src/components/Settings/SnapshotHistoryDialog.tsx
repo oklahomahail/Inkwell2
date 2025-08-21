@@ -1,8 +1,9 @@
 // File: src/components/Settings/SnapshotHistoryDialog.tsx
 import React, { useEffect, useMemo, useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
+
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/Button';
-import { formatDistanceToNow } from 'date-fns';
 import { useCurrentProject } from '@/context/AppContext';
 import snapshotService, { SnapshotMeta } from '@/services/snapshotAdapter';
 import { ScrollArea } from '@/components/ui/scroll-area';

@@ -12,6 +12,7 @@ import {
   Clock,
   User,
 } from 'lucide-react';
+
 import { type GeneratedOutline } from '../../services/storyArchitectService';
 
 interface GeneratedOutlinePreviewProps {

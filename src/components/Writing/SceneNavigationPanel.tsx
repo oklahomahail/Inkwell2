@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import {
   BookOpen,
   Plus,
-  Edit3,
   MoreVertical,
   ChevronDown,
   ChevronRight,
@@ -13,6 +12,7 @@ import {
   Trash2,
   Copy,
 } from 'lucide-react';
+
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 import { storageService } from '@/services/storageService';

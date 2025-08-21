@@ -1,7 +1,9 @@
 // src/services/importService.ts
-import { Project, validateProject, migrateProjectToLatest } from '../validation/projectSchema';
-import { snapshotService } from './snapshotService';
 import { error } from 'console';
+
+import { Project, validateProject, migrateProjectToLatest } from '../validation/projectSchema';
+
+import { snapshotService } from './snapshotService';
 
 export interface ImportResult {
   success: boolean;

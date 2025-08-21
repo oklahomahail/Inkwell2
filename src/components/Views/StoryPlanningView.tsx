@@ -1,6 +1,7 @@
 // src/components/Views/StoryPlanningView.tsx - Enhanced with Story Architect Mode
 import React, { useState } from 'react';
 import { BookOpen, Users, Map, FileText, BarChart3, Wand2 } from 'lucide-react';
+
 import BeatSheetPlanner from '../Planning/BeatSheetPlanner';
 import CharacterManager from '../Planning/CharacterManager';
 import StoryStructureVisualizer from '../Planning/StoryStructureVisualizer';

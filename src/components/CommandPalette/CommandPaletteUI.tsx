@@ -11,6 +11,7 @@ import {
   FolderOpen,
   Settings,
 } from 'lucide-react';
+
 import { useCommandPalette } from './CommandPaletteProvider';
 
 const CommandPaletteUI: React.FC = () => {

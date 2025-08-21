@@ -1,5 +1,6 @@
 // src/components/CommandPalette/CommandPalette.tsx
 import React, { useState, useEffect, useRef, useMemo, useCallback, useId } from 'react';
+
 import { Command, CommandGroup } from '@/types/commands';
 
 interface CommandPaletteProps {

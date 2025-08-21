@@ -1,7 +1,8 @@
 // src/components/BackupPanel.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { BackupManager } from '@/services/backupCore';
 import { debounce } from 'lodash';
+
+import { BackupManager } from '@/services/backupCore';
 
 interface BackupPanelProps {
   performBackup: () => Promise<void>;

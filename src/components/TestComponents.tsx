@@ -3,10 +3,6 @@ import React, { useState } from 'react';
 import {
   Plus,
   BookOpen,
-  Users as _Users,
-  Calendar as _Calendar,
-  BarChart3 as _BarChart3,
-  Settings as _Settings,
   Search,
   AlertCircle,
   Info,

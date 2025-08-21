@@ -1,6 +1,7 @@
 // src/components/Planning/CharacterManager.tsx
 import React, { useState } from 'react';
 import { Users, Plus, Edit3, Trash2, Save, User, Heart, Target, Zap, Eye } from 'lucide-react';
+
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 

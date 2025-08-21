@@ -1,5 +1,6 @@
 // src/components/CommandPalette/CommandPaletteProvider.tsx - Updated with Export Integration
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
 import { useAppContext, View } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 import { storageService } from '@/services/storageService';

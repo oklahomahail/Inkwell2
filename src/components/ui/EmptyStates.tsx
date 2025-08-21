@@ -3,7 +3,6 @@ import React from 'react';
 import {
   BookOpen,
   Edit3,
-  Plus,
   Calendar,
   BarChart3,
   Users,
@@ -14,6 +13,7 @@ import {
   ArrowRight,
   Play,
 } from 'lucide-react';
+
 import { KeyboardShortcut } from './KeyboardHints';
 
 // ==========================================

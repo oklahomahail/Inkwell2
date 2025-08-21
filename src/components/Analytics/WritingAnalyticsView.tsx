@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { TrendingUp, Calendar, Target, Clock, BookOpen, Edit3, Award, Flame } from 'lucide-react';
+
 import { useAppContext } from '@/context/AppContext';
 import { EnhancedProject, WritingSession } from '@/types/project';
 import { storageService } from '@/services/storageService';
@@ -145,7 +146,7 @@ const WritingAnalyticsView: React.FC = () => {
     // Writing streak calculation
     let writingStreak = 0;
     const today = new Date().toISOString().split('T')[0]!;
-    let checkDate = new Date();
+    const checkDate = new Date();
 
     while (checkDate >= thirtyDaysAgo) {
       const dateStr = checkDate.toISOString().split('T')[0]!;

@@ -1,6 +1,8 @@
 // src/components/ViewSwitcher.tsx - Fixed
 import React, { useState, useCallback } from 'react';
+
 import { useAppContext, View } from '@/context/AppContext';
+
 import DashboardPanel from './Panels/DashboardPanel';
 import WritingPanel from './Panels/WritingPanel';
 import TimelinePanel from './Panels/TimelinePanel';

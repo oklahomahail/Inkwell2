@@ -4,19 +4,14 @@
 import React, { useMemo } from 'react';
 import {
   BarChart3,
-  TrendingUp,
   CheckCircle,
-  Circle,
-  AlertTriangle,
   BookOpen,
   Users,
   Zap,
   Target,
-  Eye,
-  MessageSquare,
-  Clock,
   Award,
 } from 'lucide-react';
+
 import { useAppContext } from '@/context/AppContext';
 
 interface StoryStructureVisualizerProps {

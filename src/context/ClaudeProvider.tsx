@@ -1,5 +1,6 @@
 // src/context/ClaudeProvider.tsx - Fixed
 import React, { createContext, useState, useCallback, useContext, ReactNode } from 'react';
+
 import claudeService from '@/services/claudeService';
 import type { ClaudeMessage } from '@/services/claudeService';
 

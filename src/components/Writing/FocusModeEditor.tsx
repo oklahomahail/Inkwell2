@@ -1,6 +1,7 @@
 // src/components/Writing/FocusModeEditor.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { Editor } from '@tiptap/react';
+
 import { useAdvancedFocusMode } from '../../hooks/useAdvancedFocusMode';
 
 interface FocusModeEditorProps {

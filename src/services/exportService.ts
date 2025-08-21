@@ -144,7 +144,7 @@ class ExportService {
       const rawContent = await this.generateContent(projectId, options);
 
       // Convert markdown to plain text (basic conversion)
-      let content = rawContent
+      const content = rawContent
         .replace(/^#{1,6}\s+/gm, '') // Remove markdown headers
         .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
         .replace(/\*(.*?)\*/g, '$1') // Remove italic
@@ -344,7 +344,7 @@ class ExportService {
         rtf += '\\par ';
       } else {
         // Simple text with basic formatting
-        let formatted = line
+        const formatted = line
           .replace(/\*\*(.*?)\*\*/g, '\\b $1\\b0 ')
           .replace(/\*(.*?)\*/g, '\\i $1\\i0 ');
         rtf += `${formatted}\\par `;

@@ -1,9 +1,10 @@
 // File: src/components/Panels/SettingsPanel.tsx - Enhanced Claude Setup
 import React, { useState, useEffect } from 'react';
+import { Eye, EyeOff, ExternalLink, CheckCircle, AlertCircle, Info } from 'lucide-react';
+
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 import claudeService from '@/services/claudeService';
-import { Eye, EyeOff, ExternalLink, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import BackupControls from '@/components/Settings/BackupControls';
 import SnapshotHistoryDialog from '@/components/Settings/SnapshotHistoryDialog';
 import { Button } from '@/components/ui/Button';

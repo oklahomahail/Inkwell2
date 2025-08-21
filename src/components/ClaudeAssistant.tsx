@@ -1,11 +1,13 @@
 // src/components/ClaudeAssistant.tsx
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { BoltIcon, MessageCircleIcon, SearchIcon } from 'lucide-react';
+
 import { useClaude } from '@/context/ClaudeProvider';
 import { useToast } from '@/context/ToastContext';
+
 import AccessibleTabs from './AccessibleTabs';
 import MessageBubble from './MessageBubble';
 import { StatusBadge, LoadingIndicator, TypingIndicator } from './Claude';
-import { BoltIcon, MessageCircleIcon, SearchIcon } from 'lucide-react';
 
 interface ClaudeAssistantProps {
   selectedText?: string;

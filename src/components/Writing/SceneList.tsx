@@ -1,8 +1,9 @@
 // src/components/Writing/SceneList.tsx - Fixed imports
 import React from 'react';
+import { FileText, Target, Clock, Trash2 } from 'lucide-react';
+
 import { Scene, SceneStatus } from '../../types/writing';
 import { cn } from '../../utils/cn';
-import { FileText, Target, Clock, Trash2 } from 'lucide-react';
 
 interface SceneListProps {
   scenes: Scene[];

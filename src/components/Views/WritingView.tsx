@@ -1,5 +1,6 @@
 // src/components/Views/WritingView.tsx - Integration component for your ViewSwitcher
 import React from 'react';
+
 import EnhancedWritingEditor from '../Writing/EnhancedWritingEditor';
 
 const WritingView: React.FC = () => {

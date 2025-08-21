@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+
 import { useFocusMode } from '@/hooks/useFocusMode';
 import { useAppContext } from '@/context/AppContext';
 import snapshotService from '@/services/snapshotAdapter';

@@ -101,7 +101,7 @@ export default function TipTapEditor({
       const wrapperEl = editorWrapperRef.current;
       if (!wrapperEl) return;
 
-      const editorEl = wrapperEl.querySelector('.ProseMirror') as HTMLElement | null;
+      const editorEl = wrapperEl.querySelector('.ProseMirror');
       if (!editorEl) return;
 
       // Current selection

@@ -1,5 +1,6 @@
 // src/components/Panels/TimelinePanel.tsx
 import React, { useEffect, useState, useCallback } from 'react';
+
 import { useToast } from '@/context/ToastContext';
 import { useClaude } from '@/context/ClaudeProvider'; // Add this import
 import { logActivity } from '@/utils/activityLogger';

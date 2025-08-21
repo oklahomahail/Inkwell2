@@ -8,8 +8,6 @@ import {
   Download,
   RefreshCw,
   Archive,
-  LogOut,
-  FileX,
 } from 'lucide-react';
 
 // ==========================================

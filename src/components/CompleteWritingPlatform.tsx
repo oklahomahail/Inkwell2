@@ -593,7 +593,7 @@ const DashboardContent: React.FC = () => {
                           <div className="chapter-header">
                             <h3 className="chapter-title">{chapter.title}</h3>
                             <div className="flex items-center gap-2">
-                              <Badge variant={statusColors[chapter.status as keyof typeof statusColors]}>
+                              <Badge variant={statusColors[chapter.status]}>
                                 {chapter.status.replace('-', ' ')}
                               </Badge>
 

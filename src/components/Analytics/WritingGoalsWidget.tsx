@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Target, Flame, Timer, Trophy, CheckCircle, Settings, Star } from 'lucide-react';
+
 import { useProjectStats } from '@/hooks/useProjectStats';
 import { useToast } from '@/context/ToastContext';
 

@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   BookOpen,
-  Plus,
   Edit3,
   Save,
   RotateCcw,
@@ -10,6 +9,7 @@ import {
   Circle,
   Lightbulb,
 } from 'lucide-react';
+
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 

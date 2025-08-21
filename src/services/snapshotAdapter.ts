@@ -1,4 +1,4 @@
-import base, { snapshotService as svc } from '@/services/snapshotService';
+import { snapshotService as svc } from '@/services/snapshotService';
 
 export type SnapshotMeta = {
   id: string;

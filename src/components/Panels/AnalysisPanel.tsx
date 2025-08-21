@@ -1,8 +1,9 @@
 // src/components/Panels/AnalysisPanel.tsx - Upgraded Version
 import React, { useEffect, useState } from 'react';
+import { BarChart3, TrendingUp, Clock, Target } from 'lucide-react';
+
 import { useAppContext } from '@/context/AppContext';
 import WritingAnalyticsView from '@/components/Analytics/WritingAnalyticsView';
-import { BarChart3, TrendingUp, Clock, Target } from 'lucide-react';
 
 interface WritingSession {
   date: string;

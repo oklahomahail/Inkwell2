@@ -2,8 +2,10 @@
 // File: src/hooks/useWritingGoals.ts
 
 import { useState, useEffect, useCallback } from 'react';
-import { useProjectStats } from './useProjectStats';
+
 import { useToast } from '@/context/ToastContext';
+
+import { useProjectStats } from './useProjectStats';
 
 export interface WritingGoal {
   id: string;
@@ -182,7 +184,7 @@ export const useWritingGoals = () => {
 
     setGoals((prevGoals) =>
       prevGoals.map((goal) => {
-        let updatedGoal = { ...goal };
+        const updatedGoal = { ...goal };
 
         switch (goal.type) {
           case 'daily_words':

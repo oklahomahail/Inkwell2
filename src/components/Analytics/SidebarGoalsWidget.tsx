@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { Target, Flame, Timer, TrendingUp, Play, Pause } from 'lucide-react';
+
 import { useWritingGoals } from '@/hooks/useWritingGoals';
 
 interface SidebarGoalsWidgetProps {

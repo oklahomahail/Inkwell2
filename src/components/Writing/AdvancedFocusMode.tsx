@@ -14,12 +14,11 @@ import {
   Target,
   Coffee,
   Zap,
-  Eye,
-  EyeOff,
   X,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
+
 import { useAdvancedFocusMode } from '../../hooks/useAdvancedFocusMode';
 
 interface AdvancedFocusModeProps {

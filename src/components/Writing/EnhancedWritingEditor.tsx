@@ -17,13 +17,14 @@ import {
   Bot,
 } from 'lucide-react';
 
-import ClaudeToolbar from './ClaudeToolbar';
-import SceneNavigationPanel from './SceneNavigationPanel';
 import { useAppContext } from '../../context/AppContext';
 import { useToast } from '../../context/ToastContext';
 import { storageService } from '../../services/storageService';
 import { Scene, Chapter } from '../../types/writing';
 import { focusWritingEditor } from '../../utils/focusUtils';
+
+import SceneNavigationPanel from './SceneNavigationPanel';
+import ClaudeToolbar from './ClaudeToolbar';
 
 interface EnhancedWritingEditorProps {
   className?: string;

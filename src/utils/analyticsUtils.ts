@@ -145,8 +145,8 @@ export function analyzeTimeOfDayPatterns(
     const productivity = session.timeSpent > 0 ? session.wordsWritten / session.timeSpent : 0;
 
     if (!hourlyData[hour]) hourlyData[hour] = { hour, productivity: 0, count: 0 };
-    hourlyData[hour]!.productivity += productivity;
-    hourlyData[hour]!.count++;
+    hourlyData[hour].productivity += productivity;
+    hourlyData[hour].count++;
   });
 
   return hourlyData.map((data) => ({
@@ -170,8 +170,8 @@ export function analyzeDayOfWeekPatterns(
 
     if (!dailyData[dayIndex])
       dailyData[dayIndex] = { day: days[dayIndex] || `day-${dayIndex}`, productivity: 0, count: 0 };
-    dailyData[dayIndex]!.productivity += productivity;
-    dailyData[dayIndex]!.count++;
+    dailyData[dayIndex].productivity += productivity;
+    dailyData[dayIndex].count++;
   });
 
   return dailyData.map((data) => ({
@@ -234,7 +234,7 @@ export function analyzeWordCountDistribution(
       if (distIndex !== -1) {
         if (!distribution[distIndex])
           distribution[distIndex] = { range: ranges[distIndex]?.range ?? 'unknown', frequency: 0 };
-        distribution[distIndex]!.frequency++;
+        distribution[distIndex].frequency++;
       }
     }
   });
