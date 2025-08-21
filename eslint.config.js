@@ -1,101 +1,110 @@
 // eslint.config.js
 import js from '@eslint/js';
-import tsParser from '@typescript-eslint/parser';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
-import reactPlugin from 'eslint-plugin-react';
+import tseslint from 'typescript-eslint';
+import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
-import prettier from 'eslint-config-prettier';
-import globals from 'globals';
+import importPlugin from 'eslint-plugin-import';
+import unusedImports from 'eslint-plugin-unused-imports';
+
+let reactRefresh = null;
+try {
+  reactRefresh = (await import('eslint-plugin-react-refresh')).default;
+} catch {}
 
 export default [
-  // Ignore build artifacts
-  { ignores: ['dist', 'build', 'coverage', 'node_modules'] },
+  { ignores: ['node_modules/**','dist/**','build/**','.vite/**','coverage/**'] },
 
-  // Base JS rules
-  js.configs.recommended,
-
-  // --- App source: TS + React in the browser ---
+  // Global rules (apply everywhere)
   {
-    files: ['src/**/*.{ts,tsx}'],
-    languageOptions: {
-      parser: tsParser,
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      globals: globals.browser, // gives you `window`, `console`, etc.
-    },
-    settings: { react: { version: 'detect' } },
-    plugins: {
-      '@typescript-eslint': tsPlugin,
-      react: reactPlugin,
-      'react-hooks': reactHooks,
-    },
+    plugins: { 'unused-imports': unusedImports },
     rules: {
-      // TypeScript recommended
-      ...tsPlugin.configs.recommended.rules,
+      // Remove unused imports automatically
+      'unused-imports/no-unused-imports': 'error',
 
-      // Style/ergonomics: keep things calm during upgrade
-      '@typescript-eslint/no-explicit-any': 'off', // flip to 'warn' later
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
+      // Turn OFF this rule so we can use @typescript-eslint/no-unused-vars instead
+      'unused-imports/no-unused-vars': 'off',
+    },
+  },
+
+  // TS + React config
+  ...tseslint.config(
+    js.configs.recommended,
+    ...tseslint.configs.recommendedTypeChecked,
+
+    {
+      files: ['src/**/*.{ts,tsx}'],
+      languageOptions: {
+        parserOptions: {
+          project: ['./tsconfig.json'],
+          tsconfigRootDir: process.cwd(),
         },
+      },
+      plugins: {
+        react,
+        'react-hooks': reactHooks,
+        import: importPlugin,
+        ...(reactRefresh ? { 'react-refresh': reactRefresh } : {}),
+      },
+      settings: {
+        react: { version: 'detect' },
+        'import/parsers': { '@typescript-eslint/parser': ['.ts', '.tsx'] },
+        'import/resolver': { typescript: true },
+      },
+      rules: {
+        // React ergonomics
+        'react/react-in-jsx-scope': 'off',
+        'react/prop-types': 'off',
+        'react-hooks/rules-of-hooks': 'error',
+        'react-hooks/exhaustive-deps': 'warn',
+        'import/order': ['warn', { groups: ['builtin','external','internal','parent','sibling','index'], 'newlines-between': 'always' }],
+        'react-refresh/only-export-components': reactRefresh ? 'warn' : 'off',
+
+        // Promise rules tuned for React apps
+        '@typescript-eslint/no-misused-promises': ['warn', { checksVoidReturn: { arguments: true, attributes: false } }],
+        '@typescript-eslint/no-floating-promises': ['warn', { ignoreVoid: true, ignoreIIFE: true }],
+        '@typescript-eslint/require-await': 'off',
+        '@typescript-eslint/await-thenable': 'off',
+        '@typescript-eslint/prefer-promise-reject-errors': 'off',
+
+        // Use THIS rule for unused vars; underscores are ignored (including caught errors)
+        '@typescript-eslint/no-unused-vars': ['warn', {
+          vars: 'all',
+          args: 'after-used',
+          varsIgnorePattern: '^_',
+          argsIgnorePattern: '^_',
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        }],
+
+        // Turn the heavy TS “unsafe/any” family down to warnings
+        '@typescript-eslint/no-explicit-any': 'warn',
+        '@typescript-eslint/no-unsafe-assignment': 'warn',
+        '@typescript-eslint/no-unsafe-member-access': 'warn',
+        '@typescript-eslint/no-unsafe-call': 'warn',
+        '@typescript-eslint/no-unsafe-return': 'warn',
+        '@typescript-eslint/no-unsafe-argument': 'warn',
+        '@typescript-eslint/restrict-template-expressions': 'warn',
+        '@typescript-eslint/no-unsafe-enum-comparison': 'warn',
+      },
+    },
+
+    // Optional quieter zones
+    {
+      files: [
+        'src/services/**/*.{ts,tsx}',
+        'src/utils/**/*.{ts,tsx}',
+        'src/validation/**/*.{ts,tsx}',
       ],
-
-      // React 17+ (automatic runtime)
-      'react/react-in-jsx-scope': 'off',
-      'react/jsx-uses-react': 'off',
-
-      // Hooks sanity
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
-    },
-  },
-
-  // --- Node scripts/configs (allow require, __dirname, module, console) ---
-  {
-    files: [
-      'scripts/**/*.{js,cjs,mjs,ts}',
-      'tailwind.config.js',
-      'vite.config.*',
-      'eslint.config.*',
-    ],
-    languageOptions: {
-      parser: tsParser,
-      ecmaVersion: 'latest',
-      // Most of these are CJS; if you migrate them to ESM, it's fine too.
-      sourceType: 'script',
-      globals: globals.node,
-    },
-    plugins: {
-      '@typescript-eslint': tsPlugin,
-    },
-    rules: {
-      // Allow CommonJS in Node files
-      '@typescript-eslint/no-require-imports': 'off',
-      // TS rules on plain JS are noisy; keep it light
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
-      ],
-    },
-  },
-
-  // Defer formatting to Prettier
-  prettier,
-];
-
-export default [
-  // ... your existing config
-  {
-    ignores: [
-      'archive/',
-      'fix.eslint.js',
-      'node_modules/',
-      'dist/',
-      'build/'
-    ]
-  }
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off',
+        '@typescript-eslint/no-unsafe-return': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
+        '@typescript-eslint/restrict-template-expressions': 'off',
+      },
+    }
+  ),
 ];

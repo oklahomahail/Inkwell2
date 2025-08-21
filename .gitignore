@@ -48,3 +48,11 @@ reset-dev.sh
 .DS_Store
 __MACOSX/
 .vercel
+# editor/sed backups
+*.bak
+*.bak?
+*.ts.bak*
+*.tsx.bak*
+*.rebind
+*.ts.rebind*
+*.tsx.rebind*
