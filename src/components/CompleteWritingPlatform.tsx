@@ -1,3 +1,4 @@
+// src/components/CompleteWritingPlatform.tsx - CLEANED VERSION
 import React, { useState, Suspense, useEffect } from 'react';
 import {
   BookOpen,
@@ -22,6 +23,9 @@ import {
   Square,
   VolumeX,
   Volume2,
+  MessageSquare,
+  Lightbulb,
+  Shield,
 } from 'lucide-react';
 
 import { useAppContext } from '@/context/AppContext';
@@ -54,13 +58,12 @@ import {
 } from '@/components/ui/KeyboardHints';
 
 // Empty State Components
-import {
-  NoProjectsEmptyState,
-  NoChaptersEmptyState,
-} from '@/components/ui/EmptyStates';
+import { NoProjectsEmptyState, NoChaptersEmptyState } from '@/components/ui/EmptyStates';
 
 // Confirmation Dialog Components
 import { ConfirmationDialog, useConfirmation } from '@/components/ui/ConfirmationDialog';
+
+import { ConsistencyGuardianPanel } from './Claude/ConsistencyGuardianPanel';
 
 // Lazy load heavy components
 const WritingAnalyticsView = React.lazy(
@@ -68,7 +71,7 @@ const WritingAnalyticsView = React.lazy(
 );
 
 /** ----------------------------------------------------------------
- * Basic preferences (sidebar collapsed, last tab, dark mode)
+ * Basic preferences hook
  * ---------------------------------------------------------------- */
 const useBasicPreferences = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
@@ -115,7 +118,7 @@ const useBasicPreferences = () => {
 };
 
 /** ----------------------------------------------------------------
- * Small UI components (Button, Card, etc.)
+ * UI Components
  * ---------------------------------------------------------------- */
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
@@ -124,6 +127,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loadingText?: string;
   children: React.ReactNode;
 }
+
 const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',
@@ -157,6 +161,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   emptyState?: React.ReactNode;
   animated?: boolean;
 }
+
 const Card: React.FC<CardProps> = ({
   children,
   className = '',
@@ -203,6 +208,7 @@ interface BadgeProps {
   variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
   className?: string;
 }
+
 const Badge: React.FC<BadgeProps> = ({ children, variant = 'default', className = '' }) => {
   return <span className={`badge badge-${variant} ${className}`}>{children}</span>;
 };
@@ -214,6 +220,7 @@ interface ProgressProps {
   showLabel?: boolean;
   animated?: boolean;
 }
+
 const Progress: React.FC<ProgressProps> = ({
   value = 0,
   max = 100,
@@ -241,7 +248,7 @@ const Progress: React.FC<ProgressProps> = ({
 };
 
 /** ----------------------------------------------------------------
- * Sidebar
+ * Sidebar Component
  * ---------------------------------------------------------------- */
 interface SidebarProps {
   isCollapsed: boolean;
@@ -249,6 +256,7 @@ interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
+
 const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed,
   onToggleCollapse,
@@ -276,11 +284,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleToggleCollapse = () => {
     updateSidebarCollapsed(!isCollapsed);
     onToggleCollapse();
-  };
-
-  const handleCreateChapter = () => {
-    // TODO: hook up to your create flow
-    // console.log('Creating new chapter...');
   };
 
   const navItems = [
@@ -315,7 +318,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Command Palette Trigger with Hint */}
+      {/* Command Palette Trigger */}
       {!isCollapsed && (
         <div className="sidebar-command-palette">
           <CommandPaletteHint onClick={openPalette} variant="button" />
@@ -355,47 +358,83 @@ const Sidebar: React.FC<SidebarProps> = ({
           );
         })}
       </nav>
-
-      {/* Quick Actions */}
-      {!isCollapsed && (
-        <div className="sidebar-quick-actions">
-          <div className="quick-actions-header">
-            <h3>Quick Actions</h3>
-          </div>
-
-          <ShortcutTooltip content="New Chapter" shortcut={['⌘', 'N']} side="right">
-            <LoadingButton
-              variant="ghost"
-              size="sm"
-              className="quick-action-btn w-full focus-ring"
-              onClick={handleCreateChapter}
-              aria-label="Create new chapter (Cmd+N)"
-            >
-              <Plus className="quick-action-icon" />
-              <span>New Chapter</span>
-            </LoadingButton>
-          </ShortcutTooltip>
-
-          <ShortcutTooltip content="Continue Writing" shortcut={['⌘', '2']} side="right">
-            <LoadingButton
-              variant="ghost"
-              size="sm"
-              className="quick-action-btn w-full focus-ring"
-              onClick={() => handleTabChange('writing')}
-              aria-label="Continue writing (Cmd+2)"
-            >
-              <Edit3 className="quick-action-icon" />
-              <span>Continue Writing</span>
-            </LoadingButton>
-          </ShortcutTooltip>
-        </div>
-      )}
     </div>
   );
 };
 
 /** ----------------------------------------------------------------
- * DashboardContent
+ * AI Panel Component (NEW - for Consistency Guardian integration)
+ * ---------------------------------------------------------------- */
+interface AIPanelProps {
+  activeTab: 'chat' | 'analysis' | 'consistency';
+  onTabChange: (tab: 'chat' | 'analysis' | 'consistency') => void;
+}
+
+const AIPanel: React.FC<AIPanelProps> = ({ activeTab, onTabChange }) => {
+  const aiTabs = [
+    { id: 'chat' as const, label: 'Chat', icon: MessageSquare },
+    { id: 'analysis' as const, label: 'Analysis', icon: Lightbulb },
+    { id: 'consistency' as const, label: 'Guardian', icon: Shield },
+  ];
+
+  return (
+    <div className="h-full flex flex-col border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+      {/* AI Panel Header with Tabs */}
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <div className="flex">
+          {aiTabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                className={`
+                  flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors
+                  ${
+                    activeTab === tab.id
+                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }
+                `}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* AI Panel Content */}
+      <div className="flex-1 overflow-hidden">
+        {activeTab === 'chat' && (
+          <div className="h-full p-4 flex items-center justify-center text-gray-500">
+            <div className="text-center">
+              <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Chat with Claude</p>
+              <p className="text-xs opacity-75">Your existing chat panel goes here</p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'analysis' && (
+          <div className="h-full p-4 flex items-center justify-center text-gray-500">
+            <div className="text-center">
+              <Lightbulb className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Writing Analysis</p>
+              <p className="text-xs opacity-75">Your existing analysis panel goes here</p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'consistency' && <ConsistencyGuardianPanel className="h-full" />}
+      </div>
+    </div>
+  );
+};
+
+/** ----------------------------------------------------------------
+ * Dashboard Content
  * ---------------------------------------------------------------- */
 const DashboardContent: React.FC = () => {
   const { currentProject } = useAppContext();
@@ -408,20 +447,15 @@ const DashboardContent: React.FC = () => {
 
   const chapters = [
     { id: '1', title: 'Chapter 1: The Beginning', words: 2500, target: 3000, status: 'complete' },
-    { id: '2', title: 'Chapter 2: Rising Action', words: 1200, target: 3000, status: 'in-progress' },
+    {
+      id: '2',
+      title: 'Chapter 2: Rising Action',
+      words: 1200,
+      target: 3000,
+      status: 'in-progress',
+    },
     { id: '3', title: 'Chapter 3: Plot Twist', words: 0, target: 3000, status: 'planned' },
   ] as const;
-
-  const quickActions = [
-    { icon: Edit3, label: 'Continue Writing', description: 'Resume your current chapter', shortcut: ['⌘', '2'], command: 'nav-writing' },
-    { icon: Calendar, label: 'View Timeline', description: 'Check your story progress', shortcut: ['⌘', '3'], command: 'nav-timeline' },
-    { icon: BarChart3, label: 'Analytics', description: 'View writing analytics', shortcut: ['⌘', '4'], command: 'nav-analysis' },
-    { icon: CommandIcon, label: 'Command Palette', description: 'Quick access to all features', shortcut: ['⌘', 'K'], command: 'open-palette' },
-  ] as const;
-
-  const handleQuickAction = (command: string) => {
-    if (command === 'open-palette') openPalette();
-  };
 
   const handleNewChapter = async () => {
     await save(async () => {
@@ -442,8 +476,7 @@ const DashboardContent: React.FC = () => {
       variant: 'danger',
       requiresTyping: 'DELETE',
       onConfirm: () => {
-        // TODO: wire to deletion
-        // console.log('Deleting chapter:', chapterId);
+        console.log('Deleting chapter:', chapterId);
       },
       details: [
         'The chapter will be permanently removed',
@@ -454,13 +487,13 @@ const DashboardContent: React.FC = () => {
   };
 
   if (!hasProjects) {
-    return <NoProjectsEmptyState onCreateProject={handleCreateProject} onOpenHelp={handleOpenHelp} />;
+    return (
+      <NoProjectsEmptyState onCreateProject={handleCreateProject} onOpenHelp={handleOpenHelp} />
+    );
   }
 
   return (
     <div className="dashboard-content page-transition">
-      <a href="#main-content" className="skip-link">Skip to main content</a>
-
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Dashboard</h1>
@@ -495,22 +528,14 @@ const DashboardContent: React.FC = () => {
         </div>
       </div>
 
-      <div className="command-hint">
-        <div className="command-hint-content">
-          <CommandIcon className="command-hint-icon" />
-          <span>
-            Press <KeyboardShortcut keys={['⌘', 'K']} size="sm" /> to open the command palette for
-            quick access to all features
-          </span>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div id="main-content" className="stats-grid">
+      {/* Stats Grid */}
+      <div className="stats-grid">
         <Card loading={isLoadingStats} hover animated>
           <CardContent>
             <div className="stat-item">
-              <div className="stat-icon stat-icon-blue"><BookOpen className="icon" /></div>
+              <div className="stat-icon stat-icon-blue">
+                <BookOpen className="icon" />
+              </div>
               <div className="stat-content">
                 <p className="stat-label">Total Words</p>
                 <p className="stat-value">3,700</p>
@@ -522,7 +547,9 @@ const DashboardContent: React.FC = () => {
         <Card loading={isLoadingStats} hover animated>
           <CardContent>
             <div className="stat-item">
-              <div className="stat-icon stat-icon-green"><Target className="icon" /></div>
+              <div className="stat-icon stat-icon-green">
+                <Target className="icon" />
+              </div>
               <div className="stat-content">
                 <p className="stat-label">Goal Progress</p>
                 <p className="stat-value">37%</p>
@@ -534,7 +561,9 @@ const DashboardContent: React.FC = () => {
         <Card loading={isLoadingStats} hover animated>
           <CardContent>
             <div className="stat-item">
-              <div className="stat-icon stat-icon-yellow"><Clock className="icon" /></div>
+              <div className="stat-icon stat-icon-yellow">
+                <Clock className="icon" />
+              </div>
               <div className="stat-content">
                 <p className="stat-label">Chapters</p>
                 <p className="stat-value">3</p>
@@ -546,7 +575,9 @@ const DashboardContent: React.FC = () => {
         <Card loading={isLoadingStats} hover animated>
           <CardContent>
             <div className="stat-item">
-              <div className="stat-icon stat-icon-purple"><TrendingUp className="icon" /></div>
+              <div className="stat-icon stat-icon-purple">
+                <TrendingUp className="icon" />
+              </div>
               <div className="stat-content">
                 <p className="stat-label">Streak</p>
                 <p className="stat-value">5 days</p>
@@ -574,7 +605,9 @@ const DashboardContent: React.FC = () => {
               <CardHeader>
                 <div className="card-header-row">
                   <h2 className="card-title">Recent Chapters</h2>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm">
+                    View All
+                  </Button>
                 </div>
               </CardHeader>
 
@@ -597,7 +630,6 @@ const DashboardContent: React.FC = () => {
                                 {chapter.status.replace('-', ' ')}
                               </Badge>
 
-                              {/* Actions */}
                               <div className="relative group">
                                 <button
                                   className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 focus-ring"
@@ -644,7 +676,6 @@ const DashboardContent: React.FC = () => {
         </Card>
       </ErrorBoundary>
 
-      {/* Confirmations */}
       <ConfirmationDialog
         isOpen={deleteConfirmation.isOpen}
         onClose={deleteConfirmation.close}
@@ -665,7 +696,41 @@ const DashboardContent: React.FC = () => {
 };
 
 /** ----------------------------------------------------------------
- * FocusModeWritingInterface
+ * Writing Interface with AI Panel
+ * ---------------------------------------------------------------- */
+const WritingInterface: React.FC = () => {
+  const [activeAITab, setActiveAITab] = useState<'chat' | 'analysis' | 'consistency'>('chat');
+
+  return (
+    <div className="h-full flex gap-4 p-4">
+      {/* Main Writing Area */}
+      <div className="flex-1">
+        <div className="placeholder-content page-transition h-full">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <BookOpen className="placeholder-icon" />
+              <h2 className="placeholder-title">Writing Interface</h2>
+              <p className="placeholder-text">Your existing writing components will go here</p>
+            </div>
+            <FocusModeControls currentWordCount={3700} />
+          </div>
+
+          <div className="h-96 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
+            <p className="text-gray-500">TipTap Editor Component</p>
+          </div>
+        </div>
+      </div>
+
+      {/* AI Panel */}
+      <div className="w-96">
+        <AIPanel activeTab={activeAITab} onTabChange={setActiveAITab} />
+      </div>
+    </div>
+  );
+};
+
+/** ----------------------------------------------------------------
+ * Focus Mode Interface
  * ---------------------------------------------------------------- */
 const FocusModeWritingInterface: React.FC = () => {
   const {
@@ -690,7 +755,6 @@ const FocusModeWritingInterface: React.FC = () => {
     if (!settings.zenMode) return;
 
     let timeout: number | undefined;
-
     const resetTimer = () => {
       setShowControls(true);
       if (timeout) window.clearTimeout(timeout);
@@ -698,10 +762,8 @@ const FocusModeWritingInterface: React.FC = () => {
     };
 
     const handleActivity = () => resetTimer();
-
     document.addEventListener('mousemove', handleActivity);
     document.addEventListener('keydown', handleActivity);
-
     resetTimer();
 
     return () => {
@@ -724,11 +786,12 @@ const FocusModeWritingInterface: React.FC = () => {
       <div
         className={cn(
           'absolute top-0 left-0 right-0 bg-black bg-opacity-50 backdrop-blur-sm transition-all duration-500',
-          showControls || !settings.zenMode ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+          showControls || !settings.zenMode
+            ? 'translate-y-0 opacity-100'
+            : '-translate-y-full opacity-0',
         )}
       >
         <div className="flex items-center justify-between p-4">
-          {/* Sprint Controls */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
@@ -778,7 +841,6 @@ const FocusModeWritingInterface: React.FC = () => {
             </button>
           </div>
 
-          {/* Status */}
           <div className="flex items-center gap-6 text-white">
             {sprint.isActive && (
               <div className="flex items-center gap-2">
@@ -797,7 +859,6 @@ const FocusModeWritingInterface: React.FC = () => {
             )}
           </div>
 
-          {/* Exit Button */}
           <button
             onClick={disableFocusMode}
             className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors focus-ring"
@@ -845,11 +906,12 @@ const FocusModeWritingInterface: React.FC = () => {
           })}
         >
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden min-h-[600px]">
-            {/* Your TipTap Editor Component goes here */}
             <div className="p-8 h-full">
               <div className="prose prose-lg dark:prose-invert max-w-none">
                 <h1>Focus Mode Editor</h1>
-                <p>Your enhanced TipTap editor will be rendered here with focus mode capabilities.</p>
+                <p>
+                  Your enhanced TipTap editor will be rendered here with focus mode capabilities.
+                </p>
                 <p>This is where your actual writing interface components will integrate.</p>
               </div>
             </div>
@@ -872,7 +934,7 @@ const FocusModeWritingInterface: React.FC = () => {
 };
 
 /** ----------------------------------------------------------------
- * CompleteWritingPlatform (main)
+ * Main Complete Writing Platform Component
  * ---------------------------------------------------------------- */
 export default function CompleteWritingPlatform() {
   const {
@@ -915,14 +977,29 @@ export default function CompleteWritingPlatform() {
       }
       if (event.key === 'Escape' && showKeyboardHelp) setShowKeyboardHelp(false);
 
-      // Tab nav
+      // Tab navigation
       if (event.metaKey || event.ctrlKey) {
         switch (event.key) {
-          case '1': event.preventDefault(); handleTabChange('dashboard'); break;
-          case '2': event.preventDefault(); handleTabChange('writing'); break;
-          case '3': event.preventDefault(); handleTabChange('timeline'); break;
-          case '4': event.preventDefault(); handleTabChange('analysis'); break;
-          case ',': event.preventDefault(); handleTabChange('settings'); break;
+          case '1':
+            event.preventDefault();
+            handleTabChange('dashboard');
+            break;
+          case '2':
+            event.preventDefault();
+            handleTabChange('writing');
+            break;
+          case '3':
+            event.preventDefault();
+            handleTabChange('timeline');
+            break;
+          case '4':
+            event.preventDefault();
+            handleTabChange('analysis');
+            break;
+          case ',':
+            event.preventDefault();
+            handleTabChange('settings');
+            break;
         }
       }
     };
@@ -948,28 +1025,7 @@ export default function CompleteWritingPlatform() {
       case 'writing':
         return (
           <ErrorBoundary level="feature">
-            <div className="placeholder-content page-transition">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <BookOpen className="placeholder-icon" />
-                  <h2 className="placeholder-title">Writing Interface</h2>
-                  <p className="placeholder-text">
-                    Your existing writing components will go here
-                  </p>
-                </div>
-
-                {/* Add Focus Mode Controls here */}
-                <FocusModeControls currentWordCount={3700} />
-              </div>
-
-              <div className="flex items-center gap-4">
-                <Button onClick={openPalette} variant="outline">
-                  <CommandIcon className="btn-icon" />
-                  Open Command Palette
-                </Button>
-                <KeyboardShortcut keys={['⌘', 'K']} size="sm" />
-              </div>
-            </div>
+            <WritingInterface />
           </ErrorBoundary>
         );
 
