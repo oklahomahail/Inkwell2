@@ -1,23 +1,31 @@
-name: Lint
+name: Lint • Typecheck • Build
 
 on:
   push:
-    branches: [ "**" ]
+    branches: [main]
   pull_request:
 
 jobs:
-  lint:
+  ci:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [22.x]   # or [18.x, 20.x, 22.x] to test multiple
     steps:
       - uses: actions/checkout@v4
 
+      # Install pnpm
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      # Node + cache for pnpm (looks for pnpm-lock.yaml)
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
-          cache: npm
+          node-version: 22
+          cache: 'pnpm'
 
-      - run: npm ci
-      - run: npm run lint
+      # Install deps from lockfile
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
