@@ -2,12 +2,12 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { BoltIcon, MessageCircleIcon, SearchIcon } from 'lucide-react';
 
-import { useClaude } from '@/context/ClaudeProvider';
-import { useToast } from '@/context/ToastContext';
-
 import AccessibleTabs from './AccessibleTabs';
 import MessageBubble from './MessageBubble';
 import { StatusBadge, LoadingIndicator, TypingIndicator } from './Claude';
+
+import { useToast } from '@/context/ToastContext';
+import { useClaude } from '@/context/ClaudeProvider';
 
 interface ClaudeAssistantProps {
   selectedText?: string;

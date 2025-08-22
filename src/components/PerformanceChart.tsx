@@ -1,194 +1,125 @@
-import React from 'react';
-import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+// src/components/PerformanceChart.tsx
+import React, { useEffect, useMemo, useState } from 'react';
+
+type Row = Record<string, unknown>;
+export type PerformanceChartType = 'trend' | 'comparison' | 'success-rate' | 'roi';
 
 interface PerformanceChartProps {
-  type: 'comparison' | 'success-rate' | 'roi' | 'trend';
-  data: any;
-  className?: string;
+  title?: string;
+  type?: PerformanceChartType;
+  rows?: Row[];
+  xKey: string;
+  yKey: string;
   height?: number;
+  className?: string;
 }
 
-// Mock data builder to avoid buildChartData dependency
-function buildChartData(chartType: string, _rawData: any) {
-  // Simple mock data structure
-  const mockData = [
-    { name: 'Jan', value: 400, growth: 12 },
-    { name: 'Feb', value: 300, growth: 8 },
-    { name: 'Mar', value: 600, growth: 15 },
-    { name: 'Apr', value: 800, growth: 20 },
-    { name: 'May', value: 700, growth: 18 },
-    { name: 'Jun', value: 900, growth: 25 },
-  ];
-
-  return {
-    data: mockData,
-    xKey: 'name',
-    yKeys: ['value', 'growth'],
-    kind: chartType,
-  };
+function toNumber(v: unknown): number | null {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  if (typeof v === 'string') {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
 }
 
-// Mock data types to avoid import issues
-interface _ComparisonData {
-  current: number;
-  previous: number;
-}
+export default function PerformanceChart({
+  title,
+  type = 'trend',
+  rows,
+  xKey,
+  yKey,
+  height = 280,
+  className,
+}: PerformanceChartProps) {
+  const [R, setR] = useState<any>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-interface _CampaignSuccessData {
-  successful: number;
-  total: number;
-  rate: number;
-}
+  useEffect(() => {
+    let alive = true;
+    import('recharts')
+      .then((mod) => {
+        if (alive) setR(mod);
+      })
+      .catch((e) => {
+        if (alive) setLoadError(String(e));
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
-// Custom tooltip component
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: any[];
-  label?: string;
-  chartType: string;
-}
+  const data = useMemo(() => {
+    const raw = Array.isArray(rows) ? rows : [];
+    return raw.map((d) => (toNumber((d as any)[yKey]) == null ? null : d)).filter(Boolean) as Row[];
+  }, [rows, yKey]);
 
-const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, chartType }) => {
-  if (!active || !payload || !payload.length) return null;
+  const isArea = type === 'comparison' || type === 'success-rate' || type === 'roi';
 
-  const val = payload[0].value as number;
+  if (loadError) {
+    return (
+      <div className={className}>
+        {title ? <h3 className="font-medium mb-3">{title}</h3> : null}
+        <div className="h-64 rounded border border-dashed flex items-center justify-center text-sm text-slate-500">
+          Charts failed to load: {loadError}
+        </div>
+      </div>
+    );
+  }
+  if (!R) {
+    return (
+      <div className={className}>
+        {title ? <h3 className="font-medium mb-3">{title}</h3> : null}
+        <div className="h-64 rounded border border-dashed animate-pulse bg-slate-100 dark:bg-slate-800" />
+      </div>
+    );
+  }
+
+  const {
+    ResponsiveContainer,
+    LineChart,
+    Line,
+    AreaChart,
+    Area,
+    CartesianGrid,
+    XAxis,
+    YAxis,
+    Tooltip,
+    Legend,
+  } = R;
 
   return (
-    <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-lg">
-      <div className="text-white font-medium mb-1">
-        {chartType === 'comparison'
-          ? `Growth: ${val}%`
-          : chartType === 'success-rate'
-            ? `Success Rate: ${val}%`
-            : payload[0].name}
-      </div>
-      <div className="text-xs text-slate-400">{label}</div>
-    </div>
-  );
-};
-
-const PerformanceChart: React.FC<PerformanceChartProps> = ({
-  type,
-  data,
-  className = '',
-  height = 300,
-}) => {
-  // Build chart data from props
-  const { data: rows, xKey, yKeys: _yKeys, kind: _kind } = buildChartData(type, data);
-
-  const chartTitle =
-    type === 'comparison'
-      ? 'Period-over-period growth metrics'
-      : type === 'success-rate'
-        ? 'Campaign goal achievement rates'
-        : type === 'roi'
-          ? 'Return on investment by campaign'
-          : type === 'trend'
-            ? 'Performance trends over time'
-            : 'Performance Chart';
-
-  const isAreaChart = type === 'comparison' || type === 'success-rate' || type === 'roi';
-
-  return (
-    <div className={`card-base p-6 ${className}`}>
-      {/* Chart Header */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold font-semibold text-slate-200 mb-2">
-          Performance Analytics
-        </h3>
-        <p className="text-sm text-slate-400">{chartTitle}</p>
-      </div>
-
-      {/* Chart Container */}
-      <div style={{ height }} className="relative">
-        <ResponsiveContainer width="100%" height="100%">
-          {isAreaChart ? (
-            <AreaChart data={rows}>
-              <defs>
-                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey={xKey} stroke="#64748B" fontSize={12} />
-              <YAxis stroke="#64748B" fontSize={12} />
-              <Tooltip content={<CustomTooltip chartType={type} />} />
+    <div className={className}>
+      {title ? <h3 className="font-medium mb-3">{title}</h3> : null}
+      <div style={{ height }} className="w-full">
+        <ResponsiveContainer>
+          {isArea ? (
+            <AreaChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey={xKey} />
+              <YAxis />
+              <Tooltip />
+              <Legend />
               <Area
                 type="monotone"
-                dataKey="value"
-                stroke="#3B82F6"
-                strokeWidth={2}
-                fill="url(#colorValue)"
+                dataKey={yKey}
+                stroke="#8884d8"
+                fillOpacity={0.2}
+                fill="#8884d8"
               />
             </AreaChart>
           ) : (
-            <LineChart data={rows}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey={xKey} stroke="#64748B" fontSize={12} />
-              <YAxis stroke="#64748B" fontSize={12} />
-              <Tooltip content={<CustomTooltip chartType={type} />} />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="#3B82F6"
-                strokeWidth={2}
-                dot={{ fill: '#3B82F6', strokeWidth: 2 }}
-                activeDot={{ r: 6 }}
-              />
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey={xKey} />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey={yKey} stroke="#8884d8" dot={false} />
             </LineChart>
           )}
         </ResponsiveContainer>
       </div>
-
-      {/* Chart Footer */}
-      <div className="mt-4 pt-4 border-t border-slate-700">
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-slate-400">
-            {type === 'comparison' && 'Growth vs previous period'}
-            {type === 'success-rate' && `${rows.length} campaigns analyzed`}
-            {type === 'roi' && 'Return on investment metrics'}
-            {type === 'trend' && 'Historical performance data'}
-          </span>
-        </div>
-      </div>
-
-      {/* Additional metrics for comparison charts */}
-      {type === 'comparison' && (
-        <div className="mt-4 grid grid-cols-2 gap-4">
-          <div className="bg-slate-800/50 rounded-lg p-3">
-            <div className="text-xs text-slate-400 mb-1">Average Growth</div>
-            <div className="text-lg font-semibold font-semibold text-slate-200">
-              {rows.length > 0
-                ? `${(rows.reduce((sum: number, item: any) => sum + (item.growth || 0), 0) / rows.length).toFixed(1)}%`
-                : '0%'}
-            </div>
-          </div>
-          <div className="bg-slate-800/50 rounded-lg p-3">
-            <div className="text-xs text-slate-400 mb-1">Best Month</div>
-            <div className="text-lg font-semibold font-semibold text-slate-200">
-              {rows.length > 0
-                ? rows.reduce(
-                    (max: any, item: any) => ((item.growth || 0) > (max.growth || 0) ? item : max),
-                    rows[0],
-                  )?.name || 'N/A'
-                : 'N/A'}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
-};
-
-export default PerformanceChart;
+}

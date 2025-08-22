@@ -3,9 +3,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-import { useToast } from '@/context/ToastContext';
-
 import { useProjectStats } from './useProjectStats';
+
+import { useToast } from '@/context/ToastContext';
 
 export interface WritingGoal {
   id: string;

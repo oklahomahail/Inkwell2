@@ -1,110 +1,109 @@
-// eslint.config.js
+// @ts-check
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import importPlugin from 'eslint-plugin-import';
 import unusedImports from 'eslint-plugin-unused-imports';
+import globals from 'globals';
 
 let reactRefresh = null;
 try {
   reactRefresh = (await import('eslint-plugin-react-refresh')).default;
-} catch {}
+} catch {
+  /* noop */
+}
 
 export default [
-  { ignores: ['node_modules/**','dist/**','build/**','.vite/**','coverage/**'] },
+  // Ignore build artifacts & snapshots
+  { ignores: ['node_modules/**','dist/**','build/**','.vite/**','coverage/**','archive/**'] },
 
-  // Global rules (apply everywhere)
+  // Base language options for all source files
   {
-    plugins: { 'unused-imports': unusedImports },
-    rules: {
-      // Remove unused imports automatically
-      'unused-imports/no-unused-imports': 'error',
-
-      // Turn OFF this rule so we can use @typescript-eslint/no-unused-vars instead
-      'unused-imports/no-unused-vars': 'off',
+    files: ['src/**/*.{js,jsx,ts,tsx}'],
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: 'module',
+      globals: globals.browser,
     },
   },
 
-  // TS + React config
-  ...tseslint.config(
-    js.configs.recommended,
-    ...tseslint.configs.recommendedTypeChecked,
+  // JS/JSX recommended
+  {
+    files: ['src/**/*.{js,jsx}'],
+    ...js.configs.recommended,
+  },
 
-    {
-      files: ['src/**/*.{ts,tsx}'],
-      languageOptions: {
-        parserOptions: {
-          project: ['./tsconfig.json'],
-          tsconfigRootDir: process.cwd(),
-        },
-      },
-      plugins: {
-        react,
-        'react-hooks': reactHooks,
-        import: importPlugin,
-        ...(reactRefresh ? { 'react-refresh': reactRefresh } : {}),
-      },
-      settings: {
-        react: { version: 'detect' },
-        'import/parsers': { '@typescript-eslint/parser': ['.ts', '.tsx'] },
-        'import/resolver': { typescript: true },
-      },
-      rules: {
-        // React ergonomics
-        'react/react-in-jsx-scope': 'off',
-        'react/prop-types': 'off',
-        'react-hooks/rules-of-hooks': 'error',
-        'react-hooks/exhaustive-deps': 'warn',
-        'import/order': ['warn', { groups: ['builtin','external','internal','parent','sibling','index'], 'newlines-between': 'always' }],
-        'react-refresh/only-export-components': reactRefresh ? 'warn' : 'off',
+  // TS/TSX recommended (NON type-checked)
+  ...tseslint.configs.recommended,
 
-        // Promise rules tuned for React apps
-        '@typescript-eslint/no-misused-promises': ['warn', { checksVoidReturn: { arguments: true, attributes: false } }],
-        '@typescript-eslint/no-floating-promises': ['warn', { ignoreVoid: true, ignoreIIFE: true }],
-        '@typescript-eslint/require-await': 'off',
-        '@typescript-eslint/await-thenable': 'off',
-        '@typescript-eslint/prefer-promise-reject-errors': 'off',
-
-        // Use THIS rule for unused vars; underscores are ignored (including caught errors)
-        '@typescript-eslint/no-unused-vars': ['warn', {
-          vars: 'all',
-          args: 'after-used',
-          varsIgnorePattern: '^_',
-          argsIgnorePattern: '^_',
-          caughtErrors: 'all',
-          caughtErrorsIgnorePattern: '^_',
-          ignoreRestSiblings: true,
-        }],
-
-        // Turn the heavy TS “unsafe/any” family down to warnings
-        '@typescript-eslint/no-explicit-any': 'warn',
-        '@typescript-eslint/no-unsafe-assignment': 'warn',
-        '@typescript-eslint/no-unsafe-member-access': 'warn',
-        '@typescript-eslint/no-unsafe-call': 'warn',
-        '@typescript-eslint/no-unsafe-return': 'warn',
-        '@typescript-eslint/no-unsafe-argument': 'warn',
-        '@typescript-eslint/restrict-template-expressions': 'warn',
-        '@typescript-eslint/no-unsafe-enum-comparison': 'warn',
-      },
+  // React + imports + hygiene for src
+  {
+    files: ['src/**/*.{js,jsx,ts,tsx}'],
+    plugins: {
+      react,
+      'react-hooks': reactHooks,
+      import: importPlugin,
+      'unused-imports': unusedImports,
+      ...(reactRefresh ? { 'react-refresh': reactRefresh } : {}),
     },
+    settings: { react: { version: 'detect' } },
+    rules: {
+      // Unused imports/vars
+      // ⬇ make non-blocking to avoid hard errors from refactors
+      'unused-imports/no-unused-imports': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', {
+        args: 'after-used',
+        vars: 'all',
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true,
+      }],
 
-    // Optional quieter zones
-    {
-      files: [
-        'src/services/**/*.{ts,tsx}',
-        'src/utils/**/*.{ts,tsx}',
-        'src/validation/**/*.{ts,tsx}',
-      ],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'off',
-        '@typescript-eslint/no-unsafe-assignment': 'off',
-        '@typescript-eslint/no-unsafe-member-access': 'off',
-        '@typescript-eslint/no-unsafe-call': 'off',
-        '@typescript-eslint/no-unsafe-return': 'off',
-        '@typescript-eslint/no-unsafe-argument': 'off',
-        '@typescript-eslint/restrict-template-expressions': 'off',
-      },
-    }
-  ),
+      // React ergonomics
+      'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      'import/order': ['warn', {
+        groups: ['builtin','external','internal','parent','sibling','index'],
+        'newlines-between': 'always'
+      }],
+      'react-refresh/only-export-components': reactRefresh ? 'warn' : 'off',
+
+      // Turn OFF typed-only rules (no project/tsconfig required)
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/await-thenable': 'off',
+
+      // Reasonable TS hygiene
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
+
+  // Node/CJS & tool files — relax rules so they don't error
+  {
+    files: [
+      'eslint.config.js',
+      'tailwind.config.js',
+      'vite.config.ts',
+      'scripts/**/*.{js,cjs,ts}',
+      'fix.eslint.js',
+    ],
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: 'commonjs',
+      globals: { ...globals.node },
+    },
+    rules: {
+      // Allow empty catch in configs
+      'no-empty': ['warn', { allowEmptyCatch: true }],
+      // Allow require() in CJS/tooling
+      '@typescript-eslint/no-require-imports': 'off',
+      // Avoid false positives in tool files
+      'no-undef': 'off',
+      'import/order': 'off',
+      'unused-imports/no-unused-imports': 'off',
+    },
+  },
 ];

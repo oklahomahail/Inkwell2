@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Download, Trash2, RefreshCw, X } from 'lucide-react';
 
-import { useToast } from '@/context/ToastContext';
-
 import { quotaAwareStorage, StorageQuotaInfo, StorageError } from '../../utils/quotaAwareStorage';
 import { exportService } from '../../services/exportService';
 import { snapshotService } from '../../services/snapshotService';
+
+import { useToast } from '@/context/ToastContext';
 
 interface StorageRecoveryBannerProps {
   onDismiss?: () => void;

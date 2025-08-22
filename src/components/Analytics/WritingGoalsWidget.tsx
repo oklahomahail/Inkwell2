@@ -47,6 +47,7 @@ const WritingGoalsWidget: React.FC<WritingGoalsWidgetProps> = ({
 
   // Initialize default goals
   useEffect(() => {
+    updateGoalsProgress();
     const defaultGoals: WritingGoal[] = [
       {
         id: 'daily_words',
@@ -58,6 +59,7 @@ const WritingGoalsWidget: React.FC<WritingGoalsWidgetProps> = ({
         color: 'text-blue-600',
         emoji: '📝',
       },
+
       {
         id: 'daily_time',
         type: 'daily_time',
