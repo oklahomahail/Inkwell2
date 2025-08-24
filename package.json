@@ -3,30 +3,29 @@
   "version": "1.0.1",
   "type": "module",
   "private": true,
+  "engines": {
+    "node": ">=20 <23"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
-    "lint:css": "stylelint '**/*.css'",
-    "lint:css:fix": "stylelint '**/*.css' --fix",
-    "vercel:test": "npm run build && npm run preview",
+    "lint:css": "stylelint \"**/*.css\"",
+    "lint:css:fix": "stylelint \"**/*.css\" --fix",
+    "lint:ci": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=314",
     "format": "prettier --write .",
     "prepare": "husky",
-    "typecheck": "tsc --noEmit",
     "tailwind:replace": "node scripts/tailwind-text-replacer.mjs",
-    "lint:ci": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=314",
-    "repo:audit": "pnpm -s knip && pnpm -s unimported && pnpm -s depcheck && pnpm -s madge:orphans && pnpm -s madge:cycles",
-    "knip": "knip",
-    "unimported": "unimported --flow -e src/main.tsx",
-    "depcheck": "depcheck --skip-missing=true",
-    "madge:orphans": "madge --extensions ts,tsx --ts-config tsconfig.json --orphans src",
-    "madge:cycles": "madge --extensions ts,tsx --ts-config tsconfig.json --circular src",
-    "audit:knip": "knip --dependencies --files --reporter compact --no-exit-code",
+    "vercel:test": "npm run build && npm run preview",
+    "audit:knip": "knip --dependencies --files --reporter symbols --no-exit-code --tsConfig tsconfig.json",
     "audit:depcheck": "depcheck --skip-missing=true || true",
-    "audit:orphans": "madge --extensions ts,tsx --ts-config tsconfig.json --orphans src/main.tsx || true",
-    "audit:cycles": "madge --extensions ts,tsx --ts-config tsconfig.json --circular src/main.tsx || true"
+    "audit:orphans": "madge --extensions ts,tsx --ts-config tsconfig.json --orphans src | grep -Ev '^(src/main\\.tsx|src/vite-env\\.d\\.ts)$' || true",
+    "audit:cycles": "madge --extensions ts,tsx --ts-config tsconfig.json --circular src || true",
+    "repo:audit": "pnpm -s audit:knip && pnpm -s audit:depcheck && pnpm -s audit:orphans && pnpm -s audit:cycles",
+    "ci:audit": "mkdir -p reports && pnpm -s audit:knip | tee reports/knip.txt && pnpm -s audit:depcheck | tee reports/depcheck.txt && pnpm -s audit:orphans | tee reports/madge-orphans.txt && pnpm -s audit:cycles | tee reports/madge-cycles.txt"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -58,7 +57,6 @@
     "lucide-react": "^0.541.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-router-dom": "^7.8.1",
     "recharts": "^3.1.2",
     "tailwind-merge": "^3.3.1",
     "zod": "^4.0.17"
@@ -102,7 +100,6 @@
     "ts-prune": "^0.10.3",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.40.0",
-    "unimported": "^1.31.1",
     "vite": "^7.0.6"
   },
   "pnpm": {

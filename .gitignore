@@ -58,3 +58,7 @@ __MACOSX/
 *.tsx.rebind*
 
 eslint.config.js.backup
+
+# build/share archives
+inkwell-src-*.zip
+
