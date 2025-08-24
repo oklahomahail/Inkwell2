@@ -1,0 +1,9 @@
+archive/          export-ignore
+*.backup          export-ignore
+patch.diff*       export-ignore
+src/assets/*.png  export-ignore
+node_modules      export-ignore
+dist              export-ignore
+.next             export-ignore
+coverage          export-ignore
+.DS_Store         export-ignore
