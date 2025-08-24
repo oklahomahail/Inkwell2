@@ -16,7 +16,17 @@
     "prepare": "husky",
     "typecheck": "tsc --noEmit",
     "tailwind:replace": "node scripts/tailwind-text-replacer.mjs",
-    "lint:ci": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=314"
+    "lint:ci": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=314",
+    "repo:audit": "pnpm -s knip && pnpm -s unimported && pnpm -s depcheck && pnpm -s madge:orphans && pnpm -s madge:cycles",
+    "knip": "knip",
+    "unimported": "unimported --flow -e src/main.tsx",
+    "depcheck": "depcheck --skip-missing=true",
+    "madge:orphans": "madge --extensions ts,tsx --ts-config tsconfig.json --orphans src",
+    "madge:cycles": "madge --extensions ts,tsx --ts-config tsconfig.json --circular src",
+    "audit:knip": "knip --dependencies --files --reporter compact --no-exit-code",
+    "audit:depcheck": "depcheck --skip-missing=true || true",
+    "audit:orphans": "madge --extensions ts,tsx --ts-config tsconfig.json --orphans src/main.tsx || true",
+    "audit:cycles": "madge --extensions ts,tsx --ts-config tsconfig.json --circular src/main.tsx || true"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -68,6 +78,7 @@
     "@typescript-eslint/parser": "^8.39.0",
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.15",
+    "depcheck": "^1.4.7",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^3.10.1",
@@ -80,14 +91,18 @@
     "eslint-plugin-unused-imports": "^4.2.0",
     "globals": "^16.3.0",
     "husky": "^9.0.0",
+    "knip": "^5.63.0",
     "lint-staged": "^15.2.0",
+    "madge": "^8.0.0",
     "postcss": "^8.4.35",
     "prettier": "^3.6.2",
     "stylelint": "^16.10.0",
     "stylelint-config-standard": "^36.0.1",
     "tailwindcss": "^3.4.4",
+    "ts-prune": "^0.10.3",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.40.0",
+    "unimported": "^1.31.1",
     "vite": "^7.0.6"
   },
   "pnpm": {
@@ -96,5 +111,6 @@
       "react-dom": "19.1.0",
       "react-is": "^19.1.1"
     }
-  }
+  },
+  "packageManager": "pnpm@9.12.0"
 }

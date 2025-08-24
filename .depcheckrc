@@ -1,0 +1,13 @@
+{
+  "ignoreMatches": [
+    "autoprefixer",
+    "postcss",
+    "eslint-config-prettier",
+    "eslint-plugin-prettier",
+    "eslint-import-resolver-typescript",
+    "eslint-plugin-jsx-a11y",
+    "@typescript-eslint/parser",
+    "stylelint-config-standard",
+    "ts-prune"
+  ]
+}
