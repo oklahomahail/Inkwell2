@@ -4,7 +4,7 @@ on:
   pull_request:
   workflow_dispatch:
   schedule:
-    # 13:00 UTC = 8:00 AM during CDT, 7:00 AM during CST
+    # 13:00 UTC = 8:00 AM CDT, 7:00 AM CST
     - cron: "0 13 * * 1"
 
 permissions:
@@ -31,33 +31,26 @@ jobs:
           version: 9.12.0
           run_install: false
 
-      - name: Install deps (frozen, with fallback)
-        run: |
-          set -e
-          echo "pnpm: $(pnpm -v)  node: $(node -v)"
-          if ! pnpm install --frozen-lockfile; then
-            echo "::warning:: frozen install failed; retrying without frozen to capture details"
-            pnpm install --no-frozen-lockfile
-            if ! git diff --exit-code pnpm-lock.yaml; then
-              echo "::error:: pnpm-lock.yaml changed. Commit the updated lockfile or fix package.json."
-              exit 1
-            fi
-          fi
-
-      - name: Run audits (non-blocking)
+      - name: Run audits (via pnpm dlx – no install)
         run: |
           set -e
           mkdir -p reports
+          echo "node: $(node -v)  pnpm: $(pnpm -v)"
+
           # knip
-          pnpm -s knip --dependencies --files --reporter symbols --no-exit-code --tsConfig tsconfig.json \
+          pnpm dlx knip@5.63.0 \
+            --dependencies --files --reporter symbols --no-exit-code --tsConfig tsconfig.json \
             | tee reports/knip.txt || true
+
           # depcheck
-          pnpm -s depcheck --skip-missing=true \
+          pnpm dlx depcheck@1.4.7 --skip-missing=true \
             | tee reports/depcheck.txt || true
+
           # madge (orphans & cycles)
-          pnpm -s madge --extensions ts,tsx --ts-config tsconfig.json --orphans src \
+          pnpm dlx madge@8.0.0 --extensions ts,tsx --ts-config tsconfig.json --orphans src \
             | tee reports/madge-orphans.txt || true
-          pnpm -s madge --extensions ts,tsx --ts-config tsconfig.json --circular src \
+
+          pnpm dlx madge@8.0.0 --extensions ts,tsx --ts-config tsconfig.json --circular src \
             | tee reports/madge-cycles.txt || true
 
       - name: Upload reports
@@ -69,7 +62,6 @@ jobs:
       - name: Fail on audit issues
         run: |
           set -e
-
           echo "=== Check knip for dependency issues ==="
           if grep -Eqi "Unused dependencies|Unlisted dependencies|Unresolved" reports/knip.txt; then
             echo "::error::Knip found dependency issues"
