@@ -1,0 +1,15 @@
+{
+  "$schema": "https://unpkg.com/knip/schemas/knip.schema.json",
+  "entry": ["src/main.tsx", "index.html"],
+  "project": ["tsconfig.json"],
+  "ignore": [
+    "archive/**",
+    "**/*.backup",
+    "**/*.diff",
+    ".husky-disabled/**",
+    "docs/**",
+    "env/**",
+    "public/vite.svg"
+  ],
+  "ignoreDependencies": ["postcss-load-config"]
+}
