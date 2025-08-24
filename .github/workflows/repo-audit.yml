@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
 
       - name: Setup pnpm 9.12.0
         uses: pnpm/action-setup@v4
@@ -46,7 +46,7 @@ jobs:
           pnpm dlx depcheck@1.4.7 --skip-missing=true \
             | tee reports/depcheck.txt || true
 
-          # madge (orphans & cycles) — scan from the app entry
+          # madge (entry-based)
           pnpm dlx madge@8.0.0 --extensions ts,tsx --ts-config tsconfig.json --orphans src/main.tsx \
             | tee reports/madge-orphans.txt || true
 
@@ -71,11 +71,15 @@ jobs:
           fi
 
           echo "=== Check madge for orphans (excluding known roots) ==="
-          # Keep only file-like lines, ignore the 'Processed...' headers, then exclude entry/ambient files.
-          ORPHANS=$(awk '/\.(ts|tsx)$/ {print}' reports/madge-orphans.txt \
-            | sed 's|^\./||' \
-            | grep -Ev '^(src/)?(main\.tsx|vite-env\.d\.ts)$' || true)
-
+          # Keep only .ts/.tsx paths, trim whitespace, drop leading ./, drop empties,
+          # then ignore entry/ambient files regardless of src/ prefix.
+          ORPHANS=$(
+            awk '/\.(ts|tsx)$/{print}' reports/madge-orphans.txt \
+            | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//; s|^\./||' \
+            | awk 'NF' \
+            | grep -Ev '^(.*/)?(main\.tsx|vite-env\.d\.ts)$' \
+            || true
+          )
           if [ -n "$ORPHANS" ]; then
             echo "::error::Orphaned files detected"
             echo "$ORPHANS"
