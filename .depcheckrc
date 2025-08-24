@@ -2,18 +2,12 @@
   "ignoreMatches": [
     "autoprefixer",
     "postcss",
-    "postcss-load-config",
     "eslint-config-prettier",
     "eslint-plugin-prettier",
     "eslint-import-resolver-typescript",
     "eslint-plugin-jsx-a11y",
     "@typescript-eslint/parser",
-    "^@types/.*",
-    "stylelint",
     "stylelint-config-standard",
-    "ts-prune",
-    "husky",
-    "lint-staged"
-  ],
-  "ignoreDirs": ["archive", "docs", "env", ".husky-disabled"]
+    "ts-prune"
+  ]
 }
