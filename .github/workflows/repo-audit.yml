@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Setup pnpm 9.12.0
         uses: pnpm/action-setup@v4
@@ -46,7 +46,7 @@ jobs:
           pnpm dlx depcheck@1.4.7 --skip-missing=true \
             | tee reports/depcheck.txt || true
 
-          # madge (orphans & cycles)
+          # madge (orphans & cycles) — scan from the app entry
           pnpm dlx madge@8.0.0 --extensions ts,tsx --ts-config tsconfig.json --orphans src/main.tsx \
             | tee reports/madge-orphans.txt || true
 
@@ -62,6 +62,7 @@ jobs:
       - name: Fail on audit issues
         run: |
           set -e
+
           echo "=== Check knip for dependency issues ==="
           if grep -Eqi "Unused dependencies|Unlisted dependencies|Unresolved" reports/knip.txt; then
             echo "::error::Knip found dependency issues"
@@ -70,7 +71,11 @@ jobs:
           fi
 
           echo "=== Check madge for orphans (excluding known roots) ==="
-          ORPHANS=$(grep -Ev '^(src/main\.tsx|src/vite-env\.d\.ts)$' reports/madge-orphans.txt || true)
+          # Keep only file-like lines, ignore the 'Processed...' headers, then exclude entry/ambient files.
+          ORPHANS=$(awk '/\.(ts|tsx)$/ {print}' reports/madge-orphans.txt \
+            | sed 's|^\./||' \
+            | grep -Ev '^(src/)?(main\.tsx|vite-env\.d\.ts)$' || true)
+
           if [ -n "$ORPHANS" ]; then
             echo "::error::Orphaned files detected"
             echo "$ORPHANS"
