@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Setup pnpm 9.12.0
         uses: pnpm/action-setup@v4
@@ -42,16 +42,15 @@ jobs:
             --dependencies --files --reporter symbols --no-exit-code --tsConfig tsconfig.json \
             | tee reports/knip.txt || true
 
-          # depcheck
+          # depcheck (informational only)
           pnpm dlx depcheck@1.4.7 --skip-missing=true \
             | tee reports/depcheck.txt || true
 
-          # madge (entry-based)
-          pnpm dlx madge@8.0.0 --extensions ts,tsx --ts-config tsconfig.json --orphans src/main.tsx \
+          # madge from app entry (so only truly unreachable files are flagged)
+          pnpm dlx madge@8.0.0 --extensions ts,tsx --ts-config tsconfig.json --orphans   src/main.tsx \
             | tee reports/madge-orphans.txt || true
-
-          pnpm dlx madge@8.0.0 --extensions ts,tsx --ts-config tsconfig.json --circular src/main.tsx \
-            | tee reports/madge-cycles.txt || true
+          pnpm dlx madge@8.0.0 --extensions ts,tsx --ts-config tsconfig.json --circular  src/main.tsx \
+            | tee reports/madge-cycles.txt  || true
 
       - name: Upload reports
         uses: actions/upload-artifact@v4
@@ -71,13 +70,12 @@ jobs:
           fi
 
           echo "=== Check madge for orphans (excluding known roots) ==="
-          # Keep only .ts/.tsx paths, trim whitespace, drop leading ./, drop empties,
-          # then ignore entry/ambient files regardless of src/ prefix.
+          # Skip header lines, normalize, keep only ts/tsx, then drop entry/ambient files.
           ORPHANS=$(
-            awk '/\.(ts|tsx)$/{print}' reports/madge-orphans.txt \
-            | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//; s|^\./||' \
-            | awk 'NF' \
-            | grep -Ev '^(.*/)?(main\.tsx|vite-env\.d\.ts)$' \
+            tail -n +3 reports/madge-orphans.txt \
+            | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' \
+            | grep -E '\.(ts|tsx)$' \
+            | grep -Ev '(^|/)main\.tsx$|(^|/)vite-env\.d\.ts$' \
             || true
           )
           if [ -n "$ORPHANS" ]; then
