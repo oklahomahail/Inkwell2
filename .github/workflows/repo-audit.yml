@@ -1,0 +1,77 @@
+name: Repo audit
+
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # 13:00 UTC = 8:00 AM during CDT, 7:00 AM during CST
+    - cron: "0 13 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repo-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node & pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Activate pnpm 9.12.0 via Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.12.0 --activate
+          pnpm -v && node -v
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Run audits (non-blocking)
+        run: |
+          mkdir -p reports
+          pnpm -s knip --dependencies --files --reporter symbols --no-exit-code --tsConfig tsconfig.json | tee reports/knip.txt || true
+          pnpm -s depcheck --skip-missing=true | tee reports/depcheck.txt || true
+          pnpm -s madge --extensions ts,tsx --ts-config tsconfig.json --orphans src | tee reports/madge-orphans.txt || true
+          pnpm -s madge --extensions ts,tsx --ts-config tsconfig.json --circular src | tee reports/madge-cycles.txt || true
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-audit-reports
+          path: reports/
+
+      - name: Fail on audit issues
+        run: |
+          set -e
+          echo "=== Check knip for dependency issues ==="
+          if grep -Eqi "Unused dependencies|Unlisted dependencies|Unresolved" reports/knip.txt; then
+            echo "::error::Knip found dependency issues"
+            sed -n '1,200p' reports/knip.txt
+            exit 1
+          fi
+
+          echo "=== Check madge for orphans (excluding known roots) ==="
+          ORPHANS=$(grep -Ev '^(src/main\.tsx|src/vite-env\.d\.ts)$' reports/madge-orphans.txt || true)
+          if [ -n "$ORPHANS" ]; then
+            echo "::error::Orphaned files detected"
+            echo "$ORPHANS"
+            exit 1
+          fi
+
+          echo "=== Check madge for cycles ==="
+          if ! grep -q "No circular dependency found" reports/madge-cycles.txt; then
+            echo "::error::Circular dependencies detected"
+            sed -n '1,200p' reports/madge-cycles.txt
+            exit 1
+          fi
+
+          echo "All audit checks passed ✅"
