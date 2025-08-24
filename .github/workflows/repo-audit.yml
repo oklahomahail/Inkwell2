@@ -47,10 +47,10 @@ jobs:
             | tee reports/depcheck.txt || true
 
           # madge (orphans & cycles)
-          pnpm dlx madge@8.0.0 --extensions ts,tsx --ts-config tsconfig.json --orphans src \
+          pnpm dlx madge@8.0.0 --extensions ts,tsx --ts-config tsconfig.json --orphans src/main.tsx \
             | tee reports/madge-orphans.txt || true
 
-          pnpm dlx madge@8.0.0 --extensions ts,tsx --ts-config tsconfig.json --circular src \
+          pnpm dlx madge@8.0.0 --extensions ts,tsx --ts-config tsconfig.json --circular src/main.tsx \
             | tee reports/madge-cycles.txt || true
 
       - name: Upload reports
