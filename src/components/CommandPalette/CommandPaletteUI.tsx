@@ -11,24 +11,34 @@ import {
   Settings,
 } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
-import { useCommandPalette } from './CommandPaletteProvider';
+
+// ⬇️ import directly from the context
+import { useCommandPaletteContext as useCommandPalette } from '@/context/CommandPaletteContext';
 
 const CommandPaletteUI: React.FC = () => {
-  const { state, closePalette, setQuery, executeCommand, filteredCommands } = useCommandPalette();
+  const {
+    isOpen,
+    query,
+    selectedIndex,
+    close, // was closePalette
+    setQuery,
+    executeCommand,
+    filteredCommands,
+  } = useCommandPalette();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus input when palette opens
   useEffect(() => {
-    if (state.isOpen && inputRef.current) {
+    if (isOpen && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [state.isOpen]);
+  }, [isOpen]);
 
   // Handle backdrop click
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      closePalette();
+      close();
     }
   };
 
@@ -68,7 +78,14 @@ const CommandPaletteUI: React.FC = () => {
     }
   };
 
-  if (!state.isOpen) return null;
+  if (!isOpen) return null;
+
+  // Group commands by category (light typing to avoid `any`)
+  const grouped = filteredCommands.reduce<Record<string, typeof filteredCommands>>((acc, cmd) => {
+    const category = (cmd as { category: string }).category;
+    (acc[category] ||= []).push(cmd);
+    return acc;
+  }, {});
 
   return (
     <div
@@ -83,12 +100,12 @@ const CommandPaletteUI: React.FC = () => {
             ref={inputRef}
             type="text"
             placeholder="Search commands..."
-            value={state.query}
+            value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="flex-1 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none text-lg"
           />
           <button
-            onClick={closePalette}
+            onClick={close}
             className="ml-3 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <X className="w-5 h-5" />
@@ -105,18 +122,7 @@ const CommandPaletteUI: React.FC = () => {
             </div>
           ) : (
             <div className="py-2">
-              {/* Group commands by category */}
-              {Object.entries(
-                filteredCommands.reduce(
-                  (groups, command) => {
-                    const category = command.category;
-                    if (!groups[category]) groups[category] = [];
-                    groups[category].push(command);
-                    return groups;
-                  },
-                  {} as Record<string, typeof filteredCommands>,
-                ),
-              ).map(([category, commands]) => (
+              {Object.entries(grouped).map(([category, commands]) => (
                 <div key={category}>
                   {/* Category Header */}
                   <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
@@ -126,13 +132,15 @@ const CommandPaletteUI: React.FC = () => {
                   {/* Category Commands */}
                   {commands.map((command) => {
                     const globalIndex = filteredCommands.indexOf(command);
-                    const isSelected = globalIndex === state.selectedIndex;
-                    const IconComponent = getCategoryIcon(command.category);
+                    const isSelected = globalIndex === selectedIndex;
+                    const IconComponent = getCategoryIcon(
+                      (command as { category: string }).category,
+                    );
 
                     return (
                       <button
-                        key={command.id}
-                        onClick={() => executeCommand(command)}
+                        key={(command as { id: string }).id}
+                        onClick={() => executeCommand(command as any)}
                         className={`w-full px-4 py-3 text-left flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
                           isSelected
                             ? 'bg-blue-50 dark:bg-blue-900/50 border-r-2 border-blue-500'
@@ -140,26 +148,30 @@ const CommandPaletteUI: React.FC = () => {
                         }`}
                       >
                         <div className="flex items-center min-w-0 flex-1">
-                          <div className={`mr-3 ${getCategoryColor(command.category)}`}>
+                          <div
+                            className={`mr-3 ${getCategoryColor(
+                              (command as { category: string }).category,
+                            )}`}
+                          >
                             <IconComponent className="w-4 h-4" />
                           </div>
 
                           <div className="min-w-0 flex-1">
                             <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                              {command.label}
+                              {(command as { label: string }).label}
                             </div>
-                            {command.description && (
+                            {(command as { description?: string }).description && (
                               <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                                {command.description}
+                                {(command as { description?: string }).description}
                               </div>
                             )}
                           </div>
                         </div>
 
                         <div className="flex items-center ml-4 space-x-2">
-                          {command.shortcut && (
+                          {(command as { shortcut?: string }).shortcut && (
                             <kbd className="hidden sm:inline-block px-2 py-1 text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded border">
-                              {command.shortcut}
+                              {(command as { shortcut?: string }).shortcut}
                             </kbd>
                           )}
                           {isSelected && <ArrowRight className="w-4 h-4 text-blue-500" />}

@@ -1,259 +1,192 @@
-// src/components/CommandPalette/CommandPaletteProvider.tsx - Updated with Export Integration
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+// src/components/CommandPalette/CommandPaletteProvider.tsx
+import React, { useEffect, useState, type ReactNode } from 'react';
+
 import { useAppContext, View } from '@/context/AppContext';
+import {
+  CommandPaletteContext,
+  type CommandPaletteContextValue,
+} from '@/context/CommandPaletteContext';
 import { useToast } from '@/context/ToastContext';
 import { exportService } from '@/services/exportService';
 import { storageService } from '@/services/storageService';
-import { ChapterStatus, SceneStatus, ExportFormat } from '@/types/writing';
+import { ChapterStatus, SceneStatus, ExportFormat, type Chapter } from '@/types/writing';
 import { generateId } from '@/utils/id';
 
+export type CommandCategory = 'navigation' | 'writing' | 'project' | 'ai' | 'settings' | 'export';
 export interface Command {
   id: string;
   label: string;
   description?: string;
   icon?: React.ComponentType;
   shortcut?: string;
-  category: 'navigation' | 'writing' | 'project' | 'ai' | 'settings' | 'export';
+  category: CommandCategory;
   action: () => void | Promise<void>;
   condition?: () => boolean;
 }
 
-interface CommandPaletteState {
+interface State {
   isOpen: boolean;
   query: string;
   selectedIndex: number;
   commands: Command[];
 }
 
-interface CommandPaletteContextValue {
-  state: CommandPaletteState;
-  openPalette: () => void;
-  closePalette: () => void;
-  setQuery: (query: string) => void;
-  executeCommand: (command: Command) => void;
-  registerCommand: (command: Command) => void;
-  unregisterCommand: (commandId: string) => void;
-  filteredCommands: Command[];
-}
-
-const CommandPaletteContext = createContext<CommandPaletteContextValue | null>(null);
-
-export const useCommandPalette = () => {
-  const context = useContext(CommandPaletteContext);
-  if (!context) {
-    throw new Error('useCommandPalette must be used within CommandPaletteProvider');
-  }
-  return context;
-};
-
 export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { setView, claudeActions, currentProject, projects } = useAppContext();
   const { showToast } = useToast();
-  const [state, setState] = useState<CommandPaletteState>({
+
+  const [state, setState] = useState<State>({
     isOpen: false,
     query: '',
     selectedIndex: 0,
     commands: [],
   });
 
-  // Initialize default commands
+  // --- commands ---
+  const createNewChapter = async () => {
+    if (!currentProject) return showToast('No project selected', 'error');
+    try {
+      const existing = await storageService.loadWritingChapters(currentProject.id);
+      const newChapter = {
+        id: generateId('chapter'),
+        title: `Chapter ${existing.length + 1}`,
+        order: existing.length,
+        scenes: [],
+        totalWordCount: 0,
+        status: ChapterStatus.DRAFT,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await storageService.saveWritingChapters(currentProject.id, [...existing, newChapter]);
+      showToast(`Created ${newChapter.title}`, 'success');
+      setView(View.Writing);
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to create chapter', 'error');
+    }
+  };
+
+  const createNewScene = async () => {
+    if (!currentProject) {
+      showToast('No project selected', 'error');
+      return;
+    }
+    try {
+      const chapters = await storageService.loadWritingChapters(currentProject.id);
+      if (!chapters || chapters.length === 0) {
+        await createNewChapter();
+        return;
+      }
+      const target: Chapter | undefined = chapters[0];
+      if (!target) {
+        showToast('No chapter available', 'error');
+        return;
+      }
+      const nextSceneNumber = (target.scenes?.length ?? 0) + 1;
+      const newScene = {
+        id: generateId('scene'),
+        title: `Scene ${nextSceneNumber}`,
+        content: '',
+        wordCount: 0,
+        status: SceneStatus.DRAFT,
+        order: nextSceneNumber - 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await storageService.saveScene(currentProject.id, newScene);
+      showToast(`Added new scene to ${target.title}`, 'success');
+      setView(View.Writing);
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to create scene', 'error');
+    }
+  };
+
+  const showWordCount = async () => {
+    if (!currentProject) return showToast('No project selected', 'error');
+    try {
+      const chapters = await storageService.loadWritingChapters(currentProject.id);
+      const totalWords = chapters.reduce(
+        (t, ch) => t + ch.scenes.reduce((ct, s) => ct + (s.wordCount || 0), 0),
+        0,
+      );
+      const chapterCount = chapters.length;
+      const sceneCount = chapters.reduce((t, ch) => t + ch.scenes.length, 0);
+      showToast(
+        `📊 Project Stats: ${totalWords.toLocaleString()} words, ${chapterCount} chapters, ${sceneCount} scenes`,
+        'success',
+        5000,
+      );
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to calculate word count', 'error');
+    }
+  };
+
+  const openExportDialog = () => {
+    if (!currentProject) return showToast('No project selected', 'error');
+    const btn = document.getElementById('global-export-trigger');
+    if (btn) btn.click();
+    else showToast('Export dialog not available', 'error');
+  };
+
+  const quickExportMarkdown = async () => {
+    if (!currentProject) return showToast('No project selected', 'error');
+    try {
+      showToast('Exporting to Markdown...', 'info');
+      const res = await exportService.exportProject(currentProject.id, ExportFormat.MARKDOWN);
+      res.success
+        ? showToast(`Successfully exported ${res.filename}`, 'success')
+        : showToast(`Export failed: ${res.error}`, 'error');
+    } catch (e) {
+      console.error(e);
+      showToast('Export failed', 'error');
+    }
+  };
+
+  const quickExportPDF = async () => {
+    if (!currentProject) return showToast('No project selected', 'error');
+    try {
+      showToast('Opening PDF export...', 'info');
+      const res = await exportService.exportProject(currentProject.id, ExportFormat.PDF);
+      res.success
+        ? showToast('PDF export window opened', 'success')
+        : showToast(`Export failed: ${res.error}`, 'error');
+    } catch (e) {
+      console.error(e);
+      showToast('Export failed', 'error');
+    }
+  };
+
+  const backupProject = async () => {
+    if (!currentProject) return showToast('No project selected', 'error');
+    try {
+      const chapters = await storageService.loadWritingChapters(currentProject.id);
+      const backupData = {
+        project: currentProject,
+        chapters,
+        exportedAt: new Date().toISOString(),
+        version: '1.0',
+      };
+      const dataStr = JSON.stringify(backupData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+      const name = `${currentProject.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_backup_${
+        new Date().toISOString().split('T')[0]
+      }.json`;
+      const a = document.createElement('a');
+      a.href = dataUri;
+      a.download = name;
+      a.click();
+      showToast('Project backup downloaded', 'success');
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to create backup', 'error');
+    }
+  };
+
+  // Build commands when deps change
   useEffect(() => {
-    const createNewChapter = async () => {
-      if (!currentProject) {
-        showToast('No project selected', 'error');
-        return;
-      }
-
-      try {
-        const existingChapters = await storageService.loadWritingChapters(currentProject.id);
-        const nextChapterNumber = existingChapters.length + 1;
-
-        const newChapter = {
-          id: generateId('chapter'),
-          title: `Chapter ${nextChapterNumber}`,
-          order: existingChapters.length,
-          scenes: [],
-          totalWordCount: 0,
-          status: ChapterStatus.DRAFT,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        const updatedChapters = [...existingChapters, newChapter];
-        await storageService.saveWritingChapters(currentProject.id, updatedChapters);
-
-        showToast(`Created ${newChapter.title}`, 'success');
-        setView(View.Writing);
-      } catch (error) {
-        console.error('Failed to create chapter:', error);
-        showToast('Failed to create chapter', 'error');
-      }
-    };
-
-    const createNewScene = async () => {
-      if (!currentProject) {
-        showToast('No project selected', 'error');
-        return;
-      }
-
-      try {
-        const chapters = await storageService.loadWritingChapters(currentProject.id);
-
-        if (chapters.length === 0) {
-          await createNewChapter();
-          return;
-        }
-
-        const targetChapter = chapters[0];
-        if (!targetChapter) {
-          showToast('No chapter available', 'error');
-          return;
-        }
-
-        const newScene = {
-          id: generateId('scene'),
-          title: `Scene ${targetChapter.scenes.length + 1}`,
-          content: '',
-          wordCount: 0,
-          status: SceneStatus.DRAFT,
-          order: targetChapter.scenes.length,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        await storageService.saveScene(currentProject.id, newScene);
-        showToast(`Added new scene to ${targetChapter.title}`, 'success');
-        setView(View.Writing);
-      } catch (error) {
-        console.error('Failed to create scene:', error);
-        showToast('Failed to create scene', 'error');
-      }
-    };
-
-    const showWordCount = async () => {
-      if (!currentProject) {
-        showToast('No project selected', 'error');
-        return;
-      }
-
-      try {
-        const chapters = await storageService.loadWritingChapters(currentProject.id);
-        const totalWords = chapters.reduce((total, chapter) => {
-          return (
-            total +
-            chapter.scenes.reduce((chapterTotal, scene) => {
-              return chapterTotal + (scene.wordCount || 0);
-            }, 0)
-          );
-        }, 0);
-
-        const chapterCount = chapters.length;
-        const sceneCount = chapters.reduce((total, chapter) => total + chapter.scenes.length, 0);
-
-        showToast(
-          `📊 Project Stats: ${totalWords.toLocaleString()} words, ${chapterCount} chapters, ${sceneCount} scenes`,
-          'success',
-          5000,
-        );
-      } catch (error) {
-        console.error('Failed to calculate word count:', error);
-        showToast('Failed to calculate word count', 'error');
-      }
-    };
-
-    // ✅ NEW: Enhanced export function that opens the dialog
-    const openExportDialog = () => {
-      if (!currentProject) {
-        showToast('No project selected', 'error');
-        return;
-      }
-
-      // Trigger the global export dialog
-      const exportTrigger = document.getElementById('global-export-trigger');
-      if (exportTrigger) {
-        exportTrigger.click();
-      } else {
-        showToast('Export dialog not available', 'error');
-      }
-    };
-
-    // ✅ NEW: Quick export functions for common formats
-    const quickExportMarkdown = async () => {
-      if (!currentProject) {
-        showToast('No project selected', 'error');
-        return;
-      }
-
-      try {
-        showToast('Exporting to Markdown...', 'info');
-        const result = await exportService.exportProject(currentProject.id, ExportFormat.MARKDOWN);
-
-        if (result.success) {
-          showToast(`Successfully exported ${result.filename}`, 'success');
-        } else {
-          showToast(`Export failed: ${result.error}`, 'error');
-        }
-      } catch (error) {
-        console.error('Export error:', error);
-        showToast('Export failed', 'error');
-      }
-    };
-
-    const quickExportPDF = async () => {
-      if (!currentProject) {
-        showToast('No project selected', 'error');
-        return;
-      }
-
-      try {
-        showToast('Opening PDF export...', 'info');
-        const result = await exportService.exportProject(currentProject.id, ExportFormat.PDF);
-
-        if (result.success) {
-          showToast('PDF export window opened', 'success');
-        } else {
-          showToast(`Export failed: ${result.error}`, 'error');
-        }
-      } catch (error) {
-        console.error('Export error:', error);
-        showToast('Export failed', 'error');
-      }
-    };
-
-    const backupProject = async () => {
-      if (!currentProject) {
-        showToast('No project selected', 'error');
-        return;
-      }
-
-      try {
-        const chapters = await storageService.loadWritingChapters(currentProject.id);
-        const backupData = {
-          project: currentProject,
-          chapters,
-          exportedAt: new Date().toISOString(),
-          version: '1.0',
-        };
-
-        const dataStr = JSON.stringify(backupData, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-
-        const exportFileDefaultName = `${currentProject.name.replace(/[^a-z0-9]/gi, '_')}_backup_${new Date().toISOString().split('T')[0]}.json`;
-
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileDefaultName);
-        linkElement.click();
-
-        showToast('Project backup downloaded', 'success');
-      } catch (error) {
-        console.error('Failed to backup project:', error);
-        showToast('Failed to create backup', 'error');
-      }
-    };
-
-    const commands: Command[] = [
-      // Navigation
+    const cmds: Command[] = [
       {
         id: 'nav-dashboard',
         label: 'Go to Dashboard',
@@ -295,7 +228,6 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         action: () => setView(View.Settings),
       },
 
-      // Writing commands
       {
         id: 'writing-new-chapter',
         label: 'New Chapter',
@@ -321,7 +253,6 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         condition: () => !!currentProject,
       },
 
-      // ✅ NEW: Enhanced Export Commands
       {
         id: 'export-dialog',
         label: 'Export Project...',
@@ -348,7 +279,6 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         condition: () => !!currentProject,
       },
 
-      // AI Commands
       {
         id: 'ai-toggle',
         label: 'Toggle AI Assistant',
@@ -375,14 +305,13 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         description: 'Get plot suggestions from AI',
         category: 'ai',
         action: async () => {
-          const context = currentProject?.description || 'a story';
-          await claudeActions.generatePlotIdeas(context);
+          const ctx = currentProject?.description || 'a story';
+          await claudeActions.generatePlotIdeas(ctx);
           claudeActions.toggleVisibility();
         },
         condition: () => !!currentProject,
       },
 
-      // Project Management
       {
         id: 'project-backup',
         label: 'Backup Project',
@@ -397,44 +326,30 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         description: 'Switch to a different project',
         category: 'project',
         action: () => {
-          if (projects.length === 0) {
-            showToast('No other projects available', 'error');
-            return;
-          }
-
-          const projectList = projects
-            .filter((p) => p.id !== currentProject?.id)
-            .map((p, i) => `${i + 1}. ${p.name}`)
-            .join('\n');
-
-          if (projectList) {
-            const choice = prompt(`Select project:\n${projectList}\n\nEnter number:`);
-            const projectIndex = parseInt(choice || '0') - 1;
-            const selectedProject = projects.filter((p) => p.id !== currentProject?.id)[
-              projectIndex
-            ];
-
-            if (selectedProject) {
-              showToast(`Switched to ${selectedProject.name}`, 'success');
-              setView(View.Dashboard);
-            } else {
-              showToast('Invalid project selection', 'error');
-            }
+          if (projects.length === 0) return showToast('No other projects available', 'error');
+          const others = projects.filter((p) => p.id !== currentProject?.id);
+          const projectList = others.map((p, i) => `${i + 1}. ${p.name}`).join('\n');
+          if (!projectList) return;
+          const choice = prompt(`Select project:\n${projectList}\n\nEnter number:`);
+          const idx = parseInt(choice || '0', 10) - 1;
+          const selected = others[idx];
+          if (selected) {
+            showToast(`Switched to ${selected.name}`, 'success');
+            setView(View.Dashboard);
+          } else {
+            showToast('Invalid project selection', 'error');
           }
         },
         condition: () => projects.length > 1,
       },
 
-      // Quick actions
       {
         id: 'quick-save',
         label: 'Save All',
         description: 'Force save all changes',
         category: 'writing',
         shortcut: '⌘S',
-        action: () => {
-          showToast('All changes saved', 'success');
-        },
+        action: () => showToast('All changes saved', 'success'),
         condition: () => !!currentProject,
       },
       {
@@ -443,170 +358,135 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         description: 'Enter distraction-free writing mode',
         category: 'writing',
         shortcut: '⌘⇧F',
-        action: () => {
-          showToast('Focus mode toggled (feature coming soon)', 'success');
-        },
+        action: () => showToast('Focus mode toggled (feature coming soon)', 'success'),
         condition: () => !!currentProject,
       },
 
-      // Settings & Help
       {
         id: 'help-shortcuts',
         label: 'Keyboard Shortcuts',
         description: 'View all keyboard shortcuts',
         category: 'settings',
-        action: () => {
-          const shortcuts = [
-            '⌘K - Command Palette',
-            '⌘1 - Dashboard',
-            '⌘2 - Writing',
-            '⌘3 - Timeline',
-            '⌘4 - Analysis',
-            '⌘, - Settings',
-            '⌘S - Save All',
-            '⌘⇧E - Export Dialog',
-            '⌘⇧F - Focus Mode',
-          ];
-          alert(`Keyboard Shortcuts:\n\n${shortcuts.join('\n')}`);
-        },
+        action: () =>
+          alert(
+            [
+              '⌘K - Command Palette',
+              '⌘1 - Dashboard',
+              '⌘2 - Writing',
+              '⌘3 - Timeline',
+              '⌘4 - Analysis',
+              '⌘, - Settings',
+              '⌘S - Save All',
+              '⌘⇧E - Export Dialog',
+              '⌘⇧F - Focus Mode',
+            ].join('\n'),
+          ),
       },
       {
         id: 'help-about',
         label: 'About Inkwell',
         description: 'Information about this application',
         category: 'settings',
-        action: () => {
+        action: () =>
           alert(
             'Inkwell - Local-first Fiction Writing Platform\nVersion 1.0.0\n\nBuilt with React, TypeScript, and Claude AI',
-          );
-        },
+          ),
       },
     ];
 
-    setState((prev) => ({
-      ...prev,
-      commands,
-    }));
+    setState((prev) => ({ ...prev, commands: cmds }));
   }, [setView, claudeActions, currentProject, projects, showToast]);
 
-  // Filter commands based on query and conditions
-  const filteredCommands = state.commands.filter((command) => {
-    if (command.condition && !command.condition()) {
-      return false;
-    }
-
+  // ---- filtering ----
+  const filteredCommands = state.commands.filter((c) => {
+    if (c.condition && !c.condition()) return false;
     if (!state.query) return true;
-
-    const query = state.query.toLowerCase();
+    const q = state.query.toLowerCase();
     return (
-      command.label.toLowerCase().includes(query) ||
-      command.description?.toLowerCase().includes(query) ||
-      command.category.toLowerCase().includes(query)
+      c.label.toLowerCase().includes(q) ||
+      c.description?.toLowerCase().includes(q) ||
+      c.category.toLowerCase().includes(q)
     );
   });
 
-  const openPalette = () => {
-    setState((prev) => ({
-      ...prev,
-      isOpen: true,
-      query: '',
-      selectedIndex: 0,
-    }));
-  };
+  // ---- API expected by context ----
+  const open = () => setState((p) => ({ ...p, isOpen: true, query: '', selectedIndex: 0 }));
+  const close = () => setState((p) => ({ ...p, isOpen: false, query: '', selectedIndex: 0 }));
+  const toggle = () =>
+    setState((p) => ({ ...p, isOpen: !p.isOpen, selectedIndex: p.isOpen ? 0 : p.selectedIndex }));
 
-  const closePalette = () => {
-    setState((prev) => ({
-      ...prev,
-      isOpen: false,
-      query: '',
-      selectedIndex: 0,
-    }));
-  };
-
-  const setQuery = (query: string) => {
-    setState((prev) => ({
-      ...prev,
+  const setQuery = (query: string) =>
+    setState((p) => ({
+      ...p,
       query,
       selectedIndex: 0,
     }));
-  };
 
-  const executeCommand = async (command: Command) => {
+  const executeCommand = async (cmd: Command) => {
     try {
-      await command.action();
-      closePalette();
-    } catch (error) {
-      console.error('Failed to execute command:', error);
-      showToast(`Failed to execute ${command.label}`, 'error');
+      await cmd.action();
+      close();
+    } catch (e) {
+      console.error('Failed to execute command:', e);
+      showToast(`Failed to execute ${cmd.label}`, 'error');
     }
   };
 
-  const registerCommand = (command: Command) => {
-    setState((prev) => ({
-      ...prev,
-      commands: [...prev.commands.filter((c) => c.id !== command.id), command],
-    }));
-  };
+  const registerCommand = (cmd: Command) =>
+    setState((p) => ({ ...p, commands: [...p.commands.filter((c) => c.id !== cmd.id), cmd] }));
 
-  const unregisterCommand = (commandId: string) => {
-    setState((prev) => ({
-      ...prev,
-      commands: prev.commands.filter((c) => c.id !== commandId),
-    }));
-  };
+  const unregisterCommand = (id: string) =>
+    setState((p) => ({ ...p, commands: p.commands.filter((c) => c.id !== id) }));
 
-  // Keyboard navigation
+  // keyboard navigation
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const onKey = (e: KeyboardEvent) => {
       if (!state.isOpen) {
         if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
           e.preventDefault();
-          openPalette();
+          open();
         }
         return;
       }
-
       switch (e.key) {
-        case 'Escape': {
+        case 'Escape':
           e.preventDefault();
-          closePalette();
+          close();
           break;
-        }
-        case 'ArrowDown': {
+        case 'ArrowDown':
           e.preventDefault();
-          setState((prev) => ({
-            ...prev,
-            selectedIndex: Math.min(prev.selectedIndex + 1, filteredCommands.length - 1),
+          setState((p) => ({
+            ...p,
+            selectedIndex: Math.min(p.selectedIndex + 1, filteredCommands.length - 1),
           }));
           break;
-        }
-        case 'ArrowUp': {
+        case 'ArrowUp':
           e.preventDefault();
-          setState((prev) => ({
-            ...prev,
-            selectedIndex: Math.max(prev.selectedIndex - 1, 0),
+          setState((p) => ({
+            ...p,
+            selectedIndex: Math.max(p.selectedIndex - 1, 0),
           }));
           break;
-        }
         case 'Enter': {
           e.preventDefault();
-          const selectedCommand = filteredCommands[state.selectedIndex];
-          if (selectedCommand) {
-            executeCommand(selectedCommand);
-          }
+          const sel = filteredCommands[state.selectedIndex];
+          if (sel) executeCommand(sel);
           break;
         }
       }
     };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
   }, [state.isOpen, state.selectedIndex, filteredCommands]);
 
-  const contextValue: CommandPaletteContextValue = {
-    state,
-    openPalette,
-    closePalette,
+  // --- build the context payload ONCE ---
+  const ctx: CommandPaletteContextValue = {
+    isOpen: state.isOpen,
+    query: state.query,
+    selectedIndex: state.selectedIndex,
+    open,
+    close,
+    toggle,
     setQuery,
     executeCommand,
     registerCommand,
@@ -614,7 +494,5 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     filteredCommands,
   };
 
-  return (
-    <CommandPaletteContext.Provider value={contextValue}>{children}</CommandPaletteContext.Provider>
-  );
+  return <CommandPaletteContext.Provider value={ctx}>{children}</CommandPaletteContext.Provider>;
 };

@@ -1,0 +1,6 @@
+{
+  "tsConfig": "./tsconfig.json",
+  "fileExtensions": ["ts", "tsx"],
+  "excludeRegExp": ["\\.css$", "\\.svg$", "/__tests__/", "/stories?/"],
+  "detectGlobal": false
+}

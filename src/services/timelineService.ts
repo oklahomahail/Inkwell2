@@ -1,10 +1,11 @@
 // src/services/timelineService.ts
-import type { GeneratedOutline } from './storyArchitectService';
-import { TimelineEvent } from '@/components/Views/TimelineView';
 import type { EnhancedProject } from '@/types/project';
+import type { TimelineItem, TimelineRange } from '@/types/timeline';
+
+import type { GeneratedOutline } from './storyArchitectService';
 
 export interface TimelineExportData {
-  events: TimelineEvent[];
+  items: TimelineItem[];
   metadata: {
     projectId: string;
     projectName: string;
@@ -14,32 +15,37 @@ export interface TimelineExportData {
 }
 
 export interface TimelineImportResult {
-  importedEvents: number;
-  skippedEvents: number;
+  importedItems: number;
+  skippedItems: number;
   conflicts: Array<{
-    eventId: string;
+    itemId: string;
     reason: string;
   }>;
 }
 
 export interface TimelineAnalytics {
-  eventCount: number;
+  itemCount: number;
   povCharacters: string[];
-  timeSpan: { start: number; end: number } | null;
-  eventsByImportance: Record<string, number>;
-  eventsByType: Record<string, number>;
-  averageEventsPerChapter: number;
+  timeSpan: TimelineRange | null;
+  itemsByImportance: Record<string, number>;
+  itemsByType: Record<string, number>;
+  averageItemsPerChapter: number;
   consistencyScore: number;
+}
+
+export function within(items: TimelineItem[], range: TimelineRange): TimelineItem[] {
+  return items.filter((item) => {
+    const itemEnd = item.end ?? item.start;
+    return item.start <= range.end && itemEnd >= range.start;
+  });
 }
 
 class TimelineService {
   private readonly STORAGE_VERSION = '1.0';
   private readonly STORAGE_PREFIX = 'timeline_';
 
-  /**
-   * Get timeline events for a specific project using localStorage
-   */
-  async getProjectTimeline(projectId: string): Promise<TimelineEvent[]> {
+  /** Get timeline items for a specific project using localStorage */
+  async getProjectTimeline(projectId: string): Promise<TimelineItem[]> {
     try {
       const storageKey = this.getStorageKey(projectId);
       const stored = localStorage.getItem(storageKey);
@@ -48,10 +54,10 @@ class TimelineService {
       if (!data) return [];
 
       // Deserialize dates
-      return data.map((event: any) => ({
-        ...event,
-        createdAt: new Date(event.createdAt),
-        updatedAt: new Date(event.updatedAt),
+      return data.map((item: any) => ({
+        ...item,
+        createdAt: new Date(item.createdAt),
+        updatedAt: new Date(item.updatedAt),
       }));
     } catch (error) {
       console.error('Failed to load timeline:', error);
@@ -59,18 +65,15 @@ class TimelineService {
     }
   }
 
-  /**
-   * Save timeline events for a project using localStorage
-   */
-  async saveProjectTimeline(projectId: string, events: TimelineEvent[]): Promise<void> {
+  /** Save timeline items for a project using localStorage */
+  async saveProjectTimeline(projectId: string, items: TimelineItem[]): Promise<void> {
     try {
       const storageKey = this.getStorageKey(projectId);
-      localStorage.setItem(storageKey, JSON.stringify(events));
+      localStorage.setItem(storageKey, JSON.stringify(items));
 
-      // Track analytics if available
       this.trackEvent('timeline_saved', {
         projectId,
-        eventCount: events.length,
+        itemCount: items.length,
         timestamp: Date.now(),
       });
     } catch (error) {
@@ -79,23 +82,18 @@ class TimelineService {
     }
   }
 
-  /**
-   * Generate timeline events from Story Architect outline
-   */
-  generateTimelineFromOutline(outline: GeneratedOutline, projectId: string): TimelineEvent[] {
-    const events: TimelineEvent[] = [];
+  /** Generate timeline items from Story Architect outline */
+  generateTimelineFromOutline(outline: GeneratedOutline, projectId: string): TimelineItem[] {
+    const items: TimelineItem[] = [];
     let orderIndex = 1;
 
-    // Add story-level events
-    events.push({
-      id: `event_story_start_${Date.now()}`,
+    // Story start
+    items.push({
+      id: `item_story_start_${Date.now()}`,
       title: `${outline.title} - Story Begins`,
       description: outline.summary,
-      when: {
-        type: 'order',
-        value: orderIndex++,
-        displayText: 'Story Opening',
-      },
+      start: orderIndex++,
+      end: undefined,
       characterIds: [],
       pov: undefined,
       location: undefined,
@@ -106,18 +104,17 @@ class TimelineService {
       updatedAt: new Date(),
     });
 
-    // Process chapters
+    // Chapters & scenes
     outline.chapters.forEach((chapter, chapterIndex) => {
-      // Chapter milestone event
-      events.push({
-        id: `event_chapter_${chapterIndex}_${Date.now()}`,
+      const chapterStart = orderIndex++;
+      const chapterEnd = chapterStart + (chapter.scenes?.length || 0);
+
+      items.push({
+        id: `item_chapter_${chapterIndex}_${Date.now()}`,
         title: chapter.title,
         description: `${chapter.plotFunction}: ${chapter.summary}`,
-        when: {
-          type: 'order',
-          value: orderIndex++,
-          displayText: `Chapter ${chapterIndex + 1}`,
-        },
+        start: chapterStart,
+        end: chapterEnd,
         characterIds: [],
         pov: undefined,
         location: undefined,
@@ -129,20 +126,16 @@ class TimelineService {
         updatedAt: new Date(),
       });
 
-      // Scene events
       chapter.scenes?.forEach((scene, sceneIndex) => {
         const sceneCharacters = scene.characters || [];
-        const povCharacter = sceneCharacters[0]; // Use first character as POV
+        const povCharacter = sceneCharacters[0];
 
-        events.push({
-          id: `event_scene_${chapterIndex}_${sceneIndex}_${Date.now()}`,
+        items.push({
+          id: `item_scene_${chapterIndex}_${sceneIndex}_${Date.now()}`,
           title: scene.title,
           description: `${scene.purpose}\n\nConflict: ${scene.conflict}`,
-          when: {
-            type: 'order',
-            value: orderIndex++,
-            displayText: `Ch${chapterIndex + 1}, Scene ${sceneIndex + 1}`,
-          },
+          start: orderIndex++,
+          end: undefined,
           characterIds: sceneCharacters,
           pov: povCharacter,
           location: undefined,
@@ -157,20 +150,18 @@ class TimelineService {
       });
     });
 
-    // Add character arc events
+    // Character arcs
     outline.characters?.forEach((character, charIndex) => {
       if (character.arc) {
-        const midPoint = Math.floor(outline.chapters.length / 2) + 1;
+        const arcStart = Math.floor(outline.chapters.length / 3) + 1;
+        const arcEnd = Math.floor((outline.chapters.length * 2) / 3) + 1;
 
-        events.push({
-          id: `event_character_arc_${charIndex}_${Date.now()}`,
+        items.push({
+          id: `item_character_arc_${charIndex}_${Date.now()}`,
           title: `${character.name}'s Transformation`,
           description: character.arc,
-          when: {
-            type: 'order',
-            value: midPoint,
-            displayText: `${character.name}'s Arc`,
-          },
+          start: arcStart,
+          end: arcEnd,
           characterIds: [character.name],
           pov: character.name,
           location: undefined,
@@ -183,34 +174,30 @@ class TimelineService {
       }
     });
 
-    // Sort events by order
-    return events.sort((a, b) => a.when.value - b.when.value);
+    return items.sort((a, b) => a.start - b.start);
   }
 
-  /**
-   * Merge events from existing project chapters
-   */
+  /** Merge items from existing project chapters */
   async syncWithProjectChapters(projectId: string, project: EnhancedProject): Promise<void> {
-    const existingEvents = await this.getProjectTimeline(projectId);
-    const newEvents: TimelineEvent[] = [];
-    let orderIndex = existingEvents.length + 1;
+    const existingItems = await this.getProjectTimeline(projectId);
+    const newItems: TimelineItem[] = [];
+    let orderIndex = existingItems.length + 1;
 
-    // Find chapters not yet in timeline
     project.chapters.forEach((chapter, chapterIndex) => {
-      const chapterExists = existingEvents.some(
-        (event) => event.chapterId === chapter.id || event.title.includes(chapter.title),
+      const chapterExists = existingItems.some(
+        (item) => item.chapterId === chapter.id || item.title.includes(chapter.title),
       );
 
       if (!chapterExists) {
-        newEvents.push({
-          id: `event_sync_chapter_${chapterIndex}_${Date.now()}`,
+        const chapterStart = chapter.order || orderIndex++;
+        const chapterEnd = chapterStart + (chapter.scenes?.length || 0);
+
+        newItems.push({
+          id: `item_sync_chapter_${chapterIndex}_${Date.now()}`,
           title: chapter.title,
           description: chapter.summary || 'Chapter content',
-          when: {
-            type: 'order',
-            value: chapter.order || orderIndex++,
-            displayText: `Chapter ${chapter.order || chapterIndex + 1}`,
-          },
+          start: chapterStart,
+          end: chapterEnd,
           characterIds: chapter.charactersInChapter || [],
           pov: undefined,
           location: undefined,
@@ -222,18 +209,14 @@ class TimelineService {
           updatedAt: new Date(),
         });
 
-        // Add scene events if they exist
         if (chapter.scenes && Array.isArray(chapter.scenes)) {
           chapter.scenes.forEach((scene: any, sceneIndex) => {
-            newEvents.push({
-              id: `event_sync_scene_${chapterIndex}_${sceneIndex}_${Date.now()}`,
+            newItems.push({
+              id: `item_sync_scene_${chapterIndex}_${sceneIndex}_${Date.now()}`,
               title: scene.title || `Scene ${sceneIndex + 1}`,
               description: scene.summary || scene.content?.substring(0, 200) + '...' || '',
-              when: {
-                type: 'order',
-                value: orderIndex++,
-                displayText: `Ch${chapter.order || chapterIndex + 1}, Scene ${sceneIndex + 1}`,
-              },
+              start: orderIndex++,
+              end: undefined,
               characterIds: [],
               pov: undefined,
               location: undefined,
@@ -250,22 +233,18 @@ class TimelineService {
       }
     });
 
-    if (newEvents.length > 0) {
-      const allEvents = [...existingEvents, ...newEvents].sort(
-        (a, b) => a.when.value - b.when.value,
-      );
-      await this.saveProjectTimeline(projectId, allEvents);
+    if (newItems.length > 0) {
+      const allItems = [...existingItems, ...newItems].sort((a, b) => a.start - b.start);
+      await this.saveProjectTimeline(projectId, allItems);
     }
   }
 
-  /**
-   * Export timeline to various formats
-   */
+  /** Export timeline to various formats */
   async exportTimeline(projectId: string, projectName: string): Promise<TimelineExportData> {
-    const events = await this.getProjectTimeline(projectId);
+    const items = await this.getProjectTimeline(projectId);
 
     return {
-      events,
+      items,
       metadata: {
         projectId,
         projectName,
@@ -275,127 +254,125 @@ class TimelineService {
     };
   }
 
-  /**
-   * Import timeline from export data
-   */
+  /** Import timeline from export data */
   async importTimeline(projectId: string, data: TimelineExportData): Promise<TimelineImportResult> {
-    const existingEvents = await this.getProjectTimeline(projectId);
+    const existingItems = await this.getProjectTimeline(projectId);
     const result: TimelineImportResult = {
-      importedEvents: 0,
-      skippedEvents: 0,
+      importedItems: 0,
+      skippedItems: 0,
       conflicts: [],
     };
 
-    const eventsToImport: TimelineEvent[] = [];
+    const itemsToImport: TimelineItem[] = [];
 
-    data.events.forEach((event) => {
-      const existingEvent = existingEvents.find(
-        (e) => e.title === event.title && e.when.value === event.when.value,
+    data.items.forEach((item) => {
+      const existingItem = existingItems.find(
+        (i) => i.title === item.title && i.start === item.start,
       );
 
-      if (existingEvent) {
-        result.skippedEvents++;
+      if (existingItem) {
+        result.skippedItems++;
         result.conflicts.push({
-          eventId: event.id,
-          reason: 'Event with same title and time already exists',
+          itemId: item.id,
+          reason: 'Item with same title and start time already exists',
         });
       } else {
-        // Create new event with fresh ID and timestamps
-        eventsToImport.push({
-          ...event,
+        itemsToImport.push({
+          ...item,
           id: `imported_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           createdAt: new Date(),
           updatedAt: new Date(),
         });
-        result.importedEvents++;
+        result.importedItems++;
       }
     });
 
-    if (eventsToImport.length > 0) {
-      const allEvents = [...existingEvents, ...eventsToImport].sort(
-        (a, b) => a.when.value - b.when.value,
-      );
-      await this.saveProjectTimeline(projectId, allEvents);
+    if (itemsToImport.length > 0) {
+      const allItems = [...existingItems, ...itemsToImport].sort((a, b) => a.start - b.start);
+      await this.saveProjectTimeline(projectId, allItems);
     }
 
     return result;
   }
 
-  /**
-   * Analyze timeline for insights and consistency
-   */
+  /** Analyze timeline for insights and consistency */
   async analyzeTimeline(projectId: string): Promise<TimelineAnalytics> {
-    const events = await this.getProjectTimeline(projectId);
+    const items = await this.getProjectTimeline(projectId);
 
-    if (events.length === 0) {
+    if (items.length === 0) {
       return {
-        eventCount: 0,
+        itemCount: 0,
         povCharacters: [],
         timeSpan: null,
-        eventsByImportance: {},
-        eventsByType: {},
-        averageEventsPerChapter: 0,
+        itemsByImportance: {},
+        itemsByType: {},
+        averageItemsPerChapter: 0,
         consistencyScore: 100,
       };
     }
 
-    // Calculate basic stats with proper type handling
-    const povCharacters = events
-      .map((e) => e.pov)
+    // Distinct POV characters
+    const povCharacters = items
+      .map((i) => i.pov)
       .filter((pov): pov is string => pov !== undefined && pov !== null)
-      .filter((pov, index, arr) => arr.indexOf(pov) === index); // Remove duplicates
+      .filter((pov, index, arr) => arr.indexOf(pov) === index);
 
-    const eventsByImportance = events.reduce(
-      (acc, event) => {
-        acc[event.importance] = (acc[event.importance] || 0) + 1;
+    // Aggregations
+    const itemsByImportance = items.reduce(
+      (acc, item) => {
+        acc[item.importance] = (acc[item.importance] || 0) + 1;
         return acc;
       },
       {} as Record<string, number>,
     );
 
-    const eventsByType = events.reduce(
-      (acc, event) => {
-        acc[event.eventType] = (acc[event.eventType] || 0) + 1;
+    const itemsByType = items.reduce(
+      (acc, item) => {
+        acc[item.eventType] = (acc[item.eventType] || 0) + 1;
         return acc;
       },
       {} as Record<string, number>,
     );
 
-    // Time span with proper type handling
-    const times = events.map((e) => e.when.value).sort((a, b) => a - b);
-    let timeSpan: { start: number; end: number } | null = null;
-    if (times.length > 1) {
-      const start = times[0];
-      const end = times[times.length - 1];
-      if (typeof start === 'number' && typeof end === 'number') {
-        timeSpan = { start, end };
-      }
+    // Time span calculation (robust: filter to numbers)
+    const startTimes = items
+      .map((i) => i.start)
+      .filter((n): n is number => typeof n === 'number')
+      .sort((a, b) => a - b);
+
+    const endTimes = items
+      .map((i) => i.end ?? i.start)
+      .filter((n): n is number => typeof n === 'number')
+      .sort((a, b) => a - b);
+
+    let timeSpan: TimelineRange | null = null;
+    if (startTimes.length > 0 && endTimes.length > 0) {
+      timeSpan = {
+        start: startTimes[0],
+        end: endTimes[endTimes.length - 1],
+      };
     }
 
     // Chapter analysis
-    const chapterEvents = events.filter((e) => e.tags.includes('chapter'));
-    const averageEventsPerChapter =
-      chapterEvents.length > 0 ? events.length / chapterEvents.length : 0;
+    const chapterItems = items.filter((i) => Array.isArray(i.tags) && i.tags.includes('chapter'));
+    const averageItemsPerChapter = chapterItems.length > 0 ? items.length / chapterItems.length : 0;
 
     // Consistency score (simplified)
-    let consistencyScore = 100;
-    const issues = this.checkConsistencyIssues(events);
-    consistencyScore = Math.max(0, 100 - issues.length * 5);
+    const issues = this.checkConsistencyIssues(items);
+    const consistencyScore = Math.max(0, 100 - issues.length * 5);
 
     return {
-      eventCount: events.length,
+      itemCount: items.length,
       povCharacters,
       timeSpan,
-      eventsByImportance,
-      eventsByType,
-      averageEventsPerChapter,
+      itemsByImportance,
+      itemsByType,
+      averageItemsPerChapter,
       consistencyScore,
     };
   }
 
-  /**
-   * Delete all timeline data for a project
-   */
+  /** Delete all timeline data for a project */
   async deleteProjectTimeline(projectId: string): Promise<void> {
     try {
       const storageKey = this.getStorageKey(projectId);
@@ -411,14 +388,12 @@ class TimelineService {
     }
   }
 
-  /**
-   * Backup timeline data
-   */
+  /** Backup timeline data */
   async backupTimeline(projectId: string): Promise<void> {
     try {
-      const events = await this.getProjectTimeline(projectId);
+      const items = await this.getProjectTimeline(projectId);
       const backup = {
-        events,
+        items,
         timestamp: Date.now(),
         version: this.STORAGE_VERSION,
       };
@@ -430,26 +405,22 @@ class TimelineService {
     }
   }
 
-  /**
-   * Restore timeline from backup
-   */
+  /** Restore timeline from backup */
   async restoreFromBackup(projectId: string): Promise<boolean> {
     try {
       const backupKey = `${this.getStorageKey(projectId)}_backup`;
       const stored = localStorage.getItem(backupKey);
       const backup = stored ? JSON.parse(stored) : null;
 
-      if (!backup || !backup.events) {
-        return false;
-      }
+      if (!backup || !backup.items) return false;
 
-      const events = backup.events.map((event: any) => ({
-        ...event,
-        createdAt: new Date(event.createdAt),
-        updatedAt: new Date(event.updatedAt),
+      const items = backup.items.map((item: any) => ({
+        ...item,
+        createdAt: new Date(item.createdAt),
+        updatedAt: new Date(item.updatedAt),
       }));
 
-      await this.saveProjectTimeline(projectId, events);
+      await this.saveProjectTimeline(projectId, items);
       return true;
     } catch (error) {
       console.error('Timeline restore failed:', error);
@@ -457,83 +428,71 @@ class TimelineService {
     }
   }
 
-  /**
-   * Track analytics events (with fallback if analytics service unavailable)
-   */
+  /** Track analytics events (with fallback if analytics service unavailable) */
   private trackEvent(eventName: string, data: any): void {
     try {
-      // Try to use analytics service if available
       if (typeof window !== 'undefined' && (window as any).analyticsService) {
         (window as any).analyticsService.track(eventName, data);
       } else {
-        // Fallback: just log to console for development
         console.log(`Analytics: ${eventName}`, data);
       }
     } catch (error) {
-      // Silently fail - analytics shouldn't break core functionality
       console.debug('Analytics tracking failed:', error);
     }
   }
 
-  /**
-   * Get timeline events that conflict with each other
-   */
-  private checkConsistencyIssues(events: TimelineEvent[]): Array<{
-    eventId: string;
-    issue: string;
-  }> {
-    const issues: Array<{ eventId: string; issue: string }> = [];
+  /** Get timeline items that conflict with each other */
+  private checkConsistencyIssues(items: TimelineItem[]): Array<{ itemId: string; issue: string }> {
+    const issues: Array<{ itemId: string; issue: string }> = [];
 
-    events.forEach((event) => {
-      // Check for missing titles
-      if (!event.title.trim()) {
-        issues.push({
-          eventId: event.id,
-          issue: 'Missing event title',
-        });
+    items.forEach((item) => {
+      // Missing titles
+      if (!item.title || !item.title.trim()) {
+        issues.push({ itemId: item.id, issue: 'Missing item title' });
       }
 
-      // Check for POV consistency
-      if (event.pov && !event.characterIds.includes(event.pov)) {
-        issues.push({
-          eventId: event.id,
-          issue: 'POV character not in character list',
-        });
+      // POV consistency
+      if (item.pov && !item.characterIds.includes(item.pov)) {
+        issues.push({ itemId: item.id, issue: 'POV character not in character list' });
       }
 
-      // Check for timeline conflicts (same time, same POV)
-      const conflicts = events.filter(
-        (e) =>
-          e.id !== event.id &&
-          e.when.value === event.when.value &&
-          e.pov === event.pov &&
-          event.pov, // Only check if POV is defined
+      // Overlaps for same POV
+      const conflicts = items.filter(
+        (i) =>
+          i.id !== item.id &&
+          i.pov === item.pov &&
+          item.pov &&
+          this.rangesOverlap(
+            { start: item.start, end: item.end ?? item.start },
+            { start: i.start, end: i.end ?? i.start },
+          ),
       );
-
       if (conflicts.length > 0) {
-        issues.push({
-          eventId: event.id,
-          issue: 'Timeline conflict with another event',
-        });
+        issues.push({ itemId: item.id, issue: 'Timeline conflict with another item' });
+      }
+
+      // Invalid ranges
+      if (item.end && item.end < item.start) {
+        issues.push({ itemId: item.id, issue: 'End time is before start time' });
       }
     });
 
     return issues;
   }
 
-  /**
-   * Determine chapter importance based on plot function
-   */
-  private getChapterImportance(plotFunction: string): TimelineEvent['importance'] {
-    const majorEvents = ['inciting incident', 'midpoint', 'climax', 'resolution'];
-    const lowerFunction = plotFunction.toLowerCase();
-
-    return majorEvents.some((event) => lowerFunction.includes(event)) ? 'major' : 'minor';
+  /** Check if two time ranges overlap */
+  private rangesOverlap(range1: TimelineRange, range2: TimelineRange): boolean {
+    return range1.start <= range2.end && range2.start <= range1.end;
   }
 
-  /**
-   * Generate storage key for project timeline
-   */
+  /** Determine chapter importance based on plot function */
+  private getChapterImportance(plotFunction: string): TimelineItem['importance'] {
+    const majorEvents = ['inciting incident', 'midpoint', 'climax', 'resolution'];
+    const lower = plotFunction.toLowerCase();
+    return majorEvents.some((e) => lower.includes(e)) ? 'major' : 'minor';
+  }
+
+  /** Generate storage key for project timeline */
   private getStorageKey(projectId: string): string {
     return `${this.STORAGE_PREFIX}${projectId}`;
   }
