@@ -1,6 +1,5 @@
 // src/services/timelineService.ts
 import type { GeneratedOutline } from './storyArchitectService';
-
 import { TimelineEvent } from '@/components/Views/TimelineView';
 import type { EnhancedProject } from '@/types/project';
 

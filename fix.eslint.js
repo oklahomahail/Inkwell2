@@ -1,4 +1,4 @@
-const fs = require('fs');
+import * as fs from 'node:fs';
 
 // Fix App.tsx
 let app = fs.readFileSync('src/App.tsx', 'utf8');

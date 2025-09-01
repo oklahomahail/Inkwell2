@@ -1,14 +1,13 @@
 // src/components/Views/StoryPlanningView.tsx - Enhanced with Story Architect Mode
-import React, { useState } from 'react';
 import { BookOpen, Users, Map, FileText, BarChart3, Wand2 } from 'lucide-react';
-
-import BeatSheetPlanner from '../Planning/BeatSheetPlanner';
-import CharacterManager from '../Planning/CharacterManager';
-import StoryStructureVisualizer from '../Planning/StoryStructureVisualizer';
-import { StoryArchitectMode } from '../Planning/StoryArchitectMode';
-import { GeneratedOutlinePreview } from '../Planning/GeneratedOutlinePreview';
+import React, { useState } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { storyArchitectService, type GeneratedOutline } from '../../services/storyArchitectService';
+import BeatSheetPlanner from '../Planning/BeatSheetPlanner';
+import CharacterManager from '../Planning/CharacterManager';
+import { GeneratedOutlinePreview } from '../Planning/GeneratedOutlinePreview';
+import { StoryArchitectMode } from '../Planning/StoryArchitectMode';
+import StoryStructureVisualizer from '../Planning/StoryStructureVisualizer';
 
 type PlanningTab = 'overview' | 'beats' | 'characters' | 'world' | 'health';
 

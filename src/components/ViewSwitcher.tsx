@@ -1,13 +1,11 @@
 // src/components/ViewSwitcher.tsx - Fixed
 import React, { useState, useCallback } from 'react';
-
-import DashboardPanel from './Panels/DashboardPanel';
-import WritingPanel from './Panels/WritingPanel';
-import TimelinePanel from './Panels/TimelinePanel';
 import AnalysisPanel from './Panels/AnalysisPanel';
+import DashboardPanel from './Panels/DashboardPanel';
 import SettingsPanel from './Panels/SettingsPanel';
+import TimelinePanel from './Panels/TimelinePanel';
+import WritingPanel from './Panels/WritingPanel';
 import StoryPlanningView from './Views/StoryPlanningView';
-
 import { useAppContext, View } from '@/context/AppContext';
 
 const ViewSwitcher: React.FC = () => {

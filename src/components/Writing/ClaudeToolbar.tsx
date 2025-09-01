@@ -1,7 +1,6 @@
 // Enhanced version of your existing ClaudeToolbar.tsx
 // This adds the missing quick actions while keeping all your great features
 
-import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
   Brain,
@@ -21,7 +20,7 @@ import {
   Pen, // NEW: For "Continue Scene"
   Focus, // NEW: For "Show Don't Tell" (or use Eye)
 } from 'lucide-react';
-
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 

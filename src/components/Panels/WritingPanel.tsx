@@ -1,5 +1,4 @@
 // src/components/Panels/WritingPanel.tsx - Fixed version
-import React, { useState, useCallback } from 'react';
 import {
   PlusCircle,
   BookOpen,
@@ -9,15 +8,15 @@ import {
   Save,
   Download,
 } from 'lucide-react';
-
-import { useAppContext } from '@/context/AppContext';
-import TipTapEditor from '@/components/Writing/TipTapEditor';
+import React, { useState, useCallback } from 'react';
 import ClaudeToolbar from '@/components/Writing/ClaudeToolbar';
-import { SceneHeader } from '@/components/Writing/SceneHeader';
 import ExportDialog from '@/components/Writing/ExportDialog';
+import { SceneHeader } from '@/components/Writing/SceneHeader';
+import TipTapEditor from '@/components/Writing/TipTapEditor';
+import { useAppContext } from '@/context/AppContext';
 import { Scene, SceneStatus, Chapter } from '@/types/writing';
-import { generateId } from '@/utils/idUtils';
 import { cn } from '@/utils/cn';
+import { generateId } from '@/utils/idUtils';
 
 interface WritingPanelProps {
   draftText: string;

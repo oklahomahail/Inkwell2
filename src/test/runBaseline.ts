@@ -1,0 +1,12 @@
+import { quickPerformanceCheck } from './baseline.test';
+
+console.log('Starting search performance baseline...');
+quickPerformanceCheck()
+  .then(() => {
+    console.log('Baseline test completed successfully');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('Baseline test failed:', error);
+    process.exit(1);
+  });

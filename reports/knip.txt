@@ -1,0 +1,32 @@
+Unused dependencies (18)
+@tiptap/core                       package.json:49:6
+@tiptap/extension-character-count  package.json:50:6
+@tiptap/extension-history          package.json:51:6
+@tiptap/extension-placeholder      package.json:52:6
+@tiptap/extension-typography       package.json:53:6
+@tiptap/pm                         package.json:54:6
+@tiptap/react                      package.json:55:6
+@tiptap/starter-kit                package.json:56:6
+clsx                               package.json:57:6
+crypto-js                          package.json:58:6
+date-fns                           package.json:59:6
+file-saver                         package.json:60:6
+jszip                              package.json:61:6
+lodash                             package.json:62:6
+lucide-react                       package.json:63:6
+recharts                           package.json:66:6
+tailwind-merge                     package.json:67:6
+zod                                package.json:68:6
+Unused devDependencies (11)
+@testing-library/jest-dom    package.json:75:6 
+@testing-library/user-event  package.json:77:6 
+@types/crypto-js             package.json:78:6 
+@types/file-saver            package.json:79:6 
+@types/lodash                package.json:80:6 
+@typescript-eslint/parser    package.json:85:6 
+@vitest/coverage-v8          package.json:87:6 
+eslint-config-prettier       package.json:91:6 
+eslint-plugin-jsx-a11y       package.json:94:6 
+eslint-plugin-prettier       package.json:95:6 
+ts-prune                     package.json:111:6
+Configuration hints (1)

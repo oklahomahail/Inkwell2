@@ -1,6 +1,5 @@
 // src/components/Platform/PanelContainer.tsx
 import React from 'react';
-
 import { PanelConfig } from './panelRegistry';
 
 interface PanelContainerProps {

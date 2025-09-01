@@ -104,8 +104,8 @@ export function useAdvancedFocusMode() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Replace NodeJS.Timeout with a cross-env type
-  type TimeoutRef = ReturnType<typeof setTimeout>;
-  const sprintTimerRef = useRef<TimeoutRef | null>(null);
+  type TimeoutRef = ReturnType<typeof setInterval>;
+  const sprintTimerRef = useRef<number | null>(null);
 
   // Load settings from localStorage
   useEffect(() => {
@@ -173,13 +173,13 @@ export function useAdvancedFocusMode() {
   // Sprint timer management
   useEffect(() => {
     if (sprint.isActive && !sprint.isPaused && !sprint.isOnBreak) {
-      sprintTimerRef.current = setInterval(() => {
+      sprintTimerRef.current = window.setInterval(() => {
+        // Use window.setInterval
         setSprint((prev) => {
           const elapsed = Date.now() - prev.startTime - prev.pausedTime;
           const remaining = Math.max(0, prev.duration * 1000 - elapsed);
 
           if (remaining === 0) {
-            // Sprint completed
             return {
               ...prev,
               isActive: false,
@@ -197,14 +197,14 @@ export function useAdvancedFocusMode() {
       }, 1000);
     } else {
       if (sprintTimerRef.current) {
-        clearInterval(sprintTimerRef.current);
+        window.clearInterval(sprintTimerRef.current); // Use window.clearInterval
         sprintTimerRef.current = null;
       }
     }
 
     return () => {
       if (sprintTimerRef.current) {
-        clearInterval(sprintTimerRef.current);
+        window.clearInterval(sprintTimerRef.current);
       }
     };
   }, [sprint.isActive, sprint.isPaused, sprint.isOnBreak, sprintSettings.autoStartBreaks]);

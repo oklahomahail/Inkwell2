@@ -1,6 +1,6 @@
 // src/components/Shared/ErrorBoundary.tsx - Fixed Version
-import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home, FileText, Settings } from 'lucide-react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 // ==========================================
 // ENHANCED PROPS & STATE INTERFACES

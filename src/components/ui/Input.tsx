@@ -1,5 +1,5 @@
-import React, { forwardRef } from 'react';
 import { AlertCircle } from 'lucide-react';
+import React, { forwardRef } from 'react';
 
 const cn = (...classes: (string | undefined)[]) => classes.filter(Boolean).join(' ');
 

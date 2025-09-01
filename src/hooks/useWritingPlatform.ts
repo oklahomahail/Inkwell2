@@ -1,6 +1,5 @@
 import type { Dispatch } from 'react';
 import { useMemo, useCallback } from 'react';
-
 import { useAppContext } from '@/context/AppContext';
 
 type Chapter = any;
@@ -24,10 +23,7 @@ export default function useWriting(): WritingAPI {
     return { currentProject: id, chapters };
   }, [currentProject?.id, currentProject?.chapters]);
 
-  const passthroughDispatch = useCallback<Dispatch<any>>(
-    (action) => dispatch(action),
-    [dispatch],
-  );
+  const passthroughDispatch = useCallback<Dispatch<any>>((action) => dispatch(action), [dispatch]);
 
   return { state, dispatch: passthroughDispatch };
 }

@@ -1,6 +1,6 @@
 // src/components/Platform/panelRegistry.ts
-import React, { lazy } from 'react';
 import { LayoutDashboard, Edit3, Clock, BarChart3 } from 'lucide-react';
+import React, { lazy } from 'react';
 
 export interface PanelConfig {
   id: string;

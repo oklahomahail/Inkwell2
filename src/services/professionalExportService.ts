@@ -1,0 +1,592 @@
+// src/services/professionalExportService.ts
+import JSZip from 'jszip';
+import type { EnhancedProject } from '@/types/project';
+import type { Chapter } from '@/types/writing';
+
+export interface ExportTemplate {
+  name: string;
+  description: string;
+  format: 'docx' | 'epub';
+  settings: {
+    fontSize: number;
+    fontFamily: string;
+    lineSpacing: number;
+    margins: {
+      top: number;
+      bottom: number;
+      left: number;
+      right: number;
+    };
+    pageSize: 'letter' | 'a4';
+    includeHeaders: boolean;
+    includePageNumbers: boolean;
+    chapterPageBreaks: boolean;
+    sceneBreaks: string;
+  };
+}
+
+export const EXPORT_TEMPLATES: Record<string, ExportTemplate> = {
+  'standard-manuscript': {
+    name: 'Standard Manuscript',
+    description: 'Industry-standard formatting for agent submissions',
+    format: 'docx',
+    settings: {
+      fontSize: 12,
+      fontFamily: 'Times New Roman',
+      lineSpacing: 2.0,
+      margins: { top: 1, bottom: 1, left: 1.25, right: 1.25 },
+      pageSize: 'letter',
+      includeHeaders: true,
+      includePageNumbers: true,
+      chapterPageBreaks: true,
+      sceneBreaks: '* * *',
+    },
+  },
+  'paperback-novel': {
+    name: 'Paperback Novel',
+    description: 'Print-ready formatting for paperback books',
+    format: 'docx',
+    settings: {
+      fontSize: 11,
+      fontFamily: 'Garamond',
+      lineSpacing: 1.2,
+      margins: { top: 0.75, bottom: 0.75, left: 1, right: 0.75 },
+      pageSize: 'letter',
+      includeHeaders: false,
+      includePageNumbers: true,
+      chapterPageBreaks: true,
+      sceneBreaks: '***',
+    },
+  },
+  'ebook-epub': {
+    name: 'Standard EPUB',
+    description: 'Industry-standard EPUB for e-readers',
+    format: 'epub',
+    settings: {
+      fontSize: 14,
+      fontFamily: 'serif',
+      lineSpacing: 1.4,
+      margins: { top: 1, bottom: 1, left: 1, right: 1 },
+      pageSize: 'a4',
+      includeHeaders: false,
+      includePageNumbers: false,
+      chapterPageBreaks: true,
+      sceneBreaks: '* * *',
+    },
+  },
+};
+
+export class ProfessionalExportService {
+  /**
+   * Export project as professional DOCX
+   */
+  async exportDOCX(
+    project: EnhancedProject,
+    chapters: Chapter[],
+    templateKey: string = 'standard-manuscript',
+  ): Promise<{ success: boolean; filename: string; error?: string }> {
+    try {
+      const template = EXPORT_TEMPLATES[templateKey];
+      if (!template || template.format !== 'docx') {
+        throw new Error('Invalid DOCX template');
+      }
+
+      // Build DOCX payload
+      const docxContent = await this.generateDOCXContent(project, chapters, template);
+      const filename = `${this.sanitizeFilename(project.name)}_${templateKey}.docx`;
+
+      const zip = new JSZip();
+      // Required DOCX structure
+      zip.file('[Content_Types].xml', this.generateContentTypes());
+
+      const relsFolder = zip.folder('_rels')!;
+      relsFolder.file('.rels', this.generateMainRels());
+
+      const wordFolder = zip.folder('word')!;
+      wordFolder.file('document.xml', docxContent);
+      wordFolder.file('styles.xml', this.generateStyles(template));
+      wordFolder.file('settings.xml', this.generateSettings());
+      wordFolder.file('fontTable.xml', this.generateFontTable(template));
+
+      const wordRelsFolder = wordFolder.folder('_rels')!;
+      wordRelsFolder.file('document.xml.rels', this.generateDocumentRels());
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      this.downloadFile(
+        blob,
+        filename,
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      );
+
+      return { success: true, filename };
+    } catch (error) {
+      console.error('DOCX export failed:', error);
+      return {
+        success: false,
+        filename: '',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
+   * Export project as professional EPUB
+   */
+  async exportEPUB(
+    project: EnhancedProject,
+    chapters: Chapter[],
+  ): Promise<{ success: boolean; filename: string; error?: string }> {
+    try {
+      const template = EXPORT_TEMPLATES['ebook-epub'];
+      if (!template || template.format !== 'epub') {
+        throw new Error('Export template is required for EPUB generation');
+      }
+
+      const filename = `${this.sanitizeFilename(project.name)}.epub`;
+      const zip = new JSZip();
+
+      // EPUB structure
+      zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
+
+      const metaInf = zip.folder('META-INF')!;
+      metaInf.file('container.xml', this.generateContainer());
+
+      const oebps = zip.folder('OEBPS')!;
+
+      // Generate core EPUB content (chapters are strings: one XHTML per chapter)
+      const {
+        opf,
+        ncx,
+        navXhtml,
+        chapters: chapterFiles,
+      } = await this.generateEPUBContent(project, chapters, template);
+
+      // Core OEBPS files
+      oebps.file('content.opf', opf);
+      oebps.file('toc.ncx', ncx);
+      oebps.file('nav.xhtml', navXhtml);
+      oebps.file('styles.css', this.generateEPUBStyles());
+      oebps.file('title.xhtml', this.generateTitlePage(project));
+
+      // Chapter XHTML files: chapter1.xhtml, chapter2.xhtml, ...
+      chapterFiles.forEach((chapterContent, index) => {
+        oebps.file(`chapter${index + 1}.xhtml`, chapterContent);
+      });
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      this.downloadFile(blob, filename, 'application/epub+zip');
+
+      return { success: true, filename };
+    } catch (error) {
+      console.error('EPUB export failed:', error);
+      return {
+        success: false,
+        filename: '',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /* =========================
+     DOCX generation helpers
+     ========================= */
+
+  private async generateDOCXContent(
+    project: EnhancedProject,
+    chapters: Chapter[],
+    template: ExportTemplate,
+  ): Promise<string> {
+    const content: string[] = [];
+
+    content.push(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`);
+    content.push(
+      `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">`,
+    );
+    content.push(`<w:body>`);
+
+    // Title page
+    content.push(this.generateDOCXTitlePage(project, template, chapters));
+
+    // Chapters
+    chapters.forEach((chapter, chapterIndex) => {
+      if (chapterIndex > 0 && template.settings.chapterPageBreaks) {
+        content.push(`<w:p><w:pPr><w:pageBreakBefore/></w:pPr></w:p>`);
+      }
+
+      content.push(
+        `<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>${this.escapeXML(
+          chapter.title,
+        )}</w:t></w:r></w:p>`,
+      );
+      content.push(`<w:p><w:pPr><w:spacing w:after="240"/></w:pPr></w:p>`);
+
+      chapter.scenes.forEach((scene, sceneIndex) => {
+        if (scene.content) {
+          if (sceneIndex > 0) {
+            content.push(
+              `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="240" w:after="240"/></w:pPr><w:r><w:t>${template.settings.sceneBreaks}</w:t></w:r></w:p>`,
+            );
+          }
+
+          const paragraphs = this.htmlToDOCXParagraphs(scene.content);
+          content.push(...paragraphs);
+        }
+      });
+    });
+
+    content.push(`<w:sectPr>`);
+    content.push(
+      `<w:pgSz w:w="${
+        template.settings.pageSize === 'letter' ? '12240' : '11906'
+      }" w:h="${template.settings.pageSize === 'letter' ? '15840' : '16838'}"/>`,
+    );
+    content.push(
+      `<w:pgMar w:top="${Math.round(template.settings.margins.top * 1440)}" w:right="${Math.round(
+        template.settings.margins.right * 1440,
+      )}" w:bottom="${Math.round(template.settings.margins.bottom * 1440)}" w:left="${Math.round(
+        template.settings.margins.left * 1440,
+      )}"/>`,
+    );
+    content.push(`</w:sectPr>`);
+    content.push(`</w:body>`);
+    content.push(`</w:document>`);
+
+    return content.join('\n');
+  }
+
+  private generateDOCXTitlePage(
+    project: EnhancedProject,
+    template: ExportTemplate,
+    chapters: Chapter[],
+  ): string {
+    const content: string[] = [];
+
+    content.push(
+      `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="720" w:after="360"/></w:pPr><w:r><w:rPr><w:sz w:val="36"/><w:b/></w:rPr><w:t>${this.escapeXML(
+        project.name,
+      )}</w:t></w:r></w:p>`,
+    );
+    content.push(
+      `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="720"/></w:pPr><w:r><w:rPr><w:sz w:val="24"/></w:rPr><w:t>by [Author Name]</w:t></w:r></w:p>`,
+    );
+
+    if (project.description) {
+      content.push(
+        `<w:p><w:pPr><w:spacing w:before="720" w:after="240"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Synopsis</w:t></w:r></w:p>`,
+      );
+      content.push(
+        `<w:p><w:pPr><w:spacing w:after="720"/></w:pPr><w:r><w:t>${this.escapeXML(
+          project.description,
+        )}</w:t></w:r></w:p>`,
+      );
+    }
+
+    const wordCount = chapters.reduce((sum, ch) => sum + ch.totalWordCount, 0);
+    content.push(
+      `<w:p><w:pPr><w:spacing w:before="720"/></w:pPr><w:r><w:t>Word Count: ${wordCount.toLocaleString()}</w:t></w:r></w:p>`,
+    );
+    content.push(`<w:p><w:r><w:t>Genre: ${project.genre || 'Fiction'}</w:t></w:r></w:p>`);
+    content.push(`<w:p><w:pPr><w:pageBreakBefore/></w:pPr></w:p>`);
+
+    return content.join('\n');
+  }
+
+  private htmlToDOCXParagraphs(html: string): string[] {
+    const plainText = html
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&');
+
+    const paragraphs = plainText
+      .split('\n\n')
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+
+    return paragraphs.map(
+      (paragraph) =>
+        `<w:p><w:pPr><w:spacing w:after="240"/></w:pPr><w:r><w:t>${this.escapeXML(
+          paragraph,
+        )}</w:t></w:r></w:p>`,
+    );
+  }
+
+  /* =========================
+     EPUB generation helpers
+     ========================= */
+
+  private async generateEPUBContent(
+    project: EnhancedProject,
+    chapters: Chapter[],
+    template: ExportTemplate,
+  ): Promise<{
+    opf: string;
+    ncx: string;
+    navXhtml: string;
+    chapters: string[]; // each string is a full chapter XHTML
+  }> {
+    const bookId = `book-${Date.now()}`;
+    const chapterFiles: string[] = [];
+
+    chapters.forEach((chapter, index) => {
+      const chapterXhtml = this.generateChapterXHTML(chapter, index + 1, template);
+      chapterFiles.push(chapterXhtml);
+    });
+
+    const opf = this.generateOPF(project, chapters, bookId);
+    const ncx = this.generateNCX(project, chapters, bookId);
+    const navXhtml = this.generateNavXHTML(project, chapters);
+
+    return { opf, ncx, navXhtml, chapters: chapterFiles };
+  }
+
+  private generateContainer(): string {
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+  <rootfiles>
+    <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+  </rootfiles>
+</container>`;
+  }
+
+  private generateOPF(project: EnhancedProject, chapters: Chapter[], bookId: string): string {
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId" version="3.0">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:identifier id="BookId">${bookId}</dc:identifier>
+    <dc:title>${this.escapeXML(project.name)}</dc:title>
+    <dc:creator>[Author Name]</dc:creator>
+    <dc:language>en</dc:language>
+  </metadata>
+  <manifest>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+    <item id="styles" href="styles.css" media-type="text/css"/>
+    <item id="title" href="title.xhtml" media-type="application/xhtml+xml"/>
+    ${chapters
+      .map(
+        (_c, index) =>
+          `<item id="chapter${index + 1}" href="chapter${index + 1}.xhtml" media-type="application/xhtml+xml"/>`,
+      )
+      .join('\n')}
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="title"/>
+    ${chapters.map((_c, index) => `<itemref idref="chapter${index + 1}"/>`).join('\n')}
+  </spine>
+</package>`;
+  }
+
+  private generateNCX(project: EnhancedProject, chapters: Chapter[], bookId: string): string {
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+  <head>
+    <meta name="dtb:uid" content="${bookId}"/>
+  </head>
+  <docTitle><text>${this.escapeXML(project.name)}</text></docTitle>
+  <navMap>
+    ${chapters
+      .map(
+        (chapter, index) => `<navPoint id="chapter${index + 1}" playOrder="${index + 1}">
+      <navLabel><text>${this.escapeXML(chapter.title)}</text></navLabel>
+      <content src="chapter${index + 1}.xhtml"/>
+    </navPoint>`,
+      )
+      .join('\n')}
+  </navMap>
+</ncx>`;
+  }
+
+  private generateNavXHTML(project: EnhancedProject, chapters: Chapter[]): string {
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head><title>Table of Contents</title></head>
+  <body>
+    <nav id="toc">
+      <h1>Table of Contents</h1>
+      <ol>
+        ${chapters
+          .map(
+            (chapter, index) =>
+              `<li><a href="chapter${index + 1}.xhtml">${this.escapeXML(chapter.title)}</a></li>`,
+          )
+          .join('\n')}
+      </ol>
+    </nav>
+  </body>
+</html>`;
+  }
+
+  private generateTitlePage(project: EnhancedProject): string {
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Title Page</title>
+    <link rel="stylesheet" href="styles.css"/>
+  </head>
+  <body>
+    <div class="title-page">
+      <h1>${this.escapeXML(project.name)}</h1>
+      <p>by [Author Name]</p>
+    </div>
+  </body>
+</html>`;
+  }
+
+  private generateChapterXHTML(
+    chapter: Chapter,
+    chapterNum: number,
+    template: ExportTemplate,
+  ): string {
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>${this.escapeXML(chapter.title)}</title>
+    <link rel="stylesheet" href="styles.css"/>
+  </head>
+  <body>
+    <h1>${this.escapeXML(chapter.title)}</h1>
+    ${chapter.scenes
+      .map((scene, index) => {
+        let content = '';
+        if (index > 0) {
+          content += `<div class="scene-break">${template.settings.sceneBreaks}</div>`;
+        }
+        content += `<div class="scene">${scene.content || ''}</div>`;
+        return content;
+      })
+      .join('\n')}
+  </body>
+</html>`;
+  }
+
+  private generateEPUBStyles(): string {
+    return `
+body { font-family: serif; line-height: 1.6; margin: 1em; }
+h1 { text-align: center; margin: 2em 0; }
+.scene-break { text-align: center; margin: 2em 0; }
+.scene { margin: 1em 0; }
+p { text-indent: 1.5em; margin: 1em 0; }
+`;
+  }
+
+  /* =========================
+     Shared helpers
+     ========================= */
+
+  private generateContentTypes(): string {
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+  <Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>
+  <Override PartName="/word/fontTable.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.fontTable+xml"/>
+</Types>`;
+  }
+
+  private generateMainRels(): string {
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+  }
+
+  private generateDocumentRels(): string {
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>
+  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable" Target="fontTable.xml"/>
+</Relationships>`;
+  }
+
+  private generateStyles(template: ExportTemplate): string {
+    const fontSize = template.settings.fontSize * 2;
+    const lineSpacing = Math.round(template.settings.lineSpacing * 240);
+
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:style w:type="paragraph" w:default="1" w:styleId="Normal">
+    <w:name w:val="Normal"/>
+    <w:qFormat/>
+    <w:pPr>
+      <w:spacing w:line="${lineSpacing}" w:lineRule="auto"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:ascii="${template.settings.fontFamily}" w:hAnsi="${template.settings.fontFamily}"/>
+      <w:sz w:val="${fontSize}"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Heading1">
+    <w:name w:val="heading 1"/>
+    <w:basedOn w:val="Normal"/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:spacing w:before="240" w:after="240"/>
+      <w:jc w:val="center"/>
+    </w:pPr>
+    <w:rPr>
+      <w:b/>
+      <w:sz w:val="${fontSize + 4}"/>
+    </w:rPr>
+  </w:style>
+</w:styles>`;
+  }
+
+  private generateSettings(): string {
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:defaultTabStop w:val="708"/>
+</w:settings>`;
+  }
+
+  private generateFontTable(template: ExportTemplate): string {
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:fonts xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:font w:name="${template.settings.fontFamily}">
+    <w:family w:val="roman"/>
+  </w:font>
+</w:fonts>`;
+  }
+
+  private escapeXML(text: string): string {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  private sanitizeFilename(filename: string): string {
+    return filename
+      .replace(/[^a-z0-9\s\-_]/gi, '')
+      .replace(/\s+/g, '_')
+      .toLowerCase();
+  }
+
+  // Note: _mimeType is unused (download attribute covers it). Keep for API parity; prefix to please ESLint.
+  private downloadFile(blob: Blob, filename: string, _mimeType: string): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+}
+
+export const professionalExportService = new ProfessionalExportService();
+export default professionalExportService;

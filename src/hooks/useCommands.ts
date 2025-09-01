@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
-
-import { Command } from '@/types/commands';
 import { useAppContext, View } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
+import { Command } from '@/types/commands';
 
 export function useCommands(
   selectedText?: string,

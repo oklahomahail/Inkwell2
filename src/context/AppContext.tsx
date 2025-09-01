@@ -1,6 +1,5 @@
 // File: src/context/AppContext.tsx - Updated with auto-save state
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
-
 import { ClaudeProvider, useClaude } from './ClaudeProvider';
 
 // ===== ENUMS & TYPES =====

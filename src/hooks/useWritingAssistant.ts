@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-
 import { useAppContext } from '@/context/AppContext';
 
 export interface AssistantActions {

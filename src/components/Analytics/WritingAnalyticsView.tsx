@@ -1,7 +1,6 @@
 // src/components/Analytics/WritingAnalyticsView.tsx
-import React, { useMemo, useState } from 'react';
 import { TrendingUp, Calendar, Target, Clock, BookOpen, Award, Edit3 } from 'lucide-react';
-
+import React, { useMemo, useState } from 'react';
 import PerformanceChart from '@/components/PerformanceChart';
 import { useAppContext } from '@/context/AppContext';
 

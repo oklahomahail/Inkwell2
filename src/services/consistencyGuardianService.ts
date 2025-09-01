@@ -1,6 +1,5 @@
 // src/services/consistencyGuardianService.ts - FIXED VERSION
 import type { EnhancedProject } from '../types/project';
-
 import claudeService from './claudeService';
 import type { ClaudeResponse } from './claudeService';
 

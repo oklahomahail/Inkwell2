@@ -1,6 +1,5 @@
 import type { Dispatch } from 'react';
 import { useMemo, useReducer } from 'react';
-
 import { useAppContext } from '@/context/AppContext';
 import { Chapter, Scene } from '@/types/writing';
 

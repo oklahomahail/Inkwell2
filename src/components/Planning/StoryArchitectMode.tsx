@@ -1,14 +1,13 @@
 // src/components/Planning/StoryArchitectMode.tsx
-import React, { useState } from 'react';
 import { Wand2, BookOpen, Target, Palette, MapPin, Lightbulb } from 'lucide-react';
-
+import React, { useState } from 'react';
+import { useToast } from '../../context/ToastContext';
+import { useLoading } from '../../hooks/useLoading';
 import {
   storyArchitectService,
   type StoryPremise,
   type GeneratedOutline,
 } from '../../services/storyArchitectService';
-import { useToast } from '../../context/ToastContext';
-import { useLoading } from '../../hooks/useLoading';
 
 interface StoryArchitectModeProps {
   onOutlineGenerated: (outline: GeneratedOutline) => void;

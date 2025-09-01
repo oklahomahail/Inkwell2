@@ -1,5 +1,4 @@
 // src/components/CompleteWritingPlatform.tsx - CLEANED VERSION
-import React, { useState, Suspense, useEffect, useCallback, JSX } from 'react';
 import {
   BookOpen,
   Calendar,
@@ -20,42 +19,40 @@ import {
   Lightbulb,
   Shield,
 } from 'lucide-react';
-
+import React, { useState, Suspense, useEffect, useCallback, JSX } from 'react';
 import { ConsistencyGuardianPanel } from './Claude/ConsistencyGuardianPanel';
-
-import WritingPanel from '@/components/Panels/WritingPanel';
-import { useAppContext } from '@/context/AppContext';
 import { useCommandPalette } from '@/components/CommandPalette/CommandPaletteProvider';
-import { useViewCommands } from '@/hooks/useViewCommands';
-import { focusWritingEditor } from '@/utils/focusUtils';
-import { useSaveOperation } from '@/hooks/useSaveOperation';
-import { useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
-import { FocusModeControls } from '@/components/Writing/FocusModeControls';
-import { cn } from '@/utils/cn';
+import WritingPanel from '@/components/Panels/WritingPanel';
+import ViewRouter from '@/components/Platform/ViewRouter';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
-
-// Loading Components
-import {
-  LoadingButton,
-  CardSkeleton,
-  AutoSaveIndicator,
-  PageLoader,
-} from '@/components/ui/LoadingComponents';
-
-// Keyboard Hint Components
+import { ConfirmationDialog, useConfirmation } from '@/components/ui/ConfirmationDialog';
+import { NoProjectsEmptyState, NoChaptersEmptyState } from '@/components/ui/EmptyStates';
 import {
   KeyboardShortcut,
   ShortcutTooltip,
   CommandPaletteHint,
   KeyboardShortcutsHelp,
 } from '@/components/ui/KeyboardHints';
+import {
+  LoadingButton,
+  CardSkeleton,
+  AutoSaveIndicator,
+  PageLoader,
+} from '@/components/ui/LoadingComponents';
+import { FocusModeControls } from '@/components/Writing/FocusModeControls';
+import { useAppContext } from '@/context/AppContext';
+import { useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
+import { useSaveOperation } from '@/hooks/useSaveOperation';
+import { useViewCommands } from '@/hooks/useViewCommands';
+import { cn } from '@/utils/cn';
+import { focusWritingEditor } from '@/utils/focusUtils';
+// Loading Components
+
+// Keyboard Hint Components
 
 // Empty State Components
-import { NoProjectsEmptyState, NoChaptersEmptyState } from '@/components/ui/EmptyStates';
 
 // Confirmation Dialog Components
-import { ConfirmationDialog, useConfirmation } from '@/components/ui/ConfirmationDialog';
-import ViewRouter from '@/components/Platform/ViewRouter';
 
 /** ----------------------------------------------------------------
  * Basic preferences hook

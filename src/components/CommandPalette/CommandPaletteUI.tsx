@@ -1,5 +1,4 @@
 // src/components/CommandPalette/CommandPaletteUI.tsx
-import React, { useEffect, useRef } from 'react';
 import {
   Search,
   X,
@@ -11,7 +10,7 @@ import {
   FolderOpen,
   Settings,
 } from 'lucide-react';
-
+import React, { useEffect, useRef } from 'react';
 import { useCommandPalette } from './CommandPaletteProvider';
 
 const CommandPaletteUI: React.FC = () => {

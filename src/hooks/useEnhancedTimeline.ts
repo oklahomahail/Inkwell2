@@ -1,9 +1,8 @@
 // src/hooks/useEnhancedTimeline.ts
 import { useState, useCallback, useMemo, useEffect } from 'react';
-
+import { TimelineEvent, TimelineFilters } from '@/components/Views/TimelineView';
 import { useAppContext } from '@/context/AppContext';
 import { timelineService } from '@/services/timelineService';
-import { TimelineEvent, TimelineFilters } from '@/components/Views/TimelineView';
 
 interface UseEnhancedTimelineResult {
   // Event management
@@ -157,17 +156,35 @@ export function useEnhancedTimeline(): UseEnhancedTimelineResult {
       const newEvents = [...events];
 
       eventIds.forEach((eventId, index) => {
-        const eventIndex = newEvents.findIndex((e) => e.id === eventId);
-        if (eventIndex !== -1) {
-          newEvents[eventIndex] = {
-            ...newEvents[eventIndex],
-            when: {
-              ...newEvents[eventIndex].when,
-              value: newPositions[index],
-            },
-            updatedAt: new Date(),
-          };
-        }
+        const ei = newEvents.findIndex((e) => e.id === eventId);
+        if (ei === -1) return;
+
+        const prev = newEvents[ei];
+        if (!prev) return; // extra safety
+
+        // Previous "when" or a sane default
+        const prevWhen = prev.when ?? { type: 'order' as const, value: 0, displayText: undefined };
+
+        // Coalesce the new position safely
+        const raw = newPositions?.[index];
+        const nextValue =
+          typeof raw === 'number' && Number.isFinite(raw) ? raw : (prevWhen.value ?? 0);
+
+        // Preserve the previous when.type
+        const nextWhen =
+          prevWhen.type === 'date'
+            ? { type: 'date' as const, value: nextValue, displayText: prevWhen.displayText }
+            : { type: 'order' as const, value: nextValue, displayText: prevWhen.displayText };
+
+        // Final merged event (no duplicate keys; required strings guaranteed)
+        newEvents[ei] = {
+          ...prev,
+          id: prev.id ?? `evt_${ei}`,
+          title: prev.title ?? '(untitled)',
+          description: prev.description ?? '',
+          when: nextWhen,
+          updatedAt: new Date(),
+        };
       });
 
       // Re-sort events
@@ -282,8 +299,8 @@ export function useEnhancedTimeline(): UseEnhancedTimelineResult {
 
     if (validTimes.length > 0) {
       stats.timeSpan = {
-        earliest: validTimes[0],
-        latest: validTimes[validTimes.length - 1],
+        earliest: validTimes[0] || 0,
+        latest: validTimes[validTimes.length - 1] || 0,
       };
     }
 

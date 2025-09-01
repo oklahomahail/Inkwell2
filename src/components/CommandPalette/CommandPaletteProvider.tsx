@@ -1,12 +1,11 @@
 // src/components/CommandPalette/CommandPaletteProvider.tsx - Updated with Export Integration
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
 import { useAppContext, View } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
-import { storageService } from '@/services/storageService';
 import { exportService } from '@/services/exportService';
-import { generateId } from '@/utils/id';
+import { storageService } from '@/services/storageService';
 import { ChapterStatus, SceneStatus, ExportFormat } from '@/types/writing';
+import { generateId } from '@/utils/id';
 
 export interface Command {
   id: string;

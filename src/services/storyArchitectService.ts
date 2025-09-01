@@ -1,6 +1,5 @@
 // src/services/storyArchitectService.ts - UPDATED WITH REAL API
 import type { Character, EnhancedProject } from '../types/project';
-
 import claudeService from './claudeService';
 
 export interface StoryPremise {
@@ -123,7 +122,10 @@ Your entire response must be valid JSON only. Do not include any text outside th
 
   async generateOutline(premise: StoryPremise): Promise<GeneratedOutline> {
     try {
-      console.log('🎯 Story Architect: Generating outline with real Claude API for:', premise.title);
+      console.log(
+        '🎯 Story Architect: Generating outline with real Claude API for:',
+        premise.title,
+      );
 
       // Validate Claude service is configured
       if (!claudeService.isConfigured()) {
@@ -164,7 +166,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
         console.error('JSON Parse Error:', parseError);
         console.log('Raw response:', claudeResponse);
         console.log('Cleaned response:', cleanResponse);
-        
+
         // Try to extract JSON from the response if it's embedded in text
         const jsonMatch = cleanResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
@@ -275,7 +277,8 @@ Your entire response must be valid JSON only. Do not include any text outside th
   }
 
   private generateMockChapters(premise: StoryPremise): GeneratedChapter[] {
-    const chapterCount = premise.targetLength === 'short' ? 8 : premise.targetLength === 'novella' ? 15 : 25;
+    const chapterCount =
+      premise.targetLength === 'short' ? 8 : premise.targetLength === 'novella' ? 15 : 25;
     const chapters: GeneratedChapter[] = [];
 
     for (let i = 0; i < chapterCount; i++) {

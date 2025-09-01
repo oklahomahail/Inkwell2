@@ -1,10 +1,9 @@
 // src/components/Writing/EnhancedWritingEditor.tsx - Fixed version
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import CharacterCount from '@tiptap/extension-character-count';
+import Placeholder from '@tiptap/extension-placeholder';
+import Typography from '@tiptap/extension-typography';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import CharacterCount from '@tiptap/extension-character-count';
-import Typography from '@tiptap/extension-typography';
 import {
   Save,
   Eye,
@@ -16,15 +15,14 @@ import {
   Focus,
   Bot,
 } from 'lucide-react';
-
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { useToast } from '../../context/ToastContext';
 import { storageService } from '../../services/storageService';
 import { Scene, Chapter } from '../../types/writing';
 import { focusWritingEditor } from '../../utils/focusUtils';
-
-import SceneNavigationPanel from './SceneNavigationPanel';
 import ClaudeToolbar from './ClaudeToolbar';
+import SceneNavigationPanel from './SceneNavigationPanel';
 
 interface EnhancedWritingEditorProps {
   className?: string;

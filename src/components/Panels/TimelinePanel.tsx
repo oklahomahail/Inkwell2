@@ -1,8 +1,7 @@
 // src/components/Panels/TimelinePanel.tsx
 import React, { useEffect, useState, useCallback } from 'react';
-
-import { useToast } from '@/context/ToastContext';
 import { useClaude } from '@/context/ClaudeProvider'; // Add this import
+import { useToast } from '@/context/ToastContext';
 import { logActivity } from '@/utils/activityLogger';
 
 interface Scene {

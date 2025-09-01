@@ -1,15 +1,6 @@
 // src/components/Planning/BeatSheetPlanner.tsx
+import { BookOpen, Edit3, Save, RotateCcw, CheckCircle, Circle, Lightbulb } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import {
-  BookOpen,
-  Edit3,
-  Save,
-  RotateCcw,
-  CheckCircle,
-  Circle,
-  Lightbulb,
-} from 'lucide-react';
-
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 

@@ -1,17 +1,8 @@
 // Story Structure Visualizer - Professional story health dashboard
 // File: src/components/Planning/StoryStructureVisualizer.tsx
 
+import { BarChart3, CheckCircle, BookOpen, Users, Zap, Target, Award } from 'lucide-react';
 import React, { useMemo } from 'react';
-import {
-  BarChart3,
-  CheckCircle,
-  BookOpen,
-  Users,
-  Zap,
-  Target,
-  Award,
-} from 'lucide-react';
-
 import { useAppContext } from '@/context/AppContext';
 
 interface StoryStructureVisualizerProps {

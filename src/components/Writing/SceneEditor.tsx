@@ -1,12 +1,9 @@
 // src/components/Writing/SceneEditor.tsx
-import React, { useCallback, useState } from 'react';
 import { Save, Settings, Target, Clock, FileText, ChevronDown } from 'lucide-react';
-
+import React, { useCallback, useState } from 'react';
 import { Scene, SceneStatus } from '../../types/writing';
 import { cn } from '../../utils/cn';
-
 import TipTapEditor from './TipTapEditor';
-
 
 interface SceneEditorProps {
   scene: Scene;

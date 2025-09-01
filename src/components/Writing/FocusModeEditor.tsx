@@ -1,7 +1,6 @@
 // src/components/Writing/FocusModeEditor.tsx
-import React, { useEffect, useRef, useState } from 'react';
 import { Editor } from '@tiptap/react';
-
+import React, { useEffect, useRef, useState } from 'react';
 import { useAdvancedFocusMode } from '../../hooks/useAdvancedFocusMode';
 
 interface FocusModeEditorProps {
@@ -57,7 +56,7 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
 
     document.addEventListener('mousemove', handleActivity);
     document.addEventListener('keydown', handleActivity);
-    
+
     const inactivityTimer = setInterval(handleInactivity, 1000);
 
     return () => {
@@ -108,8 +107,8 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
       const currentParagraph = paragraphElements[currentParagraphIndex];
       if (currentParagraph) {
         // Remove previous highlights
-        paragraphElements.forEach(p => p.classList.remove('is-editor-focused'));
-        
+        paragraphElements.forEach((p) => p.classList.remove('is-editor-focused'));
+
         // Highlight current paragraph
         currentParagraph.classList.add('is-editor-focused');
 
@@ -122,7 +121,7 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
 
         editorElement.scrollBy({
           top: scrollOffset,
-          behavior: 'smooth'
+          behavior: 'smooth',
         });
       }
     };
@@ -175,7 +174,17 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isFocusMode, sprint, wordCount, disableFocusMode, startSprint, pauseSprint, resumeSprint, stopSprint, toggleMute]);
+  }, [
+    isFocusMode,
+    sprint,
+    wordCount,
+    disableFocusMode,
+    startSprint,
+    pauseSprint,
+    resumeSprint,
+    stopSprint,
+    toggleMute,
+  ]);
 
   if (!isFocusMode) {
     return null;
@@ -187,14 +196,14 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
       {/* Ambient Sound Visualizer */}
-      {!isMuted && settings.ambientSound !== 'none' && (
-        <div className="ambient-visualizer" />
-      )}
+      {!isMuted && settings.ambientSound !== 'none' && <div className="ambient-visualizer" />}
 
       {/* Top Controls Bar */}
-      <div 
+      <div
         className={`absolute top-0 left-0 right-0 bg-black bg-opacity-50 backdrop-blur-sm transition-all duration-500 z-10 ${
-          showControls || !settings.zenMode ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+          showControls || !settings.zenMode
+            ? 'translate-y-0 opacity-100'
+            : '-translate-y-full opacity-0'
         }`}
       >
         <div className="flex items-center justify-between p-4">
@@ -253,12 +262,14 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
           {/* Status Display */}
           <div className="flex items-center gap-6 text-white">
             {sprint.isActive && (
-              <div className={`flex items-center gap-2 ${isSprintUrgent ? 'sprint-timer urgent' : ''}`}>
+              <div
+                className={`flex items-center gap-2 ${isSprintUrgent ? 'sprint-timer urgent' : ''}`}
+              >
                 <Clock className="w-4 h-4" />
                 <span className="font-mono text-lg">{formatTime(sprint.remainingTime)}</span>
               </div>
             )}
-            
+
             {settings.showWordCount && (
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
@@ -294,7 +305,7 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
                   {wordsWritten} / {sprint.target} words ({Math.round(wordsProgress)}%)
                 </span>
               </div>
-              
+
               {/* Time Progress Bar */}
               <div className="mb-2">
                 <div className="bg-gray-600 rounded-full h-2">
@@ -306,7 +317,7 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
                   />
                 </div>
               </div>
-              
+
               {/* Words Progress Bar */}
               <div>
                 <div className="bg-gray-600 rounded-full h-2">
@@ -323,7 +334,7 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
 
       {/* Main Editor Area */}
       <div className="flex-1 flex items-center justify-center p-8 pt-32">
-        <div 
+        <div
           ref={editorRef}
           className={`w-full max-w-4xl mx-auto transition-all duration-300 ${
             settings.typewriterMode ? 'typewriter-mode' : ''
@@ -345,16 +356,14 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
 
       {/* Bottom Status Bar */}
       {!settings.zenMode && (
-        <div 
+        <div
           className={`absolute bottom-0 left-0 right-0 bg-black bg-opacity-30 backdrop-blur-sm p-3 transition-all duration-500 ${
             showControls ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
           }`}
         >
           <div className="flex items-center justify-center gap-8 text-white text-sm">
             <span>Focus Mode Active</span>
-            {sprint.isActive && (
-              <span>Sprint: {formatTime(sprint.remainingTime)} remaining</span>
-            )}
+            {sprint.isActive && <span>Sprint: {formatTime(sprint.remainingTime)} remaining</span>}
             <span className="opacity-75">Press Esc to exit</span>
           </div>
         </div>
@@ -397,18 +406,26 @@ const SprintCompletionModal: React.FC<SprintCompletionModalProps> = ({
           <div className="text-6xl mb-4">
             {exceeded ? '🎉' : completionPercentage >= 80 ? '👏' : '💪'}
           </div>
-          
+
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Sprint Complete!
           </h2>
-          
+
           <div className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-            <div>You wrote <strong>{wordsWritten}</strong> words</div>
-            <div>Target was <strong>{target}</strong> words</div>
-            <div className={`mt-2 ${exceeded ? 'text-green-600' : completionPercentage >= 80 ? 'text-blue-600' : 'text-yellow-600'}`}>
-              {exceeded ? `${completionPercentage}% - Exceeded target!` :
-               completionPercentage >= 80 ? `${completionPercentage}% - Great job!` :
-               `${completionPercentage}% - Good effort!`}
+            <div>
+              You wrote <strong>{wordsWritten}</strong> words
+            </div>
+            <div>
+              Target was <strong>{target}</strong> words
+            </div>
+            <div
+              className={`mt-2 ${exceeded ? 'text-green-600' : completionPercentage >= 80 ? 'text-blue-600' : 'text-yellow-600'}`}
+            >
+              {exceeded
+                ? `${completionPercentage}% - Exceeded target!`
+                : completionPercentage >= 80
+                  ? `${completionPercentage}% - Great job!`
+                  : `${completionPercentage}% - Good effort!`}
             </div>
           </div>
 

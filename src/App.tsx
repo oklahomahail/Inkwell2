@@ -1,19 +1,19 @@
-// src/App.tsx - Enhanced with Safety UI Integration
+// src/App.tsx — Enhanced with Safety UI Integration (cleaned)
 import React, { useState, useEffect } from 'react';
-
-import PlatformLayout from './components/Platform/PlatformLayout';
-import ViewSwitcher from './components/ViewSwitcher';
-import { ToastContainer } from './components/ToastContainer';
 import ClaudeAssistant from './components/ClaudeAssistant';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
-import ExportDialog from './components/ExportDialog';
 import { CommandPaletteProvider } from './components/CommandPalette/CommandPaletteProvider';
 import CommandPaletteUI from './components/CommandPalette/CommandPaletteUI';
+import DebugSearchPanel from './components/DebugSearchPanel';
+import ExportDialog from './components/ExportDialog';
+import PlatformLayout from './components/Platform/PlatformLayout';
 import {
   StorageRecoveryBanner,
   OfflineBanner,
   useStorageRecovery,
 } from './components/Recovery/StorageRecoveryBanner';
+import { ToastContainer } from './components/ToastContainer';
+import ViewSwitcher from './components/ViewSwitcher';
 import { useAppContext } from './context/AppContext';
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
@@ -22,6 +22,13 @@ interface ConnectivityStatus {
   isOnline: boolean;
   queuedWrites: number;
 }
+
+type QueuedOperation = {
+  id: string | number;
+  operation: string;
+  timestamp: number;
+  retryCount?: number;
+};
 
 const App: React.FC = () => {
   const { claude, currentProject } = useAppContext();
@@ -79,13 +86,10 @@ const App: React.FC = () => {
   const closeExportDialog = () => setIsExportDialogOpen(false);
 
   // Queue management
-  const handleViewQueue = () => {
-    setShowOfflineQueue(true);
-  };
+  const handleViewQueue = () => setShowOfflineQueue(true);
 
   const handleDismissOfflineBanner = () => {
-    // Optional: Allow users to temporarily hide the offline banner
-    // You might want to store this preference in localStorage
+    // Optional: store a "snoozed" state in localStorage if you want
   };
 
   return (
@@ -107,7 +111,7 @@ const App: React.FC = () => {
         <ToastContainer />
 
         {/* Claude Assistant with Error Boundary */}
-        {claude.isVisible && (
+        {claude?.isVisible && (
           <ClaudeErrorBoundary>
             <ClaudeAssistant
               selectedText=""
@@ -137,43 +141,42 @@ const App: React.FC = () => {
         {/* Command Palette UI */}
         <CommandPaletteUI />
 
-        {/* Global export trigger - you can access this from anywhere */}
+        {/* Global export trigger - can be clicked programmatically */}
         <div style={{ display: 'none' }}>
           <button onClick={openExportDialog} id="global-export-trigger">
             Export
           </button>
         </div>
 
-        {/* Storage Stats Debug Panel (only in development) */}
+        {/* Dev-only debug panels */}
         {import.meta.env.DEV && <StorageDebugPanel />}
+        {import.meta.env.DEV && <DebugSearchPanel />}
       </PlatformLayout>
     </CommandPaletteProvider>
   );
 };
 
-// Optional: Offline Queue Management Modal
-const OfflineQueueModal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-}> = ({ isOpen, onClose }) => {
-  const [queuedOperations, setQueuedOperations] = useState<any[]>([]);
+// -------- Optional: Offline Queue Management Modal --------
+function OfflineQueueModal(props: { isOpen: boolean; onClose: () => void }) {
+  const { isOpen, onClose } = props;
+  const [queuedOperations, setQueuedOperations] = useState<QueuedOperation[]>([]);
 
   useEffect(() => {
     if (isOpen) {
-      const operations = connectivityService.getQueuedOperations();
-      setQueuedOperations(operations);
+      const operations = (connectivityService.getQueuedOperations?.() ?? []) as QueuedOperation[];
+      setQueuedOperations(Array.isArray(operations) ? operations : []);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Queued Operations</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            ✕
+            ×
           </button>
         </div>
 
@@ -182,21 +185,21 @@ const OfflineQueueModal: React.FC<{
             <p className="text-gray-500">No operations queued</p>
           ) : (
             queuedOperations.map((op) => (
-              <div key={op.id} className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
+              <div key={String(op.id)} className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
                 <div className="text-sm font-medium">{op.operation}</div>
                 <div className="text-xs text-gray-500">
                   {new Date(op.timestamp).toLocaleTimeString()}
-                  {op.retryCount > 0 && ` (Retry ${op.retryCount})`}
+                  {op.retryCount && op.retryCount > 0 ? ` (Retry ${op.retryCount})` : ''}
                 </div>
               </div>
             ))
           )}
         </div>
 
-        <div className="mt-4 flex justify-end space-x-2">
+        <div className="mt-4 flex justify-end gap-2">
           <button
             onClick={async () => {
-              await connectivityService.clearQueue();
+              await connectivityService.clearQueue?.();
               setQueuedOperations([]);
             }}
             className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
@@ -213,10 +216,10 @@ const OfflineQueueModal: React.FC<{
       </div>
     </div>
   );
-};
+}
 
-// Optional: Development Storage Debug Panel
-const StorageDebugPanel: React.FC = () => {
+// -------- Optional: Development Storage Debug Panel --------
+function StorageDebugPanel() {
   const [stats, setStats] = useState<any>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -237,25 +240,29 @@ const StorageDebugPanel: React.FC = () => {
 
   if (!stats) return null;
 
+  const mb = (n: number) => (n > 0 ? (n / 1024 / 1024).toFixed(1) : '0.0');
+
   return (
     <div className="fixed bottom-4 right-4 z-40">
       <div className="bg-gray-900 text-white text-xs rounded-lg shadow-lg">
         <button
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => setIsExpanded((v) => !v)}
           className="w-full px-3 py-2 text-left hover:bg-gray-800 rounded-lg"
         >
-          📊 Storage: {(stats.storageUsed / 1024 / 1024).toFixed(1)}MB
+          Storage: {mb(stats.storageUsed)} MB
         </button>
 
         {isExpanded && (
           <div className="px-3 pb-3 space-y-1 border-t border-gray-700 pt-2">
             <div>Projects: {stats.totalProjects}</div>
-            <div>Words: {stats.totalWordCount.toLocaleString()}</div>
+            <div>Words: {stats.totalWordCount?.toLocaleString?.() ?? '—'}</div>
             <div>Sessions: {stats.writingSessions}</div>
             <div>Snapshots: {stats.snapshotCount}</div>
             <div>
               Usage:{' '}
-              {stats.quotaInfo ? `${(stats.quotaInfo.percentUsed * 100).toFixed(1)}%` : 'Unknown'}
+              {stats.quotaInfo
+                ? `${((stats.quotaInfo.percentUsed ?? 0) * 100).toFixed(1)}%`
+                : 'Unknown'}
             </div>
             <button
               onClick={async () => {
@@ -272,6 +279,6 @@ const StorageDebugPanel: React.FC = () => {
       </div>
     </div>
   );
-};
+}
 
 export default App;

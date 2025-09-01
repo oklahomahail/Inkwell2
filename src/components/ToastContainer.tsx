@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { useToast } from '@/context/ToastContext';
 
 export type ToastContainerProps = {

@@ -1,9 +1,8 @@
 // Compact sidebar widget for your main writing interface
 // File: src/components/Analytics/SidebarGoalsWidget.tsx (moved to Analytics folder)
 
-import React from 'react';
 import { Target, Flame, Timer, TrendingUp, Play, Pause } from 'lucide-react';
-
+import React from 'react';
 import { useWritingGoals } from '@/hooks/useWritingGoals';
 
 interface SidebarGoalsWidgetProps {

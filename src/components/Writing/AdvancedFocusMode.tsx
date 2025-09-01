@@ -1,7 +1,6 @@
 // src/components/Writing/AdvancedFocusMode.tsx
 // Enhanced focus mode UI that integrates with your existing writing editor
 
-import React, { useState } from 'react';
 import {
   Focus,
   Timer,
@@ -18,7 +17,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-
+import React, { useState } from 'react';
 import { useAdvancedFocusMode } from '../../hooks/useAdvancedFocusMode';
 
 interface AdvancedFocusModeProps {

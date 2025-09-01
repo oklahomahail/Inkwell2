@@ -1,5 +1,4 @@
 // src/components/Writing/SceneNavigationPanel.tsx
-import React, { useState, useEffect } from 'react';
 import {
   BookOpen,
   Plus,
@@ -12,12 +11,12 @@ import {
   Trash2,
   Copy,
 } from 'lucide-react';
-
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 import { storageService } from '@/services/storageService';
-import { generateId } from '@/utils/id';
 import { Chapter, Scene, SceneStatus, ChapterStatus } from '@/types/writing';
+import { generateId } from '@/utils/id';
 
 interface SceneNavigationPanelProps {
   currentSceneId?: string;

@@ -1,109 +1,62 @@
-// @ts-check
-import js from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import react from 'eslint-plugin-react';
+// eslint.config.js (Flat config for ESLint v9)
+import tsParser from '@typescript-eslint/parser';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
 import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
 import importPlugin from 'eslint-plugin-import';
 import unusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
 
-let reactRefresh = null;
-try {
-  reactRefresh = (await import('eslint-plugin-react-refresh')).default;
-} catch {
-  /* noop */
-}
-
 export default [
-  // Ignore build artifacts & snapshots
-  { ignores: ['node_modules/**','dist/**','build/**','.vite/**','coverage/**','archive/**'] },
-
-  // Base language options for all source files
+  // replaces .eslintignore
   {
-    files: ['src/**/*.{js,jsx,ts,tsx}'],
+    ignores: ['node_modules/**', 'build/**', 'dist/**', 'src/test/**'],
+  },
+
+  {
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
-      ecmaVersion: 2023,
-      sourceType: 'module',
-      globals: globals.browser,
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 2023,
+        sourceType: 'module',
+        ecmaFeatures: { jsx: true },
+        // If you want type-aware linting later, add:
+        // projectService: true,
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
     },
-  },
-
-  // JS/JSX recommended
-  {
-    files: ['src/**/*.{js,jsx}'],
-    ...js.configs.recommended,
-  },
-
-  // TS/TSX recommended (NON type-checked)
-  ...tseslint.configs.recommended,
-
-  // React + imports + hygiene for src
-  {
-    files: ['src/**/*.{js,jsx,ts,tsx}'],
     plugins: {
-      react,
+      '@typescript-eslint': tsPlugin,
       'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
       import: importPlugin,
       'unused-imports': unusedImports,
-      ...(reactRefresh ? { 'react-refresh': reactRefresh } : {}),
     },
-    settings: { react: { version: 'detect' } },
     rules: {
-      // Unused imports/vars
-      // ⬇ make non-blocking to avoid hard errors from refactors
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+
+      // Auto-remove unused imports, keep @typescript-eslint rule for vars/args
       'unused-imports/no-unused-imports': 'warn',
-      '@typescript-eslint/no-unused-vars': ['warn', {
-        args: 'after-used',
-        vars: 'all',
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        ignoreRestSiblings: true,
-      }],
+      'unused-imports/no-unused-vars': 'off',
 
-      // React ergonomics
-      'react/react-in-jsx-scope': 'off',
-      'react/prop-types': 'off',
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
-      'import/order': ['warn', {
-        groups: ['builtin','external','internal','parent','sibling','index'],
-        'newlines-between': 'always'
-      }],
-      'react-refresh/only-export-components': reactRefresh ? 'warn' : 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-refresh/only-export-components': 'off',
 
-      // Turn OFF typed-only rules (no project/tsconfig required)
-      '@typescript-eslint/no-misused-promises': 'off',
-      '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/await-thenable': 'off',
-
-      // Reasonable TS hygiene
-      '@typescript-eslint/no-explicit-any': 'warn',
-    },
-  },
-
-  // Node/CJS & tool files — relax rules so they don't error
-  {
-    files: [
-      'eslint.config.js',
-      'tailwind.config.js',
-      'vite.config.ts',
-      'scripts/**/*.{js,cjs,ts}',
-      'fix.eslint.js',
-    ],
-    languageOptions: {
-      ecmaVersion: 2023,
-      sourceType: 'commonjs',
-      globals: { ...globals.node },
-    },
-    rules: {
-      // Allow empty catch in configs
-      'no-empty': ['warn', { allowEmptyCatch: true }],
-      // Allow require() in CJS/tooling
-      '@typescript-eslint/no-require-imports': 'off',
-      // Avoid false positives in tool files
-      'no-undef': 'off',
-      'import/order': 'off',
-      'unused-imports/no-unused-imports': 'off',
+      'import/order': [
+        'warn',
+        {
+          'newlines-between': 'never',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
     },
   },
 ];

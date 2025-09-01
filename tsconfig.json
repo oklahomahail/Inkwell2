@@ -2,7 +2,7 @@
   "compilerOptions": {
     /* Language & Environment */
     "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
 
     /* Modules & Resolution */
     "module": "ESNext",
@@ -25,7 +25,7 @@
     "allowJs": false,
     "noEmit": true,
 
-    /* Aliases (keep in sync with vite.config.ts / next.config.js) */
+    /* Aliases (keep in sync with vite.config.ts) */
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
@@ -37,7 +37,7 @@
     },
 
     /* Type Declarations */
-    "types": ["vite/client", "node"]
+    "types": ["vite/client", "vitest/globals", "node"]
   },
   "include": ["src", "vite.config.ts"],
   "exclude": ["node_modules", "dist", "build"]

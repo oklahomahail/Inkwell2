@@ -1,11 +1,10 @@
 // Writing Goals Widget - Add to your existing analytics system
 // File: src/components/Analytics/WritingGoalsWidget.tsx
 
-import React, { useState, useEffect } from 'react';
 import { Target, Flame, Timer, Trophy, CheckCircle, Settings, Star } from 'lucide-react';
-
-import { useProjectStats } from '@/hooks/useProjectStats';
+import React, { useState, useEffect } from 'react';
 import { useToast } from '@/context/ToastContext';
+import { useProjectStats } from '@/hooks/useProjectStats';
 
 interface WritingGoal {
   id: string;

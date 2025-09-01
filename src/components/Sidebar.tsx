@@ -1,7 +1,6 @@
 // src/components/Sidebar.tsx
-import React from 'react';
 import { Home, Settings, BarChart3, Clock, PenTool, BookOpen } from 'lucide-react';
-
+import React from 'react';
 import { useAppContext, View } from '@/context/AppContext';
 import { cn } from '@/utils/cn';
 import { focusWritingEditor } from '@/utils/focusUtils';

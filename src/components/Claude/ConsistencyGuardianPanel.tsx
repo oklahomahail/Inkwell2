@@ -1,5 +1,4 @@
 // src/components/Claude/ConsistencyGuardianPanel.tsx - FIXED VERSION
-import React, { useState, useEffect } from 'react';
 import {
   Shield,
   AlertTriangle,
@@ -13,7 +12,7 @@ import {
   User,
   Globe,
 } from 'lucide-react';
-
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { useToast } from '../../context/ToastContext';
 import { consistencyGuardianService } from '../../services/consistencyGuardianService';

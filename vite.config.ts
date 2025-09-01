@@ -1,14 +1,21 @@
 // vite.config.ts
-import { defineConfig } from 'vite';
+import { fileURLToPath, URL } from 'node:url';
 import react from '@vitejs/plugin-react';
-import * as path from 'path';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react()],
 
   resolve: {
-    alias: { '@': path.resolve(__dirname, 'src') },
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
     dedupe: ['react', 'react-dom'],
+  },
+
+  // Vite handles workers out of the box; this keeps them ESM.
+  worker: {
+    format: 'es',
   },
 
   optimizeDeps: {
@@ -16,7 +23,6 @@ export default defineConfig({
     exclude: ['recharts'], // don't prebundle recharts
   },
 
-  // Optional: you can put your other fields back later, but avoid manualChunks until we're stable.
   build: {
     sourcemap: false,
   },

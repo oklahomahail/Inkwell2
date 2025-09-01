@@ -1,6 +1,6 @@
 // src/components/ui/LoadingComponents.tsx
-import React from 'react';
 import { Loader2, AlertCircle, CheckCircle, Info } from 'lucide-react';
+import React from 'react';
 
 // ==========================================
 // LOADING SPINNER COMPONENTS

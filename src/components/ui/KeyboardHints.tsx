@@ -1,6 +1,6 @@
 // src/components/ui/KeyboardHints.tsx
-import React from 'react';
 import { Command } from 'lucide-react';
+import React from 'react';
 
 // ==========================================
 // KEYBOARD SHORTCUT DISPLAY COMPONENTS

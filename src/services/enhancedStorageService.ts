@@ -1,11 +1,9 @@
 // src/services/enhancedStorageService.ts
 
-import { validateProject } from '../validation/projectSchema';
 import { quotaAwareStorage } from '../utils/quotaAwareStorage';
-
+import { validateProject } from '../validation/projectSchema';
 import { connectivityService } from './connectivityService';
 import { snapshotService } from './snapshotService';
-
 import { EnhancedProject } from '@/types/project';
 
 export interface WritingSession {

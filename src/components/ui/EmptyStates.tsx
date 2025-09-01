@@ -1,5 +1,4 @@
 // src/components/ui/EmptyStates.tsx
-import React from 'react';
 import {
   BookOpen,
   Edit3,
@@ -13,7 +12,7 @@ import {
   ArrowRight,
   Play,
 } from 'lucide-react';
-
+import React from 'react';
 import { KeyboardShortcut } from './KeyboardHints';
 
 // ==========================================

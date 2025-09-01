@@ -1,6 +1,6 @@
 // src/components/Panels/DashboardPanel.tsx - Fixed imports
-import React from 'react';
 import { PlusCircle, FileText, Clock, BarChart3, BookOpen } from 'lucide-react';
+import React from 'react';
 
 // Import the context hook directly - make sure there's only one import
 import { useAppContext } from '@/context/AppContext';

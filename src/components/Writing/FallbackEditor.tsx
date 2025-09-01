@@ -1,6 +1,5 @@
 // src/components/Writing/FallbackEditor.tsx
 import React, { useState, useEffect, useRef } from 'react';
-
 import { cn } from '../../utils/cn';
 
 interface FallbackEditorProps {

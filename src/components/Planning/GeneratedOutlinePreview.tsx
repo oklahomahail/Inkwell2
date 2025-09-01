@@ -1,5 +1,4 @@
 // src/components/Planning/GeneratedOutlinePreview.tsx
-import React, { useState } from 'react';
 import {
   BookOpen,
   Users,
@@ -12,7 +11,7 @@ import {
   Clock,
   User,
 } from 'lucide-react';
-
+import React, { useState } from 'react';
 import { type GeneratedOutline } from '../../services/storyArchitectService';
 
 interface GeneratedOutlinePreviewProps {

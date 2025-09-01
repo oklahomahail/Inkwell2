@@ -1,6 +1,5 @@
 // src/hooks/useViewCommands.ts
 import { useEffect } from 'react';
-
 import { useCommandPalette } from '@/components/CommandPalette/CommandPaletteProvider';
 import { useAppContext, View } from '@/context/AppContext';
 
