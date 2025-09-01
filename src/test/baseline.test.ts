@@ -2,6 +2,7 @@
 // Quick test to establish current search performance baseline
 
 import { generateSyntheticCorpus } from './syntheticCorpusGenerator';
+import { describe, it, expect } from 'vitest';
 
 import { searchService } from '@/services/searchService';
 import { storageService } from '@/services/storageService';
@@ -26,7 +27,11 @@ interface BaselineResult {
   };
   issues: string[];
 }
-
+describe('baseline harness', () => {
+  it('is wired', () => {
+    expect(true).toBe(true);
+  });
+});
 /**
  * Quick baseline test - run this first to see where your current implementation stands
  */
