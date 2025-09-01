@@ -9,6 +9,7 @@ import {
   Download,
 } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
+
 import ClaudeToolbar from '@/components/Writing/ClaudeToolbar';
 import ExportDialog from '@/components/Writing/ExportDialog';
 import { SceneHeader } from '@/components/Writing/SceneHeader';

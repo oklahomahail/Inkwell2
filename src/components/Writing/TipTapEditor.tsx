@@ -6,6 +6,7 @@ import Typography from '@tiptap/extension-typography';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect, useRef } from 'react';
+
 import { useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
 import { cn } from '@/utils/cn';
 

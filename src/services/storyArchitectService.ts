@@ -1,6 +1,7 @@
 // src/services/storyArchitectService.ts - UPDATED WITH REAL API
-import type { Character, EnhancedProject } from '../types/project';
 import claudeService from './claudeService';
+
+import type { Character, EnhancedProject } from '../types/project';
 
 export interface StoryPremise {
   title: string;

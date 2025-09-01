@@ -20,7 +20,7 @@ import {
   Shield,
 } from 'lucide-react';
 import React, { useState, Suspense, useEffect, useCallback, JSX } from 'react';
-import { ConsistencyGuardianPanel } from './Claude/ConsistencyGuardianPanel';
+
 import { useCommandPalette } from '@/components/CommandPalette/CommandPaletteProvider';
 import WritingPanel from '@/components/Panels/WritingPanel';
 import ViewRouter from '@/components/Platform/ViewRouter';
@@ -46,6 +46,8 @@ import { useSaveOperation } from '@/hooks/useSaveOperation';
 import { useViewCommands } from '@/hooks/useViewCommands';
 import { cn } from '@/utils/cn';
 import { focusWritingEditor } from '@/utils/focusUtils';
+
+import { ConsistencyGuardianPanel } from './Claude/ConsistencyGuardianPanel';
 // Loading Components
 
 // Keyboard Hint Components

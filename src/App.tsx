@@ -1,5 +1,9 @@
-// src/App.tsx — Enhanced with Safety UI Integration (cleaned)
-import React, { useState, useEffect } from 'react';
+// src/App.tsx — provider composition at the root + clean AppShell
+import React, { useEffect, useState } from 'react';
+
+// Providers
+
+// UI + panels
 import ClaudeAssistant from './components/ClaudeAssistant';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
 import { CommandPaletteProvider } from './components/CommandPalette/CommandPaletteProvider';
@@ -7,6 +11,8 @@ import CommandPaletteUI from './components/CommandPalette/CommandPaletteUI';
 import DebugSearchPanel from './components/DebugSearchPanel';
 import ExportDialog from './components/ExportDialog';
 import PlatformLayout from './components/Platform/PlatformLayout';
+
+// Banners / recovery
 import {
   StorageRecoveryBanner,
   OfflineBanner,
@@ -14,7 +20,10 @@ import {
 } from './components/Recovery/StorageRecoveryBanner';
 import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
-import { useAppContext } from './context/AppContext';
+import { AppProvider, useAppContext } from './context/AppContext';
+import { ClaudeProvider } from './context/ClaudeProvider';
+
+// Services
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
 
@@ -30,21 +39,19 @@ type QueuedOperation = {
   retryCount?: number;
 };
 
-const App: React.FC = () => {
+// All app logic lives here, safely *inside* the providers.
+function AppShell() {
   const { claude, currentProject } = useAppContext();
-  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const [showOfflineQueue, setShowOfflineQueue] = useState(false);
 
-  // Storage recovery state
+  // storage recovery
   const { showRecoveryBanner, dismissRecoveryBanner } = useStorageRecovery();
 
-  // Connectivity state
+  // connectivity
   const [connectivityStatus, setConnectivityStatus] = useState<ConnectivityStatus>({
     isOnline: true,
     queuedWrites: 0,
   });
 
-  // Initialize connectivity monitoring
   useEffect(() => {
     const unsubscribe = connectivityService.onStatusChange((status) => {
       setConnectivityStatus({
@@ -53,7 +60,6 @@ const App: React.FC = () => {
       });
     });
 
-    // Initial status
     const initialStatus = connectivityService.getStatus();
     setConnectivityStatus({
       isOnline: initialStatus.isOnline,
@@ -63,7 +69,7 @@ const App: React.FC = () => {
     return unsubscribe;
   }, []);
 
-  // Perform maintenance check on app start
+  // maintenance after start
   useEffect(() => {
     const performStartupMaintenance = async () => {
       try {
@@ -76,28 +82,28 @@ const App: React.FC = () => {
       }
     };
 
-    // Run maintenance after a short delay to avoid blocking startup
     const timeoutId = setTimeout(performStartupMaintenance, 2000);
     return () => clearTimeout(timeoutId);
   }, []);
 
-  // Export dialog controls
+  // export dialog state
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const openExportDialog = () => setIsExportDialogOpen(true);
   const closeExportDialog = () => setIsExportDialogOpen(false);
 
-  // Queue management
+  // offline queue modal
+  const [showOfflineQueue, setShowOfflineQueue] = useState(false);
   const handleViewQueue = () => setShowOfflineQueue(true);
-
   const handleDismissOfflineBanner = () => {
-    // Optional: store a "snoozed" state in localStorage if you want
+    // optional: persist snooze preference
   };
 
   return (
-    <CommandPaletteProvider>
-      {/* Storage Recovery Banner - Highest priority, appears above everything */}
+    <>
+      {/* Storage Recovery Banner */}
       {showRecoveryBanner && <StorageRecoveryBanner onDismiss={dismissRecoveryBanner} />}
 
-      {/* Offline Banner - Shows when offline with queued operations */}
+      {/* Offline Banner */}
       {!connectivityStatus.isOnline && connectivityStatus.queuedWrites > 0 && (
         <OfflineBanner
           queuedOperations={connectivityStatus.queuedWrites}
@@ -116,14 +122,14 @@ const App: React.FC = () => {
             <ClaudeAssistant
               selectedText=""
               onInsertText={(text) => {
-                // TODO: Connect this to the current editor
+                // TODO: wire to current editor
                 console.log('Insert text:', text);
               }}
             />
           </ClaudeErrorBoundary>
         )}
 
-        {/* Enhanced Export Dialog with Import Support */}
+        {/* Export Dialog */}
         {currentProject && (
           <ExportDialog
             isOpen={isExportDialogOpen}
@@ -133,7 +139,7 @@ const App: React.FC = () => {
           />
         )}
 
-        {/* Queue Management Modal */}
+        {/* Offline Queue Modal */}
         {showOfflineQueue && (
           <OfflineQueueModal isOpen={showOfflineQueue} onClose={() => setShowOfflineQueue(false)} />
         )}
@@ -141,7 +147,7 @@ const App: React.FC = () => {
         {/* Command Palette UI */}
         <CommandPaletteUI />
 
-        {/* Global export trigger - can be clicked programmatically */}
+        {/* Hidden global export trigger */}
         <div style={{ display: 'none' }}>
           <button onClick={openExportDialog} id="global-export-trigger">
             Export
@@ -152,11 +158,11 @@ const App: React.FC = () => {
         {import.meta.env.DEV && <StorageDebugPanel />}
         {import.meta.env.DEV && <DebugSearchPanel />}
       </PlatformLayout>
-    </CommandPaletteProvider>
+    </>
   );
-};
+}
 
-// -------- Optional: Offline Queue Management Modal --------
+// Offline Queue Management Modal
 function OfflineQueueModal(props: { isOpen: boolean; onClose: () => void }) {
   const { isOpen, onClose } = props;
   const [queuedOperations, setQueuedOperations] = useState<QueuedOperation[]>([]);
@@ -218,7 +224,7 @@ function OfflineQueueModal(props: { isOpen: boolean; onClose: () => void }) {
   );
 }
 
-// -------- Optional: Development Storage Debug Panel --------
+// Development Storage Debug Panel
 function StorageDebugPanel() {
   const [stats, setStats] = useState<any>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -234,7 +240,7 @@ function StorageDebugPanel() {
 
   useEffect(() => {
     refreshStats();
-    const interval = setInterval(refreshStats, 5000); // Refresh every 5 seconds
+    const interval = setInterval(refreshStats, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -281,4 +287,15 @@ function StorageDebugPanel() {
   );
 }
 
-export default App;
+// Root export: compose providers at the top and render AppShell inside.
+export default function App() {
+  return (
+    <ClaudeProvider>
+      <AppProvider>
+        <CommandPaletteProvider>
+          <AppShell />
+        </CommandPaletteProvider>
+      </AppProvider>
+    </ClaudeProvider>
+  );
+}

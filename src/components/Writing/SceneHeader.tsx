@@ -1,5 +1,6 @@
 // src/components/Writing/SceneHeader.tsx
 import React from 'react';
+
 import { SceneStatus } from '@/types/writing';
 
 export function SceneHeader({

@@ -1,5 +1,6 @@
 import { Focus, Timer, Target } from 'lucide-react';
 import React from 'react';
+
 import { useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
 
 interface FocusModeControlsProps {

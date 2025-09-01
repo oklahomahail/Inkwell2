@@ -1,6 +1,7 @@
 // File: src/context/AppContext.tsx - Updated with auto-save state
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
-import { ClaudeProvider, useClaude } from './ClaudeProvider';
+
+import { useClaude } from './ClaudeProvider';
 
 // ===== ENUMS & TYPES =====
 export enum View {
@@ -280,10 +281,4 @@ ${character}`;
 }
 
 // ===== MAIN PROVIDER COMPONENT =====
-export function AppProvider({ children }: { children: ReactNode }) {
-  return (
-    <ClaudeProvider>
-      <AppProviderInner>{children}</AppProviderInner>
-    </ClaudeProvider>
-  );
-}
+export function AppProvider({ children }: { children: ReactNode }) {}

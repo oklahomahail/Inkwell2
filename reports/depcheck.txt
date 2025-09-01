@@ -1,12 +1,14 @@
 Unused devDependencies
+* @eslint/js
 * @testing-library/user-event
-* @typescript-eslint/parser
 * @vitest/coverage-v8
 * autoprefixer
 * eslint-config-prettier
 * eslint-import-resolver-typescript
 * eslint-plugin-jsx-a11y
 * eslint-plugin-prettier
+* eslint-plugin-react
 * postcss
 * stylelint-config-standard
 * ts-prune
+* typescript-eslint

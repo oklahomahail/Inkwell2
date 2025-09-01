@@ -12,6 +12,7 @@ import {
   User,
 } from 'lucide-react';
 import React, { useState } from 'react';
+
 import { type GeneratedOutline } from '../../services/storyArchitectService';
 
 interface GeneratedOutlinePreviewProps {

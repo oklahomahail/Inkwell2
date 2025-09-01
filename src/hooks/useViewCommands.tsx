@@ -1,7 +1,9 @@
 // src/hooks/useViewCommands.ts
 import { useEffect } from 'react';
-import { useCommandPalette } from '@/components/CommandPalette/CommandPaletteProvider';
+
 import { useAppContext, View } from '@/context/AppContext';
+import { useCommandPaletteContext as useCommandPalette } from '@/context/CommandPaletteContext';
+import { useCommandPaletteContext } from '@/context/CommandPaletteContext';
 
 export const useViewCommands = () => {
   const { setView } = useAppContext();
@@ -93,4 +95,5 @@ export const useViewCommands = () => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [setView]);
+  const palette = useCommandPaletteContext();
 };

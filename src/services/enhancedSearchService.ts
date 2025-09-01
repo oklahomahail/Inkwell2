@@ -1,9 +1,10 @@
 // src/services/enhancedSearchService.ts
 // Enhanced search service that uses a Web Worker when available, falls back to main thread
 
+import type { Chapter } from '@/types/writing';
+
 import { searchWorkerService } from './searchWorkerService';
 import { storageService } from './storageService';
-import type { Chapter } from '@/types/writing';
 
 /** Minimal shapes we index against (keeps us decoupled from app-wide types) */
 type IndexedScene = {

@@ -1,6 +1,7 @@
 // src/components/Views/TimelineView.tsx
 import { Clock, MapPin, User, Tag, Plus, Edit3, Trash2, Save, X } from 'lucide-react';
 import React, { useState, useMemo, useCallback } from 'react';
+
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 // Remove unused import - we're using useEnhancedTimeline instead

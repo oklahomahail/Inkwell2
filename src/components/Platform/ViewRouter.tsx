@@ -1,5 +1,6 @@
 // src/components/Platform/ViewRouter.tsx
 import React, { JSX, Suspense } from 'react';
+
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 
 const DashboardPanel = React.lazy(() => import('@/components/Panels/DashboardPanel'));

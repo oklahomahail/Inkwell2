@@ -1,5 +1,6 @@
 // src/components/Writing/FocusModeTypewriter.tsx (top ~100 lines fixed)
 import React, { useEffect, useRef, useState } from 'react';
+
 import { useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
 
 interface TypewriterModeProps {

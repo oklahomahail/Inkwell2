@@ -1,12 +1,14 @@
 // src/components/ViewSwitcher.tsx - Fixed
 import React, { useState, useCallback } from 'react';
+
+import { useAppContext, View } from '@/context/AppContext';
+
 import AnalysisPanel from './Panels/AnalysisPanel';
 import DashboardPanel from './Panels/DashboardPanel';
 import SettingsPanel from './Panels/SettingsPanel';
 import TimelinePanel from './Panels/TimelinePanel';
 import WritingPanel from './Panels/WritingPanel';
 import StoryPlanningView from './Views/StoryPlanningView';
-import { useAppContext, View } from '@/context/AppContext';
 
 const ViewSwitcher: React.FC = () => {
   const { state, currentProject, updateProject } = useAppContext();

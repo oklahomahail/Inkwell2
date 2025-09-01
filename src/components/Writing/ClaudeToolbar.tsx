@@ -21,6 +21,7 @@ import {
   Focus, // NEW: For "Show Don't Tell" (or use Eye)
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 

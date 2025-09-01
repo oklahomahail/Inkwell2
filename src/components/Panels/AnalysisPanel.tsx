@@ -1,6 +1,7 @@
 // src/components/Panels/AnalysisPanel.tsx - Upgraded Version
 import { BarChart3, TrendingUp, Clock, Target } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+
 import WritingAnalyticsView from '@/components/Analytics/WritingAnalyticsView';
 import { useAppContext } from '@/context/AppContext';
 

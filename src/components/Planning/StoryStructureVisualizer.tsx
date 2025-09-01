@@ -3,6 +3,7 @@
 
 import { BarChart3, CheckCircle, BookOpen, Users, Zap, Target, Award } from 'lucide-react';
 import React, { useMemo } from 'react';
+
 import { useAppContext } from '@/context/AppContext';
 
 interface StoryStructureVisualizerProps {

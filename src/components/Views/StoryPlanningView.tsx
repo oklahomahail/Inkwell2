@@ -1,6 +1,7 @@
 // src/components/Views/StoryPlanningView.tsx - Enhanced with Story Architect Mode
 import { BookOpen, Users, Map, FileText, BarChart3, Wand2 } from 'lucide-react';
 import React, { useState } from 'react';
+
 import { useToast } from '../../context/ToastContext';
 import { storyArchitectService, type GeneratedOutline } from '../../services/storyArchitectService';
 import BeatSheetPlanner from '../Planning/BeatSheetPlanner';

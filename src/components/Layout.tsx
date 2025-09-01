@@ -1,5 +1,6 @@
 // src/components/Layout.tsx
 import React from 'react';
+
 import Sidebar from '@/components/Sidebar';
 import Topbar from '@/components/Topbar';
 import { useFocusMode } from '@/hooks/useFocusMode';

@@ -1,7 +1,9 @@
 // src/components/Search/SearchBar.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
+
 import { NavProvider } from '../../context/NavContext';
+
 import { SearchBar } from './SearchBar';
 
 const renderWithProviders = (ui: React.ReactElement) => render(<NavProvider>{ui}</NavProvider>);

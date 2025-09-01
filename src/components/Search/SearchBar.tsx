@@ -1,5 +1,6 @@
 import { Search, X } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
+
 import { useNavigation } from '@/context/NavContext';
 
 interface SearchBarProps {

@@ -18,6 +18,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import React, { useState } from 'react';
+
 import { useAdvancedFocusMode } from '../../hooks/useAdvancedFocusMode';
 
 interface AdvancedFocusModeProps {
