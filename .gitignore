@@ -65,3 +65,6 @@ inkwell-src-*.zip
 
 .env*
 reports/*.clean.txt
+
+.env*
+reports/*.clean.txt
