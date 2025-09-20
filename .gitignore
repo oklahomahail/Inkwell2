@@ -62,3 +62,6 @@ eslint.config.js.backup
 # build/share archives
 inkwell-src-*.zip
 
+
+.env*
+reports/*.clean.txt
