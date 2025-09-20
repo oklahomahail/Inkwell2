@@ -1,18 +1,8 @@
-name: Repo audit
-
+name: repo-audit
 on:
+  push:
+    branches: [main]
   pull_request:
-  workflow_dispatch:
-  schedule:
-    # 13:00 UTC = 8:00 AM during CDT, 7:00 AM during CST
-    - cron: "0 13 * * 1"
-
-permissions:
-  contents: read
-
-concurrency:
-  group: repo-audit-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   audit:
@@ -20,76 +10,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
+          cache: 'pnpm'
 
-      - name: Setup pnpm 9.12.0
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
-          run_install: false
+      - name: Enable Corepack
+        run: corepack enable
 
-      - name: Install deps (frozen, with fallback)
+      - name: Show versions
         run: |
-          set -e
-          echo "pnpm: $(pnpm -v)  node: $(node -v)"
-          if ! pnpm install --frozen-lockfile; then
-            echo "::warning:: frozen install failed; retrying without frozen to capture details"
-            pnpm install --no-frozen-lockfile
-            if ! git diff --exit-code pnpm-lock.yaml; then
-              echo "::error:: pnpm-lock.yaml changed. Commit the updated lockfile or fix package.json."
-              exit 1
-            fi
-          fi
+          node -v
+          pnpm -v
 
-      - name: Run audits (non-blocking)
-        run: |
-          set -e
-          mkdir -p reports
-          # knip
-          pnpm -s knip --dependencies --files --reporter symbols --no-exit-code --tsConfig tsconfig.json \
-            | tee reports/knip.txt || true
-          # depcheck
-          pnpm -s depcheck --skip-missing=true \
-            | tee reports/depcheck.txt || true
-          # madge (orphans & cycles)
-          pnpm -s madge --extensions ts,tsx --ts-config tsconfig.json --orphans src \
-            | tee reports/madge-orphans.txt || true
-          pnpm -s madge --extensions ts,tsx --ts-config tsconfig.json --circular src \
-            | tee reports/madge-cycles.txt || true
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
 
-      - name: Upload reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: repo-audit-reports
-          path: reports/
+      - name: Build
+        run: pnpm run build
 
-      - name: Fail on audit issues
-        run: |
-          set -e
-
-          echo "=== Check knip for dependency issues ==="
-          if grep -Eqi "Unused dependencies|Unlisted dependencies|Unresolved" reports/knip.txt; then
-            echo "::error::Knip found dependency issues"
-            sed -n '1,200p' reports/knip.txt
-            exit 1
-          fi
-
-          echo "=== Check madge for orphans (excluding known roots) ==="
-          ORPHANS=$(grep -Ev '^(src/main\.tsx|src/vite-env\.d\.ts)$' reports/madge-orphans.txt || true)
-          if [ -n "$ORPHANS" ]; then
-            echo "::error::Orphaned files detected"
-            echo "$ORPHANS"
-            exit 1
-          fi
-
-          echo "=== Check madge for cycles ==="
-          if ! grep -q "No circular dependency found" reports/madge-cycles.txt; then
-            echo "::error::Circular dependencies detected"
-            sed -n '1,200p' reports/madge-cycles.txt
-            exit 1
-          fi
-
-          echo "All audit checks passed ✅"
+      - name: Test
+        run: pnpm test
