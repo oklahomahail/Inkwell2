@@ -281,4 +281,6 @@ ${character}`;
 }
 
 // ===== MAIN PROVIDER COMPONENT =====
-export function AppProvider({ children }: { children: ReactNode }) {}
+export function AppProvider({ children }: { children: ReactNode }) {
+  return <AppProviderInner>{children}</AppProviderInner>;
+}
