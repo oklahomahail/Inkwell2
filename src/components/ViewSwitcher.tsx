@@ -1,72 +1,28 @@
-// src/components/ViewSwitcher.tsx - Fixed
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 
-import { useAppContext, View } from '@/context/AppContext';
+import { useNavigation } from '@/context/NavContext';
 
-import AnalysisPanel from './Panels/AnalysisPanel';
-import DashboardPanel from './Panels/DashboardPanel';
-import SettingsPanel from './Panels/SettingsPanel';
-import TimelinePanel from './Panels/TimelinePanel';
-import WritingPanel from './Panels/WritingPanel';
-import StoryPlanningView from './Views/StoryPlanningView';
+export default function ViewSwitcher() {
+  const { currentView, navigateToView } = useNavigation();
 
-const ViewSwitcher: React.FC = () => {
-  const { state, currentProject, updateProject } = useAppContext();
-  const [selectedText, setSelectedText] = useState('');
-
-  // Get current project content or default
-  const draftText = currentProject?.content || '';
-
-  // Handle text changes and save to current project
-  const handleTextChange = useCallback(
-    (value: string) => {
-      if (currentProject) {
-        const updatedProject = {
-          ...currentProject,
-          content: value,
-          updatedAt: Date.now(),
-        };
-        updateProject(updatedProject);
-      }
-    },
-    [currentProject, updateProject],
+  const Btn = ({ view, label }: { view: typeof currentView; label: string }) => (
+    <button
+      type="button"
+      onClick={() => navigateToView(view)}
+      aria-pressed={currentView === view}
+      className={`px-3 py-1 rounded ${currentView === view ? 'font-semibold underline' : ''}`}
+    >
+      {label}
+    </button>
   );
 
-  // Handle text selection for Claude integration
-  const handleTextSelect = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const selection = window.getSelection();
-      const selected = selection?.toString() || '';
-      setSelectedText(selected);
-    }
-  }, []);
-
-  const currentView = state.view;
-
-  switch (currentView) {
-    case View.Dashboard:
-      return <DashboardPanel />;
-    case View.Writing:
-      return (
-        <WritingPanel
-          draftText={draftText}
-          onChangeText={handleTextChange}
-          onTextSelect={handleTextSelect}
-          selectedText={selectedText}
-        />
-      );
-    case View.Timeline:
-      return <TimelinePanel />;
-    case View.Analysis:
-      return <AnalysisPanel />;
-    // ✅ ADD THIS NEW CASE
-    case View.Planning:
-      return <StoryPlanningView />;
-    case View.Settings:
-      return <SettingsPanel />;
-    default:
-      return <DashboardPanel />;
-  }
-};
-
-export default ViewSwitcher;
+  return (
+    <div role="tablist" aria-label="Views" className="flex gap-2">
+      <Btn view="dashboard" label="Dashboard" />
+      <Btn view="writing" label="Writing" />
+      <Btn view="timeline" label="Timeline" />
+      <Btn view="analysis" label="Analysis" />
+      <Btn view="settings" label="Settings" />
+    </div>
+  );
+}

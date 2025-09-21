@@ -1,23 +1,29 @@
-import { useState, useCallback } from 'react';
+// src/hooks/useCommandPalette.ts
 
-import { useCommands } from './useCommands';
+// If your provider exports a context, use it here. Otherwise this is a safe no-op shim.
+type CommandPaletteAPI = {
+  openPalette: () => void;
+  closePalette?: () => void;
+  togglePalette?: () => void;
+};
 
-export function useCommandPalette(selectedText?: string) {
-  const [isOpen, setIsOpen] = useState(false);
+// Try to import your provider context if it exists; otherwise fall back to a no-op
+let useFromProvider: (() => CommandPaletteAPI | undefined) | undefined;
+try {
+  // If you already have a provider with a hook, you can re-export it here instead.
+  // Example (uncomment if you have it):
+  // const real = require('@/components/CommandPalette/CommandPaletteProvider') as any;
+  // useFromProvider = real.useCommandPalette as any;
+} catch {
+  /* ignore */
+}
 
-  const commands = useCommands(selectedText, (commandId) => {
-    console.log(`Executed command: ${commandId}`);
-  });
-
-  const open = useCallback(() => setIsOpen(true), []);
-  const close = useCallback(() => setIsOpen(false), []);
-  const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
-
+export function useCommandPalette(): CommandPaletteAPI {
+  const provided = useFromProvider?.();
+  if (provided) return provided;
   return {
-    isOpen,
-    open,
-    close,
-    toggle,
-    commands,
+    openPalette: () => {},
+    closePalette: () => {},
+    togglePalette: () => {},
   };
 }

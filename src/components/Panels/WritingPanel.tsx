@@ -1,4 +1,4 @@
-// src/components/Panels/WritingPanel.tsx - Fixed version
+// src/components/Panels/WritingPanel.tsx
 import {
   PlusCircle,
   BookOpen,
@@ -8,13 +8,14 @@ import {
   Save,
   Download,
 } from 'lucide-react';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 
 import ClaudeToolbar from '@/components/Writing/ClaudeToolbar';
 import ExportDialog from '@/components/Writing/ExportDialog';
 import { SceneHeader } from '@/components/Writing/SceneHeader';
 import TipTapEditor from '@/components/Writing/TipTapEditor';
 import { useAppContext } from '@/context/AppContext';
+import { useNavigation } from '@/context/NavContext';
 import { Scene, SceneStatus, Chapter } from '@/types/writing';
 import { cn } from '@/utils/cn';
 import { generateId } from '@/utils/idUtils';
@@ -33,8 +34,13 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
   selectedText,
 }) => {
   const { currentProject, updateProject } = useAppContext();
+
+  // Nav is the *single* source of truth for location
+  const { currentProjectId, currentChapterId, currentSceneId, navigateToScene, navigateToChapter } =
+    useNavigation();
+
+  // Local chapter data (content, scenes, etc.) stays here
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
-  const [currentSceneId, setCurrentSceneId] = useState<string | null>(null);
   const [showSceneList, setShowSceneList] = useState(true);
   const [exportDialog, setExportDialog] = useState<{
     isOpen: boolean;
@@ -48,7 +54,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     title: '',
   });
 
-  // Initialize with mock data if no chapter exists
+  // Fallback chapter if none is loaded
   const initializeChapter = (): Chapter => ({
     id: 'chapter-1',
     title: currentProject?.name || 'Chapter 1',
@@ -74,9 +80,42 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
   });
 
   const chapter = currentChapter || initializeChapter();
-  const scenes: Scene[] = chapter.scenes; // Fixed: chapter is never undefined due to fallback above
-  const currentScene = scenes.find((s) => s.id === currentSceneId);
-  const currentSceneIndex = scenes.findIndex((s) => s.id === currentSceneId);
+  const scenes: Scene[] = chapter.scenes;
+
+  // If no scene selected in Nav, auto-select the first scene (and ensure chapter is set)
+  useEffect(() => {
+    if (!currentProjectId || scenes.length === 0) return;
+
+    const chapId = currentChapterId ?? chapter.id;
+    if (!currentChapterId) {
+      // Make sure chapter is established first
+      navigateToChapter(currentProjectId, chapId);
+    }
+
+    if (!currentSceneId && scenes[0]) {
+      navigateToScene(currentProjectId, chapId, scenes[0].id);
+    }
+  }, [
+    currentProjectId,
+    currentChapterId,
+    currentSceneId,
+    scenes,
+    chapter.id,
+    navigateToChapter,
+    navigateToScene,
+  ]);
+
+  const currentScene = (currentSceneId && scenes.find((s) => s.id === currentSceneId)) || null;
+  const currentSceneIndex = currentScene ? scenes.findIndex((s) => s.id === currentScene.id) : -1;
+
+  const selectScene = useCallback(
+    (sceneId: string) => {
+      if (!currentProjectId) return;
+      const chapId = currentChapterId ?? chapter.id;
+      navigateToScene(currentProjectId, chapId, sceneId);
+    },
+    [currentProjectId, currentChapterId, chapter.id, navigateToScene],
+  );
 
   const handleSceneUpdate = useCallback(
     (sceneId: string, updates: Partial<Scene>) => {
@@ -93,13 +132,13 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
 
       setCurrentChapter(updatedChapter);
 
-      // Update parent component
+      // Keep parent draftText in sync if needed
       const updatedScene = updatedScenes.find((s) => s.id === sceneId);
       if (updatedScene?.content) {
         onChangeText(updatedScene.content);
       }
 
-      // Save to current project
+      // Minimal persistence into current project (your service layer likely handles real save)
       if (currentProject) {
         const updatedProject = {
           ...currentProject,
@@ -112,9 +151,27 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     [scenes, chapter, currentProject, updateProject, onChangeText],
   );
 
-  const handleSceneSelect = useCallback((sceneId: string) => {
-    setCurrentSceneId(sceneId);
-  }, []);
+  const handleContentChange = useCallback(
+    (content: string) => {
+      if (!currentScene) return;
+      handleSceneUpdate(currentScene.id, { content });
+    },
+    [currentScene, handleSceneUpdate],
+  );
+
+  const handleWordCountChange = useCallback(
+    (wordCount: number) => {
+      if (!currentScene) return;
+      handleSceneUpdate(currentScene.id, { wordCount });
+    },
+    [currentScene, handleSceneUpdate],
+  );
+
+  const handleInsertText = (text: string) => {
+    if (!currentScene) return;
+    const newContent = (currentScene.content ?? '') + '\n\n' + text;
+    handleSceneUpdate(currentScene.id, { content: newContent });
+  };
 
   const handleAddScene = () => {
     const newScene: Scene = {
@@ -137,67 +194,26 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     };
 
     setCurrentChapter(updatedChapter);
-    setCurrentSceneId(newScene.id);
+
+    // Select the new scene via Nav
+    if (currentProjectId) {
+      const chapId = currentChapterId ?? chapter.id;
+      navigateToScene(currentProjectId, chapId, newScene.id);
+    }
   };
 
-  const navigateToScene = (direction: 'prev' | 'next') => {
+  const jump = (dir: 'prev' | 'next') => {
+    if (currentSceneIndex < 0) return;
     const newIndex =
-      direction === 'prev'
+      dir === 'prev'
         ? Math.max(0, currentSceneIndex - 1)
         : Math.min(scenes.length - 1, currentSceneIndex + 1);
-
-    if (scenes[newIndex]) {
-      handleSceneSelect(scenes[newIndex].id);
+    const next = scenes[newIndex];
+    if (next && currentProjectId) {
+      const chapId = currentChapterId ?? chapter.id;
+      navigateToScene(currentProjectId, chapId, next.id);
     }
   };
-
-  const handleContentChange = useCallback(
-    (content: string) => {
-      if (!currentScene) return;
-      handleSceneUpdate(currentScene.id, { content });
-    },
-    [currentScene, handleSceneUpdate],
-  );
-
-  const handleWordCountChange = useCallback(
-    (wordCount: number) => {
-      if (!currentScene) return;
-      handleSceneUpdate(currentScene.id, { wordCount });
-    },
-    [currentScene, handleSceneUpdate],
-  );
-
-  const handleInsertText = (text: string) => {
-    if (!currentScene) return;
-    const newContent = currentScene.content + '\n\n' + text;
-    handleSceneUpdate(currentScene.id, { content: newContent });
-  };
-
-  const handleExportScene = () => {
-    if (!currentScene) return;
-    setExportDialog({
-      isOpen: true,
-      type: 'scene',
-      data: currentScene,
-      title: currentScene.title,
-    });
-  };
-
-  const handleExportChapter = () => {
-    setExportDialog({
-      isOpen: true,
-      type: 'chapter',
-      data: chapter,
-      title: chapter.title,
-    });
-  };
-
-  // Auto-select first scene if none selected
-  React.useEffect(() => {
-    if (!currentSceneId && scenes.length > 0 && scenes[0]) {
-      setCurrentSceneId(scenes[0].id);
-    }
-  }, [currentSceneId, scenes]);
 
   if (!currentProject) {
     return (
@@ -231,7 +247,14 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
 
           <div className="flex items-center gap-2">
             <button
-              onClick={handleExportChapter}
+              onClick={() =>
+                setExportDialog({
+                  isOpen: true,
+                  type: 'chapter',
+                  data: chapter,
+                  title: chapter.title,
+                })
+              }
               className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
             >
               <Download className="w-4 h-4" />
@@ -278,7 +301,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
               {scenes.map((scene, index) => (
                 <button
                   key={scene.id}
-                  onClick={() => handleSceneSelect(scene.id)}
+                  onClick={() => selectScene(scene.id)}
                   className={cn(
                     'w-full p-3 rounded-lg text-left transition-colors',
                     scene.id === currentSceneId
@@ -321,8 +344,8 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
                   {/* Scene Navigation */}
                   <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => navigateToScene('prev')}
-                      disabled={currentSceneIndex === 0}
+                      onClick={() => jump('prev')}
+                      disabled={currentSceneIndex <= 0}
                       className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -331,8 +354,8 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
                       Scene {currentSceneIndex + 1} of {scenes.length}
                     </span>
                     <button
-                      onClick={() => navigateToScene('next')}
-                      disabled={currentSceneIndex === scenes.length - 1}
+                      onClick={() => jump('next')}
+                      disabled={currentSceneIndex >= scenes.length - 1}
                       className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -341,7 +364,14 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={handleExportScene}
+                      onClick={() =>
+                        setExportDialog({
+                          isOpen: true,
+                          type: 'scene',
+                          data: currentScene,
+                          title: currentScene.title,
+                        })
+                      }
                       className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                     >
                       <Download className="w-4 h-4 inline mr-2" />
