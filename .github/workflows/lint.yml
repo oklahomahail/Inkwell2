@@ -31,6 +31,12 @@ jobs:
       - run: corepack enable
 
       - name: Show versions
+      - name: Debug PATH and versions
+        run: |
+          echo "$PATH"
+          command -v pnpm || echo "pnpm missing"
+          node -v
+          pnpm -v
         run: |
           node -v
           pnpm -v
