@@ -8,11 +8,7 @@ import unusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
 
 export default [
-  // Global ignores (still included in the tree, just not linted)
-  {
-    ignores: ['node_modules/**', 'build/**', 'dist/**', 'src/test/**'],
-  },
-
+  { ignores: ["dist/**", "node_modules/**", "coverage/**"] },
   // TypeScript / React rules
   {
     files: ['**/*.{ts,tsx}'],
