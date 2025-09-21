@@ -1,299 +1,225 @@
-// src/App.tsx — provider composition at the root + clean AppShell
-import React, { useEffect, useState } from 'react';
+// src/App.tsx - Fresh clean version with NavContext integration
+import React from 'react';
 
-// Providers
-
-// UI + panels
-import ClaudeAssistant from './components/ClaudeAssistant';
-import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
 import { CommandPaletteProvider } from './components/CommandPalette/CommandPaletteProvider';
-import CommandPaletteUI from './components/CommandPalette/CommandPaletteUI';
-import DebugSearchPanel from './components/DebugSearchPanel';
-import ExportDialog from './components/ExportDialog';
-import PlatformLayout from './components/Platform/PlatformLayout';
-// Banners / recovery
-import {
-  StorageRecoveryBanner,
-  OfflineBanner,
-  useStorageRecovery,
-} from './components/Recovery/StorageRecoveryBanner';
-import { ToastContainer } from './components/ToastContainer';
-import ViewSwitcher from './components/ViewSwitcher';
-import { AppProvider, useAppContext } from './context/AppContext';
+import { AppProvider } from './context/AppContext';
 import { ClaudeProvider } from './context/ClaudeProvider';
+import { NavProvider, useNavigation } from './context/NavContext';
 
-// Services
-import { connectivityService } from './services/connectivityService';
-import { enhancedStorageService } from './services/enhancedStorageService';
+// Navigation test component
+function NavTestComponent() {
+  try {
+    const nav = useNavigation();
 
-interface ConnectivityStatus {
-  isOnline: boolean;
-  queuedWrites: number;
-}
+    return (
+      <div
+        style={{
+          marginTop: '20px',
+          padding: '15px',
+          backgroundColor: '#e6ffe6',
+          border: '1px solid #4caf50',
+          borderRadius: '8px',
+        }}
+      >
+        <h3 style={{ margin: '0 0 10px 0', color: '#2e7d32' }}>NavContext Test - SUCCESS</h3>
 
-type QueuedOperation = {
-  id: string | number;
-  operation: string;
-  timestamp: number;
-  retryCount?: number;
-};
-
-// All app logic lives here, safely *inside* the providers.
-function AppShell() {
-  const { claude, currentProject } = useAppContext();
-
-  // storage recovery
-  const { showRecoveryBanner, dismissRecoveryBanner } = useStorageRecovery();
-
-  // connectivity
-  const [connectivityStatus, setConnectivityStatus] = useState<ConnectivityStatus>({
-    isOnline: true,
-    queuedWrites: 0,
-  });
-
-  useEffect(() => {
-    const unsubscribe = connectivityService.onStatusChange((status) => {
-      setConnectivityStatus({
-        isOnline: status.isOnline,
-        queuedWrites: status.queuedWrites,
-      });
-    });
-
-    const initialStatus = connectivityService.getStatus();
-    setConnectivityStatus({
-      isOnline: initialStatus.isOnline,
-      queuedWrites: initialStatus.queuedWrites,
-    });
-
-    return unsubscribe;
-  }, []);
-
-  // maintenance after start
-  useEffect(() => {
-    const performStartupMaintenance = async () => {
-      try {
-        const result = await enhancedStorageService.performMaintenance();
-        if (result.actions.length > 0) {
-          console.log('Startup maintenance completed:', result.actions);
-        }
-      } catch (error) {
-        console.warn('Startup maintenance failed:', error);
-      }
-    };
-
-    const timeoutId = setTimeout(performStartupMaintenance, 2000);
-    return () => clearTimeout(timeoutId);
-  }, []);
-
-  // export dialog state
-  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const openExportDialog = () => setIsExportDialogOpen(true);
-  const closeExportDialog = () => setIsExportDialogOpen(false);
-
-  // offline queue modal
-  const [showOfflineQueue, setShowOfflineQueue] = useState(false);
-  const handleViewQueue = () => setShowOfflineQueue(true);
-  const handleDismissOfflineBanner = () => {
-    // optional: persist snooze preference
-  };
-
-  return (
-    <>
-      {/* Storage Recovery Banner */}
-      {showRecoveryBanner && <StorageRecoveryBanner onDismiss={dismissRecoveryBanner} />}
-
-      {/* Offline Banner */}
-      {!connectivityStatus.isOnline && connectivityStatus.queuedWrites > 0 && (
-        <OfflineBanner
-          queuedOperations={connectivityStatus.queuedWrites}
-          onViewQueue={handleViewQueue}
-          onDismiss={handleDismissOfflineBanner}
-        />
-      )}
-
-      <PlatformLayout>
-        <ViewSwitcher />
-        <ToastContainer />
-
-        {/* Claude Assistant with Error Boundary */}
-        {claude?.isVisible && (
-          <ClaudeErrorBoundary>
-            <ClaudeAssistant
-              selectedText=""
-              onInsertText={(text) => {
-                // TODO: wire to current editor
-                console.log('Insert text:', text);
-              }}
-            />
-          </ClaudeErrorBoundary>
-        )}
-
-        {/* Export Dialog */}
-        {currentProject && (
-          <ExportDialog
-            isOpen={isExportDialogOpen}
-            onClose={closeExportDialog}
-            projectId={currentProject.id}
-            projectName={currentProject.name}
-          />
-        )}
-
-        {/* Offline Queue Modal */}
-        {showOfflineQueue && (
-          <OfflineQueueModal isOpen={showOfflineQueue} onClose={() => setShowOfflineQueue(false)} />
-        )}
-
-        {/* Command Palette UI */}
-        <CommandPaletteUI />
-
-        {/* Hidden global export trigger */}
-        <div style={{ display: 'none' }}>
-          <button onClick={openExportDialog} id="global-export-trigger">
-            Export
-          </button>
+        <div style={{ marginBottom: '15px' }}>
+          <p style={{ margin: '5px 0' }}>
+            Current View: <strong>{nav.currentView}</strong>
+          </p>
+          <p style={{ margin: '5px 0' }}>
+            Project ID: <strong>{nav.currentProjectId || 'None'}</strong>
+          </p>
+          <p style={{ margin: '5px 0' }}>
+            Chapter ID: <strong>{nav.currentChapterId || 'None'}</strong>
+          </p>
+          <p style={{ margin: '5px 0' }}>
+            Scene ID: <strong>{nav.currentSceneId || 'None'}</strong>
+          </p>
+          <p style={{ margin: '5px 0' }}>
+            Focus Mode: <strong>{nav.focusMode ? 'ON' : 'OFF'}</strong>
+          </p>
+          <p style={{ margin: '5px 0' }}>
+            Can Go Back: <strong>{nav.canGoBack ? 'YES' : 'NO'}</strong>
+          </p>
         </div>
 
-        {/* Dev-only debug panels */}
-        {import.meta.env.DEV && <StorageDebugPanel />}
-        {import.meta.env.DEV && <DebugSearchPanel />}
-      </PlatformLayout>
-    </>
-  );
-}
-
-// Offline Queue Management Modal
-function OfflineQueueModal(props: { isOpen: boolean; onClose: () => void }) {
-  const { isOpen, onClose } = props;
-  const [queuedOperations, setQueuedOperations] = useState<QueuedOperation[]>([]);
-
-  useEffect(() => {
-    if (isOpen) {
-      const operations = (connectivityService.getQueuedOperations?.() ?? []) as QueuedOperation[];
-      setQueuedOperations(Array.isArray(operations) ? operations : []);
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Queued Operations</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            ×
-          </button>
-        </div>
-
-        <div className="space-y-2 max-h-60 overflow-y-auto">
-          {queuedOperations.length === 0 ? (
-            <p className="text-gray-500">No operations queued</p>
-          ) : (
-            queuedOperations.map((op) => (
-              <div key={String(op.id)} className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
-                <div className="text-sm font-medium">{op.operation}</div>
-                <div className="text-xs text-gray-500">
-                  {new Date(op.timestamp).toLocaleTimeString()}
-                  {op.retryCount && op.retryCount > 0 ? ` (Retry ${op.retryCount})` : ''}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="mt-4 flex justify-end gap-2">
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <button
-            onClick={async () => {
-              await connectivityService.clearQueue?.();
-              setQueuedOperations([]);
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#4caf50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
             }}
-            className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+            onClick={() => nav.navigateToView('writing')}
           >
-            Clear Queue
+            Go to Writing
           </button>
+
           <button
-            onClick={onClose}
-            className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#2196f3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+            onClick={() => nav.navigateToProject('test-project-123')}
           >
-            Close
+            Test Project Nav
+          </button>
+
+          <button
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#ff9800',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+            onClick={() => nav.toggleFocusMode()}
+          >
+            Toggle Focus
+          </button>
+
+          <button
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#9c27b0',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              opacity: nav.canGoBack ? 1 : 0.5,
+            }}
+            onClick={() => nav.goBack()}
+            disabled={!nav.canGoBack}
+          >
+            Go Back
           </button>
         </div>
+
+        <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
+          Check browser URL and console for navigation events
+        </div>
       </div>
-    </div>
-  );
+    );
+  } catch (error) {
+    return (
+      <div
+        style={{
+          marginTop: '20px',
+          padding: '15px',
+          backgroundColor: '#ffebee',
+          border: '1px solid #f44336',
+          borderRadius: '8px',
+        }}
+      >
+        <h3 style={{ margin: '0 0 10px 0', color: '#c62828' }}>NavContext Error</h3>
+        <p style={{ margin: '5px 0', color: '#d32f2f' }}>Error: {error.message}</p>
+        <p style={{ margin: '5px 0', fontSize: '12px', color: '#666' }}>
+          Make sure NavProvider is properly wrapping this component
+        </p>
+      </div>
+    );
+  }
 }
 
-// Development Storage Debug Panel
-function StorageDebugPanel() {
-  const [stats, setStats] = useState<any>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const refreshStats = async () => {
-    try {
-      const storageStats = await enhancedStorageService.getStorageStats();
-      setStats(storageStats);
-    } catch (error) {
-      console.error('Failed to get storage stats:', error);
-    }
-  };
-
-  useEffect(() => {
-    refreshStats();
-    const interval = setInterval(refreshStats, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  if (!stats) return null;
-
-  const mb = (n: number) => (n > 0 ? (n / 1024 / 1024).toFixed(1) : '0.0');
+function AppShell() {
+  console.log('AppShell rendering with NavContext integration...');
 
   return (
-    <div className="fixed bottom-4 right-4 z-40">
-      <div className="bg-gray-900 text-white text-xs rounded-lg shadow-lg">
-        <button
-          onClick={() => setIsExpanded((v) => !v)}
-          className="w-full px-3 py-2 text-left hover:bg-gray-800 rounded-lg"
-        >
-          Storage: {mb(stats.storageUsed)} MB
-        </button>
+    <div
+      style={{
+        padding: '20px',
+        fontFamily: 'system-ui',
+        maxWidth: '900px',
+        margin: '0 auto',
+        lineHeight: '1.6',
+      }}
+    >
+      <h1 style={{ color: '#333', marginBottom: '10px' }}>Inkwell - NavContext Integration Test</h1>
+      <p style={{ color: '#666', marginBottom: '20px' }}>
+        Testing unified navigation architecture with URL sync and session persistence
+      </p>
 
-        {isExpanded && (
-          <div className="px-3 pb-3 space-y-1 border-t border-gray-700 pt-2">
-            <div>Projects: {stats.totalProjects}</div>
-            <div>Words: {stats.totalWordCount?.toLocaleString?.() ?? '—'}</div>
-            <div>Sessions: {stats.writingSessions}</div>
-            <div>Snapshots: {stats.snapshotCount}</div>
-            <div>
-              Usage:{' '}
-              {stats.quotaInfo
-                ? `${((stats.quotaInfo.percentUsed ?? 0) * 100).toFixed(1)}%`
-                : 'Unknown'}
-            </div>
-            <button
-              onClick={async () => {
-                const result = await enhancedStorageService.performMaintenance();
-                console.log('Manual maintenance:', result);
-                refreshStats();
-              }}
-              className="w-full mt-2 px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
-            >
-              Run Maintenance
-            </button>
-          </div>
-        )}
+      <div
+        style={{
+          marginBottom: '20px',
+          padding: '15px',
+          backgroundColor: '#f8f9fa',
+          border: '1px solid #dee2e6',
+          borderRadius: '8px',
+        }}
+      >
+        <h3 style={{ margin: '0 0 10px 0' }}>System Status</h3>
+        <p style={{ margin: '5px 0' }}>Environment: {import.meta.env.MODE}</p>
+        <p style={{ margin: '5px 0' }}>React: {React.version}</p>
+        <p style={{ margin: '5px 0' }}>Timestamp: {new Date().toLocaleTimeString()}</p>
+      </div>
+
+      {/* NavContext interactive test */}
+      <NavTestComponent />
+
+      <div
+        style={{
+          marginTop: '20px',
+          padding: '15px',
+          backgroundColor: '#e3f2fd',
+          border: '1px solid #2196f3',
+          borderRadius: '8px',
+        }}
+      >
+        <h3 style={{ margin: '0 0 10px 0' }}>Architecture Features</h3>
+        <ul style={{ margin: '10px 0', paddingLeft: '20px' }}>
+          <li>Single source of truth navigation state</li>
+          <li>Intent-based API with reducer pattern</li>
+          <li>URL synchronization (check query params)</li>
+          <li>Session persistence (localStorage)</li>
+          <li>Browser back/forward integration</li>
+          <li>History management with deduplication</li>
+        </ul>
+      </div>
+
+      <div
+        style={{
+          marginTop: '20px',
+          padding: '15px',
+          backgroundColor: '#fff3cd',
+          border: '1px solid #ffc107',
+          borderRadius: '8px',
+        }}
+      >
+        <h3 style={{ margin: '0 0 10px 0' }}>Next Integration Steps</h3>
+        <ol style={{ margin: '10px 0', paddingLeft: '20px' }}>
+          <li>Test navigation buttons above</li>
+          <li>Verify URL changes in browser bar</li>
+          <li>Test browser back/forward buttons</li>
+          <li>Refresh page to test session persistence</li>
+          <li>Add search context integration</li>
+          <li>Integrate with existing UI components</li>
+        </ol>
       </div>
     </div>
   );
 }
 
-// Root export: compose providers at the top and render AppShell inside.
 export default function App() {
+  console.log('App rendering with full provider stack...');
+
   return (
     <ClaudeProvider>
       <AppProvider>
-        <CommandPaletteProvider>
-          <AppShell />
-        </CommandPaletteProvider>
+        <NavProvider>
+          <CommandPaletteProvider>
+            <AppShell />
+          </CommandPaletteProvider>
+        </NavProvider>
       </AppProvider>
     </ClaudeProvider>
   );
