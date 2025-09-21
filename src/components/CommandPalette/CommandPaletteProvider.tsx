@@ -30,7 +30,7 @@ interface State {
   selectedIndex: number;
   commands: Command[];
 }
-
+export function useCommandPalette() {}
 export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { setView, claudeActions, currentProject, projects } = useAppContext();
   const { showToast } = useToast();
