@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import React, { useState, Suspense, useEffect, useCallback, JSX } from 'react';
 
-import { useCommandPalette } from '@/components/CommandPalette/CommandPaletteProvider';
 import WritingPanel from '@/components/Panels/WritingPanel';
 import ViewRouter from '@/components/Platform/ViewRouter';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
@@ -42,6 +41,7 @@ import {
 import { FocusModeControls } from '@/components/Writing/FocusModeControls';
 import { useAppContext } from '@/context/AppContext';
 import { useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
+import { useCommandPalette } from '@/hooks/useCommandPalette';
 import { useSaveOperation } from '@/hooks/useSaveOperation';
 import { useViewCommands } from '@/hooks/useViewCommands';
 import { cn } from '@/utils/cn';
@@ -935,7 +935,7 @@ export default function CompleteWritingPlatform() {
         {/* Content */}
         <main className="content" role="main">
           <Suspense fallback={<PageLoader message="Loading content..." />}>
-            <ViewRouter activeTab={activeTab} renderWriting={renderWriting} />
+            <ViewRouter renderWriting={renderWriting} />
           </Suspense>
         </main>
       </div>

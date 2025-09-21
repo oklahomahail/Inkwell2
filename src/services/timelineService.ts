@@ -348,8 +348,8 @@ class TimelineService {
     let timeSpan: TimelineRange | null = null;
     if (startTimes.length > 0 && endTimes.length > 0) {
       timeSpan = {
-        start: startTimes[0],
-        end: endTimes[endTimes.length - 1],
+        start: startTimes[0] ?? 0,
+        end: endTimes[endTimes.length - 1] ?? 0,
       };
     }
 
