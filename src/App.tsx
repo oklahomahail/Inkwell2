@@ -11,7 +11,6 @@ import CommandPaletteUI from './components/CommandPalette/CommandPaletteUI';
 import DebugSearchPanel from './components/DebugSearchPanel';
 import ExportDialog from './components/ExportDialog';
 import PlatformLayout from './components/Platform/PlatformLayout';
-
 // Banners / recovery
 import {
   StorageRecoveryBanner,

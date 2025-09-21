@@ -1,47 +1,47 @@
 name: Lint & Build
 
+
 on:
-  push:
-    branches: [main]
-  pull_request:
+ push:
+   branches: [main]
+ pull_request:
+
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+ group: ${{ github.workflow }}-${{ github.ref }}
+ cancel-in-progress: true
+
 
 jobs:
-  ci:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+ ci:
+   runs-on: ubuntu-latest
+   steps:
+     - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22.17.0'
-          cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
 
-      # Ensure pnpm exists on PATH
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
-          run_install: false
+     - uses: actions/setup-node@v4
+       with:
+         node-version: '22.17.0'
+         cache: 'pnpm'
+         cache-dependency-path: pnpm-lock.yaml
 
-      # Optional: keep Corepack awareness
-      - run: corepack enable
 
-      - name: Show versions
-      - name: Debug PATH and versions
-        run: |
-          echo "$PATH"
-          command -v pnpm || echo "pnpm missing"
-          node -v
-          pnpm -v
-        run: |
-          node -v
-          pnpm -v
+     - uses: pnpm/action-setup@v4
+       with:
+         version: 9.12.0
+         run_install: false
 
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run lint
-      - run: pnpm run typecheck
-      - run: pnpm run build
+
+     - name: Show versions
+       run: |
+         node -v
+         pnpm -v
+
+
+     - run: pnpm install --frozen-lockfile
+     - run: pnpm run lint
+     - run: pnpm run typecheck
+     - run: pnpm run build
+
+
+

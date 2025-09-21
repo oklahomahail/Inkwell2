@@ -190,9 +190,9 @@ function reducer(state: StateWithHistory, intent: NavIntent): StateWithHistory {
     case 'BACK': {
       const idx = state.history.length - 1;
       if (idx < 0) return state;
-      const prev = state.history[idx];
-      if (!prev) return state; // extra safety for TS
-      return { nav: prev, history: state.history.slice(0, idx) };
+      const prevNav = state.history[idx];
+      if (!prevNav) return state;
+      return { nav: prevNav, history: state.history.slice(0, idx) };
     }
 
     case 'HYDRATE_FROM_URL': {
