@@ -1,11 +1,12 @@
 // src/test/baselineTest.ts
 // Quick test to establish current search performance baseline
 
-import { generateSyntheticCorpus } from './syntheticCorpusGenerator';
 import { describe, it, expect } from 'vitest';
 
 import { searchService } from '@/services/searchService';
 import { storageService } from '@/services/storageService';
+
+import { generateSyntheticCorpus } from './syntheticCorpusGenerator';
 
 interface BaselineResult {
   corpusStats: {

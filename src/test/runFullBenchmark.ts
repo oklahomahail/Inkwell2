@@ -1,11 +1,11 @@
 // src/test/searchBenchmarkHarness.ts
+import { searchService, type SearchOptions } from '@/services/searchService';
+
 import {
   generateSyntheticCorpus,
   type GeneratedCorpus,
   type CorpusSettings,
 } from './syntheticCorpusGenerator';
-
-import { searchService, type SearchOptions } from '@/services/searchService';
 
 export interface BenchmarkConfig {
   warmupQueries: number; // Number of warmup queries to run first
