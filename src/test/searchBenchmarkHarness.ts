@@ -1,12 +1,12 @@
 // src/test/searchBenchmarkHarness.ts
+import { approxWordCount, makeCorpus } from '@/dev/makeCoprus';
+import { searchService, type SearchOptions } from '@/services/searchService';
+
 import {
   generateSyntheticCorpus,
   type GeneratedCorpus,
   type CorpusSettings,
 } from './syntheticCorpusGenerator';
-
-import { searchService, type SearchOptions } from '@/services/searchService';
-import { approxWordCount, makeCorpus } from '@/dev/makeCoprus';
 
 export interface BenchmarkConfig {
   warmupQueries: number; // Number of warmup queries to run first

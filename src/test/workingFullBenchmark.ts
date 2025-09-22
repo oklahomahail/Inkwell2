@@ -1,7 +1,7 @@
-import { generateSyntheticCorpus } from './syntheticCorpusGenerator';
-
 import { searchService } from '@/services/searchService';
 import { storageService } from '@/services/storageService';
+
+import { generateSyntheticCorpus } from './syntheticCorpusGenerator';
 
 async function workingFullBenchmark() {
   try {

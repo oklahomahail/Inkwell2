@@ -1,6 +1,6 @@
 // src/test/syntheticCorpusGenerator.ts
-import type { Scene, Chapter } from '@/types/writing';
 import type { EnhancedProject, Character } from '@/types/project';
+import type { Scene, Chapter } from '@/types/writing';
 
 export interface CorpusSettings {
   targetWordCount: number; // 150,000 words
