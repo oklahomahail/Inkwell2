@@ -50,8 +50,9 @@ export default defineConfig({
         },
         // Ensure deterministic chunk naming
         chunkFileNames: (chunkInfo) => {
-          const facadeModuleId = chunkInfo.facadeModuleId
-            ? chunkInfo.facadeModuleId
+          const rawModuleId = chunkInfo.facadeModuleId;
+          const facadeModuleId = rawModuleId
+            ? rawModuleId
                 .split('/')
                 .pop()
                 .replace(/\.[jt]sx?$/, '')
