@@ -55,7 +55,7 @@ export default defineConfig({
             ? rawModuleId
                 .split('/')
                 .pop()
-                .replace(/\.[jt]sx?$/, '')
+                ?.replace(/\.[jt]sx?$/, '') || 'chunk'
             : 'chunk';
           return `assets/${facadeModuleId}-[hash].js`;
         },

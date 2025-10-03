@@ -60,9 +60,9 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [expandedIssues, setExpandedIssues] = useState<Set<string>>(new Set());
-  const [filterSeverity, setFilterSeverity] = useState<string>('all');
-  const [filterType, setFilterType] = useState<string>('all');
-  const [showResolved, setShowResolved] = useState(false);
+  const [filterSeverity, _setFilterSeverity] = useState<string>('all');
+  const [filterType, _setFilterType] = useState<string>('all');
+  const [showResolved, _setShowResolved] = useState(false);
 
   // Analysis options
   const [options, setOptions] = useState<ConsistencyCheckOptions>({
@@ -148,7 +148,7 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
         const updatedReport = { ...report, issues: [...report.issues, ...issues] };
         setReport(updatedReport);
       }
-    } catch (error) {
+    } catch (_error) {
       showToast(`Quick ${type} check failed`, 'error');
     } finally {
       setIsAnalyzing(false);
@@ -156,7 +156,7 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
   };
 
   // Toggle issue expansion
-  const toggleIssueExpansion = (issueId: string) => {
+  const _toggleIssueExpansion = (issueId: string) => {
     const newExpanded = new Set(expandedIssues);
     if (newExpanded.has(issueId)) {
       newExpanded.delete(issueId);
@@ -167,7 +167,7 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
   };
 
   // Mark issue as resolved/unresolved
-  const toggleIssueResolution = (issueId: string) => {
+  const _toggleIssueResolution = (issueId: string) => {
     if (!currentProject || !report) return;
 
     const issue = report.issues.find((i) => i.id === issueId);
@@ -192,7 +192,7 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
   };
 
   // Get severity icon and color
-  const getSeverityDisplay = (severity: string) => {
+  const _getSeverityDisplay = (severity: string) => {
     switch (severity) {
       case 'critical':
         return { icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' };
@@ -212,7 +212,7 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
   };
 
   // Get type icon
-  const getTypeIcon = (type: string) => {
+  const _getTypeIcon = (type: string) => {
     switch (type) {
       case 'character':
         return User;
@@ -228,7 +228,7 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
   };
 
   // Filter issues
-  const filteredIssues =
+  const _filteredIssues =
     report?.issues.filter((issue) => {
       if (!showResolved && issue.isResolved) return false;
       if (filterSeverity !== 'all' && issue.severity !== filterSeverity) return false;

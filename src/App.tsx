@@ -1,8 +1,6 @@
 // src/App.tsx — provider composition at the root + clean AppShell
 import React, { useEffect, useState } from 'react';
 
-// Providers
-
 // UI + panels
 import ClaudeAssistant from './components/ClaudeAssistant';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
@@ -11,8 +9,6 @@ import CommandPaletteUI from './components/CommandPalette/CommandPaletteUI';
 import DebugSearchPanel from './components/DebugSearchPanel';
 import ExportDialog from './components/ExportDialog';
 import PlatformLayout from './components/Platform/PlatformLayout';
-
-// Banners / recovery
 import {
   StorageRecoveryBanner,
   OfflineBanner,
@@ -20,9 +16,10 @@ import {
 } from './components/Recovery/StorageRecoveryBanner';
 import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
+// Context and providers
 import { AppProvider, useAppContext } from './context/AppContext';
 import { ClaudeProvider } from './context/ClaudeProvider';
-
+import { useEditorContext } from './context/EditorContext';
 // Services
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
@@ -42,6 +39,7 @@ type QueuedOperation = {
 // All app logic lives here, safely *inside* the providers.
 function AppShell() {
   const { claude, currentProject } = useAppContext();
+  const { insertText } = useEditorContext();
 
   // storage recovery
   const { showRecoveryBanner, dismissRecoveryBanner } = useStorageRecovery();
@@ -122,8 +120,7 @@ function AppShell() {
             <ClaudeAssistant
               selectedText=""
               onInsertText={(text) => {
-                // TODO: wire to current editor
-                console.log('Insert text:', text);
+                insertText(text);
               }}
             />
           </ClaudeErrorBoundary>
@@ -155,8 +152,8 @@ function AppShell() {
         </div>
 
         {/* Dev-only debug panels */}
-        {import.meta.env.DEV && <StorageDebugPanel />}
         {import.meta.env.DEV && <DebugSearchPanel />}
+        {import.meta.env.DEV && <StorageDebugPanel />}
       </PlatformLayout>
     </>
   );

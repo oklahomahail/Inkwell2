@@ -64,11 +64,94 @@ export async function restoreBackup(
       return { success: false, error: 'Backup not found' };
     }
 
-    // TODO: Implement actual restore logic based on your app's needs
-    // This would typically involve restoring the backup.data to your app state
-    console.log('Restoring backup:', backup);
+    if (!backup.data || typeof backup.data !== 'object') {
+      return { success: false, error: 'Invalid backup data format' };
+    }
 
-    return { success: true, message: 'Backup restored successfully' };
+    // Check if the backup contains project data or writing chapters
+    const data = backup.data as any;
+
+    // Restore projects if present
+    if (data.projects && Array.isArray(data.projects)) {
+      try {
+        // Create backup of current state first
+        const currentProjects = localStorage.getItem('inkwell_enhanced_projects');
+        if (currentProjects) {
+          const emergencyBackup: Backup = {
+            id: `emergency_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            type: 'emergency',
+            title: 'Emergency Backup Before Restore',
+            description: `Automatic backup created before restoring backup ${id}`,
+            data: JSON.parse(currentProjects),
+            timestamp: Date.now(),
+          };
+          await saveBackup(emergencyBackup);
+        }
+
+        // Restore the project data
+        localStorage.setItem('inkwell_enhanced_projects', JSON.stringify(data.projects));
+      } catch (error) {
+        return {
+          success: false,
+          error: `Failed to restore projects: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        };
+      }
+    }
+
+    // Restore writing chapters if present
+    if (data.writingChapters && typeof data.writingChapters === 'object') {
+      try {
+        for (const [projectId, chapters] of Object.entries(data.writingChapters)) {
+          if (Array.isArray(chapters)) {
+            const key = `inkwell_writing_chapters_${projectId}`;
+            // Create emergency backup of current writing data
+            const currentChapters = localStorage.getItem(key);
+            if (currentChapters) {
+              const emergencyBackup: Backup = {
+                id: `emergency_chapters_${projectId}_${Date.now()}`,
+                type: 'emergency',
+                title: `Emergency Writing Backup - ${projectId}`,
+                description: `Automatic backup of writing chapters before restore`,
+                data: { projectId, chapters: JSON.parse(currentChapters) },
+                timestamp: Date.now(),
+              };
+              await saveBackup(emergencyBackup);
+            }
+
+            localStorage.setItem(key, JSON.stringify(chapters));
+          }
+        }
+      } catch (error) {
+        return {
+          success: false,
+          error: `Failed to restore writing chapters: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        };
+      }
+    }
+
+    // Restore general app data if present
+    if (data.appData && typeof data.appData === 'object') {
+      try {
+        for (const [key, value] of Object.entries(data.appData)) {
+          if (key.startsWith('inkwell_')) {
+            localStorage.setItem(key, JSON.stringify(value));
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to restore some app data:', error);
+      }
+    }
+
+    // Trigger a page reload to refresh the app state
+    // This ensures all components pick up the restored data
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+
+    return {
+      success: true,
+      message: 'Backup restored successfully! The page will reload to apply changes.',
+    };
   } catch (error) {
     return {
       success: false,
@@ -229,19 +312,84 @@ export function stopAutoBackup(): void {
 }
 
 export async function createManualBackup(
-  data: unknown,
+  data?: unknown,
   title?: string,
   description?: string,
 ): Promise<{ success: boolean; backup?: Backup; error?: string }> {
   try {
+    // If no data provided, create a comprehensive backup of current state
+    let backupData = data;
+    if (!data) {
+      backupData = {
+        // Backup all project data
+        projects: JSON.parse(localStorage.getItem('inkwell_enhanced_projects') || '[]'),
+
+        // Backup all writing chapters for all projects
+        writingChapters: (() => {
+          const chapters: Record<string, any> = {};
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('inkwell_writing_chapters_')) {
+              const projectId = key.replace('inkwell_writing_chapters_', '');
+              const data = localStorage.getItem(key);
+              if (data) {
+                try {
+                  chapters[projectId] = JSON.parse(data);
+                } catch (error) {
+                  console.warn(
+                    `Failed to backup writing chapters for project ${projectId}:`,
+                    error,
+                  );
+                }
+              }
+            }
+          }
+          return chapters;
+        })(),
+
+        // Backup other app data
+        appData: (() => {
+          const appData: Record<string, any> = {};
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (
+              key &&
+              key.startsWith('inkwell_') &&
+              !key.startsWith('inkwell_enhanced_projects') &&
+              !key.startsWith('inkwell_writing_chapters_')
+            ) {
+              const data = localStorage.getItem(key);
+              if (data) {
+                try {
+                  appData[key] = JSON.parse(data);
+                } catch (error) {
+                  // Store as string if it's not JSON
+                  appData[key] = data;
+                }
+              }
+            }
+          }
+          return appData;
+        })(),
+
+        // Metadata about the backup
+        backupMetadata: {
+          version: '1.0',
+          createdBy: 'Inkwell Manual Backup',
+          timestamp: Date.now(),
+          userAgent: navigator.userAgent,
+        },
+      };
+    }
+
     const backup: Backup = {
       id: `manual_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type: 'manual',
       title: title || 'Manual Backup',
-      description: description || 'User-created backup',
-      data,
+      description: description || 'User-created comprehensive backup',
+      data: backupData,
       timestamp: Date.now(),
-      size: new Blob([JSON.stringify(data)]).size,
+      size: new Blob([JSON.stringify(backupData)]).size,
     };
 
     await saveBackup(backup);

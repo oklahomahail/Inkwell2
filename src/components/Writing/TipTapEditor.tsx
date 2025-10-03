@@ -7,6 +7,7 @@ import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect, useRef } from 'react';
 
+import { useEditorContext } from '@/context/EditorContext';
 import { useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
 import { cn } from '@/utils/cn';
 
@@ -32,6 +33,7 @@ export default function TipTapEditor({
   wordCountGoal,
 }: Props) {
   const { isFocusMode, settings, sprint, updateSprintWordCount } = useAdvancedFocusMode();
+  const { setCurrentEditor } = useEditorContext();
 
   const editorWrapperRef = useRef<HTMLDivElement>(null);
   const currentWordCount = useRef(0);
@@ -84,14 +86,23 @@ export default function TipTapEditor({
     },
   });
 
-  // Keep external `value` in sync
+  // Register editor with global context and keep external `value` in sync
   useEffect(() => {
     if (!editor) return;
+
+    // Register this editor as the current active editor
+    setCurrentEditor(editor);
+
     const current = editor.getHTML();
     if (current !== value) {
       editor.commands.setContent(value, { emitUpdate: false });
     }
-  }, [value, editor]);
+
+    // Cleanup: unregister editor when component unmounts or editor changes
+    return () => {
+      setCurrentEditor(null);
+    };
+  }, [value, editor, setCurrentEditor]);
 
   // Typewriter mode: center current paragraph & highlight it
   useEffect(() => {
