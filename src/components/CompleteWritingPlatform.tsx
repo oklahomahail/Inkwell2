@@ -195,7 +195,7 @@ interface BadgeProps {
   className?: string;
 }
 
-const Badge: React.FC<BadgeProps> = ({ children, variant = 'default', className = '' }) => {
+const _Badge: React.FC<BadgeProps> = ({ children, variant = 'default', className = '' }) => {
   return <span className={`badge badge-${variant} ${className}`}>{children}</span>;
 };
 
@@ -207,7 +207,7 @@ interface ProgressProps {
   animated?: boolean;
 }
 
-const Progress: React.FC<ProgressProps> = ({
+const _Progress: React.FC<ProgressProps> = ({
   value = 0,
   max = 100,
   className = '',
@@ -420,16 +420,16 @@ const AIPanel: React.FC<AIPanelProps> = ({ activeTab, onTabChange }) => {
 /** ----------------------------------------------------------------
  * Dashboard Content
  * ---------------------------------------------------------------- */
-const DashboardContent: React.FC = () => {
+const _DashboardContent: React.FC = () => {
   const { currentProject } = useAppContext();
   const { open: openPalette } = useCommandPalette();
   const { isSaving, save, lastSaved } = useSaveOperation();
   const [isLoadingStats] = useState(false);
   const [hasProjects] = useState(!!currentProject);
-  const [hasChapters] = useState(true);
+  const [_hasChapters] = useState(true);
   const deleteConfirmation = useConfirmation();
 
-  const chapters = [
+  const _chapters = [
     { id: '1', title: 'Chapter 1: The Beginning', words: 2500, target: 3000, status: 'complete' },
     {
       id: '2',
@@ -452,7 +452,7 @@ const DashboardContent: React.FC = () => {
   const handleOpenHelp = () => {};
   const handleOpenPlanning = () => {};
 
-  const handleDeleteChapter = (chapterId: string, chapterTitle: string) => {
+  const _handleDeleteChapter = (chapterId: string, chapterTitle: string) => {
     deleteConfirmation.open({
       title: 'Delete Chapter',
       message: `Are you sure you want to delete "${chapterTitle}"? This action cannot be undone.`,
@@ -621,7 +621,7 @@ const DashboardContent: React.FC = () => {
 /** ----------------------------------------------------------------
  * Writing Interface with AI Panel
  * ---------------------------------------------------------------- */
-const WritingInterface: React.FC = () => {
+const _WritingInterface: React.FC = () => {
   const [activeAITab, setActiveAITab] = useState<'chat' | 'analysis' | 'consistency'>('chat');
 
   return (
@@ -659,20 +659,20 @@ const FocusModeWritingInterface: React.FC = () => {
   const {
     settings,
     sprint,
-    sprintProgress,
-    wordsProgress,
+    _sprintProgress,
+    _wordsProgress,
     formatTime,
-    disableFocusMode,
-    startSprint,
-    pauseSprint,
-    resumeSprint,
-    stopSprint,
-    isMuted,
-    toggleMute,
+    _disableFocusMode,
+    _startSprint,
+    _pauseSprint,
+    _resumeSprint,
+    _stopSprint,
+    _isMuted,
+    _toggleMute,
   } = useAdvancedFocusMode();
 
   const [showControls, setShowControls] = useState(true);
-  const [wordCount, setWordCount] = useState(0);
+  const [wordCount, _setWordCount] = useState(0);
 
   useEffect(() => {
     if (!settings.zenMode) return;
@@ -696,11 +696,11 @@ const FocusModeWritingInterface: React.FC = () => {
     };
   }, [settings.zenMode]);
 
-  const wordsWritten = sprint.isActive ? wordCount - sprint.wordsAtStart : 0;
+  const _wordsWritten = sprint.isActive ? wordCount - sprint.wordsAtStart : 0;
 
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 focus-mode">
-      {!isMuted && settings.ambientSound !== 'none' && (
+      {!_isMuted && settings.ambientSound !== 'none' && (
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 opacity-30 animate-pulse" />
       )}
 
@@ -809,7 +809,7 @@ export default function CompleteWritingPlatform() {
     if (tab === 'writing') setTimeout(focusWritingEditor, 100);
   };
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (_event: KeyboardEvent) => {
       // ... your existing logic ...
     };
     document.addEventListener('keydown', handleKeyDown);

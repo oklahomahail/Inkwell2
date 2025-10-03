@@ -1,5 +1,6 @@
 // src/components/Writing/FocusModeEditor.tsx
 import { Editor } from '@tiptap/react';
+import { Play, Pause, Square, Clock, FileText, VolumeX, Volume2 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { useAdvancedFocusMode } from '../../hooks/useAdvancedFocusMode';
@@ -13,8 +14,8 @@ interface FocusModeEditorProps {
 
 export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
   editor,
-  content,
-  onContentChange,
+  _content,
+  _onContentChange,
   wordCount,
 }) => {
   const {
@@ -450,5 +451,3 @@ const SprintCompletionModal: React.FC<SprintCompletionModalProps> = ({
   );
 };
 
-// Import required icons
-import { Play, Pause, Square, Clock, FileText, VolumeX, Volume2 } from 'lucide-react';

@@ -17,7 +17,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   className = '',
 }) => {
   const [query, setQuery] = useState('');
-  const navigation = useNavigation();
+  const _navigation = useNavigation();
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {

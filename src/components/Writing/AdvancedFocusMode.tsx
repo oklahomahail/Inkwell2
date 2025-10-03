@@ -29,8 +29,8 @@ interface AdvancedFocusModeProps {
 }
 
 export function AdvancedFocusMode({
-  isActive,
-  onToggle,
+  _isActive,
+  _onToggle,
   currentWordCount,
   children,
 }: AdvancedFocusModeProps) {
@@ -49,8 +49,8 @@ export function AdvancedFocusMode({
     stopSprint,
     updateSprintWordCount,
     sprintProgress,
-    wordsProgress,
-    sessionStats,
+    _wordsProgress,
+    _sessionStats,
     isMuted,
     toggleMute,
     ambientSounds,
