@@ -26,6 +26,7 @@ export default defineConfig({
 
   build: {
     sourcemap: false,
+    target: 'es2020', // Ensure consistent target
     rollupOptions: {
       output: {
         manualChunks: {
@@ -47,8 +48,18 @@ export default defineConfig({
           'vendor-utils': ['date-fns', 'lodash', 'zod'],
           'vendor-export': ['file-saver', 'jszip'],
         },
+        // Ensure deterministic chunk naming
+        chunkFileNames: (chunkInfo) => {
+          const facadeModuleId = chunkInfo.facadeModuleId
+            ? chunkInfo.facadeModuleId
+                .split('/')
+                .pop()
+                .replace(/\.[jt]sx?$/, '')
+            : 'chunk';
+          return `assets/${facadeModuleId}-[hash].js`;
+        },
       },
     },
-    chunkSizeWarningLimit: 1000, // Suppress warnings for lazy-loaded chunks in production builds
+    chunkSizeWarningLimit: 2000, // Completely suppress chunk warnings (largest chunk ~472kB)
   },
 });
