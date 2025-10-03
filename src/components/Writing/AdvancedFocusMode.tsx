@@ -22,8 +22,8 @@ import React, { useState } from 'react';
 import { useAdvancedFocusMode } from '../../hooks/useAdvancedFocusMode';
 
 interface AdvancedFocusModeProps {
-  isActive: boolean;
-  onToggle: () => void;
+  _isActive: boolean;
+  _onToggle: () => void;
   currentWordCount: number;
   children: React.ReactNode;
 }
@@ -49,8 +49,8 @@ export function AdvancedFocusMode({
     stopSprint,
     updateSprintWordCount,
     sprintProgress,
-    _wordsProgress,
-    _sessionStats,
+    wordsProgress: _wordsProgress,
+    sessionStats: _sessionStats,
     isMuted,
     toggleMute,
     ambientSounds,

@@ -125,7 +125,7 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
     });
 
     // Calculate story health
-    const totalWords = chaptersAnalysis.reduce((sum, ch) => sum + ch.wordCount, 0);
+    const _totalWords = chaptersAnalysis.reduce((sum, ch) => sum + ch.wordCount, 0);
     const completedChapters = chaptersAnalysis.filter(
       (ch) => ch.completionStatus === 'complete',
     ).length;

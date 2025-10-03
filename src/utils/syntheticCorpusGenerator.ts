@@ -415,7 +415,7 @@ export class SyntheticCorpusGenerator {
   private generateSceneContent(
     targetWords: number,
     elements: { characters: string[]; locations: string[]; concepts: string[] },
-    genre: GenreKey,
+    _genre: GenreKey,
   ): string {
     const paragraphs: string[] = [];
     let currentWords = 0;

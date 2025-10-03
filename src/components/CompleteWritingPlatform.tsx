@@ -659,16 +659,16 @@ const FocusModeWritingInterface: React.FC = () => {
   const {
     settings,
     sprint,
-    _sprintProgress,
-    _wordsProgress,
+    sprintProgress: _sprintProgress,
+    wordsProgress: _wordsProgress,
     formatTime,
-    _disableFocusMode,
-    _startSprint,
-    _pauseSprint,
-    _resumeSprint,
-    _stopSprint,
-    _isMuted,
-    _toggleMute,
+    disableFocusMode: _disableFocusMode,
+    startSprint: _startSprint,
+    pauseSprint: _pauseSprint,
+    resumeSprint: _resumeSprint,
+    stopSprint: _stopSprint,
+    isMuted,
+    toggleMute: _toggleMute,
   } = useAdvancedFocusMode();
 
   const [showControls, setShowControls] = useState(true);
@@ -700,7 +700,7 @@ const FocusModeWritingInterface: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 focus-mode">
-      {!_isMuted && settings.ambientSound !== 'none' && (
+      {!isMuted && settings.ambientSound !== 'none' && (
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 opacity-30 animate-pulse" />
       )}
 
@@ -790,7 +790,7 @@ export default function CompleteWritingPlatform() {
       <WritingPanel
         draftText={draftText}
         onChangeText={handleChangeText as any}
-        onTextSelect={handleTextSelect as any}
+        _onTextSelect={handleTextSelect as any}
         selectedText={selectedText}
       />
     ),

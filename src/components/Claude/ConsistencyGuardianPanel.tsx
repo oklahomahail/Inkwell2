@@ -148,7 +148,8 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
         const updatedReport = { ...report, issues: [...report.issues, ...issues] };
         setReport(updatedReport);
       }
-    } catch (_error) {
+    } catch (error) {
+      console.error(`Quick ${type} check failed:`, error);
       showToast(`Quick ${type} check failed`, 'error');
     } finally {
       setIsAnalyzing(false);

@@ -57,7 +57,8 @@ export const StorageRecoveryBanner: React.FC<StorageRecoveryBannerProps> = ({ on
       if (!newQuotaInfo.isCritical) {
         setStorageError(null);
       }
-    } catch (_error) {
+    } catch (error) {
+      console.error('Cleanup failed:', error);
       showToast('Cleanup failed. Please try manual backup.', 'error');
     } finally {
       setIsCleaningUp(false);
@@ -77,7 +78,8 @@ export const StorageRecoveryBanner: React.FC<StorageRecoveryBannerProps> = ({ on
       } else {
         showToast('No projects found to backup', 'warning');
       }
-    } catch (_error) {
+    } catch (error) {
+      console.error('Backup download failed:', error);
       showToast('Backup download failed', 'error');
     } finally {
       setIsDownloading(false);
@@ -99,7 +101,8 @@ export const StorageRecoveryBanner: React.FC<StorageRecoveryBannerProps> = ({ on
       // Refresh quota info
       const newQuotaInfo = await quotaAwareStorage.getQuotaInfo();
       setQuotaInfo(newQuotaInfo);
-    } catch (_error) {
+    } catch (error) {
+      console.error('Failed to clear snapshots:', error);
       showToast('Failed to clear snapshots', 'error');
     }
   };
@@ -108,10 +111,8 @@ export const StorageRecoveryBanner: React.FC<StorageRecoveryBannerProps> = ({ on
   if (!quotaInfo || (!quotaInfo.isNearLimit && !storageError)) {
     return null;
   }
-  // const isQuotaIssue = quotaInfo.isCritical || quotaInfo.isNearLimit;
-  // const isStorageError = storageError !== null;
-  const isQuotaIssue = quotaInfo.isCritical || quotaInfo.isNearLimit;
-  const isStorageError = storageError !== null;
+  const _isQuotaIssue = quotaInfo.isCritical || quotaInfo.isNearLimit;
+  const _isStorageError = storageError !== null;
 
   return (
     <div

@@ -51,7 +51,7 @@ const ViewSwitcher: React.FC = () => {
         <WritingPanel
           draftText={draftText}
           onChangeText={handleTextChange}
-          onTextSelect={handleTextSelect}
+          _onTextSelect={handleTextSelect}
           selectedText={selectedText}
         />
       );

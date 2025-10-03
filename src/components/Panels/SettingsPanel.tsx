@@ -83,7 +83,8 @@ const SettingsPanel: React.FC = () => {
     try {
       claudeService.updateConfig?.(claudeConfig);
       showToast('Claude configuration updated', 'success');
-    } catch (_error) {
+    } catch (error) {
+      console.error('Failed to update Claude configuration:', error);
       showToast('Failed to update Claude configuration', 'error');
     }
   };

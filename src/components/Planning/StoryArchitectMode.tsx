@@ -31,7 +31,7 @@ export const StoryArchitectMode: React.FC<StoryArchitectModeProps> = ({
 
   const [currentTheme, setCurrentTheme] = useState('');
   const { showToast } = useToast();
-  const { isLoading } = useLoading();
+  const { isLoading: _isLoading } = useLoading();
 
   // Local loading state since useLoading doesn't have setIsLoading
   const [isGenerating, setIsGenerating] = useState(false);

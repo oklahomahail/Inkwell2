@@ -7,8 +7,8 @@ import { useAdvancedFocusMode } from '../../hooks/useAdvancedFocusMode';
 
 interface FocusModeEditorProps {
   editor: Editor | null;
-  content: string;
-  onContentChange: (content: string) => void;
+  _content: string;
+  _onContentChange: (content: string) => void;
   wordCount: number;
 }
 
@@ -25,7 +25,7 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
     sprintProgress,
     wordsProgress,
     formatTime,
-    enableFocusMode,
+    enableFocusMode: _enableFocusMode,
     disableFocusMode,
     startSprint,
     pauseSprint,
@@ -88,14 +88,13 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
       const selection = editor.state.selection;
       const currentPos = selection.$anchor.pos;
       const resolvedPos = editor.state.doc.resolve(currentPos);
-      const currentNode = resolvedPos.parent;
+      const _currentNode = resolvedPos.parent;
 
       // Find the current paragraph element
       const paragraphElements = editorElement.querySelectorAll('p');
       let currentParagraphIndex = 0;
 
       // Calculate which paragraph the cursor is in
-      let nodePos = 0;
       editor.state.doc.descendants((node, pos) => {
         if (node.type.name === 'paragraph') {
           if (pos <= currentPos && currentPos <= pos + node.nodeSize) {
@@ -103,7 +102,7 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
           }
           currentParagraphIndex++;
         }
-        nodePos = pos;
+        return true;
       });
 
       const currentParagraph = paragraphElements[currentParagraphIndex];
@@ -115,7 +114,7 @@ export const FocusModeEditor: React.FC<FocusModeEditorProps> = ({
         currentParagraph.classList.add('is-editor-focused');
 
         // Scroll to center the current line
-        const editorRect = editorElement.getBoundingClientRect();
+        const _editorRect = editorElement.getBoundingClientRect();
         const paragraphRect = currentParagraph.getBoundingClientRect();
         const viewportCenter = window.innerHeight / 2;
         const paragraphCenter = paragraphRect.top + paragraphRect.height / 2;
@@ -450,4 +449,3 @@ const SprintCompletionModal: React.FC<SprintCompletionModalProps> = ({
     </div>
   );
 };
-

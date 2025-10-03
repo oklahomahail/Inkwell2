@@ -22,7 +22,7 @@ import { generateId } from '@/utils/idUtils';
 interface WritingPanelProps {
   draftText: string;
   onChangeText: (text: string) => void;
-  onTextSelect: () => void;
+  _onTextSelect: () => void;
   selectedText: string;
 }
 
