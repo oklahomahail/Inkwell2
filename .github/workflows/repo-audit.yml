@@ -1,1 +1,80 @@
-<paste repo-audit.yml here>
+name: Repository Audit
+
+on:
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    # Allow manual trigger
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run repository audit
+        run: pnpm repo:audit
+
+      - name: Upload audit reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audit-reports
+          path: reports/
+          retention-days: 30
+
+      - name: Comment on PR with audit results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'reports/';
+            
+            let comment = '## 📊 Repository Audit Results\n\n';
+            
+            if (fs.existsSync(path + 'knip.txt')) {
+              const knipResults = fs.readFileSync(path + 'knip.txt', 'utf8');
+              comment += '### Unused Dependencies\n```\n' + knipResults.slice(0, 1000) + '\n```\n\n';
+            }
+            
+            if (fs.existsSync(path + 'madge-cycles.txt')) {
+              const cycleResults = fs.readFileSync(path + 'madge-cycles.txt', 'utf8');
+              if (cycleResults.trim()) {
+                comment += '### Circular Dependencies\n```\n' + cycleResults + '\n```\n\n';
+              } else {
+                comment += '### Circular Dependencies\n✅ No circular dependencies found\n\n';
+              }
+            }
+            
+            comment += '### Full Reports\nDownload the complete audit reports from the job artifacts.';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
