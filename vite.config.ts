@@ -49,6 +49,6 @@ export default defineConfig({
         },
       },
     },
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 800, // Higher limit for lazy-loaded chunks (TipTap: 345kB, Recharts: 472kB)
   },
 });
