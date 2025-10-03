@@ -1,4 +1,4 @@
-// src/components/Writing/EnhancedWritingEditor.tsx - Fixed version
+// src/components/Writing/EnhancedWritingEditor.tsx - Fixed version with consistency checking
 import CharacterCount from '@tiptap/extension-character-count';
 import Placeholder from '@tiptap/extension-placeholder';
 import Typography from '@tiptap/extension-typography';
@@ -15,6 +15,7 @@ import {
   Focus,
   Bot,
   FileText,
+  AlertTriangle,
 } from 'lucide-react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
@@ -24,9 +25,19 @@ import { storageService } from '../../services/storageService';
 import { Scene, Chapter } from '../../types/writing';
 import { debounce as debounceUtil } from '../../utils/debounce';
 import { focusWritingEditor } from '../../utils/focusUtils';
+import ConsistencyIssuesPanel from '../editor/ConsistencyIssuesPanel';
+import ConsistencyExtension from '../editor/extensions/ConsistencyExtension';
 
 import ClaudeToolbar from './ClaudeToolbar';
 import SceneNavigationPanel from './SceneNavigationPanel';
+
+import type {
+  EditorIssue,
+  ConsistencyDecorationOptions,
+} from '../../services/editorConsistencyDecorator';
+
+// Import the consistency styles
+import '../../styles/consistency-issues.css';
 
 interface EnhancedWritingEditorProps {
   className?: string;
@@ -41,6 +52,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
   const [showScenePanel, setShowScenePanel] = useState(true);
   const [showAIPanel, setShowAIPanel] = useState(true);
+  const [showConsistencyPanel, setShowConsistencyPanel] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [showWordGoal, setShowWordGoal] = useState(false);
   const [wordGoal, setWordGoal] = useState(500);
@@ -50,7 +62,35 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [manuscriptPreview, setManuscriptPreview] = useState(false);
 
+  // Consistency checking state
+  const [consistencyEnabled, setConsistencyEnabled] = useState(true);
+  const [consistencyIssues, setConsistencyIssues] = useState<EditorIssue[]>([]);
+  const [consistencyOptions, setConsistencyOptions] = useState<
+    Partial<ConsistencyDecorationOptions>
+  >({});
+
   const editorRef = useRef<HTMLDivElement>(null);
+
+  // Consistency extension handlers
+  const handleConsistencyIssuesUpdated = useCallback((issues: EditorIssue[]) => {
+    setConsistencyIssues(issues);
+  }, []);
+
+  const handleConsistencyIssueClick = useCallback(
+    (issue: EditorIssue) => {
+      if (editor && issue.startPos >= 0 && issue.endPos >= 0) {
+        // Navigate to the issue location in the editor
+        editor.commands.focus();
+        editor.commands.setTextSelection({ from: issue.startPos, to: issue.endPos });
+
+        // Show the consistency panel if not already shown
+        if (!showConsistencyPanel) {
+          setShowConsistencyPanel(true);
+        }
+      }
+    },
+    [editor, showConsistencyPanel],
+  );
 
   // TipTap Editor
   const editor = useEditor({
@@ -68,6 +108,15 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
         limit: 100000,
       }),
       Typography,
+      ConsistencyExtension.configure({
+        project: currentProject,
+        scene: currentScene,
+        chapter: currentChapter,
+        enabled: consistencyEnabled,
+        decorationOptions: consistencyOptions,
+        onIssuesUpdated: handleConsistencyIssuesUpdated,
+        onIssueClicked: handleConsistencyIssueClick,
+      }),
     ],
     content: currentScene?.content || '',
     onUpdate: ({ editor }) => {
@@ -174,6 +223,45 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
 
     loadInitialScene();
   }, [currentProject, editor, showToast]);
+
+  // Update consistency extension when context changes
+  useEffect(() => {
+    if (editor && currentProject && currentScene && currentChapter) {
+      editor.commands.updateConsistencyContext(currentProject, currentScene, currentChapter);
+    }
+  }, [editor, currentProject, currentScene, currentChapter]);
+
+  // Update consistency extension options
+  useEffect(() => {
+    if (editor) {
+      editor.commands.updateDecorationOptions(consistencyOptions);
+    }
+  }, [editor, consistencyOptions]);
+
+  // Consistency handlers
+  const handleToggleConsistency = useCallback(
+    (enabled: boolean) => {
+      setConsistencyEnabled(enabled);
+      if (editor) {
+        editor.commands.toggleConsistencyChecking();
+      }
+    },
+    [editor],
+  );
+
+  const handleUpdateConsistencyOptions = useCallback(
+    (options: Partial<ConsistencyDecorationOptions>) => {
+      setConsistencyOptions((prev) => ({ ...prev, ...options }));
+    },
+    [],
+  );
+
+  const handleRefreshConsistencyAnalysis = useCallback(() => {
+    if (editor && currentProject && currentScene && currentChapter) {
+      editor.commands.updateConsistencyContext(currentProject, currentScene, currentChapter);
+      showToast('Consistency analysis refreshed', 'success');
+    }
+  }, [editor, currentProject, currentScene, currentChapter, showToast]);
 
   // Handle scene selection
   const handleSceneSelect = (scene: Scene, chapter: Chapter) => {
@@ -308,6 +396,23 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
                 <Bot size={18} />
               </button>
 
+              <button
+                onClick={() => setShowConsistencyPanel(!showConsistencyPanel)}
+                className={`relative p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors ${
+                  consistencyIssues.length > 0 && consistencyEnabled
+                    ? 'text-orange-600 dark:text-orange-400'
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
+                title={showConsistencyPanel ? 'Hide consistency panel' : 'Show consistency panel'}
+              >
+                <AlertTriangle size={18} />
+                {consistencyIssues.length > 0 && consistencyEnabled && (
+                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {consistencyIssues.length > 9 ? '9+' : consistencyIssues.length}
+                  </span>
+                )}
+              </button>
+
               {/* Current scene info */}
               {currentScene && (
                 <div className="flex items-center space-x-2">
@@ -376,8 +481,8 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
               <button
                 onClick={() => setManuscriptPreview(!manuscriptPreview)}
                 className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors ${
-                  manuscriptPreview 
-                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' 
+                  manuscriptPreview
+                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
                     : 'text-gray-600 dark:text-gray-400'
                 }`}
                 title="Toggle manuscript preview"
@@ -400,9 +505,11 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
         {/* Editor Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Main Editor */}
-          <div className={`flex-1 overflow-y-auto ${showAIPanel ? 'pr-4' : ''} ${
-            manuscriptPreview ? 'bg-white dark:bg-gray-100' : ''
-          }`}>
+          <div
+            className={`flex-1 overflow-y-auto ${
+              showAIPanel || showConsistencyPanel ? 'pr-4' : ''
+            } ${manuscriptPreview ? 'bg-white dark:bg-gray-100' : ''}`}
+          >
             <div
               className={`
               max-w-none mx-auto p-8
@@ -450,6 +557,22 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
               </div>
             </div>
           )}
+
+          {/* Consistency Panel */}
+          {showConsistencyPanel && !isFocusMode && (
+            <div className="w-96 border-l border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 overflow-y-auto">
+              <ConsistencyIssuesPanel
+                issues={consistencyIssues}
+                isEnabled={consistencyEnabled}
+                options={consistencyOptions}
+                onToggleEnabled={handleToggleConsistency}
+                onUpdateOptions={handleUpdateConsistencyOptions}
+                onIssueClick={handleConsistencyIssueClick}
+                onRefreshAnalysis={handleRefreshConsistencyAnalysis}
+                className="h-full"
+              />
+            </div>
+          )}
         </div>
 
         {/* Focus mode exit hint */}
@@ -480,11 +603,10 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
           }}
         />
       )}
-    </div>
-    
-    {/* Manuscript Preview Styles */}
-    {manuscriptPreview && (
-      <style>{`
+
+      {/* Manuscript Preview Styles */}
+      {manuscriptPreview && (
+        <style>{`
         .manuscript-preview {
           /* Standard manuscript formatting */
           max-width: 8.5in !important;
@@ -596,7 +718,8 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
           color: black !important;
         }
       `}</style>
-    )}
+      )}
+    </div>
   );
 };
 

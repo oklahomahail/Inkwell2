@@ -83,7 +83,7 @@ class TimelineService {
   }
 
   /** Generate timeline items from Story Architect outline */
-  generateTimelineFromOutline(outline: GeneratedOutline, projectId: string): TimelineItem[] {
+  generateTimelineFromOutline(outline: GeneratedOutline, _projectId: string): TimelineItem[] {
     const items: TimelineItem[] = [];
     let orderIndex = 1;
 
@@ -495,13 +495,13 @@ class TimelineService {
   /** Link a scene to timeline events */
   async linkScene(projectId: string, sceneId: string, eventId: string): Promise<void> {
     const items = await this.getProjectTimeline(projectId);
-    const event = items.find(item => item.id === eventId);
-    
+    const event = items.find((item) => item.id === eventId);
+
     if (event) {
       event.sceneId = sceneId;
       event.updatedAt = new Date();
       await this.saveProjectTimeline(projectId, items);
-      
+
       this.trackEvent('scene_linked_to_timeline', {
         projectId,
         sceneId,
@@ -514,13 +514,13 @@ class TimelineService {
   /** Unlink a scene from timeline events */
   async unlinkScene(projectId: string, sceneId: string, eventId: string): Promise<void> {
     const items = await this.getProjectTimeline(projectId);
-    const event = items.find(item => item.id === eventId);
-    
+    const event = items.find((item) => item.id === eventId);
+
     if (event && event.sceneId === sceneId) {
       delete event.sceneId;
       event.updatedAt = new Date();
       await this.saveProjectTimeline(projectId, items);
-      
+
       this.trackEvent('scene_unlinked_from_timeline', {
         projectId,
         sceneId,
@@ -533,30 +533,35 @@ class TimelineService {
   /** Get timeline events linked to a specific scene */
   async getEventsForScene(projectId: string, sceneId: string): Promise<TimelineItem[]> {
     const items = await this.getProjectTimeline(projectId);
-    return items.filter(item => item.sceneId === sceneId);
+    return items.filter((item) => item.sceneId === sceneId);
   }
 
   /** Get scenes referenced by timeline events (requires project data) */
-  async getScenesForEvents(projectId: string, eventIds: string[]): Promise<Array<{ eventId: string; sceneId?: string; title?: string }>> {
+  async getScenesForEvents(
+    projectId: string,
+    eventIds: string[],
+  ): Promise<Array<{ eventId: string; sceneId?: string; title?: string }>> {
     const items = await this.getProjectTimeline(projectId);
-    return eventIds.map(eventId => {
-      const event = items.find(item => item.id === eventId);
+    return eventIds.map((eventId) => {
+      const event = items.find((item) => item.id === eventId);
       return {
         eventId,
         sceneId: event?.sceneId,
-        title: event?.title
+        title: event?.title,
       };
     });
   }
 
   /** Check for timeline consistency issues specific to scene linkage */
-  async checkSceneLinkageConsistency(projectId: string): Promise<Array<{
-    type: 'orphan-event' | 'missing-scene' | 'chronological-mismatch';
-    eventId: string;
-    sceneId?: string;
-    issue: string;
-    suggestion: string;
-  }>> {
+  async checkSceneLinkageConsistency(projectId: string): Promise<
+    Array<{
+      type: 'orphan-event' | 'missing-scene' | 'chronological-mismatch';
+      eventId: string;
+      sceneId?: string;
+      issue: string;
+      suggestion: string;
+    }>
+  > {
     const items = await this.getProjectTimeline(projectId);
     const issues: Array<{
       type: 'orphan-event' | 'missing-scene' | 'chronological-mismatch';
@@ -567,36 +572,43 @@ class TimelineService {
     }> = [];
 
     // Find events that should be linked to scenes but aren't
-    const plotEvents = items.filter(item => 
-      (item.eventType === 'plot' || item.eventType === 'character') && 
-      item.importance === 'major' && 
-      !item.sceneId
+    const plotEvents = items.filter(
+      (item) =>
+        (item.eventType === 'plot' || item.eventType === 'character') &&
+        item.importance === 'major' &&
+        !item.sceneId,
     );
 
-    plotEvents.forEach(event => {
+    plotEvents.forEach((event) => {
       issues.push({
         type: 'orphan-event',
         eventId: event.id,
         issue: `Major ${event.eventType} event "${event.title}" is not linked to any scene`,
-        suggestion: `Link this event to the scene where it occurs for better navigation and consistency tracking`
+        suggestion: `Link this event to the scene where it occurs for better navigation and consistency tracking`,
       });
     });
 
     // Check chronological order of linked scenes (simplified)
-    const linkedEvents = items.filter(item => item.sceneId).sort((a, b) => a.start - b.start);
+    const linkedEvents = items.filter((item) => item.sceneId).sort((a, b) => a.start - b.start);
     for (let i = 1; i < linkedEvents.length; i++) {
       const prev = linkedEvents[i - 1];
       const current = linkedEvents[i];
-      
-      if (prev && current && prev.sceneId && current.sceneId && 
-          prev.sceneId === current.sceneId && 
-          Math.abs(current.start - prev.start) > 10) {
+
+      if (
+        prev &&
+        current &&
+        prev.sceneId &&
+        current.sceneId &&
+        prev.sceneId === current.sceneId &&
+        Math.abs(current.start - prev.start) > 10
+      ) {
         issues.push({
           type: 'chronological-mismatch',
           eventId: current.id,
           sceneId: current.sceneId,
           issue: `Events in scene "${current.sceneId}" are spread far apart in timeline (positions ${prev.start} and ${current.start})`,
-          suggestion: 'Consider if these events should be in separate scenes or if the timeline positions need adjustment'
+          suggestion:
+            'Consider if these events should be in separate scenes or if the timeline positions need adjustment',
         });
       }
     }
@@ -605,38 +617,44 @@ class TimelineService {
   }
 
   /** Navigation helper: Get next/previous linked scenes */
-  async getSceneNavigation(projectId: string, currentSceneId: string): Promise<{
+  async getSceneNavigation(
+    projectId: string,
+    currentSceneId: string,
+  ): Promise<{
     previous?: { sceneId: string; eventTitle: string };
     next?: { sceneId: string; eventTitle: string };
   }> {
     const items = await this.getProjectTimeline(projectId);
-    const linkedEvents = items.filter(item => item.sceneId).sort((a, b) => a.start - b.start);
-    
-    const currentIndex = linkedEvents.findIndex(item => item.sceneId === currentSceneId);
+    const linkedEvents = items.filter((item) => item.sceneId).sort((a, b) => a.start - b.start);
+
+    const currentIndex = linkedEvents.findIndex((item) => item.sceneId === currentSceneId);
     if (currentIndex === -1) return {};
 
-    const result: { previous?: { sceneId: string; eventTitle: string }; next?: { sceneId: string; eventTitle: string } } = {};
-    
+    const result: {
+      previous?: { sceneId: string; eventTitle: string };
+      next?: { sceneId: string; eventTitle: string };
+    } = {};
+
     if (currentIndex > 0 && linkedEvents[currentIndex - 1]) {
       const prev = linkedEvents[currentIndex - 1];
       if (prev && prev.sceneId) {
         result.previous = {
           sceneId: prev.sceneId,
-          eventTitle: prev.title
+          eventTitle: prev.title,
         };
       }
     }
-    
+
     if (currentIndex < linkedEvents.length - 1 && linkedEvents[currentIndex + 1]) {
       const next = linkedEvents[currentIndex + 1];
       if (next && next.sceneId) {
         result.next = {
           sceneId: next.sceneId,
-          eventTitle: next.title
+          eventTitle: next.title,
         };
       }
     }
-    
+
     return result;
   }
 

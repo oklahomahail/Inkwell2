@@ -38,7 +38,9 @@ const SettingsPanel: React.FC = () => {
   });
 
   // Phrase Hygiene Settings
-  const [phraseSettings, setPhraseSettings] = useState<PhraseHygieneSettings>(DEFAULT_PHRASE_HYGIENE_SETTINGS);
+  const [phraseSettings, setPhraseSettings] = useState<PhraseHygieneSettings>(
+    DEFAULT_PHRASE_HYGIENE_SETTINGS,
+  );
   const [customPhraseInput, setCustomPhraseInput] = useState('');
 
   // Snapshots dialog
@@ -141,7 +143,7 @@ const SettingsPanel: React.FC = () => {
 
   const handleAddCustomPhrase = () => {
     if (!customPhraseInput.trim() || !state.currentProject) return;
-    
+
     phraseAnalysisService.addToCustomStoplist(state.currentProject.id, customPhraseInput.trim());
     const updatedSettings = phraseAnalysisService.getSettings(state.currentProject.id);
     setPhraseSettings(updatedSettings);
@@ -151,7 +153,7 @@ const SettingsPanel: React.FC = () => {
 
   const handleRemoveCustomPhrase = (phrase: string) => {
     if (!state.currentProject) return;
-    
+
     phraseAnalysisService.removeFromCustomStoplist(state.currentProject.id, phrase);
     const updatedSettings = phraseAnalysisService.getSettings(state.currentProject.id);
     setPhraseSettings(updatedSettings);
@@ -490,26 +492,32 @@ const SettingsPanel: React.FC = () => {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="text-sm font-medium text-gray-300">Enable phrase detection</label>
-                  <p className="text-xs text-gray-500">Automatically detect overused phrases in your writing</p>
+                  <label className="text-sm font-medium text-gray-300">
+                    Enable phrase detection
+                  </label>
+                  <p className="text-xs text-gray-500">
+                    Automatically detect overused phrases in your writing
+                  </p>
                 </div>
                 <input
                   type="checkbox"
                   checked={phraseSettings.enabled}
-                  onChange={(e) => setPhraseSettings({ ...phraseSettings, enabled: e.target.checked })}
+                  onChange={(e) =>
+                    setPhraseSettings({ ...phraseSettings, enabled: e.target.checked })
+                  }
                   className="w-4 h-4 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"
                 />
               </div>
 
               {phraseSettings.enabled && (
-                <>
+                <div>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
                         N-gram sizes (word phrase lengths to check)
                       </label>
                       <div className="flex gap-2">
-                        {[2, 3, 4, 5].map(size => (
+                        {[2, 3, 4, 5].map((size) => (
                           <label key={size} className="flex items-center text-sm text-gray-300">
                             <input
                               type="checkbox"
@@ -517,7 +525,7 @@ const SettingsPanel: React.FC = () => {
                               onChange={(e) => {
                                 const newSizes = e.target.checked
                                   ? [...phraseSettings.ngramSizes, size].sort()
-                                  : phraseSettings.ngramSizes.filter(s => s !== size);
+                                  : phraseSettings.ngramSizes.filter((s) => s !== size);
                                 setPhraseSettings({ ...phraseSettings, ngramSizes: newSizes });
                               }}
                               className="mr-1 w-3 h-3 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"
@@ -539,10 +547,12 @@ const SettingsPanel: React.FC = () => {
                         <input
                           type="number"
                           value={phraseSettings.minOccurrences}
-                          onChange={(e) => setPhraseSettings({ 
-                            ...phraseSettings, 
-                            minOccurrences: Math.max(1, parseInt(e.target.value) || 2)
-                          })}
+                          onChange={(e) =>
+                            setPhraseSettings({
+                              ...phraseSettings,
+                              minOccurrences: Math.max(1, parseInt(e.target.value) || 2),
+                            })
+                          }
                           min={1}
                           max={20}
                           className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6]"
@@ -563,13 +573,15 @@ const SettingsPanel: React.FC = () => {
                           <input
                             type="number"
                             value={phraseSettings.thresholds.low}
-                            onChange={(e) => setPhraseSettings({ 
-                              ...phraseSettings, 
-                              thresholds: { 
-                                ...phraseSettings.thresholds, 
-                                low: Math.max(0.1, parseFloat(e.target.value) || 0.5) 
-                              }
-                            })}
+                            onChange={(e) =>
+                              setPhraseSettings({
+                                ...phraseSettings,
+                                thresholds: {
+                                  ...phraseSettings.thresholds,
+                                  low: Math.max(0.1, parseFloat(e.target.value) || 0.5),
+                                },
+                              })
+                            }
                             step={0.1}
                             min={0.1}
                             max={10}
@@ -581,13 +593,15 @@ const SettingsPanel: React.FC = () => {
                           <input
                             type="number"
                             value={phraseSettings.thresholds.medium}
-                            onChange={(e) => setPhraseSettings({ 
-                              ...phraseSettings, 
-                              thresholds: { 
-                                ...phraseSettings.thresholds, 
-                                medium: Math.max(0.1, parseFloat(e.target.value) || 1.0) 
-                              }
-                            })}
+                            onChange={(e) =>
+                              setPhraseSettings({
+                                ...phraseSettings,
+                                thresholds: {
+                                  ...phraseSettings.thresholds,
+                                  medium: Math.max(0.1, parseFloat(e.target.value) || 1.0),
+                                },
+                              })
+                            }
                             step={0.1}
                             min={0.1}
                             max={10}
@@ -599,13 +613,15 @@ const SettingsPanel: React.FC = () => {
                           <input
                             type="number"
                             value={phraseSettings.thresholds.high}
-                            onChange={(e) => setPhraseSettings({ 
-                              ...phraseSettings, 
-                              thresholds: { 
-                                ...phraseSettings.thresholds, 
-                                high: Math.max(0.1, parseFloat(e.target.value) || 2.0) 
-                              }
-                            })}
+                            onChange={(e) =>
+                              setPhraseSettings({
+                                ...phraseSettings,
+                                thresholds: {
+                                  ...phraseSettings.thresholds,
+                                  high: Math.max(0.1, parseFloat(e.target.value) || 2.0),
+                                },
+                              })
+                            }
                             step={0.1}
                             min={0.1}
                             max={10}
@@ -656,12 +672,13 @@ const SettingsPanel: React.FC = () => {
                         </div>
                       )}
                       <p className="text-xs text-gray-500 mt-1">
-                        Add phrases that should not be flagged as overused (e.g., character names, specific terminology)
+                        Add phrases that should not be flagged as overused (e.g., character names,
+                        specific terminology)
                       </p>
                     </div>
-                  </>
-                )}
-              </div>
+                  </div>
+                </div>
+              )}
 
               <button
                 onClick={handlePhraseSettingsUpdate}
