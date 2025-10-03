@@ -34,6 +34,6 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      # Pick whichever script you prefer; --if-present avoids hard failures
+      # Run linting with fallback to relaxed mode if needed
       - name: Lint
-        run: pnpm run lint --if-present || pnpm run lint:relaxed --if-present
+        run: pnpm run lint || pnpm run lint:relaxed
