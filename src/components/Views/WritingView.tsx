@@ -1,12 +1,26 @@
 // src/components/Views/WritingView.tsx - Integration component for your ViewSwitcher
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 
-import EnhancedWritingEditor from '../Writing/EnhancedWritingEditor';
+// Lazy load the heavy writing editor
+const EnhancedWritingEditor = lazy(() => import('../Writing/EnhancedWritingEditor'));
+
+function WritingLoadingFallback() {
+  return (
+    <div className="h-full flex items-center justify-center bg-white dark:bg-gray-900">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <p className="text-gray-500 dark:text-gray-400">Loading writing editor...</p>
+      </div>
+    </div>
+  );
+}
 
 const WritingView: React.FC = () => {
   return (
     <div className="h-full bg-white dark:bg-gray-900">
-      <EnhancedWritingEditor className="h-full" />
+      <Suspense fallback={<WritingLoadingFallback />}>
+        <EnhancedWritingEditor className="h-full" />
+      </Suspense>
     </div>
   );
 };

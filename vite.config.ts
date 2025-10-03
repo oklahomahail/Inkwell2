@@ -26,5 +26,29 @@ export default defineConfig({
 
   build: {
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks for better caching
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-ui': ['lucide-react', 'clsx', 'tailwind-merge'],
+          // Heavy dependencies get their own chunks
+          'vendor-tiptap': [
+            '@tiptap/core',
+            '@tiptap/react',
+            '@tiptap/starter-kit',
+            '@tiptap/extension-character-count',
+            '@tiptap/extension-history',
+            '@tiptap/extension-placeholder',
+            '@tiptap/extension-typography',
+          ],
+          'vendor-charts': ['recharts'],
+          'vendor-crypto': ['crypto-js'],
+          'vendor-utils': ['date-fns', 'lodash', 'zod'],
+          'vendor-export': ['file-saver', 'jszip'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
   },
 });

@@ -250,7 +250,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onTabChange,
 }) => {
   const { currentProject } = useAppContext();
-  const { openPalette } = useCommandPalette();
+  const { open: openPalette } = useCommandPalette();
   const [isNavigating, setIsNavigating] = useState(false);
   const { updateSidebarCollapsed, updateLastActiveTab } = useBasicPreferences();
 
@@ -422,7 +422,7 @@ const AIPanel: React.FC<AIPanelProps> = ({ activeTab, onTabChange }) => {
  * ---------------------------------------------------------------- */
 const DashboardContent: React.FC = () => {
   const { currentProject } = useAppContext();
-  const { openPalette } = useCommandPalette();
+  const { open: openPalette } = useCommandPalette();
   const { isSaving, save, lastSaved } = useSaveOperation();
   const [isLoadingStats] = useState(false);
   const [hasProjects] = useState(!!currentProject);
@@ -769,7 +769,7 @@ export default function CompleteWritingPlatform() {
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
 
   useViewCommands();
-  const { openPalette } = useCommandPalette();
+  const { open: openPalette } = useCommandPalette();
   const { isFocusMode } = useAdvancedFocusMode();
 
   // WritingPanel state + handlers (minimal, satisfies required props)
@@ -935,7 +935,7 @@ export default function CompleteWritingPlatform() {
         {/* Content */}
         <main className="content" role="main">
           <Suspense fallback={<PageLoader message="Loading content..." />}>
-            <ViewRouter renderWriting={renderWriting} />
+            <ViewRouter activeTab={activeTab} renderWriting={renderWriting} />
           </Suspense>
         </main>
       </div>

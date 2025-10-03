@@ -21,6 +21,7 @@ import { useAppContext } from '../../context/AppContext';
 import { useToast } from '../../context/ToastContext';
 import { storageService } from '../../services/storageService';
 import { Scene, Chapter } from '../../types/writing';
+import { debounce as debounceUtil } from '../../utils/debounce';
 import { focusWritingEditor } from '../../utils/focusUtils';
 
 import ClaudeToolbar from './ClaudeToolbar';
@@ -141,7 +142,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
 
   // Debounced save function
   const debouncedSave = useCallback(
-    debounce((scene: Scene) => saveScene(scene), 2000),
+    debounceUtil((scene: Scene) => saveScene(scene), 2000),
     [saveScene],
   );
 

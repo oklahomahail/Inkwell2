@@ -9,23 +9,27 @@
 ## Current Features (Phase 3 - August 2025)
 
 ### Core Writing Experience
+
 - **TipTap Rich Text Editor** with real-time word counts and auto-save
 - **Focus Mode** with distraction-free writing environment
 - **Scene-Based Organization** with chapter management
 - **Professional Exports** (PDF, DOCX, Markdown, TXT) with clean formatting
 
 ### AI-Powered Story Development
+
 - **Story Architect Mode** — Generate complete story outlines from premise to scene details
 - **Consistency Guardian** — AI analysis of character, timeline, and plot consistency
 - **AI Writing Toolbar** — Context-aware suggestions for continuing scenes and improving flow
 - **Character Development** — AI-assisted character arcs, motivations, and conflicts
 
 ### Visual Story Management
+
 - **Timeline View** — Map story events across POV lanes with filtering and drag-reorder
 - **Story Structure Visualizer** — Professional story health analytics and pacing insights
 - **Planning Tools** — Beat sheet templates, character profiles, and project analytics
 
 ### Professional Features
+
 - **Command Palette** (⌘K) with full keyboard navigation
 - **Writing Goals & Analytics** — Daily targets, streak tracking, and productivity insights
 - **Multi-layer Backups** with version history and recovery
@@ -61,12 +65,17 @@ pnpm dev
 ```
 
 ### Development Commands
+
 ```bash
 pnpm dev          # Start dev server
 pnpm build        # Production build
 pnpm preview      # Preview build
-pnpm tsc          # Type checking
+pnpm typecheck    # Type checking
 pnpm lint         # ESLint check
+pnpm test:run     # Run tests
+
+# Deployment
+./scripts/deploy.sh  # Complete deployment pipeline
 ```
 
 ---
@@ -76,6 +85,7 @@ pnpm lint         # ESLint check
 **Current Phase:** Phase 3 P0 (Publication-Ready Features)
 
 **Recently Completed:**
+
 - ✅ Story Architect Mode (AI story generation)
 - ✅ Consistency Guardian (AI analysis)
 - ✅ Visual Timeline with POV lanes
@@ -83,11 +93,13 @@ pnpm lint         # ESLint check
 - ✅ Professional export system
 
 **In Progress:**
+
 - 🚧 Focus Mode polish (typewriter mode, sprint timers)
 - 🚧 Full-text search with filtering
 - 🚧 EPUB export with metadata
 
 **Next Up:**
+
 - Corkboard view for scene organization
 - Performance optimizations for large manuscripts
 - Beta reader pack with feedback import
@@ -125,6 +137,7 @@ We welcome contributions! Please:
 4. Include clear commit messages
 
 ### Development Guidelines
+
 - Use TypeScript strict mode
 - Follow component patterns in existing codebase
 - Add error boundaries for new features
@@ -135,6 +148,13 @@ We welcome contributions! Please:
 ## License
 
 MIT License © 2025 Inkwell Authors
+
+---
+
+## Documentation
+
+📚 **[User Guide](USER_GUIDE.md)** - Complete guide for writers using Inkwell  
+🚀 **[Deployment Guide](DEPLOYMENT.md)** - Instructions for deploying to production
 
 ---
 
