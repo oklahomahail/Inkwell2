@@ -14,6 +14,7 @@ import {
   PanelLeftClose,
   Focus,
   Bot,
+  FileText,
 } from 'lucide-react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
@@ -47,6 +48,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
   const [toolbarPosition, setToolbarPosition] = useState({ x: 0, y: 0 });
   const [showPopupToolbar, setShowPopupToolbar] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [manuscriptPreview, setManuscriptPreview] = useState(false);
 
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -370,6 +372,19 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
                 <Save size={16} />
               </button>
 
+              {/* Manuscript Preview */}
+              <button
+                onClick={() => setManuscriptPreview(!manuscriptPreview)}
+                className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors ${
+                  manuscriptPreview 
+                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' 
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
+                title="Toggle manuscript preview"
+              >
+                <FileText size={16} />
+              </button>
+
               {/* Focus mode */}
               <button
                 onClick={toggleFocusMode}
@@ -385,11 +400,14 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
         {/* Editor Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Main Editor */}
-          <div className={`flex-1 overflow-y-auto ${showAIPanel ? 'pr-4' : ''}`}>
+          <div className={`flex-1 overflow-y-auto ${showAIPanel ? 'pr-4' : ''} ${
+            manuscriptPreview ? 'bg-white dark:bg-gray-100' : ''
+          }`}>
             <div
               className={`
               max-w-none mx-auto p-8
               ${isFocusMode ? 'max-w-4xl pt-16' : 'max-w-4xl'}
+              ${manuscriptPreview ? 'manuscript-preview' : ''}
             `}
             >
               {currentScene ? (
@@ -463,6 +481,122 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
         />
       )}
     </div>
+    
+    {/* Manuscript Preview Styles */}
+    {manuscriptPreview && (
+      <style>{`
+        .manuscript-preview {
+          /* Standard manuscript formatting */
+          max-width: 8.5in !important;
+          min-height: 11in;
+          margin: 0 auto !important;
+          padding: 1in 1.25in 1in 1.25in !important;
+          background: white !important;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          font-family: 'Times New Roman', Times, serif !important;
+          font-size: 12pt !important;
+          line-height: 2.0 !important;
+          color: black !important;
+        }
+        
+        .manuscript-preview .ProseMirror {
+          font-family: 'Times New Roman', Times, serif !important;
+          font-size: 12pt !important;
+          line-height: 2.0 !important;
+          color: black !important;
+          text-align: left !important;
+        }
+        
+        .manuscript-preview .ProseMirror p {
+          text-indent: 0.5in !important;
+          margin: 0 !important;
+          font-family: 'Times New Roman', Times, serif !important;
+          font-size: 12pt !important;
+          line-height: 2.0 !important;
+          color: black !important;
+        }
+        
+        .manuscript-preview .ProseMirror p:first-of-type,
+        .manuscript-preview .ProseMirror h1 + p,
+        .manuscript-preview .ProseMirror h2 + p,
+        .manuscript-preview .ProseMirror h3 + p {
+          text-indent: 0 !important;
+        }
+        
+        .manuscript-preview .ProseMirror h1,
+        .manuscript-preview .ProseMirror h2,
+        .manuscript-preview .ProseMirror h3 {
+          font-family: 'Times New Roman', Times, serif !important;
+          font-size: 12pt !important;
+          font-weight: normal !important;
+          text-align: center !important;
+          margin: 1em 0 !important;
+          text-transform: uppercase !important;
+          color: black !important;
+        }
+        
+        .manuscript-preview .ProseMirror strong {
+          font-weight: normal !important;
+          text-decoration: underline !important;
+          color: black !important;
+        }
+        
+        .manuscript-preview .ProseMirror em {
+          font-style: normal !important;
+          text-decoration: underline !important;
+          color: black !important;
+        }
+        
+        .manuscript-preview .ProseMirror blockquote {
+          margin: 1em 0 !important;
+          padding: 0 !important;
+          border: none !important;
+          text-indent: 0.5in !important;
+          color: black !important;
+        }
+        
+        /* Scene break styling */
+        .manuscript-preview .ProseMirror hr {
+          border: none !important;
+          text-align: center !important;
+          margin: 2em 0 !important;
+        }
+        
+        .manuscript-preview .ProseMirror hr::after {
+          content: "* * *";
+          font-family: 'Times New Roman', Times, serif !important;
+          font-size: 12pt !important;
+          color: black !important;
+        }
+        
+        /* Remove dark mode styles in preview */
+        .manuscript-preview * {
+          background: transparent !important;
+        }
+        
+        /* Manuscript header simulation */
+        .manuscript-preview::before {
+          content: "[SURNAME] / [TITLE] / ";
+          position: absolute;
+          top: 0.5in;
+          right: 1.25in;
+          font-family: 'Times New Roman', Times, serif !important;
+          font-size: 12pt !important;
+          color: black !important;
+          counter-increment: page;
+        }
+        
+        .manuscript-preview::after {
+          content: counter(page);
+          position: absolute;
+          top: 0.5in;
+          right: 1in;
+          font-family: 'Times New Roman', Times, serif !important;
+          font-size: 12pt !important;
+          color: black !important;
+        }
+      `}</style>
+    )}
   );
 };
 

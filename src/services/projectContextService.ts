@@ -1,7 +1,23 @@
 import { EnhancedProject } from '@/types/project';
 
+// Character Bible types
+export interface CharacterTrait {
+  name: string;
+  pronouns: string;
+  ageRange?: string; // e.g., "20-25", "middle-aged"
+  physicalMarkers: string[]; // ["tall", "brown eyes", "scar on left hand"]
+  voiceNotes: string[]; // ["speaks softly", "uses 'darling' often", "avoids contractions"]
+  aliases: string[]; // ["Alex", "Alexandra", "Xandra"]
+  forbiddenContradictions: string[]; // ["never swears", "always calm under pressure"]
+}
+
+export interface CharacterBible {
+  [characterId: string]: CharacterTrait;
+}
+
 export class ProjectContextService {
   private static instance: ProjectContextService;
+  private readonly CHARACTER_BIBLE_KEY = 'inkwell_character_bible';
 
   static getInstance(): ProjectContextService {
     if (!ProjectContextService.instance) {
@@ -42,6 +58,179 @@ export class ProjectContextService {
 
   estimateTokenCount(context: string): number {
     return Math.ceil(context.length / 4);
+  }
+
+  // Character Bible methods
+  getCharacterBible(projectId: string): CharacterBible {
+    try {
+      const storageKey = `${this.CHARACTER_BIBLE_KEY}_${projectId}`;
+      const stored = localStorage.getItem(storageKey);
+      return stored ? JSON.parse(stored) : {};
+    } catch (error) {
+      console.warn('Failed to load character bible:', error);
+      return {};
+    }
+  }
+
+  saveCharacterBible(projectId: string, bible: CharacterBible): void {
+    try {
+      const storageKey = `${this.CHARACTER_BIBLE_KEY}_${projectId}`;
+      localStorage.setItem(storageKey, JSON.stringify(bible));
+      console.log(`Character bible saved for project ${projectId}`);
+    } catch (error) {
+      console.error('Failed to save character bible:', error);
+      throw error;
+    }
+  }
+
+  // Helper: Generate character trait from existing character data
+  generateCharacterTrait(character: any): CharacterTrait {
+    return {
+      name: character.name || 'Unknown',
+      pronouns: this.extractPronouns(character.description || ''),
+      ageRange: this.extractAgeRange(character.description || ''),
+      physicalMarkers: this.extractPhysicalMarkers(character.appearance || character.description || ''),
+      voiceNotes: this.extractVoiceNotes(character.personality || []),
+      aliases: this.extractAliases(character.name || ''),
+      forbiddenContradictions: [],
+    };
+  }
+
+  // Helper: Update character bible from project characters
+  syncCharacterBibleFromProject(project: EnhancedProject): void {
+    const bible = this.getCharacterBible(project.id);
+    let hasChanges = false;
+
+    project.characters.forEach((character) => {
+      if (!bible[character.id]) {
+        bible[character.id] = this.generateCharacterTrait(character);
+        hasChanges = true;
+      }
+    });
+
+    if (hasChanges) {
+      this.saveCharacterBible(project.id, bible);
+    }
+  }
+
+  // Helper: Check for trait contradictions in text
+  checkTraitConsistency(projectId: string, characterId: string, text: string): Array<{
+    issue: string;
+    suggestion: string;
+    severity: 'low' | 'medium' | 'high';
+  }> {
+    const bible = this.getCharacterBible(projectId);
+    const trait = bible[characterId];
+    if (!trait) return [];
+
+    const issues: Array<{ issue: string; suggestion: string; severity: 'low' | 'medium' | 'high' }> = [];
+    const textLower = text.toLowerCase();
+
+    // Check pronouns
+    if (trait.pronouns && !textLower.includes(trait.pronouns.toLowerCase())) {
+      const wrongPronouns = ['he', 'she', 'they'].filter(p => 
+        p !== trait.pronouns.toLowerCase() && textLower.includes(p)
+      );
+      if (wrongPronouns.length > 0) {
+        issues.push({
+          issue: `Incorrect pronouns used for ${trait.name}`,
+          suggestion: `Use ${trait.pronouns} instead of ${wrongPronouns.join(', ')}`,
+          severity: 'medium'
+        });
+      }
+    }
+
+    // Check forbidden contradictions
+    trait.forbiddenContradictions.forEach(contradiction => {
+      if (textLower.includes(contradiction.toLowerCase())) {
+        issues.push({
+          issue: `Character contradiction: ${trait.name} ${contradiction}`,
+          suggestion: `Remove or revise text that contradicts established trait: "${contradiction}"`,
+          severity: 'high'
+        });
+      }
+    });
+
+    return issues;
+  }
+
+  private extractPronouns(text: string): string {
+    const pronounSets = {
+      'he/him': ['he', 'him', 'his'],
+      'she/her': ['she', 'her', 'hers'],
+      'they/them': ['they', 'them', 'their']
+    };
+    
+    for (const [pronounSet, pronouns] of Object.entries(pronounSets)) {
+      if (pronouns.some(p => text.toLowerCase().includes(p))) {
+        return pronounSet;
+      }
+    }
+    return 'they/them'; // default
+  }
+
+  private extractAgeRange(text: string): string | undefined {
+    const agePatterns = [
+      /age[sd]?\s+(\d+)/i,
+      /(\d+)\s*year[s]?\s*old/i,
+      /(teenage?r?|young|middle-aged|elderly|old)/i
+    ];
+    
+    for (const pattern of agePatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        return match[1] || match[0];
+      }
+    }
+    return undefined;
+  }
+
+  private extractPhysicalMarkers(text: string): string[] {
+    const markers: string[] = [];
+    const physicalTerms = [
+      'tall', 'short', 'thin', 'heavy', 'muscular', 'slender',
+      'brown eyes', 'blue eyes', 'green eyes', 'hazel eyes',
+      'blonde hair', 'brown hair', 'black hair', 'red hair', 'gray hair',
+      'scar', 'tattoo', 'beard', 'mustache', 'glasses'
+    ];
+    
+    const textLower = text.toLowerCase();
+    physicalTerms.forEach(term => {
+      if (textLower.includes(term)) {
+        markers.push(term);
+      }
+    });
+    
+    return markers;
+  }
+
+  private extractVoiceNotes(personality: string[]): string[] {
+    const voiceIndicators = personality.filter(trait => 
+      trait.toLowerCase().includes('speak') || 
+      trait.toLowerCase().includes('voice') || 
+      trait.toLowerCase().includes('talk')
+    );
+    return voiceIndicators;
+  }
+
+  private extractAliases(name: string): string[] {
+    if (!name) return [];
+    
+    const parts = name.split(/\s+/);
+    const aliases: string[] = [name];
+    
+    // Add first name if multiple parts
+    if (parts.length > 1) {
+      aliases.push(parts[0]);
+    }
+    
+    // Common nickname patterns (very basic)
+    const firstName = parts[0];
+    if (firstName.endsWith('y') && firstName.length > 3) {
+      aliases.push(firstName.slice(0, -1) + 'ie'); // Bobby -> Bobbie
+    }
+    
+    return [...new Set(aliases)]; // remove duplicates
   }
 }
 

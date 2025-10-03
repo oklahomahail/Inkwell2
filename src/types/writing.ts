@@ -68,6 +68,7 @@ export interface Scene {
   wordCount: number;
   wordCountGoal?: number;
   summary?: string;
+  timelineEventIds?: string[]; // Links to timeline events
   createdAt: Date;
   updatedAt: Date;
 }

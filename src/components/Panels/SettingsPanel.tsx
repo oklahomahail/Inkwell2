@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 import claudeService from '@/services/claudeService';
+import { phraseAnalysisService, DEFAULT_PHRASE_HYGIENE_SETTINGS } from '@/utils/textAnalysis';
+import type { PhraseHygieneSettings } from '@/utils/textAnalysis';
 
 const SettingsPanel: React.FC = () => {
   const { state, claudeActions, claude } = useAppContext();
@@ -35,6 +37,10 @@ const SettingsPanel: React.FC = () => {
     showReadingTime: true,
   });
 
+  // Phrase Hygiene Settings
+  const [phraseSettings, setPhraseSettings] = useState<PhraseHygieneSettings>(DEFAULT_PHRASE_HYGIENE_SETTINGS);
+  const [customPhraseInput, setCustomPhraseInput] = useState('');
+
   // Snapshots dialog
   const [openHistory, setOpenHistory] = useState(false);
 
@@ -52,7 +58,13 @@ const SettingsPanel: React.FC = () => {
     } catch (_error) {
       console.warn('Could not load Claude configuration:', _error);
     }
-  }, []);
+
+    // Load phrase hygiene settings for current project
+    if (state.currentProject) {
+      const settings = phraseAnalysisService.getSettings(state.currentProject.id);
+      setPhraseSettings(settings);
+    }
+  }, [state.currentProject]);
 
   const validateApiKey = (key: string): boolean => key.startsWith('sk-ant-') && key.length > 20;
 
@@ -113,10 +125,44 @@ const SettingsPanel: React.FC = () => {
     showToast('Claude conversation history cleared', 'success');
   };
 
+  const handlePhraseSettingsUpdate = () => {
+    if (!state.currentProject) {
+      showToast('No project selected', 'error');
+      return;
+    }
+    try {
+      phraseAnalysisService.saveSettings(state.currentProject.id, phraseSettings);
+      showToast('Phrase hygiene settings updated', 'success');
+    } catch (error) {
+      console.error('Failed to save phrase settings:', error);
+      showToast('Failed to save phrase settings', 'error');
+    }
+  };
+
+  const handleAddCustomPhrase = () => {
+    if (!customPhraseInput.trim() || !state.currentProject) return;
+    
+    phraseAnalysisService.addToCustomStoplist(state.currentProject.id, customPhraseInput.trim());
+    const updatedSettings = phraseAnalysisService.getSettings(state.currentProject.id);
+    setPhraseSettings(updatedSettings);
+    setCustomPhraseInput('');
+    showToast(`Added "${customPhraseInput.trim()}" to stoplist`, 'success');
+  };
+
+  const handleRemoveCustomPhrase = (phrase: string) => {
+    if (!state.currentProject) return;
+    
+    phraseAnalysisService.removeFromCustomStoplist(state.currentProject.id, phrase);
+    const updatedSettings = phraseAnalysisService.getSettings(state.currentProject.id);
+    setPhraseSettings(updatedSettings);
+    showToast(`Removed "${phrase}" from stoplist`, 'success');
+  };
+
   const handleExportSettings = () => {
     const settings = {
       claudeConfig,
       appSettings,
+      phraseSettings: state.currentProject ? phraseSettings : null,
       exportedAt: new Date().toISOString(),
       version: '1.0.0',
     };
@@ -431,6 +477,200 @@ const SettingsPanel: React.FC = () => {
               />
             </div>
           </div>
+        </div>
+
+        {/* Phrase Hygiene Settings */}
+        <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
+          <h3 className="text-xl font-semibold text-white mb-4">Phrase Hygiene</h3>
+          {!state.currentProject ? (
+            <p className="text-gray-400 text-sm mb-4">
+              Select a project to configure phrase detection settings.
+            </p>
+          ) : (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-300">Enable phrase detection</label>
+                  <p className="text-xs text-gray-500">Automatically detect overused phrases in your writing</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={phraseSettings.enabled}
+                  onChange={(e) => setPhraseSettings({ ...phraseSettings, enabled: e.target.checked })}
+                  className="w-4 h-4 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"
+                />
+              </div>
+
+              {phraseSettings.enabled && (
+                <>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        N-gram sizes (word phrase lengths to check)
+                      </label>
+                      <div className="flex gap-2">
+                        {[2, 3, 4, 5].map(size => (
+                          <label key={size} className="flex items-center text-sm text-gray-300">
+                            <input
+                              type="checkbox"
+                              checked={phraseSettings.ngramSizes.includes(size)}
+                              onChange={(e) => {
+                                const newSizes = e.target.checked
+                                  ? [...phraseSettings.ngramSizes, size].sort()
+                                  : phraseSettings.ngramSizes.filter(s => s !== size);
+                                setPhraseSettings({ ...phraseSettings, ngramSizes: newSizes });
+                              }}
+                              className="mr-1 w-3 h-3 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"
+                            />
+                            {size} words
+                          </label>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Example: "2 words" checks "very good", "3 words" checks "very good indeed"
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Minimum occurrences
+                        </label>
+                        <input
+                          type="number"
+                          value={phraseSettings.minOccurrences}
+                          onChange={(e) => setPhraseSettings({ 
+                            ...phraseSettings, 
+                            minOccurrences: Math.max(1, parseInt(e.target.value) || 2)
+                          })}
+                          min={1}
+                          max={20}
+                          className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6]"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Only flag phrases that appear this many times
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Severity thresholds (per 1000 words)
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <label className="text-xs text-yellow-400">Low</label>
+                          <input
+                            type="number"
+                            value={phraseSettings.thresholds.low}
+                            onChange={(e) => setPhraseSettings({ 
+                              ...phraseSettings, 
+                              thresholds: { 
+                                ...phraseSettings.thresholds, 
+                                low: Math.max(0.1, parseFloat(e.target.value) || 0.5) 
+                              }
+                            })}
+                            step={0.1}
+                            min={0.1}
+                            max={10}
+                            className="w-full px-2 py-1 bg-gray-800 border border-gray-600 rounded text-gray-200 text-sm focus:outline-none focus:border-[#0073E6]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-orange-400">Medium</label>
+                          <input
+                            type="number"
+                            value={phraseSettings.thresholds.medium}
+                            onChange={(e) => setPhraseSettings({ 
+                              ...phraseSettings, 
+                              thresholds: { 
+                                ...phraseSettings.thresholds, 
+                                medium: Math.max(0.1, parseFloat(e.target.value) || 1.0) 
+                              }
+                            })}
+                            step={0.1}
+                            min={0.1}
+                            max={10}
+                            className="w-full px-2 py-1 bg-gray-800 border border-gray-600 rounded text-gray-200 text-sm focus:outline-none focus:border-[#0073E6]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-red-400">High</label>
+                          <input
+                            type="number"
+                            value={phraseSettings.thresholds.high}
+                            onChange={(e) => setPhraseSettings({ 
+                              ...phraseSettings, 
+                              thresholds: { 
+                                ...phraseSettings.thresholds, 
+                                high: Math.max(0.1, parseFloat(e.target.value) || 2.0) 
+                              }
+                            })}
+                            step={0.1}
+                            min={0.1}
+                            max={10}
+                            className="w-full px-2 py-1 bg-gray-800 border border-gray-600 rounded text-gray-200 text-sm focus:outline-none focus:border-[#0073E6]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Custom stoplist (phrases to ignore)
+                      </label>
+                      <div className="flex gap-2 mb-2">
+                        <input
+                          type="text"
+                          value={customPhraseInput}
+                          onChange={(e) => setCustomPhraseInput(e.target.value)}
+                          placeholder="Enter phrase to ignore..."
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddCustomPhrase()}
+                          className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6]"
+                        />
+                        <button
+                          onClick={handleAddCustomPhrase}
+                          disabled={!customPhraseInput.trim()}
+                          className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          Add
+                        </button>
+                      </div>
+                      {phraseSettings.customStoplist.length > 0 && (
+                        <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                          {phraseSettings.customStoplist.map((phrase, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-gray-700 text-gray-300 rounded text-xs"
+                            >
+                              {phrase}
+                              <button
+                                onClick={() => handleRemoveCustomPhrase(phrase)}
+                                className="text-red-400 hover:text-red-300"
+                                title={`Remove "${phrase}"`}
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-500 mt-1">
+                        Add phrases that should not be flagged as overused (e.g., character names, specific terminology)
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <button
+                onClick={handlePhraseSettingsUpdate}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition-colors"
+              >
+                Save Phrase Settings
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Data Management */}

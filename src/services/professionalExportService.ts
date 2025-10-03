@@ -23,13 +23,19 @@ export interface ExportTemplate {
     includePageNumbers: boolean;
     chapterPageBreaks: boolean;
     sceneBreaks: string;
+    // Manuscript-specific settings
+    runningHeader?: boolean;
+    headerFormat?: string;
+    firstPageSpecial?: boolean;
+    contactInfo?: boolean;
+    indentFirstLine?: boolean;
   };
 }
 
 export const EXPORT_TEMPLATES: Record<string, ExportTemplate> = {
   'standard-manuscript': {
     name: 'Standard Manuscript',
-    description: 'Industry-standard formatting for agent submissions',
+    description: 'Industry-standard formatting for agent/editor submissions (Shunn format)',
     format: 'docx',
     settings: {
       fontSize: 12,
@@ -40,7 +46,13 @@ export const EXPORT_TEMPLATES: Record<string, ExportTemplate> = {
       includeHeaders: true,
       includePageNumbers: true,
       chapterPageBreaks: true,
-      sceneBreaks: '* * *',
+      sceneBreaks: '***',
+      // Standard manuscript specific settings
+      runningHeader: true,
+      headerFormat: 'SURNAME / TITLE / PAGE',
+      firstPageSpecial: true,
+      contactInfo: true,
+      indentFirstLine: true,
     },
   },
   'paperback-novel': {
@@ -98,7 +110,7 @@ export class ProfessionalExportService {
 
       const zip = new JSZip();
       // Required DOCX structure
-      zip.file('[Content_Types].xml', this.generateContentTypes());
+      zip.file('[Content_Types].xml', this.generateContentTypes(template.settings.runningHeader));
 
       const relsFolder = zip.folder('_rels')!;
       relsFolder.file('.rels', this.generateMainRels());
@@ -108,9 +120,14 @@ export class ProfessionalExportService {
       wordFolder.file('styles.xml', this.generateStyles(template));
       wordFolder.file('settings.xml', this.generateSettings());
       wordFolder.file('fontTable.xml', this.generateFontTable(template));
+      
+      // Add header if needed for manuscript format
+      if (template.settings.runningHeader) {
+        wordFolder.file('header1.xml', this.generateManuscriptHeader(project, template));
+      }
 
       const wordRelsFolder = wordFolder.folder('_rels')!;
-      wordRelsFolder.file('document.xml.rels', this.generateDocumentRels());
+      wordRelsFolder.file('document.xml.rels', this.generateDocumentRels(template.settings.runningHeader));
 
       const blob = await zip.generateAsync({ type: 'blob' });
       this.downloadFile(
@@ -236,6 +253,12 @@ export class ProfessionalExportService {
     });
 
     content.push(`<w:sectPr>`);
+    
+    // Add header reference if using manuscript format
+    if (template.settings.runningHeader) {
+      content.push(`<w:headerReference w:type="default" r:id="rId4"/>`);
+    }
+    
     content.push(
       `<w:pgSz w:w="${
         template.settings.pageSize === 'letter' ? '12240' : '11906'
@@ -261,34 +284,77 @@ export class ProfessionalExportService {
     chapters: Chapter[],
   ): string {
     const content: string[] = [];
-
-    content.push(
-      `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="720" w:after="360"/></w:pPr><w:r><w:rPr><w:sz w:val="36"/><w:b/></w:rPr><w:t>${this.escapeXML(
-        project.name,
-      )}</w:t></w:r></w:p>`,
-    );
-    content.push(
-      `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="720"/></w:pPr><w:r><w:rPr><w:sz w:val="24"/></w:rPr><w:t>by [Author Name]</w:t></w:r></w:p>`,
-    );
-
-    if (project.description) {
+    const wordCount = chapters.reduce((sum, ch) => sum + ch.totalWordCount, 0);
+    
+    if (template.settings.contactInfo && template.name === 'Standard Manuscript') {
+      // Standard manuscript first page format (Shunn format)
       content.push(
-        `<w:p><w:pPr><w:spacing w:before="720" w:after="240"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Synopsis</w:t></w:r></w:p>`,
+        `<w:p><w:pPr><w:jc w:val="left"/></w:pPr><w:r><w:t>[Your Name]</w:t></w:r></w:p>`
       );
       content.push(
-        `<w:p><w:pPr><w:spacing w:after="720"/></w:pPr><w:r><w:t>${this.escapeXML(
-          project.description,
+        `<w:p><w:pPr><w:jc w:val="left"/></w:pPr><w:r><w:t>[Your Address]</w:t></w:r></w:p>`
+      );
+      content.push(
+        `<w:p><w:pPr><w:jc w:val="left"/></w:pPr><w:r><w:t>[City, State ZIP]</w:t></w:r></w:p>`
+      );
+      content.push(
+        `<w:p><w:pPr><w:jc w:val="left"/></w:pPr><w:r><w:t>[Phone Number]</w:t></w:r></w:p>`
+      );
+      content.push(
+        `<w:p><w:pPr><w:jc w:val="left"/></w:pPr><w:r><w:t>[Email Address]</w:t></w:r></w:p>`
+      );
+      content.push(`<w:p><w:pPr><w:spacing w:after="240"/></w:pPr></w:p>`);
+      
+      // Word count and genre (right-aligned)
+      content.push(
+        `<w:p><w:pPr><w:jc w:val="right"/></w:pPr><w:r><w:t>About ${Math.round(wordCount / 250) * 250} words</w:t></w:r></w:p>`
+      );
+      content.push(
+        `<w:p><w:pPr><w:jc w:val="right"/></w:pPr><w:r><w:t>${project.genre || 'Fiction'}</w:t></w:r></w:p>`
+      );
+      content.push(`<w:p><w:pPr><w:spacing w:after="720"/></w:pPr></w:p>`);
+      
+      // Centered title and author
+      content.push(
+        `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="1440" w:after="240"/></w:pPr><w:r><w:rPr><w:sz w:val="24"/><w:b/></w:rPr><w:t>${this.escapeXML(
+          project.name.toUpperCase(),
         )}</w:t></w:r></w:p>`,
       );
+      content.push(
+        `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="480"/></w:pPr><w:r><w:rPr><w:sz w:val="24"/></w:rPr><w:t>by</w:t></w:r></w:p>`,
+      );
+      content.push(
+        `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="720"/></w:pPr><w:r><w:rPr><w:sz w:val="24"/></w:rPr><w:t>[Your Name]</w:t></w:r></w:p>`,
+      );
+    } else {
+      // Standard title page format for other templates
+      content.push(
+        `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="720" w:after="360"/></w:pPr><w:r><w:rPr><w:sz w:val="36"/><w:b/></w:rPr><w:t>${this.escapeXML(
+          project.name,
+        )}</w:t></w:r></w:p>`,
+      );
+      content.push(
+        `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="720"/></w:pPr><w:r><w:rPr><w:sz w:val="24"/></w:rPr><w:t>by [Author Name]</w:t></w:r></w:p>`,
+      );
+      
+      if (project.description) {
+        content.push(
+          `<w:p><w:pPr><w:spacing w:before="720" w:after="240"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Synopsis</w:t></w:r></w:p>`,
+        );
+        content.push(
+          `<w:p><w:pPr><w:spacing w:after="720"/></w:pPr><w:r><w:t>${this.escapeXML(
+            project.description,
+          )}</w:t></w:r></w:p>`,
+        );
+      }
+      
+      content.push(
+        `<w:p><w:pPr><w:spacing w:before="720"/></w:pPr><w:r><w:t>Word Count: ${wordCount.toLocaleString()}</w:t></w:r></w:p>`,
+      );
+      content.push(`<w:p><w:r><w:t>Genre: ${project.genre || 'Fiction'}</w:t></w:r></w:p>`);
     }
-
-    const wordCount = chapters.reduce((sum, ch) => sum + ch.totalWordCount, 0);
-    content.push(
-      `<w:p><w:pPr><w:spacing w:before="720"/></w:pPr><w:r><w:t>Word Count: ${wordCount.toLocaleString()}</w:t></w:r></w:p>`,
-    );
-    content.push(`<w:p><w:r><w:t>Genre: ${project.genre || 'Fiction'}</w:t></w:r></w:p>`);
+    
     content.push(`<w:p><w:pPr><w:pageBreakBefore/></w:pPr></w:p>`);
-
     return content.join('\n');
   }
 
@@ -481,16 +547,24 @@ p { text-indent: 1.5em; margin: 1em 0; }
      Shared helpers
      ========================= */
 
-  private generateContentTypes(): string {
-    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  private generateContentTypes(includeHeader: boolean = false): string {
+    let content = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml" ContentType="application/xml"/>
   <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
   <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
   <Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>
-  <Override PartName="/word/fontTable.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.fontTable+xml"/>
+  <Override PartName="/word/fontTable.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.fontTable+xml"/>`;
+    
+    if (includeHeader) {
+      content += `
+  <Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>`;
+    }
+    
+    content += `
 </Types>`;
+    return content;
   }
 
   private generateMainRels(): string {
@@ -500,13 +574,22 @@ p { text-indent: 1.5em; margin: 1em 0; }
 </Relationships>`;
   }
 
-  private generateDocumentRels(): string {
-    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  private generateDocumentRels(includeHeader: boolean = false): string {
+    let relationships = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
   <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>
-  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable" Target="fontTable.xml"/>
+  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable" Target="fontTable.xml"/>`;
+    
+    if (includeHeader) {
+      relationships += `
+  <Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/>`;
+    }
+    
+    relationships += `
 </Relationships>`;
+    
+    return relationships;
   }
 
   private generateStyles(template: ExportTemplate): string {
@@ -575,6 +658,57 @@ p { text-indent: 1.5em; margin: 1em 0; }
   }
 
   // Note: _mimeType is unused (download attribute covers it). Keep for API parity; prefix to please ESLint.
+  private generateManuscriptHeader(project: EnhancedProject, template: ExportTemplate): string {
+    // Generate manuscript running header: SURNAME / TITLE / PAGE
+    const surname = "[SURNAME]";
+    const title = project.name.length > 50 ? project.name.substring(0, 47) + "..." : project.name;
+    
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:p>
+    <w:pPr>
+      <w:tabs>
+        <w:tab w:val="center" w:pos="4320"/>
+        <w:tab w:val="right" w:pos="8640"/>
+      </w:tabs>
+    </w:pPr>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="${template.settings.fontFamily}" w:hAnsi="${template.settings.fontFamily}"/>
+        <w:sz w:val="${template.settings.fontSize * 2}"/>
+      </w:rPr>
+      <w:t>${surname}</w:t>
+    </w:r>
+    <w:r>
+      <w:tab/>
+    </w:r>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="${template.settings.fontFamily}" w:hAnsi="${template.settings.fontFamily}"/>
+        <w:sz w:val="${template.settings.fontSize * 2}"/>
+      </w:rPr>
+      <w:t>${this.escapeXML(title)}</w:t>
+    </w:r>
+    <w:r>
+      <w:tab/>
+    </w:r>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="${template.settings.fontFamily}" w:hAnsi="${template.settings.fontFamily}"/>
+        <w:sz w:val="${template.settings.fontSize * 2}"/>
+      </w:rPr>
+      <w:fldChar w:fldCharType="begin"/>
+    </w:r>
+    <w:r>
+      <w:instrText> PAGE </w:instrText>
+    </w:r>
+    <w:r>
+      <w:fldChar w:fldCharType="end"/>
+    </w:r>
+  </w:p>
+</w:hdr>`;
+  }
+
   private downloadFile(blob: Blob, filename: string, _mimeType: string): void {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

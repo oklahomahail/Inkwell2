@@ -3,6 +3,7 @@ import { TrendingUp, Calendar, Target, Clock, BookOpen, Award, Edit3 } from 'luc
 import React, { useMemo, useState } from 'react';
 
 import PerformanceChart from '@/components/PerformanceChart';
+import PhraseHygieneWidget from '@/components/Analytics/PhraseHygieneWidget';
 import { useAppContext } from '@/context/AppContext';
 
 type Session = {
@@ -167,7 +168,7 @@ export default function WritingAnalyticsView() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="rounded-2xl border p-4">
           <div className="flex items-center gap-2 mb-3">
             <Calendar className="w-4 h-4 text-purple-600" />
@@ -188,6 +189,11 @@ export default function WritingAnalyticsView() {
             yKey="words"
             height={280}
           />
+        </div>
+
+        {/* Phrase Hygiene Widget */}
+        <div className="rounded-2xl border-0">
+          <PhraseHygieneWidget className="border-0" />
         </div>
       </div>
     </div>

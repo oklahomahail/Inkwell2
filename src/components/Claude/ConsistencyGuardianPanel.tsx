@@ -17,6 +17,8 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { useToast } from '../../context/ToastContext';
 import { consistencyGuardianService } from '../../services/consistencyGuardianService';
+import { projectContextService } from '../../services/projectContextService';
+import type { CharacterBible } from '../../services/projectContextService';
 
 import type {
   ConsistencyReport,
@@ -59,6 +61,8 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
   const [report, setReport] = useState<ConsistencyReport | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [showBible, setShowBible] = useState(false);
+  const [characterBible, setCharacterBible] = useState<CharacterBible>({});
   const [expandedIssues, setExpandedIssues] = useState<Set<string>>(new Set());
   const [filterSeverity, _setFilterSeverity] = useState<string>('all');
   const [filterType, _setFilterType] = useState<string>('all');
@@ -73,11 +77,22 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
     includeMinorIssues: false,
   });
 
-  // Load existing report on mount
+  // Load existing report and character bible on mount
   useEffect(() => {
     if (currentProject) {
       const existingReport = consistencyGuardianService.getReport(currentProject.id);
       setReport(existingReport);
+      
+      // Load character bible
+      const bible = projectContextService.getCharacterBible(currentProject.id);
+      setCharacterBible(bible);
+      
+      // Sync character bible from project characters if empty
+      if (Object.keys(bible).length === 0 && currentProject.characters?.length > 0) {
+        projectContextService.syncCharacterBibleFromProject(convertToEnhancedProject(currentProject));
+        const updatedBible = projectContextService.getCharacterBible(currentProject.id);
+        setCharacterBible(updatedBible);
+      }
     }
   }, [currentProject]);
 
@@ -275,14 +290,76 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
             <h3 className="font-semibold text-gray-900 dark:text-white">Consistency Guardian</h3>
           </div>
 
-          <button
-            onClick={() => setShowOptions(!showOptions)}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-            title="Analysis Options"
-          >
-            <Settings className="w-4 h-4 text-gray-500" />
-          </button>
+          <div className="flex gap-1">
+            <button
+              onClick={() => setShowBible(!showBible)}
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              title="Character Bible"
+            >
+              <User className="w-4 h-4 text-gray-500" />
+            </button>
+            <button
+              onClick={() => setShowOptions(!showOptions)}
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              title="Analysis Options"
+            >
+              <Settings className="w-4 h-4 text-gray-500" />
+            </button>
+          </div>
         </div>
+
+        {/* Character Bible */}
+        {showBible && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 mb-3 space-y-3">
+            <div className="flex justify-between items-center">
+              <div className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                Character Bible ({Object.keys(characterBible).length} characters)
+              </div>
+              <button
+                onClick={() => {
+                  if (currentProject) {
+                    const enhancedProject = convertToEnhancedProject(currentProject);
+                    projectContextService.syncCharacterBibleFromProject(enhancedProject);
+                    const updatedBible = projectContextService.getCharacterBible(currentProject.id);
+                    setCharacterBible(updatedBible);
+                    showToast('Character Bible updated from project', 'success');
+                  }
+                }}
+                className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Sync from Project
+              </button>
+            </div>
+            
+            {Object.keys(characterBible).length === 0 ? (
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                No character traits defined. Click "Sync from Project" to generate from existing characters.
+              </p>
+            ) : (
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {Object.entries(characterBible).map(([characterId, trait]) => (
+                  <div key={characterId} className="text-xs p-2 bg-white dark:bg-gray-800 rounded border">
+                    <div className="font-medium text-gray-900 dark:text-white">
+                      {trait.name} ({trait.pronouns})
+                    </div>
+                    {trait.physicalMarkers.length > 0 && (
+                      <div className="text-gray-600 dark:text-gray-400 mt-1">
+                        Physical: {trait.physicalMarkers.slice(0, 3).join(', ')}
+                        {trait.physicalMarkers.length > 3 && ` +${trait.physicalMarkers.length - 3} more`}
+                      </div>
+                    )}
+                    {trait.forbiddenContradictions.length > 0 && (
+                      <div className="text-red-600 dark:text-red-400 mt-1">
+                        Never: {trait.forbiddenContradictions.slice(0, 2).join(', ')}
+                        {trait.forbiddenContradictions.length > 2 && ` +${trait.forbiddenContradictions.length - 2} more`}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Analysis Options */}
         {showOptions && (
