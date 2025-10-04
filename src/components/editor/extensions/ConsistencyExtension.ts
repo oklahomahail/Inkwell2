@@ -10,17 +10,17 @@ import editorConsistencyDecorator, {
 import type { EnhancedProject } from '@/types/project';
 import type { Scene, Chapter } from '@/types/writing';
 
-// Declare module augmentation for TipTap commands
+// Extend the existing Commands interface without type parameters to avoid conflicts
 declare module '@tiptap/core' {
-  interface Commands<_ReturnType = any> {
+  interface Commands {
     consistency: {
       toggleConsistencyChecking: () => Command;
-      updateConsistencyContext: (
-        project: EnhancedProject | null,
-        scene: Scene | null,
-        chapter: Chapter | null,
-      ) => Command;
+      updateConsistencyContext: (project: EnhancedProject | null, scene: Scene | null, chapter: Chapter | null) => Command;
       updateDecorationOptions: (options: Partial<ConsistencyDecorationOptions>) => Command;
+      getCurrentConsistencyIssues: () => Command;
+    };
+  }
+}
       getCurrentConsistencyIssues: () => Command;
     };
   }

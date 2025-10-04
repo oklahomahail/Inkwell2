@@ -242,8 +242,8 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
       const enhancedProject: EnhancedProject = {
         ...currentProject,
         currentWordCount: 0,
-        plotNotes: '',
-        worldBuilding: '',
+        plotNotes: [],
+        worldBuilding: [],
         recentContent: '',
         storyBeats: [],
       };
@@ -282,8 +282,8 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
       const enhancedProject: EnhancedProject = {
         ...currentProject,
         currentWordCount: 0,
-        plotNotes: '',
-        worldBuilding: '',
+        plotNotes: [],
+        worldBuilding: [],
         recentContent: '',
         storyBeats: [],
       };
