@@ -6,7 +6,7 @@ import BackupControls from '@/components/Settings/BackupControls';
 import SnapshotHistoryDialog from '@/components/Settings/SnapshotHistoryDialog';
 import { Button } from '@/components/ui/Button';
 import { useAppContext } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import claudeService from '@/services/claudeService';
 import { phraseAnalysisService, DEFAULT_PHRASE_HYGIENE_SETTINGS } from '@/utils/textAnalysis';
 import type { PhraseHygieneSettings } from '@/utils/textAnalysis';

@@ -3,7 +3,7 @@ import { Users, Plus, Edit3, Trash2, Save, User, Heart, Target, Zap, Eye } from 
 import React, { useState } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 
 interface Character {
   id: string;

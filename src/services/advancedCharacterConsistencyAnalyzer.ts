@@ -4,8 +4,7 @@
 import claudeService from './claudeService';
 import { voiceConsistencyService } from './voiceConsistencyService';
 
-import type { GeneratedCharacter } from './storyArchitectService';
-import type { EnhancedProject } from '../types/project';
+import type { EnhancedProject, Character } from '../types/project';
 
 export interface CharacterTraitContradiction {
   id: string;
@@ -112,7 +111,7 @@ class AdvancedCharacterConsistencyAnalyzer {
 
     // Run parallel analyses
     const [traitContradictions, relationshipIssues, voiceEvolution] = await Promise.all([
-      this.analyzeTraitContradictions(project, character, deepAnalysis),
+      this.analyzeCharacterTraits(project, character, deepAnalysis),
       includeRelationships
         ? this.analyzeRelationshipConsistency(project, character)
         : Promise.resolve([]),
@@ -158,7 +157,7 @@ class AdvancedCharacterConsistencyAnalyzer {
    */
   private async analyzeCharacterTraits(
     project: EnhancedProject,
-    character: GeneratedCharacter,
+    character: Character,
     deepAnalysis: boolean = false,
   ): Promise<CharacterTraitContradiction[]> {
     if (!claudeService.isConfigured()) {
@@ -194,7 +193,7 @@ class AdvancedCharacterConsistencyAnalyzer {
    */
   private async analyzeRelationshipConsistency(
     project: EnhancedProject,
-    character: GeneratedCharacter,
+    character: Character,
   ): Promise<CharacterRelationshipInconsistency[]> {
     if (!claudeService.isConfigured()) {
       return [];
@@ -225,7 +224,7 @@ class AdvancedCharacterConsistencyAnalyzer {
    */
   private async analyzeVoiceEvolution(
     project: EnhancedProject,
-    character: GeneratedCharacter,
+    character: Character,
   ): Promise<CharacterVoiceEvolution> {
     try {
       const chapterData = [];
@@ -277,7 +276,7 @@ class AdvancedCharacterConsistencyAnalyzer {
   /**
    * Build detailed character profile for analysis
    */
-  private buildCharacterProfile(character: GeneratedCharacter): string {
+  private buildCharacterProfile(character: Character): string {
     const profile = [];
 
     profile.push(`CHARACTER: ${character.name}`);
@@ -296,12 +295,12 @@ class AdvancedCharacterConsistencyAnalyzer {
       profile.push(`CONFLICTS: ${character.conflicts}`);
     }
 
-    if (character.background) {
-      profile.push(`BACKGROUND: ${character.background}`);
+    if (character.backstory) {
+      profile.push(`BACKGROUND: ${character.backstory}`);
     }
 
-    if (character.physicalDescription) {
-      profile.push(`PHYSICAL DESCRIPTION: ${character.physicalDescription}`);
+    if (character.appearance) {
+      profile.push(`PHYSICAL DESCRIPTION: ${character.appearance}`);
     }
 
     return profile.join('\n');
@@ -314,7 +313,7 @@ class AdvancedCharacterConsistencyAnalyzer {
     const character = project.characters.find((c) => c.id === characterId);
     if (!character) return '';
 
-    const content = [];
+    const content: string[] = [];
 
     for (const chapter of project.chapters) {
       const chapterText = chapter.content.replace(/<[^>]*>/g, '');
@@ -342,7 +341,9 @@ class AdvancedCharacterConsistencyAnalyzer {
     let sectionLength = 0;
 
     for (let i = 0; i < sentences.length; i++) {
-      const sentence = sentences[i].trim();
+      const sentence = sentences[i]?.trim();
+      if (!sentence) continue;
+
       const sentenceLower = sentence.toLowerCase();
 
       if (
@@ -358,7 +359,7 @@ class AdvancedCharacterConsistencyAnalyzer {
         // End section if it gets long or we hit a clear break
         if (
           sectionLength >= 5 ||
-          (i < sentences.length - 1 && !sentences[i + 1].toLowerCase().includes(characterLower))
+          (i < sentences.length - 1 && !sentences[i + 1]?.toLowerCase().includes(characterLower))
         ) {
           if (currentSection.length > 50) {
             sections.push(currentSection.trim());
@@ -663,7 +664,7 @@ Your entire response must be valid JSON only.`;
       );
       const context = (beforeText + afterText).toLowerCase();
 
-      if (context.includes(characterName.toLowerCase())) {
+      if (context.includes(characterName.toLowerCase()) && quotedText) {
         dialogue.push(quotedText);
       }
     }
@@ -678,10 +679,10 @@ Your entire response must be valid JSON only.`;
     projectId: string,
     character: Character,
     dialogue: string[],
-    chapterId: string,
+    _chapterId: string,
   ): Promise<any> {
     // Use voice consistency service to analyze
-    const voiceAnalysis = await voiceConsistencyService.analyzeCharacterDialogue(
+    const _voiceAnalysis = await voiceConsistencyService.analyzeCharacterDialogue(
       projectId,
       character.name,
       dialogue,
@@ -735,7 +736,7 @@ Your entire response must be valid JSON only.`;
     const positiveWords = /\b(happy|joy|love|great|wonderful|amazing|good|excellent|fantastic)\b/gi;
     const negativeWords = /\b(sad|angry|hate|terrible|awful|bad|horrible|disgusting|furious)\b/gi;
     const exclamations = /!/g;
-    const questions = /\?/g;
+    const _questions = /\?/g;
 
     const positiveCount = (text.match(positiveWords) || []).length;
     const negativeCount = (text.match(negativeWords) || []).length;
@@ -993,7 +994,7 @@ Your entire response must be valid JSON only.`;
     try {
       const reports = this.getStoredReports();
       const filteredReports = Object.fromEntries(
-        Object.entries(reports).filter(([key, report]) => report.projectId !== projectId),
+        Object.entries(reports).filter(([_key, report]) => report.projectId !== projectId),
       );
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredReports));
     } catch (error) {

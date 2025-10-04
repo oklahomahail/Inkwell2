@@ -150,8 +150,12 @@ class EditorConsistencyDecorator {
     try {
       const analysis = await phraseAnalysisService.analyzeText(text, projectId);
 
-      analysis.overusedPhrases.forEach((phrase) => {
+      analysis.phrases.forEach((phrase) => {
         let searchIndex = 0;
+
+        // Calculate frequency per 1000 words
+        const wordCount = text.split(/\s+/).filter((word) => word.length > 0).length;
+        const frequency = wordCount > 0 ? (phrase.count / wordCount) * 1000 : 0;
 
         // Find all occurrences of this phrase
         while (true) {
@@ -166,7 +170,7 @@ class EditorConsistencyDecorator {
             type: 'phrase',
             severity: severity as EditorIssue['severity'],
             title: `Overused phrase: "${phrase.phrase}"`,
-            description: `This phrase appears ${phrase.count} times in your text (${phrase.frequency.toFixed(1)} per 1000 words)`,
+            description: `This phrase appears ${phrase.count} times in your text (${frequency.toFixed(1)} per 1000 words)`,
             suggestion: `Consider using synonyms or rephrasing to avoid repetition`,
             startPos: index,
             endPos: index + phrase.phrase.length,
@@ -347,11 +351,13 @@ class EditorConsistencyDecorator {
     let match;
 
     while ((match = dialoguePattern.exec(text)) !== null) {
-      dialogues.push({
-        text: match[1],
-        startPos: match.index,
-        endPos: match.index + match[0].length,
-      });
+      if (match[1]) {
+        dialogues.push({
+          text: match[1],
+          startPos: match.index,
+          endPos: match.index + match[0].length,
+        });
+      }
     }
 
     return dialogues;
@@ -376,9 +382,11 @@ class EditorConsistencyDecorator {
     const matches = contextText.match(speakerPattern);
     if (matches && matches.length > 0) {
       const lastMatch = matches[matches.length - 1];
-      const speakerMatch = lastMatch.match(/(\w+)\s+/);
-      if (speakerMatch) {
-        return speakerMatch[1];
+      if (lastMatch) {
+        const speakerMatch = lastMatch.match(/(\w+)\s+/);
+        if (speakerMatch && speakerMatch[1]) {
+          return speakerMatch[1];
+        }
       }
     }
 

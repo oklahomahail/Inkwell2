@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import type {
   EditorIssue,
   ConsistencyDecorationOptions,

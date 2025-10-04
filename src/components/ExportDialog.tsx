@@ -2,7 +2,7 @@
 import { X, Download, FileText, File, FileImage, Settings } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import { exportService, ExportOptions } from '@/services/exportService';
 import { ExportFormat } from '@/types/writing';
 

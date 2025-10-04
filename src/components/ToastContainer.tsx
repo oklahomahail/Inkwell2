@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 
 export type ToastContainerProps = {
   className?: string;

@@ -5,7 +5,7 @@ import { Wand2, BookOpen, Clock, Users } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import { storyArchitectService, type GeneratedOutline } from '@/services/storyArchitectService';
 
 import { StoryArchitectFlow } from './StoryArchitectFlow';

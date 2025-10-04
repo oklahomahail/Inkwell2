@@ -2,7 +2,7 @@
 import { useMemo } from 'react';
 
 import { useAppContext, View } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import { Command } from '@/types/commands';
 
 export function useCommands(

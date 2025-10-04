@@ -2,7 +2,8 @@
 import { BookOpen, Users, Map, FileText, BarChart3, Wand2 } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '@/context/toast';
+
 import { type GeneratedOutline } from '../../services/storyArchitectService';
 import BeatSheetPlanner from '../Planning/BeatSheetPlanner';
 import CharacterManager from '../Planning/CharacterManager';

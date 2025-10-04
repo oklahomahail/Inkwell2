@@ -326,7 +326,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
           try {
             parsedOutline = JSON.parse(jsonMatch[0]);
             console.log('🔧 Successfully extracted JSON from response');
-          } catch (secondParseError) {
+          } catch (__secondParseError) {
             throw new Error('Could not parse JSON from Claude response. Please try again.');
           }
         } else {
@@ -672,7 +672,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
     );
   }
 
-  private getInternalState(stage: string, character: GeneratedCharacter): string {
+  private getInternalState(stage: string, _character: GeneratedCharacter): string {
     const states = {
       introduction: 'Comfortable but restless',
       inciting_incident: 'Confused and resistant',
@@ -854,13 +854,15 @@ Your entire response must be valid JSON only. Do not include any text outside th
       sentenceLength: baseProfile.sentenceLength as CharacterVoice['sentenceLength'],
       emotionalExpression: baseProfile.emotionalExpression as CharacterVoice['emotionalExpression'],
       speechPatterns: [`Distinctive ${character.role} speech patterns`],
-      distinctiveTraits: [`Voice traits reflecting ${character.personality || 'their nature'}`],
+      distinctiveTraits: [
+        `Voice traits reflecting ${(character as any).personality || 'their nature'}`,
+      ],
     };
   }
 
   private generateSceneEmotionalArc(
     scene: GeneratedScene,
-    chapter: GeneratedChapter,
+    _chapter: GeneratedChapter,
   ): SceneEmotionalArc {
     return {
       opening: 'Scene opens with establishing mood',
@@ -876,7 +878,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
 
   private generateSceneCharacterGrowth(
     scene: GeneratedScene,
-    characters: GeneratedCharacter[],
+    _characters: GeneratedCharacter[],
   ): SceneCharacterGrowth[] {
     return scene.characters.map((charName) => ({
       character: charName,

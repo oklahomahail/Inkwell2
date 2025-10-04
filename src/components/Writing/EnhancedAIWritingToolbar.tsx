@@ -18,7 +18,7 @@ import {
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import claudeService from '@/services/claudeService';
 
 interface EnhancedAIWritingToolbarProps {

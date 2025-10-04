@@ -398,7 +398,7 @@ export async function createManualBackup(
               if (data) {
                 try {
                   appData[key] = JSON.parse(data);
-                } catch (_error) {
+                } catch (__error) {
                   // Store as string if it's not JSON
                   appData[key] = data;
                 }

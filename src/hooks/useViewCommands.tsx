@@ -95,5 +95,5 @@ export const useViewCommands = () => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [setView]);
-  const palette = useCommandPaletteContext();
+  const _palette = useCommandPaletteContext();
 };

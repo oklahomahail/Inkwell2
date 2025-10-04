@@ -230,10 +230,10 @@ class SmartSearchService {
 
       // Use Claude to enhance semantic understanding
       const semanticPrompt = this.buildSemanticPrompt(query, baseResults, options);
-      const semanticResponse = await claudeService.generateText(semanticPrompt);
+      const semanticResponse = await claudeService.sendMessage(semanticPrompt);
 
       // Parse Claude's semantic analysis
-      const semanticAnalysis = this.parseSemanticResponse(semanticResponse);
+      const semanticAnalysis = this.parseSemanticResponse(semanticResponse.content);
 
       // Re-rank results based on semantic similarity
       return this.applySemantic排名(baseResults, query, semanticAnalysis, options);
@@ -303,7 +303,7 @@ class SmartSearchService {
     const phraseRegex = /"([^"]+)"/g;
     let match;
     while ((match = phraseRegex.exec(remaining)) !== null) {
-      parsed.phrases.push(match[1]);
+      if (match[1]) parsed.phrases.push(match[1]);
       remaining = remaining.replace(match[0], ' ');
     }
 
@@ -314,9 +314,9 @@ class SmartSearchService {
       const term = match[2];
 
       if (operator === '+') {
-        parsed.operators.must.push(term);
-      } else if (operator === '-') {
-        parsed.operators.mustNot.push(term);
+        if (term) parsed.operators.must.push(term);
+      } else {
+        if (term) parsed.operators.mustNot.push(term);
       }
 
       remaining = remaining.replace(match[0], ' ');
@@ -538,12 +538,12 @@ class SmartSearchService {
     // Limit cache size
     if (this.cache.size >= this.MAX_CACHE_SIZE) {
       const oldestKey = Array.from(this.cache.keys())[0];
-      this.cache.delete(oldestKey);
+      if (oldestKey) this.cache.delete(oldestKey);
     }
 
     this.cache.set(cacheKey, {
-      query: cacheKey.split(':')[0],
-      options: cacheKey.split(':')[1],
+      query: cacheKey.split(':')[0] || '',
+      options: cacheKey.split(':')[1] || '',
       results,
       timestamp: Date.now(),
       ttl: this.CACHE_TTL,
@@ -661,19 +661,18 @@ class SmartSearchService {
 
   private async generateSemanticSuggestions(
     query: string,
-    options: SmartSearchOptions,
+    _options: SmartSearchOptions,
   ): Promise<SearchSuggestion[]> {
     try {
       const prompt = `Based on the search query "${query}" in a creative writing context, suggest 3 related search terms that a writer might want to explore. Return only the search terms, one per line.`;
 
-      const response = await claudeService.generateText(prompt, {
+      const response = await claudeService.sendMessage(prompt, {
         maxTokens: 100,
-        temperature: 0.7,
       });
 
-      const terms = response
+      const terms = response.content
         .split('\n')
-        .filter((term) => term.trim())
+        .filter((term: string) => term.trim())
         .slice(0, 3);
 
       return terms.map((term, index) => ({
@@ -780,31 +779,31 @@ class SmartSearchService {
   }
 
   private levenshteinDistance(str1: string, str2: string): number {
-    const matrix = [];
+    const matrix: number[][] = [];
 
     for (let i = 0; i <= str2.length; i++) {
       matrix[i] = [i];
     }
 
     for (let j = 0; j <= str1.length; j++) {
-      matrix[0][j] = j;
+      if (matrix[0]) matrix[0][j] = j;
     }
 
     for (let i = 1; i <= str2.length; i++) {
       for (let j = 1; j <= str1.length; j++) {
         if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-          matrix[i][j] = matrix[i - 1][j - 1];
+          matrix[i]![j] = matrix[i - 1]?.[j - 1] ?? 0;
         } else {
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j - 1] + 1,
-            matrix[i][j - 1] + 1,
-            matrix[i - 1][j] + 1,
+          matrix[i]![j] = Math.min(
+            (matrix[i - 1]?.[j - 1] ?? 0) + 1,
+            (matrix[i]?.[j - 1] ?? 0) + 1,
+            (matrix[i - 1]?.[j] ?? 0) + 1,
           );
         }
       }
     }
 
-    return matrix[str2.length][str1.length];
+    return matrix[str2.length]?.[str1.length] ?? 0;
   }
 
   private getIntentBoost(result: SmartSearchResult, intent: string): number {
@@ -889,7 +888,7 @@ Format your response as JSON.`;
     results: SearchResult[],
     query: string,
     analysis: any,
-    options: SmartSearchOptions,
+    _options: SmartSearchOptions,
   ): SmartSearchResult[] {
     // Apply semantic analysis to re-rank results
     return results

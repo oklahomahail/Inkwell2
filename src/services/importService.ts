@@ -53,7 +53,7 @@ class ImportService {
       if (typeof jsonData === 'string') {
         try {
           projectData = JSON.parse(jsonData);
-        } catch (_error) {
+        } catch (__error) {
           result.errors!.push('Invalid JSON format');
           return result;
         }
@@ -93,7 +93,7 @@ class ImportService {
             tags: ['import-backup'],
           });
           result.warnings!.push('Created backup of existing project');
-        } catch (_error) {
+        } catch (__error) {
           result.warnings!.push('Failed to create backup of existing project');
         }
       }
@@ -159,19 +159,19 @@ class ImportService {
               isAutomatic: false,
               tags: ['import'],
             });
-          } catch (_error) {
+          } catch (__error) {
             result.warnings!.push('Failed to create import snapshot');
           }
         }
 
         console.log(`Project imported successfully: ${project.title} (${project.id})`);
-      } catch (_error) {
+      } catch (__error) {
         result.errors!.push(
           `Failed to save imported project: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
         return result;
       }
-    } catch (_error) {
+    } catch (__error) {
       result.errors!.push(
         `Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -291,7 +291,7 @@ class ImportService {
       const { EnhancedStorageService } = await import('./enhancedStorageService');
       const project = EnhancedStorageService.loadProject(projectId);
       return project as any; // Type assertion for compatibility
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -381,7 +381,7 @@ class ImportService {
 
       // Check character references if beat sheets exist
       if (project.beatSheets && project.characters) {
-        const characterIds = new Set(project.characters.map((char) => char.id));
+        const _characterIds = new Set(project.characters.map((char) => char.id));
         for (const beatSheet of project.beatSheets) {
           for (const beat of beatSheet.beats) {
             if (beat.linkedScenes) {
@@ -394,7 +394,7 @@ class ImportService {
           }
         }
       }
-    } catch (_error) {
+    } catch (__error) {
       errors.push(
         `Integrity validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -626,7 +626,7 @@ class ImportService {
           differences,
         },
       };
-    } catch (_error) {
+    } catch (__error) {
       const errorMessage = `Round-trip test failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
       errors.push(errorMessage);
       console.error(errorMessage, error);

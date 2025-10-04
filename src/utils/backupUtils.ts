@@ -85,7 +85,7 @@ export function calculateLightChecksum(data: BackupData): string {
 export function calculateDataSize(data: BackupData): number {
   try {
     return new Blob([JSON.stringify(data)]).size;
-  } catch (_error) {
+  } catch (__error) {
     return 0;
   }
 }
@@ -216,7 +216,7 @@ export function validateBackupData(
     }
 
     return { isValid: errors.length === 0, errors, warnings };
-  } catch (_error) {
+  } catch (__error) {
     return {
       isValid: false,
       errors: ['Validation process failed'],
@@ -354,7 +354,7 @@ export function cleanupCorruptedBackups(backups: Record<string, Record<string, u
         removedCount++;
         errors.push(`Removed corrupted backup ${id}: ${validation.errors.join(', ')}`);
       }
-    } catch (_error) {
+    } catch (__error) {
       removedCount++;
       errors.push(`Removed invalid backup ${id}: parsing failed`);
     }

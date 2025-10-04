@@ -6,7 +6,7 @@ import {
   CommandPaletteContext,
   type CommandPaletteContextValue,
 } from '@/context/CommandPaletteContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import { exportService } from '@/services/exportService';
 import { storageService } from '@/services/storageService';
 import { ChapterStatus, SceneStatus, ExportFormat, type Chapter } from '@/types/writing';

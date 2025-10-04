@@ -3,7 +3,7 @@ import { Clock, MapPin, User, Tag, Plus, Edit3, Trash2, Save, X } from 'lucide-r
 import React, { useState, useMemo, useCallback } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 // Remove unused import - we're using useEnhancedTimeline instead
 
 // Enhanced Timeline Event type that integrates with your project structure

@@ -14,7 +14,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
 import { useNavigation } from '@/context/NavContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import { timelineService } from '@/services/timelineService';
 import type { TimelineItem } from '@/types/timeline';
 import { logActivity } from '@/utils/activityLogger';

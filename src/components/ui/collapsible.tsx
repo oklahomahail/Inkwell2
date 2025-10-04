@@ -13,7 +13,7 @@ interface CollapsibleContentProps {
   className?: string;
 }
 
-const Collapsible: React.FC<CollapsibleProps> = ({ open, children, className }) => {
+const Collapsible: React.FC<CollapsibleProps> = ({ open: _open, children, className }) => {
   return <div className={className}>{children}</div>;
 };
 

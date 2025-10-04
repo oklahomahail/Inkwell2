@@ -22,7 +22,7 @@ import {
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import { cn } from '@/utils/cn';
 
 import {

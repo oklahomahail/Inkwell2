@@ -3,7 +3,7 @@ import { AlertTriangle, Ban, TrendingUp, RefreshCw } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import { phraseAnalysisService } from '@/utils/textAnalysis';
 
 interface PhraseOffender {
@@ -22,11 +22,11 @@ interface PhraseHygieneWidgetProps {
 export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
   className = '',
   showTitle = true,
-  maxItems = 10
+  maxItems = 10,
 }) => {
   const { currentProject } = useAppContext();
   const { showToast } = useToast();
-  
+
   const [offenders, setOffenders] = useState<PhraseOffender[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [lastAnalyzed, setLastAnalyzed] = useState<Date | null>(null);
@@ -49,9 +49,8 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
     setIsAnalyzing(true);
     try {
       // Get all chapter content
-      const allContent = currentProject.chapters
-        ?.map((chapter: any) => chapter.content || '')
-        .join(' ') || '';
+      const allContent =
+        currentProject.chapters?.map((chapter: any) => chapter.content || '').join(' ') || '';
 
       if (!allContent.trim()) {
         setOffenders([]);
@@ -60,18 +59,15 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
         return;
       }
 
-      const results = await phraseAnalysisService.analyzeText(
-        allContent, 
-        currentProject.id
-      );
+      const results = await phraseAnalysisService.analyzeText(allContent, currentProject.id);
 
       // Convert results to our format
       const phraseOffenders: PhraseOffender[] = results.phrases
-        .map(phrase => ({
+        .map((phrase) => ({
           phrase: phrase.phrase,
           count: phrase.count,
           severity: phrase.severity,
-          frequency: (phrase.count / results.totalWords) * 1000
+          frequency: (phrase.count / results.totalWords) * 1000,
         }))
         .sort((a, b) => {
           // Sort by severity first, then by count
@@ -86,7 +82,6 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
       setOffenders(phraseOffenders);
       setTotalWords(results.totalWords);
       setLastAnalyzed(new Date());
-
     } catch (error) {
       console.error('Failed to analyze phrases:', error);
       showToast('Failed to analyze phrases', 'error');
@@ -98,27 +93,33 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
 
   const addToStoplist = (phrase: string) => {
     if (!currentProject) return;
-    
+
     phraseAnalysisService.addToCustomStoplist(currentProject.id, phrase);
     showToast(`Added "${phrase}" to stoplist`, 'success');
-    
+
     // Remove from current offenders list
-    setOffenders(prev => prev.filter(o => o.phrase !== phrase));
+    setOffenders((prev) => prev.filter((o) => o.phrase !== phrase));
   };
 
   const getSeverityColor = (severity: 'low' | 'medium' | 'high') => {
     switch (severity) {
-      case 'high': return 'text-red-500 bg-red-50 dark:bg-red-900/20';
-      case 'medium': return 'text-orange-500 bg-orange-50 dark:bg-orange-900/20';
-      case 'low': return 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20';
+      case 'high':
+        return 'text-red-500 bg-red-50 dark:bg-red-900/20';
+      case 'medium':
+        return 'text-orange-500 bg-orange-50 dark:bg-orange-900/20';
+      case 'low':
+        return 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20';
     }
   };
 
   const getSeverityIcon = (severity: 'low' | 'medium' | 'high') => {
     switch (severity) {
-      case 'high': return <AlertTriangle className="w-3 h-3" />;
-      case 'medium': return <TrendingUp className="w-3 h-3" />;
-      case 'low': return <TrendingUp className="w-3 h-3" />;
+      case 'high':
+        return <AlertTriangle className="w-3 h-3" />;
+      case 'medium':
+        return <TrendingUp className="w-3 h-3" />;
+      case 'low':
+        return <TrendingUp className="w-3 h-3" />;
     }
   };
 
@@ -174,9 +175,7 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">Issues found:</span>
-              <span className="font-medium text-gray-900 dark:text-white">
-                {offenders.length}
-              </span>
+              <span className="font-medium text-gray-900 dark:text-white">{offenders.length}</span>
             </div>
             {lastAnalyzed && (
               <div className="text-xs text-gray-500 mt-1">
@@ -194,9 +193,7 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
               <p className="text-sm font-medium text-green-700 dark:text-green-400 mb-1">
                 Great phrase hygiene!
               </p>
-              <p className="text-xs text-gray-500">
-                No overused phrases detected
-              </p>
+              <p className="text-xs text-gray-500">No overused phrases detected</p>
             </div>
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto">
@@ -207,7 +204,9 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(offender.severity)}`}>
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(offender.severity)}`}
+                      >
                         {getSeverityIcon(offender.severity)}
                         {offender.severity}
                       </span>
@@ -219,7 +218,7 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
                       {offender.count} uses • {offender.frequency.toFixed(1)} per 1000 words
                     </div>
                   </div>
-                  
+
                   <button
                     onClick={() => addToStoplist(offender.phrase)}
                     className="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
@@ -239,18 +238,21 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
                 onClick={() => {
                   if (currentProject) {
                     // Add all high severity phrases to stoplist
-                    const highSeverityPhrases = offenders.filter(o => o.severity === 'high');
-                    highSeverityPhrases.forEach(phrase => {
+                    const highSeverityPhrases = offenders.filter((o) => o.severity === 'high');
+                    highSeverityPhrases.forEach((phrase) => {
                       phraseAnalysisService.addToCustomStoplist(currentProject.id, phrase.phrase);
                     });
                     if (highSeverityPhrases.length > 0) {
-                      showToast(`Added ${highSeverityPhrases.length} high-severity phrases to stoplist`, 'success');
-                      setOffenders(prev => prev.filter(o => o.severity !== 'high'));
+                      showToast(
+                        `Added ${highSeverityPhrases.length} high-severity phrases to stoplist`,
+                        'success',
+                      );
+                      setOffenders((prev) => prev.filter((o) => o.severity !== 'high'));
                     }
                   }
                 }}
                 className="text-xs px-3 py-1 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors"
-                disabled={!offenders.some(o => o.severity === 'high')}
+                disabled={!offenders.some((o) => o.severity === 'high')}
               >
                 Ignore all high-severity phrases
               </button>

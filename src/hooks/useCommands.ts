@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { useAppContext, View } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import { Command } from '@/types/commands';
 
 export function useCommands(
@@ -169,7 +169,7 @@ export function useCommands(
               } else {
                 showToast('No text to improve', 'error');
               }
-            } catch (_error) {
+            } catch (__error) {
               showToast('Failed to improve text', 'error');
             }
           },
@@ -192,7 +192,7 @@ export function useCommands(
               } else {
                 showToast('No text to continue from', 'error');
               }
-            } catch (_error) {
+            } catch (__error) {
               showToast('Failed to continue writing', 'error');
             }
           },
@@ -215,7 +215,7 @@ export function useCommands(
               } else {
                 showToast('No text to analyze', 'error');
               }
-            } catch (_error) {
+            } catch (__error) {
               showToast('Failed to analyze text', 'error');
             }
           },
@@ -233,7 +233,7 @@ export function useCommands(
               const context = currentProject?.content || 'New creative writing project';
               await claudeActions.brainstormIdeas(context);
               showToast('Brainstorming session started', 'success');
-            } catch (_error) {
+            } catch (__error) {
               showToast('Failed to generate ideas', 'error');
             }
           },
@@ -251,7 +251,7 @@ export function useCommands(
               const context = currentProject?.content || 'Story development';
               await claudeActions.generatePlotIdeas(context);
               showToast('Plot ideas generated', 'success');
-            } catch (_error) {
+            } catch (__error) {
               showToast('Failed to generate plot ideas', 'error');
             }
           },

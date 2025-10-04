@@ -4,7 +4,6 @@
 import claudeService from './claudeService';
 
 import type { EnhancedProject } from '../types/project';
-import type { Chapter } from '../types/writing';
 
 export interface TimelineEvent {
   id: string;
@@ -126,7 +125,11 @@ class TimelinePlotConsistencyAnalyzer {
       focusChapters?: string[];
     } = {},
   ): Promise<TimelinePlotReport> {
-    const { deepAnalysis = false, includeMinorIssues = false, focusChapters = [] } = options;
+    const {
+      deepAnalysis = false,
+      includeMinorIssues: _includeMinorIssues = false,
+      focusChapters = [],
+    } = options;
 
     console.log('Starting timeline and plot consistency analysis...');
 
@@ -226,7 +229,7 @@ class TimelinePlotConsistencyAnalyzer {
    */
   private async extractChapterEvents(
     project: EnhancedProject,
-    chapter: Chapter,
+    chapter: import('../types/project').Chapter,
   ): Promise<TimelineEvent[]> {
     const prompt = this.buildEventExtractionPrompt(project, chapter);
 
@@ -241,7 +244,10 @@ class TimelinePlotConsistencyAnalyzer {
   /**
    * Build event extraction prompt for Claude
    */
-  private buildEventExtractionPrompt(project: EnhancedProject, chapter: Chapter): string {
+  private buildEventExtractionPrompt(
+    project: EnhancedProject,
+    chapter: import('../types/project').Chapter,
+  ): string {
     const characters = project.characters.map((c) => c.name).join(', ');
 
     return `Extract key timeline events from this chapter. Focus on events that advance the plot, develop characters, or establish important story elements.
@@ -279,7 +285,10 @@ Your entire response must be valid JSON only.`;
   /**
    * Parse timeline events from Claude response
    */
-  private parseTimelineEvents(response: any, chapter: Chapter): TimelineEvent[] {
+  private parseTimelineEvents(
+    response: any,
+    chapter: import('../types/project').Chapter,
+  ): TimelineEvent[] {
     try {
       const responseText =
         typeof response === 'string' ? response : response.content || response.text || '';
@@ -333,7 +342,7 @@ Your entire response must be valid JSON only.`;
       /\b(\d+) (hour|minute|day|week|month)s? (later|ago|after|before)\b/gi,
     ];
 
-    chaptersToAnalyze.forEach((chapter, chapterIndex) => {
+    chaptersToAnalyze.forEach((chapter, _chapterIndex) => {
       const text = chapter.content.replace(/<[^>]*>/g, '');
       const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 20);
 
@@ -647,14 +656,16 @@ Your entire response must be valid JSON only.`;
         const currentChapter = project.chapters[i];
         const nextChapter = project.chapters[i + 1];
 
-        const transition = await this.analyzeChapterTransition(
-          currentChapter,
-          nextChapter,
-          deepAnalysis,
-        );
+        if (currentChapter && nextChapter) {
+          const transition = await this.analyzeChapterTransition(
+            currentChapter,
+            nextChapter,
+            deepAnalysis,
+          );
 
-        if (transition) {
-          sequenceProblems.push(transition);
+          if (transition) {
+            sequenceProblems.push(transition);
+          }
         }
       }
 
@@ -669,8 +680,8 @@ Your entire response must be valid JSON only.`;
    * Analyze transition between two chapters
    */
   private async analyzeChapterTransition(
-    fromChapter: Chapter,
-    toChapter: Chapter,
+    fromChapter: import('../types/project').Chapter,
+    toChapter: import('../types/project').Chapter,
     deepAnalysis: boolean,
   ): Promise<SceneSequenceProblem | null> {
     const prompt = this.buildTransitionAnalysisPrompt(fromChapter, toChapter, deepAnalysis);
@@ -687,8 +698,8 @@ Your entire response must be valid JSON only.`;
    * Build transition analysis prompt
    */
   private buildTransitionAnalysisPrompt(
-    fromChapter: Chapter,
-    toChapter: Chapter,
+    fromChapter: import('../types/project').Chapter,
+    toChapter: import('../types/project').Chapter,
     deepAnalysis: boolean,
   ): string {
     const fromEnd = fromChapter.content.replace(/<[^>]*>/g, '').slice(-500);
@@ -741,8 +752,8 @@ Your entire response must be valid JSON only.`;
    */
   private parseTransitionProblem(
     response: any,
-    fromChapter: Chapter,
-    toChapter: Chapter,
+    fromChapter: import('../types/project').Chapter,
+    toChapter: import('../types/project').Chapter,
   ): SceneSequenceProblem | null {
     try {
       const responseText =

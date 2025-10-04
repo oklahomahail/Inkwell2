@@ -1,30 +1,7 @@
-// src/context/ToastContext.tsx
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+// src/context/ToastContext.tsx - Toast Provider Component
+import React, { useState, useCallback, useMemo, type ReactNode } from 'react';
 
-export type ToastType = 'info' | 'success' | 'error' | 'warning';
-export type Toast = { id: string; message: string; type: ToastType };
-
-export type ToastContextValue = {
-  toasts: Toast[];
-  showToast: (message: string, type?: ToastType, timeoutMs?: number) => void;
-  removeToast: (id: string) => void;
-  clearToasts: () => void;
-};
-
-const ToastContext = createContext<ToastContextValue | null>(null);
-
-export function useToast(): ToastContextValue {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error('useToast must be used within a ToastProvider');
-  return ctx;
-}
+import { ToastContext, type ToastContextValue, type Toast, type ToastType } from './toast';
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);

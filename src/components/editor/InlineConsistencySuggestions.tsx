@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import type { CharacterTraitIssue } from '@/services/characterConsistencyAnalyzer';
 import claudeService from '@/services/claudeService';
 import type { EditorIssue } from '@/services/editorConsistencyDecorator';

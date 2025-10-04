@@ -296,7 +296,7 @@ class VoiceConsistencyService {
       const speakerGroups = this.groupDialogueBySpeaker(dialogueLines, text);
 
       // Analyze each group against known fingerprints
-      for (const [speakerId, lines] of speakerGroups.entries()) {
+      for (const [_speakerId, lines] of speakerGroups.entries()) {
         const combinedText = lines.map((line) => line.text).join(' ');
 
         if (combinedText.length < minDialogueLength) continue;
@@ -353,13 +353,13 @@ class VoiceConsistencyService {
 
     dialogueLines.forEach((line, index) => {
       // Try to identify the speaker from context
-      const speakerId = this.identifySpeaker(line, fullText, index);
+      const _speakerId = this.identifySpeaker(line, fullText, index);
 
-      if (!groups.has(speakerId)) {
-        groups.set(speakerId, []);
+      if (!groups.has(_speakerId)) {
+        groups.set(_speakerId, []);
       }
 
-      groups.get(speakerId)!.push(line);
+      groups.get(_speakerId)!.push(line);
     });
 
     return groups;

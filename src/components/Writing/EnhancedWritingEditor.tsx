@@ -20,10 +20,10 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
+import { useToast } from '@/context/toast';
 import type { EnhancedProject } from '@/types/project';
 
 import { useAppContext } from '../../context/AppContext';
-import { useToast } from '../../context/ToastContext';
 import { storageService } from '../../services/storageService';
 import { Scene, Chapter } from '../../types/writing';
 import { debounce as debounceUtil } from '../../utils/debounce';
@@ -245,7 +245,15 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
         plotNotes: [],
         worldBuilding: [],
         recentContent: '',
-        storyBeats: [],
+        sessions: [],
+        claudeContext: {
+          includeCharacters: true,
+          includePlotNotes: true,
+          includeWorldBuilding: true,
+          maxCharacters: 5,
+          maxPlotNotes: 10,
+          contextLength: 'medium',
+        },
       };
       editor.commands.updateConsistencyContext(enhancedProject, currentScene, currentChapter);
     }
@@ -285,7 +293,15 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
         plotNotes: [],
         worldBuilding: [],
         recentContent: '',
-        storyBeats: [],
+        sessions: [],
+        claudeContext: {
+          includeCharacters: true,
+          includePlotNotes: true,
+          includeWorldBuilding: true,
+          maxCharacters: 5,
+          maxPlotNotes: 10,
+          contextLength: 'medium',
+        },
       };
       editor.commands.updateConsistencyContext(enhancedProject, currentScene, currentChapter);
       showToast('Consistency analysis refreshed', 'success');

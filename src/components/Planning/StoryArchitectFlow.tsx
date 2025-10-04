@@ -17,7 +17,7 @@ import {
 import React, { useState, useCallback, useEffect } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import {
   storyArchitectService,
   type StoryPremise,

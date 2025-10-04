@@ -14,7 +14,7 @@ import {
 import React, { useState, useEffect } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import { storageService } from '@/services/storageService';
 import { Chapter, Scene, SceneStatus, ChapterStatus } from '@/types/writing';
 import { generateId } from '@/utils/id';
@@ -208,7 +208,7 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
           setChapters(chaptersWithExpanded);
 
           showToast('Scene duplicated', 'success');
-        } catch (_error) {
+        } catch (__error) {
           showToast('Failed to duplicate scene', 'error');
         }
         break;
@@ -218,7 +218,7 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
           try {
             // Implementation would need to be added to storage service
             showToast('Delete functionality coming soon', 'info');
-          } catch (_error) {
+          } catch (__error) {
             showToast('Failed to delete scene', 'error');
           }
         }

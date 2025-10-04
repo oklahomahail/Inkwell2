@@ -2,7 +2,8 @@
 import { Wand2, BookOpen, Target, Palette, MapPin, Lightbulb } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '@/context/toast';
+
 import { useLoading } from '../../hooks/useLoading';
 import {
   storyArchitectService,

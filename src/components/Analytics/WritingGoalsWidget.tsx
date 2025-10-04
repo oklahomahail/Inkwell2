@@ -4,7 +4,7 @@
 import { Target, Flame, Timer, Trophy, CheckCircle, Settings, Star } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 import { useProjectStats } from '@/hooks/useProjectStats';
 
 interface WritingGoal {

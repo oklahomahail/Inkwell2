@@ -19,7 +19,7 @@ export const useSmartSearch = (options: UseSmartSearchOptions = {}) => {
   const [query, setQuery] = useState(defaultQuery);
 
   // Open search modal
-  const openSearch = useCallback((initialQuery?: string, mode?: typeof focusMode) => {
+  const openSearch = useCallback((initialQuery?: string, _mode?: typeof focusMode) => {
     if (initialQuery !== undefined) {
       setQuery(initialQuery);
     }

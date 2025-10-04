@@ -195,7 +195,7 @@ class ConnectivityService {
         cache: 'no-cache',
       });
       return true;
-    } catch (_error) {
+    } catch (__error) {
       // Also check navigator.onLine as fallback
       return navigator.onLine;
     }

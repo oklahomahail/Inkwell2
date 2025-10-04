@@ -104,7 +104,7 @@ export function useAdvancedFocusMode() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Replace NodeJS.Timeout with a cross-env type
-  type TimeoutRef = ReturnType<typeof setInterval>;
+  type _TimeoutRef = ReturnType<typeof setInterval>;
   const sprintTimerRef = useRef<number | null>(null);
 
   // Load settings from localStorage

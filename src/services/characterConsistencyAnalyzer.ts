@@ -355,13 +355,13 @@ Return an empty array [] if no consistency issues are found. Be thorough but foc
     const parts = name.split(' ');
 
     // First name only
-    if (parts.length > 1) {
+    if (parts.length > 1 && parts[0]) {
       aliases.push(parts[0]);
     }
 
     // Common nickname patterns
     const firstName = parts[0];
-    if (firstName.endsWith('y') && firstName.length > 3) {
+    if (firstName && firstName.endsWith('y') && firstName.length > 3) {
       aliases.push(firstName.slice(0, -1) + 'ie'); // Bobby -> Bobbie
     }
 

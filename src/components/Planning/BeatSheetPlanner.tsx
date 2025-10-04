@@ -3,7 +3,7 @@ import { BookOpen, Edit3, Save, RotateCcw, CheckCircle, Circle, Lightbulb } from
 import React, { useState, useEffect } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 
 interface Beat {
   id: string;

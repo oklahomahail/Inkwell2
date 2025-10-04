@@ -14,8 +14,9 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
+import { useToast } from '@/context/toast';
+
 import { useAppContext } from '../../context/AppContext';
-import { useToast } from '../../context/ToastContext';
 import { consistencyGuardianService } from '../../services/consistencyGuardianService';
 import { projectContextService } from '../../services/projectContextService';
 

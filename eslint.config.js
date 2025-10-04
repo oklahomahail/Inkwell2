@@ -10,7 +10,15 @@ import globals from 'globals';
 export default [
   // Global ignores (still included in the tree, just not linted)
   {
-    ignores: ['node_modules/**', 'build/**', 'dist/**', 'src/test/**'],
+    ignores: [
+      'node_modules/**', 
+      'build/**', 
+      'dist/**', 
+      'src/test/**', 
+      'bench/**', 
+      'dev/**',
+      '.vercel/**'
+    ],
   },
 
   // TypeScript / React rules

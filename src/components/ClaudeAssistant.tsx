@@ -3,7 +3,7 @@ import { BoltIcon, MessageCircleIcon, SearchIcon } from 'lucide-react';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 import { useClaude } from '@/context/ClaudeProvider';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/context/toast';
 
 import AccessibleTabs from './AccessibleTabs';
 import { StatusBadge, LoadingIndicator, TypingIndicator } from './Claude';
