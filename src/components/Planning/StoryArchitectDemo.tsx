@@ -1,7 +1,7 @@
 // Story Architect Demo Integration
 // Shows how to integrate the StoryArchitectFlow with existing Inkwell components
 
-import { Wand2, BookOpen, Timeline, Users } from 'lucide-react';
+import { Wand2, BookOpen, Clock, Users } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
@@ -133,7 +133,7 @@ export const StoryArchitectDemo: React.FC<StoryArchitectDemoProps> = ({
 
               <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
                 <div className="flex items-center gap-3 mb-2">
-                  <Timeline className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   <h4 className="font-medium text-purple-900 dark:text-purple-100">
                     Timeline Integration
                   </h4>

@@ -49,7 +49,7 @@ export const ConsistencyExtension = Extension.create<ConsistencyExtensionOptions
             return DecorationSet.empty;
           },
 
-          apply(tr, oldState, oldDoc, newDoc) {
+          apply(tr, oldState, _oldDoc, newState) {
             // If document hasn't changed, keep existing decorations
             if (!tr.docChanged) {
               return oldState;
@@ -66,7 +66,7 @@ export const ConsistencyExtension = Extension.create<ConsistencyExtensionOptions
             }
 
             // Get text content and trigger consistency analysis
-            const content = newDoc.textContent;
+            const content = newState.doc.textBetween(0, newState.doc.content.size, '\n');
             editorConsistencyDecorator.analyzeContent(
               content,
               extension.options.project,
@@ -76,7 +76,7 @@ export const ConsistencyExtension = Extension.create<ConsistencyExtensionOptions
             );
 
             // Return current decorations (will be updated asynchronously)
-            return editorConsistencyDecorator.generateDecorations(newDoc);
+            return editorConsistencyDecorator.generateDecorations(newState.doc);
           },
         },
 
@@ -119,12 +119,12 @@ export const ConsistencyExtension = Extension.create<ConsistencyExtensionOptions
                 extension.options.scene &&
                 extension.options.chapter
               ) {
-                const content = view.state.doc.textContent;
+                const content = view.state.doc.textBetween(0, view.state.doc.content.size, '\n');
                 editorConsistencyDecorator.analyzeContent(
                   content,
-                  extension.options.project,
-                  extension.options.scene,
-                  extension.options.chapter,
+                  extension.options.project!,
+                  extension.options.scene!,
+                  extension.options.chapter!,
                   extension.options.decorationOptions,
                 );
               } else {
@@ -173,26 +173,29 @@ export const ConsistencyExtension = Extension.create<ConsistencyExtensionOptions
     return {
       toggleConsistencyChecking:
         () =>
-        ({ commands }) => {
+        ({ commands }: { commands: any }) => {
           this.options.enabled = !this.options.enabled;
-
           // Force re-render
           return commands.focus();
         },
 
       updateConsistencyContext:
-        (project: EnhancedProject, scene: Scene, chapter: Chapter) =>
-        ({ commands: _commands }) => {
+        (project: EnhancedProject | null, scene: Scene | null, chapter: Chapter | null) =>
+        ({ commands: _commands }: { commands: any }) => {
           this.options.project = project;
           this.options.scene = scene;
           this.options.chapter = chapter;
 
           // Trigger immediate re-analysis if enabled
-          if (this.options.enabled) {
+          if (this.options.enabled && project && scene && chapter) {
             setTimeout(() => {
               const editor = this.editor;
               if (editor?.view) {
-                const content = editor.view.state.doc.textContent;
+                const content = editor.view.state.doc.textBetween(
+                  0,
+                  editor.view.state.doc.content.size,
+                  '\n',
+                );
                 editorConsistencyDecorator.analyzeContent(
                   content,
                   project,
@@ -209,7 +212,7 @@ export const ConsistencyExtension = Extension.create<ConsistencyExtensionOptions
 
       updateDecorationOptions:
         (options: Partial<ConsistencyDecorationOptions>) =>
-        ({ commands: _commands }) => {
+        ({ commands: _commands }: { commands: any }) => {
           this.options.decorationOptions = {
             ...this.options.decorationOptions,
             ...options,
@@ -225,7 +228,11 @@ export const ConsistencyExtension = Extension.create<ConsistencyExtensionOptions
             setTimeout(() => {
               const editor = this.editor;
               if (editor?.view) {
-                const content = editor.view.state.doc.textContent;
+                const content = editor.view.state.doc.textBetween(
+                  0,
+                  editor.view.state.doc.content.size,
+                  '\n',
+                );
                 editorConsistencyDecorator.analyzeContent(
                   content,
                   this.options.project,
@@ -242,7 +249,7 @@ export const ConsistencyExtension = Extension.create<ConsistencyExtensionOptions
 
       getCurrentConsistencyIssues:
         () =>
-        ({ commands: _commands }) => {
+        ({ commands: _commands }: { commands: any }) => {
           return editorConsistencyDecorator.getCurrentIssues();
         },
     };

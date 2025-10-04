@@ -11,16 +11,13 @@ import {
 } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 
-import type {
-  GeneratedCharacter,
-  CharacterVoiceProfile,
-} from '../../services/storyArchitectService';
+import type { GeneratedCharacter, CharacterVoice } from '../../services/storyArchitectService';
 
 interface VoiceSnapshot {
   id: string;
   chapter: number;
   stage: string;
-  voiceProfile: CharacterVoiceProfile;
+  voiceProfile: CharacterVoice;
   emotionalState: string;
   contextDescription: string;
   sampleDialogue?: string;
@@ -88,25 +85,27 @@ export default function VoiceEvolutionTracker({
 
         if (arcStages.length > midPoint && midPoint > 0) {
           const midStage = arcStages[midPoint];
-          snapshots.push({
-            id: `${character.name}-mid`,
-            chapter: midStage.chapter,
-            stage: midStage.stage,
-            voiceProfile: {
-              ...baseVoice,
-              emotionalExpression: getEvolvedVoiceTrait(
-                baseVoice.emotionalExpression,
-                midStage.internalState,
-                0.5,
-              ),
-              speechPatterns: [
-                ...(baseVoice.speechPatterns || []),
-                `Developing ${midStage.growth} patterns`,
-              ],
-            },
-            emotionalState: midStage.internalState,
-            contextDescription: midStage.description,
-          });
+          if (midStage) {
+            snapshots.push({
+              id: `${character.name}-mid`,
+              chapter: midStage.chapter,
+              stage: midStage.stage,
+              voiceProfile: {
+                ...baseVoice,
+                emotionalExpression: getEvolvedVoiceTrait(
+                  baseVoice.emotionalExpression,
+                  midStage.internalState,
+                  0.5,
+                ),
+                speechPatterns: [
+                  ...(baseVoice.speechPatterns || []),
+                  `Developing ${midStage.growth} patterns`,
+                ],
+              },
+              emotionalState: midStage.internalState,
+              contextDescription: midStage.description,
+            });
+          }
         }
 
         if (finalStage) {
@@ -187,10 +186,10 @@ export default function VoiceEvolutionTracker({
     };
 
     const category = Object.keys(evolutionMap).find((cat) =>
-      Object.keys(evolutionMap[cat]).includes(original),
+      Object.keys(evolutionMap[cat] || {}).includes(original),
     );
 
-    if (category && evolutionMap[category][original]) {
+    if (category && evolutionMap[category]?.[original]) {
       return evolutionMap[category][original];
     }
 
@@ -204,8 +203,10 @@ export default function VoiceEvolutionTracker({
     let totalElements = 0;
 
     for (let i = 0; i < snapshots.length - 1; i++) {
-      const current = snapshots[i].voiceProfile;
-      const next = snapshots[i + 1].voiceProfile;
+      const current = snapshots[i]?.voiceProfile;
+      const next = snapshots[i + 1]?.voiceProfile;
+
+      if (!current || !next) continue;
 
       // Check core consistency (some evolution is expected)
       const coreTraits = ['vocabulary', 'sentenceLength'] as const;
@@ -243,6 +244,8 @@ export default function VoiceEvolutionTracker({
     const first = snapshots[0];
     const last = snapshots[snapshots.length - 1];
 
+    if (!first || !last) return [];
+
     if (first.voiceProfile.vocabulary !== last.voiceProfile.vocabulary) {
       changes.push(
         `Vocabulary evolved from ${first.voiceProfile.vocabulary} to ${last.voiceProfile.vocabulary}`,
@@ -273,8 +276,16 @@ export default function VoiceEvolutionTracker({
       };
     }
 
-    const first = snapshots[0].voiceProfile;
-    const last = snapshots[snapshots.length - 1].voiceProfile;
+    const first = snapshots[0]?.voiceProfile;
+    const last = snapshots[snapshots.length - 1]?.voiceProfile;
+
+    if (!first || !last) {
+      return {
+        vocabulary: { initial: '', current: '', changed: false },
+        sentenceLength: { initial: '', current: '', changed: false },
+        emotionalExpression: { initial: '', current: '', changed: false },
+      };
+    }
 
     return {
       vocabulary: {

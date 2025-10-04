@@ -110,7 +110,9 @@ const Stepper: React.FC<StepperProps> = ({ currentStep, completedSteps }) => {
                 className={`
                 w-16 h-0.5 mx-4 mt-6 transition-all
                 ${
-                  isCompleted && completedSteps.has(steps[index + 1].id as FlowStep)
+                  isCompleted &&
+                  steps[index + 1] &&
+                  completedSteps.has(steps[index + 1].id as FlowStep)
                     ? 'bg-green-500'
                     : isAccessible
                       ? 'bg-gray-300 dark:bg-gray-600'
@@ -257,19 +259,22 @@ export const StoryArchitectFlow: React.FC<StoryArchitectFlowProps> = ({
       if (integrationOptions.replaceProject || integrationOptions.mergeCharacters) {
         const projectUpdate = storyArchitectService.convertToProject(
           generatedOutline,
-          currentProject,
+          currentProject as any,
         );
 
         if (integrationOptions.replaceProject) {
-          updatedProject = { ...currentProject, ...projectUpdate };
+          updatedProject = { ...currentProject, ...projectUpdate } as any;
         } else if (integrationOptions.mergeCharacters) {
           // Merge characters without replacing everything
           updatedProject = {
             ...currentProject,
-            characters: [...(currentProject.characters || []), ...(projectUpdate.characters || [])],
+            characters: [
+              ...(currentProject.characters || []),
+              ...(projectUpdate.characters || []),
+            ] as any,
             description: projectUpdate.description || currentProject.description,
-            genre: projectUpdate.genre || currentProject.genre,
-          };
+            genre: (projectUpdate as any).genre || (currentProject as any).genre,
+          } as any;
         }
       }
 
@@ -287,7 +292,7 @@ export const StoryArchitectFlow: React.FC<StoryArchitectFlowProps> = ({
       }
 
       // Update project
-      await updateProject(currentProject.id, updatedProject);
+      await updateProject(currentProject.id);
 
       // Generate timeline if requested
       if (integrationOptions.generateTimeline) {
@@ -316,14 +321,20 @@ export const StoryArchitectFlow: React.FC<StoryArchitectFlowProps> = ({
   const goToNextStep = useCallback(() => {
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex < stepOrder.length - 1) {
-      setCurrentStep(stepOrder[currentIndex + 1]);
+      const nextStep = stepOrder[currentIndex + 1];
+      if (nextStep) {
+        setCurrentStep(nextStep);
+      }
     }
   }, [currentStep]);
 
   const goToPreviousStep = useCallback(() => {
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex > 0) {
-      setCurrentStep(stepOrder[currentIndex - 1]);
+      const prevStep = stepOrder[currentIndex - 1];
+      if (prevStep) {
+        setCurrentStep(prevStep);
+      }
     }
   }, [currentStep]);
 

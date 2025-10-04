@@ -238,6 +238,43 @@ class VoiceConsistencyService {
   }
 
   /**
+   * Simplified method for editor integration - analyzes character dialogue
+   */
+  async analyzeCharacterDialogue(
+    projectId: string,
+    characterName: string,
+    dialogueLines: string[],
+  ): Promise<{ deviationScore: number; suggestions: string[] }> {
+    try {
+      const characterId = characterName.toLowerCase().replace(/\s+/g, '-');
+      const combinedText = dialogueLines.join(' ');
+
+      const analysis = this.analyzeVoiceConsistency(projectId, characterId, combinedText);
+
+      if (!analysis) {
+        // No existing fingerprint, create a baseline if enough data
+        if (combinedText.length > 50) {
+          this.analyzeCharacterVoice(
+            projectId,
+            characterId,
+            characterName,
+            dialogueLines.map((text) => ({ text })),
+          );
+        }
+        return { deviationScore: 0, suggestions: [] };
+      }
+
+      const deviationScore = 1 - analysis.matchScore;
+      const suggestions = analysis.deviations.map((d) => d.suggestion);
+
+      return { deviationScore, suggestions };
+    } catch (error) {
+      console.error('Voice analysis failed:', error);
+      return { deviationScore: 0, suggestions: [] };
+    }
+  }
+
+  /**
    * Real-time voice analysis for editor integration
    */
   async analyzeTextForVoiceIssues(
@@ -290,10 +327,10 @@ class VoiceConsistencyService {
               textSample: combinedText,
               matchScore: analysis.matchScore,
               deviations: analysis.deviations,
-              startPos: this.findTextPosition(text, lines[0].text),
+              startPos: this.findTextPosition(text, lines[0]?.text || ''),
               endPos:
-                this.findTextPosition(text, lines[lines.length - 1].text) +
-                lines[lines.length - 1].text.length,
+                this.findTextPosition(text, lines[lines.length - 1]?.text || '') +
+                (lines[lines.length - 1]?.text?.length || 0),
             });
           }
         }
@@ -381,7 +418,7 @@ class VoiceConsistencyService {
 
     const primaryDeviation = deviations[0];
     return (
-      primaryDeviation.suggestion ||
+      primaryDeviation?.suggestion ||
       "Adjust dialogue to match character's established voice pattern."
     );
   }
@@ -679,26 +716,6 @@ class VoiceConsistencyService {
         casualPhrases: 0,
       },
     };
-  }
-
-  private mergeCommonWords(
-    existing: Array<{ word: string; frequency: number }>,
-    newWords: Array<{ word: string; frequency: number }>,
-  ): Array<{ word: string; frequency: number }> {
-    const merged = new Map<string, number>();
-
-    existing.forEach(({ word, frequency }) => {
-      merged.set(word, frequency);
-    });
-
-    newWords.forEach(({ word, frequency }) => {
-      merged.set(word, (merged.get(word) || 0) + frequency);
-    });
-
-    return Array.from(merged.entries())
-      .map(([word, frequency]) => ({ word, frequency }))
-      .sort((a, b) => b.frequency - a.frequency)
-      .slice(0, 20);
   }
 
   private storeFingerprint(projectId: string, fingerprint: VoiceFingerprint): void {

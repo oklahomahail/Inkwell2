@@ -40,7 +40,7 @@ const arcTemplates: ArcTemplate[] = [
     totalChapters: 20,
     arcStages: [
       {
-        stage: 'ordinary_world',
+        stage: 'introduction',
         chapter: 1,
         description: 'Character in their familiar environment before the story begins',
         growth: 'establishment',
@@ -48,7 +48,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'none',
       },
       {
-        stage: 'call_to_adventure',
+        stage: 'inciting_incident',
         chapter: 3,
         description: 'Character is presented with a problem or challenge',
         growth: 'awakening',
@@ -56,7 +56,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'opportunity',
       },
       {
-        stage: 'refusal_of_call',
+        stage: 'first_plot_point',
         chapter: 4,
         description: 'Character hesitates or refuses the adventure',
         growth: 'resistance',
@@ -64,7 +64,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'doubt',
       },
       {
-        stage: 'mentor_meeting',
+        stage: 'first_plot_point',
         chapter: 5,
         description: 'Character encounters a wise figure who gives advice',
         growth: 'guidance',
@@ -72,7 +72,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'learning',
       },
       {
-        stage: 'crossing_threshold',
+        stage: 'first_plot_point',
         chapter: 7,
         description: 'Character commits to the adventure and enters a new world',
         growth: 'commitment',
@@ -80,7 +80,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'transition',
       },
       {
-        stage: 'tests_allies_enemies',
+        stage: 'midpoint',
         chapter: 10,
         description: 'Character faces challenges and makes allies and enemies',
         growth: 'development',
@@ -88,7 +88,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'conflicts',
       },
       {
-        stage: 'ordeal',
+        stage: 'crisis',
         chapter: 15,
         description: 'Character faces their greatest fear or most difficult challenge',
         growth: 'crisis',
@@ -96,7 +96,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'life_threat',
       },
       {
-        stage: 'reward',
+        stage: 'climax',
         chapter: 16,
         description: 'Character survives and gains something from the experience',
         growth: 'victory',
@@ -104,7 +104,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'achievement',
       },
       {
-        stage: 'road_back',
+        stage: 'climax',
         chapter: 18,
         description: 'Character begins the journey back to ordinary world',
         growth: 'return',
@@ -112,7 +112,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'consequences',
       },
       {
-        stage: 'resurrection',
+        stage: 'climax',
         chapter: 19,
         description: 'Character faces a final test and is transformed',
         growth: 'transformation',
@@ -120,7 +120,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'final_test',
       },
       {
-        stage: 'return_with_elixir',
+        stage: 'resolution',
         chapter: 20,
         description: 'Character returns home with wisdom or power to help others',
         growth: 'mastery',
@@ -145,7 +145,7 @@ const arcTemplates: ArcTemplate[] = [
     totalChapters: 18,
     arcStages: [
       {
-        stage: 'dark_past',
+        stage: 'introduction',
         chapter: 1,
         description: 'Character established with morally questionable background',
         growth: 'introduction',
@@ -161,7 +161,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'consequences',
       },
       {
-        stage: 'first_attempt',
+        stage: 'inciting_incident',
         chapter: 6,
         description: 'Character makes initial attempts to do good but struggles',
         growth: 'effort',
@@ -169,7 +169,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'skepticism',
       },
       {
-        stage: 'setback',
+        stage: 'first_plot_point',
         chapter: 9,
         description: 'Old habits or external forces cause character to falter',
         growth: 'regression',
@@ -177,7 +177,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'relapse',
       },
       {
-        stage: 'recommitment',
+        stage: 'midpoint',
         chapter: 11,
         description: 'Character finds new resolve and deeper understanding',
         growth: 'renewal',
@@ -185,7 +185,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'proving_worth',
       },
       {
-        stage: 'major_sacrifice',
+        stage: 'crisis',
         chapter: 15,
         description: 'Character makes significant personal sacrifice for others',
         growth: 'selflessness',
@@ -193,7 +193,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'high_stakes',
       },
       {
-        stage: 'acceptance',
+        stage: 'resolution',
         chapter: 17,
         description: "Others begin to accept the character's transformation",
         growth: 'recognition',
@@ -201,7 +201,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'trust_building',
       },
       {
-        stage: 'new_purpose',
+        stage: 'resolution',
         chapter: 18,
         description: 'Character finds their new role in the world',
         growth: 'fulfillment',
@@ -226,7 +226,7 @@ const arcTemplates: ArcTemplate[] = [
     totalChapters: 16,
     arcStages: [
       {
-        stage: 'meet_cute',
+        stage: 'introduction',
         chapter: 2,
         description: 'Character meets love interest in memorable way',
         growth: 'attraction',
@@ -234,7 +234,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'first_impression',
       },
       {
-        stage: 'getting_to_know',
+        stage: 'inciting_incident',
         chapter: 4,
         description: 'Characters spend time together and build connection',
         growth: 'bonding',
@@ -242,7 +242,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'compatibility',
       },
       {
-        stage: 'growing_feelings',
+        stage: 'first_plot_point',
         chapter: 7,
         description: 'Character realizes deeper feelings are developing',
         growth: 'emotional_awakening',
@@ -250,7 +250,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'vulnerability',
       },
       {
-        stage: 'conflict_obstacle',
+        stage: 'midpoint',
         chapter: 10,
         description: 'External or internal obstacle threatens the relationship',
         growth: 'testing',
@@ -258,7 +258,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'relationship_threat',
       },
       {
-        stage: 'dark_moment',
+        stage: 'crisis',
         chapter: 12,
         description: 'Relationship seems impossible due to misunderstanding or obstacle',
         growth: 'separation',
@@ -266,7 +266,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'loss',
       },
       {
-        stage: 'realization',
+        stage: 'crisis',
         chapter: 14,
         description: 'Character understands what they must do for love',
         growth: 'clarity',
@@ -274,7 +274,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'action_needed',
       },
       {
-        stage: 'grand_gesture',
+        stage: 'climax',
         chapter: 15,
         description: 'Character makes significant effort to win back love',
         growth: 'courage',
@@ -282,7 +282,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'risk_taking',
       },
       {
-        stage: 'happy_ending',
+        stage: 'resolution',
         chapter: 16,
         description: 'Characters unite and commit to their future together',
         growth: 'fulfillment',
@@ -307,7 +307,7 @@ const arcTemplates: ArcTemplate[] = [
     totalChapters: 18,
     arcStages: [
       {
-        stage: 'peak_position',
+        stage: 'introduction',
         chapter: 1,
         description: 'Character at height of power, success, or moral standing',
         growth: 'establishment',
@@ -315,7 +315,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'maintaining_status',
       },
       {
-        stage: 'fatal_flaw',
+        stage: 'inciting_incident',
         chapter: 3,
         description: "Character's weakness or vice is revealed",
         growth: 'flaw_introduction',
@@ -323,7 +323,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'temptation',
       },
       {
-        stage: 'first_mistake',
+        stage: 'first_plot_point',
         chapter: 5,
         description: 'Character makes initial poor decision due to their flaw',
         growth: 'first_fall',
@@ -331,7 +331,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'consequences',
       },
       {
-        stage: 'escalation',
+        stage: 'crisis',
         chapter: 8,
         description: "Character's mistakes compound and situation worsens",
         growth: 'spiral',
@@ -339,7 +339,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'mounting_pressure',
       },
       {
-        stage: 'point_of_no_return',
+        stage: 'midpoint',
         chapter: 12,
         description: "Character crosses line from which there's no easy return",
         growth: 'corruption',
@@ -347,7 +347,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'moral_compromise',
       },
       {
-        stage: 'allies_turn',
+        stage: 'crisis',
         chapter: 14,
         description: 'Friends and supporters begin to abandon character',
         growth: 'isolation',
@@ -355,7 +355,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'betrayal',
       },
       {
-        stage: 'final_downfall',
+        stage: 'climax',
         chapter: 17,
         description: 'Character loses everything they once held dear',
         growth: 'destruction',
@@ -363,7 +363,7 @@ const arcTemplates: ArcTemplate[] = [
         externalChallenge: 'total_loss',
       },
       {
-        stage: 'aftermath',
+        stage: 'resolution',
         chapter: 18,
         description: 'Character faces consequences of their choices',
         growth: 'reckoning',

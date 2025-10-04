@@ -56,15 +56,18 @@ export interface PhraseIndex {
   projectId: string;
   lastUpdated: number;
   totalWords: number;
-  phrases: Map<string, {
-    count: number;
-    ngramSize: number;
-    positions: Array<{
-      chapterId: string;
-      start: number;
-      end: number;
-    }>;
-  }>;
+  phrases: Map<
+    string,
+    {
+      count: number;
+      ngramSize: number;
+      positions: Array<{
+        chapterId: string;
+        start: number;
+        end: number;
+      }>;
+    }
+  >;
   topOffenders: Array<{
     phrase: string;
     count: number;
@@ -74,12 +77,75 @@ export interface PhraseIndex {
 
 // Default stop words (common words to ignore in phrase analysis)
 const DEFAULT_STOP_WORDS = [
-  'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
-  'he', 'she', 'it', 'they', 'we', 'you', 'i', 'his', 'her', 'its', 'their', 'our', 'your', 'my',
-  'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did',
-  'will', 'would', 'could', 'should', 'can', 'may', 'might', 'must', 'shall',
-  'this', 'that', 'these', 'those', 'here', 'there', 'where', 'when', 'why', 'how',
-  'said', 'says', 'say', 'asked', 'asks', 'ask', 'told', 'tells', 'tell'
+  'the',
+  'a',
+  'an',
+  'and',
+  'or',
+  'but',
+  'in',
+  'on',
+  'at',
+  'to',
+  'for',
+  'of',
+  'with',
+  'by',
+  'he',
+  'she',
+  'it',
+  'they',
+  'we',
+  'you',
+  'i',
+  'his',
+  'her',
+  'its',
+  'their',
+  'our',
+  'your',
+  'my',
+  'is',
+  'are',
+  'was',
+  'were',
+  'be',
+  'been',
+  'being',
+  'have',
+  'has',
+  'had',
+  'do',
+  'does',
+  'did',
+  'will',
+  'would',
+  'could',
+  'should',
+  'can',
+  'may',
+  'might',
+  'must',
+  'shall',
+  'this',
+  'that',
+  'these',
+  'those',
+  'here',
+  'there',
+  'where',
+  'when',
+  'why',
+  'how',
+  'said',
+  'says',
+  'say',
+  'asked',
+  'asks',
+  'ask',
+  'told',
+  'tells',
+  'tell',
 ];
 
 class PhraseAnalyzer {
@@ -100,21 +166,26 @@ class PhraseAnalyzer {
 
     // Generate n-grams for each requested size
     for (const ngramSize of options.ngramSizes) {
-      const ngrams = this.generateNGrams(words, ngramSize, options.stopWords, options.customStoplist);
+      const ngrams = this.generateNGrams(
+        words,
+        ngramSize,
+        options.stopWords,
+        options.customStoplist,
+      );
       const phraseMap = this.countPhrases(ngrams);
-      
+
       // Convert to results format
       for (const [phrase, data] of phraseMap.entries()) {
         if (data.count >= options.minOccurrences) {
           const positions = this.findPhrasePositions(text, phrase);
           const severity = this.calculateSeverity(data.count, words.length);
-          
+
           allPhrases.push({
             phrase,
             count: data.count,
             ngramSize,
             positions,
-            severity
+            severity,
           });
         }
       }
@@ -137,8 +208,8 @@ class PhraseAnalyzer {
       results: {
         phrases: allPhrases,
         totalWords: words.length,
-        analysisTime: endTime - startTime
-      }
+        analysisTime: endTime - startTime,
+      },
     };
   }
 
@@ -146,15 +217,18 @@ class PhraseAnalyzer {
     const startTime = performance.now();
     const { projectId, chapters, options } = request;
 
-    const phraseMap = new Map<string, {
-      count: number;
-      ngramSize: number;
-      positions: Array<{
-        chapterId: string;
-        start: number;
-        end: number;
-      }>;
-    }>();
+    const phraseMap = new Map<
+      string,
+      {
+        count: number;
+        ngramSize: number;
+        positions: Array<{
+          chapterId: string;
+          start: number;
+          end: number;
+        }>;
+      }
+    >();
 
     let totalWords = 0;
 
@@ -164,28 +238,35 @@ class PhraseAnalyzer {
       totalWords += words.length;
 
       for (const ngramSize of options.ngramSizes) {
-        const ngrams = this.generateNGrams(words, ngramSize, options.stopWords, options.customStoplist);
-        
+        const ngrams = this.generateNGrams(
+          words,
+          ngramSize,
+          options.stopWords,
+          options.customStoplist,
+        );
+
         for (const ngram of ngrams) {
           const phrase = ngram.phrase;
           const existing = phraseMap.get(phrase);
-          
+
           if (existing) {
             existing.count++;
             existing.positions.push({
               chapterId: chapter.id,
               start: ngram.position,
-              end: ngram.position + phrase.length
+              end: ngram.position + phrase.length,
             });
           } else {
             phraseMap.set(phrase, {
               count: 1,
               ngramSize,
-              positions: [{
-                chapterId: chapter.id,
-                start: ngram.position,
-                end: ngram.position + phrase.length
-              }]
+              positions: [
+                {
+                  chapterId: chapter.id,
+                  start: ngram.position,
+                  end: ngram.position + phrase.length,
+                },
+              ],
             });
           }
         }
@@ -203,12 +284,12 @@ class PhraseAnalyzer {
     for (const [phrase, data] of phraseMap.entries()) {
       if (data.count >= options.minOccurrences) {
         filteredPhrases.set(phrase, data);
-        
+
         const severity = this.calculateSeverity(data.count, totalWords);
         topOffenders.push({
           phrase,
           count: data.count,
-          severity
+          severity,
         });
       }
     }
@@ -227,7 +308,7 @@ class PhraseAnalyzer {
       lastUpdated: Date.now(),
       totalWords,
       phrases: filteredPhrases,
-      topOffenders: topOffenders.slice(0, 50) // Keep top 50
+      topOffenders: topOffenders.slice(0, 50), // Keep top 50
     };
 
     // Cache the index
@@ -239,7 +320,7 @@ class PhraseAnalyzer {
       type: 'indexing-complete',
       projectId,
       index,
-      analysisTime: endTime - startTime
+      analysisTime: endTime - startTime,
     };
   }
 
@@ -248,48 +329,50 @@ class PhraseAnalyzer {
       .toLowerCase()
       .replace(/[^\w\s]/g, ' ') // Replace punctuation with spaces
       .split(/\s+/)
-      .filter(word => word.length > 0);
+      .filter((word) => word.length > 0);
   }
 
   private generateNGrams(
-    words: string[], 
-    ngramSize: number, 
+    words: string[],
+    ngramSize: number,
     stopWords: string[],
-    customStoplist: string[] = []
+    customStoplist: string[] = [],
   ): Array<{ phrase: string; position: number }> {
     const stopWordSet = new Set([...DEFAULT_STOP_WORDS, ...stopWords]);
-    const customStopSet = new Set(customStoplist.map(p => p.toLowerCase()));
+    const customStopSet = new Set(customStoplist.map((p) => p.toLowerCase()));
     const ngrams: Array<{ phrase: string; position: number }> = [];
-    
+
     for (let i = 0; i <= words.length - ngramSize; i++) {
       const phraseWords = words.slice(i, i + ngramSize);
-      
+
       // Skip if contains stop words (for larger n-grams)
       if (ngramSize > 2) {
-        const hasStopWords = phraseWords.some(word => stopWordSet.has(word));
+        const hasStopWords = phraseWords.some((word) => stopWordSet.has(word));
         if (hasStopWords) continue;
       }
-      
+
       const phrase = phraseWords.join(' ');
-      
+
       // Skip if in custom stoplist
       if (customStopSet.has(phrase)) continue;
-      
+
       // Skip very short phrases
       if (phrase.length < 3) continue;
-      
+
       ngrams.push({
         phrase,
-        position: i // word position, not character position
+        position: i, // word position, not character position
       });
     }
-    
+
     return ngrams;
   }
 
-  private countPhrases(ngrams: Array<{ phrase: string; position: number }>): Map<string, { count: number }> {
+  private countPhrases(
+    ngrams: Array<{ phrase: string; position: number }>,
+  ): Map<string, { count: number }> {
     const counts = new Map<string, { count: number }>();
-    
+
     for (const ngram of ngrams) {
       const existing = counts.get(ngram.phrase);
       if (existing) {
@@ -298,7 +381,7 @@ class PhraseAnalyzer {
         counts.set(ngram.phrase, { count: 1 });
       }
     }
-    
+
     return counts;
   }
 
@@ -306,22 +389,22 @@ class PhraseAnalyzer {
     const positions: Array<{ start: number; end: number }> = [];
     const lowerText = text.toLowerCase();
     const lowerPhrase = phrase.toLowerCase();
-    
+
     let index = 0;
     while ((index = lowerText.indexOf(lowerPhrase, index)) !== -1) {
       positions.push({
         start: index,
-        end: index + phrase.length
+        end: index + phrase.length,
       });
       index += phrase.length;
     }
-    
+
     return positions;
   }
 
   private calculateSeverity(count: number, totalWords: number): 'low' | 'medium' | 'high' {
-    const frequency = count / totalWords * 1000; // per 1000 words
-    
+    const frequency = (count / totalWords) * 1000; // per 1000 words
+
     if (frequency > 2) return 'high';
     if (frequency > 1) return 'medium';
     return 'low';
@@ -335,7 +418,7 @@ const analyzer = new PhraseAnalyzer();
 
 self.addEventListener('message', (event) => {
   const request = event.data;
-  
+
   try {
     if (request.type === 'analyze') {
       const response = analyzer.analyzeText(request);
@@ -346,23 +429,16 @@ self.addEventListener('message', (event) => {
     } else {
       self.postMessage({
         type: 'error',
-        message: `Unknown request type: ${request.type}`
+        message: `Unknown request type: ${request.type}`,
       });
     }
   } catch (error) {
     self.postMessage({
       type: 'error',
       message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
+      stack: error instanceof Error ? error.stack : undefined,
     });
   }
 });
 
-// Export types for use in main thread
-export type {
-  PhraseAnalysisRequest,
-  PhraseAnalysisResponse,
-  ProjectIndexRequest,
-  ProjectIndexResponse,
-  PhraseIndex
-};
+// Types are exported at the top of the file

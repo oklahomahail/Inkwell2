@@ -68,7 +68,9 @@ export default function CharacterGoalTracker({
       deferred: 0,
     };
     goals.forEach((g) => (byStatus[g.status] = (byStatus[g.status] || 0) + 1));
-    const completion = goals.length ? Math.round((byStatus.completed / goals.length) * 100) : 0;
+    const completion = goals.length
+      ? Math.round(((byStatus.completed || 0) / goals.length) * 100)
+      : 0;
     return { byStatus, completion };
   }, [goals]);
 

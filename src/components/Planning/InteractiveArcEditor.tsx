@@ -96,7 +96,7 @@ export default function InteractiveArcEditor({
             setHasUnsavedChanges(true);
             // Update the character's arc stage
             const characterName = prev.stageId.split('-')[0];
-            const stageIndex = parseInt(prev.stageId.split('-')[1]);
+            const stageIndex = parseInt(prev.stageId?.split('-')[1] || '0');
             const character = characters.find((char) => char.name === characterName);
 
             if (character?.arcStages?.[stageIndex]) {
@@ -150,7 +150,7 @@ export default function InteractiveArcEditor({
     for (let i = 0; i < sortedStages.length - 1; i++) {
       const current = sortedStages[i];
       const next = sortedStages[i + 1];
-      if (next.chapter - current.chapter < 2) {
+      if (current && next && next.chapter - current.chapter < 2) {
         issues.push({
           type: 'pacing',
           message: `${current.stage} and ${next.stage} are too close (Ch. ${current.chapter}-${next.chapter})`,

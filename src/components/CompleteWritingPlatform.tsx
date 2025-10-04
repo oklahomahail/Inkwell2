@@ -5,7 +5,6 @@ import {
   BarChart3,
   Settings,
   Plus,
-  Search,
   Menu,
   Sun,
   Moon,
@@ -23,6 +22,7 @@ import React, { useState, Suspense, useEffect, useCallback, JSX } from 'react';
 
 import WritingPanel from '@/components/Panels/WritingPanel';
 import ViewRouter from '@/components/Platform/ViewRouter';
+import { SmartSearchModal, SmartSearchTrigger } from '@/components/Search';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { ConfirmationDialog, useConfirmation } from '@/components/ui/ConfirmationDialog';
 import { NoProjectsEmptyState, NoChaptersEmptyState } from '@/components/ui/EmptyStates';
@@ -43,6 +43,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
 import { useCommandPalette } from '@/hooks/useCommandPalette';
 import { useSaveOperation } from '@/hooks/useSaveOperation';
+import { useSmartSearch } from '@/hooks/useSmartSearch';
 import { useViewCommands } from '@/hooks/useViewCommands';
 import { cn } from '@/utils/cn';
 import { focusWritingEditor } from '@/utils/focusUtils';
@@ -772,6 +773,24 @@ export default function CompleteWritingPlatform() {
   const { open: openPalette } = useCommandPalette();
   const { isFocusMode } = useAdvancedFocusMode();
 
+  // Smart Search integration
+  const smartSearch = useSmartSearch({
+    onNavigate: (result) => {
+      // Handle navigation based on search result type
+      switch (result.type) {
+        case 'scene':
+        case 'chapter':
+          handleTabChange('writing');
+          break;
+        case 'character':
+          handleTabChange('timeline'); // or character view if you have one
+          break;
+        default:
+          break;
+      }
+    },
+  });
+
   // WritingPanel state + handlers (minimal, satisfies required props)
   const [draftText, setDraftText] = useState<string>('');
   const [selectedText, setSelectedText] = useState<string>('');
@@ -866,6 +885,15 @@ export default function CompleteWritingPlatform() {
       {/* Keyboard Shortcuts Help Overlay */}
       <KeyboardShortcutsHelp isOpen={showKeyboardHelp} onClose={() => setShowKeyboardHelp(false)} />
 
+      {/* Smart Search Modal */}
+      <SmartSearchModal
+        isOpen={smartSearch.isOpen}
+        onClose={smartSearch.closeSearch}
+        onNavigate={smartSearch.handleNavigate}
+        initialQuery={smartSearch.query}
+        focusMode={smartSearch.focusMode}
+      />
+
       {/* Sidebar */}
       <ErrorBoundary level="component">
         <Sidebar
@@ -884,8 +912,12 @@ export default function CompleteWritingPlatform() {
             <div className="header-content">
               <div className="header-left">
                 <div className="search-container">
-                  <Search className="search-icon" />
-                  <CommandPaletteHint onClick={openPalette} variant="input" />
+                  <SmartSearchTrigger
+                    onClick={smartSearch.openSearch}
+                    placeholder={`Search ${smartSearch.currentProject?.name || 'your project'}...`}
+                    disabled={!smartSearch.isAvailable}
+                    className="max-w-md"
+                  />
                 </div>
               </div>
 

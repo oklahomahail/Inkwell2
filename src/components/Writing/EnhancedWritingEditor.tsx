@@ -27,6 +27,7 @@ import { Scene, Chapter } from '../../types/writing';
 import { debounce as debounceUtil } from '../../utils/debounce';
 import { focusWritingEditor } from '../../utils/focusUtils';
 import ConsistencyIssuesPanel from '../editor/ConsistencyIssuesPanel';
+import { ConsistencyExtension } from '../editor/extensions/ConsistencyExtension';
 
 import ClaudeToolbar from './ClaudeToolbar';
 import EnhancedAIWritingToolbar from './EnhancedAIWritingToolbar';
@@ -36,6 +37,7 @@ import type {
   EditorIssue,
   ConsistencyDecorationOptions,
 } from '../../services/editorConsistencyDecorator';
+import type { EnhancedProject } from '../../types/project';
 
 // Import the consistency styles
 import '../../styles/consistency-issues.css';
@@ -74,17 +76,9 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
   const editorRef = useRef<HTMLDivElement>(null);
 
   // Consistency extension handlers
-  const _handleConsistencyIssuesUpdated = useCallback((issues: EditorIssue[]) => {
+  const handleConsistencyIssuesUpdated = useCallback((issues: EditorIssue[]) => {
     setConsistencyIssues(issues);
   }, []);
-
-  const handleConsistencyIssueClick = useCallback(
-    (_issue: EditorIssue) => {
-      // Note: editor will be available when this is called from the extension
-      // We'll pass a ref to the current editor instance
-    },
-    [showConsistencyPanel],
-  );
 
   // TipTap Editor
   const editor = useEditor({
@@ -102,15 +96,22 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
         limit: 100000,
       }),
       Typography,
-      // ConsistencyExtension.configure({
-      //   project: currentProject,
-      //   scene: currentScene,
-      //   chapter: currentChapter,
-      //   enabled: consistencyEnabled,
-      //   decorationOptions: consistencyOptions,
-      //   onIssuesUpdated: handleConsistencyIssuesUpdated,
-      //   onIssueClicked: handleConsistencyIssueClick,
-      // }),
+      ConsistencyExtension.configure({
+        project: currentProject as EnhancedProject | null,
+        scene: currentScene,
+        chapter: currentChapter,
+        enabled: consistencyEnabled,
+        decorationOptions: consistencyOptions,
+        onIssuesUpdated: handleConsistencyIssuesUpdated,
+        onIssueClicked: (issue: EditorIssue) => {
+          if (editor) {
+            editor.chain().focus().setTextSelection(issue.startPos).run();
+            if (!showConsistencyPanel) {
+              setShowConsistencyPanel(true);
+            }
+          }
+        },
+      }),
     ],
     content: currentScene?.content || '',
     onUpdate: ({ editor }) => {
@@ -168,6 +169,21 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
     },
     immediatelyRender: false,
   });
+
+  // Consistency issue click handler
+  const handleConsistencyIssueClick = useCallback(
+    (issue: EditorIssue) => {
+      if (editor) {
+        // Jump to the issue position in the editor
+        editor.chain().focus().setTextSelection(issue.startPos).run();
+        // Show the consistency panel if not already visible
+        if (!showConsistencyPanel) {
+          setShowConsistencyPanel(true);
+        }
+      }
+    },
+    [editor, showConsistencyPanel],
+  );
 
   // Auto-save functionality
   const saveScene = useCallback(
@@ -574,7 +590,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
                 onInsertText={handleInsertText}
                 sceneTitle={currentScene?.title || ''}
                 currentContent={editor?.getText() || ''}
-                projectContext={`${currentProject?.title || 'Untitled Project'} - ${currentChapter?.title || 'Chapter'}`}
+                projectContext={`${currentProject?.name || 'Untitled Project'} - ${currentChapter?.title || 'Chapter'}`}
                 position="panel"
                 className="border-0 bg-transparent shadow-none"
               />
@@ -644,7 +660,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
               onInsertText={handleInsertText}
               sceneTitle={currentScene?.title || ''}
               currentContent={editor?.getText() || ''}
-              projectContext={`${currentProject?.title || 'Untitled Project'} - ${currentChapter?.title || 'Chapter'}`}
+              projectContext={`${currentProject?.name || 'Untitled Project'} - ${currentChapter?.title || 'Chapter'}`}
               position="popup"
               onClose={() => {
                 setShowPopupToolbar(false);

@@ -23,7 +23,8 @@ import type {
   EPUBValidationIssue,
 } from '@/services/epubValidationService';
 import professionalExportService from '@/services/professionalExportService';
-import type { Chapter, ChapterStatus } from '@/types/writing';
+import type { Chapter } from '@/types/writing';
+import { ChapterStatus } from '@/types/writing';
 
 interface ExportQualityDashboardProps {
   className?: string;

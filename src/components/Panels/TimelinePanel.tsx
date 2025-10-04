@@ -150,7 +150,7 @@ const TimelinePanel: React.FC = () => {
     setState((prev) => ({ ...prev, loading: true }));
     try {
       // Sync timeline with current project chapters/scenes
-      await timelineService.syncWithProjectChapters(currentProject.id, currentProject);
+      await timelineService.syncWithProjectChapters(currentProject.id, currentProject as any);
 
       // Reload timeline events
       const events = await timelineService.getProjectTimeline(currentProject.id);

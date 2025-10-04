@@ -101,7 +101,7 @@ export default function EnhancedAIWritingToolbar({
   const [isRealTimeMode, setIsRealTimeMode] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const realTimeAnalysisRef = useRef<NodeJS.Timeout>();
+  const realTimeAnalysisRef = useRef<NodeJS.Timeout | null>(null);
 
   // Advanced AI Tools Configuration
   const _advancedTools: AdvancedTool[] = [

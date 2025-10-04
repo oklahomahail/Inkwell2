@@ -80,6 +80,8 @@ export default function ArcConflictAnalyzer({
             love_interest: 1.2,
             mentor: 1,
             family: 1.1,
+            neutral: 1,
+            rival: 1.3,
           }[rel.type] || 1;
 
         const influenceWeight =
@@ -142,17 +144,17 @@ export default function ArcConflictAnalyzer({
         for (let i = 0; i < arcStages.length - 1; i++) {
           const current = arcStages[i];
           const next = arcStages[i + 1];
-          if (next.chapter - current.chapter < 2) {
+          if (current && next && next.chapter - current.chapter < 2) {
             conflicts.push({
               id: `pacing-tight-${character.name}-${i}`,
               type: 'pacing',
               severity: 'medium',
               title: 'Arc Stages Too Close',
-              description: `${character.name}'s "${current.stage}" and "${next.stage}" stages are only ${next.chapter - current.chapter} chapter(s) apart, which may rush character development.`,
+              description: `${character.name}'s "${current?.stage}" and "${next?.stage}" stages are only ${(next?.chapter || 0) - (current?.chapter || 0)} chapter(s) apart, which may rush character development.`,
               affectedCharacters: [character.name],
-              chapters: [current.chapter, next.chapter],
+              chapters: [current?.chapter || 0, next?.chapter || 0],
               suggestions: [
-                `Move "${next.stage}" to chapter ${next.chapter + 2} or later`,
+                `Move "${next?.stage}" to chapter ${(next?.chapter || 0) + 2} or later`,
                 `Add transitional development between the stages`,
                 `Consider combining the stages if they serve similar purposes`,
               ],
@@ -165,15 +167,15 @@ export default function ArcConflictAnalyzer({
         for (let i = 0; i < arcStages.length - 1; i++) {
           const current = arcStages[i];
           const next = arcStages[i + 1];
-          if (next.chapter - current.chapter > 6) {
+          if (current && next && next.chapter - current.chapter > 6) {
             conflicts.push({
               id: `pacing-gap-${character.name}-${i}`,
               type: 'pacing',
               severity: 'low',
               title: 'Large Gap in Character Development',
-              description: `${character.name} has a ${next.chapter - current.chapter}-chapter gap between "${current.stage}" and "${next.stage}", which may cause development to feel disconnected.`,
+              description: `${character.name} has a ${(next?.chapter || 0) - (current?.chapter || 0)}-chapter gap between "${current?.stage}" and "${next?.stage}", which may cause development to feel disconnected.`,
               affectedCharacters: [character.name],
-              chapters: [current.chapter, next.chapter],
+              chapters: [current?.chapter || 0, next?.chapter || 0],
               suggestions: [
                 'Add intermediate development moments or smaller arc stages',
                 'Include character reflection or growth scenes in the gap',
@@ -249,7 +251,7 @@ export default function ArcConflictAnalyzer({
         if (!relationshipMatrix[character.name]) relationshipMatrix[character.name] = {};
         if (!relationshipMatrix[rel.withCharacter]) relationshipMatrix[rel.withCharacter] = {};
 
-        relationshipMatrix[character.name][rel.withCharacter] = rel.type;
+        relationshipMatrix[character.name]![rel.withCharacter] = rel.type;
 
         // Check for reciprocal relationships
         const reciprocalChar = characters.find((c) => c.name === rel.withCharacter);
