@@ -27,6 +27,13 @@ export const StoryArchitectMode: React.FC<StoryArchitectModeProps> = ({
     tone: '',
     themes: [],
     setting: '',
+    // Enhanced character-driven options
+    focusType: 'balanced',
+    povStyle: 'single-pov',
+    characterCount: 'moderate',
+    relationshipFocus: [],
+    characterDevelopmentDepth: 'moderate',
+    narrativePerspective: 'third-limited',
   });
 
   const [currentTheme, setCurrentTheme] = useState('');
@@ -289,6 +296,134 @@ export const StoryArchitectMode: React.FC<StoryArchitectModeProps> = ({
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Advanced Character & POV Options */}
+            <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                <svg
+                  className="w-5 h-5 text-purple-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0a4.002 4.002 0 01-8 0 4.002 4.002 0 018 0z"
+                  />
+                </svg>
+                Character & POV Settings
+              </h3>
+
+              {/* Story Focus & Character Count */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                    Story Focus
+                  </label>
+                  <select
+                    value={premise.focusType || 'balanced'}
+                    onChange={(e) =>
+                      setPremise((prev) => ({ ...prev, focusType: e.target.value as any }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    <option value="plot-driven">Plot-Driven (Action & Events)</option>
+                    <option value="character-driven">Character-Driven (Internal Growth)</option>
+                    <option value="balanced">Balanced (Both Plot & Character)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                    Character Count
+                  </label>
+                  <select
+                    value={premise.characterCount || 'moderate'}
+                    onChange={(e) =>
+                      setPremise((prev) => ({ ...prev, characterCount: e.target.value as any }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    <option value="minimal">Minimal (2-3 characters)</option>
+                    <option value="moderate">Moderate (4-6 characters)</option>
+                    <option value="ensemble">Ensemble (6+ characters)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* POV Style & Narrative Perspective */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                    POV Style
+                  </label>
+                  <select
+                    value={premise.povStyle || 'single-pov'}
+                    onChange={(e) =>
+                      setPremise((prev) => ({ ...prev, povStyle: e.target.value as any }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    <option value="single-pov">Single POV (One Character)</option>
+                    <option value="dual-pov">Dual POV (Two Characters)</option>
+                    <option value="multi-pov">Multi POV (3-4 Characters)</option>
+                    <option value="alternating-pov">Alternating POV (Systematic)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                    Narrative Perspective
+                  </label>
+                  <select
+                    value={premise.narrativePerspective || 'third-limited'}
+                    onChange={(e) =>
+                      setPremise((prev) => ({
+                        ...prev,
+                        narrativePerspective: e.target.value as any,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    <option value="first-person">First Person (I, me)</option>
+                    <option value="third-limited">Third Limited (He/she, limited)</option>
+                    <option value="third-omniscient">Third Omniscient (He/she, all-knowing)</option>
+                    <option value="mixed">Mixed (Varies by character)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Character Development Depth */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-900 dark:text-white">
+                  Character Development Depth
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {['light', 'moderate', 'deep'].map((depth) => (
+                    <button
+                      key={depth}
+                      onClick={() =>
+                        setPremise((prev) => ({ ...prev, characterDevelopmentDepth: depth as any }))
+                      }
+                      className={`p-2 text-sm rounded-md border transition-colors ${
+                        premise.characterDevelopmentDepth === depth
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
+                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                      }`}
+                    >
+                      <div className="font-medium capitalize">{depth}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {depth === 'light' && 'Basic arcs'}
+                        {depth === 'moderate' && 'Full development'}
+                        {depth === 'deep' && 'Complex psychology'}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 

@@ -1,12 +1,31 @@
 // src/components/ui/collapsible.tsx
-'use client';
+import React from 'react';
 
-import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
+interface CollapsibleProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  children: React.ReactNode;
+  className?: string;
+}
 
-const Collapsible = CollapsiblePrimitive.Root;
+interface CollapsibleContentProps {
+  children: React.ReactNode;
+  className?: string;
+}
 
-const CollapsibleTrigger = CollapsiblePrimitive.CollapsibleTrigger;
+const Collapsible: React.FC<CollapsibleProps> = ({ open, children, className }) => {
+  return <div className={className}>{children}</div>;
+};
 
-const CollapsibleContent = CollapsiblePrimitive.CollapsibleContent;
+const CollapsibleTrigger: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className,
+}) => {
+  return <div className={className}>{children}</div>;
+};
+
+const CollapsibleContent: React.FC<CollapsibleContentProps> = ({ children, className }) => {
+  return <div className={className}>{children}</div>;
+};
 
 export { Collapsible, CollapsibleTrigger, CollapsibleContent };

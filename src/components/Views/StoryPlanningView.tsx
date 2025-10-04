@@ -1,34 +1,20 @@
-// src/components/Views/StoryPlanningView.tsx - Enhanced with Story Architect Mode
+// src/components/Views/StoryPlanningView.tsx - Enhanced with Story Architect Flow
 import { BookOpen, Users, Map, FileText, BarChart3, Wand2 } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { useToast } from '../../context/ToastContext';
-import { storyArchitectService, type GeneratedOutline } from '../../services/storyArchitectService';
+import { type GeneratedOutline } from '../../services/storyArchitectService';
 import BeatSheetPlanner from '../Planning/BeatSheetPlanner';
 import CharacterManager from '../Planning/CharacterManager';
-import { GeneratedOutlinePreview } from '../Planning/GeneratedOutlinePreview';
-import { StoryArchitectMode } from '../Planning/StoryArchitectMode';
+import { StoryArchitectFlow } from '../Planning/StoryArchitectFlow';
 import StoryStructureVisualizer from '../Planning/StoryStructureVisualizer';
 
 type PlanningTab = 'overview' | 'beats' | 'characters' | 'world' | 'health';
 
 const StoryPlanningView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<PlanningTab>('overview');
-  const [showArchitectMode, setShowArchitectMode] = useState(false);
-  const [generatedOutline, setGeneratedOutline] = useState<GeneratedOutline | null>(null);
+  const [showArchitectFlow, setShowArchitectFlow] = useState(false);
   const { showToast } = useToast();
-
-  // Mock useWriting functionality for now - you'll need to adapt this to your actual hook
-  const currentProject = null; // Replace with actual project state
-  const updateProject = async (id: string, updates: any) => {
-    // Replace with actual project update logic
-    console.log('Updating project:', id, updates);
-  };
-  const createChapter = async (title: string, summary: string) => {
-    // Replace with actual chapter creation logic
-    console.log('Creating chapter:', title, summary);
-    return { id: 'new-chapter', title, summary };
-  };
 
   const tabs = [
     { id: 'overview' as const, label: 'Overview', icon: FileText },
@@ -38,44 +24,11 @@ const StoryPlanningView: React.FC = () => {
     { id: 'world' as const, label: 'World Building', icon: Map },
   ];
 
-  const handleOutlineGenerated = (outline: GeneratedOutline) => {
-    setGeneratedOutline(outline);
-    setShowArchitectMode(false);
-  };
-
-  const handleAcceptOutline = async () => {
-    if (!generatedOutline) return;
-
-    try {
-      console.log('🎯 Accepting outline:', generatedOutline.title);
-
-      // For now, just log the conversion (since currentProject is null)
-      const projectUpdate = storyArchitectService.convertToProject(generatedOutline, undefined);
-      console.log('📋 Generated project data:', projectUpdate);
-
-      // Generate chapters and scenes
-      const chaptersAndScenes = storyArchitectService.generateChaptersAndScenes(generatedOutline);
-      console.log('📖 Generated chapters and scenes:', chaptersAndScenes);
-
-      // Mock the project update (replace with real integration later)
-      console.log('✅ Would update project with:', {
-        characters: projectUpdate.characters,
-        chapters: chaptersAndScenes,
-        title: generatedOutline.title,
-      });
-
-      showToast('Story outline imported successfully! (Check console for data)', 'success');
-      setGeneratedOutline(null);
-      setActiveTab('beats'); // Navigate to beat sheet to see results
-    } catch (error) {
-      console.error('Failed to import outline:', error);
-      showToast('Failed to import outline. Please try again.', 'error');
-    }
-  };
-
-  const handleRegenerateOutline = () => {
-    setGeneratedOutline(null);
-    setShowArchitectMode(true);
+  const handleStoryArchitectComplete = (outline: GeneratedOutline) => {
+    // Story has been successfully integrated by the StoryArchitectFlow
+    setShowArchitectFlow(false);
+    setActiveTab('beats'); // Navigate to beat sheet to see results
+    showToast(`Story outline "${outline.title}" integrated successfully!`, 'success');
   };
 
   const renderTabContent = () => {
@@ -84,7 +37,7 @@ const StoryPlanningView: React.FC = () => {
         return (
           <OverviewTab
             onNavigateToTab={setActiveTab}
-            onOpenArchitectMode={() => setShowArchitectMode(true)}
+            onOpenArchitectFlow={() => setShowArchitectFlow(true)}
           />
         );
       case 'health':
@@ -99,7 +52,7 @@ const StoryPlanningView: React.FC = () => {
         return (
           <OverviewTab
             onNavigateToTab={setActiveTab}
-            onOpenArchitectMode={() => setShowArchitectMode(true)}
+            onOpenArchitectFlow={() => setShowArchitectFlow(true)}
           />
         );
     }
@@ -142,7 +95,7 @@ const StoryPlanningView: React.FC = () => {
 
           {/* Story Architect Button */}
           <button
-            onClick={() => setShowArchitectMode(true)}
+            onClick={() => setShowArchitectFlow(true)}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
           >
             <Wand2 className="w-4 h-4" />
@@ -154,21 +107,11 @@ const StoryPlanningView: React.FC = () => {
       {/* Tab Content */}
       <div className="flex-1 overflow-hidden">{renderTabContent()}</div>
 
-      {/* Story Architect Mode Modal */}
-      {showArchitectMode && (
-        <StoryArchitectMode
-          onOutlineGenerated={handleOutlineGenerated}
-          onClose={() => setShowArchitectMode(false)}
-        />
-      )}
-
-      {/* Generated Outline Preview Modal */}
-      {generatedOutline && (
-        <GeneratedOutlinePreview
-          outline={generatedOutline}
-          onAccept={handleAcceptOutline}
-          onRegenerate={handleRegenerateOutline}
-          onClose={() => setGeneratedOutline(null)}
+      {/* Story Architect Flow Modal */}
+      {showArchitectFlow && (
+        <StoryArchitectFlow
+          onComplete={handleStoryArchitectComplete}
+          onClose={() => setShowArchitectFlow(false)}
         />
       )}
     </div>
@@ -178,8 +121,8 @@ const StoryPlanningView: React.FC = () => {
 // Enhanced Overview Tab with Story Architect integration
 const OverviewTab: React.FC<{
   onNavigateToTab: (tab: PlanningTab) => void;
-  onOpenArchitectMode: () => void;
-}> = ({ onNavigateToTab, onOpenArchitectMode }) => {
+  onOpenArchitectFlow: () => void;
+}> = ({ onNavigateToTab, onOpenArchitectFlow }) => {
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="max-w-4xl mx-auto">
@@ -205,7 +148,7 @@ const OverviewTab: React.FC<{
                   your premise. Perfect for getting started or breaking through planning blocks.
                 </p>
                 <button
-                  onClick={onOpenArchitectMode}
+                  onClick={onOpenArchitectFlow}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md font-medium transition-colors"
                 >
                   <Wand2 className="w-4 h-4" />

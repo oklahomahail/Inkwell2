@@ -50,7 +50,7 @@ const TimelinePanel: React.FC = () => {
     },
   });
 
-  const [showFilters, setShowFilters] = useState(false);
+  const [_showFilters, _setShowFilters] = useState(false);
 
   // Load timeline events for current project
   useEffect(() => {

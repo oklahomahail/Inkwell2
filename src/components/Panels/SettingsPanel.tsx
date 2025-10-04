@@ -12,7 +12,7 @@ import { phraseAnalysisService, DEFAULT_PHRASE_HYGIENE_SETTINGS } from '@/utils/
 import type { PhraseHygieneSettings } from '@/utils/textAnalysis';
 
 const SettingsPanel: React.FC = () => {
-  const { state, claudeActions, claude } = useAppContext();
+  const { state, claudeActions, claude, currentProject } = useAppContext();
   const { showToast } = useToast();
 
   // API Key Management
@@ -62,11 +62,11 @@ const SettingsPanel: React.FC = () => {
     }
 
     // Load phrase hygiene settings for current project
-    if (state.currentProject) {
-      const settings = phraseAnalysisService.getSettings(state.currentProject.id);
+    if (currentProject) {
+      const settings = phraseAnalysisService.getSettings(currentProject.id);
       setPhraseSettings(settings);
     }
-  }, [state.currentProject]);
+  }, [currentProject]);
 
   const validateApiKey = (key: string): boolean => key.startsWith('sk-ant-') && key.length > 20;
 
@@ -128,12 +128,12 @@ const SettingsPanel: React.FC = () => {
   };
 
   const handlePhraseSettingsUpdate = () => {
-    if (!state.currentProject) {
+    if (!currentProject) {
       showToast('No project selected', 'error');
       return;
     }
     try {
-      phraseAnalysisService.saveSettings(state.currentProject.id, phraseSettings);
+      phraseAnalysisService.saveSettings(currentProject.id, phraseSettings);
       showToast('Phrase hygiene settings updated', 'success');
     } catch (error) {
       console.error('Failed to save phrase settings:', error);
@@ -142,20 +142,20 @@ const SettingsPanel: React.FC = () => {
   };
 
   const handleAddCustomPhrase = () => {
-    if (!customPhraseInput.trim() || !state.currentProject) return;
+    if (!customPhraseInput.trim() || !currentProject) return;
 
-    phraseAnalysisService.addToCustomStoplist(state.currentProject.id, customPhraseInput.trim());
-    const updatedSettings = phraseAnalysisService.getSettings(state.currentProject.id);
+    phraseAnalysisService.addToCustomStoplist(currentProject.id, customPhraseInput.trim());
+    const updatedSettings = phraseAnalysisService.getSettings(currentProject.id);
     setPhraseSettings(updatedSettings);
     setCustomPhraseInput('');
     showToast(`Added "${customPhraseInput.trim()}" to stoplist`, 'success');
   };
 
   const handleRemoveCustomPhrase = (phrase: string) => {
-    if (!state.currentProject) return;
+    if (!currentProject) return;
 
-    phraseAnalysisService.removeFromCustomStoplist(state.currentProject.id, phrase);
-    const updatedSettings = phraseAnalysisService.getSettings(state.currentProject.id);
+    phraseAnalysisService.removeFromCustomStoplist(currentProject.id, phrase);
+    const updatedSettings = phraseAnalysisService.getSettings(currentProject.id);
     setPhraseSettings(updatedSettings);
     showToast(`Removed "${phrase}" from stoplist`, 'success');
   };
@@ -164,7 +164,7 @@ const SettingsPanel: React.FC = () => {
     const settings = {
       claudeConfig,
       appSettings,
-      phraseSettings: state.currentProject ? phraseSettings : null,
+      phraseSettings: currentProject ? phraseSettings : null,
       exportedAt: new Date().toISOString(),
       version: '1.0.0',
     };
@@ -484,7 +484,7 @@ const SettingsPanel: React.FC = () => {
         {/* Phrase Hygiene Settings */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
           <h3 className="text-xl font-semibold text-white mb-4">Phrase Hygiene</h3>
-          {!state.currentProject ? (
+          {!currentProject ? (
             <p className="text-gray-400 text-sm mb-4">
               Select a project to configure phrase detection settings.
             </p>

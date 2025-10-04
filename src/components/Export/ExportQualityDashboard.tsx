@@ -23,7 +23,7 @@ import type {
   EPUBValidationIssue,
 } from '@/services/epubValidationService';
 import professionalExportService from '@/services/professionalExportService';
-import type { Chapter } from '@/types/writing';
+import type { Chapter, ChapterStatus } from '@/types/writing';
 
 interface ExportQualityDashboardProps {
   className?: string;
@@ -50,22 +50,67 @@ const ExportQualityDashboard: React.FC<ExportQualityDashboardProps> = ({ classNa
 
     setIsAnalyzing(true);
     try {
-      // Convert project chapters to the expected format
-      const chapters: Chapter[] = (currentProject.chapters || []).map((ch) => ({
+      // Convert project to EnhancedProject format for validation services
+      const enhancedProject: import('@/types/project').EnhancedProject = {
+        id: currentProject.id,
+        name: currentProject.name,
+        description: currentProject.description,
+        currentWordCount: 0, // Will be calculated from chapters
+        characters: [],
+        plotNotes: [],
+        worldBuilding: [],
+        chapters: (currentProject.chapters || []).map((ch: any) => ({
+          id: ch.id || `chapter-${Date.now()}`,
+          title: ch.title || 'Untitled Chapter',
+          summary: ch.summary || '',
+          content: ch.content || '',
+          wordCount: ch.wordCount || 0,
+          targetWordCount: ch.targetWordCount,
+          status: 'draft' as const,
+          order: ch.order || 0,
+          charactersInChapter: [],
+          plotPointsResolved: [],
+          notes: ch.notes || '',
+          scenes: ch.scenes || [],
+          createdAt: ch.createdAt || Date.now(),
+          updatedAt: ch.updatedAt || Date.now(),
+        })),
+        recentContent: '',
+        createdAt: currentProject.createdAt || Date.now(),
+        updatedAt: currentProject.updatedAt || Date.now(),
+        sessions: [],
+        claudeContext: {
+          includeCharacters: true,
+          includePlotNotes: true,
+          includeWorldBuilding: true,
+          maxCharacters: 10,
+          maxPlotNotes: 10,
+          contextLength: 'medium' as const,
+        },
+      };
+
+      // Calculate total word count
+      enhancedProject.currentWordCount = enhancedProject.chapters.reduce(
+        (total, ch) => total + (ch.wordCount || 0),
+        0,
+      );
+
+      // Convert project chapters to the expected format for Chapter[] parameter
+      const chapters: Chapter[] = enhancedProject.chapters.map((ch) => ({
         id: ch.id,
         title: ch.title,
-        order: ch.order || 0,
+        order: ch.order,
         scenes: ch.scenes || [],
         totalWordCount: ch.wordCount || 0,
-        status: 'draft' as const,
-        createdAt: new Date(ch.createdAt || Date.now()),
-        updatedAt: new Date(ch.updatedAt || Date.now()),
+        status: ChapterStatus.DRAFT,
+        createdAt: new Date(ch.createdAt),
+        updatedAt: new Date(ch.updatedAt),
       }));
 
       // Run both validations
       const [manuscriptResult, epubResult] = await Promise.all([
-        epubValidationService.validateManuscriptProject(currentProject, chapters),
-        epubValidationService.validateEPUBProject(currentProject, chapters),
+        epubValidationService.validateManuscriptProject(enhancedProject, chapters),
+        epubValidationService.validateEPUBProject(enhancedProject, chapters),
       ]);
 
       setManuscriptReport(manuscriptResult);
@@ -113,20 +158,64 @@ const ExportQualityDashboard: React.FC<ExportQualityDashboardProps> = ({ classNa
     if (!currentProject) return;
 
     try {
-      const chapters: Chapter[] = (currentProject.chapters || []).map((ch) => ({
+      // Convert project to EnhancedProject format for export services
+      const enhancedProject: import('@/types/project').EnhancedProject = {
+        id: currentProject.id,
+        name: currentProject.name,
+        description: currentProject.description,
+        currentWordCount: 0,
+        characters: [],
+        plotNotes: [],
+        worldBuilding: [],
+        chapters: (currentProject.chapters || []).map((ch: any) => ({
+          id: ch.id || `chapter-${Date.now()}`,
+          title: ch.title || 'Untitled Chapter',
+          summary: ch.summary || '',
+          content: ch.content || '',
+          wordCount: ch.wordCount || 0,
+          targetWordCount: ch.targetWordCount,
+          status: 'draft' as const,
+          order: ch.order || 0,
+          charactersInChapter: [],
+          plotPointsResolved: [],
+          notes: ch.notes || '',
+          scenes: ch.scenes || [],
+          createdAt: ch.createdAt || Date.now(),
+          updatedAt: ch.updatedAt || Date.now(),
+        })),
+        recentContent: '',
+        createdAt: currentProject.createdAt || Date.now(),
+        updatedAt: currentProject.updatedAt || Date.now(),
+        sessions: [],
+        claudeContext: {
+          includeCharacters: true,
+          includePlotNotes: true,
+          includeWorldBuilding: true,
+          maxCharacters: 10,
+          maxPlotNotes: 10,
+          contextLength: 'medium' as const,
+        },
+      };
+
+      enhancedProject.currentWordCount = enhancedProject.chapters.reduce(
+        (total, ch) => total + (ch.wordCount || 0),
+        0,
+      );
+
+      const chapters: Chapter[] = enhancedProject.chapters.map((ch) => ({
         id: ch.id,
         title: ch.title,
-        order: ch.order || 0,
+        order: ch.order,
         scenes: ch.scenes || [],
         totalWordCount: ch.wordCount || 0,
-        status: 'draft' as const,
-        createdAt: new Date(ch.createdAt || Date.now()),
-        updatedAt: new Date(ch.updatedAt || Date.now()),
+        status: ChapterStatus.DRAFT,
+        createdAt: new Date(ch.createdAt),
+        updatedAt: new Date(ch.updatedAt),
       }));
 
       if (format === 'docx') {
         const result = await professionalExportService.exportDOCX(
-          currentProject,
+          enhancedProject,
           chapters,
           template,
         );
@@ -136,7 +225,7 @@ const ExportQualityDashboard: React.FC<ExportQualityDashboardProps> = ({ classNa
           showToast(`Export failed: ${result.error}`, 'error');
         }
       } else {
-        const result = await professionalExportService.exportEPUB(currentProject, chapters);
+        const result = await professionalExportService.exportEPUB(enhancedProject, chapters);
         if (result.success) {
           showToast(`Exported as ${result.filename}`, 'success');
         } else {

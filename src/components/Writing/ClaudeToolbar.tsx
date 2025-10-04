@@ -214,7 +214,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: 'Brainstorm Ideas',
       shortLabel: 'Ideas',
       icon: 'Brain',
-      prompt: (text, context) =>
+      prompt: (text, _context) =>
         `Based on this scene "${sceneTitle}" and content: "${text}", brainstorm 5 creative directions this story could take next. Consider plot twists, character conflicts, and dramatic possibilities.`,
       color: 'bg-emerald-600 hover:bg-emerald-700',
       category: 'generate',

@@ -18,10 +18,10 @@ import {
 import React, { useState, useMemo } from 'react';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -267,7 +267,7 @@ export default function ConsistencyIssuesPanel({
                   <div className="flex items-center space-x-2">
                     <Switch
                       checked={options.enableCharacterChecks !== false}
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={(checked: boolean) =>
                         handleUpdateOption('enableCharacterChecks', checked)
                       }
                       id="enable-character"
@@ -279,7 +279,7 @@ export default function ConsistencyIssuesPanel({
                   <div className="flex items-center space-x-2">
                     <Switch
                       checked={options.enableVoiceChecks !== false}
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={(checked: boolean) =>
                         handleUpdateOption('enableVoiceChecks', checked)
                       }
                       id="enable-voice"
@@ -291,7 +291,7 @@ export default function ConsistencyIssuesPanel({
                   <div className="flex items-center space-x-2">
                     <Switch
                       checked={options.enablePhraseChecks !== false}
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={(checked: boolean) =>
                         handleUpdateOption('enablePhraseChecks', checked)
                       }
                       id="enable-phrase"
@@ -303,7 +303,7 @@ export default function ConsistencyIssuesPanel({
                   <div className="flex items-center space-x-2">
                     <Switch
                       checked={options.enableTimelineChecks === true}
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={(checked: boolean) =>
                         handleUpdateOption('enableTimelineChecks', checked)
                       }
                       id="enable-timeline"

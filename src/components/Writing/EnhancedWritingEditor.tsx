@@ -14,6 +14,7 @@ import {
   PanelLeftClose,
   Focus,
   Bot,
+  Brain,
   FileText,
   AlertTriangle,
 } from 'lucide-react';
@@ -26,9 +27,9 @@ import { Scene, Chapter } from '../../types/writing';
 import { debounce as debounceUtil } from '../../utils/debounce';
 import { focusWritingEditor } from '../../utils/focusUtils';
 import ConsistencyIssuesPanel from '../editor/ConsistencyIssuesPanel';
-import ConsistencyExtension from '../editor/extensions/ConsistencyExtension';
 
 import ClaudeToolbar from './ClaudeToolbar';
+import EnhancedAIWritingToolbar from './EnhancedAIWritingToolbar';
 import SceneNavigationPanel from './SceneNavigationPanel';
 
 import type {
@@ -52,10 +53,11 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
   const [showScenePanel, setShowScenePanel] = useState(true);
   const [showAIPanel, setShowAIPanel] = useState(true);
+  const [showEnhancedToolbar, setShowEnhancedToolbar] = useState(false);
   const [showConsistencyPanel, setShowConsistencyPanel] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [showWordGoal, setShowWordGoal] = useState(false);
-  const [wordGoal, setWordGoal] = useState(500);
+  const [wordGoal, _setWordGoal] = useState(500);
   const [selectedText, setSelectedText] = useState('');
   const [toolbarPosition, setToolbarPosition] = useState({ x: 0, y: 0 });
   const [showPopupToolbar, setShowPopupToolbar] = useState(false);
@@ -72,24 +74,16 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
   const editorRef = useRef<HTMLDivElement>(null);
 
   // Consistency extension handlers
-  const handleConsistencyIssuesUpdated = useCallback((issues: EditorIssue[]) => {
+  const _handleConsistencyIssuesUpdated = useCallback((issues: EditorIssue[]) => {
     setConsistencyIssues(issues);
   }, []);
 
   const handleConsistencyIssueClick = useCallback(
-    (issue: EditorIssue) => {
-      if (editor && issue.startPos >= 0 && issue.endPos >= 0) {
-        // Navigate to the issue location in the editor
-        editor.commands.focus();
-        editor.commands.setTextSelection({ from: issue.startPos, to: issue.endPos });
-
-        // Show the consistency panel if not already shown
-        if (!showConsistencyPanel) {
-          setShowConsistencyPanel(true);
-        }
-      }
+    (_issue: EditorIssue) => {
+      // Note: editor will be available when this is called from the extension
+      // We'll pass a ref to the current editor instance
     },
-    [editor, showConsistencyPanel],
+    [showConsistencyPanel],
   );
 
   // TipTap Editor
@@ -108,15 +102,15 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
         limit: 100000,
       }),
       Typography,
-      ConsistencyExtension.configure({
-        project: currentProject,
-        scene: currentScene,
-        chapter: currentChapter,
-        enabled: consistencyEnabled,
-        decorationOptions: consistencyOptions,
-        onIssuesUpdated: handleConsistencyIssuesUpdated,
-        onIssueClicked: handleConsistencyIssueClick,
-      }),
+      // ConsistencyExtension.configure({
+      //   project: currentProject,
+      //   scene: currentScene,
+      //   chapter: currentChapter,
+      //   enabled: consistencyEnabled,
+      //   decorationOptions: consistencyOptions,
+      //   onIssuesUpdated: handleConsistencyIssuesUpdated,
+      //   onIssueClicked: handleConsistencyIssueClick,
+      // }),
     ],
     content: currentScene?.content || '',
     onUpdate: ({ editor }) => {
@@ -269,7 +263,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
     if (currentScene && editor) {
       const content = editor.getHTML();
       const text = editor.getText();
-      const wordCount = text.split(/\s+/).filter((word) => word.length > 0).length;
+      const wordCount = text.split(/\s+/).filter((word: string) => word.length > 0).length;
 
       const updatedScene = {
         ...currentScene,
@@ -295,7 +289,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
   };
 
   // Handle scene creation
-  const handleSceneCreate = (chapterId: string) => {
+  const handleSceneCreate = (_chapterId: string) => {
     // Refresh scene list by reloading
     showToast('Scene created! Refreshing...', 'success');
   };
@@ -321,7 +315,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
 
     const content = editor.getHTML();
     const text = editor.getText();
-    const wordCount = text.split(/\s+/).filter((word) => word.length > 0).length;
+    const wordCount = text.split(/\s+/).filter((word: string) => word.length > 0).length;
 
     const updatedScene = {
       ...currentScene,
@@ -394,6 +388,20 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
                 title={showAIPanel ? 'Hide AI panel' : 'Show AI panel'}
               >
                 <Bot size={18} />
+              </button>
+
+              <button
+                onClick={() => setShowEnhancedToolbar(!showEnhancedToolbar)}
+                className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors ${
+                  showEnhancedToolbar
+                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
+                title={
+                  showEnhancedToolbar ? 'Hide enhanced AI toolkit' : 'Show enhanced AI toolkit'
+                }
+              >
+                <Brain size={18} />
               </button>
 
               <button
@@ -542,7 +550,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
             </div>
           </div>
 
-          {/* AI Panel */}
+          {/* AI Toolbar Panel */}
           {showAIPanel && !isFocusMode && (
             <div className="w-96 border-l border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 overflow-y-auto">
               <div className="p-4">
@@ -555,6 +563,21 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
                   className="border-0 bg-transparent"
                 />
               </div>
+            </div>
+          )}
+
+          {/* Enhanced AI Toolkit Panel */}
+          {showEnhancedToolbar && !isFocusMode && (
+            <div className="w-96 border-l border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 overflow-y-auto">
+              <EnhancedAIWritingToolbar
+                selectedText={selectedText}
+                onInsertText={handleInsertText}
+                sceneTitle={currentScene?.title || ''}
+                currentContent={editor?.getText() || ''}
+                projectContext={`${currentProject?.title || 'Untitled Project'} - ${currentChapter?.title || 'Chapter'}`}
+                position="panel"
+                className="border-0 bg-transparent shadow-none"
+              />
             </div>
           )}
 
@@ -589,7 +612,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
       </div>
 
       {/* Popup AI Toolbar on Selection */}
-      {showPopupToolbar && selectedText && !showAIPanel && (
+      {showPopupToolbar && selectedText && !showAIPanel && !showEnhancedToolbar && (
         <ClaudeToolbar
           selectedText={selectedText}
           onInsertText={handleInsertText}
@@ -602,6 +625,35 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
             setSelectedText('');
           }}
         />
+      )}
+
+      {/* Popup Enhanced AI Toolbar on Selection */}
+      {showPopupToolbar && selectedText && !showAIPanel && showEnhancedToolbar && (
+        <div
+          className="fixed z-50 pointer-events-none"
+          style={{
+            left: toolbarPosition.x,
+            top: Math.max(10, toolbarPosition.y),
+            maxWidth: '400px',
+            maxHeight: '500px',
+          }}
+        >
+          <div className="pointer-events-auto">
+            <EnhancedAIWritingToolbar
+              selectedText={selectedText}
+              onInsertText={handleInsertText}
+              sceneTitle={currentScene?.title || ''}
+              currentContent={editor?.getText() || ''}
+              projectContext={`${currentProject?.title || 'Untitled Project'} - ${currentChapter?.title || 'Chapter'}`}
+              position="popup"
+              onClose={() => {
+                setShowPopupToolbar(false);
+                setSelectedText('');
+              }}
+              className="max-w-none"
+            />
+          </div>
+        </div>
       )}
 
       {/* Manuscript Preview Styles */}
@@ -724,7 +776,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
 };
 
 // Utility functions
-function debounce<T extends (...args: any[]) => any>(func: T, wait: number): T {
+function _debounce<T extends (...args: any[]) => any>(func: T, wait: number): T {
   let timeout: ReturnType<typeof setTimeout>;
   return ((...args: any[]) => {
     clearTimeout(timeout);

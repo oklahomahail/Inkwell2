@@ -12,8 +12,7 @@ export const FocusModeControls: React.FC<FocusModeControlsProps> = ({
   currentWordCount,
   className = '',
 }) => {
-  const { isFocusMode, enableFocusMode, settings, sprint, startSprint, formatTime } =
-    useAdvancedFocusMode();
+  const { isFocusMode, enableFocusMode, sprint, startSprint, formatTime } = useAdvancedFocusMode();
 
   if (isFocusMode) {
     return null; // Controls are handled by the focus mode overlay

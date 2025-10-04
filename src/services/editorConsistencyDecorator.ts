@@ -7,7 +7,7 @@ import type { Scene, Chapter } from '@/types/writing';
 import { debounce } from '@/utils/debounce';
 import { phraseAnalysisService } from '@/utils/textAnalysis';
 
-import voiceConsistencyService from './voiceConsistencyService';
+import { voiceConsistencyService } from './voiceConsistencyService';
 
 export interface EditorIssue {
   id: string;

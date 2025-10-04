@@ -18,13 +18,13 @@ import { useAppContext } from '../../context/AppContext';
 import { useToast } from '../../context/ToastContext';
 import { consistencyGuardianService } from '../../services/consistencyGuardianService';
 import { projectContextService } from '../../services/projectContextService';
-import type { CharacterBible } from '../../services/projectContextService';
 
 import type {
   ConsistencyReport,
   ConsistencyIssue,
   ConsistencyCheckOptions,
 } from '../../services/consistencyGuardianService';
+import type { CharacterBible } from '../../services/projectContextService';
 import type { EnhancedProject } from '../../types/project';
 
 interface ConsistencyGuardianPanelProps {
@@ -82,14 +82,16 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
     if (currentProject) {
       const existingReport = consistencyGuardianService.getReport(currentProject.id);
       setReport(existingReport);
-      
+
       // Load character bible
       const bible = projectContextService.getCharacterBible(currentProject.id);
       setCharacterBible(bible);
-      
+
       // Sync character bible from project characters if empty
       if (Object.keys(bible).length === 0 && currentProject.characters?.length > 0) {
-        projectContextService.syncCharacterBibleFromProject(convertToEnhancedProject(currentProject));
+        projectContextService.syncCharacterBibleFromProject(
+          convertToEnhancedProject(currentProject),
+        );
         const updatedBible = projectContextService.getCharacterBible(currentProject.id);
         setCharacterBible(updatedBible);
       }
@@ -330,28 +332,34 @@ export const ConsistencyGuardianPanel: React.FC<ConsistencyGuardianPanelProps> =
                 Sync from Project
               </button>
             </div>
-            
+
             {Object.keys(characterBible).length === 0 ? (
               <p className="text-xs text-blue-600 dark:text-blue-400">
-                No character traits defined. Click "Sync from Project" to generate from existing characters.
+                No character traits defined. Click "Sync from Project" to generate from existing
+                characters.
               </p>
             ) : (
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {Object.entries(characterBible).map(([characterId, trait]) => (
-                  <div key={characterId} className="text-xs p-2 bg-white dark:bg-gray-800 rounded border">
+                  <div
+                    key={characterId}
+                    className="text-xs p-2 bg-white dark:bg-gray-800 rounded border"
+                  >
                     <div className="font-medium text-gray-900 dark:text-white">
                       {trait.name} ({trait.pronouns})
                     </div>
                     {trait.physicalMarkers.length > 0 && (
                       <div className="text-gray-600 dark:text-gray-400 mt-1">
                         Physical: {trait.physicalMarkers.slice(0, 3).join(', ')}
-                        {trait.physicalMarkers.length > 3 && ` +${trait.physicalMarkers.length - 3} more`}
+                        {trait.physicalMarkers.length > 3 &&
+                          ` +${trait.physicalMarkers.length - 3} more`}
                       </div>
                     )}
                     {trait.forbiddenContradictions.length > 0 && (
                       <div className="text-red-600 dark:text-red-400 mt-1">
                         Never: {trait.forbiddenContradictions.slice(0, 2).join(', ')}
-                        {trait.forbiddenContradictions.length > 2 && ` +${trait.forbiddenContradictions.length - 2} more`}
+                        {trait.forbiddenContradictions.length > 2 &&
+                          ` +${trait.forbiddenContradictions.length - 2} more`}
                       </div>
                     )}
                   </div>
