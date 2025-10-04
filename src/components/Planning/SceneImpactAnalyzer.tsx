@@ -61,11 +61,11 @@ interface SceneImpactAnalyzerProps {
 export default function SceneImpactAnalyzer({
   characters = [],
   totalChapters = 20,
-  onSceneUpdate,
+  onSceneUpdate: _onSceneUpdate,
   className = '',
 }: SceneImpactAnalyzerProps) {
   const [selectedChapter, setSelectedChapter] = useState(1);
-  const [viewMode, setViewMode] = useState<'grid' | 'timeline' | 'heatmap'>('grid');
+  const [_viewMode, _setViewMode] = useState<'grid' | 'timeline' | 'heatmap'>('grid');
   const [filterSignificance, setFilterSignificance] = useState<string>('all');
 
   // Generate comprehensive scene analysis based on character data
@@ -245,7 +245,7 @@ export default function SceneImpactAnalyzer({
   }, [characters, totalChapters]);
 
   // Filter scenes based on significance
-  const filteredScenes = useMemo(() => {
+  const _filteredScenes = useMemo(() => {
     if (filterSignificance === 'all') return sceneAnalyses;
     return sceneAnalyses.filter((scene) => scene.overallSignificance === filterSignificance);
   }, [sceneAnalyses, filterSignificance]);

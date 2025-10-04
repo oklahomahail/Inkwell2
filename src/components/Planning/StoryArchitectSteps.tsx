@@ -32,7 +32,7 @@ interface OptionsStepProps {
 export const OptionsStep: React.FC<OptionsStepProps> = ({
   premise,
   onChange,
-  onNext,
+  onNext: _onNext,
   onPrevious,
   onGenerate,
   isGenerating,

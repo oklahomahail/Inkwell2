@@ -1,5 +1,5 @@
 // src/components/editor/extensions/ConsistencyExtension.ts - TipTap extension for real-time consistency checking
-import { Extension } from '@tiptap/core';
+import { Extension, type Command } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { DecorationSet } from '@tiptap/pm/view';
 
@@ -9,6 +9,22 @@ import editorConsistencyDecorator, {
 } from '@/services/editorConsistencyDecorator';
 import type { EnhancedProject } from '@/types/project';
 import type { Scene, Chapter } from '@/types/writing';
+
+// Declare module augmentation for TipTap commands
+declare module '@tiptap/core' {
+  interface Commands<_ReturnType = any> {
+    consistency: {
+      toggleConsistencyChecking: () => Command;
+      updateConsistencyContext: (
+        project: EnhancedProject | null,
+        scene: Scene | null,
+        chapter: Chapter | null,
+      ) => Command;
+      updateDecorationOptions: (options: Partial<ConsistencyDecorationOptions>) => Command;
+      getCurrentConsistencyIssues: () => Command;
+    };
+  }
+}
 
 export interface ConsistencyExtensionOptions {
   project: EnhancedProject | null;
@@ -233,13 +249,15 @@ export const ConsistencyExtension = Extension.create<ConsistencyExtensionOptions
                   editor.view.state.doc.content.size,
                   '\n',
                 );
-                editorConsistencyDecorator.analyzeContent(
-                  content,
-                  this.options.project,
-                  this.options.scene,
-                  this.options.chapter,
-                  this.options.decorationOptions,
-                );
+                if (this.options.project && this.options.scene && this.options.chapter) {
+                  editorConsistencyDecorator.analyzeContent(
+                    content,
+                    this.options.project,
+                    this.options.scene,
+                    this.options.chapter,
+                    this.options.decorationOptions,
+                  );
+                }
               }
             }, 0);
           }
@@ -250,7 +268,9 @@ export const ConsistencyExtension = Extension.create<ConsistencyExtensionOptions
       getCurrentConsistencyIssues:
         () =>
         ({ commands: _commands }: { commands: any }) => {
-          return editorConsistencyDecorator.getCurrentIssues();
+          // Store issues in storage for retrieval by parent component
+          this.storage.currentIssues = editorConsistencyDecorator.getCurrentIssues();
+          return true;
         },
     };
   },

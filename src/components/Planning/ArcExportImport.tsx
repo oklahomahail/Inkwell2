@@ -346,8 +346,10 @@ export default function ArcExportImport({
     resolution: ImportConflict['resolution'],
   ) => {
     const updated = [...importConflicts];
-    updated[conflictIndex].resolution = resolution;
-    setImportConflicts(updated);
+    if (updated[conflictIndex]) {
+      updated[conflictIndex].resolution = resolution;
+      setImportConflicts(updated);
+    }
   };
 
   // Utility functions for format conversion

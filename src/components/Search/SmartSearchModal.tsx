@@ -66,7 +66,7 @@ export const SmartSearchModal: React.FC<SmartSearchModalProps> = ({
   const [currentView, setCurrentView] = useState<SearchView>('search');
   const [selectedResultIndex, setSelectedResultIndex] = useState(-1);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
-  const [showFilters, setShowFilters] = useState(false);
+  const [_showFilters, _setShowFilters] = useState(false);
 
   // Filter state
   const [filters, setFilters] = useState<SmartSearchOptions>({

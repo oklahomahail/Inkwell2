@@ -51,7 +51,7 @@ interface VoiceEvolutionTrackerProps {
 export default function VoiceEvolutionTracker({
   characters = [],
   onAddSnapshot,
-  onUpdateSnapshot,
+  onUpdateSnapshot: _onUpdateSnapshot,
   className = '',
 }: VoiceEvolutionTrackerProps) {
   const [selectedCharacter, setSelectedCharacter] = useState<string>(characters[0]?.name || '');
@@ -124,7 +124,7 @@ export default function VoiceEvolutionTracker({
                 baseVoice.emotionalExpression,
                 finalStage.internalState,
                 1,
-              ),
+              ) as 'direct' | 'reserved' | 'dramatic' | 'subtle',
               speechPatterns: [
                 ...(baseVoice.speechPatterns || []),
                 `Mastered ${finalStage.growth} expression`,
@@ -231,8 +231,10 @@ export default function VoiceEvolutionTracker({
   function calculateEvolutionStrength(snapshots: VoiceSnapshot[]): number {
     if (snapshots.length < 2) return 0;
 
-    const first = snapshots[0].voiceProfile;
-    const last = snapshots[snapshots.length - 1].voiceProfile;
+    const first = snapshots[0]?.voiceProfile;
+    const last = snapshots[snapshots.length - 1]?.voiceProfile;
+
+    if (!first || !last) return 0;
 
     let changes = 0;
     let totalAspects = 3;
@@ -485,7 +487,7 @@ export default function VoiceEvolutionTracker({
             </div>
 
             <div className="space-y-4">
-              {selectedEvolution.snapshots.map((snapshot, index) => (
+              {selectedEvolution.snapshots.map((snapshot, _index) => (
                 <div
                   key={snapshot.id}
                   className={`p-4 border rounded-lg transition-colors ${

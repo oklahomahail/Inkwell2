@@ -17,7 +17,7 @@ interface StoryArchitectDemoProps {
 
 export const StoryArchitectDemo: React.FC<StoryArchitectDemoProps> = ({
   onNavigateToTimeline,
-  onNavigateToWriting,
+  onNavigateToWriting: _onNavigateToWriting,
 }) => {
   const { currentProject } = useAppContext();
   const { showToast } = useToast();

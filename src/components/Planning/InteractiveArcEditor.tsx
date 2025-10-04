@@ -348,7 +348,7 @@ export default function InteractiveArcEditor({
                             Ch. {stage.chapter}
                           </span>
                           <button
-                            onClick={() => setEditingStage(stage.id)}
+                            onClick={() => _setEditingStage(stage.id)}
                             className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                           >
                             <Edit2 className="w-3 h-3" />

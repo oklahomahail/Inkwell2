@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
+import type { EnhancedProject } from '@/types/project';
+
 import { useAppContext } from '../../context/AppContext';
 import { useToast } from '../../context/ToastContext';
 import { storageService } from '../../services/storageService';
@@ -37,7 +39,6 @@ import type {
   EditorIssue,
   ConsistencyDecorationOptions,
 } from '../../services/editorConsistencyDecorator';
-import type { EnhancedProject } from '../../types/project';
 
 // Import the consistency styles
 import '../../styles/consistency-issues.css';
@@ -237,7 +238,16 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
   // Update consistency extension when context changes
   useEffect(() => {
     if (editor && currentProject && currentScene && currentChapter) {
-      editor.commands.updateConsistencyContext(currentProject, currentScene, currentChapter);
+      // Convert Project to EnhancedProject
+      const enhancedProject: EnhancedProject = {
+        ...currentProject,
+        currentWordCount: 0,
+        plotNotes: '',
+        worldBuilding: '',
+        recentContent: '',
+        storyBeats: [],
+      };
+      editor.commands.updateConsistencyContext(enhancedProject, currentScene, currentChapter);
     }
   }, [editor, currentProject, currentScene, currentChapter]);
 
@@ -268,7 +278,16 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
 
   const handleRefreshConsistencyAnalysis = useCallback(() => {
     if (editor && currentProject && currentScene && currentChapter) {
-      editor.commands.updateConsistencyContext(currentProject, currentScene, currentChapter);
+      // Convert Project to EnhancedProject
+      const enhancedProject: EnhancedProject = {
+        ...currentProject,
+        currentWordCount: 0,
+        plotNotes: '',
+        worldBuilding: '',
+        recentContent: '',
+        storyBeats: [],
+      };
+      editor.commands.updateConsistencyContext(enhancedProject, currentScene, currentChapter);
       showToast('Consistency analysis refreshed', 'success');
     }
   }, [editor, currentProject, currentScene, currentChapter, showToast]);
