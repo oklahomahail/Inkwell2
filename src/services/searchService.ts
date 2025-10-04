@@ -166,7 +166,7 @@ class SearchService {
     const {
       types = ['scene', 'chapter', 'character', 'plot'],
       maxResults = 20,
-      minScore = 0.1,
+      minScore = 0.001,
       projectId,
     } = options;
 
@@ -199,8 +199,9 @@ class SearchService {
         const entry = index.get(term);
         if (!entry) return;
 
-        const idf = Math.log(
-          (docCount - entry.documents.size + 0.5) / (entry.documents.size + 0.5),
+        const idf = Math.max(
+          0.001,
+          Math.log((docCount - entry.documents.size + 0.5) / (entry.documents.size + 0.5)),
         );
 
         entry.documents.forEach((termDoc, docId) => {

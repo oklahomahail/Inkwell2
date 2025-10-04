@@ -37,6 +37,9 @@ type NotifyFn = (message: string, type?: 'info' | 'success' | 'error') => void;
 
 const BACKUPS_KEY = 'app_backups';
 
+// Simple lock mechanism for concurrent operations
+let saveLock: Promise<void> | null = null;
+
 // Utility functions
 export async function getBackups(): Promise<Backup[]> {
   try {
@@ -49,9 +52,23 @@ export async function getBackups(): Promise<Backup[]> {
 }
 
 export async function saveBackup(backup: Backup): Promise<void> {
-  const backups = await getBackups();
-  backups.push(backup);
-  localStorage.setItem(BACKUPS_KEY, JSON.stringify(backups));
+  // Wait for any pending save operations to complete
+  while (saveLock) {
+    await saveLock;
+  }
+
+  // Create a new lock for this operation
+  saveLock = (async () => {
+    const backups = await getBackups();
+    backups.push(backup);
+    localStorage.setItem(BACKUPS_KEY, JSON.stringify(backups));
+  })();
+
+  try {
+    await saveLock;
+  } finally {
+    saveLock = null;
+  }
 }
 
 export async function restoreBackup(
@@ -64,12 +81,21 @@ export async function restoreBackup(
       return { success: false, error: 'Backup not found' };
     }
 
-    if (!backup.data || typeof backup.data !== 'object') {
+    if (!backup.data || backup.data === null || typeof backup.data !== 'object') {
       return { success: false, error: 'Invalid backup data format' };
     }
 
     // Check if the backup contains project data or writing chapters
     const data = backup.data as any;
+
+    // Validate that the backup has at least some meaningful data
+    const hasProjects = data.projects && Array.isArray(data.projects);
+    const hasChapters = data.writingChapters && typeof data.writingChapters === 'object';
+    const hasAppData = data.appData && typeof data.appData === 'object';
+
+    if (!hasProjects && !hasChapters && !hasAppData) {
+      return { success: false, error: 'Invalid backup data format' };
+    }
 
     // Restore projects if present
     if (data.projects && Array.isArray(data.projects)) {
@@ -232,7 +258,10 @@ export async function importBackup(
   } catch (error) {
     return {
       success: false,
-      error: `Failed to import backup: ${error instanceof Error ? error.message : 'Invalid file format'}`,
+      error:
+        error instanceof Error && error.message.includes('JSON')
+          ? 'Invalid file format'
+          : `Failed to import backup: ${error instanceof Error ? error.message : 'Invalid file format'}`,
     };
   }
 }
@@ -255,7 +284,14 @@ export async function clearAllBackups(): Promise<{
 
 export async function getBackupStatus(): Promise<BackupStats> {
   const backups = await getBackups();
-  const totalSizeBytes = new Blob([JSON.stringify(backups)]).size;
+  // Calculate total size based on individual backup sizes when available, or data size
+  const totalSizeBytes =
+    backups.length === 0
+      ? 0
+      : backups.reduce((total, backup) => {
+          if (backup.size) return total + backup.size;
+          return total + new Blob([JSON.stringify(backup.data)]).size;
+        }, 0);
 
   const formatSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
