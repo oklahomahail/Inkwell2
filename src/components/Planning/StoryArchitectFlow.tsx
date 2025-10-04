@@ -112,7 +112,8 @@ const Stepper: React.FC<StepperProps> = ({ currentStep, completedSteps }) => {
                 ${
                   isCompleted &&
                   steps[index + 1] &&
-                  completedSteps.has(steps[index + 1].id as FlowStep)
+                  steps[index + 1] &&
+                  completedSteps.has(steps[index + 1]!.id as FlowStep)
                     ? 'bg-green-500'
                     : isAccessible
                       ? 'bg-gray-300 dark:bg-gray-600'
@@ -292,7 +293,7 @@ export const StoryArchitectFlow: React.FC<StoryArchitectFlowProps> = ({
       }
 
       // Update project
-      await updateProject(currentProject.id);
+      await updateProject(updatedProject);
 
       // Generate timeline if requested
       if (integrationOptions.generateTimeline) {

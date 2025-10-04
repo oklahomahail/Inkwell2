@@ -96,7 +96,7 @@ export default function VoiceEvolutionTracker({
                   baseVoice.emotionalExpression,
                   midStage.internalState,
                   0.5,
-                ),
+                ) as 'direct' | 'reserved' | 'dramatic' | 'subtle',
                 speechPatterns: [
                   ...(baseVoice.speechPatterns || []),
                   `Developing ${midStage.growth} patterns`,
@@ -115,7 +115,11 @@ export default function VoiceEvolutionTracker({
             stage: finalStage.stage,
             voiceProfile: {
               ...baseVoice,
-              vocabulary: getEvolvedVoiceTrait(baseVoice.vocabulary, finalStage.internalState, 1),
+              vocabulary: getEvolvedVoiceTrait(
+                baseVoice.vocabulary,
+                finalStage.internalState,
+                1,
+              ) as 'formal' | 'casual' | 'technical' | 'poetic' | 'streetwise',
               emotionalExpression: getEvolvedVoiceTrait(
                 baseVoice.emotionalExpression,
                 finalStage.internalState,
@@ -174,14 +178,17 @@ export default function VoiceEvolutionTracker({
   function getEvolvedVoiceTrait(original: string, internalState: string, progress: number): string {
     const evolutionMap: { [key: string]: { [state: string]: string } } = {
       vocabulary: {
-        simple: progress > 0.5 ? 'complex' : 'moderate',
-        formal: progress > 0.5 ? 'eloquent' : 'formal',
-        casual: progress > 0.5 ? 'confident' : 'casual',
+        formal: progress > 0.5 ? 'technical' : 'formal',
+        casual: progress > 0.5 ? 'poetic' : 'casual',
+        technical: progress > 0.5 ? 'formal' : 'technical',
+        poetic: progress > 0.5 ? 'streetwise' : 'poetic',
+        streetwise: 'streetwise',
       },
       emotionalExpression: {
-        reserved: progress > 0.7 ? 'expressive' : progress > 0.3 ? 'measured' : 'reserved',
-        direct: progress > 0.5 ? 'nuanced' : 'direct',
-        expressive: 'expressive',
+        reserved: progress > 0.7 ? 'dramatic' : progress > 0.3 ? 'subtle' : 'reserved',
+        direct: progress > 0.5 ? 'dramatic' : 'direct',
+        dramatic: 'dramatic',
+        subtle: progress > 0.5 ? 'direct' : 'subtle',
       },
     };
 

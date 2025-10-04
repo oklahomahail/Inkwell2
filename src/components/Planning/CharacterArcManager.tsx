@@ -45,7 +45,7 @@ export default function CharacterArcManager({
   className = '',
 }: CharacterArcManagerProps) {
   const [activeView, setActiveView] = useState<ViewMode>('overview');
-  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+  const [_selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   const toggleSection = (sectionId: string) => {
@@ -313,7 +313,7 @@ export default function CharacterArcManager({
     </div>
   );
 
-  const renderRelationships = () => (
+  const _renderRelationships = () => (
     <div className="space-y-6">
       <div className="grid gap-4">
         {characters.map((character) => (

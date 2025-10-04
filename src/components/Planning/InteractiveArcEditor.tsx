@@ -41,7 +41,7 @@ export default function InteractiveArcEditor({
     currentChapter: 0,
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [editingStage, setEditingStage] = useState<string | null>(null);
+  const [_editingStage, _setEditingStage] = useState<string | null>(null);
 
   // Create arc stage positions with unique IDs for drag & drop
   const arcStagePositions = useMemo(() => {

@@ -42,8 +42,8 @@ interface RelationshipMapperProps {
 
 export default function RelationshipMapper({
   characters = [],
-  totalChapters = 20,
-  onRelationshipUpdate,
+  totalChapters: _totalChapters = 20,
+  onRelationshipUpdate: _onRelationshipUpdate,
   className = '',
 }: RelationshipMapperProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);

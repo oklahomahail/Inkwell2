@@ -227,7 +227,7 @@ export const ContextAwarePrompts: React.FC<ContextAwarePromptsProps> = ({
     return labels[contextType as keyof typeof labels] || contextType;
   };
 
-  const getContextTypeDescription = (contextType: string) => {
+  const _getContextTypeDescription = (contextType: string) => {
     const descriptions = {
       selection: 'AI suggestions based on your selected text',
       scene: 'Scene-specific writing assistance',

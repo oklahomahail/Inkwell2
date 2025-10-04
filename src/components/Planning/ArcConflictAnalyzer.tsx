@@ -137,7 +137,7 @@ export default function ArcConflictAnalyzer({
     const metrics = developmentMetrics;
 
     // 1. Pacing Conflicts
-    characters.forEach((character, charIndex) => {
+    characters.forEach((character, _charIndex) => {
       const arcStages = character.arcStages || [];
       if (arcStages.length > 1) {
         // Check for stages too close together

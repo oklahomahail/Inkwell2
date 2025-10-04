@@ -74,7 +74,7 @@ export default function CharacterGoalTracker({
     return { byStatus, completion };
   }, [goals]);
 
-  const addGoal = () => {
+  const _addGoal = () => {
     const owner = filterCharacter === 'all' ? characters[0]?.name || '' : filterCharacter;
     const newGoal: CharacterGoal = {
       id: `goal-${Date.now()}`,

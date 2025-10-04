@@ -383,7 +383,7 @@ const arcTemplates: ArcTemplate[] = [
 export default function CharacterArcTemplates({
   onApplyTemplate,
   onPreviewTemplate,
-  characters = [],
+  characters: _characters = [],
   className = '',
 }: CharacterArcTemplatesProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

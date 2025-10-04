@@ -385,12 +385,13 @@ export default function ArcExportImport({
     // Simplified CSV parsing for demo purposes
     // In a real implementation, you'd want more robust CSV parsing
     const lines = content.split('\n');
-    const headers = lines[0].split(',').map((h) => h.replace(/"/g, ''));
+    const _headers = lines[0]?.split(',').map((h) => h.replace(/"/g, ''));
     const characters: GeneratedCharacter[] = [];
 
     for (let i = 1; i < lines.length; i++) {
-      if (lines[i].trim()) {
-        const values = lines[i].split(',').map((v) => v.replace(/"/g, ''));
+      const currentLine = lines[i];
+      if (currentLine?.trim()) {
+        const values = currentLine.split(',').map((v) => v.replace(/"/g, ''));
         characters.push({
           name: values[0] || `Character ${i}`,
           role: (values[1] as any) || 'supporting',
@@ -398,7 +399,6 @@ export default function ArcExportImport({
           internalConflict: values[3] || '',
           externalConflict: values[4] || '',
           description: `Imported character from CSV`,
-          backstory: '',
           motivation: '',
           conflict: values[3] || '',
         });
@@ -470,7 +470,6 @@ ${data.characters
           name: line.split('"')[1] || 'Unnamed Character',
           role: 'supporting',
           description: 'Imported character from YAML',
-          backstory: '',
           motivation: '',
           conflict: '',
         };
@@ -479,7 +478,7 @@ ${data.characters
           .trim()
           .split(':')
           .map((s) => s.trim());
-        const cleanValue = value.replace(/"/g, '');
+        const cleanValue = value?.replace(/"/g, '') || '';
 
         switch (key) {
           case 'role':
