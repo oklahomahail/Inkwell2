@@ -4,6 +4,7 @@
 import { DndContext } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import {
@@ -16,15 +17,28 @@ import {
 import { VirtualizedColumn } from '../VirtualizedColumn';
 
 // Mock react-window with simpler implementation
-vi.mock('react-window', () => ({
-  List: ({ children, itemData, itemCount }: any) => (
+vi.mock('react-window', () => {
+  const MockList = ({ children, itemData, itemCount }: any) => (
     <div data-testid="virtualized-list" data-item-count={itemCount}>
       {Array.from({ length: Math.min(itemCount, 10) }, (_, index) =>
-        children({ index, style: {}, data: itemData }),
+        React.createElement('div', { key: index }, children({ index, style: {}, data: itemData })),
       )}
     </div>
-  ),
-}));
+  );
+
+  // Add ref forwarding support
+  const MockListWithRef = React.forwardRef<any, any>((props, ref) => {
+    React.useImperativeHandle(ref, () => ({
+      scrollToItem: vi.fn(),
+    }));
+    return <MockList {...props} />;
+  });
+
+  return {
+    List: MockList,
+    FixedSizeList: MockListWithRef,
+  };
+});
 
 // Mock store with minimal implementation
 vi.mock('../../store', () => ({
