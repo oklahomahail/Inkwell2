@@ -104,7 +104,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       items.splice(planningIndex + 1, 0, plotBoardsItem);
 
       // Update shortcut numbers for items after Plot Boards
-      items.forEach((item, index) => {
+      items.forEach((item, _index) => {
         if (item.id === 'timeline') item.shortcut = '⌘7';
         else if (item.id === 'analytics') item.shortcut = '⌘8';
       });

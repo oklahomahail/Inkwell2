@@ -431,11 +431,11 @@ export class NetworkCollaborationStorage implements CollaborationStorageAdapter 
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async getUserById(userId: string): Promise<CollaborativeUser | null> {
+  async getUserById(_userId: string): Promise<CollaborativeUser | null> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async getWorkspaceUsers(workspaceId: string): Promise<CollaborativeUser[]> {
+  async getWorkspaceUsers(_workspaceId: string): Promise<CollaborativeUser[]> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 

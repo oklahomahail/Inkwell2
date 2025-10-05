@@ -20,7 +20,7 @@ interface EnhancedWritingPanelProps {
 }
 
 const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }) => {
-  const { state, currentProject, updateProject, dispatch } = useAppContext();
+  const { state: _state, currentProject, updateProject, dispatch } = useAppContext();
   const [content, setContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<number | null>(null);

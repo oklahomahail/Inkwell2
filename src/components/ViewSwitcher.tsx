@@ -16,13 +16,13 @@ import EnhancedWritingPanel from './Writing/EnhancedWritingPanel';
 
 const ViewSwitcher: React.FC = () => {
   const { state, currentProject, updateProject } = useAppContext();
-  const [selectedText, setSelectedText] = useState('');
+  const [_selectedText, _setSelectedText] = useState('');
 
   // Get current project content or default
-  const draftText = currentProject?.content || '';
+  const _draftText = currentProject?.content || '';
 
   // Handle text changes and save to current project
-  const handleTextChange = useCallback(
+  const _handleTextChange = useCallback(
     (value: string) => {
       if (currentProject) {
         const updatedProject = {
@@ -37,11 +37,11 @@ const ViewSwitcher: React.FC = () => {
   );
 
   // Handle text selection for Claude integration
-  const handleTextSelect = useCallback(() => {
+  const _handleTextSelect = useCallback(() => {
     if (typeof window !== 'undefined') {
       const selection = window.getSelection();
       const selected = selection?.toString() || '';
-      setSelectedText(selected);
+      _setSelectedText(selected);
     }
   }, []);
 

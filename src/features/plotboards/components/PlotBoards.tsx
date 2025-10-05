@@ -90,7 +90,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
     getTemplatesByCategory,
   } = usePlotBoardStore();
 
-  const { settings } = useSettingsStore();
+  const settingsStore = useSettingsStore();
   const { getChaptersByProject } = useChaptersStore();
 
   // Chapter integration

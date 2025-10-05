@@ -210,7 +210,7 @@ const TimelinePanel: React.FC = () => {
   );
 
   const handleAutoFix = useCallback(
-    async (conflictId: string) => {
+    async (_conflictId: string) => {
       showToast('Auto-fix functionality will be implemented soon', 'info');
       // Implementation would go here
     },
@@ -452,7 +452,7 @@ const TimelinePanel: React.FC = () => {
           <div className="p-6">
             <TimelineValidationPanel
               projectId={currentProject.id}
-              project={currentProject as EnhancedProject}
+              project={currentProject as unknown as EnhancedProject}
               onNavigateToEvent={handleNavigateToEvent}
               onNavigateToScene={handleNavigateToScene}
               onAutoFix={handleAutoFix}
@@ -464,7 +464,7 @@ const TimelinePanel: React.FC = () => {
           <div className="p-6">
             <SceneLinkageSuggestions
               projectId={currentProject.id}
-              project={currentProject as EnhancedProject}
+              project={currentProject as unknown as EnhancedProject}
               onLinkAccepted={handleLinkAccepted}
               onNavigateToScene={handleNavigateToScene}
               onNavigateToEvent={handleNavigateToEvent}

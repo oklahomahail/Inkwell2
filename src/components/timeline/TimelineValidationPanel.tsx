@@ -79,7 +79,7 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
     }
   };
 
-  const renderConflictCard = (conflict: TimelineConflict, isWarning: boolean = false) => {
+  const renderConflictCard = (conflict: TimelineConflict, _isWarning: boolean = false) => {
     const isExpanded = expandedConflict === conflict.id;
     const colorClass = severityColors[conflict.severity];
 

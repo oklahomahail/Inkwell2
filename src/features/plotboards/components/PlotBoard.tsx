@@ -181,6 +181,9 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
           }
         }
 
+        // Get destination column for announcements and undo
+        const destinationColumn = board.columns.find((col) => col.id === destinationColumnId);
+
         // Save state before the move for undo
         const sourceColumn = board.columns.find((col) => col.cards.some((c) => c.id === card.id));
 
@@ -190,7 +193,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
           createOperationDescription.moveCard(
             card.title,
             sourceColumn?.title || 'Unknown',
-            destColumn?.title || 'Unknown',
+            destinationColumn?.title || 'Unknown',
           ),
           { cardId: card.id, sourceColumnId: sourceColumn?.id, destinationColumnId, newOrder },
         );
@@ -199,7 +202,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
 
         // Announce the move
         keyboardNav.announce(
-          `Moved card "${card.title}" to column "${destColumn?.title || 'Unknown'}" at position ${newOrder + 1}`,
+          `Moved card "${card.title}" to column "${destinationColumn?.title || 'Unknown'}" at position ${newOrder + 1}`,
         );
         return;
       }
@@ -375,7 +378,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
                         isCompact={settings.compactView}
                         focusedCardId={keyboardNav.focusedCardId}
                         draggedCardId={keyboardNav.draggedCardId}
-                        onCardFocus={keyboardNav.setFocus}
+                        onCardFocus={(cardId) => keyboardNav.setFocus(cardId, column.id)}
                         onKeyboardDragStart={keyboardNav.startDrag}
                         onBeforeCardDelete={async (cardId, cardTitle) => {
                           await undoRedo.pushEntry(
@@ -409,7 +412,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
                         isCompact={settings.compactView}
                         focusedCardId={keyboardNav.focusedCardId}
                         draggedCardId={keyboardNav.draggedCardId}
-                        onCardFocus={keyboardNav.setFocus}
+                        onCardFocus={(cardId) => keyboardNav.setFocus(cardId, column.id)}
                         onKeyboardDragStart={keyboardNav.startDrag}
                         onBeforeCardDelete={async (cardId, cardTitle) => {
                           await undoRedo.pushEntry(
@@ -482,7 +485,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
                   isCompact={settings.compactView}
                   focusedCardId={keyboardNav.focusedCardId}
                   draggedCardId={keyboardNav.draggedCardId}
-                  onCardFocus={keyboardNav.setFocus}
+                  onCardFocus={(cardId) => keyboardNav.setFocus(cardId, activeColumn.id)}
                   onKeyboardDragStart={keyboardNav.startDrag}
                   onBeforeCardDelete={async (cardId, cardTitle) => {
                     // This is for the drag overlay, operations are handled in the main board
@@ -503,7 +506,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
                   isCompact={settings.compactView}
                   focusedCardId={keyboardNav.focusedCardId}
                   draggedCardId={keyboardNav.draggedCardId}
-                  onCardFocus={keyboardNav.setFocus}
+                  onCardFocus={(cardId) => keyboardNav.setFocus(cardId, activeColumn.id)}
                   onKeyboardDragStart={keyboardNav.startDrag}
                   onBeforeCardDelete={async (cardId, cardTitle) => {
                     // This is for the drag overlay, operations are handled in the main board

@@ -106,7 +106,7 @@ const SceneLinkageSuggestions: React.FC<SceneLinkageSuggestionsProps> = ({
 
   const getScene = (sceneId: string, chapterId: string) => {
     const chapter = project.chapters.find((c) => c.id === chapterId);
-    return chapter?.scenes?.find((s) => s.id === sceneId);
+    return chapter?.scenes?.find((s: any) => s.id === sceneId);
   };
 
   const getChapter = (chapterId: string) => {
