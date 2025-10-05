@@ -4,12 +4,13 @@ import React, { useEffect, useState } from 'react';
 // UI + panels
 import ClaudeAssistant from './components/ClaudeAssistant';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
-import { CommandPaletteProvider } from './components/CommandPalette/CommandPaletteProvider';
 import CommandPaletteUI from './components/CommandPalette/CommandPaletteUI';
 // New professional layout and components
 import DebugSearchPanel from './components/DebugSearchPanel';
 import ExportDialog from './components/ExportDialog';
+import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
+import Providers from './components/Providers';
 import {
   StorageRecoveryBanner,
   OfflineBanner,
@@ -18,10 +19,8 @@ import {
 import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
 // Context and providers
-import { AppProvider, useAppContext } from './context/AppContext';
-import { ClaudeProvider } from './context/ClaudeProvider';
+import { useAppContext } from './context/AppContext';
 import { useEditorContext } from './context/EditorContext';
-import { NavProvider } from './context/NavContext';
 // Services
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
@@ -42,6 +41,14 @@ type QueuedOperation = {
 function AppShell() {
   const { claude, currentProject } = useAppContext();
   const { insertText } = useEditorContext();
+
+  // Check for health route (for CI testing)
+  const isHealthRoute =
+    window.location.pathname === '/health' || window.location.search.includes('health=true');
+
+  if (isHealthRoute) {
+    return <HealthCheck />;
+  }
 
   // storage recovery
   const { showRecoveryBanner, dismissRecoveryBanner } = useStorageRecovery();
@@ -279,6 +286,43 @@ function StorageDebugPanel() {
             >
               Run Maintenance
             </button>
+            <button
+              onClick={async () => {
+                if (
+                  confirm('Reset all data and reload? This will clear IndexedDB and localStorage.')
+                ) {
+                  try {
+                    // Clear localStorage
+                    localStorage.clear();
+
+                    // Clear IndexedDB
+                    if ('indexedDB' in window) {
+                      const databases = await indexedDB.databases();
+                      await Promise.all(
+                        databases.map((db) => {
+                          if (db.name) {
+                            return new Promise<void>((resolve, reject) => {
+                              const deleteReq = indexedDB.deleteDatabase(db.name!);
+                              deleteReq.onsuccess = () => resolve();
+                              deleteReq.onerror = () => reject(deleteReq.error);
+                            });
+                          }
+                        }),
+                      );
+                    }
+
+                    // Reload the page
+                    window.location.reload();
+                  } catch (error) {
+                    console.error('Failed to reset:', error);
+                    alert('Reset failed. Check console for details.');
+                  }
+                }
+              }}
+              className="w-full mt-1 px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-xs"
+            >
+              🔄 Reset & Reload
+            </button>
           </div>
         )}
       </div>
@@ -286,17 +330,11 @@ function StorageDebugPanel() {
   );
 }
 
-// Root export: compose providers at the top and render AppShell inside.
+// Root export: use centralized Providers component for clean composition
 export default function App() {
   return (
-    <NavProvider>
-      <ClaudeProvider>
-        <AppProvider>
-          <CommandPaletteProvider>
-            <AppShell />
-          </CommandPaletteProvider>
-        </AppProvider>
-      </ClaudeProvider>
-    </NavProvider>
+    <Providers>
+      <AppShell />
+    </Providers>
   );
 }

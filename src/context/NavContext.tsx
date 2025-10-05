@@ -218,7 +218,7 @@ export function useNavigation(): NavContextValue {
       throw new Error('useNavigation must be used within a NavProvider');
     } else {
       console.warn(
-        '[navigation] useNavigation used without NavProvider. Returning no-op fallback.',
+        '[navigation] useNavigation used without NavProvider. Returning loading fallback.',
       );
       return {
         currentView: 'dashboard',
@@ -226,12 +226,28 @@ export function useNavigation(): NavContextValue {
         currentChapterId: null,
         currentSceneId: null,
         focusMode: false,
-        navigateToView: () => {},
-        navigateToProject: () => {},
-        navigateToChapter: () => {},
-        navigateToScene: () => {},
-        toggleFocusMode: () => {},
-        goBack: () => {},
+        navigateToView: (view) => {
+          console.warn(`[navigation] Navigation attempted without provider: ${view}`);
+        },
+        navigateToProject: (projectId) => {
+          console.warn(`[navigation] Project navigation attempted without provider: ${projectId}`);
+        },
+        navigateToChapter: (projectId, chapterId) => {
+          console.warn(
+            `[navigation] Chapter navigation attempted without provider: ${projectId}/${chapterId}`,
+          );
+        },
+        navigateToScene: (projectId, chapterId, sceneId) => {
+          console.warn(
+            `[navigation] Scene navigation attempted without provider: ${projectId}/${chapterId}/${sceneId}`,
+          );
+        },
+        toggleFocusMode: () => {
+          console.warn('[navigation] Focus mode toggle attempted without provider');
+        },
+        goBack: () => {
+          console.warn('[navigation] Back navigation attempted without provider');
+        },
         canGoBack: false,
       };
     }
