@@ -203,6 +203,16 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     } catch (error) {
       console.warn('Failed to load theme from localStorage:', error);
     }
+
+    // Load current project ID from localStorage
+    try {
+      const storedProjectId = localStorage.getItem('inkwell_current_project_id');
+      if (storedProjectId) {
+        dispatch({ type: 'SET_CURRENT_PROJECT', payload: storedProjectId });
+      }
+    } catch (error) {
+      console.warn('Failed to load current project ID from localStorage:', error);
+    }
   }, []);
 
   // Persist projects
@@ -223,6 +233,19 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       console.warn('Failed to save theme to localStorage:', error);
     }
   }, [state.theme]);
+
+  // Persist current project ID
+  useEffect(() => {
+    try {
+      if (state.currentProjectId) {
+        localStorage.setItem('inkwell_current_project_id', state.currentProjectId);
+      } else {
+        localStorage.removeItem('inkwell_current_project_id');
+      }
+    } catch (error) {
+      console.warn('Failed to save current project ID to localStorage:', error);
+    }
+  }, [state.currentProjectId]);
 
   const currentProject = state.projects.find((p) => p.id === state.currentProjectId) || null;
 

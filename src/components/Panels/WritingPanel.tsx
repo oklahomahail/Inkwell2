@@ -201,15 +201,21 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
 
   if (!currentProject) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
+      <div className="flex items-center justify-center h-full bg-white dark:bg-gray-900">
+        <div className="text-center max-w-md mx-auto p-6">
           <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-400" />
           <h3 className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">
             No Project Selected
           </h3>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-gray-500 dark:text-gray-400 mb-4">
             Select a project from the dashboard to start writing
           </p>
+          <button
+            onClick={() => (window.location.href = '/')}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          >
+            Go to Dashboard
+          </button>
         </div>
       </div>
     );
