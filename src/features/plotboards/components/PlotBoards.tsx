@@ -91,7 +91,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
   } = usePlotBoardStore();
 
   const settingsStore = useSettingsStore();
-  const { getChaptersByProject } = useChaptersStore();
+  const { chapters } = useChaptersStore();
 
   // Chapter integration
   const integration = usePlotBoardIntegration({
@@ -116,7 +116,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
   // Get current project's boards and chapters
   const projectBoards = getBoardsByProject(projectId);
   const currentBoard = activeBoard ? boards[activeBoard] : null;
-  const projectChapters = getChaptersByProject(projectId);
+  const projectChapters = chapters; // Use chapters directly from store
 
   // Create a new board
   const handleCreateBoard = async (title: string, templateId?: string) => {
@@ -137,7 +137,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
       await deleteBoard(boardId);
       if (activeBoard === boardId) {
         const remainingBoards = projectBoards.filter((b) => b.id !== boardId);
-        setActiveBoard(remainingBoards.length > 0 ? remainingBoards[0].id : null);
+        setActiveBoard(remainingBoards.length > 0 ? remainingBoards[0]?.id || null : null);
       }
     }
   };
@@ -358,7 +358,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
                   Create Cards from Chapters
                 </h4>
                 <div className="max-h-60 overflow-y-auto border rounded">
-                  {projectChapters.map((chapter) => (
+                  {projectChapters.map((chapter: any) => (
                     <label
                       key={chapter.id}
                       className="flex items-center p-3 hover:bg-gray-50 cursor-pointer"
@@ -602,10 +602,10 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
           <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Board</h3>
           <p className="text-gray-600 mb-4">Select a board to start working.</p>
           <button
-            onClick={() => setActiveBoard(projectBoards[0].id)}
+            onClick={() => setActiveBoard(projectBoards[0]?.id || null)}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
-            Open {projectBoards[0].title}
+            Open {projectBoards[0]?.title || 'Board'}
           </button>
         </div>
       </div>

@@ -439,31 +439,31 @@ export class NetworkCollaborationStorage implements CollaborationStorageAdapter 
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async updateUser(user: CollaborativeUser): Promise<void> {
+  async updateUser(_user: CollaborativeUser): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async updateUserPresence(userId: string, presence: any): Promise<void> {
+  async updateUserPresence(_userId: string, _presence: any): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async publishEvent(event: CollaborativeEvent): Promise<void> {
+  async publishEvent(_event: CollaborativeEvent): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  subscribeToEvents(boardId: string, callback: (event: CollaborativeEvent) => void): () => void {
+  subscribeToEvents(_boardId: string, _callback: (event: CollaborativeEvent) => void): () => void {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async getEventHistory(boardId: string, fromVersion?: number): Promise<CollaborativeEvent[]> {
+  async getEventHistory(_boardId: string, _fromVersion?: number): Promise<CollaborativeEvent[]> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async saveConflict(conflict: CollaborativeConflict): Promise<void> {
+  async saveConflict(_conflict: CollaborativeConflict): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async getConflicts(boardId: string): Promise<CollaborativeConflict[]> {
+  async getConflicts(_boardId: string): Promise<CollaborativeConflict[]> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 

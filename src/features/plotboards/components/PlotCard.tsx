@@ -52,9 +52,9 @@ export const PlotCard: React.FC<PlotCardProps> = ({
   // Find linked scene/chapter info
   const linkedScene =
     card.sceneId && card.chapterId
-      ? chapters[card.chapterId]?.scenes?.find((s) => s.id === card.sceneId)
+      ? (chapters as any)[card.chapterId]?.scenes?.find((s: any) => s.id === card.sceneId)
       : null;
-  const linkedChapter = card.chapterId ? chapters[card.chapterId] : null;
+  const linkedChapter = card.chapterId ? (chapters as any)[card.chapterId] : null;
 
   // Status and priority styling
   const getStatusColor = (status: PlotCardStatus): string => {
