@@ -53,7 +53,7 @@ class ImportService {
       if (typeof jsonData === 'string') {
         try {
           projectData = JSON.parse(jsonData);
-        } catch (__error) {
+        } catch {
           result.errors!.push('Invalid JSON format');
           return result;
         }
@@ -93,7 +93,7 @@ class ImportService {
             tags: ['import-backup'],
           });
           result.warnings!.push('Created backup of existing project');
-        } catch (__error) {
+        } catch {
           result.warnings!.push('Failed to create backup of existing project');
         }
       }
@@ -159,19 +159,19 @@ class ImportService {
               isAutomatic: false,
               tags: ['import'],
             });
-          } catch (__error) {
+          } catch {
             result.warnings!.push('Failed to create import snapshot');
           }
         }
 
         console.log(`Project imported successfully: ${project.title} (${project.id})`);
-      } catch (__error) {
+      } catch {
         result.errors!.push(
           `Failed to save imported project: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
         return result;
       }
-    } catch (__error) {
+    } catch {
       result.errors!.push(
         `Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -291,7 +291,7 @@ class ImportService {
       const { EnhancedStorageService } = await import('./enhancedStorageService');
       const project = EnhancedStorageService.loadProject(projectId);
       return project as any; // Type assertion for compatibility
-    } catch (__error) {
+    } catch {
       return null;
     }
   }
@@ -394,7 +394,7 @@ class ImportService {
           }
         }
       }
-    } catch (__error) {
+    } catch {
       errors.push(
         `Integrity validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -626,7 +626,7 @@ class ImportService {
           differences,
         },
       };
-    } catch (__error) {
+    } catch {
       const errorMessage = `Round-trip test failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
       errors.push(errorMessage);
       console.error(errorMessage, error);

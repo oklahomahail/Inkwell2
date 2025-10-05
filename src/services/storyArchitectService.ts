@@ -326,7 +326,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
           try {
             parsedOutline = JSON.parse(jsonMatch[0]);
             console.log('🔧 Successfully extracted JSON from response');
-          } catch (__secondParseError) {
+          } catch {
             throw new Error('Could not parse JSON from Claude response. Please try again.');
           }
         } else {

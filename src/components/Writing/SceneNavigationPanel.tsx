@@ -208,7 +208,7 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
           setChapters(chaptersWithExpanded);
 
           showToast('Scene duplicated', 'success');
-        } catch (__error) {
+        } catch {
           showToast('Failed to duplicate scene', 'error');
         }
         break;
@@ -218,7 +218,7 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
           try {
             // Implementation would need to be added to storage service
             showToast('Delete functionality coming soon', 'info');
-          } catch (__error) {
+          } catch {
             showToast('Failed to delete scene', 'error');
           }
         }
