@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "engines": {
-    "node": ">=20.11",
+    "node": "20.x",
     "pnpm": ">=9"
   },
   "scripts": {
@@ -19,7 +19,7 @@
     "lint:ci": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",
     "format": "prettier --write .",
     "lint:strict": "eslint \"src/**/*.{ts,tsx}\" --max-warnings 0",
-    "prepare": "husky && husky install",
+    "prepare": "git rev-parse --is-inside-work-tree >/dev/null 2>&1 && husky install || echo 'skip husky on CI'",
     "tailwind:replace": "node scripts/tailwind-text-replacer.mjs",
     "vercel:test": "npm run build && npm run preview",
     "test": "vitest",
