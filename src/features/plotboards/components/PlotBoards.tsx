@@ -3,8 +3,8 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { useChaptersStore } from '../../../hooks/stores/useChaptersStore';
-import { useSettingsStore } from '../../../hooks/stores/useSettingsStore';
+import { useChaptersStore } from '../../../stores/useChaptersStore';
+import { useSettingsStore } from '../../../stores/useSettingsStore';
 import { useFeatureFlag } from '../../../utils/flags';
 import { usePlotBoardIntegration } from '../hooks/usePlotBoardIntegration';
 import { usePlotBoardStore, initializePlotBoardStore } from '../store';

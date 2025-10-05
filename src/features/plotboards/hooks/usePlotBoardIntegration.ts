@@ -3,7 +3,7 @@
 
 import { useEffect, useCallback, useRef } from 'react';
 
-import { useChaptersStore } from '../../../hooks/stores/useChaptersStore';
+import { useChaptersStore } from '../../../stores/useChaptersStore';
 import { trace } from '../../../utils/trace';
 import { usePlotBoardStore } from '../store';
 

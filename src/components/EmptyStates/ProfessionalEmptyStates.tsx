@@ -10,6 +10,7 @@ import {
   Sparkles,
   Coffee,
   Zap,
+  TrendingUp,
 } from 'lucide-react';
 import React from 'react';
 
