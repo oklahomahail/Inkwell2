@@ -467,39 +467,39 @@ export class NetworkCollaborationStorage implements CollaborationStorageAdapter 
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async resolveConflict(conflictId: string, resolution: any): Promise<void> {
+  async resolveConflict(_conflictId: string, _resolution: any): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async saveOperation(operation: Operation): Promise<void> {
+  async saveOperation(_operation: Operation): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async getOperations(boardId: string, fromVersion?: number): Promise<Operation[]> {
+  async getOperations(_boardId: string, _fromVersion?: number): Promise<Operation[]> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async applyOperations(operations: Operation[]): Promise<void> {
+  async applyOperations(_operations: Operation[]): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async createSession(session: CollaborativeSession): Promise<void> {
+  async createSession(_session: CollaborativeSession): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async updateSession(sessionId: string, updates: Partial<CollaborativeSession>): Promise<void> {
+  async updateSession(_sessionId: string, _updates: Partial<CollaborativeSession>): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async getActiveSession(boardId: string): Promise<CollaborativeSession | null> {
+  async getActiveSession(_boardId: string): Promise<CollaborativeSession | null> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async getSyncState(boardId: string): Promise<SyncState | null> {
+  async getSyncState(_boardId: string): Promise<SyncState | null> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async updateSyncState(syncState: SyncState): Promise<void> {
+  async updateSyncState(_syncState: SyncState): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
@@ -507,35 +507,35 @@ export class NetworkCollaborationStorage implements CollaborationStorageAdapter 
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async updateConnectionState(state: ConnectionState): Promise<void> {
+  async updateConnectionState(_state: ConnectionState): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async createSharedBoard(sharedBoard: SharedBoard): Promise<void> {
+  async createSharedBoard(_sharedBoard: SharedBoard): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async getSharedBoard(shareId: string): Promise<SharedBoard | null> {
+  async getSharedBoard(_shareId: string): Promise<SharedBoard | null> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async updateSharedBoard(shareId: string, updates: Partial<SharedBoard>): Promise<void> {
+  async updateSharedBoard(_shareId: string, _updates: Partial<SharedBoard>): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async saveComment(comment: CardComment): Promise<void> {
+  async saveComment(_comment: CardComment): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async getComments(cardId: string): Promise<CardComment[]> {
+  async getComments(_cardId: string): Promise<CardComment[]> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async updateComment(commentId: string, updates: Partial<CardComment>): Promise<void> {
+  async updateComment(_commentId: string, _updates: Partial<CardComment>): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 
-  async deleteComment(commentId: string): Promise<void> {
+  async deleteComment(_commentId: string): Promise<void> {
     throw new Error('NetworkCollaborationStorage not implemented yet');
   }
 }
@@ -603,7 +603,7 @@ export class CollaborationManager {
     }
   }
 
-  async hasPermission(userId: string, permission: Permission, boardId?: string): Promise<boolean> {
+  async hasPermission(userId: string, permission: Permission, _boardId?: string): Promise<boolean> {
     const user = await this.storage.getUserById(userId);
     return user?.permissions.includes(permission) || false;
   }
