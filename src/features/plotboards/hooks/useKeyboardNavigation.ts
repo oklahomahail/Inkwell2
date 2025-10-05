@@ -79,15 +79,16 @@ export const useKeyboardNavigation = ({
       if (!state.focusedCardId) {
         // If no card focused, focus first card
         const allCards = getAllCards();
-        if (allCards.length > 0) {
+        if (allCards.length > 0 && allCards[0]) {
+          const firstCard = allCards[0];
           setState((prev) => ({
             ...prev,
-            focusedCardId: allCards[0].card.id,
-            focusedColumnId: allCards[0].column.id,
+            focusedCardId: firstCard.card.id,
+            focusedColumnId: firstCard.column.id,
           }));
           lastFocusRef.current = {
-            cardId: allCards[0].card.id,
-            columnId: allCards[0].column.id,
+            cardId: firstCard.card.id,
+            columnId: firstCard.column.id,
           };
         }
         return;
@@ -105,21 +106,31 @@ export const useKeyboardNavigation = ({
           targetCardIndex = Math.max(0, cardIndex - 1);
           break;
         case 'down':
-          targetCardIndex = Math.min(board.columns[columnIndex].cards.length - 1, cardIndex + 1);
+          const currentColumn = board.columns[columnIndex];
+          if (currentColumn && currentColumn.cards) {
+            targetCardIndex = Math.min(currentColumn.cards.length - 1, cardIndex + 1);
+          }
           break;
         case 'left':
           targetColumnIndex = Math.max(0, columnIndex - 1);
-          targetCardIndex = Math.min(cardIndex, board.columns[targetColumnIndex].cards.length - 1);
+          const leftColumn = board.columns[targetColumnIndex];
+          if (leftColumn && leftColumn.cards) {
+            targetCardIndex = Math.min(cardIndex, leftColumn.cards.length - 1);
+          }
           break;
         case 'right':
           targetColumnIndex = Math.min(board.columns.length - 1, columnIndex + 1);
-          targetCardIndex = Math.min(cardIndex, board.columns[targetColumnIndex].cards.length - 1);
+          const rightColumn = board.columns[targetColumnIndex];
+          if (rightColumn && rightColumn.cards) {
+            targetCardIndex = Math.min(cardIndex, rightColumn.cards.length - 1);
+          }
           break;
       }
 
       const targetColumn = board.columns[targetColumnIndex];
-      const targetCard = targetColumn.cards[targetCardIndex];
+      if (!targetColumn || !targetColumn.cards) return;
 
+      const targetCard = targetColumn.cards[targetCardIndex];
       if (targetCard) {
         setState((prev) => ({
           ...prev,
@@ -303,14 +314,16 @@ export const useAriaLiveRegion = (announcements: string[]) => {
   useEffect(() => {
     if (announcements.length > 0) {
       const latestAnnouncement = announcements[announcements.length - 1];
-      setCurrentAnnouncement(latestAnnouncement);
+      if (latestAnnouncement) {
+        setCurrentAnnouncement(latestAnnouncement);
 
-      // Clear announcement after a delay to allow it to be read
-      const timer = setTimeout(() => {
-        setCurrentAnnouncement('');
-      }, 1000);
+        // Clear announcement after a delay to allow it to be read
+        const timer = setTimeout(() => {
+          setCurrentAnnouncement('');
+        }, 1000);
 
-      return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
+      }
     }
   }, [announcements]);
 

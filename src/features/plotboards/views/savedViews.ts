@@ -3,7 +3,13 @@
 
 import { trace } from '../../../utils/trace';
 import { FilterContext } from '../filters/filtering';
-import { PlotBoardView, PlotBoardFilters, PlotBoardSorting, PlotBoardGrouping } from '../types';
+import {
+  PlotBoardView,
+  PlotBoardFilters,
+  PlotBoardSorting,
+  PlotBoardGrouping,
+  PlotCardPriority,
+} from '../types';
 
 /* ========= View Management Types ========= */
 
@@ -105,7 +111,7 @@ export const DEFAULT_VIEWS: SavedViewData[] = [
       name: 'High Priority',
       filters: {
         statuses: [],
-        priorities: ['high', 'critical'],
+        priorities: [PlotCardPriority.HIGH, PlotCardPriority.CRITICAL],
         tags: [],
         characters: [],
         chapters: [],
@@ -317,6 +323,11 @@ export class SavedViewManager {
         ...(updates.filterContext && updates.filterContext),
       },
       layoutSettings: {
+        columnWidth: 320,
+        showDescriptions: true,
+        showWordCounts: true,
+        compactMode: false,
+        virtualizationThreshold: 50,
         ...existingView.layoutSettings,
         ...(updates.layoutSettings && updates.layoutSettings),
       },

@@ -49,7 +49,7 @@ export const usePlotBoardIntegration = (
     getProgressMetrics,
   } = usePlotBoardStore();
 
-  const { chapters, getChaptersByProject } = useChaptersStore();
+  const { chapters } = useChaptersStore();
 
   // Auto-sync state
   const lastSyncTimeRef = useRef<Date | null>(null);
@@ -58,7 +58,8 @@ export const usePlotBoardIntegration = (
 
   // Get current board and project chapters
   const currentBoard = boardId ? boards[boardId] : null;
-  const projectChapters = getChaptersByProject(projectId);
+  // Filter chapters for current project (assuming chapters have projectId property)
+  const projectChapters = chapters.filter((chapter) => chapter.projectId === projectId);
 
   // Sync operations
   const handleSyncWithChapters = useCallback(async () => {
@@ -71,7 +72,7 @@ export const usePlotBoardIntegration = (
 
       // Convert chapters array to record for integration utils
       const chaptersRecord = projectChapters.reduce(
-        (acc, chapter) => {
+        (acc: Record<string, any>, chapter: any) => {
           acc[chapter.id] = chapter;
           return acc;
         },
@@ -115,7 +116,7 @@ export const usePlotBoardIntegration = (
       });
 
       const chaptersRecord = projectChapters.reduce(
-        (acc, chapter) => {
+        (acc: Record<string, any>, chapter: any) => {
           acc[chapter.id] = chapter;
           return acc;
         },
@@ -139,7 +140,7 @@ export const usePlotBoardIntegration = (
 
       try {
         const chaptersRecord = projectChapters.reduce(
-          (acc, chapter) => {
+          (acc: Record<string, any>, chapter: any) => {
             acc[chapter.id] = chapter;
             return acc;
           },
@@ -158,7 +159,7 @@ export const usePlotBoardIntegration = (
     if (!boardId) return null;
 
     const chaptersRecord = projectChapters.reduce(
-      (acc, chapter) => {
+      (acc: Record<string, any>, chapter: any) => {
         acc[chapter.id] = chapter;
         return acc;
       },

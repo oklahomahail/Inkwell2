@@ -25,6 +25,8 @@ export interface PlotColumn {
   cards: PlotCard[];
   type: PlotColumnType;
   settings: PlotColumnSettings;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface PlotCard {

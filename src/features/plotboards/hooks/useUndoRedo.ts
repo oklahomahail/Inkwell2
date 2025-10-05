@@ -175,6 +175,11 @@ export const useUndoRedo = (
 
     try {
       const entryToUndo = state.undoStack[state.undoStack.length - 1];
+      if (!entryToUndo) {
+        setState((prev) => ({ ...prev, isUndoing: false }));
+        return null;
+      }
+
       const newUndoStack = state.undoStack.slice(0, -1);
       const newRedoStack = [...state.redoStack, entryToUndo];
 
@@ -228,6 +233,11 @@ export const useUndoRedo = (
 
     try {
       const entryToRedo = state.redoStack[state.redoStack.length - 1];
+      if (!entryToRedo) {
+        setState((prev) => ({ ...prev, isRedoing: false }));
+        return null;
+      }
+
       const newRedoStack = state.redoStack.slice(0, -1);
       const newUndoStack = [...state.undoStack, entryToRedo];
 
@@ -293,13 +303,15 @@ export const useUndoRedo = (
   // Get description for next undo operation
   const getUndoDescription = useCallback((): string | null => {
     if (state.undoStack.length === 0) return null;
-    return state.undoStack[state.undoStack.length - 1].description;
+    const lastEntry = state.undoStack[state.undoStack.length - 1];
+    return lastEntry ? lastEntry.description : null;
   }, [state.undoStack]);
 
   // Get description for next redo operation
   const getRedoDescription = useCallback((): string | null => {
     if (state.redoStack.length === 0) return null;
-    return state.redoStack[state.redoStack.length - 1].description;
+    const lastEntry = state.redoStack[state.redoStack.length - 1];
+    return lastEntry ? lastEntry.description : null;
   }, [state.redoStack]);
 
   return {

@@ -48,9 +48,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   // Handle status filter changes
   const handleStatusChange = useCallback(
     (status: PlotCardStatus, checked: boolean) => {
+      const currentStatuses = filters.statuses || [];
       const newStatuses = checked
-        ? [...filters.statuses, status]
-        : filters.statuses.filter((s) => s !== status);
+        ? [...currentStatuses, status]
+        : currentStatuses.filter((s) => s !== status);
 
       onFiltersChange({ ...filters, statuses: newStatuses });
     },
@@ -60,9 +61,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   // Handle priority filter changes
   const handlePriorityChange = useCallback(
     (priority: PlotCardPriority, checked: boolean) => {
+      const currentPriorities = filters.priorities || [];
       const newPriorities = checked
-        ? [...filters.priorities, priority]
-        : filters.priorities.filter((p) => p !== priority);
+        ? [...currentPriorities, priority]
+        : currentPriorities.filter((p) => p !== priority);
 
       onFiltersChange({ ...filters, priorities: newPriorities });
     },
@@ -72,7 +74,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   // Handle tag filter changes
   const handleTagChange = useCallback(
     (tag: string, checked: boolean) => {
-      const newTags = checked ? [...filters.tags, tag] : filters.tags.filter((t) => t !== tag);
+      const currentTags = filters.tags || [];
+      const newTags = checked ? [...currentTags, tag] : currentTags.filter((t) => t !== tag);
 
       onFiltersChange({ ...filters, tags: newTags });
     },
@@ -82,9 +85,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   // Handle chapter filter changes
   const handleChapterChange = useCallback(
     (chapterId: string, checked: boolean) => {
+      const currentChapters = filters.chapters || [];
       const newChapters = checked
-        ? [...filters.chapters, chapterId]
-        : filters.chapters.filter((c) => c !== chapterId);
+        ? [...currentChapters, chapterId]
+        : currentChapters.filter((c) => c !== chapterId);
 
       onFiltersChange({ ...filters, chapters: newChapters });
     },
@@ -247,7 +251,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <label className="text-sm font-medium text-gray-900">Status</label>
-                      {filters.statuses.length > 0 && (
+                      {(filters.statuses || []).length > 0 && (
                         <button
                           onClick={() => handleClearFilter('statuses')}
                           className="text-xs text-gray-500 hover:text-gray-700"
@@ -261,7 +265,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                         <label key={status.value} className="flex items-center">
                           <input
                             type="checkbox"
-                            checked={filters.statuses.includes(status.value)}
+                            checked={(filters.statuses || []).includes(status.value)}
                             onChange={(e) => handleStatusChange(status.value, e.target.checked)}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
@@ -279,7 +283,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <label className="text-sm font-medium text-gray-900">Priority</label>
-                      {filters.priorities.length > 0 && (
+                      {(filters.priorities || []).length > 0 && (
                         <button
                           onClick={() => handleClearFilter('priorities')}
                           className="text-xs text-gray-500 hover:text-gray-700"
@@ -293,7 +297,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                         <label key={priority.value} className="flex items-center">
                           <input
                             type="checkbox"
-                            checked={filters.priorities.includes(priority.value)}
+                            checked={(filters.priorities || []).includes(priority.value)}
                             onChange={(e) => handlePriorityChange(priority.value, e.target.checked)}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
@@ -312,7 +316,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <label className="text-sm font-medium text-gray-900">Tags</label>
-                      {filters.tags.length > 0 && (
+                      {(filters.tags || []).length > 0 && (
                         <button
                           onClick={() => handleClearFilter('tags')}
                           className="text-xs text-gray-500 hover:text-gray-700"
@@ -326,7 +330,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                         <label key={tag.value} className="flex items-center">
                           <input
                             type="checkbox"
-                            checked={filters.tags.includes(tag.value)}
+                            checked={(filters.tags || []).includes(tag.value)}
                             onChange={(e) => handleTagChange(tag.value, e.target.checked)}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
@@ -494,30 +498,30 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
       {activeFilterCount > 0 && !isExpanded && (
         <div className="px-4 py-2 bg-blue-50 border-t border-blue-100">
           <div className="flex flex-wrap gap-2">
-            {filters.statuses.map((status) => (
+            {(filters.statuses || []).map((status) => (
               <FilterChip
                 key={`status-${status}`}
                 label={`Status: ${status.replace('_', ' ')}`}
                 onRemove={() => handleStatusChange(status, false)}
               />
             ))}
-            {filters.priorities.map((priority) => (
+            {(filters.priorities || []).map((priority) => (
               <FilterChip
                 key={`priority-${priority}`}
                 label={`Priority: ${priority}`}
                 onRemove={() => handlePriorityChange(priority, false)}
               />
             ))}
-            {filters.tags.slice(0, 3).map((tag) => (
+            {(filters.tags || []).slice(0, 3).map((tag) => (
               <FilterChip
                 key={`tag-${tag}`}
                 label={`Tag: ${tag}`}
                 onRemove={() => handleTagChange(tag, false)}
               />
             ))}
-            {filters.tags.length > 3 && (
+            {(filters.tags || []).length > 3 && (
               <span className="text-xs text-gray-600 px-2 py-1">
-                +{filters.tags.length - 3} more tags
+                +{(filters.tags || []).length - 3} more tags
               </span>
             )}
             {filterContext.searchTerm && (

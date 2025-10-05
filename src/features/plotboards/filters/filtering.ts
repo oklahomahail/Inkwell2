@@ -77,11 +77,11 @@ export class PlotCardFilterEngine {
   isEmpty(): boolean {
     const { statuses, priorities, tags, characters, chapters, dateRange } = this.filters;
     return (
-      statuses.length === 0 &&
-      priorities.length === 0 &&
-      tags.length === 0 &&
-      characters.length === 0 &&
-      chapters.length === 0 &&
+      (statuses || []).length === 0 &&
+      (priorities || []).length === 0 &&
+      (tags || []).length === 0 &&
+      (characters || []).length === 0 &&
+      (chapters || []).length === 0 &&
       !dateRange &&
       !this.context.searchTerm
     );
@@ -129,47 +129,50 @@ export class PlotCardFilterEngine {
     }
 
     // Apply status filters
-    if (this.filters.statuses.length > 0) {
-      filteredCards = filteredCards.filter((card) => this.filters.statuses.includes(card.status));
-      appliedFilters.push(`Status: ${this.filters.statuses.join(', ')}`);
+    const statusFilters = this.filters.statuses || [];
+    if (statusFilters.length > 0) {
+      filteredCards = filteredCards.filter((card) => statusFilters.includes(card.status));
+      appliedFilters.push(`Status: ${statusFilters.join(', ')}`);
     }
 
     // Apply priority filters
-    if (this.filters.priorities.length > 0) {
-      filteredCards = filteredCards.filter((card) =>
-        this.filters.priorities.includes(card.priority),
-      );
-      appliedFilters.push(`Priority: ${this.filters.priorities.join(', ')}`);
+    const priorityFilters = this.filters.priorities || [];
+    if (priorityFilters.length > 0) {
+      filteredCards = filteredCards.filter((card) => priorityFilters.includes(card.priority));
+      appliedFilters.push(`Priority: ${priorityFilters.join(', ')}`);
     }
 
     // Apply tag filters
-    if (this.filters.tags.length > 0) {
+    const tagFilters = this.filters.tags || [];
+    if (tagFilters.length > 0) {
       filteredCards = filteredCards.filter((card) =>
-        this.filters.tags.some((filterTag) => card.tags.includes(filterTag)),
+        tagFilters.some((filterTag) => card.tags.includes(filterTag)),
       );
-      appliedFilters.push(`Tags: ${this.filters.tags.join(', ')}`);
+      appliedFilters.push(`Tags: ${tagFilters.join(', ')}`);
     }
 
     // Apply character filters (via sceneId/chapterId)
-    if (this.filters.characters.length > 0) {
+    const characterFilters = this.filters.characters || [];
+    if (characterFilters.length > 0) {
       filteredCards = filteredCards.filter((card) => {
         // This would need integration with character data
         // For now, we'll check if character names appear in card descriptions
-        return this.filters.characters.some(
+        return characterFilters.some(
           (character) =>
             card.description?.toLowerCase().includes(character.toLowerCase()) ||
             card.notes?.toLowerCase().includes(character.toLowerCase()),
         );
       });
-      appliedFilters.push(`Characters: ${this.filters.characters.join(', ')}`);
+      appliedFilters.push(`Characters: ${characterFilters.join(', ')}`);
     }
 
     // Apply chapter filters
-    if (this.filters.chapters.length > 0) {
+    const chapterFilters = this.filters.chapters || [];
+    if (chapterFilters.length > 0) {
       filteredCards = filteredCards.filter(
-        (card) => card.chapterId && this.filters.chapters.includes(card.chapterId),
+        (card) => card.chapterId && chapterFilters.includes(card.chapterId),
       );
-      appliedFilters.push(`Chapters: ${this.filters.chapters.length} selected`);
+      appliedFilters.push(`Chapters: ${chapterFilters.length} selected`);
     }
 
     // Apply date range filter
@@ -415,11 +418,11 @@ export class PlotCardFilterEngine {
   getActiveFilterCount(): number {
     let count = 0;
 
-    if (this.filters.statuses.length > 0) count++;
-    if (this.filters.priorities.length > 0) count++;
-    if (this.filters.tags.length > 0) count++;
-    if (this.filters.characters.length > 0) count++;
-    if (this.filters.chapters.length > 0) count++;
+    if ((this.filters.statuses || []).length > 0) count++;
+    if ((this.filters.priorities || []).length > 0) count++;
+    if ((this.filters.tags || []).length > 0) count++;
+    if ((this.filters.characters || []).length > 0) count++;
+    if ((this.filters.chapters || []).length > 0) count++;
     if (this.filters.dateRange) count++;
     if (this.context.searchTerm) count++;
 

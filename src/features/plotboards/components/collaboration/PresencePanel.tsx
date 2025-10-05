@@ -177,12 +177,9 @@ export const PresencePanel: React.FC<PresencePanelProps> = ({
               .map((user) => (
                 <div key={user.id} className="p-3 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
-                    <UserStatusBadge
-                      user={user}
-                      variant="compact"
-                      className="cursor-pointer"
-                      onClick={() => onUserClick?.(user)}
-                    />
+                    <div className="cursor-pointer" onClick={() => onUserClick?.(user)}>
+                      <UserStatusBadge user={user} variant="compact" />
+                    </div>
 
                     <div className="flex items-center space-x-2">
                       {/* Activity Status */}

@@ -4,7 +4,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { List } from 'react-window';
+import { FixedSizeList } from 'react-window';
 
 import { usePlotBoardStore } from '../store';
 import { PlotColumn as PlotColumnType, PlotCard as PlotCardType } from '../types';
@@ -108,7 +108,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { deleteCard, createCard } = usePlotBoardStore();
-  const listRef = useRef<any>(null);
+  const listRef = useRef<FixedSizeList>(null);
 
   // Droppable area for cards
   const { isOver, setNodeRef } = useDroppable({
@@ -389,7 +389,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
           <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
             {shouldVirtualize ? (
               // Virtualized list for performance
-              <List
+              <FixedSizeList
                 ref={listRef}
                 height={typeof listHeight === 'number' ? listHeight : 400}
                 itemCount={sortedCards.length}
@@ -398,8 +398,8 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
                 overscanCount={overscanCount}
                 className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
               >
-                {VirtualizedCardItem as any}
-              </List>
+                {VirtualizedCardItem}
+              </FixedSizeList>
             ) : (
               // Regular rendering for smaller lists
               <div className="space-y-2">
