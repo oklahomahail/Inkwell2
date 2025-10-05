@@ -16,29 +16,20 @@ import {
 } from '../../types';
 import { VirtualizedColumn } from '../VirtualizedColumn';
 
-// Mock react-window with simpler implementation
-vi.mock('react-window', () => {
-  const MockList = ({ children, itemData, itemCount }: any) => (
-    <div data-testid="virtualized-list" data-item-count={itemCount}>
-      {Array.from({ length: Math.min(itemCount, 10) }, (_, index) =>
-        React.createElement('div', { key: index }, children({ index, style: {}, data: itemData })),
-      )}
-    </div>
-  );
-
-  // Add ref forwarding support
-  const MockListWithRef = React.forwardRef<any, any>((props, ref) => {
-    React.useImperativeHandle(ref, () => ({
-      scrollToItem: vi.fn(),
-    }));
-    return <MockList {...props} />;
-  });
-
-  return {
-    List: MockListWithRef,
-    FixedSizeList: MockListWithRef,
-  };
-});
+// Mock @tanstack/react-virtual with simpler implementation
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: vi.fn(() => ({
+    getTotalSize: () => 1400, // Mock total size for 10 items at 140px each
+    getVirtualItems: () =>
+      Array.from({ length: 10 }, (_, index) => ({
+        index,
+        key: `item-${index}`,
+        start: index * 140,
+        size: 140,
+      })),
+    scrollToIndex: vi.fn(),
+  })),
+}));
 
 // Mock store with minimal implementation
 vi.mock('../../store', () => ({
@@ -119,7 +110,8 @@ describe('VirtualizedColumn', () => {
 
       // Should not show virtualization indicator
       expect(screen.queryByText('⚡')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('virtualized-list')).not.toBeInTheDocument();
+      // Should render cards directly without virtualization wrapper
+      expect(screen.getByText('Test Card 1')).toBeInTheDocument();
     });
 
     it('enables virtualization for large card lists', () => {
@@ -129,15 +121,17 @@ describe('VirtualizedColumn', () => {
       // Should show virtualization indicator
       expect(screen.getByText('⚡')).toBeInTheDocument();
       expect(screen.getByTitle('Virtualized for performance')).toBeInTheDocument();
-      expect(screen.getByTestId('virtualized-list')).toBeInTheDocument();
       expect(screen.getByText('⚡ Performance mode: 60 cards virtualized')).toBeInTheDocument();
+
+      // Should render virtualized cards (mock returns first 10)
+      expect(screen.getByText('Test Card 1')).toBeInTheDocument();
     });
 
     it('displays correct virtualization threshold', () => {
       // Test right at the threshold
       const cards = createMockCards(50);
       renderVirtualizedColumn(mockColumn, cards);
-      expect(screen.queryByTestId('virtualized-list')).not.toBeInTheDocument();
+      expect(screen.queryByText('⚡')).not.toBeInTheDocument();
 
       // Test just above threshold
       const cardsAboveThreshold = createMockCards(51);
@@ -155,15 +149,17 @@ describe('VirtualizedColumn', () => {
         </DndContext>,
       );
 
-      expect(screen.getByTestId('virtualized-list')).toBeInTheDocument();
+      expect(screen.getByText('⚡')).toBeInTheDocument();
     });
 
-    it('passes correct item count to virtualized list', () => {
+    it('handles large card counts with virtualization', () => {
       const cards = createMockCards(100);
       renderVirtualizedColumn(mockColumn, cards);
 
-      const list = screen.getByTestId('virtualized-list');
-      expect(list).toHaveAttribute('data-item-count', '100');
+      // Should show virtualization is active
+      expect(screen.getByText('⚡ Performance mode: 100 cards virtualized')).toBeInTheDocument();
+      // Should render some cards (mock returns first 10)
+      expect(screen.getByText('Test Card 1')).toBeInTheDocument();
     });
   });
 
@@ -201,8 +197,8 @@ describe('VirtualizedColumn', () => {
       const cards = createMockCards(60); // Use virtualized version
       renderVirtualizedColumn(mockColumn, cards);
 
-      // Initially expanded - should show virtualized list
-      expect(screen.getByTestId('virtualized-list')).toBeInTheDocument();
+      // Initially expanded - should show virtualized cards
+      expect(screen.getByText('Test Card 1')).toBeInTheDocument();
 
       // Click collapse
       const collapseBtn = screen.getByTitle('Collapse column');
@@ -212,14 +208,14 @@ describe('VirtualizedColumn', () => {
       expect(screen.getByText('cards')).toBeInTheDocument();
       expect(screen.getAllByText('60')).toHaveLength(2); // Card count appears in header and collapsed view
       expect(screen.getByText('⚡ virtualized')).toBeInTheDocument();
-      expect(screen.queryByTestId('virtualized-list')).not.toBeInTheDocument();
+      expect(screen.queryByText('Test Card 1')).not.toBeInTheDocument();
 
       // Click expand
       const expandBtn = screen.getByTitle('Expand column');
       fireEvent.click(expandBtn);
 
-      // Should be expanded again with virtualized list
-      expect(screen.getByTestId('virtualized-list')).toBeInTheDocument();
+      // Should be expanded again with virtualized cards
+      expect(screen.getByText('Test Card 1')).toBeInTheDocument();
       expect(screen.queryByText('cards')).not.toBeInTheDocument();
     });
   });
@@ -243,8 +239,8 @@ describe('VirtualizedColumn', () => {
         onCardFocus: mockOnCardFocus,
       });
 
-      // Virtualized list should be present with navigation props
-      expect(screen.getByTestId('virtualized-list')).toBeInTheDocument();
+      // Should show virtualized cards with navigation props
+      expect(screen.getByText('Test Card 1')).toBeInTheDocument();
     });
   });
 
@@ -258,7 +254,9 @@ describe('VirtualizedColumn', () => {
         overscanCount: 10,
       });
 
-      expect(screen.getByTestId('virtualized-list')).toBeInTheDocument();
+      // Should render with custom settings applied
+      expect(screen.getByText('Test Card 1')).toBeInTheDocument();
+      expect(screen.getByText('⚡ Performance mode: 60 cards virtualized')).toBeInTheDocument();
     });
   });
 
@@ -298,11 +296,9 @@ describe('VirtualizedColumn', () => {
       const cards = createMockCards(60);
       renderVirtualizedColumn(mockColumn, cards);
 
-      // Virtualized list should contain cards
-      expect(screen.getByTestId('virtualized-list')).toBeInTheDocument();
-
-      // Should render some cards (mocked to show first 10)
+      // Should render virtualized cards within DnD context
       expect(screen.getByText('Test Card 1')).toBeInTheDocument();
+      expect(screen.getByText('⚡ Performance mode: 60 cards virtualized')).toBeInTheDocument();
     });
   });
 });

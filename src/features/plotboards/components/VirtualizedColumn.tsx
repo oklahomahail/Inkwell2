@@ -1,10 +1,10 @@
 // Virtualized column component for performance with large card lists
-// Uses react-window to efficiently render only visible cards while maintaining DnD
+// Uses @tanstack/react-virtual to efficiently render only visible cards while maintaining DnD
 
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { List as FixedSizeList } from 'react-window';
 
 import { usePlotBoardStore } from '../store';
 import { PlotColumn as PlotColumnType, PlotCard as PlotCardType } from '../types';
@@ -35,57 +35,6 @@ interface VirtualizedColumnProps {
   overscanCount?: number;
 }
 
-interface VirtualizedCardItemProps {
-  index: number;
-  style: React.CSSProperties;
-  data: {
-    cards: PlotCardType[];
-    onEditCard?: (card: PlotCardType) => void;
-    onDeleteCard: (cardId: string) => Promise<void>;
-    showSceneLinks: boolean;
-    showTimeline: boolean;
-    focusedCardId?: string | null;
-    draggedCardId?: string | null;
-    onCardFocus?: (cardId: string) => void;
-    onKeyboardDragStart?: (cardId: string) => void;
-  };
-}
-
-const VirtualizedCardItem: React.FC<VirtualizedCardItemProps> = ({ index, style, data }) => {
-  const {
-    cards,
-    onEditCard,
-    onDeleteCard,
-    showSceneLinks,
-    showTimeline,
-    focusedCardId,
-    draggedCardId,
-    onCardFocus,
-    onKeyboardDragStart,
-  } = data;
-
-  const card = cards[index];
-  if (!card) return null;
-
-  return (
-    <div style={style}>
-      <div className="px-1 py-1">
-        <PlotCard
-          card={card}
-          onEdit={onEditCard}
-          onDelete={onDeleteCard}
-          showSceneLink={showSceneLinks}
-          showTimeline={showTimeline}
-          isFocused={focusedCardId === card.id}
-          isDraggedCard={draggedCardId === card.id}
-          onFocus={onCardFocus}
-          onKeyboardDragStart={onKeyboardDragStart}
-        />
-      </div>
-    </div>
-  );
-};
-
 export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
   column,
   cards,
@@ -108,7 +57,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { deleteCard, createCard } = usePlotBoardStore();
-  const listRef = useRef<any>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
 
   // Droppable area for cards
   const { isOver, setNodeRef } = useDroppable({
@@ -174,17 +123,25 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
   const shouldVirtualize = cards.length > 50;
   const listHeight = shouldVirtualize ? Math.min(maxHeight, cards.length * itemHeight) : 'auto';
 
+  // Set up virtualizer for large lists
+  const virtualizer = useVirtualizer({
+    count: shouldVirtualize ? sortedCards.length : 0,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => itemHeight,
+    overscan: overscanCount,
+  });
+
   // Scroll to focused card when it changes
   const scrollToCard = useCallback(
     (cardId: string) => {
-      if (!shouldVirtualize || !listRef.current) return;
+      if (!shouldVirtualize) return;
 
       const cardIndex = sortedCards.findIndex((card) => card.id === cardId);
       if (cardIndex >= 0) {
-        listRef.current.scrollToItem(cardIndex, 'smart');
+        virtualizer.scrollToIndex(cardIndex);
       }
     },
-    [shouldVirtualize, sortedCards],
+    [shouldVirtualize, sortedCards, virtualizer],
   );
 
   // Scroll to focused card when it changes
@@ -217,32 +174,6 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
     ${isOver ? 'bg-blue-50 ring-2 ring-blue-200' : ''}
     ${isCompact ? 'min-h-[120px]' : ''}
   `.trim();
-
-  // Data for virtualized list
-  const listData = useMemo(
-    () => ({
-      cards: sortedCards,
-      onEditCard,
-      onDeleteCard: handleDeleteCard,
-      showSceneLinks,
-      showTimeline,
-      focusedCardId,
-      draggedCardId,
-      onCardFocus,
-      onKeyboardDragStart,
-    }),
-    [
-      sortedCards,
-      onEditCard,
-      handleDeleteCard,
-      showSceneLinks,
-      showTimeline,
-      focusedCardId,
-      draggedCardId,
-      onCardFocus,
-      onKeyboardDragStart,
-    ],
-  );
 
   return (
     <div className={columnClasses} style={{ backgroundColor: `${column.color}15` }}>
@@ -389,17 +320,55 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
           <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
             {shouldVirtualize ? (
               // Virtualized list for performance
-              <FixedSizeList
-                ref={listRef}
-                height={typeof listHeight === 'number' ? listHeight : 400}
-                itemCount={sortedCards.length}
-                itemSize={itemHeight}
-                itemData={listData}
-                overscanCount={overscanCount}
+              <div
+                ref={parentRef}
                 className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+                style={{
+                  height: typeof listHeight === 'number' ? listHeight : 400,
+                  overflow: 'auto',
+                }}
               >
-                {VirtualizedCardItem as any}
-              </FixedSizeList>
+                <div
+                  style={{
+                    height: `${virtualizer.getTotalSize()}px`,
+                    width: '100%',
+                    position: 'relative',
+                  }}
+                >
+                  {virtualizer.getVirtualItems().map((virtualItem) => {
+                    const card = sortedCards[virtualItem.index];
+                    if (!card) return null;
+
+                    return (
+                      <div
+                        key={card.id}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: `${virtualItem.size}px`,
+                          transform: `translateY(${virtualItem.start}px)`,
+                        }}
+                      >
+                        <div className="px-1 py-1 h-full">
+                          <PlotCard
+                            card={card}
+                            onEdit={onEditCard}
+                            onDelete={handleDeleteCard}
+                            showSceneLink={showSceneLinks}
+                            showTimeline={showTimeline}
+                            isFocused={focusedCardId === card.id}
+                            isDraggedCard={draggedCardId === card.id}
+                            onFocus={onCardFocus}
+                            onKeyboardDragStart={onKeyboardDragStart}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             ) : (
               // Regular rendering for smaller lists
               <div className="space-y-2">
