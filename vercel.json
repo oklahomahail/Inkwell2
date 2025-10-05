@@ -1,14 +1,11 @@
 {
-  "version": 2,
-  "name": "inkwell",
   "buildCommand": "pnpm build",
-  "devCommand": "pnpm dev",
-  "installCommand": "pnpm install",
   "outputDirectory": "dist",
-  "framework": "vite",
+  "installCommand": "pnpm install",
+  "devCommand": "pnpm dev",
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ],
@@ -31,13 +28,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "build": {
-    "env": {
-      "NODE_ENV": "production"
-    }
-  }
+  ]
 }
