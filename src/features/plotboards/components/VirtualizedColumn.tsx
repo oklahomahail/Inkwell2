@@ -4,7 +4,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import { List, ListChildComponentProps } from 'react-window';
 
 import { usePlotBoardStore } from '../store';
 import { PlotColumn as PlotColumnType, PlotCard as PlotCardType } from '../types';

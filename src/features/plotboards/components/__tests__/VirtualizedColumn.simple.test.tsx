@@ -17,7 +17,7 @@ import { VirtualizedColumn } from '../VirtualizedColumn';
 
 // Mock react-window with simpler implementation
 vi.mock('react-window', () => ({
-  FixedSizeList: ({ children, itemData, itemCount }: any) => (
+  List: ({ children, itemData, itemCount }: any) => (
     <div data-testid="virtualized-list" data-item-count={itemCount}>
       {Array.from({ length: Math.min(itemCount, 10) }, (_, index) =>
         children({ index, style: {}, data: itemData }),

@@ -111,7 +111,7 @@ console.log(shouldVirtualize); // true for > 50 cards
 
 - **Modern Browsers**: Chrome 60+, Firefox 55+, Safari 12+, Edge 79+
 - **React Version**: React 16.8+ (hooks support)
-- **Dependencies**: react-window@^1.8.8
+- **Dependencies**: react-window@^2.2.0
 
 ### Fallback Behavior
 
