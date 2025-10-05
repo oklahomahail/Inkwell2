@@ -10,6 +10,7 @@ export enum View {
   Timeline = 'timeline',
   Analysis = 'analysis',
   Planning = 'planning',
+  PlotBoards = 'plotboards',
   Settings = 'settings',
 }
 

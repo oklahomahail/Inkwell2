@@ -13,18 +13,20 @@ import {
   Moon,
   Command,
   Plus,
+  Kanban,
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 import { useAppContext, View } from '@/context/AppContext';
 import { cn } from '@/utils/cn';
+import { useFeatureFlag } from '@/utils/flags';
 
 interface MainLayoutProps {
   children: React.ReactNode;
   className?: string;
 }
 
-const navigationItems = [
+const baseNavigationItems = [
   {
     id: 'dashboard',
     label: 'Dashboard',
@@ -79,6 +81,37 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const { state, dispatch } = useAppContext();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Feature flags
+  const isPlotBoardsEnabled = useFeatureFlag('plotBoards');
+
+  // Dynamic navigation items based on feature flags
+  const navigationItems = React.useMemo(() => {
+    const items = [...baseNavigationItems];
+
+    // Insert PlotBoards after Planning if enabled
+    if (isPlotBoardsEnabled) {
+      const planningIndex = items.findIndex((item) => item.id === 'planning');
+      const plotBoardsItem = {
+        id: 'plotboards',
+        label: 'Plot Boards',
+        icon: Kanban,
+        view: View.PlotBoards,
+        shortcut: '⌘6',
+        description: 'Kanban-style plot and scene organization (Experimental)',
+      };
+
+      items.splice(planningIndex + 1, 0, plotBoardsItem);
+
+      // Update shortcut numbers for items after Plot Boards
+      items.forEach((item, index) => {
+        if (item.id === 'timeline') item.shortcut = '⌘7';
+        else if (item.id === 'analytics') item.shortcut = '⌘8';
+      });
+    }
+
+    return items;
+  }, [isPlotBoardsEnabled]);
 
   // Load preferences from localStorage
   useEffect(() => {

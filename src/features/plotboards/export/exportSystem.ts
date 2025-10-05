@@ -1,0 +1,582 @@
+// Enhanced Plot Boards Export System
+// Supports multiple formats with validation and metadata
+
+import { trace } from '../../../utils/trace';
+import { CURRENT_SCHEMA_VERSION } from '../schema/versioning';
+import { PlotBoard, PlotBoardTemplate } from '../types';
+import { SavedViewData } from '../views/savedViews';
+
+/* ========= Export Types ========= */
+
+export interface ExportOptions {
+  format: ExportFormat;
+  includeViews?: boolean;
+  includeTemplates?: boolean;
+  includeMetadata?: boolean;
+  includeCards?: boolean;
+  includeSettings?: boolean;
+  compression?: boolean;
+  validate?: boolean;
+}
+
+export enum ExportFormat {
+  JSON = 'json',
+  MARKDOWN = 'markdown',
+  CSV = 'csv',
+  YAML = 'yaml',
+  TEMPLATE = 'template',
+}
+
+export interface ExportResult {
+  success: boolean;
+  data?: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+  metadata: ExportMetadata;
+  errors?: string[];
+  warnings?: string[];
+}
+
+export interface ExportMetadata {
+  exportedAt: string;
+  schemaVersion: string;
+  format: ExportFormat;
+  boardId: string;
+  boardTitle: string;
+  cardsCount: number;
+  columnsCount: number;
+  viewsCount?: number;
+  templatesCount?: number;
+  totalSize: number;
+  checksum: string;
+}
+
+export interface ExportBundle {
+  metadata: ExportMetadata;
+  board: PlotBoard;
+  views?: SavedViewData[];
+  templates?: PlotBoardTemplate[];
+  settings?: any;
+}
+
+/* ========= Export System Class ========= */
+
+export class PlotBoardExportSystem {
+  private generateChecksum(data: string): string {
+    // Simple checksum for data integrity
+    let hash = 0;
+    for (let i = 0; i < data.length; i++) {
+      const char = data.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash).toString(16);
+  }
+
+  private sanitizeFilename(name: string): string {
+    return name
+      .replace(/[^a-z0-9]/gi, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .toLowerCase();
+  }
+
+  /**
+   * Export a complete plot board with all data
+   */
+  async exportBoard(
+    board: PlotBoard,
+    views: SavedViewData[] = [],
+    templates: PlotBoardTemplate[] = [],
+    options: Partial<ExportOptions> = {},
+  ): Promise<ExportResult> {
+    const opts: ExportOptions = {
+      format: ExportFormat.JSON,
+      includeViews: true,
+      includeTemplates: false,
+      includeMetadata: true,
+      includeCards: true,
+      includeSettings: true,
+      compression: false,
+      validate: true,
+      ...options,
+    };
+
+    try {
+      trace('PlotBoardExportSystem', 'Exporting board', {
+        boardId: board.id,
+        format: opts.format,
+        options: opts,
+      });
+
+      let exportData: string;
+      let mimeType: string;
+      let fileExtension: string;
+
+      switch (opts.format) {
+        case ExportFormat.JSON:
+          const result = await this.exportAsJSON(board, views, templates, opts);
+          exportData = result.data;
+          mimeType = result.mimeType;
+          fileExtension = 'json';
+          break;
+
+        case ExportFormat.MARKDOWN:
+          const mdResult = await this.exportAsMarkdown(board, opts);
+          exportData = mdResult.data;
+          mimeType = mdResult.mimeType;
+          fileExtension = 'md';
+          break;
+
+        case ExportFormat.CSV:
+          const csvResult = await this.exportAsCSV(board, opts);
+          exportData = csvResult.data;
+          mimeType = csvResult.mimeType;
+          fileExtension = 'csv';
+          break;
+
+        case ExportFormat.YAML:
+          const yamlResult = await this.exportAsYAML(board, views, templates, opts);
+          exportData = yamlResult.data;
+          mimeType = yamlResult.mimeType;
+          fileExtension = 'yaml';
+          break;
+
+        case ExportFormat.TEMPLATE:
+          const templateResult = await this.exportAsTemplate(board, opts);
+          exportData = templateResult.data;
+          mimeType = templateResult.mimeType;
+          fileExtension = 'json';
+          break;
+
+        default:
+          throw new Error(`Unsupported export format: ${opts.format}`);
+      }
+
+      // Generate metadata
+      const metadata: ExportMetadata = {
+        exportedAt: new Date().toISOString(),
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+        format: opts.format,
+        boardId: board.id,
+        boardTitle: board.title,
+        cardsCount: board.columns.reduce((sum, col) => sum + col.cards.length, 0),
+        columnsCount: board.columns.length,
+        viewsCount: opts.includeViews ? views.length : undefined,
+        templatesCount: opts.includeTemplates ? templates.length : undefined,
+        totalSize: new Blob([exportData]).size,
+        checksum: this.generateChecksum(exportData),
+      };
+
+      // Generate filename
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const safeBoardTitle = this.sanitizeFilename(board.title);
+      const filename = `${safeBoardTitle}-${timestamp}.${fileExtension}`;
+
+      return {
+        success: true,
+        data: exportData,
+        filename,
+        mimeType,
+        size: metadata.totalSize,
+        metadata,
+        errors: [],
+        warnings: [],
+      };
+    } catch (error) {
+      trace('PlotBoardExportSystem', 'Export failed', { error });
+      return {
+        success: false,
+        filename: '',
+        mimeType: '',
+        size: 0,
+        metadata: {
+          exportedAt: new Date().toISOString(),
+          schemaVersion: CURRENT_SCHEMA_VERSION,
+          format: opts.format,
+          boardId: board.id,
+          boardTitle: board.title,
+          cardsCount: 0,
+          columnsCount: 0,
+          totalSize: 0,
+          checksum: '',
+        },
+        errors: [error instanceof Error ? error.message : 'Export failed'],
+      };
+    }
+  }
+
+  /**
+   * Export as JSON format
+   */
+  private async exportAsJSON(
+    board: PlotBoard,
+    views: SavedViewData[],
+    templates: PlotBoardTemplate[],
+    options: ExportOptions,
+  ): Promise<{ data: string; mimeType: string }> {
+    const bundle: ExportBundle = {
+      metadata: {
+        exportedAt: new Date().toISOString(),
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+        format: ExportFormat.JSON,
+        boardId: board.id,
+        boardTitle: board.title,
+        cardsCount: board.columns.reduce((sum, col) => sum + col.cards.length, 0),
+        columnsCount: board.columns.length,
+        viewsCount: options.includeViews ? views.length : undefined,
+        templatesCount: options.includeTemplates ? templates.length : undefined,
+        totalSize: 0,
+        checksum: '',
+      },
+      board: options.includeCards
+        ? board
+        : {
+            ...board,
+            columns: board.columns.map((col) => ({
+              ...col,
+              cards: [], // Exclude cards if requested
+            })),
+          },
+    };
+
+    if (options.includeViews) {
+      bundle.views = views;
+    }
+
+    if (options.includeTemplates) {
+      bundle.templates = templates;
+    }
+
+    if (options.includeSettings) {
+      bundle.settings = {
+        boardSettings: board.settings,
+        columnSettings: board.columns.map((col) => ({
+          columnId: col.id,
+          settings: col.settings,
+        })),
+      };
+    }
+
+    const data = JSON.stringify(bundle, null, 2);
+    bundle.metadata.totalSize = new Blob([data]).size;
+    bundle.metadata.checksum = this.generateChecksum(data);
+
+    return {
+      data: JSON.stringify(bundle, null, 2),
+      mimeType: 'application/json',
+    };
+  }
+
+  /**
+   * Export as Markdown format
+   */
+  private async exportAsMarkdown(
+    board: PlotBoard,
+    options: ExportOptions,
+  ): Promise<{ data: string; mimeType: string }> {
+    let markdown = `# ${board.title}\n\n`;
+
+    if (board.description) {
+      markdown += `${board.description}\n\n`;
+    }
+
+    // Metadata
+    if (options.includeMetadata) {
+      markdown += `## Board Information\n\n`;
+      markdown += `- **Created**: ${board.createdAt.toLocaleDateString()}\n`;
+      markdown += `- **Updated**: ${board.updatedAt.toLocaleDateString()}\n`;
+      markdown += `- **Columns**: ${board.columns.length}\n`;
+      markdown += `- **Total Cards**: ${board.columns.reduce((sum, col) => sum + col.cards.length, 0)}\n`;
+      markdown += `- **Project ID**: ${board.projectId}\n\n`;
+      markdown += `---\n\n`;
+    }
+
+    // Columns and Cards
+    board.columns
+      .sort((a, b) => a.order - b.order)
+      .forEach((column) => {
+        markdown += `## ${column.title}\n\n`;
+
+        if (column.description) {
+          markdown += `*${column.description}*\n\n`;
+        }
+
+        if (options.includeCards && column.cards.length > 0) {
+          column.cards
+            .sort((a, b) => a.order - b.order)
+            .forEach((card) => {
+              markdown += `### ${card.title}\n\n`;
+
+              if (card.description) {
+                markdown += `${card.description}\n\n`;
+              }
+
+              markdown += `- **Status**: ${card.status}\n`;
+              markdown += `- **Priority**: ${card.priority}\n`;
+
+              if (card.tags.length > 0) {
+                markdown += `- **Tags**: ${card.tags.join(', ')}\n`;
+              }
+
+              if (card.wordCount) {
+                markdown += `- **Word Count**: ${card.wordCount}\n`;
+              }
+
+              if (card.notes) {
+                markdown += `\n**Notes**: ${card.notes}\n`;
+              }
+
+              markdown += `\n---\n\n`;
+            });
+        } else if (options.includeCards) {
+          markdown += `*No cards in this column*\n\n`;
+        }
+      });
+
+    return {
+      data: markdown,
+      mimeType: 'text/markdown',
+    };
+  }
+
+  /**
+   * Export as CSV format (cards only)
+   */
+  private async exportAsCSV(
+    board: PlotBoard,
+    options: ExportOptions,
+  ): Promise<{ data: string; mimeType: string }> {
+    const headers = [
+      'Card Title',
+      'Description',
+      'Column',
+      'Status',
+      'Priority',
+      'Tags',
+      'Word Count',
+      'Order',
+      'Created',
+      'Updated',
+      'Scene ID',
+      'Chapter ID',
+      'Notes',
+    ];
+
+    let csv = headers.join(',') + '\n';
+
+    board.columns
+      .sort((a, b) => a.order - b.order)
+      .forEach((column) => {
+        column.cards
+          .sort((a, b) => a.order - b.order)
+          .forEach((card) => {
+            const row = [
+              this.escapeCSV(card.title),
+              this.escapeCSV(card.description || ''),
+              this.escapeCSV(column.title),
+              card.status,
+              card.priority,
+              this.escapeCSV(card.tags.join('; ')),
+              card.wordCount || 0,
+              card.order,
+              card.createdAt.toISOString(),
+              card.updatedAt.toISOString(),
+              card.sceneId || '',
+              card.chapterId || '',
+              this.escapeCSV(card.notes || ''),
+            ];
+            csv += row.join(',') + '\n';
+          });
+      });
+
+    return {
+      data: csv,
+      mimeType: 'text/csv',
+    };
+  }
+
+  /**
+   * Export as YAML format
+   */
+  private async exportAsYAML(
+    board: PlotBoard,
+    views: SavedViewData[],
+    templates: PlotBoardTemplate[],
+    options: ExportOptions,
+  ): Promise<{ data: string; mimeType: string }> {
+    // Simple YAML serialization for board data
+    let yaml = `title: "${board.title}"\n`;
+    yaml += `id: "${board.id}"\n`;
+    yaml += `project_id: "${board.projectId}"\n`;
+    yaml += `created_at: "${board.createdAt.toISOString()}"\n`;
+    yaml += `updated_at: "${board.updatedAt.toISOString()}"\n\n`;
+
+    if (board.description) {
+      yaml += `description: "${board.description}"\n\n`;
+    }
+
+    yaml += `columns:\n`;
+    board.columns
+      .sort((a, b) => a.order - b.order)
+      .forEach((column) => {
+        yaml += `  - title: "${column.title}"\n`;
+        yaml += `    id: "${column.id}"\n`;
+        yaml += `    type: "${column.type}"\n`;
+        yaml += `    color: "${column.color}"\n`;
+        yaml += `    order: ${column.order}\n`;
+
+        if (column.description) {
+          yaml += `    description: "${column.description}"\n`;
+        }
+
+        if (options.includeCards && column.cards.length > 0) {
+          yaml += `    cards:\n`;
+          column.cards
+            .sort((a, b) => a.order - b.order)
+            .forEach((card) => {
+              yaml += `      - title: "${card.title}"\n`;
+              yaml += `        id: "${card.id}"\n`;
+              yaml += `        status: "${card.status}"\n`;
+              yaml += `        priority: "${card.priority}"\n`;
+              yaml += `        order: ${card.order}\n`;
+
+              if (card.description) {
+                yaml += `        description: "${card.description}"\n`;
+              }
+
+              if (card.tags.length > 0) {
+                yaml += `        tags: [${card.tags.map((tag) => `"${tag}"`).join(', ')}]\n`;
+              }
+
+              if (card.wordCount) {
+                yaml += `        word_count: ${card.wordCount}\n`;
+              }
+            });
+        }
+      });
+
+    return {
+      data: yaml,
+      mimeType: 'application/x-yaml',
+    };
+  }
+
+  /**
+   * Export as reusable template
+   */
+  private async exportAsTemplate(
+    board: PlotBoard,
+    options: ExportOptions,
+  ): Promise<{ data: string; mimeType: string }> {
+    const template: PlotBoardTemplate = {
+      id: `template_${Date.now()}`,
+      name: `${board.title} Template`,
+      description: board.description || `Template created from ${board.title}`,
+      category: 'custom' as any,
+      tags: ['custom', 'exported'],
+      isBuiltIn: false,
+      columns: board.columns.map((column) => ({
+        title: column.title,
+        description: column.description || '',
+        type: column.type,
+        color: column.color,
+        order: column.order,
+        defaultCards: options.includeCards
+          ? column.cards.map((card) => ({
+              title: card.title,
+              description: card.description || '',
+              status: card.status,
+              priority: card.priority,
+              tags: card.tags,
+            }))
+          : [],
+      })),
+    };
+
+    return {
+      data: JSON.stringify(template, null, 2),
+      mimeType: 'application/json',
+    };
+  }
+
+  /**
+   * Utility: Escape CSV values
+   */
+  private escapeCSV(value: string): string {
+    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+      return `"${value.replace(/"/g, '""')}"`;
+    }
+    return value;
+  }
+
+  /**
+   * Download exported data
+   */
+  async downloadExport(exportResult: ExportResult): Promise<void> {
+    if (!exportResult.success || !exportResult.data) {
+      throw new Error('Export failed - no data to download');
+    }
+
+    try {
+      const blob = new Blob([exportResult.data], { type: exportResult.mimeType });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = exportResult.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Cleanup
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      trace('PlotBoardExportSystem', 'Download initiated', {
+        filename: exportResult.filename,
+        size: exportResult.size,
+      });
+    } catch (error) {
+      trace('PlotBoardExportSystem', 'Download failed', { error });
+      throw new Error(`Download failed: ${error}`);
+    }
+  }
+
+  /**
+   * Validate export data integrity
+   */
+  validateExport(exportResult: ExportResult): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    if (!exportResult.data) {
+      errors.push('Export data is empty');
+    }
+
+    if (!exportResult.metadata) {
+      errors.push('Export metadata is missing');
+    }
+
+    if (exportResult.metadata) {
+      // Verify checksum
+      const calculatedChecksum = this.generateChecksum(exportResult.data || '');
+      if (calculatedChecksum !== exportResult.metadata.checksum) {
+        errors.push('Data integrity check failed - checksum mismatch');
+      }
+
+      // Verify size
+      const actualSize = new Blob([exportResult.data || '']).size;
+      if (actualSize !== exportResult.metadata.totalSize) {
+        errors.push('Size mismatch in export metadata');
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+    };
+  }
+}
+
+// Export singleton instance
+export const plotBoardExportSystem = new PlotBoardExportSystem();

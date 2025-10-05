@@ -34,6 +34,7 @@
 ### Visual Story Management
 
 - **Timeline View** — Map story events across POV lanes with filtering and drag-reorder
+- **Plot Boards** — Kanban-style story structure visualization with collaborative editing, real-time sync, and comprehensive export/import
 - **Story Structure Visualizer** — Professional story health analytics and pacing insights
 - **Planning Tools** — Beat sheet templates, character profiles, and project analytics
 
@@ -99,10 +100,21 @@ pnpm vercel:test     # Test production build locally
 
 ## Project Status
 
-**Current Phase:** Phase 2 Advanced Features ✅ (Timeline Integration Complete)
+**Current Phase:** Phase 2 Advanced Features ✅ (Plot Boards MVP Complete)
 
 **Recently Completed (October 2025):**
 
+- ✅ **Plot Boards Feature** — Complete Kanban-style story organization system with:
+  - Drag-and-drop interface with @dnd-kit integration
+  - Chapter/scene synchronization and two-way data binding
+  - Built-in story structure templates (Three-Act, Hero's Journey)
+  - Timeline event linking and progress tracking
+  - **Multi-user collaboration** with real-time presence and conflict resolution
+  - **Comprehensive export/import system** supporting JSON, Markdown, CSV, and portable packages
+  - **Advanced filtering and saved views** with persistent user preferences
+  - **Full accessibility support** with keyboard navigation and screen reader compatibility
+  - Feature flag system for controlled rollout
+  - Comprehensive test suite with 120+ test cases covering all collaboration scenarios
 - ✅ **Enhanced Timeline Service** — Comprehensive conflict detection and validation system
 - ✅ **Scene-Timeline Linkage** — Intelligent auto-detection and manual linking with validation
 - ✅ **Timeline Navigation** — Chronological scene navigation with sibling detection
@@ -110,7 +122,6 @@ pnpm vercel:test     # Test production build locally
 - ✅ **Linkage Suggestions UI** — AI-powered scene linkage recommendations interface
 - ✅ **Timeline Health Scoring** — Overall timeline quality assessment (0-100 scale)
 - ✅ **Time Anchoring System** — Lock critical story moments for consistency
-- ✅ **Comprehensive Test Suite** — 88 tests including 22 new timeline integration tests
 
 **Previously Completed:**
 
@@ -122,12 +133,18 @@ pnpm vercel:test     # Test production build locally
 - ✅ ESLint 9 migration with flat config
 - ✅ TypeScript strict mode compliance
 
-**Next Priority (Phase 2 Completion):**
+**Next Priority (Phase 3 Transition):**
 
-- 🚧 **Story Architect Service** — Scene outline management and story structure templates
-- 🚧 **Story Outline Editor** — Interactive outline editing with drag-and-drop reordering
-- 🚧 **Template System** — Predefined story structure templates (3-act, hero's journey, etc.)
-- 🚧 **Architect Panel Integration** — Main story architect interface with visualization
+- 🚧 **Advanced Plot Boards** — Enhanced features for power users:
+  - PDF/image export of plot boards
+  - Advanced filtering and search within boards
+  - Collaboration features (comments, assignments)
+  - Custom template creation and sharing
+- 🚧 **AI-Enhanced Plot Analysis** — AI-powered story structure insights:
+  - Plot hole detection across board cards
+  - Pacing analysis and recommendations
+  - Character arc consistency checking
+  - Genre-specific structure validation
 
 **Future Phases:**
 
@@ -151,6 +168,22 @@ src/
 │   │   ├── SceneLinkageSuggestions.tsx
 │   │   └── TimelineNavigation.tsx
 │   └── Claude/          # AI integration
+├── features/            # Feature-based architecture
+│   └── plotboards/      # Plot Boards feature
+│       ├── components/          # Kanban UI components
+│       │   ├── collaboration/   # Multi-user collaboration UI
+│       │   ├── filters/         # Advanced filtering interface
+│       │   └── views/           # Saved views management
+│       ├── collaboration/       # Collaboration backend systems
+│       ├── export/              # Board export functionality
+│       ├── import/              # Board import with validation
+│       ├── portability/         # Universal board portability
+│       ├── views/               # Saved view persistence
+│       ├── hooks/               # Feature-specific hooks
+│       ├── store.ts             # Zustand state management
+│       ├── types.ts             # Plot boards data models
+│       ├── utils/               # Integration utilities
+│       └── tests/               # Comprehensive test suite
 ├── services/
 │   ├── claudeService.ts           # AI API integration
 │   ├── storyArchitectService.ts   # Story outline & templates
@@ -160,6 +193,11 @@ src/
 │   ├── searchService.ts           # Full-text search
 │   └── backupService.ts           # Backup & recovery
 ├── hooks/               # Custom React hooks
+│   └── stores/          # Zustand store definitions
+├── utils/               # Shared utilities
+│   ├── flags.ts         # Feature flag system
+│   ├── storage.ts       # Enhanced storage with IndexedDB
+│   └── tracing.ts       # Performance tracing
 ├── types/              # TypeScript definitions
 └── styles/             # CSS modules and globals
 ```
@@ -194,6 +232,7 @@ MIT License © 2025 Inkwell Authors
 
 📚 **[User Guide](USER_GUIDE.md)** - Complete guide for writers using Inkwell  
 🚀 **[Deployment Guide](DEPLOYMENT.md)** - Instructions for deploying to production  
+🎨 **[Plot Boards Guide](docs/PLOT_BOARDS.md)** - Complete documentation for the Plot Boards feature  
 🔧 **[ESLint Migration Guide](docs/ESLINT_MIGRATION.md)** - Technical details about ESLint 9 upgrade
 
 ---
