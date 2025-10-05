@@ -8,9 +8,11 @@ This guide covers deploying Inkwell to production environments.
 
 **Prerequisites:**
 
-- Node.js 20+ and pnpm installed
+- Node.js 20.11+ and pnpm 9+ installed
 - Vercel account
 - Git repository
+
+**Note:** Inkwell now uses ESLint 9 with flat config. Ensure your development environment supports modern tooling.
 
 **Steps:**
 
@@ -229,6 +231,27 @@ npx vite-bundle-analyzer dist
 
 # Check gzip sizes
 find dist -name "*.js" -exec gzip -9 -c {} \; | wc -c
+```
+
+#### ESLint Parsing Errors
+
+**Common Issues:**
+
+- "Declaration or statement expected" - Usually caused by module declaration formatting
+- ESLint flat config not recognized - Ensure ESLint 9+ is installed
+- Plugin compatibility issues - Check plugin versions for ESLint 9 support
+
+**Solutions:**
+
+```bash
+# Check ESLint version
+npx eslint --version  # Should be 9.x
+
+# Run with relaxed rules for deployment
+pnpm lint:relaxed
+
+# Update dependencies if needed
+pnpm add -D eslint@^9 @typescript-eslint/parser@^8 @typescript-eslint/eslint-plugin@^8
 ```
 
 ### Error Monitoring

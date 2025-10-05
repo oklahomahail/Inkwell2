@@ -67,15 +67,23 @@ pnpm dev
 ### Development Commands
 
 ```bash
+# Development
 pnpm dev          # Start dev server
 pnpm build        # Production build
-pnpm preview      # Preview build
-pnpm typecheck    # Type checking
-pnpm lint         # ESLint check
-pnpm test:run     # Run tests
+pnpm preview      # Preview build locally
+
+# Code Quality
+pnpm typecheck    # TypeScript type checking
+pnpm lint         # ESLint check (strict)
+pnpm lint:relaxed # ESLint with warnings only
+pnpm lint:fix     # Auto-fix ESLint issues
+pnpm test         # Run tests in watch mode
+pnpm test:run     # Run tests once
+pnpm test:coverage # Run tests with coverage
 
 # Deployment
 ./scripts/deploy.sh  # Complete deployment pipeline
+pnpm vercel:test     # Test production build locally
 ```
 
 ---
@@ -91,6 +99,9 @@ pnpm test:run     # Run tests
 - ✅ Visual Timeline with POV lanes
 - ✅ Enhanced Focus Mode baseline
 - ✅ Professional export system
+- ✅ ESLint 9 migration with flat config
+- ✅ Deployment pipeline improvements
+- ✅ TypeScript strict mode compliance
 
 **In Progress:**
 
@@ -154,7 +165,8 @@ MIT License © 2025 Inkwell Authors
 ## Documentation
 
 📚 **[User Guide](USER_GUIDE.md)** - Complete guide for writers using Inkwell  
-🚀 **[Deployment Guide](DEPLOYMENT.md)** - Instructions for deploying to production
+🚀 **[Deployment Guide](DEPLOYMENT.md)** - Instructions for deploying to production  
+🔧 **[ESLint Migration Guide](docs/ESLINT_MIGRATION.md)** - Technical details about ESLint 9 upgrade
 
 ---
 
