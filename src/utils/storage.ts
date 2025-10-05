@@ -298,6 +298,23 @@ class StorageManager {
 
     await this.transact(operations);
   }
+
+  // Compatibility methods for localStorage-like API
+  async getItem<T>(key: string): Promise<T | null> {
+    return this.get<T>(key);
+  }
+
+  async setItem<T>(key: string, value: T): Promise<void> {
+    return this.put(key, value);
+  }
+
+  async removeItem(key: string): Promise<void> {
+    return this.delete(key);
+  }
+
+  async getAllKeys(): Promise<string[]> {
+    return this.list();
+  }
 }
 
 /* ========= Singleton Instance ========= */

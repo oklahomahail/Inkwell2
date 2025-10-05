@@ -149,7 +149,7 @@ export class SchemaVersionManager {
     options?: MigrationOptions,
   ): Promise<MigrationResult<VersionedData<T>>> {
     const startTime = Date.now();
-    trace('SchemaVersionManager', 'Starting migration', {
+    trace.log('Starting migration', 'user_action', 'info', {
       currentVersion: CURRENT_SCHEMA_VERSION,
       dataVersion: this.getDataVersion(data),
     });
@@ -227,7 +227,7 @@ export class SchemaVersionManager {
       const finalData = this.wrapInVersionedData(currentData as T, migrationHistory);
       const duration = Date.now() - startTime;
 
-      trace('SchemaVersionManager', 'Migration completed', {
+      trace.log('Migration completed', 'user_action', 'info', {
         duration: `${duration}ms`,
         warnings: allWarnings.length,
         errors: allErrors.length,
@@ -241,7 +241,7 @@ export class SchemaVersionManager {
         success: allErrors.length === 0,
       };
     } catch (error) {
-      trace('SchemaVersionManager', 'Migration failed', error);
+      trace.log('Migration failed', 'user_action', 'error', { error });
       return {
         data: this.wrapInVersionedData(data as T),
         warnings: [],

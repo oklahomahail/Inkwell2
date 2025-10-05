@@ -5,7 +5,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock trace utility
 vi.mock('../../../utils/trace', () => ({
-  trace: vi.fn(),
+  trace: {
+    log: vi.fn(),
+    start: vi.fn().mockReturnValue('mock-trace-id'),
+    end: vi.fn(),
+  },
 }));
 import { PlotCardFilterEngine, PRESET_FILTERS } from '../filters/filtering';
 import { schemaVersionManager } from '../schema/versioning';

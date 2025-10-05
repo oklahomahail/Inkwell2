@@ -118,7 +118,7 @@ export class PlotBoardImportSystem {
     };
 
     try {
-      trace('PlotBoardImportSystem', 'Starting import', { options: opts });
+      trace.log('Starting import', 'user_action', 'info', { options: opts });
 
       // Parse data
       const bundle = typeof data === 'string' ? this.parseImportData(data) : data;
@@ -167,7 +167,7 @@ export class PlotBoardImportSystem {
         },
       };
     } catch (error) {
-      trace('PlotBoardImportSystem', 'Import failed', { error });
+      trace.log('Import failed', 'user_action', 'error', { error });
       return {
         success: false,
         errors: [error instanceof Error ? error.message : 'Import failed'],
@@ -295,7 +295,7 @@ export class PlotBoardImportSystem {
 
       return null;
     } catch (error) {
-      trace('PlotBoardImportSystem', 'Failed to parse import data', { error });
+      trace.log('Failed to parse import data', 'user_action', 'error', { error });
       return null;
     }
   }

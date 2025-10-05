@@ -6,16 +6,20 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import React, { useState } from 'react';
 
 import { usePlotBoardStore } from '../store';
-import { PlotColumn as PlotColumnType, PlotCard as PlotCardType, PlotColumnType } from '../types';
+import {
+  PlotColumn as PlotColumnInterface,
+  PlotCard as PlotCardType,
+  PlotColumnType,
+} from '../types';
 
 import { PlotCard } from './PlotCard';
 
 interface PlotColumnProps {
-  column: PlotColumnType;
+  column: PlotColumnInterface;
   cards: PlotCardType[];
   onEditCard?: (card: PlotCardType) => void;
   onAddCard?: (columnId: string) => void;
-  onEditColumn?: (column: PlotColumnType) => void;
+  onEditColumn?: (column: PlotColumnInterface) => void;
   onDeleteColumn?: (columnId: string) => void;
   showSceneLinks?: boolean;
   showTimeline?: boolean;

@@ -129,7 +129,7 @@ export class PlotBoardPortabilitySystem {
     };
 
     try {
-      trace('PlotBoardPortabilitySystem', 'Creating portable package', {
+      trace.log('Creating portable package', 'user_action', 'info', {
         boardCount: boards.length,
         options: opts,
       });
@@ -169,14 +169,14 @@ export class PlotBoardPortabilitySystem {
         integrity: integrityInfo,
       };
 
-      trace('PlotBoardPortabilitySystem', 'Portable package created', {
+      trace.log('Portable package created', 'user_action', 'info', {
         packageId,
         itemCounts: integrityInfo.itemCounts,
       });
 
       return portablePackage;
     } catch (error) {
-      trace('PlotBoardPortabilitySystem', 'Failed to create portable package', { error });
+      trace.log('Failed to create portable package', 'user_action', 'error', { error });
       throw new Error(
         `Failed to create portable package: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -208,7 +208,7 @@ export class PlotBoardPortabilitySystem {
 
       const checksum = this.calculateChecksum(data);
 
-      trace('PlotBoardPortabilitySystem', 'Portable package exported', {
+      trace.log('Portable package exported', 'user_action', 'info', {
         filename: finalFilename,
         size: blob.size,
         checksum,
@@ -220,7 +220,7 @@ export class PlotBoardPortabilitySystem {
         checksum,
       };
     } catch (error) {
-      trace('PlotBoardPortabilitySystem', 'Export failed', { error });
+      trace.log('Export failed', 'user_action', 'error', { error });
       throw new Error(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -236,14 +236,14 @@ export class PlotBoardPortabilitySystem {
       // Validate package format
       await this.validatePortablePackage(portablePackage);
 
-      trace('PlotBoardPortabilitySystem', 'Portable package imported', {
+      trace.log('Portable package imported', 'user_action', 'info', {
         packageId: portablePackage.metadata.packageId,
         version: portablePackage.version,
       });
 
       return portablePackage;
     } catch (error) {
-      trace('PlotBoardPortabilitySystem', 'Import failed', { error });
+      trace.log('Import failed', 'user_action', 'error', { error });
       throw new Error(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -264,7 +264,7 @@ export class PlotBoardPortabilitySystem {
     };
 
     try {
-      trace('PlotBoardPortabilitySystem', 'Starting restore from portable package', {
+      trace.log('Starting restore from portable package', 'user_action', 'info', {
         packageId: portablePackage.metadata.packageId,
         options: opts,
       });
@@ -342,7 +342,7 @@ export class PlotBoardPortabilitySystem {
       // Restore templates (would need integration with template system)
       restored.templates = portablePackage.data.templates.length;
 
-      trace('PlotBoardPortabilitySystem', 'Restore completed', {
+      trace.log('Restore completed', 'user_action', 'info', {
         restored,
         errors: errors.length,
         warnings: warnings.length,
@@ -357,7 +357,7 @@ export class PlotBoardPortabilitySystem {
         conflicts: conflicts.length > 0 ? conflicts : undefined,
       };
     } catch (error) {
-      trace('PlotBoardPortabilitySystem', 'Restore failed', { error });
+      trace.log('Restore failed', 'user_action', 'error', { error });
       return {
         success: false,
         restored: { boards: 0, views: 0, templates: 0 },

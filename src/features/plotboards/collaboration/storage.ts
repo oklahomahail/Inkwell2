@@ -91,7 +91,7 @@ export class LocalCollaborationStorage implements CollaborationStorageAdapter {
       const item = localStorage.getItem(this.getStorageKey(key));
       return item ? JSON.parse(item) : null;
     } catch (error) {
-      trace('LocalCollaborationStorage', 'Failed to get item', { key, error });
+      trace.log('Failed to get item', 'store_action', 'error', { key, error });
       return null;
     }
   }
@@ -100,7 +100,7 @@ export class LocalCollaborationStorage implements CollaborationStorageAdapter {
     try {
       localStorage.setItem(this.getStorageKey(key), JSON.stringify(value));
     } catch (error) {
-      trace('LocalCollaborationStorage', 'Failed to set item', { key, error });
+      trace.log('Failed to set item', 'store_action', 'error', { key, error });
       throw error;
     }
   }
@@ -109,7 +109,7 @@ export class LocalCollaborationStorage implements CollaborationStorageAdapter {
     try {
       localStorage.removeItem(this.getStorageKey(key));
     } catch (error) {
-      trace('LocalCollaborationStorage', 'Failed to remove item', { key, error });
+      trace.log('Failed to remove item', 'store_action', 'error', { key, error });
     }
   }
 
@@ -239,11 +239,11 @@ export class LocalCollaborationStorage implements CollaborationStorageAdapter {
       try {
         callback(event);
       } catch (error) {
-        trace('LocalCollaborationStorage', 'Event callback error', { error });
+        trace.log('Event callback error', 'store_action', 'error', { error });
       }
     });
 
-    trace('LocalCollaborationStorage', 'Event published', {
+    trace.log('Event published', 'store_action', 'info', {
       eventType: event.type,
       boardId: event.boardId,
     });
@@ -313,11 +313,11 @@ export class LocalCollaborationStorage implements CollaborationStorageAdapter {
   async applyOperations(operations: Operation[]): Promise<void> {
     // This would integrate with the plot board store to apply operations
     // For now, just log the operations
-    trace('LocalCollaborationStorage', 'Applying operations', { count: operations.length });
+    trace.log('Applying operations', 'store_action', 'info', { count: operations.length });
 
     for (const operation of operations) {
       // In a real implementation, this would apply the operation to the board state
-      trace('LocalCollaborationStorage', 'Operation applied', {
+      trace.log('Operation applied', 'store_action', 'debug', {
         type: operation.type,
         targetId: operation.targetId,
       });
@@ -585,9 +585,9 @@ export class CollaborationManager {
         await this.storage.publishEvent(event);
       }
 
-      trace('CollaborationManager', 'Event queue processed', { count: events.length });
+      trace.log('Event queue processed', 'store_action', 'info', { count: events.length });
     } catch (error) {
-      trace('CollaborationManager', 'Failed to process event queue', { error });
+      trace.log('Failed to process event queue', 'store_action', 'error', { error });
       // Re-queue events for retry (up to limit)
       if (this.eventQueue.length < this.syncOptions.offlineQueueLimit) {
         this.eventQueue.unshift(...this.eventQueue);

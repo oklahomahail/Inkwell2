@@ -104,7 +104,7 @@ export class PlotBoardExportSystem {
     };
 
     try {
-      trace('PlotBoardExportSystem', 'Exporting board', {
+      trace.log('Exporting board', 'user_action', 'info', {
         boardId: board.id,
         format: opts.format,
         options: opts,
@@ -185,7 +185,7 @@ export class PlotBoardExportSystem {
         warnings: [],
       };
     } catch (error) {
-      trace('PlotBoardExportSystem', 'Export failed', { error });
+      trace.log('Export failed', 'user_action', 'error', { error });
       return {
         success: false,
         filename: '',
@@ -533,12 +533,12 @@ export class PlotBoardExportSystem {
       // Cleanup
       setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-      trace('PlotBoardExportSystem', 'Download initiated', {
+      trace.log('Download initiated', 'user_action', 'info', {
         filename: exportResult.filename,
         size: exportResult.size,
       });
     } catch (error) {
-      trace('PlotBoardExportSystem', 'Download failed', { error });
+      trace.log('Download failed', 'user_action', 'error', { error });
       throw new Error(`Download failed: ${error}`);
     }
   }

@@ -58,7 +58,7 @@ export const HealthCheck: React.FC = () => {
   };
 
   const allPassed = healthStatuses.every((status) => status.status === 'success');
-  const anyFailed = healthStatuses.some((status) => status.status === 'error');
+  const _anyFailed = healthStatuses.some((status) => status.status === 'error');
   const allCompleted = healthStatuses.every((status) => status.status !== 'loading');
 
   return (

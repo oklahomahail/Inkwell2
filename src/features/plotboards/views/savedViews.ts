@@ -211,12 +211,12 @@ export class SavedViewManager {
   setCurrentView(viewId: string): boolean {
     const view = this.getView(viewId);
     if (!view) {
-      trace('SavedViewManager', 'View not found', { viewId });
+      trace.log('View not found', 'user_action', 'warn', { viewId });
       return false;
     }
 
     this.currentViewId = viewId;
-    trace('SavedViewManager', 'Current view changed', { viewId, viewName: view.view.name });
+    trace.log('Current view changed', 'user_action', 'info', { viewId, viewName: view.view.name });
     return true;
   }
 
@@ -272,7 +272,7 @@ export class SavedViewManager {
       await this.saveToStorage();
     }
 
-    trace('SavedViewManager', 'View created', { viewId, name });
+    trace.log('View created', 'user_action', 'info', { viewId, name });
     return viewId;
   }
 
@@ -292,7 +292,7 @@ export class SavedViewManager {
   ): Promise<boolean> {
     const existingView = this.views.get(viewId);
     if (!existingView) {
-      trace('SavedViewManager', 'View not found for update', { viewId });
+      trace.log('View not found for update', 'user_action', 'warn', { viewId });
       return false;
     }
 
@@ -334,7 +334,7 @@ export class SavedViewManager {
       await this.saveToStorage();
     }
 
-    trace('SavedViewManager', 'View updated', { viewId, updates: Object.keys(updates) });
+    trace.log('View updated', 'user_action', 'info', { viewId, updates: Object.keys(updates) });
     return true;
   }
 
@@ -344,7 +344,7 @@ export class SavedViewManager {
   async deleteView(viewId: string): Promise<boolean> {
     const view = this.views.get(viewId);
     if (!view) {
-      trace('SavedViewManager', 'View not found for deletion', { viewId });
+      trace.log('View not found for deletion', 'user_action', 'warn', { viewId });
       return false;
     }
 
@@ -363,7 +363,7 @@ export class SavedViewManager {
       await this.saveToStorage();
     }
 
-    trace('SavedViewManager', 'View deleted', { viewId });
+    trace.log('View deleted', 'user_action', 'info', { viewId });
     return true;
   }
 
@@ -550,9 +550,9 @@ export class SavedViewManager {
       };
 
       localStorage.setItem(this.options.storageKey, JSON.stringify(storageData));
-      trace('SavedViewManager', 'Views saved to storage', { count: customViews.length });
+      trace.log('Views saved to storage', 'store_action', 'debug', { count: customViews.length });
     } catch (error) {
-      trace('SavedViewManager', 'Failed to save views to storage', error);
+      trace.log('Failed to save views to storage', 'store_action', 'error', { error });
     }
   }
 
@@ -566,7 +566,7 @@ export class SavedViewManager {
 
       const parsed = JSON.parse(storedData);
       if (parsed.boardId !== this.boardId) {
-        trace('SavedViewManager', 'Storage data for different board', {
+        trace.log('Storage data for different board', 'store_action', 'warn', {
           storedBoardId: parsed.boardId,
           currentBoardId: this.boardId,
         });
@@ -585,12 +585,12 @@ export class SavedViewManager {
         this.currentViewId = parsed.currentViewId;
       }
 
-      trace('SavedViewManager', 'Views loaded from storage', {
+      trace.log('Views loaded from storage', 'store_action', 'debug', {
         count: parsed.views?.length || 0,
         currentViewId: this.currentViewId,
       });
     } catch (error) {
-      trace('SavedViewManager', 'Failed to load views from storage', error);
+      trace.log('Failed to load views from storage', 'store_action', 'error', { error });
     }
   }
 
@@ -612,6 +612,8 @@ export class SavedViewManager {
       await this.saveToStorage();
     }
 
-    trace('SavedViewManager', 'Reset to defaults', { removedCustomViews: customViewIds.length });
+    trace.log('Reset to defaults', 'user_action', 'info', {
+      removedCustomViews: customViewIds.length,
+    });
   }
 }

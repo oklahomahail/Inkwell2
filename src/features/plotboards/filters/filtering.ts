@@ -106,7 +106,7 @@ export class PlotCardFilterEngine {
    */
   filterCards(cards: PlotCard[]): FilterResult<PlotCard> {
     const startTime = performance.now();
-    trace('PlotCardFilterEngine', 'Starting card filtering', {
+    trace.log('Starting card filtering', 'performance', 'debug', {
       totalCards: cards.length,
       filtersActive: !this.isEmpty(),
     });
@@ -191,7 +191,7 @@ export class PlotCardFilterEngine {
     const endTime = performance.now();
     const duration = endTime - startTime;
 
-    trace('PlotCardFilterEngine', 'Card filtering completed', {
+    trace.log('Card filtering completed', 'performance', 'debug', {
       originalCount: cards.length,
       filteredCount: filteredCards.length,
       duration: `${duration.toFixed(2)}ms`,
