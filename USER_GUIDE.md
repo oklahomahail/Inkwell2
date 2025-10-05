@@ -76,16 +76,37 @@ To unlock AI-powered writing features:
 
 ## 🎨 Core Features
 
-### Dashboard Overview
+### Professional Dashboard
 
-The **Dashboard** is your command center:
+The **Enhanced Dashboard** is your project command center with a modern, professional interface:
 
-- **Recent Projects**: Quick access to your stories
-- **Writing Statistics**: Daily word counts and progress
-- **Quick Actions**: Create projects, import files, export work
-- **Writing Goals**: Set and track daily targets
+- **Welcome Section**: Onboarding for new users with guided setup
+- **Quick Actions**: Create new project, import files, view recent work
+- **Project Overview**: Beautiful project cards with statistics and actions
+- **Writing Statistics**: Real-time word counts, daily progress, and streak tracking
+- **Recent Projects**: Quick access to your most recently worked on stories
+- **Empty States**: Helpful guidance when you're just getting started
 
-### Navigation
+### Professional Main Layout
+
+Inkwell now features a **collapsible sidebar** and enhanced navigation:
+
+**Sidebar Features**:
+
+- **Collapsible Design**: Click the hamburger menu (☰) to toggle sidebar
+- **Project Selector**: Switch between projects with dropdown menu
+- **View Navigation**: Dashboard, Writing, Timeline, Analysis tabs
+- **Settings Access**: Quick access to preferences and configuration
+- **Dark Mode Toggle**: Switch between light and dark themes
+
+**Header Features**:
+
+- **Project Name**: Shows currently selected project
+- **View Breadcrumb**: Current section and context
+- **Quick Actions**: Export, settings, help access
+- **User Status**: Writing statistics and session info
+
+### Navigation & Keyboard Shortcuts
 
 | Shortcut                       | Action                  |
 | ------------------------------ | ----------------------- |
@@ -94,6 +115,9 @@ The **Dashboard** is your command center:
 | **⌘2**                         | Switch to Writing       |
 | **⌘3**                         | Switch to Timeline      |
 | **⌘4**                         | Switch to Analysis      |
+| **⌘\\**                        | Toggle Sidebar          |
+| **⌘D**                         | Toggle Dark Mode        |
+| **F11**                        | Enter Focus Mode        |
 | **?**                          | Show keyboard shortcuts |
 
 ---
@@ -189,15 +213,32 @@ Access via **Settings** → **Project Settings**:
 
 ## ✍️ Writing Tools
 
-### The Writing Editor
+### Enhanced Writing Editor
 
-**Features**:
+**Core Features**:
 
-- **Rich Text Editor**: Bold, italics, formatting
-- **Auto-save**: Changes saved automatically
-- **Word Count**: Live tracking in status bar
-- **Focus Mode**: Distraction-free environment
-- **Typewriter Mode**: Text centers as you write
+- **Rich Text Editor**: Bold, italics, formatting with TipTap
+- **Auto-save**: Changes saved automatically with visual indicators
+- **Real-time Statistics**: Live word count, reading time, character count
+- **Writing Progress**: Daily goal tracking and session statistics
+- **Professional UI**: Clean, distraction-free interface
+
+**Enhanced Writing Panel Features**:
+
+- **Auto-save Indicator**: Visual feedback when content is being saved
+- **Manual Save Button**: Explicit save option with confirmation
+- **Writing Statistics Bar**: Real-time metrics display
+- **Focus Mode Toggle**: Quick access to distraction-free writing
+- **Fullscreen Mode**: Maximize writing area for deep focus
+- **Session Timer**: Track your writing session duration
+- **Daily Goal Progress**: Visual progress toward writing targets
+
+**Empty State Experience**:
+
+- **Friendly Welcome**: Encouraging message for new projects
+- **Writing Tips**: Helpful suggestions to get started
+- **Quick Actions**: Easy navigation back to dashboard
+- **Motivational Prompts**: Inspiring quotes and writing advice
 
 ### Scene Management
 
@@ -215,23 +256,27 @@ Access via **Settings** → **Project Settings**:
 - **Split Scene**: Divide long scenes
 - **Merge Scenes**: Combine short scenes
 
-### Focus Mode
+### Enhanced Focus Mode
 
-**Distraction-Free Writing**:
+**Professional Focus Experience**:
 
-1. Click **Focus Mode** icon (🎯) in writing toolbar
-2. Choose focus level:
-   - **Minimal**: Hide sidebars only
-   - **Immersive**: Full-screen writing
-   - **Typewriter**: Centered text with highlighting
-3. Exit with **Escape** key or **Exit Focus** button
+1. Click **Focus Mode** button in the writing panel toolbar
+2. Or use keyboard shortcut **F11** for instant focus
+3. Choose from enhanced focus options:
+   - **Minimal Focus**: Hide sidebar, keep statistics visible
+   - **Immersive Mode**: Full-screen writing with minimal UI
+   - **Deep Focus**: Maximum distraction elimination
+4. Exit with **Escape** key, **F11**, or **Exit Focus** button
 
-**Focus Mode Features**:
+**Enhanced Focus Features**:
 
-- **Session Timer**: Track writing sessions
-- **Sprint Mode**: Timed writing sessions
-- **Goal Tracking**: Words per session
-- **Ambient Sounds**: Optional background audio
+- **Session Timer**: Automatic tracking of focused writing time
+- **Real-time Statistics**: Word count updates without breaking focus
+- **Goal Progress**: Visual indication of daily target progress
+- **Auto-save Indicators**: Non-intrusive save status updates
+- **Smooth Transitions**: Professional animations entering/exiting focus
+- **Keyboard Navigation**: Full functionality without mouse
+- **Writing Flow**: Optimized for continuous writing without interruption
 
 ### Timeline View
 
@@ -445,9 +490,34 @@ Press **⌘K** (Mac) or **Ctrl+K** (PC) for quick actions:
 | New Scene  | ⌘N  | Ctrl+N |
 | Focus Mode | ⌘F  | F11    |
 
-### Custom Themes
+### Professional Design System
 
-**Coming Soon**: Dark mode, custom fonts, and color schemes.
+**Inkwell 1.0.3** features a comprehensive design system with:
+
+**Theming**:
+
+- **Light Theme**: Clean, professional light interface
+- **Dark Theme**: Easy-on-the-eyes dark mode for extended writing sessions
+- **Automatic Detection**: Respects your system's theme preference
+- **Manual Toggle**: Click the theme toggle in the sidebar or use **⌘D**
+
+**Typography**:
+
+- **Reading-Optimized Fonts**: Carefully selected typefaces for long-form reading
+- **Consistent Hierarchy**: Clear visual hierarchy across all interface elements
+- **Scalable Text**: Adjusts beautifully across different screen sizes
+
+**Professional Color Palette**:
+
+- **Semantic Colors**: Consistent use of colors with meaning (success, warning, info)
+- **Accessible Contrast**: WCAG-compliant color ratios for readability
+- **Brand Consistency**: Cohesive color scheme throughout the application
+
+**Responsive Design**:
+
+- **Mobile-First**: Optimized for phones and tablets
+- **Desktop Enhanced**: Takes advantage of larger screens
+- **Flexible Layouts**: Adapts to any screen size seamlessly
 
 ---
 

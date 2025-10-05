@@ -212,7 +212,29 @@ export function NavProvider({ children, initialState = {} }: NavProviderProps) {
 export function useNavigation(): NavContextValue {
   const context = useContext(NavContext);
   if (!context) {
-    throw new Error('useNavigation must be used within a NavProvider');
+    // Fail-soft in production so UI doesn't white-screen
+    if (import.meta.env.DEV) {
+      // Keep the throw in dev to catch mistakes early
+      throw new Error('useNavigation must be used within a NavProvider');
+    } else {
+      console.warn(
+        '[navigation] useNavigation used without NavProvider. Returning no-op fallback.',
+      );
+      return {
+        currentView: 'dashboard',
+        currentProjectId: null,
+        currentChapterId: null,
+        currentSceneId: null,
+        focusMode: false,
+        navigateToView: () => {},
+        navigateToProject: () => {},
+        navigateToChapter: () => {},
+        navigateToScene: () => {},
+        toggleFocusMode: () => {},
+        goBack: () => {},
+        canGoBack: false,
+      };
+    }
   }
   return context;
 }

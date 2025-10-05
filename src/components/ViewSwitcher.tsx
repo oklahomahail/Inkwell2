@@ -59,7 +59,7 @@ const ViewSwitcher: React.FC = () => {
     case View.Settings:
       return <SettingsPanel />;
     default:
-      return <DashboardPanel />;
+      return <EnhancedDashboard />;
   }
 };
 

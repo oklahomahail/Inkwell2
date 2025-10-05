@@ -21,6 +21,7 @@ import ViewSwitcher from './components/ViewSwitcher';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { ClaudeProvider } from './context/ClaudeProvider';
 import { useEditorContext } from './context/EditorContext';
+import { NavProvider } from './context/NavContext';
 // Services
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
@@ -288,12 +289,14 @@ function StorageDebugPanel() {
 // Root export: compose providers at the top and render AppShell inside.
 export default function App() {
   return (
-    <ClaudeProvider>
-      <AppProvider>
-        <CommandPaletteProvider>
-          <AppShell />
-        </CommandPaletteProvider>
-      </AppProvider>
-    </ClaudeProvider>
+    <NavProvider>
+      <ClaudeProvider>
+        <AppProvider>
+          <CommandPaletteProvider>
+            <AppShell />
+          </CommandPaletteProvider>
+        </AppProvider>
+      </ClaudeProvider>
+    </NavProvider>
   );
 }
