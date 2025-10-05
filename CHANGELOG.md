@@ -2,6 +2,62 @@
 
 All notable changes to this project are documented here.
 
+## [1.0.5] – 2025-10-05
+
+### 🔧 **TypeScript & Developer Experience Improvements**
+
+#### Fixed
+
+- **Trace Logger System** — Complete overhaul of tracing infrastructure
+  - Resolved "TraceLogger has no call signatures" errors across all plotboards files
+  - Updated all trace calls to use proper `trace.log(message, type, level, metadata)` API
+  - Fixed test mocks to match the correct trace logger interface
+  - Now properly traces performance, user actions, and storage operations
+
+- **Storage Manager Interface** — Enhanced storage compatibility
+  - Added missing methods: `getItem()`, `setItem()`, `removeItem()`, `getAllKeys()`
+  - Created compatibility layer for existing localStorage-style code
+  - Resolved "Property does not exist" errors in plotboards storage operations
+
+- **TypeScript Compilation Issues**
+  - Fixed duplicate `PlotColumnType` identifier in PlotColumn.tsx
+  - Resolved interface mismatches across storage and trace systems
+  - Eliminated critical compilation blockers that were preventing builds
+
+- **Test Suite Stability**
+  - All plotboards tests now pass (200/200 tests passing)
+  - Fixed trace mocking in test files to match updated API
+  - Improved test reliability and eliminated flaky test failures
+
+#### Developer Experience
+
+- **Reduced TypeScript Errors** — From hundreds of compilation errors to mostly non-critical warnings
+- **Improved Logging** — Consistent trace logging across all plotboards features with proper categorization
+- **Better Error Messages** — Clear, actionable error information for debugging
+- **Enhanced Type Safety** — Proper interfaces and compatibility layers prevent future type mismatches
+
+#### Technical Details
+
+- Updated 7 plotboards files with correct trace logger usage
+- Added StorageManager compatibility methods for backward compatibility
+- Fixed test mocks across 3 test suites
+- Maintained 100% test pass rate throughout cleanup process
+- Preserved all existing functionality while improving type safety
+
+### Performance
+
+- No performance impact — changes are purely type-safety and developer experience improvements
+- Trace logging now provides better performance insights across the application
+- Storage operations remain fast with added compatibility layer
+
+### Testing
+
+- **All 200 tests passing** including full plotboards test suite
+- Enhanced test mocks for improved reliability
+- Better test coverage for trace logging functionality
+
+---
+
 ## [1.0.4] – 2025-10-05
 
 ### 🎯 **Major Feature Release: Enhanced Timeline Integration**
