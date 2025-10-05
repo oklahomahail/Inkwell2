@@ -3,12 +3,13 @@ import React, { useState, useCallback } from 'react';
 
 import { useAppContext, View } from '@/context/AppContext';
 
+// Import enhanced components
+import EnhancedDashboard from './Dashboard/EnhancedDashboard';
 import AnalysisPanel from './Panels/AnalysisPanel';
-import DashboardPanel from './Panels/DashboardPanel';
 import SettingsPanel from './Panels/SettingsPanel';
 import TimelinePanel from './Panels/TimelinePanel';
-import WritingPanel from './Panels/WritingPanel';
 import StoryPlanningView from './Views/StoryPlanningView';
+import EnhancedWritingPanel from './Writing/EnhancedWritingPanel';
 
 const ViewSwitcher: React.FC = () => {
   const { state, currentProject, updateProject } = useAppContext();
@@ -45,16 +46,9 @@ const ViewSwitcher: React.FC = () => {
 
   switch (currentView) {
     case View.Dashboard:
-      return <DashboardPanel />;
+      return <EnhancedDashboard />;
     case View.Writing:
-      return (
-        <WritingPanel
-          draftText={draftText}
-          onChangeText={handleTextChange}
-          _onTextSelect={handleTextSelect}
-          selectedText={selectedText}
-        />
-      );
+      return <EnhancedWritingPanel />;
     case View.Timeline:
       return <TimelinePanel />;
     case View.Analysis:

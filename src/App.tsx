@@ -6,9 +6,10 @@ import ClaudeAssistant from './components/ClaudeAssistant';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
 import { CommandPaletteProvider } from './components/CommandPalette/CommandPaletteProvider';
 import CommandPaletteUI from './components/CommandPalette/CommandPaletteUI';
+// New professional layout and components
 import DebugSearchPanel from './components/DebugSearchPanel';
 import ExportDialog from './components/ExportDialog';
-import PlatformLayout from './components/Platform/PlatformLayout';
+import MainLayout from './components/Layout/MainLayout';
 import {
   StorageRecoveryBanner,
   OfflineBanner,
@@ -110,7 +111,7 @@ function AppShell() {
         />
       )}
 
-      <PlatformLayout>
+      <MainLayout>
         <ViewSwitcher />
         <ToastContainer />
 
@@ -154,7 +155,7 @@ function AppShell() {
         {/* Dev-only debug panels */}
         {import.meta.env.DEV && <DebugSearchPanel />}
         {import.meta.env.DEV && <StorageDebugPanel />}
-      </PlatformLayout>
+      </MainLayout>
     </>
   );
 }
