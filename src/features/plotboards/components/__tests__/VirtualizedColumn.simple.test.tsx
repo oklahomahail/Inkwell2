@@ -35,7 +35,7 @@ vi.mock('react-window', () => {
   });
 
   return {
-    List: MockList,
+    List: MockListWithRef,
     FixedSizeList: MockListWithRef,
   };
 });
