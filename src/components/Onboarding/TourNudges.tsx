@@ -251,7 +251,11 @@ export const TourNudgeManager: React.FC<TourNudgeManagerProps> = ({ onStartTour 
     if (activeNudge || nudgeQueue.length === 0) return;
 
     const nextNudge = nudgeQueue[0];
-    if (!dismissedNudges.includes(nextNudge.id) && canShowContextualTour(nextNudge.tourType)) {
+    if (
+      nextNudge &&
+      !dismissedNudges.includes(nextNudge.id) &&
+      canShowContextualTour(nextNudge.tourType)
+    ) {
       setActiveNudge(nextNudge);
       setNudgeQueue((prev) => prev.slice(1));
       logAnalytics('nudge_shown', { nudgeId: nextNudge.id, tourType: nextNudge.tourType });

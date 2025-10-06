@@ -436,7 +436,7 @@ export const useContextualHints = (
       if (mediumPriorityHints.length > 0) {
         const randomHint =
           mediumPriorityHints[Math.floor(Math.random() * mediumPriorityHints.length)];
-        if (!isHintDismissed(randomHint.id)) {
+        if (randomHint && !isHintDismissed(randomHint.id)) {
           showHint(randomHint.id);
         }
       }

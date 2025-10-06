@@ -12,10 +12,10 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { useTour } from './TourProvider';
+import { useTour, type CompletionChecklist } from './TourProvider';
 
 interface ChecklistItemConfig {
-  key: keyof import('./TourProvider').CompletionChecklist;
+  key: keyof CompletionChecklist;
   label: string;
   description: string;
   icon: React.ElementType;
@@ -79,7 +79,7 @@ interface CompletionChecklistProps {
   onStartTour?: (tourType: string) => void;
 }
 
-export const CompletionChecklist: React.FC<CompletionChecklistProps> = ({
+export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = ({
   isOpen,
   onClose,
   onStartTour,
@@ -101,7 +101,7 @@ export const CompletionChecklist: React.FC<CompletionChecklistProps> = ({
   };
 
   const getItemStyle = (item: ChecklistItemConfig) => {
-    const isCompleted = checklist[item.key];
+    const isCompleted = checklist[item.key as keyof typeof checklist];
     const canStartTour = item.tourTrigger && canShowContextualTour(item.tourTrigger);
 
     return {
@@ -169,12 +169,12 @@ export const CompletionChecklist: React.FC<CompletionChecklistProps> = ({
           <div className="space-y-2">
             {CHECKLIST_ITEMS.map((item) => {
               const Icon = item.icon;
-              const isCompleted = checklist[item.key];
+              const isCompleted = checklist[item.key as keyof typeof checklist];
               const canStartTour = item.tourTrigger && canShowContextualTour(item.tourTrigger);
 
               return (
                 <div
-                  key={item.key}
+                  key={String(item.key)}
                   className={`p-3 rounded-lg border transition-all duration-200 ${
                     isCompleted
                       ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20'
@@ -184,7 +184,7 @@ export const CompletionChecklist: React.FC<CompletionChecklistProps> = ({
                   }`}
                   style={getItemStyle(item)}
                   onClick={() => handleItemClick(item)}
-                  onMouseEnter={() => setHoveredItem(item.key)}
+                  onMouseEnter={() => setHoveredItem(String(item.key))}
                   onMouseLeave={() => setHoveredItem(null)}
                   role={canStartTour ? 'button' : 'listitem'}
                   tabIndex={canStartTour ? 0 : undefined}

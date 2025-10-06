@@ -63,7 +63,7 @@ interface TourPreferences {
   tourDismissals: number; // how many times user dismissed
 }
 
-interface CompletionChecklist {
+export interface CompletionChecklist {
   createProject: boolean;
   addChapter: boolean;
   addCharacter: boolean;

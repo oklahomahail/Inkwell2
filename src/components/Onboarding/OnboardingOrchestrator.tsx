@@ -1,7 +1,7 @@
 // src/components/Onboarding/OnboardingOrchestrator.tsx
 import React, { useState, useEffect } from 'react';
 
-import CompletionChecklist from './CompletionChecklist';
+import { CompletionChecklistComponent } from './CompletionChecklist';
 import { TourNudgeManager } from './TourNudges';
 import TourOverlay from './TourOverlay';
 import { useTour, TOUR_MAP } from './TourProvider';
@@ -115,7 +115,7 @@ export const OnboardingOrchestrator: React.FC<OnboardingOrchestratorProps> = ({
       />
 
       {/* Completion Checklist */}
-      <CompletionChecklist
+      <CompletionChecklistComponent
         isOpen={showChecklist}
         onClose={handleCloseChecklist}
         onStartTour={handleStartTour}
