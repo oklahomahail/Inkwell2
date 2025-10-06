@@ -77,10 +77,13 @@ export default function TipTapEditor({
     },
     editorProps: {
       attributes: {
-        class: cn('prose prose-lg dark:prose-invert max-w-none focus:outline-none', {
-          'typewriter-editor': settings.typewriterMode,
-          'zen-editor': settings.zenMode,
-        }),
+        class: cn(
+          'prose prose-lg dark:prose-invert max-w-none focus:outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100',
+          {
+            'typewriter-editor': settings.typewriterMode,
+            'zen-editor': settings.zenMode,
+          },
+        ),
         'data-scene-id': sceneId || '',
       },
     },
@@ -245,10 +248,13 @@ export default function TipTapEditor({
 
       <EditorContent
         editor={editor}
-        className={cn('prose prose-lg dark:prose-invert max-w-none', {
-          'focus:outline-none': true,
-          'min-h-[500px]': isFocusMode,
-        })}
+        className={cn(
+          'prose prose-lg dark:prose-invert max-w-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6 rounded-lg border border-gray-200 dark:border-gray-700',
+          {
+            'focus:outline-none': true,
+            'min-h-[500px]': isFocusMode,
+          },
+        )}
       />
 
       {/* Word count display */}

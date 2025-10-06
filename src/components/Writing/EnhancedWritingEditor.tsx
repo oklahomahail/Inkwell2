@@ -161,6 +161,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
       attributes: {
         class: `
           prose prose-lg dark:prose-invert max-w-none focus:outline-none
+          bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
           prose-headings:font-bold prose-p:leading-relaxed
           prose-strong:text-gray-900 dark:prose-strong:text-white
           prose-em:text-gray-700 dark:prose-em:text-gray-300
@@ -565,13 +566,13 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
         <div className="flex-1 flex overflow-hidden">
           {/* Main Editor */}
           <div
-            className={`flex-1 overflow-y-auto ${
+            className={`flex-1 overflow-y-auto bg-white dark:bg-gray-900 ${
               showAIPanel || showConsistencyPanel ? 'pr-4' : ''
             } ${manuscriptPreview ? 'bg-white dark:bg-gray-100' : ''}`}
           >
             <div
               className={`
-              max-w-none mx-auto p-8
+              max-w-none mx-auto p-8 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
               ${isFocusMode ? 'max-w-4xl pt-16' : 'max-w-4xl'}
               ${manuscriptPreview ? 'manuscript-preview' : ''}
             `}

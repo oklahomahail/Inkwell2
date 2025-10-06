@@ -371,13 +371,13 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
               </div>
 
               {/* TipTap Editor */}
-              <div className="flex-1 p-6 overflow-auto">
+              <div className="flex-1 p-6 overflow-auto bg-white dark:bg-gray-900">
                 <TipTapEditor
                   value={currentScene.content}
                   onChange={handleContentChange}
                   onWordCountChange={handleWordCountChange}
                   placeholder={`Start writing "${currentScene.title}"...`}
-                  className="min-h-full"
+                  className="min-h-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </>
