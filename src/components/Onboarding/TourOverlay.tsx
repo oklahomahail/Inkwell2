@@ -1,5 +1,5 @@
 // src/components/Onboarding/TourOverlay.tsx
-import { X, ChevronLeft, Skip, CheckCircle, ArrowRight, Lightbulb } from 'lucide-react';
+import { X, ChevronLeft, SkipForward, CheckCircle, ArrowRight, Lightbulb } from 'lucide-react';
 import React, { useEffect, useState, useRef } from 'react';
 
 import { useTour, TourStep } from './TourProvider';
@@ -303,7 +303,7 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ onClose }) => {
                   className="btn btn-ghost btn-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                   aria-label="Skip this optional step"
                 >
-                  <Skip className="w-4 h-4" aria-hidden="true" />
+                  <SkipForward className="w-4 h-4" aria-hidden="true" />
                   Skip
                 </button>
               )}
