@@ -50,11 +50,14 @@
 
 ### User Experience & Onboarding
 
-- **Interactive Tour System** — Guided walkthrough with spotlight effects and contextual guidance
-- **Progressive Feature Discovery** — Smart hints and tooltips that appear based on user context
+- **🚀 Enhanced First-Run Experience** — Smart welcome modal with user choice (Start tour, Remind later, Never show)
+- **🎪 Layered Tour System** — 60-90 second core tour plus contextual mini-tours for each panel
+- **📋 Interactive Completion Checklist** — Track mastery of 7 key features with progress celebration
+- **💡 Smart Tour Nudges** — Context-aware tour suggestions triggered by user milestones
+- **🎯 Stable & Resilient** — Multiple CSS selectors per step with graceful fallbacks
+- **♿ Full Accessibility** — WCAG AA compliant with keyboard navigation and screen reader support
+- **📊 Built-in Analytics** — Anonymous usage tracking for tour optimization (privacy-first)
 - **Sample Projects** — "The Midnight Library" demo project with rich content and structure
-- **Enhanced Empty States** — Helpful guidance and tips when sections are empty
-- **Tour State Management** — Progress tracking with persistent state across sessions
 
 ### Professional Features
 
@@ -130,13 +133,15 @@ pnpm vercel:test     # Test production build locally
   - **Writing Analytics** with detailed insights into writing habits and productivity
   - **Project Templates** with genre-specific structures (Mystery, Romance, Sci-Fi, Fantasy)
   - **Professional Dashboard** with project browser and insights views
-- ✅ **Interactive Onboarding System** — Complete guided user experience:
-  - **Tour System** with spotlight effects and contextual step-by-step guidance
-  - **Progressive Feature Discovery** with contextual hints and tooltips
-  - **Sample Projects** with "The Midnight Library" mystery novel template
-  - **Enhanced Empty States** with helpful guidance and tour integration
-  - **Project Templates** for different genres with pre-built structure
-  - **Tour State Management** with progress tracking and localStorage persistence
+- ✅ **Enhanced Onboarding System** — World-class user experience with 8 integrated layers:
+  - **🚀 First-Run Experience**: Smart welcome modal with user choice and dismissal tracking
+  - **📋 Completion Checklist**: Interactive progress tracking with tour integration
+  - **🎪 Layered Tours**: 60-90 second core tour + contextual mini-tours (3-5 steps each)
+  - **💡 Smart Nudges**: Context-aware tour suggestions after user milestones
+  - **🎯 Stable Anchoring**: Multiple selectors with fallbacks for empty states
+  - **♿ Full Accessibility**: WCAG AA compliant with keyboard navigation
+  - **📊 Analytics Foundation**: Anonymous usage tracking for optimization
+  - **🧠 Intelligent Surfacing**: Context-aware tour recommendations
 - ✅ **TypeScript & Developer Experience Improvements** — Major cleanup and stability improvements:
   - Complete trace logger system overhaul with proper API usage
   - StorageManager compatibility layer for backward compatibility
@@ -202,10 +207,14 @@ src/
 │   ├── Views/           # Main application views
 │   ├── Planning/        # Story planning tools
 │   ├── Writing/         # Editor components
-│   ├── Onboarding/      # Interactive tour and feature discovery
-│   │   ├── TourProvider.tsx          # Tour state management and context
-│   │   ├── TourOverlay.tsx           # Visual tour with spotlight effects
-│   │   └── FeatureDiscovery.tsx      # Contextual hints system
+│   ├── Onboarding/      # Enhanced tour and onboarding system
+│   │   ├── TourProvider.tsx          # Enhanced tour state & analytics
+│   │   ├── TourOverlay.tsx           # Accessible tour with spotlight
+│   │   ├── FeatureDiscovery.tsx      # Contextual hints system
+│   │   ├── WelcomeModal.tsx          # First-run experience with options
+│   │   ├── CompletionChecklist.tsx   # Interactive progress tracking
+│   │   ├── TourNudges.tsx           # Smart contextual tour suggestions
+│   │   └── OnboardingOrchestrator.tsx # Main coordination component
 │   ├── ProjectBrowser/  # Enhanced project management
 │   │   └── EnhancedProjectBrowser.tsx # Advanced project browser interface
 │   ├── ProjectInsights/ # Writing analytics and statistics
@@ -291,7 +300,7 @@ MIT License © 2025 Inkwell Authors
 📚 **[User Guide](USER_GUIDE.md)** - Complete guide for writers using Inkwell  
 🚀 **[Deployment Guide](DEPLOYMENT.md)** - Instructions for deploying to production  
 🎨 **[Plot Boards Guide](docs/PLOT_BOARDS.md)** - Complete documentation for the Plot Boards feature  
-🎯 **[Onboarding System Guide](src/components/Onboarding/README.md)** - Interactive tour and feature discovery documentation  
+🎯 **[Enhanced Onboarding System Guide](src/components/Onboarding/README.md)** - World-class 8-layer onboarding system with accessibility and analytics
 📂 **[Project Management Guide](src/components/ProjectManagement/README.md)** - Enhanced project organization and search system  
 🔧 **[ESLint Migration Guide](docs/ESLINT_MIGRATION.md)** - Technical details about ESLint 9 upgrade  
 📊 **[Trace System Guide](docs/TRACE_SYSTEM.md)** - Performance monitoring and debugging system documentation

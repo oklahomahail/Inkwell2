@@ -8,6 +8,8 @@ import { NavProvider } from '@/context/NavContext';
 import { ToastProvider } from '@/context/ToastContext';
 
 import { CommandPaletteProvider } from './CommandPalette/CommandPaletteProvider';
+import { FeatureDiscoveryProvider } from './Onboarding/FeatureDiscovery';
+import { TourProvider } from './Onboarding/TourProvider';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -22,8 +24,10 @@ interface ProvidersProps {
  * 2. NavProvider - Navigation state management
  * 3. EditorProvider - Text editor context
  * 4. ClaudeProvider - AI assistant integration
- * 5. AppProvider - Main application state
- * 6. CommandPaletteProvider - Command palette functionality
+ * 5. TourProvider - Tour and onboarding system
+ * 6. FeatureDiscoveryProvider - Contextual hints
+ * 7. AppProvider - Main application state
+ * 8. CommandPaletteProvider - Command palette functionality
  */
 export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   return (
@@ -31,9 +35,13 @@ export const Providers: React.FC<ProvidersProps> = ({ children }) => {
       <NavProvider>
         <EditorProvider>
           <ClaudeProvider>
-            <AppProvider>
-              <CommandPaletteProvider>{children}</CommandPaletteProvider>
-            </AppProvider>
+            <TourProvider>
+              <FeatureDiscoveryProvider>
+                <AppProvider>
+                  <CommandPaletteProvider>{children}</CommandPaletteProvider>
+                </AppProvider>
+              </FeatureDiscoveryProvider>
+            </TourProvider>
           </ClaudeProvider>
         </EditorProvider>
       </NavProvider>

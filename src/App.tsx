@@ -10,6 +10,7 @@ import DebugSearchPanel from './components/DebugSearchPanel';
 import ExportDialog from './components/ExportDialog';
 import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
+import OnboardingOrchestrator from './components/Onboarding/OnboardingOrchestrator';
 import Providers from './components/Providers';
 import {
   StorageRecoveryBanner,
@@ -152,6 +153,9 @@ function AppShell() {
 
         {/* Command Palette UI */}
         <CommandPaletteUI />
+
+        {/* Onboarding System */}
+        <OnboardingOrchestrator />
 
         {/* Hidden global export trigger */}
         <div style={{ display: 'none' }}>

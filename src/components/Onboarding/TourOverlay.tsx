@@ -16,7 +16,7 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ onClose }) => {
 
   const currentStep = getCurrentStep();
 
-  // Find and highlight target element
+  // Enhanced target finding with multiple selectors and fallbacks
   useEffect(() => {
     if (!currentStep || !tourState.isActive) {
       setTargetElement(null);
@@ -25,20 +25,55 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ onClose }) => {
 
     const findTarget = () => {
       let element: HTMLElement | null = null;
+      let attempts = 0;
+      const maxAttempts = 10;
 
-      if (currentStep.target === 'body') {
-        element = document.body;
-      } else {
-        element = document.querySelector(currentStep.target) as HTMLElement;
-      }
+      const tryFindElement = () => {
+        if (currentStep.target === 'body') {
+          element = document.body;
+        } else {
+          // Try multiple selectors separated by commas
+          const selectors = currentStep.target.split(', ');
+          for (const selector of selectors) {
+            element = document.querySelector(selector.trim()) as HTMLElement;
+            if (element) break;
+          }
+        }
 
-      if (element) {
-        setTargetElement(element);
-        calculateTooltipPosition(element, currentStep.placement);
-      } else {
-        // If element not found, try again after a short delay
-        setTimeout(findTarget, 100);
-      }
+        if (element && element.offsetParent !== null) {
+          // Element found and is visible
+          setTargetElement(element);
+          calculateTooltipPosition(element, currentStep.placement);
+        } else if (attempts < maxAttempts) {
+          // Element not found or not visible, try again
+          attempts++;
+          setTimeout(tryFindElement, attempts * 100); // Exponential backoff
+        } else {
+          // Max attempts reached, show fallback
+          console.warn(
+            `Tour step target not found after ${maxAttempts} attempts:`,
+            currentStep.target,
+          );
+          // Use body as fallback for center placement
+          if (currentStep.placement === 'center') {
+            setTargetElement(document.body);
+          } else {
+            // Show a generic selector hint for non-center placements
+            const fallbackElement = document.createElement('div');
+            fallbackElement.style.position = 'fixed';
+            fallbackElement.style.top = '50%';
+            fallbackElement.style.left = '50%';
+            fallbackElement.style.width = '1px';
+            fallbackElement.style.height = '1px';
+            fallbackElement.style.pointerEvents = 'none';
+            fallbackElement.style.opacity = '0';
+            document.body.appendChild(fallbackElement);
+            setTargetElement(fallbackElement);
+          }
+        }
+      };
+
+      tryFindElement();
     };
 
     findTarget();
@@ -143,10 +178,16 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="tour-overlay fixed inset-0 z-50">
-      {/* Backdrop with spotlight effect */}
+    <div
+      className="tour-overlay fixed inset-0 z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tour-step-title"
+      aria-describedby="tour-step-description"
+    >
+      {/* High-contrast backdrop with spotlight effect */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-all duration-300"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-all duration-300"
         style={getSpotlightStyles()}
       />
 
@@ -163,14 +204,15 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ onClose }) => {
         />
       )}
 
-      {/* Tour tooltip */}
+      {/* Tour tooltip with focus trap */}
       <div
         ref={tooltipRef}
-        className="absolute tour-tooltip bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-600 max-w-sm z-10"
+        className="absolute tour-tooltip bg-white dark:bg-slate-800 rounded-xl shadow-2xl border-2 border-primary-500 dark:border-primary-400 max-w-sm z-10 focus-within:ring-4 focus-within:ring-primary-200 dark:focus-within:ring-primary-800"
         style={{
           top: tooltipPosition.top,
           left: tooltipPosition.left,
         }}
+        tabIndex={-1}
       >
         {/* Progress bar */}
         <div className="h-1 bg-slate-200 dark:bg-slate-700 rounded-t-xl overflow-hidden">
@@ -186,22 +228,35 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ onClose }) => {
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                 {currentStep.optional ? (
-                  <Lightbulb className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                  <Lightbulb
+                    className="w-4 h-4 text-primary-600 dark:text-primary-400"
+                    aria-hidden="true"
+                  />
                 ) : (
-                  <CheckCircle className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                  <CheckCircle
+                    className="w-4 h-4 text-primary-600 dark:text-primary-400"
+                    aria-hidden="true"
+                  />
                 )}
               </div>
               <div className="min-w-0">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
+                <h3
+                  id="tour-step-title"
+                  className="text-lg font-semibold text-slate-900 dark:text-white mb-1"
+                >
                   {currentStep.title}
                 </h3>
-                <div className="flex items-center gap-2 text-xs text-slate-500">
+                <div
+                  className="flex items-center gap-2 text-xs text-slate-500"
+                  role="status"
+                  aria-label={`Step ${tourState.currentStep + 1} of ${tourState.steps.length}`}
+                >
                   <span>
                     Step {tourState.currentStep + 1} of {tourState.steps.length}
                   </span>
                   {currentStep.optional && (
                     <>
-                      <span>•</span>
+                      <span aria-hidden="true">•</span>
                       <span className="text-yellow-600 dark:text-yellow-400">Optional</span>
                     </>
                   )}
@@ -210,15 +265,19 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ onClose }) => {
             </div>
             <button
               onClick={handleSkip}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1"
-              title="Close tour"
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              title="Close tour (Press Escape)"
+              aria-label="Close tour"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Content */}
-          <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">
+          <p
+            id="tour-step-description"
+            className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6"
+          >
             {currentStep.description}
           </p>
 
@@ -226,8 +285,12 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ onClose }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {!isFirstStep && (
-                <button onClick={previousStep} className="btn btn-ghost btn-sm">
-                  <ChevronLeft className="w-4 h-4" />
+                <button
+                  onClick={previousStep}
+                  className="btn btn-ghost btn-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  aria-label="Go to previous step"
+                >
+                  <ChevronLeft className="w-4 h-4" aria-hidden="true" />
                   Previous
                 </button>
               )}
@@ -235,21 +298,30 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ onClose }) => {
 
             <div className="flex items-center gap-2">
               {currentStep.optional && !isLastStep && (
-                <button onClick={nextStep} className="btn btn-ghost btn-sm">
-                  <Skip className="w-4 h-4" />
+                <button
+                  onClick={nextStep}
+                  className="btn btn-ghost btn-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                  aria-label="Skip this optional step"
+                >
+                  <Skip className="w-4 h-4" aria-hidden="true" />
                   Skip
                 </button>
               )}
-              <button onClick={handleNext} className="btn btn-primary btn-sm">
+              <button
+                onClick={handleNext}
+                className="btn btn-primary btn-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
+                aria-label={isLastStep ? 'Complete tour' : 'Continue to next step'}
+                autoFocus
+              >
                 {isLastStep ? (
                   <>
                     Finish Tour
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle className="w-4 h-4" aria-hidden="true" />
                   </>
                 ) : (
                   <>
                     {currentStep.action === 'click' ? 'Got it' : 'Next'}
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4" aria-hidden="true" />
                   </>
                 )}
               </button>
@@ -276,35 +348,60 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ onClose }) => {
       </div>
 
       {/* Tour navigation dots */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+      <div
+        className="absolute bottom-6 left-1/2 -translate-x-1/2"
+        role="tablist"
+        aria-label="Tour progress"
+      >
         <div className="flex items-center gap-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
-          {tourState.steps.map((_, index) => (
-            <button
-              key={index}
-              className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                index === tourState.currentStep
-                  ? 'bg-primary-500 scale-125'
-                  : index < tourState.currentStep
-                    ? 'bg-green-500'
-                    : 'bg-slate-300 dark:bg-slate-600'
-              }`}
-              onClick={() => {
-                // Allow jumping to previous steps only
-                if (index <= tourState.currentStep) {
-                  // goToStep(index);
-                }
-              }}
-            />
-          ))}
+          {tourState.steps.map((_, index) => {
+            const isCurrentStep = index === tourState.currentStep;
+            const isCompletedStep = index < tourState.currentStep;
+
+            return (
+              <button
+                key={index}
+                className={`w-3 h-3 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+                  isCurrentStep
+                    ? 'bg-primary-500 scale-125'
+                    : isCompletedStep
+                      ? 'bg-green-500 hover:bg-green-600'
+                      : 'bg-slate-300 dark:bg-slate-600'
+                }`}
+                onClick={() => {
+                  // Allow jumping to previous steps only
+                  if (index <= tourState.currentStep) {
+                    // Note: goToStep would need to be implemented in TourProvider
+                    // goToStep(index);
+                  }
+                }}
+                disabled={index > tourState.currentStep}
+                aria-label={`Step ${index + 1}: ${tourState.steps[index]?.title || 'Tour step'}`}
+                role="tab"
+                aria-selected={isCurrentStep}
+                aria-current={isCurrentStep ? 'step' : undefined}
+              />
+            );
+          })}
         </div>
       </div>
 
       {/* Keyboard hint */}
-      <div className="absolute top-6 right-6">
+      <div className="absolute top-6 right-6" role="complementary" aria-label="Keyboard shortcuts">
         <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg text-xs text-slate-600 dark:text-slate-400">
           Press{' '}
-          <kbd className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs">ESC</kbd> to
-          exit
+          <kbd className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs font-mono">
+            ESC
+          </kbd>{' '}
+          to exit •{' '}
+          <kbd className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs font-mono">
+            →
+          </kbd>{' '}
+          next •{' '}
+          <kbd className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs font-mono">
+            ←
+          </kbd>{' '}
+          back
         </div>
       </div>
     </div>

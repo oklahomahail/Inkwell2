@@ -109,7 +109,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
 
 export const NoProjectsEmptyState: React.FC = () => {
   const { addProject, setCurrentProjectId, dispatch } = useAppContext();
-  const { startTour, setTourSteps, tourState } = useTour();
+  const { startTour, setTourSteps, tourState, updateChecklist } = useTour();
 
   const createNewProject = async () => {
     const newProject = {
@@ -125,6 +125,9 @@ export const NoProjectsEmptyState: React.FC = () => {
     setCurrentProjectId(newProject.id);
     dispatch({ type: 'SET_VIEW', payload: View.Writing });
 
+    // Update checklist - user created their first project!
+    updateChecklist('createProject');
+
     // Start onboarding tour for first-time users
     if (tourState.isFirstTimeUser) {
       setTourSteps(ONBOARDING_STEPS);
@@ -139,6 +142,12 @@ export const NoProjectsEmptyState: React.FC = () => {
     addProject(sampleProject);
     setCurrentProjectId(sampleProject.id);
     dispatch({ type: 'SET_VIEW', payload: View.Writing });
+
+    // Update multiple checklist items since sample project has content
+    updateChecklist('createProject');
+    updateChecklist('addChapter');
+    updateChecklist('addCharacter');
+    updateChecklist('writeContent');
 
     // Optional: Show feature discovery instead of full tour for sample project
     if (tourState.isFirstTimeUser) {
