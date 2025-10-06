@@ -72,8 +72,8 @@ describe('Plot Board Store', () => {
 
       expect(board.title).toBe(title);
       expect(board.columns.length).toBe(3); // Three-act structure
-      expect(board.columns[0].title).toBe('Act I - Setup');
-      expect(board.columns[0].cards.length).toBeGreaterThan(0); // Default cards
+      expect(board.columns[0]?.title).toBe('Act I - Setup');
+      expect(board.columns[0]?.cards.length).toBeGreaterThan(0); // Default cards
     });
 
     it('should update a board', async () => {
@@ -84,9 +84,9 @@ describe('Plot Board Store', () => {
 
       const updatedStore = usePlotBoardStore.getState(); // Get updated state
       const updatedBoard = updatedStore.boards[board.id];
-      expect(updatedBoard.title).toBe(updates.title);
-      expect(updatedBoard.description).toBe(updates.description);
-      expect(updatedBoard.updatedAt).toBeInstanceOf(Date);
+      expect(updatedBoard?.title).toBe(updates.title);
+      expect(updatedBoard?.description).toBe(updates.description);
+      expect(updatedBoard?.updatedAt).toBeInstanceOf(Date);
     });
 
     it('should delete a board', async () => {
@@ -113,7 +113,7 @@ describe('Plot Board Store', () => {
       expect(duplicatedBoard.title).toBe('Duplicated Board');
       expect(duplicatedBoard.id).not.toBe(originalBoard.id);
       expect(duplicatedBoard.columns.length).toBe(
-        beforeDuplication.boards[originalBoard.id].columns.length,
+        beforeDuplication.boards[originalBoard.id]?.columns.length ?? 0,
       );
       expect(duplicatedBoard.projectId).toBe(originalBoard.projectId);
     });
@@ -141,7 +141,7 @@ describe('Plot Board Store', () => {
 
       const updatedStore = usePlotBoardStore.getState();
       const board = updatedStore.boards[boardId];
-      expect(board.columns.find((c) => c.id === column.id)).toBe(column);
+      expect(board?.columns.find((c) => c.id === column.id)).toBe(column);
     });
 
     it('should update a column', async () => {
@@ -152,7 +152,7 @@ describe('Plot Board Store', () => {
 
       const updatedStore = usePlotBoardStore.getState();
       const board = updatedStore.boards[boardId];
-      const updatedColumn = board.columns.find((c) => c.id === column.id);
+      const updatedColumn = board?.columns.find((c) => c.id === column.id);
       expect(updatedColumn?.title).toBe(updates.title);
       expect(updatedColumn?.description).toBe(updates.description);
     });
@@ -164,7 +164,7 @@ describe('Plot Board Store', () => {
 
       const updatedStore = usePlotBoardStore.getState();
       const board = updatedStore.boards[boardId];
-      expect(board.columns.find((c) => c.id === column.id)).toBeUndefined();
+      expect(board?.columns.find((c) => c.id === column.id)).toBeUndefined();
     });
 
     it('should reorder columns', async () => {
@@ -179,7 +179,7 @@ describe('Plot Board Store', () => {
 
       const updatedStore = usePlotBoardStore.getState();
       const board = updatedStore.boards[boardId];
-      const orderedColumns = board.columns.sort((a, b) => a.order - b.order);
+      const orderedColumns = board?.columns.sort((a, b) => a.order - b.order) ?? [];
       expect(orderedColumns[0].id).toBe(column2.id);
       expect(orderedColumns[1].id).toBe(column3.id);
       expect(orderedColumns[2].id).toBe(column1.id);
