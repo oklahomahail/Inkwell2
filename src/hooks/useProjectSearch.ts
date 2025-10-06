@@ -95,8 +95,12 @@ const getProjectSearchText = (project: Project): { [field: string]: string } => 
 
 export const useProjectSearch = (projects: Project[]) => {
   const [filters, setFilters] = useState<SearchFilters>(defaultFilters);
-  const { getProjectMetadata, getAllTags, getFavoriteProjectIds, getProjectIdsByTag } =
-    useProjectMetadata();
+  const {
+    getProjectMetadata,
+    getAllTags,
+    getFavoriteProjectIds: _getFavoriteProjectIds,
+    getProjectIdsByTag: _getProjectIdsByTag,
+  } = useProjectMetadata();
 
   // Get all available options for filters
   const filterOptions = useMemo(() => {

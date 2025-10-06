@@ -203,9 +203,13 @@ export const linkCardsToTimelineEvents = (
       // Basic temporal matching - could be enhanced with more sophisticated logic
       if (scene.storyDate && event.storyDate) {
         const sceneDateStr =
-          typeof scene.storyDate === 'string' ? scene.storyDate : scene.storyDate.toISOString();
+          typeof scene.storyDate === 'string'
+            ? scene.storyDate
+            : new Date(scene.storyDate).toISOString();
         const eventDateStr =
-          typeof event.storyDate === 'string' ? event.storyDate : event.storyDate.toISOString();
+          typeof event.storyDate === 'string'
+            ? event.storyDate
+            : new Date(event.storyDate).toISOString();
 
         return (
           Math.abs(new Date(sceneDateStr).getTime() - new Date(eventDateStr).getTime()) <
@@ -251,7 +255,7 @@ export interface PlotProgressMetrics {
  */
 export const calculatePlotProgress = (
   cards: PlotCard[],
-  chapters: Record<string, Chapter>,
+  _chapters: Record<string, Chapter>,
 ): PlotProgressMetrics => {
   const totalCards = cards.length;
 

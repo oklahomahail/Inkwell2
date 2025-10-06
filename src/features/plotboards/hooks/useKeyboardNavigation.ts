@@ -31,7 +31,7 @@ interface UseKeyboardNavigationProps {
 export const useKeyboardNavigation = ({
   board,
   onMoveCard,
-  onReorderColumns,
+  onReorderColumns: _onReorderColumns,
 }: UseKeyboardNavigationProps): KeyboardNavigationState & KeyboardNavigationActions => {
   const [state, setState] = useState<KeyboardNavigationState>({
     focusedCardId: null,

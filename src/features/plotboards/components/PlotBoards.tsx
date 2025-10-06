@@ -79,7 +79,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
   const {
     boards,
     activeBoard,
-    templates,
+    templates: _templates,
     isLoading,
     lastError,
     createBoard,

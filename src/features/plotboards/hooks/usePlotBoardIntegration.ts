@@ -57,7 +57,7 @@ export const usePlotBoardIntegration = (
   const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get current board and project chapters
-  const currentBoard = boardId ? boards[boardId] : null;
+  const _currentBoard = boardId ? boards[boardId] : null;
   // Filter chapters for current project (assuming chapters have projectId property)
   const projectChapters = chapters.filter((chapter) => chapter.projectId === projectId);
 

@@ -276,7 +276,7 @@ export class SchemaVersionManager {
     toVersion: string,
   ): Array<{ from: string; to: string }> {
     const path: Array<{ from: string; to: string }> = [];
-    let currentVersion = fromVersion;
+    let _currentVersion = fromVersion;
 
     // For now, we only support sequential migrations
     // In future, we could implement graph-based migration paths
@@ -310,10 +310,11 @@ export class SchemaVersionManager {
     if (data && typeof data === 'object' && 'schemaVersion' in data) {
       // Already versioned, update version
       return {
-        ...(data as VersionedData<T>),
+        ...(data as unknown as VersionedData<T>),
         schemaVersion: CURRENT_SCHEMA_VERSION,
         updatedAt: now,
-        migrationHistory: migrationHistory || (data as VersionedData<T>).migrationHistory,
+        migrationHistory:
+          migrationHistory || (data as unknown as VersionedData<T>).migrationHistory,
       } as VersionedData<T>;
     }
 
@@ -328,7 +329,7 @@ export class SchemaVersionManager {
 
   /* ========= Specific Migration Functions ========= */
 
-  private migrate_1_0_to_1_1(data: any, context: MigrationContext): MigrationResult<any> {
+  private migrate_1_0_to_1_1(data: any, _context: MigrationContext): MigrationResult<any> {
     const warnings: string[] = [];
     const errors: string[] = [];
 
@@ -369,7 +370,7 @@ export class SchemaVersionManager {
     }
   }
 
-  private migrate_1_1_to_1_2(data: any, context: MigrationContext): MigrationResult<any> {
+  private migrate_1_1_to_1_2(data: any, _context: MigrationContext): MigrationResult<any> {
     const warnings: string[] = [];
     const errors: string[] = [];
 

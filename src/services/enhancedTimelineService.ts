@@ -528,8 +528,8 @@ class EnhancedTimelineService {
 
   private generateOptimizationSuggestions(
     items: TimelineItem[],
-    conflicts: TimelineConflict[],
-    project?: EnhancedProject,
+    _conflicts: TimelineConflict[],
+    _project?: EnhancedProject,
   ): TimelineOptimization[] {
     const suggestions: TimelineOptimization[] = [];
 
@@ -616,7 +616,7 @@ class EnhancedTimelineService {
   private validateSceneLinkage(
     events: TimelineItem[],
     sceneId: string,
-    chapterId: string,
+    _chapterId: string,
   ): TimelineConflict[] {
     const conflicts: TimelineConflict[] = [];
 

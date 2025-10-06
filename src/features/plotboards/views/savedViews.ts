@@ -310,7 +310,7 @@ export class SavedViewManager {
 
     // Prevent updating default views (except layout settings)
     if (existingView.view.isDefault) {
-      const allowedUpdates = { layoutSettings: updates.layoutSettings };
+      const _allowedUpdates = { layoutSettings: updates.layoutSettings };
       if (Object.keys(updates).some((key) => key !== 'layoutSettings')) {
         throw new Error('Cannot modify default views (except layout settings)');
       }

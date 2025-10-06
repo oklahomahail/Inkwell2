@@ -332,13 +332,13 @@ export class PlotBoardImportSystem {
 
     if (options.autoMigrate) {
       try {
-        const migrationResult = await this.schemaManager.migrate(bundle, currentVersion);
+        const migrationResult = await this.schemaManager.migrate(bundle);
         return {
           migration: {
             required: true,
             fromVersion: sourceVersion,
             toVersion: currentVersion,
-            changes: migrationResult.changes || [],
+            changes: [`Migrated from ${sourceVersion} to ${currentVersion}`],
             warnings: migrationResult.warnings || [],
           },
         };
@@ -552,7 +552,7 @@ export class PlotBoardImportSystem {
     existingBoard: PlotBoard,
     incomingBoard: PlotBoard,
     conflicts: ImportConflict[],
-    options: ImportOptions,
+    _options: ImportOptions,
   ): Promise<PlotBoard> {
     const mergedBoard: PlotBoard = {
       ...existingBoard,
@@ -598,8 +598,8 @@ export class PlotBoardImportSystem {
   private async appendToBoard(
     existingBoard: PlotBoard,
     incomingBoard: PlotBoard,
-    conflicts: ImportConflict[],
-    options: ImportOptions,
+    _conflicts: ImportConflict[],
+    _options: ImportOptions,
   ): Promise<PlotBoard> {
     const appendedBoard: PlotBoard = {
       ...existingBoard,

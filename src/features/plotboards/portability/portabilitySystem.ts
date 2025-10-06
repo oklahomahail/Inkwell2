@@ -565,7 +565,7 @@ export class PlotBoardPortabilitySystem {
   private extractRelationships(
     boards: PlotBoard[],
     views: SavedViewData[],
-    templates: PlotBoardTemplate[],
+    _templates: any[],
   ): Relationship[] {
     const relationships: Relationship[] = [];
 

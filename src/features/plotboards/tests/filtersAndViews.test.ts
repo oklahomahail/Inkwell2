@@ -191,7 +191,7 @@ describe('PlotCardFilterEngine', () => {
       const result = filterEngine.filterCards(testCards);
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].chapterId).toBe('chapter1');
+      expect(result.items[0]?.chapterId).toBe('chapter1');
     });
 
     it('should filter by date range correctly', () => {
@@ -221,7 +221,7 @@ describe('PlotCardFilterEngine', () => {
       const result = filterEngine.filterCards(testCards);
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].title).toBe('High Priority Card');
+      expect(result.items[0]?.title).toBe('High Priority Card');
       expect(result.appliedFilters).toContain('Search: "High Priority"');
     });
 
@@ -234,7 +234,7 @@ describe('PlotCardFilterEngine', () => {
       const result = filterEngine.filterCards(testCards);
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].description).toContain('main character');
+      expect(result.items[0]?.description).toContain('main character');
     });
 
     it('should search in notes when enabled', () => {
@@ -246,7 +246,7 @@ describe('PlotCardFilterEngine', () => {
       const result = filterEngine.filterCards(testCards);
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].notes).toContain('major revision');
+      expect(result.items[0]?.notes).toContain('major revision');
     });
 
     it('should support case-sensitive search', () => {
@@ -273,7 +273,7 @@ describe('PlotCardFilterEngine', () => {
       const result = filterEngine.filterCards(testCards);
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].tags).toContain('urgent');
+      expect(result.items[0]?.tags).toContain('urgent');
     });
   });
 
@@ -313,8 +313,8 @@ describe('PlotCardFilterEngine', () => {
       const result = filterEngine.filterCards(testCards);
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].status).toBe(PlotCardStatus.REVISION);
-      expect(result.items[0].title).toContain('Critical');
+      expect(result.items[0]?.status).toBe(PlotCardStatus.REVISION);
+      expect(result.items[0]?.title).toContain('Critical');
     });
   });
 
