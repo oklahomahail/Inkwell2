@@ -1,7 +1,7 @@
 // src/hooks/useProjectSearch.ts
 import { useMemo, useState } from 'react';
 
-import { Project } from '@/types';
+import { Project } from '../domain/types';
 
 import { useProjectMetadata } from './useProjectMetadata';
 
@@ -79,15 +79,14 @@ const fuzzyMatch = (
 
 // Extract searchable text from project
 const getProjectSearchText = (project: Project): { [field: string]: string } => {
-  const wordCount = project.content
-    ? project.content.split(' ').filter((w) => w.length > 0).length
-    : 0;
+  const wordCount = project.metadata?.totalWordCount || 0;
 
   return {
     name: project.name || '',
     description: project.description || '',
-    content: project.content || '',
-    genre: (project as any).genre || '',
+    content:
+      project.chapters?.map((c) => c.scenes?.map((s) => s.content).join(' ')).join(' ') || '',
+    genre: project.metadata?.genre || '',
     chapters: project.chapters?.map((c) => c.title).join(' ') || '',
     characters: project.characters?.map((c) => `${c.name} ${c.role}`).join(' ') || '',
     wordCountText: wordCount.toString(),
@@ -96,7 +95,7 @@ const getProjectSearchText = (project: Project): { [field: string]: string } => 
 
 export const useProjectSearch = (projects: Project[]) => {
   const [filters, setFilters] = useState<SearchFilters>(defaultFilters);
-  const { getProjectMetadata, getAllTags, _getFavoriteProjectIds, _getProjectIdsByTag } =
+  const { getProjectMetadata, getAllTags, getFavoriteProjectIds, getProjectIdsByTag } =
     useProjectMetadata();
 
   // Get all available options for filters
@@ -105,7 +104,7 @@ export const useProjectSearch = (projects: Project[]) => {
     const allTags = new Set(getAllTags());
 
     projects.forEach((project) => {
-      const genre = (project as any).genre;
+      const genre = project.metadata?.genre;
       if (genre) genres.add(genre);
 
       // Add tags from metadata
@@ -210,7 +209,7 @@ export const useProjectSearch = (projects: Project[]) => {
 
       // Filter by genres
       if (filters.genres.length > 0) {
-        const projectGenre = (project as any).genre;
+        const projectGenre = project.metadata?.genre;
         if (!projectGenre || !filters.genres.includes(projectGenre)) {
           return false;
         }
@@ -239,14 +238,16 @@ export const useProjectSearch = (projects: Project[]) => {
           comparison = projectA.name.localeCompare(projectB.name);
           break;
         case 'updated':
-          comparison = projectB.updatedAt - projectA.updatedAt;
+          comparison =
+            new Date(projectB.updatedAt).getTime() - new Date(projectA.updatedAt).getTime();
           break;
         case 'created':
-          comparison = projectB.createdAt - projectA.createdAt;
+          comparison =
+            new Date(projectB.createdAt).getTime() - new Date(projectA.createdAt).getTime();
           break;
         case 'wordCount': {
-          const wordsA = projectA.content?.split(' ').filter((w) => w.length > 0).length || 0;
-          const wordsB = projectB.content?.split(' ').filter((w) => w.length > 0).length || 0;
+          const wordsA = projectA.metadata?.totalWordCount || 0;
+          const wordsB = projectB.metadata?.totalWordCount || 0;
           comparison = wordsB - wordsA;
           break;
         }

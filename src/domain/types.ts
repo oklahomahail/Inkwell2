@@ -48,6 +48,9 @@ export interface Scene {
   summary?: string;
   timelineEventIds?: string[];
   characterIds?: string[];
+  storyDate?: number; // Story timestamp for timeline integration
+  tags?: string[]; // Scene tags for organization
+  notes?: string; // Additional notes about the scene
   createdAt: Date;
   updatedAt: Date;
 }
@@ -59,6 +62,7 @@ export interface Chapter {
   scenes: Scene[];
   totalWordCount: number;
   status: ChapterStatus;
+  projectId?: string; // Reference to parent project
   createdAt: Date;
   updatedAt: Date;
 }
@@ -86,9 +90,11 @@ export interface TimelineEvent {
   description?: string;
   type: TimelineEventType;
   timestamp: number; // Story timestamp, not real time
+  storyDate?: number; // Alternative story date field for compatibility
   chapterIds?: string[];
   sceneIds?: string[];
   characterIds?: string[];
+  tags?: string[]; // Event tags for organization
   metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;

@@ -20,7 +20,7 @@ interface ProjectInsightsProps {
 }
 
 const ProjectInsights: React.FC<ProjectInsightsProps> = ({ compact = false }) => {
-  const { currentProject: _currentProject } = useAppContext();
+  const { state, currentProject: _currentProject } = useAppContext();
   const { getUsageStats, getProjectMetadata, getAllTags, getFavoriteProjectIds } =
     useProjectMetadata();
 
@@ -31,17 +31,18 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ compact = false }) =>
 
     // Calculate writing streaks and patterns
     const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000; // milliseconds in a day
     const weekMs = 7 * dayMs;
 
     // Get projects with recent activity (last 30 days)
-    const recentProjects = state.projects.filter((project) => {
-      const daysSinceUpdate = (now - project.updatedAt) / dayMs;
+    const recentProjects = state.projects.filter((project: any) => {
+      const daysSinceUpdate = (now - new Date(project.updatedAt).getTime()) / dayMs;
       return daysSinceUpdate <= 30;
     });
 
     // Calculate word count growth over time
-    const totalWords = state.projects.reduce((sum, project) => {
-      return sum + (project.content?.split(' ').filter((w) => w.length > 0).length || 0);
+    const totalWords = state.projects.reduce((sum: number, project: any) => {
+      return sum + (project.metadata?.totalWordCount || 0);
     }, 0);
 
     // Estimate reading time (average 200 words per minute)
@@ -51,7 +52,9 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ compact = false }) =>
     const avgCompletion =
       state.projects.length > 0
         ? Math.round(
-            (state.projects.filter((p) => p.content && p.content.length > 1000).length /
+            (state.projects.filter(
+              (p: any) => p.metadata?.totalWordCount && p.metadata.totalWordCount > 1000,
+            ).length /
               state.projects.length) *
               100,
           )
@@ -59,12 +62,12 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ compact = false }) =>
 
     // Find most worked project
     const projectsWithTime = state.projects
-      .map((project) => ({
+      .map((project: any) => ({
         project,
         metadata: getProjectMetadata(project.id),
-        wordCount: project.content?.split(' ').filter((w) => w.length > 0).length || 0,
+        wordCount: project.metadata?.totalWordCount || 0,
       }))
-      .sort((a, b) => b.metadata.totalTimeSpent - a.metadata.totalTimeSpent);
+      .sort((a: any, b: any) => b.metadata.totalTimeSpent - a.metadata.totalTimeSpent);
 
     const mostWorkedProject = projectsWithTime[0];
 
@@ -75,11 +78,13 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ compact = false }) =>
 
     // Genre distribution
     const genreCount: Record<string, number> = {};
-    state.projects.forEach((project) => {
-      const genre = (project as any).genre || 'Unspecified';
+    state.projects.forEach((project: any) => {
+      const genre = project.metadata?.genre || 'Unspecified';
       genreCount[genre] = (genreCount[genre] || 0) + 1;
     });
-    const topGenre = Object.entries(genreCount).sort(([, a], [, b]) => b - a)[0];
+    const topGenre = Object.entries(genreCount).sort(
+      ([, a], [, b]) => (b as number) - (a as number),
+    )[0];
 
     return {
       totalProjects: state.projects.length,

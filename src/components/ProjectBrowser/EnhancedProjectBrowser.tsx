@@ -30,7 +30,8 @@ import {
   getProjectColorClass,
 } from '@/hooks/useProjectMetadata';
 import { useProjectSearch } from '@/hooks/useProjectSearch';
-import { Project } from '@/types';
+
+import { Project } from '../../domain/types';
 
 interface EnhancedProjectBrowserProps {
   onProjectSelect?: (project: Project) => void;
@@ -43,7 +44,7 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
 }) => {
   const { state, currentProject, setCurrentProjectId, updateProject, deleteProject, dispatch } =
     useAppContext();
-  const { getProjectMetadata, toggleFavorite, addTag, removeTag, _getAllTags, recordProjectOpen } =
+  const { getProjectMetadata, toggleFavorite, addTag, removeTag, getAllTags, recordProjectOpen } =
     useProjectMetadata();
 
   const {
@@ -170,7 +171,7 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
   };
 
   const getProjectWordCount = (project: Project): number => {
-    return project.content?.split(' ').filter((w) => w.length > 0).length || 0;
+    return project.metadata?.totalWordCount || 0;
   };
 
   const getGenreIcon = (genre: string) => {
@@ -192,7 +193,7 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
     const { project, matchedFields } = result;
     const metadata = getProjectMetadata(project.id);
     const wordCount = getProjectWordCount(project);
-    const genre = (project as any).genre;
+    const genre = project.metadata?.genre;
     const GenreIcon = genre ? getGenreIcon(genre) : FileText;
 
     return (

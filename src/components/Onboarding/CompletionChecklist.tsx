@@ -271,4 +271,4 @@ export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = 
   );
 };
 
-export default CompletionChecklist;
+export { CompletionChecklistComponent as default };

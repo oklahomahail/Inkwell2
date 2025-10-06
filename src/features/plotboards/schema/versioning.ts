@@ -124,6 +124,23 @@ export class SchemaVersionManager {
   }
 
   /**
+   * Get current schema version
+   */
+  getCurrentVersion(): string {
+    return CURRENT_SCHEMA_VERSION;
+  }
+
+  /**
+   * Migrate data to current version (alias for migrateToCurrentVersion)
+   */
+  async migrate<T>(
+    data: VersionedData<T> | T,
+    options?: MigrationOptions,
+  ): Promise<MigrationResult<VersionedData<T>>> {
+    return this.migrateToCurrentVersion(data, options);
+  }
+
+  /**
    * Compare semantic versions
    */
   compareVersions(v1: string, v2: string): number {
@@ -276,8 +293,8 @@ export class SchemaVersionManager {
 
     for (let i = fromIndex; i < toIndex; i++) {
       path.push({
-        from: versions[i],
-        to: versions[i + 1],
+        from: versions[i] || fromVersion,
+        to: versions[i + 1] || toVersion,
       });
     }
 
@@ -297,7 +314,7 @@ export class SchemaVersionManager {
         schemaVersion: CURRENT_SCHEMA_VERSION,
         updatedAt: now,
         migrationHistory: migrationHistory || (data as VersionedData<T>).migrationHistory,
-      };
+      } as VersionedData<T>;
     }
 
     return {

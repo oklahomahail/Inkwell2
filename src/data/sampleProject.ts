@@ -1,5 +1,5 @@
 // src/data/sampleProject.ts
-import { Project } from '@/types';
+import { Project, CharacterRole, SceneStatus, ChapterStatus } from '../domain/types';
 
 export const createSampleProject = (): Project => {
   return {
@@ -47,17 +47,30 @@ As if to prove her point, the library around them began to shift and change. The
 
 "The game, as they say, is afoot," Holmes declared. "And you, Miss Elena, are about to become part of the greatest mystery you've ever imagined."`,
 
-    createdAt: Date.now() - 7 * 24 * 60 * 60 * 1000, // 7 days ago
-    updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000, // 2 days ago
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
 
     chapters: [
       {
         id: 'chapter-1',
         title: 'The First Night',
-        content: `Elena had worked at the Whitmore Public Library for three years, but she had never stayed past closing time until that Tuesday evening...`,
         order: 1,
-        createdAt: Date.now() - 7 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 6 * 24 * 60 * 60 * 1000,
+        scenes: [
+          {
+            id: 'scene-1-1',
+            title: 'Elena Works Late',
+            content: `Elena had worked at the Whitmore Public Library for three years, but she had never stayed past closing time until that Tuesday evening...`,
+            status: SceneStatus.COMPLETE,
+            order: 1,
+            wordCount: 850,
+            createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+            updatedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+          },
+        ],
+        totalWordCount: 850,
+        status: ChapterStatus.COMPLETE,
+        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
       },
       {
         id: 'chapter-2',
@@ -81,7 +94,7 @@ As if to prove her point, the library around them began to shift and change. The
       {
         id: 'elena-martinez',
         name: 'Elena Martinez',
-        role: 'Protagonist',
+        role: CharacterRole.PROTAGONIST,
         description:
           'A 28-year-old librarian with a quiet demeanor but sharp observational skills. She discovers she has the rare ability to communicate with fictional characters.',
         backstory:
@@ -93,7 +106,7 @@ As if to prove her point, the library around them began to shift and change. The
       {
         id: 'miss-marple',
         name: 'Miss Jane Marple',
-        role: 'Mentor',
+        role: CharacterRole.SUPPORTING,
         description:
           "The famous detective from Agatha Christie's novels, appearing as a wise and gentle guide to help Elena understand her new abilities.",
         backstory:
@@ -105,7 +118,7 @@ As if to prove her point, the library around them began to shift and change. The
       {
         id: 'rose-whitmore',
         name: 'Rose Whitmore',
-        role: 'Victim/Mystery',
+        role: CharacterRole.MINOR,
         description:
           'The previous librarian who died under mysterious circumstances 50 years ago. Her spirit appears in visions and memories.',
         backstory:
