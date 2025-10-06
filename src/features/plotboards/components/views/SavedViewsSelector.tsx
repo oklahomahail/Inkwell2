@@ -353,7 +353,7 @@ interface ViewItemProps {
   onDuplicate: (viewId: string) => void;
   onExport: (viewId: string) => void;
   onEditNameChange: (name: string) => void;
-  editInputRef: React.RefObject<HTMLInputElement>;
+  editInputRef: React.RefObject<HTMLInputElement | null>;
 }
 
 const ViewItem: React.FC<ViewItemProps> = ({

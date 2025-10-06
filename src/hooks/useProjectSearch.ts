@@ -176,7 +176,7 @@ export const useProjectSearch = (projects: Project[]) => {
           relevanceScore =
             metadata.lastOpened > 0
               ? (metadata.lastOpened / Date.now()) * 10
-              : (project.updatedAt / Date.now()) * 10;
+              : (project.updatedAt.getTime() / Date.now()) * 10;
         }
 
         return {

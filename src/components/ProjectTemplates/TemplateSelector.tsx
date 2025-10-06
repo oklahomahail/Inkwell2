@@ -5,6 +5,8 @@ import React, { useState } from 'react';
 import { useAppContext, View } from '@/context/AppContext';
 import { PROJECT_TEMPLATES } from '@/data/sampleProject';
 
+import { ChapterStatus } from '../../domain/types';
+
 interface ProjectTemplate {
   id: string;
   name: string;
@@ -15,7 +17,7 @@ interface ProjectTemplate {
   features: string[];
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   estimatedLength: string;
-  chapters: Array<{ title: string; content: string }>;
+  chapters: Array<{ title: string }>;
   characters: Array<{ name: string; role: string }>;
   beatSheet: Array<{ title: string; description: string }>;
 }
@@ -108,26 +110,27 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ isOpen, onClose, on
       name: projectName || selectedTemplate.name,
       description: projectDescription || selectedTemplate.description,
       content: '',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       genre: selectedTemplate.genre,
       chapters: selectedTemplate.chapters.map((chapter, index) => ({
         id: `chapter-${index + 1}`,
         title: chapter.title,
-        content: chapter.content,
         order: index + 1,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        scenes: [],
+        totalWordCount: 0,
+        status: ChapterStatus.DRAFT,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       })),
       characters: selectedTemplate.characters.map((character, index) => ({
         id: `character-${index + 1}`,
         name: character.name,
         role: character.role,
         description: '',
-        backstory: '',
         traits: [],
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        createdAt: new Date(Date.now()),
+        updatedAt: new Date(Date.now()),
       })),
       beatSheet: selectedTemplate.beatSheet.map((beat, index) => ({
         id: `beat-${index + 1}`,
@@ -136,12 +139,20 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ isOpen, onClose, on
         type: 'plot',
         order: index + 1,
         completed: false,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
       })),
     };
 
-    addProject(newProject);
+    // Convert to AppContext Project format
+    const contextProject = {
+      ...newProject,
+      createdAt: newProject.createdAt.getTime(),
+      updatedAt: newProject.updatedAt.getTime(),
+      characters: [] as never[],
+      beatSheet: newProject.beatSheet as never[],
+    };
+    addProject(contextProject);
     setCurrentProjectId(newProject.id);
 
     // Navigate to appropriate view based on template

@@ -121,7 +121,7 @@ export const NoProjectsEmptyState: React.FC = () => {
       updatedAt: Date.now(),
     };
 
-    addProject({ ...newProject, chapters: [], characters: [], beatSheet: [] });
+    addProject({ ...newProject, chapters: [], characters: [], beatSheet: [] } as any);
     setCurrentProjectId(newProject.id);
     dispatch({ type: 'SET_VIEW', payload: View.Writing });
 
@@ -139,7 +139,38 @@ export const NoProjectsEmptyState: React.FC = () => {
 
   const createSampleProjectDemo = () => {
     const sampleProject = createSampleProject();
-    addProject(sampleProject);
+    // Convert domain Project to AppContext Project format
+    const contextProject = {
+      ...sampleProject,
+      createdAt: sampleProject.createdAt.getTime(),
+      updatedAt: sampleProject.updatedAt.getTime(),
+      characters: [] as never[], // AppContext expects empty characters array
+      beatSheet: [
+        {
+          id: 'opening-image',
+          title: 'Opening Image',
+          description:
+            'Elena working alone in the library after hours, establishing the quiet, mysterious atmosphere.',
+          type: 'plot',
+          order: 1,
+          completed: true,
+          createdAt: Date.now() - 6 * 24 * 60 * 60 * 1000,
+          updatedAt: Date.now() - 6 * 24 * 60 * 60 * 1000,
+        },
+        {
+          id: 'inciting-incident',
+          title: 'The Books Come Alive',
+          description:
+            'At midnight, Elena discovers that fictional characters emerge from the books in the library.',
+          type: 'plot',
+          order: 2,
+          completed: true,
+          createdAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
+          updatedAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
+        },
+      ] as never[],
+    };
+    addProject(contextProject);
     setCurrentProjectId(sampleProject.id);
     dispatch({ type: 'SET_VIEW', payload: View.Writing });
 

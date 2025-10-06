@@ -346,7 +346,7 @@ export class PlotBoardExportSystem {
    */
   private async exportAsCSV(
     board: PlotBoard,
-    options: ExportOptions,
+    _options: ExportOptions,
   ): Promise<{ data: string; mimeType: string }> {
     const headers = [
       'Card Title',

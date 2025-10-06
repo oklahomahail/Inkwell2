@@ -9,6 +9,7 @@ import {
   PlotBoardSorting,
   PlotBoardGrouping,
   PlotCardPriority,
+  PlotCardStatus,
 } from '../types';
 
 /* ========= View Management Types ========= */
@@ -79,7 +80,12 @@ export const DEFAULT_VIEWS: SavedViewData[] = [
       boardId: '',
       name: 'Work in Progress',
       filters: {
-        statuses: ['idea', 'outlined', 'draft', 'revision'],
+        statuses: [
+          PlotCardStatus.IDEA,
+          PlotCardStatus.OUTLINED,
+          PlotCardStatus.DRAFT,
+          PlotCardStatus.REVISION,
+        ],
         priorities: [],
         tags: [],
         characters: [],

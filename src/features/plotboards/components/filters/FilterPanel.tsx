@@ -83,7 +83,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   );
 
   // Handle chapter filter changes
-  const handleChapterChange = useCallback(
+  const _handleChapterChange = useCallback(
     (chapterId: string, checked: boolean) => {
       const currentChapters = filters.chapters || [];
       const newChapters = checked
@@ -471,7 +471,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {Object.entries(PRESET_FILTERS).map(([key, presetFn]) => {
                   const presetEngine = presetFn();
-                  const presetConfig = presetEngine.exportConfig();
+                  const _presetConfig = presetEngine.exportConfig();
 
                   return (
                     <button

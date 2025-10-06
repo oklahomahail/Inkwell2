@@ -135,7 +135,7 @@ describe('VirtualizedColumn', () => {
 
       // Test just above threshold
       const cardsAboveThreshold = createMockCards(51);
-      const { rerender } = render(
+      render(
         <DndContext>
           <SortableContext
             items={cardsAboveThreshold.map((c) => c.id)}

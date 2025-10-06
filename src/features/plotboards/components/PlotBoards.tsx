@@ -90,7 +90,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
     getTemplatesByCategory,
   } = usePlotBoardStore();
 
-  const settingsStore = useSettingsStore();
+  const _settingsStore = useSettingsStore();
   const { chapters } = useChaptersStore();
 
   // Chapter integration
@@ -104,9 +104,9 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showChapterSync, setShowChapterSync] = useState(false);
   const [showBoardSelector, setShowBoardSelector] = useState(false);
-  const [selectedCard, setSelectedCard] = useState<PlotCardType | null>(null);
-  const [selectedColumn, setSelectedColumn] = useState<PlotColumnType | null>(null);
-  const [selectedBoard, setSelectedBoard] = useState<PlotBoardType | null>(null);
+  const [_selectedCard, setSelectedCard] = useState<PlotCardType | null>(null);
+  const [_selectedColumn, setSelectedColumn] = useState<PlotColumnType | null>(null);
+  const [_selectedBoard, setSelectedBoard] = useState<PlotBoardType | null>(null);
 
   // Initialize store
   useEffect(() => {

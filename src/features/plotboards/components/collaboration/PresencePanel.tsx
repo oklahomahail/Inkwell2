@@ -14,7 +14,7 @@ import {
 import { UserAvatarGroup, UserStatusBadge } from './UserAvatar';
 
 interface PresencePanelProps {
-  boardId: string;
+  _boardId: string;
   users: CollaborativeUser[];
   currentUser: CollaborativeUser;
   onUserClick?: (user: CollaborativeUser) => void;
@@ -23,7 +23,7 @@ interface PresencePanelProps {
 }
 
 export const PresencePanel: React.FC<PresencePanelProps> = ({
-  boardId,
+  _boardId,
   users,
   currentUser,
   onUserClick,

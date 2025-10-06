@@ -137,7 +137,7 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
           updateProject({
             ...project,
             name: newName.trim(),
-            updatedAt: new Date().getTime(),
+            updatedAt: new Date(),
           } as any);
         }
         break;
@@ -290,7 +290,7 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <Clock className="w-3 h-3" />
-            <span>{getRelativeTimeString(project.updatedAt)}</span>
+            <span>{getRelativeTimeString(project.updatedAt.getTime())}</span>
           </div>
           {metadata.totalTimeSpent > 0 && (
             <>
