@@ -3,6 +3,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+import { SceneStatus, ChapterStatus, TimelineEventType } from '../../../domain/types';
 import { usePlotBoardStore } from '../store';
 import { PlotCardStatus, PlotCardPriority, PlotColumnType } from '../types';
 import {
@@ -32,8 +33,6 @@ vi.mock('../../../utils/trace', () => ({
 }));
 
 describe('Plot Board Store', () => {
-  let store: ReturnType<typeof usePlotBoardStore>;
-
   beforeEach(() => {
     // Reset the store to initial state
     usePlotBoardStore.setState({
@@ -42,7 +41,6 @@ describe('Plot Board Store', () => {
       lastError: null,
       isLoading: false,
     });
-    store = usePlotBoardStore.getState();
   });
 
   afterEach(() => {
@@ -54,7 +52,7 @@ describe('Plot Board Store', () => {
       const projectId = 'test-project';
       const title = 'Test Board';
 
-      const board = await store.createBoard(projectId, title);
+      const board = await usePlotBoardStore.getState().createBoard(projectId, title);
       const updatedStore = usePlotBoardStore.getState(); // Get updated state
 
       expect(board).toBeDefined();
@@ -70,7 +68,7 @@ describe('Plot Board Store', () => {
       const title = 'Three Act Board';
       const templateId = 'three-act-structure';
 
-      const board = await store.createBoard(projectId, title, templateId);
+      const board = await usePlotBoardStore.getState().createBoard(projectId, title, templateId);
 
       expect(board.title).toBe(title);
       expect(board.columns.length).toBe(3); // Three-act structure
@@ -79,10 +77,10 @@ describe('Plot Board Store', () => {
     });
 
     it('should update a board', async () => {
-      const board = await store.createBoard('project', 'Original Title');
+      const board = await usePlotBoardStore.getState().createBoard('project', 'Original Title');
       const updates = { title: 'Updated Title', description: 'New description' };
 
-      await store.updateBoard(board.id, updates);
+      await usePlotBoardStore.getState().updateBoard(board.id, updates);
 
       const updatedStore = usePlotBoardStore.getState(); // Get updated state
       const updatedBoard = updatedStore.boards[board.id];
@@ -92,20 +90,25 @@ describe('Plot Board Store', () => {
     });
 
     it('should delete a board', async () => {
-      const board = await store.createBoard('project', 'Test Board');
+      const board = await usePlotBoardStore.getState().createBoard('project', 'Test Board');
 
-      await store.deleteBoard(board.id);
+      await usePlotBoardStore.getState().deleteBoard(board.id);
 
-      expect(store.boards[board.id]).toBeUndefined();
-      expect(store.activeBoard).toBeNull();
+      const updatedStore = usePlotBoardStore.getState();
+      expect(updatedStore.boards[board.id]).toBeUndefined();
+      expect(updatedStore.activeBoard).toBeNull();
     });
 
     it('should duplicate a board', async () => {
-      const originalBoard = await store.createBoard('project', 'Original Board');
-      await store.createColumn(originalBoard.id, 'Test Column');
+      const originalBoard = await usePlotBoardStore
+        .getState()
+        .createBoard('project', 'Original Board');
+      await usePlotBoardStore.getState().createColumn(originalBoard.id, 'Test Column');
       const beforeDuplication = usePlotBoardStore.getState(); // Get updated state
 
-      const duplicatedBoard = await store.duplicateBoard(originalBoard.id, 'Duplicated Board');
+      const duplicatedBoard = await usePlotBoardStore
+        .getState()
+        .duplicateBoard(originalBoard.id, 'Duplicated Board');
 
       expect(duplicatedBoard.title).toBe('Duplicated Board');
       expect(duplicatedBoard.id).not.toBe(originalBoard.id);
@@ -120,7 +123,7 @@ describe('Plot Board Store', () => {
     let boardId: string;
 
     beforeEach(async () => {
-      const board = await store.createBoard('project', 'Test Board');
+      const board = await usePlotBoardStore.getState().createBoard('project', 'Test Board');
       boardId = board.id;
     });
 
@@ -129,7 +132,7 @@ describe('Plot Board Store', () => {
       const type = PlotColumnType.ACT;
       const color = '#FF0000';
 
-      const column = await store.createColumn(boardId, title, type, color);
+      const column = await usePlotBoardStore.getState().createColumn(boardId, title, type, color);
 
       expect(column.title).toBe(title);
       expect(column.type).toBe(type);
@@ -142,10 +145,10 @@ describe('Plot Board Store', () => {
     });
 
     it('should update a column', async () => {
-      const column = await store.createColumn(boardId, 'Original Title');
+      const column = await usePlotBoardStore.getState().createColumn(boardId, 'Original Title');
       const updates = { title: 'Updated Title', description: 'New description' };
 
-      await store.updateColumn(column.id, updates);
+      await usePlotBoardStore.getState().updateColumn(column.id, updates);
 
       const updatedStore = usePlotBoardStore.getState();
       const board = updatedStore.boards[boardId];
@@ -155,9 +158,9 @@ describe('Plot Board Store', () => {
     });
 
     it('should delete a column', async () => {
-      const column = await store.createColumn(boardId, 'Test Column');
+      const column = await usePlotBoardStore.getState().createColumn(boardId, 'Test Column');
 
-      await store.deleteColumn(column.id);
+      await usePlotBoardStore.getState().deleteColumn(column.id);
 
       const updatedStore = usePlotBoardStore.getState();
       const board = updatedStore.boards[boardId];
@@ -165,12 +168,14 @@ describe('Plot Board Store', () => {
     });
 
     it('should reorder columns', async () => {
-      const column1 = await store.createColumn(boardId, 'Column 1');
-      const column2 = await store.createColumn(boardId, 'Column 2');
-      const column3 = await store.createColumn(boardId, 'Column 3');
+      const column1 = await usePlotBoardStore.getState().createColumn(boardId, 'Column 1');
+      const column2 = await usePlotBoardStore.getState().createColumn(boardId, 'Column 2');
+      const column3 = await usePlotBoardStore.getState().createColumn(boardId, 'Column 3');
 
       // Reorder: [1,2,3] -> [2,3,1]
-      await store.reorderColumns(boardId, [column2.id, column3.id, column1.id]);
+      await usePlotBoardStore
+        .getState()
+        .reorderColumns(boardId, [column2.id, column3.id, column1.id]);
 
       const updatedStore = usePlotBoardStore.getState();
       const board = updatedStore.boards[boardId];
@@ -186,8 +191,8 @@ describe('Plot Board Store', () => {
     let columnId: string;
 
     beforeEach(async () => {
-      const board = await store.createBoard('project', 'Test Board');
-      const column = await store.createColumn(board.id, 'Test Column');
+      const board = await usePlotBoardStore.getState().createBoard('project', 'Test Board');
+      const column = await usePlotBoardStore.getState().createColumn(board.id, 'Test Column');
       boardId = board.id;
       columnId = column.id;
     });
@@ -196,7 +201,7 @@ describe('Plot Board Store', () => {
       const title = 'Test Card';
       const description = 'Test description';
 
-      const card = await store.createCard(columnId, title, description);
+      const card = await usePlotBoardStore.getState().createCard(columnId, title, description);
 
       expect(card.title).toBe(title);
       expect(card.description).toBe(description);
@@ -206,48 +211,48 @@ describe('Plot Board Store', () => {
     });
 
     it('should update a card', async () => {
-      const card = await store.createCard(columnId, 'Original Title');
+      const card = await usePlotBoardStore.getState().createCard(columnId, 'Original Title');
       const updates = {
         title: 'Updated Title',
         status: PlotCardStatus.DRAFT,
         priority: PlotCardPriority.HIGH,
       };
 
-      await store.updateCard(card.id, updates);
+      await usePlotBoardStore.getState().updateCard(card.id, updates);
 
-      const result = store.findCardById(card.id);
+      const result = usePlotBoardStore.getState().findCardById(card.id);
       expect(result?.card.title).toBe(updates.title);
       expect(result?.card.status).toBe(updates.status);
       expect(result?.card.priority).toBe(updates.priority);
     });
 
     it('should delete a card', async () => {
-      const card = await store.createCard(columnId, 'Test Card');
+      const card = await usePlotBoardStore.getState().createCard(columnId, 'Test Card');
 
-      await store.deleteCard(card.id);
+      await usePlotBoardStore.getState().deleteCard(card.id);
 
-      const result = store.findCardById(card.id);
+      const result = usePlotBoardStore.getState().findCardById(card.id);
       expect(result).toBeNull();
     });
 
     it('should move a card between columns', async () => {
-      const column2 = await store.createColumn(boardId, 'Column 2');
-      const card = await store.createCard(columnId, 'Test Card');
+      const column2 = await usePlotBoardStore.getState().createColumn(boardId, 'Column 2');
+      const card = await usePlotBoardStore.getState().createCard(columnId, 'Test Card');
 
-      await store.moveCard(card.id, column2.id, 0);
+      await usePlotBoardStore.getState().moveCard(card.id, column2.id, 0);
 
-      const result = store.findCardById(card.id);
+      const result = usePlotBoardStore.getState().findCardById(card.id);
       expect(result?.card.columnId).toBe(column2.id);
       expect(result?.column.id).toBe(column2.id);
     });
 
     it('should reorder cards within a column', async () => {
-      const card1 = await store.createCard(columnId, 'Card 1');
-      const card2 = await store.createCard(columnId, 'Card 2');
-      const card3 = await store.createCard(columnId, 'Card 3');
+      const card1 = await usePlotBoardStore.getState().createCard(columnId, 'Card 1');
+      const card2 = await usePlotBoardStore.getState().createCard(columnId, 'Card 2');
+      const card3 = await usePlotBoardStore.getState().createCard(columnId, 'Card 3');
 
       // Reorder: [1,2,3] -> [3,1,2]
-      await store.reorderCards(columnId, [card3.id, card1.id, card2.id]);
+      await usePlotBoardStore.getState().reorderCards(columnId, [card3.id, card1.id, card2.id]);
 
       const updatedStore = usePlotBoardStore.getState();
       const board = updatedStore.boards[boardId];
@@ -260,24 +265,24 @@ describe('Plot Board Store', () => {
     });
 
     it('should link a card to a scene', async () => {
-      const card = await store.createCard(columnId, 'Test Card');
+      const card = await usePlotBoardStore.getState().createCard(columnId, 'Test Card');
       const sceneId = 'scene-1';
       const chapterId = 'chapter-1';
 
-      await store.linkCardToScene(card.id, sceneId, chapterId);
+      await usePlotBoardStore.getState().linkCardToScene(card.id, sceneId, chapterId);
 
-      const result = store.findCardById(card.id);
+      const result = usePlotBoardStore.getState().findCardById(card.id);
       expect(result?.card.sceneId).toBe(sceneId);
       expect(result?.card.chapterId).toBe(chapterId);
     });
 
     it('should link a card to timeline events', async () => {
-      const card = await store.createCard(columnId, 'Test Card');
+      const card = await usePlotBoardStore.getState().createCard(columnId, 'Test Card');
       const eventIds = ['event-1', 'event-2'];
 
-      await store.linkCardToTimeline(card.id, eventIds);
+      await usePlotBoardStore.getState().linkCardToTimeline(card.id, eventIds);
 
-      const result = store.findCardById(card.id);
+      const result = usePlotBoardStore.getState().findCardById(card.id);
       expect(result?.card.timelineEventIds).toEqual(eventIds);
     });
   });
@@ -287,21 +292,25 @@ describe('Plot Board Store', () => {
     let columnId: string;
 
     beforeEach(async () => {
-      const board = await store.createBoard('project', 'Test Board');
-      const column = await store.createColumn(board.id, 'Test Column');
+      const board = await usePlotBoardStore.getState().createBoard('project', 'Test Board');
+      const column = await usePlotBoardStore.getState().createColumn(board.id, 'Test Column');
       boardId = board.id;
       columnId = column.id;
     });
 
     it('should find cards by status', async () => {
-      await store.createCard(columnId, 'Draft Card 1');
-      await store.createCard(columnId, 'Draft Card 2');
-      const card3 = await store.createCard(columnId, 'Complete Card');
+      await usePlotBoardStore.getState().createCard(columnId, 'Draft Card 1');
+      await usePlotBoardStore.getState().createCard(columnId, 'Draft Card 2');
+      const card3 = await usePlotBoardStore.getState().createCard(columnId, 'Complete Card');
 
-      await store.updateCard(card3.id, { status: PlotCardStatus.COMPLETE });
+      await usePlotBoardStore.getState().updateCard(card3.id, { status: PlotCardStatus.COMPLETE });
 
-      const draftCards = store.getCardsByStatus(boardId, PlotCardStatus.IDEA);
-      const completeCards = store.getCardsByStatus(boardId, PlotCardStatus.COMPLETE);
+      const draftCards = usePlotBoardStore
+        .getState()
+        .getCardsByStatus(boardId, PlotCardStatus.IDEA);
+      const completeCards = usePlotBoardStore
+        .getState()
+        .getCardsByStatus(boardId, PlotCardStatus.COMPLETE);
 
       expect(draftCards.length).toBe(2);
       expect(completeCards.length).toBe(1);
@@ -309,11 +318,11 @@ describe('Plot Board Store', () => {
     });
 
     it('should search cards by text', async () => {
-      await store.createCard(columnId, 'Important Scene');
-      await store.createCard(columnId, 'Regular Chapter');
-      await store.createCard(columnId, 'Another Important Plot Point');
+      await usePlotBoardStore.getState().createCard(columnId, 'Important Scene');
+      await usePlotBoardStore.getState().createCard(columnId, 'Regular Chapter');
+      await usePlotBoardStore.getState().createCard(columnId, 'Another Important Plot Point');
 
-      const results = store.searchCards('important');
+      const results = usePlotBoardStore.getState().searchCards('important');
 
       expect(results.length).toBe(2);
       expect(results[0].title).toContain('Important');
@@ -321,14 +330,14 @@ describe('Plot Board Store', () => {
     });
 
     it('should bulk update cards', async () => {
-      const card1 = await store.createCard(columnId, 'Card 1');
-      const card2 = await store.createCard(columnId, 'Card 2');
+      const card1 = await usePlotBoardStore.getState().createCard(columnId, 'Card 1');
+      const card2 = await usePlotBoardStore.getState().createCard(columnId, 'Card 2');
       const updates = { status: PlotCardStatus.DRAFT, priority: PlotCardPriority.HIGH };
 
-      await store.bulkUpdateCards([card1.id, card2.id], updates);
+      await usePlotBoardStore.getState().bulkUpdateCards([card1.id, card2.id], updates);
 
-      const result1 = store.findCardById(card1.id);
-      const result2 = store.findCardById(card2.id);
+      const result1 = usePlotBoardStore.getState().findCardById(card1.id);
+      const result2 = usePlotBoardStore.getState().findCardById(card2.id);
 
       expect(result1?.card.status).toBe(PlotCardStatus.DRAFT);
       expect(result1?.card.priority).toBe(PlotCardPriority.HIGH);
@@ -342,7 +351,6 @@ describe('Scene Integration', () => {
   const mockChapter: Chapter = {
     id: 'chapter-1',
     title: 'Chapter 1',
-    summary: 'Opening chapter',
     scenes: [
       {
         id: 'scene-1',
@@ -350,6 +358,8 @@ describe('Scene Integration', () => {
         content: 'A long scene with lots of content for testing',
         summary: 'The story begins',
         wordCount: 500,
+        status: SceneStatus.DRAFT,
+        order: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -359,12 +369,15 @@ describe('Scene Integration', () => {
         content: 'Short',
         summary: 'Conflict arises',
         wordCount: 50,
+        status: SceneStatus.DRAFT,
+        order: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
     ],
     order: 1,
-    wordCount: 550,
+    totalWordCount: 550,
+    status: ChapterStatus.DRAFT,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -435,14 +448,22 @@ describe('Timeline Integration', () => {
     {
       id: 'event-1',
       title: 'Important Event',
-      storyDate: new Date('2023-01-01'),
+      type: TimelineEventType.PLOT_POINT,
+      timestamp: new Date('2023-01-01').getTime(),
+      storyDate: new Date('2023-01-01').getTime(),
       tags: ['battle', 'climax'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
     {
       id: 'event-2',
       title: 'Character Meeting',
-      storyDate: new Date('2023-01-02'),
+      type: TimelineEventType.CHARACTER_ARC,
+      timestamp: new Date('2023-01-02').getTime(),
+      storyDate: new Date('2023-01-02').getTime(),
       tags: ['character', 'introduction'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   ];
 
@@ -453,13 +474,19 @@ describe('Timeline Integration', () => {
       {
         id: 'scene-1',
         title: 'Battle Scene',
-        storyDate: new Date('2023-01-01'),
+        content: 'Epic battle content',
+        storyDate: new Date('2023-01-01').getTime(),
         tags: ['battle'],
+        status: SceneStatus.DRAFT,
+        order: 0,
+        wordCount: 300,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
     ],
     order: 1,
+    totalWordCount: 0,
+    status: ChapterStatus.DRAFT,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -516,8 +543,26 @@ describe('Progress Tracking', () => {
     ] as any[];
 
     const chapters = {
-      'chapter-1': { id: 'chapter-1', title: 'Chapter 1' },
-      'chapter-2': { id: 'chapter-2', title: 'Chapter 2' },
+      'chapter-1': {
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        order: 1,
+        scenes: [],
+        totalWordCount: 0,
+        status: ChapterStatus.DRAFT,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      'chapter-2': {
+        id: 'chapter-2',
+        title: 'Chapter 2',
+        order: 2,
+        scenes: [],
+        totalWordCount: 0,
+        status: ChapterStatus.DRAFT,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     };
 
     const metrics = calculatePlotProgress(cards, chapters);
@@ -549,7 +594,16 @@ describe('Progress Tracking', () => {
     ] as any[];
 
     const chapters = {
-      'chapter-1': { id: 'chapter-1', title: 'Chapter 1' },
+      'chapter-1': {
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        order: 1,
+        scenes: [],
+        totalWordCount: 0,
+        status: ChapterStatus.DRAFT,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     };
 
     const metrics = calculatePlotProgress(cards, chapters);

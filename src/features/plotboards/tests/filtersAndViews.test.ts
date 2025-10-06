@@ -332,8 +332,8 @@ describe('PlotCardFilterEngine', () => {
       expect(ideaStatus?.count).toBe(1);
 
       // Check priority order (should be critical, high, medium, low)
-      expect(stats.availablePriorities[0].value).toBe(PlotCardPriority.CRITICAL);
-      expect(stats.availablePriorities[1].value).toBe(PlotCardPriority.HIGH);
+      expect(stats.availablePriorities[0]?.value).toBe(PlotCardPriority.CRITICAL);
+      expect(stats.availablePriorities[1]?.value).toBe(PlotCardPriority.HIGH);
     });
 
     it('should calculate date range correctly', () => {
@@ -496,7 +496,7 @@ describe('SavedViewManager', () => {
       const defaultViews = allViews.filter((v) => v.view.isDefault);
 
       expect(defaultViews).toHaveLength(DEFAULT_VIEWS.length);
-      expect(defaultViews[0].view.boardId).toBe(testBoardId);
+      expect(defaultViews[0]?.view.boardId).toBe(testBoardId);
     });
 
     it('should set initial current view', () => {

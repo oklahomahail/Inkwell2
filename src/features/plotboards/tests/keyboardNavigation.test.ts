@@ -5,7 +5,14 @@ import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
-import { PlotBoard, PlotColumnType, PlotCardStatus, PlotCardPriority } from '../types';
+import {
+  PlotBoard,
+  PlotColumnType,
+  PlotCardStatus,
+  PlotCardPriority,
+  DEFAULT_BOARD_SETTINGS,
+  DEFAULT_COLUMN_SETTINGS,
+} from '../types';
 
 const mockBoard: PlotBoard = {
   id: 'test-board',
@@ -45,7 +52,9 @@ const mockBoard: PlotBoard = {
           updatedAt: new Date(),
         },
       ],
-      settings: {},
+      settings: { ...DEFAULT_COLUMN_SETTINGS },
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
     {
       id: 'col-2',
@@ -68,10 +77,12 @@ const mockBoard: PlotBoard = {
           updatedAt: new Date(),
         },
       ],
-      settings: {},
+      settings: { ...DEFAULT_COLUMN_SETTINGS },
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   ],
-  settings: {},
+  settings: { ...DEFAULT_BOARD_SETTINGS },
   createdAt: new Date(),
   updatedAt: new Date(),
 };
