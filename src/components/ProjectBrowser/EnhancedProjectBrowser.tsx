@@ -44,8 +44,14 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
 }) => {
   const { state, currentProject, setCurrentProjectId, updateProject, deleteProject, dispatch } =
     useAppContext();
-  const { getProjectMetadata, toggleFavorite, addTag, removeTag, getAllTags, recordProjectOpen } =
-    useProjectMetadata();
+  const {
+    getProjectMetadata,
+    toggleFavorite,
+    addTag,
+    removeTag,
+    getAllTags: _getAllTags,
+    recordProjectOpen,
+  } = useProjectMetadata();
 
   const {
     results,
@@ -59,7 +65,7 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
     setSorting,
     applyQuickFilter,
     searchStats,
-  } = useProjectSearch(state.projects);
+  } = useProjectSearch(state.projects as any);
 
   const [showFilters, setShowFilters] = useState(false);
   const [contextMenu, setContextMenu] = useState<{
@@ -131,8 +137,8 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
           updateProject({
             ...project,
             name: newName.trim(),
-            updatedAt: Date.now(),
-          });
+            updatedAt: new Date().getTime(),
+          } as any);
         }
         break;
       case 'delete':

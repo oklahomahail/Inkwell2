@@ -32,7 +32,7 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ compact = false }) =>
     // Calculate writing streaks and patterns
     const now = Date.now();
     const dayMs = 24 * 60 * 60 * 1000; // milliseconds in a day
-    const weekMs = 7 * dayMs;
+    const _weekMs = 7 * dayMs;
 
     // Get projects with recent activity (last 30 days)
     const recentProjects = state.projects.filter((project: any) => {

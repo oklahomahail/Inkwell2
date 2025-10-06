@@ -487,10 +487,10 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
                   draggedCardId={keyboardNav.draggedCardId}
                   onCardFocus={(cardId) => keyboardNav.setFocus(cardId, activeColumn.id)}
                   onKeyboardDragStart={keyboardNav.startDrag}
-                  onBeforeCardDelete={async (cardId, cardTitle) => {
+                  onBeforeCardDelete={async (_cardId, _cardTitle) => {
                     // This is for the drag overlay, operations are handled in the main board
                   }}
-                  onBeforeCardCreate={async (columnTitle, cardTitle) => {
+                  onBeforeCardCreate={async (_columnTitle, _cardTitle) => {
                     // This is for the drag overlay, operations are handled in the main board
                   }}
                   itemHeight={144}
@@ -508,10 +508,10 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
                   draggedCardId={keyboardNav.draggedCardId}
                   onCardFocus={(cardId) => keyboardNav.setFocus(cardId, activeColumn.id)}
                   onKeyboardDragStart={keyboardNav.startDrag}
-                  onBeforeCardDelete={async (cardId, cardTitle) => {
+                  onBeforeCardDelete={async (_cardId, _cardTitle) => {
                     // This is for the drag overlay, operations are handled in the main board
                   }}
-                  onBeforeCardCreate={async (columnTitle, cardTitle) => {
+                  onBeforeCardCreate={async (_columnTitle, _cardTitle) => {
                     // This is for the drag overlay, operations are handled in the main board
                   }}
                 />

@@ -77,16 +77,16 @@ As if to prove her point, the library around them began to shift and change. The
         title: 'The Secret Keepers',
         content: `Elena's hands trembled as she reached for the nearest shelf to steady herself...`,
         order: 2,
-        createdAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       },
       {
         id: 'chapter-3',
         title: 'Clues in the Shadows',
         content: `As the library transformed around them, Elena felt like she was stepping into a living story...`,
         order: 3,
-        createdAt: Date.now() - 3 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 24 * 60 * 60 * 1000, // 1 day ago
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
       },
     ],
 
@@ -100,8 +100,8 @@ As if to prove her point, the library around them began to shift and change. The
         backstory:
           'Elena studied Literature in college and has always felt more comfortable in the world of books than in social situations. She lives alone in a small apartment above the old bookstore downtown.',
         traits: ['Observant', 'Introverted', 'Curious', 'Loyal'],
-        createdAt: Date.now() - 6 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 4 * 24 * 60 * 60 * 1000,
+        createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
       },
       {
         id: 'miss-marple',
@@ -112,8 +112,8 @@ As if to prove her point, the library around them began to shift and change. The
         backstory:
           'Emerges from the mystery section every midnight to help solve cases that bridge the fictional and real worlds.',
         traits: ['Wise', 'Perceptive', 'Kind', 'Experienced'],
-        createdAt: Date.now() - 6 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 4 * 24 * 60 * 60 * 1000,
+        createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
       },
       {
         id: 'rose-whitmore',
@@ -124,10 +124,25 @@ As if to prove her point, the library around them began to shift and change. The
         backstory:
           "Daughter of the library's founder, she was passionate about books and helping the community. Her murder was never solved.",
         traits: ['Determined', 'Compassionate', 'Mysterious', 'Tragic'],
-        createdAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 3 * 24 * 60 * 60 * 1000,
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
       },
     ],
+
+    timelineEvents: [],
+    writingSessions: [],
+    metadata: {
+      totalWordCount: 2850,
+      targetWordCount: 80000,
+      genre: 'Mystery',
+      tags: ['mystery', 'library', 'supernatural'],
+    },
+    settings: {
+      autoSaveEnabled: true,
+      autoSaveInterval: 300000,
+      backupEnabled: true,
+      theme: 'dark' as const,
+    },
 
     beatSheet: [
       {
@@ -138,8 +153,8 @@ As if to prove her point, the library around them began to shift and change. The
         type: 'plot',
         order: 1,
         completed: true,
-        createdAt: Date.now() - 6 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 6 * 24 * 60 * 60 * 1000,
+        createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
       },
       {
         id: 'inciting-incident',
@@ -149,8 +164,8 @@ As if to prove her point, the library around them began to shift and change. The
         type: 'plot',
         order: 2,
         completed: true,
-        createdAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
       },
       {
         id: 'first-plot-point',
@@ -160,8 +175,8 @@ As if to prove her point, the library around them began to shift and change. The
         type: 'plot',
         order: 3,
         completed: true,
-        createdAt: Date.now() - 4 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 4 * 24 * 60 * 60 * 1000,
+        createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
       },
       {
         id: 'first-investigation',
@@ -171,8 +186,8 @@ As if to prove her point, the library around them began to shift and change. The
         type: 'plot',
         order: 4,
         completed: false,
-        createdAt: Date.now() - 3 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       },
       {
         id: 'midpoint-twist',
@@ -182,8 +197,8 @@ As if to prove her point, the library around them began to shift and change. The
         type: 'plot',
         order: 5,
         completed: false,
-        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 24 * 60 * 60 * 1000,
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
       },
     ],
   };
