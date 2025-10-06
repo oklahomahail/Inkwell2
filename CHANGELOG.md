@@ -2,6 +2,138 @@
 
 All notable changes to this project are documented here.
 
+## [1.0.6] – 2025-10-06
+
+### 🚀 **Major Feature Release: Comprehensive Project Management & Onboarding**
+
+#### Added
+
+- **Interactive Guided Tour System** — Complete first-time user onboarding experience
+  - Spotlight-based step-by-step feature introduction with keyboard navigation
+  - Progressive feature discovery with contextual hints and prioritized tooltips
+  - Smart tour state management with persistent progress tracking
+  - Multiple tour types: first-time users, feature-specific, and contextual guidance
+  - Integration with empty states including option to explore sample projects
+  - Auto-start for first-time users with manual tour restart capability
+
+- **Sample Demo Project** — "The Midnight Library" showcasing all features
+  - Complete multi-chapter story structure with rich metadata
+  - Character profiles, plot threads, and timeline events
+  - Genre classification and writing goals demonstration
+  - Integrated with guided tour for hands-on feature exploration
+
+- **Project Template System** — Genre-based project creation
+  - Pre-configured templates for Mystery, Romance, Sci-Fi, Fantasy, Literary Fiction, and Thriller
+  - Template-specific chapter structures, character archetypes, and plot frameworks
+  - Customizable genre selection with smart defaults
+  - Seamless integration with project creation workflow
+
+- **Enhanced Project Browser** — Advanced project management interface
+  - Fuzzy search across project names, descriptions, content, and tags
+  - Advanced filtering by favorites, genres, tags, and project status
+  - Multiple sorting options: recent, alphabetical, word count, progress, creation date
+  - Visual project cards with rich metadata display
+  - Project statistics: word count, completion percentage, last modified
+
+- **Project Favoriting System** — Organize important projects
+  - One-click favorite/unfavorite with persistent storage
+  - Filter favorites for quick access to priority projects
+  - Visual indicators throughout the interface
+  - Integrated with search and sorting functionality
+
+- **Project Tagging System** — Flexible project organization
+  - Custom tag creation and management with color coding
+  - Tag-based filtering and search capabilities
+  - Bulk tagging operations for efficient organization
+  - Tag analytics and usage statistics
+
+- **Project Context Menu** — Right-click actions for efficient project management
+  - Quick actions: favorite, rename, duplicate, delete, export
+  - Contextual actions based on project state and user permissions
+  - Keyboard shortcuts for power users
+  - Confirmation dialogs for destructive actions
+
+- **Project Insights Dashboard** — Writing analytics and progress tracking
+  - Writing velocity charts and trends analysis
+  - Time spent tracking with daily/weekly/monthly breakdowns
+  - Genre distribution visualization across all projects
+  - Word count trends and writing streak tracking
+  - Goal progress monitoring and achievement tracking
+
+- **Enhanced Dashboard V2** — Unified project and insights interface
+  - Toggleable views between project browser and analytics
+  - Smart empty state handling with onboarding guidance
+  - Responsive design optimized for various screen sizes
+  - Integration with tour system for contextual help
+
+#### Enhanced Features
+
+- **Advanced Search Capabilities**
+  - Fuzzy matching algorithm with relevance scoring
+  - Multi-field search across all project metadata
+  - Real-time search results with debounced input
+  - Search history and saved search functionality
+
+- **Project Metadata Management**
+  - Comprehensive metadata tracking with local storage persistence
+  - Automatic metadata updates on project interactions
+  - Backup and restore functionality for project data
+  - Migration support for existing project structures
+
+#### Technical Implementation
+
+- **New React Hooks**
+  - `useProjectMetadata`: Manages favorites, tags, and project-related metadata
+  - `useProjectSearch`: Provides sophisticated search and filtering capabilities
+  - `useTourState`: Handles guided tour progression and state management
+
+- **New Components**
+  - `GuidedTour`: Interactive tour system with spotlight effects
+  - `EnhancedProjectBrowser`: Advanced project management interface
+  - `ProjectInsights`: Analytics dashboard with charts and statistics
+  - `EnhancedDashboardV2`: Unified dashboard with project and insights views
+  - `ProjectTemplateSelector`: Genre-based template selection interface
+
+- **Enhanced Services**
+  - Tour progression tracking with localStorage persistence
+  - Project template generation and customization
+  - Advanced search indexing and fuzzy matching algorithms
+  - Project analytics calculation and trend analysis
+
+### Performance
+
+- Optimized search performance with debounced input and indexed searching
+- Efficient metadata storage with selective localStorage updates
+- Lazy loading for project insights and analytics components
+- Smooth animations and transitions throughout the interface
+- Memory-efficient tour state management with cleanup
+
+### User Experience
+
+- **First-Time User Journey**: Complete onboarding from account creation to first project
+- **Progressive Disclosure**: Features introduced gradually based on user progress
+- **Contextual Help**: Always-available assistance through tour system
+- **Power User Features**: Advanced search, bulk operations, and keyboard shortcuts
+- **Visual Feedback**: Clear progress indicators, loading states, and success confirmations
+
+### Testing
+
+- Comprehensive test coverage for all new hooks and components
+- User journey testing from onboarding through advanced features
+- Performance testing with large project datasets
+- Cross-browser compatibility verification
+- Accessibility compliance testing
+
+### Documentation
+
+- Updated README with comprehensive feature descriptions
+- Detailed onboarding guide for new users
+- Advanced features documentation for power users
+- Developer documentation for contributing to the project
+- API documentation for new hooks and services
+
+---
+
 ## [1.0.5] – 2025-10-05
 
 ### 🔧 **TypeScript & Developer Experience Improvements**

@@ -14,7 +14,9 @@ import {
 } from 'lucide-react';
 import React from 'react';
 
+import { useTour, ONBOARDING_STEPS } from '@/components/Onboarding/TourProvider';
 import { useAppContext, View } from '@/context/AppContext';
+import { createSampleProject } from '@/data/sampleProject';
 
 interface EmptyStateProps {
   title: string;
@@ -107,6 +109,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
 
 export const NoProjectsEmptyState: React.FC = () => {
   const { addProject, setCurrentProjectId, dispatch } = useAppContext();
+  const { startTour, setTourSteps, tourState } = useTour();
 
   const createNewProject = async () => {
     const newProject = {
@@ -121,10 +124,33 @@ export const NoProjectsEmptyState: React.FC = () => {
     addProject({ ...newProject, chapters: [], characters: [], beatSheet: [] });
     setCurrentProjectId(newProject.id);
     dispatch({ type: 'SET_VIEW', payload: View.Writing });
+
+    // Start onboarding tour for first-time users
+    if (tourState.isFirstTimeUser) {
+      setTourSteps(ONBOARDING_STEPS);
+      setTimeout(() => {
+        startTour('full-onboarding');
+      }, 1500); // Give time for view transition
+    }
+  };
+
+  const createSampleProjectDemo = () => {
+    const sampleProject = createSampleProject();
+    addProject(sampleProject);
+    setCurrentProjectId(sampleProject.id);
+    dispatch({ type: 'SET_VIEW', payload: View.Writing });
+
+    // Optional: Show feature discovery instead of full tour for sample project
+    if (tourState.isFirstTimeUser) {
+      setTimeout(() => {
+        startTour('feature-tour');
+      }, 1000);
+    }
   };
 
   const tips = [
     'Start with a simple idea - you can always expand later',
+    'Take the interactive tour to learn key features',
     'Use the planning view to organize your story structure',
     'Set daily word count goals to maintain momentum',
     'Focus mode helps eliminate distractions while writing',
@@ -138,6 +164,10 @@ export const NoProjectsEmptyState: React.FC = () => {
       actionButton={{
         label: 'Create Your First Project',
         onClick: createNewProject,
+      }}
+      secondaryAction={{
+        label: 'Explore Sample Project',
+        onClick: createSampleProjectDemo,
       }}
       tips={tips}
       illustration={
