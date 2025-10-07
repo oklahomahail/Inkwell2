@@ -41,7 +41,7 @@ const onboardingSlice = createSlice({
   initialState,
   reducers: {
     initializeProject: (
-      state,
+      state: OnboardingState,
       action: PayloadAction<{ projectId: string; uiMode?: 'beginner' | 'pro' }>,
     ) => {
       const { projectId, uiMode = 'beginner' } = action.payload;
@@ -60,13 +60,12 @@ const onboardingSlice = createSlice({
         // Track project creation
         analyticsService.track('A1_PROJECT_CREATED', {
           projectId,
-          timestamp: Date.now(),
-          uiMode,
+          projectName: projectId,
         });
       }
     },
 
-    advanceStep: (state, action: PayloadAction<{ projectId: string }>) => {
+    advanceStep: (state: OnboardingState, action: PayloadAction<{ projectId: string }>) => {
       const { projectId } = action.payload;
       const project = state.byProject[projectId];
 
@@ -74,7 +73,7 @@ const onboardingSlice = createSlice({
 
       const currentIndex = FIRST_DRAFT_STEPS.indexOf(project.current);
       if (currentIndex < FIRST_DRAFT_STEPS.length - 1) {
-        const nextStep = FIRST_DRAFT_STEPS[currentIndex + 1];
+        const nextStep = FIRST_DRAFT_STEPS[currentIndex + 1]!;
         project.current = nextStep;
         project.stepStartTimes[nextStep] = Date.now();
 
@@ -83,13 +82,12 @@ const onboardingSlice = createSlice({
           projectId,
           step: nextStep,
           stepIndex: currentIndex + 1,
-          timeFromProjectStart: Date.now() - project.startedAt,
         });
       }
     },
 
     markStepCompleted: (
-      state,
+      state: OnboardingState,
       action: PayloadAction<{ projectId: string; step: OnboardingStep }>,
     ) => {
       const { projectId, step } = action.payload;
@@ -105,8 +103,8 @@ const onboardingSlice = createSlice({
       analyticsService.track('first_draft_step_completed', {
         projectId,
         step,
-        duration: stepDuration,
-        timeFromProjectStart: Date.now() - project.startedAt,
+        stepIndex: FIRST_DRAFT_STEPS.indexOf(step),
+        stepDuration: stepDuration,
       });
 
       // Track specific activation funnel events
@@ -114,7 +112,7 @@ const onboardingSlice = createSlice({
         case 'scene':
           analyticsService.track('A2_SCENE_CREATED', {
             projectId,
-            timeFromProjectStart: Date.now() - project.startedAt,
+            sceneType: 'first_scene',
           });
           break;
 
@@ -123,8 +121,7 @@ const onboardingSlice = createSlice({
             analyticsService.track('A3_300_WORDS_SAVED', {
               projectId,
               wordCount: project.wordCount,
-              timeFromProjectStart: Date.now() - project.startedAt,
-              achievedTarget: Date.now() - project.startedAt < 15 * 60 * 1000, // 15 minutes
+              timeToReach: Date.now() - project.startedAt,
             });
           }
           break;
@@ -132,8 +129,7 @@ const onboardingSlice = createSlice({
         case 'export':
           analyticsService.track('A4_EXPORTED', {
             projectId,
-            timeFromProjectStart: Date.now() - project.startedAt,
-            completedFirstDraftPath: true,
+            exportFormat: 'first_draft',
           });
           break;
       }
@@ -142,7 +138,7 @@ const onboardingSlice = createSlice({
       if (project.isInFirstDraftPath) {
         const currentIndex = FIRST_DRAFT_STEPS.indexOf(step);
         if (currentIndex < FIRST_DRAFT_STEPS.length - 1) {
-          const nextStep = FIRST_DRAFT_STEPS[currentIndex + 1];
+          const nextStep = FIRST_DRAFT_STEPS[currentIndex + 1]!;
           project.current = nextStep;
           project.stepStartTimes[nextStep] = Date.now();
         } else {
@@ -151,7 +147,7 @@ const onboardingSlice = createSlice({
           analyticsService.track('first_draft_path_completed', {
             projectId,
             totalDuration: Date.now() - project.startedAt,
-            finalWordCount: project.wordCount,
+            stepsCompleted: FIRST_DRAFT_STEPS.length,
           });
         }
       }
@@ -171,8 +167,7 @@ const onboardingSlice = createSlice({
         const timeToFirstKeystroke = Date.now() - project.startedAt;
         analyticsService.track('TIME_TO_FIRST_KEYSTROKE_MS', {
           projectId,
-          timeToFirstKeystroke,
-          step: project.current,
+          timeMs: timeToFirstKeystroke,
         });
       }
 
@@ -206,25 +201,22 @@ const onboardingSlice = createSlice({
           case 'panel_opened':
             analyticsService.track('PANELS_OPENED_BEFORE_FIRST_SAVE', {
               projectId,
-              panel: details,
-              step: project.current,
-              timeFromStart: Date.now() - project.startedAt,
+              panelCount: 1,
+              panels: [details || 'unknown'],
             });
             break;
 
           case 'settings_visited':
             analyticsService.track('SETTINGS_VISITS_BEFORE_DRAFT', {
               projectId,
-              step: project.current,
-              timeFromStart: Date.now() - project.startedAt,
+              visitCount: 1,
             });
             break;
 
           case 'power_tools_opened':
             analyticsService.track('POWER_TOOLS_BEFORE_DRAFT', {
               projectId,
-              step: project.current,
-              timeFromStart: Date.now() - project.startedAt,
+              from: 'menu',
             });
             break;
         }
@@ -244,10 +236,8 @@ const onboardingSlice = createSlice({
 
       analyticsService.track('first_draft_path_exited', {
         projectId,
-        reason,
-        completedSteps: Object.keys(project.completed),
-        timeFromStart: Date.now() - project.startedAt,
-        wordCount: project.wordCount,
+        lastStep: project.current,
+        exitReason: reason,
       });
     },
 
@@ -276,9 +266,8 @@ const onboardingSlice = createSlice({
       ) {
         analyticsService.track('nudge_banner_shown', {
           projectId,
-          timeSinceCreation,
-          wordCount: project.wordCount,
-          currentStep: project.current,
+          nudgeType: 'comeback_reminder',
+          timingMs: timeSinceCreation,
         });
       }
     },
