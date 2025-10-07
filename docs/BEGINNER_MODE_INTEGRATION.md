@@ -437,7 +437,158 @@ describe('First Draft Path', () => {
 - [ ] Power Tools menu is discoverable and useful
 - [ ] Analytics track all funnel steps accurately
 
-## 🎉 Success Criteria
+## 🏢 Integration Matrix (Publisher vs SaaS Deployment)
+
+For white-label partners and multi-tenant deployments:
+
+| Component                    | Tenant-Aware | Configurable        | Notes                                                            |
+| ---------------------------- | ------------ | ------------------- | ---------------------------------------------------------------- |
+| **Feature Flag Presets**     | ✅ Yes       | Environment vars    | `VITE_TENANT_ID` controls preset selection                       |
+| **First Draft Path Steps**   | ✅ Yes       | Feature flags       | Each step can be enabled/disabled per tenant                     |
+| **Educational Empty States** | ✅ Yes       | Template system     | Copy and examples customizable via `VITE_CUSTOM_ONBOARDING_COPY` |
+| **Starter Templates**        | ✅ Yes       | Data configuration  | Template sets filtered by `VITE_CUSTOM_TEMPLATES_ENABLED`        |
+| **Power Tools Menu**         | ✅ Yes       | Feature flags       | Tools shown/hidden per tenant feature entitlements               |
+| **Just-in-Time AI Setup**    | ✅ Yes       | Provider config     | AI providers configurable per tenant                             |
+| **Analytics Events**         | ✅ Yes       | Service integration | Tenant ID automatically included in all events                   |
+| **Word Count Targets**       | ✅ Yes       | Environment vars    | `VITE_TARGET_WORD_COUNT` customizable per deployment             |
+| **Time Limits**              | ✅ Yes       | Environment vars    | `VITE_SUCCESS_TIME_LIMIT` adjustable for different markets       |
+| **UI Mode Toggle**           | ✅ Yes       | User preferences    | Default mode set via `VITE_DEFAULT_UI_MODE`                      |
+
+### **Partner Configuration Example**
+
+```typescript
+// White-label partner configuration
+const partnerConfig = {
+  tenantId: 'partner-xyz',
+  brandName: 'Partner Writing Studio',
+  customTemplates: ['business-writing', 'technical-docs'],
+  wordCountTarget: 500, // Higher target for business users
+  timeLimit: 1800000, // 30 minutes instead of 15
+  aiProviders: ['openai'], // Exclude Claude for cost control
+  powerToolsEnabled: false, // Simplified experience
+};
+```
+
+---
+
+## 📊 Success Dashboard Mockup
+
+Real-time activation funnel visualization for monitoring and optimization:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Activation Funnel Dashboard                 │
+├─────────────────────────────────────────────────────────────────┤
+│  A1 → A2 → A3 → A4                    Success Rate: 64.2% ↑7%  │
+│  🚀   📝   ✍️   📤                                              │
+│ 1000  847  642  580                   Avg Time: 8.3min ↓2.1min │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─── Conversion Rates ───┐    ┌─── Drop-off Analysis ───┐     │
+│  │ A1→A2: 84.7% ✅        │    │ Project Creation: 2.1%   │     │
+│  │ A2→A3: 75.8% ✅        │    │ Chapter Addition: 15.3%  │     │
+│  │ A3→A4: 90.3% ✅        │    │ Scene Creation: 20.5%    │     │
+│  └─────────────────────────┘    │ Focus Writing: 9.7%     │     │
+│                                 │ Export Success: 9.7%    │     │
+│  ┌─── Time Distribution ───┐    └─────────────────────────┘     │
+│  │     0-5min: ████ 28%    │                                   │
+│  │    5-10min: ██████ 42%  │    ┌─── Real-time Alerts ───┐     │
+│  │   10-15min: ███ 22%     │    │ ⚠️ Error spike +15%     │     │
+│  │     15min+: ██ 8%       │    │ 📈 A2→A3 improved +3%   │     │
+│  └─────────────────────────┘    │ 🎯 Daily target: 89%    │     │
+│                                 └─────────────────────────┘     │
+├─────────────────────────────────────────────────────────────────┤
+│  Last 7 Days: [Chart showing daily activation rates]           │
+│  ████▆▇█▅▆▇ (Trend: +2.3% week-over-week)                      │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### **Dashboard Implementation**
+
+```typescript
+// Analytics service integration
+const ActivationDashboard = () => {
+  const metrics = useActivationMetrics();
+  const alerts = useRealTimeAlerts();
+
+  return (
+    <div className="dashboard-grid">
+      <FunnelChart data={metrics.funnel} />
+      <ConversionRates rates={metrics.conversions} />
+      <DropoffAnalysis points={metrics.dropoffs} />
+      <TimeDistribution data={metrics.timeToValue} />
+      <AlertsPanel alerts={alerts} />
+      <TrendChart data={metrics.weekly} />
+    </div>
+  );
+};
+```
+
+---
+
+## 🚨 Rollback & Recovery
+
+### **Emergency Disable (One-Line Commands)**
+
+```bash
+# Instant disable via environment variable
+echo "ENABLE_BEGINNER_MODE=false" >> .env
+
+# Or via feature flag service
+curl -X POST /api/flags/beginner_mode_enabled -d '{"enabled": false}'
+
+# Emergency circuit breaker for all onboarding
+echo "VITE_EMERGENCY_DISABLE_BEGINNER=true" >> .env
+```
+
+### **Monitoring & Alerts**
+
+Set up alerts for these critical metrics:
+
+- **Error rate >5%**: Auto-disable if onboarding errors spike
+- **Completion rate <40%**: Alert dev team if funnel performance degrades
+- **Time to A3 >20min**: May indicate UX friction or performance issues
+
+### **Rollback Procedures**
+
+1. **Immediate (< 1 minute)**
+
+   ```bash
+   # Set Beginner Mode percentage to 0%
+   BEGINNER_MODE_PERCENT=0.00
+   ```
+
+2. **Graceful (< 5 minutes)**
+
+   ```bash
+   # Disable new enrollments, let existing complete
+   VITE_FIRST_DRAFT_PATH_ENABLED=false
+   ```
+
+3. **Full Rollback (< 15 minutes)**
+   ```bash
+   # Complete system disable with fallback to original UI
+   ENABLE_BEGINNER_MODE=false
+   git revert HEAD~1  # If needed
+   ```
+
+### **Health Check Endpoints**
+
+```typescript
+// Add to your monitoring system
+GET /api/health/beginner-mode
+{
+  "enabled": true,
+  "enrollment_rate": 0.10,
+  "error_rate": 0.018,
+  "avg_completion_time": 498000,
+  "status": "healthy"
+}
+```
+
+---
+
+## 🎉 Validation & Continuous Improvement
 
 ### Quantitative Goals
 
