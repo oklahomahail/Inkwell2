@@ -1,4 +1,5 @@
 // src/components/Navigation/PowerToolsMenu.tsx
+// Updated to resolve TypeScript compilation errors
 import {
   Wrench,
   Search,
