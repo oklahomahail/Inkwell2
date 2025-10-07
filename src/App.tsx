@@ -21,9 +21,11 @@ import {
 } from './components/Recovery/StorageRecoveryBanner';
 import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
+// Pages
 // Context and providers
 import { useAppContext } from './context/AppContext';
 import { useEditorContext } from './context/EditorContext';
+import Login from './pages/Login';
 // Error boundaries
 // Services
 import { connectivityService } from './services/connectivityService';
@@ -52,6 +54,13 @@ function AppShell() {
 
   if (isHealthRoute) {
     return <HealthCheck />;
+  }
+
+  // Check for login route
+  const isLoginRoute = window.location.pathname === '/login';
+
+  if (isLoginRoute) {
+    return <Login />;
   }
 
   // storage recovery

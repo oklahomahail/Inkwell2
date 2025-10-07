@@ -4,11 +4,15 @@
   "installCommand": "pnpm install",
   "devCommand": "pnpm dev",
   "framework": "vite",
-  "rewrites": [
+  "routes": [
+    { "src": "/api/login", "dest": "/api/login.ts" },
     {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
-    }
+      "src": "/(favicon\\.ico|manifest\\.webmanifest|manifest\\.json|robots\\.txt|sw\\.js|workbox-.*|assets/.*|vite\\.svg|icons/.*)$",
+      "dest": "/$1"
+    },
+    { "src": "/login", "dest": "/index.html" },
+    { "src": "/health", "dest": "/index.html" },
+    { "src": "/(.*)", "dest": "/api/edge-auth" }
   ],
   "headers": [
     {
