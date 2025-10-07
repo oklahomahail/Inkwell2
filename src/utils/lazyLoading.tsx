@@ -127,7 +127,7 @@ export function trackLazyLoadEnd(componentName: string) {
           start: performance.timeOrigin + lazyLoadMetrics[componentName].startTime,
           end: performance.timeOrigin + lazyLoadMetrics[componentName].endTime!,
         });
-      } catch (_e) {
+      } catch {
         // Ignore performance measurement errors
       }
     }

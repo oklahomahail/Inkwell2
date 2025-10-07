@@ -115,7 +115,7 @@ export function JustInTimeAI({
           setShowMockOption(true);
         }
       }
-    } catch (_error) {
+    } catch {
       setValidationError('Failed to connect to AI service');
       setShowMockOption(true);
     } finally {
@@ -123,7 +123,7 @@ export function JustInTimeAI({
     }
   };
 
-  const getProviderInfo = (provider: 'claude' | 'openai') => {
+  const getProviderInfo = (provider: 'claude' | 'openai' | 'mock') => {
     switch (provider) {
       case 'claude':
         return {
@@ -139,6 +139,14 @@ export function JustInTimeAI({
           description: 'Popular AI model with broad capabilities',
           keyFormat: 'sk-...',
           signupUrl: 'https://platform.openai.com/',
+          recommended: false,
+        };
+      case 'mock':
+        return {
+          name: 'Demo Mode',
+          description: 'Mock AI responses for testing',
+          keyFormat: 'demo-key',
+          signupUrl: '#',
           recommended: false,
         };
     }

@@ -118,6 +118,24 @@ export interface AnalyticsEvents {
     projectId?: string;
   };
 
+  // Power Tools Menu Events
+  power_menu_opened: BaseEvent & {
+    source: 'keyboard' | 'click';
+    projectId?: string;
+  };
+
+  POWER_TOOLS_BEFORE_DRAFT: BaseEvent & {
+    templateId?: string;
+    from?: 'menu' | 'shortcut';
+    projectId?: string;
+  };
+
+  power_tool_used: BaseEvent & {
+    tool: string;
+    success?: boolean;
+    projectId?: string;
+  };
+
   ai_request_retry_success: BaseEvent & {
     context: string;
     attempts: number;

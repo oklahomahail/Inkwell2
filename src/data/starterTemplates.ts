@@ -448,7 +448,7 @@ export function createProjectFromTemplate(
     },
 
     // Chapters with generated IDs
-    chapters: template.chapters.map((chapter, index) => ({
+    chapters: template.chapters.map((chapter, _index) => ({
       ...chapter,
       id: `${projectId}-${chapter.id}`,
       projectId,
@@ -464,7 +464,7 @@ export function createProjectFromTemplate(
         id: `${projectId}-${scene.id}`,
         projectId,
         chapterId: `${projectId}-${scene.chapterId}`,
-        filename: formatSceneFilename(projectName, chapterIndex, sceneIndex),
+        filename: formatSceneFilename(projectName, chapterIndex, _index),
         createdAt: Date.now(),
         updatedAt: Date.now(),
         content: scene.content || '', // Ensure content is never undefined

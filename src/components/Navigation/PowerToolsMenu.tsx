@@ -2,7 +2,7 @@
 import {
   Wrench,
   Search,
-  Timeline,
+  Clock,
   Users,
   GitBranch,
   FileText,
@@ -18,8 +18,8 @@ import React, { useState, useRef } from 'react';
 import { analyticsService } from '../../services/analyticsService';
 import { featureFlagService } from '../../services/featureFlagService';
 import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 interface PowerTool {
@@ -66,7 +66,7 @@ export function PowerToolsMenu({ projectId, onToolSelect }: PowerToolsMenuProps)
       id: 'timeline',
       name: 'Timeline',
       description: 'Visual timeline with POV lanes and conflict detection',
-      icon: Timeline,
+      icon: Clock,
       category: 'structure',
       keywords: ['timeline', 'chronology', 'events', 'pov', 'sequence'],
       onClick: () => handleToolClick('timeline', '/timeline'),
@@ -159,18 +159,17 @@ export function PowerToolsMenu({ projectId, onToolSelect }: PowerToolsMenuProps)
   const handleToolClick = (toolId: string, route?: string) => {
     // Track power tool usage
     analyticsService.track('power_tool_used', {
-      toolId,
+      tool: toolId,
+      success: true,
       projectId,
-      fromSearch: searchQuery.length > 0,
-      searchQuery: searchQuery || undefined,
     });
 
     // Track friction indicator if user is in first draft path
     if (projectId) {
       analyticsService.track('POWER_TOOLS_BEFORE_DRAFT', {
         projectId,
-        toolId,
-        hasSearchQuery: searchQuery.length > 0,
+        templateId: toolId,
+        from: 'menu',
       });
     }
 
@@ -193,8 +192,8 @@ export function PowerToolsMenu({ projectId, onToolSelect }: PowerToolsMenuProps)
 
       // Track power menu opened
       analyticsService.track('power_menu_opened', {
+        source: 'click',
         projectId,
-        trigger: 'button_click',
       });
     } else {
       setSearchQuery('');
