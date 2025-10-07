@@ -168,6 +168,117 @@ export interface AnalyticsEvents {
     persistent: boolean;
   };
 
+  // Nudge and engagement events
+  nudge_clicked: BaseEvent & {
+    projectId?: string;
+    nudgeType: string;
+    action?: string;
+    wordCount?: number;
+    currentStep?: string;
+  };
+
+  nudge_dismissed: BaseEvent & {
+    projectId?: string;
+    nudgeType: string;
+    wordCount?: number;
+    currentStep?: string;
+    timeSinceCreation?: number;
+  };
+
+  power_tools_quick_access: BaseEvent & {
+    source: 'click' | 'keyboard';
+    projectId?: string;
+  };
+
+  // First draft and onboarding events
+  first_draft_step_viewed: BaseEvent & {
+    step: string;
+    stepIndex: number;
+    projectId?: string;
+  };
+
+  first_draft_path_completed: BaseEvent & {
+    projectId?: string;
+    totalDuration: number;
+    stepsCompleted: number;
+  };
+
+  first_draft_step_started: BaseEvent & {
+    step: string;
+    stepIndex: number;
+    projectId?: string;
+  };
+
+  first_draft_step_completed: BaseEvent & {
+    step: string;
+    stepIndex: number;
+    projectId?: string;
+    stepDuration: number;
+  };
+
+  first_draft_path_exited: BaseEvent & {
+    projectId?: string;
+    lastStep: string;
+    exitReason: string;
+  };
+
+  // Activation funnel events
+  A1_PROJECT_CREATED: BaseEvent & {
+    projectId?: string;
+    projectName?: string;
+  };
+
+  A2_SCENE_CREATED: BaseEvent & {
+    projectId?: string;
+    sceneType?: string;
+  };
+
+  A3_300_WORDS_SAVED: BaseEvent & {
+    projectId?: string;
+    wordCount: number;
+    timeToReach: number;
+  };
+
+  A4_EXPORTED: BaseEvent & {
+    projectId?: string;
+    exportFormat?: string;
+  };
+
+  // UI and settings events
+  ui_mode_changed: BaseEvent & {
+    oldMode: string;
+    newMode: string;
+    reason?: string;
+  };
+
+  ui_mode_change_failed: BaseEvent & {
+    attemptedMode: string;
+    error: string;
+  };
+
+  // Performance tracking
+  TIME_TO_FIRST_KEYSTROKE_MS: BaseEvent & {
+    projectId?: string;
+    timeMs: number;
+  };
+
+  PANELS_OPENED_BEFORE_FIRST_SAVE: BaseEvent & {
+    projectId?: string;
+    panelCount: number;
+    panels: string[];
+  };
+
+  SETTINGS_VISITS_BEFORE_DRAFT: BaseEvent & {
+    projectId?: string;
+    visitCount: number;
+  };
+
+  nudge_banner_shown: BaseEvent & {
+    projectId?: string;
+    nudgeType: string;
+    timingMs?: number;
+  };
+
   // Feature flag events
   feature_flag_changed: BaseEvent & {
     flag: string;

@@ -15,8 +15,8 @@ import {
   advanceStep,
   exitFirstDraftPath,
 } from '../../state/onboarding/onboardingSlice';
-import { Button } from '../ui/button';
-import { Card, CardContent } from '../ui/card';
+import { Button } from '../ui/Button';
+import { Card, CardContent } from '../ui/Card';
 import { Progress } from '../ui/progress';
 
 interface FirstDraftPathProps {
@@ -96,7 +96,7 @@ export function FirstDraftPath({
     analyticsService.track('first_draft_step_viewed', {
       projectId,
       step: currentStep,
-      timeFromStart: Date.now() - projectOnboarding.startedAt,
+      stepIndex: STEPS_DATA.findIndex((s) => s.key === currentStep),
     });
   }, [currentStep, projectId, projectOnboarding]);
 
@@ -117,8 +117,8 @@ export function FirstDraftPath({
   const handlePathComplete = () => {
     analyticsService.track('first_draft_path_completed', {
       projectId,
-      totalDuration: Date.now() - projectOnboarding.startedAt,
-      finalWordCount: wordProgress.current,
+      totalDuration: Date.now() - (projectOnboarding?.startedAt || Date.now()),
+      stepsCompleted: STEPS_DATA.length,
     });
     onPathComplete?.();
   };

@@ -11,8 +11,8 @@ import {
   selectCurrentStep,
 } from '../../state/onboarding/onboardingSlice';
 import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Card, CardContent } from '../ui/card';
+import { Button } from '../ui/Button';
+import { Card, CardContent } from '../ui/Card';
 import { Progress } from '../ui/progress';
 
 interface ActivationNudgeProps {
@@ -166,7 +166,7 @@ export function ActivationAnalytics({ projectId }: { projectId: string }) {
     setMetrics({
       A1_PROJECT_CREATED: true, // Project exists
       A2_SCENE_CREATED: !!completed.scene,
-      A3_300_WORDS_SAVED: wordProgress.hasReachedTarget,
+      A3_300_WORDS_SAVED: wordProgress?.hasReachedTarget || false,
       A4_EXPORTED: !!completed.export,
       timeToA3,
       success: timeToA3 ? timeToA3 < 15 * 60 * 1000 : false, // 15 minutes

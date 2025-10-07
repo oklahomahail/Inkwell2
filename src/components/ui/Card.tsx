@@ -37,6 +37,11 @@ export const CardContent: React.FC<{ children: React.ReactNode; className?: stri
   className = '',
 }) => <div className={cn('px-6 py-4', className)}>{children}</div>;
 
+export const CardTitle: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className = '',
+}) => <h3 className={cn('text-lg font-semibold text-gray-900', className)}>{children}</h3>;
+
 export const CardFooter: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
   className = '',

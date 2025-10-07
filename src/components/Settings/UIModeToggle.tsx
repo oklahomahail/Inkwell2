@@ -4,13 +4,13 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { analyticsService } from '../../services/analyticsService';
-import { featureFlagService, UIMode } from '../../services/featureFlagService';
-import { getPresetForMode, presetToFlags } from '../../services/featureFlagService.presets';
+import { featureFlagService } from '../../services/featureFlagService';
+import { getPresetForMode, presetToFlags, UIMode } from '../../services/featureFlagService.presets';
 import { updateGlobalSettings, exitFirstDraftPath } from '../../state/onboarding/onboardingSlice';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
 
@@ -38,10 +38,9 @@ export function UIModeToggle({
     try {
       // Track the mode change
       analyticsService.track('ui_mode_changed', {
-        projectId,
-        fromMode: currentMode,
-        toMode: newMode,
-        trigger: 'settings_toggle',
+        oldMode: currentMode,
+        newMode: newMode,
+        reason: 'settings_toggle',
       });
 
       // Apply feature flags for the new mode
@@ -82,9 +81,7 @@ export function UIModeToggle({
       console.error('Failed to change UI mode:', error);
 
       analyticsService.track('ui_mode_change_failed', {
-        projectId,
-        fromMode: currentMode,
-        toMode: newMode,
+        attemptedMode: newMode,
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     } finally {

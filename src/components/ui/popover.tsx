@@ -21,16 +21,16 @@ interface PopoverTriggerProps {
 const PopoverContext = React.createContext<{
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  triggerRef: React.RefObject<HTMLElement>;
+  triggerRef: React.RefObject<HTMLElement | null>;
 }>({
   isOpen: false,
   setIsOpen: () => {},
-  triggerRef: { current: null },
+  triggerRef: { current: null as HTMLElement | null },
 });
 
 export const Popover: React.FC<PopoverProps> = ({ open, onOpenChange, children }) => {
   const [isOpen, setIsOpen] = useState(open ?? false);
-  const triggerRef = useRef<HTMLElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   const handleOpenChange = (newOpen: boolean) => {
     setIsOpen(newOpen);
@@ -58,7 +58,10 @@ export const PopoverTrigger: React.FC<PopoverTriggerProps> = ({ children, asChil
   };
 
   if (asChild) {
-    return React.cloneElement(children as React.ReactElement, {
+    const childElement = children as React.ReactElement<any>;
+    const props = childElement.props || {};
+    return React.cloneElement(childElement, {
+      ...props,
       ref: triggerRef,
       onClick: handleClick,
     });

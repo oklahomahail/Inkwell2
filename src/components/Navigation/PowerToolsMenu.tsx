@@ -215,7 +215,7 @@ export function PowerToolsMenu({ projectId, onToolSelect }: PowerToolsMenuProps)
   const groupedTools = filteredTools.reduce(
     (acc, tool) => {
       if (!acc[tool.category]) acc[tool.category] = [];
-      acc[tool.category].push(tool);
+      acc[tool.category]!.push(tool);
       return acc;
     },
     {} as Record<string, PowerTool[]>,
@@ -337,7 +337,7 @@ export function PowerToolsMenu({ projectId, onToolSelect }: PowerToolsMenuProps)
 export function PowerToolsButton({
   projectId,
   onToolSelect,
-  size = 'sm',
+  size: _size = 'sm',
 }: PowerToolsMenuProps & { size?: 'sm' | 'xs' }) {
   const showPowerMenu = featureFlagService.isEnabled('ui_showPowerMenu');
 
@@ -347,8 +347,8 @@ export function PowerToolsButton({
 
   const handleClick = () => {
     analyticsService.track('power_tools_quick_access', {
+      source: 'click',
       projectId,
-      size,
     });
 
     // Open a simplified tools menu or navigate to tools page
@@ -358,7 +358,7 @@ export function PowerToolsButton({
   return (
     <Button
       variant="ghost"
-      size={size}
+      size="sm"
       onClick={handleClick}
       className="h-8 w-8 p-0"
       title="Power Tools"
@@ -377,7 +377,7 @@ export function usePowerToolsShortcuts() {
         event.preventDefault();
 
         analyticsService.track('power_menu_opened', {
-          trigger: 'keyboard_shortcut',
+          source: 'keyboard',
         });
 
         // Trigger power tools menu open
