@@ -299,6 +299,116 @@ body {
   @apply text-slate-600 dark:text-slate-400;
 }
 
+/* ===================
+   INKWELL BRAND UTILITIES
+   =================== */
+
+@layer utilities {
+  /* Inkwell Motion Utilities */
+  .transition-ink {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .pulse-ink {
+    animation: ink-pulse 1s ease-in-out infinite alternate;
+  }
+
+  .hover-ink {
+    @apply transform transition-ink hover:scale-102;
+  }
+
+  .glow-ink {
+    filter: drop-shadow(0 0 8px rgb(91 140 255 / 30%));
+  }
+}
+
+@layer components {
+  /* Inkwell Button Styles */
+  .btn-ink-primary {
+    @apply bg-ink-primary text-white px-4 py-2 rounded-lg font-medium transition-ink hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-ink-primary focus:ring-offset-2;
+  }
+
+  .btn-ink-secondary {
+    @apply border border-ink-border bg-ink-surface text-ink-text px-4 py-2 rounded-lg font-medium transition-ink hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-ink-primary focus:ring-offset-2;
+  }
+
+  /* Inkwell Card Styles */
+  .card-ink {
+    @apply bg-ink-surface border border-ink-border rounded-lg p-6 transition-ink hover:shadow-lg;
+  }
+
+  /* Inkwell Text Styles */
+  .text-ink-brand {
+    @apply text-ink-primary font-display font-semibold tracking-wide;
+  }
+
+  .text-ink-heading {
+    @apply text-ink-text font-display font-semibold;
+  }
+
+  .text-ink-body {
+    @apply text-ink-text font-body leading-relaxed;
+  }
+
+  .text-ink-muted {
+    @apply text-ink-muted font-body;
+  }
+}
+
+/* Inkwell Brand Animations */
+@keyframes ink-pulse {
+  from {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes ink-fill {
+  from {
+    background-position: 0% 100%;
+    opacity: 0;
+  }
+
+  to {
+    background-position: 0% 0%;
+    opacity: 1;
+  }
+}
+
+@keyframes ink-spread {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Inkwell Autosave Indicator */
+.ink-save-pulse {
+  animation: ink-pulse 1.5s ease-in-out;
+}
+
+/* Inkwell Loading Animation */
+.ink-loading {
+  animation: ink-fill 2s ease-in-out infinite;
+  background: linear-gradient(180deg, #5b8cff 0%, transparent 100%);
+  background-size: 100% 200%;
+}
+
 /* Responsive Design */
 @media (width <= 640px) {
   .analytics-view {

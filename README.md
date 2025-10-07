@@ -357,7 +357,8 @@ MIT License © 2025 Inkwell Authors
 📚 **[User Guide](USER_GUIDE.md)** - Complete guide for writers using Inkwell  
 🚀 **[Deployment Guide](DEPLOYMENT.md)** - Instructions for deploying to production  
 🎓 **[Beginner Mode Integration Guide](docs/BEGINNER_MODE_INTEGRATION.md)** - Revolutionary 15-minute onboarding system with 60%+ activation improvement  
-🤖 **[AI Services Guide](docs/AI_SERVICES.md)** - Enhanced Claude AI system with robust error handling  
+🪶 **[Inkwell Brand Guide](docs/BRANDING_GUIDE.md)** - Complete visual identity system with colors, typography, motion, and components  
+🤖 **[AI Services Guide](docs/AI_SERVICES.md)** - Enhanced Claude AI system with robust error handling
 ⚡ **[Performance Guardrails Guide](docs/PERFORMANCE_GUARDRAILS.md)** - Optimization system for large projects  
 🎨 **[Plot Boards Guide](docs/PLOT_BOARDS.md)** - Complete documentation for the Plot Boards feature  
 🎯 **[Enhanced Onboarding System Guide](src/components/Onboarding/README.md)** - World-class 8-layer onboarding system with accessibility and analytics

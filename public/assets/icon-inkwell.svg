@@ -1,0 +1,15 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g id="inkwell-icon">
+    <!-- Ink droplet with quill nib fusion -->
+    <path d="M12 3C12.8284 3 13.5 3.67157 13.5 4.5V7.5C13.5 8.32843 12.8284 9 12 9C11.1716 9 10.5 8.32843 10.5 7.5V4.5C10.5 3.67157 11.1716 3 12 3Z" fill="currentColor" opacity="0.8"/>
+    
+    <!-- Main droplet body -->
+    <path d="M12 8C15.314 8 18 10.686 18 14C18 17.314 15.314 20 12 20C8.686 20 6 17.314 6 14C6 10.686 8.686 8 12 8Z" fill="currentColor"/>
+    
+    <!-- Inner highlight -->
+    <ellipse cx="10.5" cy="12.5" rx="1.5" ry="2" fill="currentColor" opacity="0.3"/>
+    
+    <!-- Quill nib detail -->
+    <path d="M11.5 9.5L12.5 9.5C12.7761 9.5 13 9.72386 13 10V11C13 11.2761 12.7761 11.5 12.5 11.5L11.5 11.5C11.2239 11.5 11 11.2761 11 11V10C11 9.72386 11.2239 9.5 11.5 9.5Z" fill="currentColor" opacity="0.6"/>
+  </g>
+</svg>
