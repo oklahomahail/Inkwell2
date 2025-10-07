@@ -4,25 +4,11 @@ module.exports = {
   darkMode: 'class', // Enable class-based dark mode (optional)
 theme: {
     extend: {
-      // Inkwell Brand Color System
       colors: {
+        // Inkwell Brand Color System
         ink: {
           primary: '#5B8CFF',
           accent: '#FFD580',
-          bg: '#0B0E13',
-          surface: '#1A1E2B',
-          text: '#E6E8EE',
-          muted: '#9EA4B8',
-          border: '#2C3242',
-          success: '#52E19F',
-          error: '#FF5C7A',
-        },
-      },
-      colors: {
-        // Inkwell brand colors (primary)
-        ink: {
-          primary: '#5B8CFF',
-          accent: '#FFD580', 
           bg: '#0B0E13',
           surface: '#1A1E2B',
           text: '#E6E8EE',
