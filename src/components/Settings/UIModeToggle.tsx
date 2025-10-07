@@ -252,7 +252,11 @@ export function UIModeToggle({
 }
 
 // Compact toggle for navigation bar
-export function UIModeQuickToggle({ projectId, currentMode, onModeChange }: UIModeToggleProps) {
+export function UIModeQuickToggle({
+  projectId: _projectId,
+  currentMode,
+  onModeChange,
+}: UIModeToggleProps) {
   return (
     <Button
       variant="ghost"

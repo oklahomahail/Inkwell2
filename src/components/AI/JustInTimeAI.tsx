@@ -5,11 +5,10 @@ import React, { useState } from 'react';
 import { aiConfigService } from '../../services/aiConfigService';
 import { analyticsService } from '../../services/analyticsService';
 import { featureFlagService } from '../../services/featureFlagService';
-import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
-import { Input } from '../ui/input';
+import { Button } from '../ui/Button';
+import { Dialog } from '../ui/dialog';
+import { Input } from '../ui/Input';
 import { Label } from '../ui/label';
 
 interface JustInTimeAIProps {
@@ -116,7 +115,7 @@ export function JustInTimeAI({
           setShowMockOption(true);
         }
       }
-    } catch (error) {
+    } catch (_error) {
       setValidationError('Failed to connect to AI service');
       setShowMockOption(true);
     } finally {
@@ -280,26 +279,34 @@ export function JustInTimeAI({
           </div>
 
           {validationError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{validationError}</AlertDescription>
-            </Alert>
+            <div className="rounded-md bg-red-50 p-4">
+              <div className="flex">
+                <AlertCircle className="h-5 w-5 text-red-400" />
+                <div className="ml-3">
+                  <p className="text-sm text-red-800">{validationError}</p>
+                </div>
+              </div>
+            </div>
           )}
 
           {showMockOption && (
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                Having trouble? You can{' '}
-                <button
-                  onClick={handleUseMock}
-                  className="font-medium text-blue-600 hover:text-blue-700 underline"
-                >
-                  try demo mode instead
-                </button>
-                .
-              </AlertDescription>
-            </Alert>
+            <div className="rounded-md bg-blue-50 p-4">
+              <div className="flex">
+                <Info className="h-5 w-5 text-blue-400" />
+                <div className="ml-3">
+                  <p className="text-sm text-blue-800">
+                    Having trouble? You can{' '}
+                    <button
+                      onClick={handleUseMock}
+                      className="font-medium text-blue-600 hover:text-blue-700 underline"
+                    >
+                      try demo mode instead
+                    </button>
+                    .
+                  </p>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
@@ -365,20 +372,22 @@ export function JustInTimeAI({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {currentStep === 'complete' ? 'Setup Complete!' : 'AI Writing Assistant'}
-          </DialogTitle>
-          {currentStep !== 'complete' && (
-            <DialogDescription>
-              Quick setup to enable "{requestedAction}" and other AI features.
-            </DialogDescription>
-          )}
-        </DialogHeader>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">
+              {currentStep === 'complete' ? 'Setup Complete!' : 'AI Writing Assistant'}
+            </h2>
+            {currentStep !== 'complete' && (
+              <p className="text-sm text-gray-600 mt-1">
+                Quick setup to enable "{requestedAction}" and other AI features.
+              </p>
+            )}
+          </div>
 
-        {getStepContent()}
-      </DialogContent>
+          {getStepContent()}
+        </div>
+      </div>
     </Dialog>
   );
 }

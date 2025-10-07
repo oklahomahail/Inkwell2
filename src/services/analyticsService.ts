@@ -85,6 +85,39 @@ export interface AnalyticsEvents {
 
   ai_config_cleared: BaseEvent;
 
+  // AI Setup Events
+  ai_setup_abandoned: BaseEvent & {
+    projectId?: string;
+    requestedAction: string;
+    step: string;
+    reason: string;
+  };
+
+  ai_setup_mock_selected: BaseEvent & {
+    projectId?: string;
+    requestedAction: string;
+    reason: string;
+  };
+
+  ai_provider_selected: BaseEvent & {
+    provider: string;
+    projectId?: string;
+    requestedAction: string;
+  };
+
+  ai_setup_completed: BaseEvent & {
+    provider: string;
+    projectId?: string;
+    requestedAction: string;
+    setupDuration: number;
+  };
+
+  ai_action_requested: BaseEvent & {
+    action: string;
+    hasSelectedText: boolean;
+    projectId?: string;
+  };
+
   ai_request_retry_success: BaseEvent & {
     context: string;
     attempts: number;

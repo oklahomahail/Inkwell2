@@ -457,7 +457,7 @@ export function createProjectFromTemplate(
     })),
 
     // Scenes with generated IDs and proper filenames
-    scenes: template.scenes.map((scene, sceneIndex) => {
+    scenes: template.scenes.map((scene, _index) => {
       const chapterIndex = template.chapters.findIndex((c) => c.id === scene.chapterId);
       return {
         ...scene,

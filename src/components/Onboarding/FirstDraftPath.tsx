@@ -87,7 +87,7 @@ export function FirstDraftPath({
     selectIsInFirstDraftPath(state, projectId),
   );
 
-  const [startTime] = useState(Date.now());
+  const [_startTime] = useState(Date.now());
 
   useEffect(() => {
     if (!projectOnboarding) return;
@@ -168,7 +168,7 @@ export function FirstDraftPath({
         {STEPS_DATA.map((stepData, index) => {
           const completed = isCompleted(stepData.key);
           const current = isCurrentStep(stepData.key);
-          const pending = isPending(stepData.key);
+          const _pending = isPending(stepData.key);
 
           return (
             <Card
