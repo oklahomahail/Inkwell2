@@ -7,11 +7,13 @@ import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
 import CommandPaletteUI from './components/CommandPalette/CommandPaletteUI';
 // New professional layout and components
 import DebugSearchPanel from './components/DebugSearchPanel';
+import { AppErrorBoundary } from './components/ErrorBoundary';
 import ExportDialog from './components/ExportDialog';
 import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
 import OnboardingOrchestrator from './components/Onboarding/OnboardingOrchestrator';
 import Providers from './components/Providers';
+import { PWAInstallButton, PWAUpdateNotification } from './components/PWA';
 import {
   StorageRecoveryBanner,
   OfflineBanner,
@@ -22,6 +24,7 @@ import ViewSwitcher from './components/ViewSwitcher';
 // Context and providers
 import { useAppContext } from './context/AppContext';
 import { useEditorContext } from './context/EditorContext';
+// Error boundaries
 // Services
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
@@ -119,6 +122,12 @@ function AppShell() {
           onDismiss={handleDismissOfflineBanner}
         />
       )}
+
+      {/* PWA Update Notification */}
+      <PWAUpdateNotification />
+
+      {/* PWA Install Prompt */}
+      <PWAInstallButton variant="fab" />
 
       <MainLayout>
         <ViewSwitcher />
@@ -337,8 +346,10 @@ function StorageDebugPanel() {
 // Root export: use centralized Providers component for clean composition
 export default function App() {
   return (
-    <Providers>
-      <AppShell />
-    </Providers>
+    <AppErrorBoundary level="app">
+      <Providers>
+        <AppShell />
+      </Providers>
+    </AppErrorBoundary>
   );
 }

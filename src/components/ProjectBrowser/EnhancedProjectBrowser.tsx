@@ -1,4 +1,5 @@
 // src/components/ProjectBrowser/EnhancedProjectBrowser.tsx
+import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   Search,
   Filter,
@@ -23,6 +24,8 @@ import {
 import React, { useState, useRef, useEffect } from 'react';
 
 import { useAppContext, View } from '@/context/AppContext';
+import { useDebouncedSearch } from '@/hooks/useDebounced';
+import { useVirtualListPerformance } from '@/hooks/usePerformanceMonitor';
 import {
   useProjectMetadata,
   formatTimeSpent,
@@ -53,11 +56,14 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
     recordProjectOpen,
   } = useProjectMetadata();
 
+  // Debounced search for better performance
+  const { query, debouncedQuery, isSearching, setQuery } = useDebouncedSearch('', 300);
+
   const {
     results,
     filters,
     filterOptions,
-    setQuery,
+    setQuery: setSearchQuery,
     toggleTag: toggleFilterTag,
     toggleGenre,
     toggleFavorites,
@@ -78,6 +84,43 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const tagInputRef = useRef<HTMLInputElement>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  // Calculate columns and rows for virtualization
+  const columnsCount = compact ? 1 : 3; // For grid layout
+  const rowCount = Math.ceil(results.length / columnsCount);
+  const estimatedRowHeight = compact ? 200 : 300; // Estimated height per row
+
+  // Performance monitoring
+  const {
+    startRenderMeasure,
+    endRenderMeasure,
+    measureVirtualScroll,
+    getVirtualListSummary: _getVirtualListSummary,
+  } = useVirtualListPerformance(results.length, rowCount, {
+    enabled: process.env.NODE_ENV === 'development',
+    logToConsole: false,
+    sampleRate: 0.2,
+  });
+
+  // Virtualizer for project grid
+  const rowVirtualizer = useVirtualizer({
+    count: rowCount,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => estimatedRowHeight,
+    overscan: 2,
+  });
+
+  // Sync debounced query with search service
+  useEffect(() => {
+    setSearchQuery(debouncedQuery);
+  }, [debouncedQuery, setSearchQuery]);
+
+  // Setup scroll performance monitoring
+  useEffect(() => {
+    const cleanup = measureVirtualScroll(parentRef.current);
+    return cleanup;
+  }, [measureVirtualScroll]);
 
   // Close context menu when clicking outside
   useEffect(() => {
@@ -196,13 +239,15 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
     relevanceScore: number;
     matchedFields: string[];
   }) => {
+    startRenderMeasure();
+
     const { project, matchedFields } = result;
     const metadata = getProjectMetadata(project.id);
     const wordCount = getProjectWordCount(project);
     const genre = project.metadata?.genre;
     const GenreIcon = genre ? getGenreIcon(genre) : FileText;
 
-    return (
+    const cardElement = (
       <div
         key={project.id}
         className={`group card card-interactive p-4 ${
@@ -365,6 +410,9 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
         )}
       </div>
     );
+
+    endRenderMeasure();
+    return cardElement;
   };
 
   return (
@@ -373,14 +421,23 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
       <div className="mb-6">
         {/* Search Bar */}
         <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search
+            className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
+              isSearching ? 'text-blue-500 animate-pulse' : 'text-slate-400'
+            }`}
+          />
           <input
             type="text"
             placeholder="Search projects by name, content, tags..."
-            value={filters.query}
+            value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500"
           />
+          {isSearching && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
         </div>
 
         {/* Filter Controls */}
@@ -527,11 +584,47 @@ const EnhancedProjectBrowser: React.FC<EnhancedProjectBrowserProps> = ({
         </div>
       </div>
 
-      {/* Project Grid */}
+      {/* Project Grid - Virtualized */}
       <div
-        className={`grid gap-4 ${compact ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
+        ref={parentRef}
+        className="h-[600px] overflow-auto"
+        style={{
+          contain: 'strict',
+        }}
       >
-        {results.map(renderProjectCard)}
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const startIndex = virtualRow.index * columnsCount;
+            const endIndex = Math.min(startIndex + columnsCount, results.length);
+            const rowItems = results.slice(startIndex, endIndex);
+
+            return (
+              <div
+                key={virtualRow.key}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <div
+                  className={`grid gap-4 h-full ${compact ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
+                >
+                  {rowItems.map(renderProjectCard)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Empty State */}

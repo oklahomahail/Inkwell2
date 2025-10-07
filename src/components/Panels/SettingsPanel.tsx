@@ -2,6 +2,7 @@
 import { Eye, EyeOff, ExternalLink, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
+import { PrivacyControls } from '@/components/Privacy/PrivacyControls';
 import BackupControls from '@/components/Settings/BackupControls';
 import SnapshotHistoryDialog from '@/components/Settings/SnapshotHistoryDialog';
 import { Button } from '@/components/ui/Button';
@@ -732,6 +733,14 @@ const SettingsPanel: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Privacy & Analytics */}
+        <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
+          <h3 className="text-xl font-semibold text-white mb-4">Privacy & Analytics</h3>
+          <div className="text-gray-300">
+            <PrivacyControls />
           </div>
         </div>
 

@@ -5,6 +5,38 @@ import { format } from 'date-fns';
 
 import { Chapter, ExportOptions, ExportFormat } from '../domain/types';
 
+// Encoder map for different formats
+type ExportEncoder = (data: unknown) => string;
+const encoders: Record<string, ExportEncoder> = {
+  json: (x) => JSON.stringify(x, null, 2),
+  yaml: (x) => {
+    // Simple YAML stringifier for metadata
+    if (typeof x === 'object' && x !== null) {
+      return Object.entries(x as Record<string, unknown>)
+        .map(([key, value]) => `${key}: ${typeof value === 'string' ? `"${value}"` : value}`)
+        .join('\n');
+    }
+    return String(x);
+  },
+  toml: (x) => {
+    // Simple TOML stringifier for metadata
+    if (typeof x === 'object' && x !== null) {
+      return Object.entries(x as Record<string, unknown>)
+        .map(([key, value]) => `${key} = ${typeof value === 'string' ? `"${value}"` : value}`)
+        .join('\n');
+    }
+    return String(x);
+  },
+};
+
+export function encodeData(data: unknown, format: 'json' | 'yaml' | 'toml'): string {
+  const encoder = encoders[format];
+  if (!encoder) {
+    throw new Error(`Unknown format: ${format}`);
+  }
+  return encoder(data);
+}
+
 /* ========= Types ========= */
 export interface ExportResult {
   content: string;
@@ -122,7 +154,7 @@ export async function exportToMarkdown(
 /**
  * Generate front matter for the document
  */
-function generateFrontMatter(chapters: Chapter[], format: 'yaml' | 'toml' | 'json'): string {
+function generateFrontMatter(chapters: Chapter[], formatType: 'yaml' | 'toml' | 'json'): string {
   const metadata = {
     title: 'Your Story',
     author: 'Author Name',
@@ -134,7 +166,7 @@ function generateFrontMatter(chapters: Chapter[], format: 'yaml' | 'toml' | 'jso
     generator: 'Inkwell',
   };
 
-  switch (format) {
+  switch (formatType) {
     case 'yaml':
       return `---\n${Object.entries(metadata)
         .map(([key, value]) => `${key}: ${typeof value === 'string' ? `"${value}"` : value}`)

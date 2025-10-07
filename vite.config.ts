@@ -3,9 +3,125 @@ import { fileURLToPath, URL } from 'node:url';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        runtimeCaching: [
+          // Cache the editor shell and core assets
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 365 days
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gstatic-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 365 days
+              },
+            },
+          },
+          // Cache API responses with network-first strategy
+          {
+            urlPattern: /\/api\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+              },
+              networkTimeoutSeconds: 3,
+            },
+          },
+          // Cache images
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+        ],
+        // Ensure core application assets are precached
+        additionalManifestEntries: [{ url: '/', revision: Date.now().toString() }],
+      },
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      manifest: {
+        name: 'Inkwell - Professional Writing Studio',
+        short_name: 'Inkwell',
+        description:
+          'A sophisticated writing environment for authors, novelists, and creative writers',
+        theme_color: '#2563eb',
+        background_color: '#ffffff',
+        display: 'standalone',
+        orientation: 'portrait-primary',
+        scope: '/',
+        start_url: '/',
+        icons: [
+          {
+            src: 'icons/icon-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable any',
+          },
+          {
+            src: 'icons/icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable any',
+          },
+        ],
+        shortcuts: [
+          {
+            name: 'New Project',
+            short_name: 'New',
+            description: 'Create a new writing project',
+            url: '/?action=new-project',
+            icons: [{ src: 'icons/shortcut-new.png', sizes: '192x192' }],
+          },
+          {
+            name: 'Recent Projects',
+            short_name: 'Recent',
+            description: 'Open recent writing projects',
+            url: '/?view=dashboard',
+            icons: [{ src: 'icons/shortcut-recent.png', sizes: '192x192' }],
+          },
+          {
+            name: 'Quick Write',
+            short_name: 'Write',
+            description: 'Start writing immediately',
+            url: '/?view=writing',
+            icons: [{ src: 'icons/shortcut-write.png', sizes: '192x192' }],
+          },
+        ],
+        categories: ['productivity', 'business', 'lifestyle'],
+        prefer_related_applications: false,
+      },
+      devOptions: {
+        enabled: true, // Enable PWA in development
+      },
+    }),
+  ],
 
   resolve: {
     alias: {

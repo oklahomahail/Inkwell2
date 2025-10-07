@@ -4,8 +4,33 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { assertExists } from '../../../test-utils/invariants';
 import { useUndoRedo, createOperationDescription } from '../hooks/useUndoRedo';
-import { PlotBoard, PlotColumnType, PlotCardStatus, PlotCardPriority } from '../types';
+import {
+  PlotBoard,
+  PlotColumnType,
+  PlotCardStatus,
+  PlotCardPriority,
+  PlotColumnSettings,
+  PlotBoardSettings,
+} from '../types';
+
+const defaultColumnSettings = (): PlotColumnSettings => ({
+  autoColor: true,
+  showCardCount: true,
+  collapsible: true,
+  sortBy: 'order',
+  showProgress: true,
+});
+
+const defaultBoardSettings = (): PlotBoardSettings => ({
+  showWordCounts: true,
+  showTimeline: true,
+  showCharacters: true,
+  colorScheme: 'auto',
+  compactView: false,
+  enableQuickActions: true,
+});
 
 // Mock storage
 vi.mock('../../../utils/storage', () => ({
@@ -50,10 +75,12 @@ const createMockBoard = (id: string = 'test-board'): PlotBoard => ({
           updatedAt: new Date(),
         },
       ],
-      settings: {},
+      settings: defaultColumnSettings(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   ],
-  settings: {},
+  settings: defaultBoardSettings(),
   createdAt: new Date(),
   updatedAt: new Date(),
 });
@@ -110,7 +137,8 @@ describe('Undo/Redo Hook', () => {
 
     expect(mockOnRestoreBoard).toHaveBeenCalledTimes(1);
     // Board should be restored with same structure (dates may be reconstructed)
-    const restoredBoard = mockOnRestoreBoard.mock.calls[0][0];
+    const restoredBoard = mockOnRestoreBoard.mock.calls[0]?.[0];
+    assertExists(restoredBoard, 'restored board not found');
     expect(restoredBoard.id).toBe(mockBoard.id);
     expect(restoredBoard.title).toBe(mockBoard.title);
     expect(restoredBoard.columns.length).toBe(mockBoard.columns.length);

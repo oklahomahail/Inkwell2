@@ -4,6 +4,12 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { EnhancedProject } from '@/types/project';
 import type { TimelineItem } from '@/types/timeline';
 
+import { getOrThrow } from '../test-utils/getters';
+import { assertExists } from '../test-utils/invariants';
+
+// ID generation helper
+const newId = () => globalThis.crypto?.randomUUID?.() ?? `test-${Date.now()}-${Math.random()}`;
+
 import { enhancedTimelineService } from './enhancedTimelineService';
 import { timelineService } from './timelineService';
 
@@ -206,18 +212,27 @@ describe('EnhancedTimelineService', () => {
 
       expect(result.isValid).toBe(false);
       expect(result.conflicts).toHaveLength(1);
-      expect(result.conflicts[0].type).toBe('time_overlap');
-      expect(result.conflicts[0].severity).toBe('high');
-      expect(result.conflicts[0].affectedEvents).toContain('event-2');
-      expect(result.conflicts[0].affectedEvents).toContain('event-3');
+      const firstConflict = getOrThrow(result.conflicts[0], 'expected first conflict');
+      expect(firstConflict.type).toBe('time_overlap');
+      expect(firstConflict.severity).toBe('high');
+      expect(firstConflict.affectedEvents).toContain('event-2');
+      expect(firstConflict.affectedEvents).toContain('event-3');
     });
 
     it('should detect chronological errors', async () => {
       const itemsWithError: TimelineItem[] = [
         {
           ...mockTimelineItems[0],
+          id: newId(),
+          title: 'Error Item',
+          characterIds: ['char-1'],
+          tags: ['test'],
+          importance: 'major',
+          eventType: 'plot',
           start: 10,
           end: 5, // End before start
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ];
       (timelineService.getProjectTimeline as any).mockResolvedValue(itemsWithError);
@@ -242,15 +257,25 @@ describe('EnhancedTimelineService', () => {
       // Should detect Hero traveling from Forest to Mountain too quickly
       const locationConflicts = result.warnings.filter((c) => c.type === 'location_mismatch');
       expect(locationConflicts.length).toBeGreaterThanOrEqual(1);
-      expect(locationConflicts[0].description).toContain('travels from');
+      if (locationConflicts.length > 0) {
+        expect(locationConflicts[0]?.description).toContain('travels from');
+      }
     });
 
     it('should detect POV inconsistencies', async () => {
       const itemsWithPOVError: TimelineItem[] = [
         {
           ...mockTimelineItems[0],
+          id: newId(),
+          title: 'POV Error Item',
+          start: 1,
+          tags: ['test'],
+          importance: 'major',
+          eventType: 'plot',
           pov: 'NonExistentCharacter',
           characterIds: ['char-1', 'char-2'], // POV not in character list
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ];
       (timelineService.getProjectTimeline as any).mockResolvedValue(itemsWithPOVError);
@@ -259,7 +284,8 @@ describe('EnhancedTimelineService', () => {
 
       const povConflicts = result.warnings.filter((c) => c.type === 'pov_inconsistency');
       expect(povConflicts.length).toBe(1);
-      expect(povConflicts[0].autoFixable).toBe(true);
+      const firstPovConflict = getOrThrow(povConflicts[0], 'expected POV conflict');
+      expect(firstPovConflict.autoFixable).toBe(true);
     });
 
     it('should calculate overall score correctly', async () => {
@@ -307,8 +333,10 @@ describe('EnhancedTimelineService', () => {
 
       expect(result.success).toBe(false);
       expect(result.conflicts).toBeDefined();
-      expect(result.conflicts![0].type).toBe('chronological_error');
-      expect(result.conflicts![0].severity).toBe('high');
+      assertExists(result.conflicts, 'expected conflicts array');
+      const firstConflict = getOrThrow(result.conflicts[0], 'expected first conflict');
+      expect(firstConflict.type).toBe('chronological_error');
+      expect(firstConflict.severity).toBe('high');
     });
 
     it('should prevent linking events already linked to other scenes', async () => {
@@ -322,7 +350,9 @@ describe('EnhancedTimelineService', () => {
 
       expect(result.success).toBe(false);
       expect(result.conflicts).toBeDefined();
-      expect(result.conflicts![0].description).toContain('already linked');
+      assertExists(result.conflicts, 'expected conflicts array');
+      const firstConflict = getOrThrow(result.conflicts[0], 'expected first conflict');
+      expect(firstConflict.description).toContain('already linked');
     });
   });
 
@@ -363,7 +393,9 @@ describe('EnhancedTimelineService', () => {
 
       if (suggestions.length > 1) {
         for (let i = 0; i < suggestions.length - 1; i++) {
-          expect(suggestions[i].confidence).toBeGreaterThanOrEqual(suggestions[i + 1].confidence);
+          const current = getOrThrow(suggestions[i], `expected suggestion at index ${i}`);
+          const next = getOrThrow(suggestions[i + 1], `expected suggestion at index ${i + 1}`);
+          expect(current.confidence).toBeGreaterThanOrEqual(next.confidence);
         }
       }
     });
@@ -415,7 +447,8 @@ describe('EnhancedTimelineService', () => {
 
       expect(navigation.siblings.length).toBeGreaterThanOrEqual(0);
       if (navigation.siblings.length > 0) {
-        expect(navigation.siblings[0].sceneId).toBe('scene-concurrent');
+        const firstSibling = getOrThrow(navigation.siblings[0], 'expected first sibling');
+        expect(firstSibling.sceneId).toBe('scene-concurrent');
       }
     });
   });
@@ -431,9 +464,10 @@ describe('EnhancedTimelineService', () => {
       expect(anchors.length).toBeGreaterThanOrEqual(majorEvents.length);
 
       if (anchors.length > 0) {
-        expect(anchors[0].anchorType).toBe('sequence');
-        expect(anchors[0].locked).toBe(true);
-        expect(anchors[0].description).toContain('Critical story moment');
+        const firstAnchor = getOrThrow(anchors[0], 'expected first anchor');
+        expect(firstAnchor.anchorType).toBe('sequence');
+        expect(firstAnchor.locked).toBe(true);
+        expect(firstAnchor.description).toContain('Critical story moment');
       }
     });
 
@@ -484,8 +518,9 @@ describe('EnhancedTimelineService', () => {
   describe('Performance', () => {
     it('should handle large timeline datasets efficiently', async () => {
       // Create a large dataset
+      const baseItem = getOrThrow(mockTimelineItems[0], 'expected base timeline item');
       const largeTimeline = Array.from({ length: 1000 }, (_, i) => ({
-        ...mockTimelineItems[0],
+        ...baseItem,
         id: `event-${i}`,
         title: `Event ${i}`,
         start: i,

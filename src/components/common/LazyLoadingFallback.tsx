@@ -1,0 +1,100 @@
+// Loading fallback components for lazy-loaded panels
+import { Loader2, Layout, TrendingUp } from 'lucide-react';
+import React from 'react';
+
+interface LazyLoadingFallbackProps {
+  type?: 'panel' | 'feature' | 'general';
+  message?: string;
+  className?: string;
+}
+
+export const LazyLoadingFallback: React.FC<LazyLoadingFallbackProps> = ({
+  type = 'general',
+  message,
+  className = '',
+}) => {
+  const getIcon = () => {
+    switch (type) {
+      case 'panel':
+        return <Layout className="w-8 h-8 text-blue-500" />;
+      case 'feature':
+        return <TrendingUp className="w-8 h-8 text-green-500" />;
+      default:
+        return <Loader2 className="w-8 h-8 text-gray-500 animate-spin" />;
+    }
+  };
+
+  const getMessage = () => {
+    if (message) return message;
+    switch (type) {
+      case 'panel':
+        return 'Loading panel...';
+      case 'feature':
+        return 'Loading feature...';
+      default:
+        return 'Loading...';
+    }
+  };
+
+  return (
+    <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
+      <div className="text-center">
+        <div className="mb-4">{getIcon()}</div>
+        <div className="text-sm text-gray-600 font-medium">{getMessage()}</div>
+      </div>
+    </div>
+  );
+};
+
+// Specific fallbacks for major features
+export const PlotBoardsFallback: React.FC = () => (
+  <LazyLoadingFallback
+    type="feature"
+    message="Loading Plot Boards..."
+    className="bg-gradient-to-br from-blue-50 to-indigo-100"
+  />
+);
+
+export const TimelineFallback: React.FC = () => (
+  <LazyLoadingFallback
+    type="feature"
+    message="Loading Timeline..."
+    className="bg-gradient-to-br from-purple-50 to-pink-100"
+  />
+);
+
+export const AnalyticsFallback: React.FC = () => (
+  <LazyLoadingFallback
+    type="feature"
+    message="Loading Analytics..."
+    className="bg-gradient-to-br from-green-50 to-emerald-100"
+  />
+);
+
+// Skeleton loaders for specific layouts
+export const PanelSkeleton: React.FC<{ rows?: number }> = ({ rows = 3 }) => (
+  <div className="animate-pulse p-6 space-y-4">
+    <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+    {Array.from({ length: rows }).map((_, i) => (
+      <div key={i} className="space-y-2">
+        <div className="h-4 bg-gray-200 rounded w-full"></div>
+        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+      </div>
+    ))}
+  </div>
+);
+
+export const CardGridSkeleton: React.FC<{ cards?: number }> = ({ cards = 6 }) => (
+  <div className="animate-pulse p-6">
+    <div className="h-6 bg-gray-200 rounded w-1/4 mb-6"></div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {Array.from({ length: cards }).map((_, i) => (
+        <div key={i} className="border rounded-lg p-4 space-y-3">
+          <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+          <div className="h-3 bg-gray-200 rounded w-full"></div>
+          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      ))}
+    </div>
+  </div>
+);

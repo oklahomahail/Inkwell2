@@ -4,6 +4,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { SceneStatus, ChapterStatus, TimelineEventType } from '../../../domain/types';
+import { getOrThrow } from '../../../test-utils/getters';
+import { assertExists } from '../../../test-utils/invariants';
 import { usePlotBoardStore } from '../store';
 import { PlotCardStatus, PlotCardPriority, PlotColumnType } from '../types';
 import {
@@ -179,10 +181,11 @@ describe('Plot Board Store', () => {
 
       const updatedStore = usePlotBoardStore.getState();
       const board = updatedStore.boards[boardId];
-      const orderedColumns = board?.columns.sort((a, b) => a.order - b.order) ?? [];
-      expect(orderedColumns[0].id).toBe(column2.id);
-      expect(orderedColumns[1].id).toBe(column3.id);
-      expect(orderedColumns[2].id).toBe(column1.id);
+      assertExists(board, 'board not found after reorder');
+      const orderedColumns = board.columns.sort((a, b) => a.order - b.order);
+      expect(orderedColumns[0]?.id).toBe(column2.id);
+      expect(orderedColumns[1]?.id).toBe(column3.id);
+      expect(orderedColumns[2]?.id).toBe(column1.id);
     });
   });
 
@@ -256,12 +259,14 @@ describe('Plot Board Store', () => {
 
       const updatedStore = usePlotBoardStore.getState();
       const board = updatedStore.boards[boardId];
+      assertExists(board, 'board not found');
       const column = board.columns.find((c) => c.id === columnId);
-      const orderedCards = column!.cards.sort((a, b) => a.order - b.order);
+      assertExists(column, 'column not found');
+      const orderedCards = column.cards.sort((a, b) => a.order - b.order);
 
-      expect(orderedCards[0].id).toBe(card3.id);
-      expect(orderedCards[1].id).toBe(card1.id);
-      expect(orderedCards[2].id).toBe(card2.id);
+      expect(orderedCards[0]?.id).toBe(card3.id);
+      expect(orderedCards[1]?.id).toBe(card1.id);
+      expect(orderedCards[2]?.id).toBe(card2.id);
     });
 
     it('should link a card to a scene', async () => {
@@ -314,7 +319,7 @@ describe('Plot Board Store', () => {
 
       expect(draftCards.length).toBe(2);
       expect(completeCards.length).toBe(1);
-      expect(completeCards[0].id).toBe(card3.id);
+      expect(completeCards[0]?.id).toBe(card3.id);
     });
 
     it('should search cards by text', async () => {
@@ -325,8 +330,8 @@ describe('Plot Board Store', () => {
       const results = usePlotBoardStore.getState().searchCards('important');
 
       expect(results.length).toBe(2);
-      expect(results[0].title).toContain('Important');
-      expect(results[1].title).toContain('Important');
+      expect(results[0]?.title).toContain('Important');
+      expect(results[1]?.title).toContain('Important');
     });
 
     it('should bulk update cards', async () => {
@@ -383,7 +388,7 @@ describe('Scene Integration', () => {
   };
 
   it('should convert scene to plot card', () => {
-    const scene = mockChapter.scenes![0];
+    const scene = getOrThrow(mockChapter.scenes?.[0], 'first scene not found');
     const columnId = 'column-1';
 
     const card = sceneToPlotCard(scene, mockChapter, columnId, 0);
@@ -398,8 +403,8 @@ describe('Scene Integration', () => {
   });
 
   it('should determine status based on content length', () => {
-    const shortScene = mockChapter.scenes![1]; // 50 words
-    const longScene = mockChapter.scenes![0]; // 500 words
+    const shortScene = getOrThrow(mockChapter.scenes?.[1], 'second scene not found'); // 50 words
+    const longScene = getOrThrow(mockChapter.scenes?.[0], 'first scene not found'); // 500 words
 
     const shortCard = sceneToPlotCard(shortScene, mockChapter, 'col', 1);
     const longCard = sceneToPlotCard(longScene, mockChapter, 'col', 0);
@@ -410,27 +415,51 @@ describe('Scene Integration', () => {
 
   it('should sync cards with scenes', () => {
     const cards = [
-      sceneToPlotCard(mockChapter.scenes![0], mockChapter, 'col', 0),
-      sceneToPlotCard(mockChapter.scenes![1], mockChapter, 'col', 1),
+      sceneToPlotCard(
+        getOrThrow(mockChapter.scenes?.[0], 'first scene not found'),
+        mockChapter,
+        'col',
+        0,
+      ),
+      sceneToPlotCard(
+        getOrThrow(mockChapter.scenes?.[1], 'second scene not found'),
+        mockChapter,
+        'col',
+        1,
+      ),
     ];
 
     // Update card title
-    cards[0].title = 'Updated Scene Title';
+    if (cards[0]) {
+      cards[0].title = 'Updated Scene Title';
+    }
 
     const chapters = { [mockChapter.id]: mockChapter };
     const result = syncCardsWithScenes(cards, chapters);
 
     expect(result.updates.length).toBe(1);
-    expect(result.updates[0].sceneUpdates.title).toBe('Updated Scene Title');
+    if (result.updates[0]) {
+      expect(result.updates[0].sceneUpdates.title).toBe('Updated Scene Title');
+    }
     expect(result.orphanedCards.length).toBe(0);
     expect(result.newCards.length).toBe(0);
   });
 
   it('should identify orphaned cards', () => {
     const cards = [
-      sceneToPlotCard(mockChapter.scenes![0], mockChapter, 'col', 0),
+      sceneToPlotCard(
+        getOrThrow(mockChapter.scenes?.[0], 'first scene not found'),
+        mockChapter,
+        'col',
+        0,
+      ),
       {
-        ...sceneToPlotCard(mockChapter.scenes![1], mockChapter, 'col', 1),
+        ...sceneToPlotCard(
+          getOrThrow(mockChapter.scenes?.[1], 'second scene not found'),
+          mockChapter,
+          'col',
+          1,
+        ),
         sceneId: 'nonexistent-scene',
       },
     ];
@@ -439,7 +468,7 @@ describe('Scene Integration', () => {
     const result = syncCardsWithScenes(cards, chapters);
 
     expect(result.orphanedCards.length).toBe(1);
-    expect(result.orphanedCards[0]).toBe(cards[1].id);
+    expect(result.orphanedCards[0]).toBe(cards[1]?.id);
   });
 });
 
@@ -492,24 +521,38 @@ describe('Timeline Integration', () => {
   };
 
   it('should link cards to timeline events by date proximity', () => {
-    const cards = [sceneToPlotCard(mockChapter.scenes![0], mockChapter, 'col', 0)];
+    const cards = [
+      sceneToPlotCard(
+        getOrThrow(mockChapter.scenes?.[0], 'first scene not found'),
+        mockChapter,
+        'col',
+        0,
+      ),
+    ];
     const chapters = { [mockChapter.id]: mockChapter };
 
     const links = linkCardsToTimelineEvents(cards, mockTimelineEvents, chapters);
 
     expect(links.length).toBe(1);
-    expect(links[0].cardId).toBe(cards[0].id);
-    expect(links[0].eventIds).toContain('event-1'); // Same date
+    expect(links[0]?.cardId).toBe(cards[0]?.id);
+    expect(links[0]?.eventIds).toContain('event-1'); // Same date
   });
 
   it('should link cards to timeline events by tag matching', () => {
-    const cards = [sceneToPlotCard(mockChapter.scenes![0], mockChapter, 'col', 0)];
+    const cards = [
+      sceneToPlotCard(
+        getOrThrow(mockChapter.scenes?.[0], 'first scene not found'),
+        mockChapter,
+        'col',
+        0,
+      ),
+    ];
     const chapters = { [mockChapter.id]: mockChapter };
 
     const links = linkCardsToTimelineEvents(cards, mockTimelineEvents, chapters);
 
     expect(links.length).toBe(1);
-    expect(links[0].eventIds).toContain('event-1'); // Matching 'battle' tag
+    expect(links[0]?.eventIds).toContain('event-1'); // Matching 'battle' tag
   });
 });
 
@@ -607,7 +650,7 @@ describe('Progress Tracking', () => {
     };
 
     const metrics = calculatePlotProgress(cards, chapters);
-    const chapterProgress = metrics.chapterProgress[0];
+    const chapterProgress = getOrThrow(metrics.chapterProgress[0], 'chapter progress not found');
 
     expect(chapterProgress.chapterId).toBe('chapter-1');
     expect(chapterProgress.totalCards).toBe(2);

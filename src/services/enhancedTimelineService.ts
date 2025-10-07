@@ -274,24 +274,28 @@ class EnhancedTimelineService {
     };
 
     // Find previous and next scenes in timeline order
-    if (currentIndex > 0 && linkedEvents[currentIndex - 1]) {
+    if (currentIndex > 0) {
       const prev = linkedEvents[currentIndex - 1];
-      result.previous = {
-        sceneId: prev.sceneId!,
-        chapterId: prev.chapterId || 'unknown',
-        eventTitle: prev.title,
-        timePosition: prev.start,
-      };
+      if (prev && prev.sceneId) {
+        result.previous = {
+          sceneId: prev.sceneId,
+          chapterId: prev.chapterId || 'unknown',
+          eventTitle: prev.title,
+          timePosition: prev.start,
+        };
+      }
     }
 
-    if (currentIndex < linkedEvents.length - 1 && linkedEvents[currentIndex + 1]) {
+    if (currentIndex < linkedEvents.length - 1) {
       const next = linkedEvents[currentIndex + 1];
-      result.next = {
-        sceneId: next.sceneId!,
-        chapterId: next.chapterId || 'unknown',
-        eventTitle: next.title,
-        timePosition: next.start,
-      };
+      if (next && next.sceneId) {
+        result.next = {
+          sceneId: next.sceneId,
+          chapterId: next.chapterId || 'unknown',
+          eventTitle: next.title,
+          timePosition: next.start,
+        };
+      }
     }
 
     // Find all sibling scenes (scenes linked to the same timeline events)
@@ -354,6 +358,8 @@ class EnhancedTimelineService {
       for (let j = i + 1; j < items.length; j++) {
         const item1 = items[i];
         const item2 = items[j];
+
+        if (!item1 || !item2) continue;
 
         // Check if same character appears in overlapping time ranges
         if (item1.pov && item2.pov && item1.pov === item2.pov) {
@@ -451,6 +457,8 @@ class EnhancedTimelineService {
       for (let i = 0; i < characterEvents.length - 1; i++) {
         const current = characterEvents[i];
         const next = characterEvents[i + 1];
+
+        if (!current || !next) continue;
 
         if (current.location && next.location && current.location !== next.location) {
           const timeDiff = next.start - current.start;
@@ -575,7 +583,11 @@ class EnhancedTimelineService {
       .trim();
   }
 
-  private calculateLinkageConfidence(scene: any, item: TimelineItem, sceneText: string): number {
+  private calculateLinkageConfidence(
+    scene: { title: string; [key: string]: any },
+    item: TimelineItem,
+    sceneText: string,
+  ): number {
     let confidence = 0;
 
     // Character overlap
@@ -601,7 +613,7 @@ class EnhancedTimelineService {
   }
 
   private generateLinkageReasoning(
-    scene: any,
+    scene: { title: string; [key: string]: any },
     events: Array<{ eventId: string; confidence: number }>,
     items: TimelineItem[],
   ): string {
@@ -648,6 +660,8 @@ class EnhancedTimelineService {
       const current = sorted[i];
       const next = sorted[i + 1];
 
+      if (!current || !next) continue;
+
       // Check if events are adjacent and similar
       if (
         next.start - current.start <= 2 &&
@@ -668,6 +682,9 @@ class EnhancedTimelineService {
     for (let i = 0; i < sorted.length - 1; i++) {
       const current = sorted[i];
       const next = sorted[i + 1];
+
+      if (!current || !next) continue;
+
       const gap = next.start - (current.end || current.start);
 
       if (gap > 5) {

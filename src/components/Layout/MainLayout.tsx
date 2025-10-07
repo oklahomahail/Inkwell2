@@ -21,6 +21,8 @@ import { useAppContext, View } from '@/context/AppContext';
 import { cn } from '@/utils/cn';
 import { useFeatureFlag } from '@/utils/flags';
 
+import { PWAOfflineIndicator } from '../PWA';
+
 interface MainLayoutProps {
   children: React.ReactNode;
   className?: string;
@@ -346,6 +348,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
               </div>
 
               <div className="flex items-center gap-2">
+                <PWAOfflineIndicator variant="badge" />
                 <button className="btn btn-ghost btn-sm" aria-label="Open command palette">
                   <Command className="w-4 h-4" />
                 </button>

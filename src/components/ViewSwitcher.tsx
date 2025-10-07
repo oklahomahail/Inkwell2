@@ -3,10 +3,15 @@ import React, { useState, useCallback } from 'react';
 
 import { useAppContext, View } from '@/context/AppContext';
 
-// Import enhanced components
 import { PlotBoards } from '../features/plotboards';
+import { useFeatureDiscovery } from '../hooks/useAnalyticsTracking';
+
+// Error boundaries
+
+// Import enhanced components
 
 import EnhancedDashboard from './Dashboard/EnhancedDashboard';
+import { FeatureErrorBoundary } from './ErrorBoundary';
 import AnalysisPanel from './Panels/AnalysisPanel';
 import SettingsPanel from './Panels/SettingsPanel';
 import TimelinePanel from './Panels/TimelinePanel';
@@ -16,6 +21,7 @@ import EnhancedWritingPanel from './Writing/EnhancedWritingPanel';
 
 const ViewSwitcher: React.FC = () => {
   const { state, currentProject, updateProject } = useAppContext();
+  const { recordFeatureUse } = useFeatureDiscovery();
   const [_selectedText, _setSelectedText] = useState('');
 
   // Get current project content or default
@@ -47,29 +53,77 @@ const ViewSwitcher: React.FC = () => {
 
   const currentView = state.view;
 
+  // Track feature usage when switching views
+  React.useEffect(() => {
+    switch (currentView) {
+      case View.PlotBoards:
+        recordFeatureUse('plot_boards');
+        break;
+      case View.Timeline:
+        recordFeatureUse('timeline');
+        break;
+      case View.Analysis:
+        recordFeatureUse('analytics');
+        break;
+      case View.Writing:
+        recordFeatureUse('writing_mode');
+        break;
+    }
+  }, [currentView, recordFeatureUse]);
+
   switch (currentView) {
     case View.Dashboard:
-      return <EnhancedDashboard />;
+      return (
+        <FeatureErrorBoundary featureName="Dashboard">
+          <EnhancedDashboard />
+        </FeatureErrorBoundary>
+      );
     case View.Writing:
-      return <EnhancedWritingPanel />;
+      return (
+        <FeatureErrorBoundary featureName="Writing Editor">
+          <EnhancedWritingPanel />
+        </FeatureErrorBoundary>
+      );
     case View.Timeline:
-      return <TimelinePanel />;
+      return (
+        <FeatureErrorBoundary featureName="Timeline">
+          <TimelinePanel />
+        </FeatureErrorBoundary>
+      );
     case View.Analysis:
-      return <AnalysisPanel />;
+      return (
+        <FeatureErrorBoundary featureName="Analytics">
+          <AnalysisPanel />
+        </FeatureErrorBoundary>
+      );
     case View.Planning:
-      return <StoryPlanningView />;
+      return (
+        <FeatureErrorBoundary featureName="Story Planning">
+          <StoryPlanningView />
+        </FeatureErrorBoundary>
+      );
     case View.PlotBoards:
       return currentProject ? (
-        <PlotBoards projectId={currentProject.id} />
+        <FeatureErrorBoundary featureName="Plot Boards">
+          <PlotBoards projectId={currentProject.id} />
+        </FeatureErrorBoundary>
       ) : (
         <div className="flex items-center justify-center h-full">
           <p className="text-gray-500">Please select a project to use Plot Boards</p>
         </div>
       );
     case View.Settings:
-      return <SettingsPanel />;
+      return (
+        <FeatureErrorBoundary featureName="Settings">
+          <SettingsPanel />
+        </FeatureErrorBoundary>
+      );
     default:
-      return <EnhancedDashboard />;
+      return (
+        <FeatureErrorBoundary featureName="Dashboard">
+          <EnhancedDashboard />
+        </FeatureErrorBoundary>
+      );
   }
 };
 

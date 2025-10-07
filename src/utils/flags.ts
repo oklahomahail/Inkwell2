@@ -312,22 +312,35 @@ export function withFeatureFlag<T>(flagKey: string, component: T, fallback?: T):
 /**
  * Create a feature-flagged component
  */
-export function createFeatureFlaggedComponent<P>(
+export function createFeatureFlaggedComponent<P extends Record<string, any>>(
   flagKey: string,
   Component: React.ComponentType<P>,
   FallbackComponent?: React.ComponentType<P>,
 ): React.ComponentType<P> {
   return function FeatureFlaggedComponent(props: P) {
     if (featureFlags.isEnabled(flagKey)) {
-      return React.createElement(Component, props);
+      return React.createElement(Component, props as any);
     }
 
     if (FallbackComponent) {
-      return React.createElement(FallbackComponent, props);
+      return React.createElement(FallbackComponent, props as any);
     }
 
     return null;
   };
+}
+
+/* ========= Higher Order Component with ForwardRef ========= */
+export function withFlag<P extends Record<string, any>>(
+  Wrapped: React.ComponentType<P>,
+): React.ComponentType<P> {
+  const WithFlag = (props: P) => {
+    // Flag logic could go here
+    return React.createElement(Wrapped, props);
+  };
+
+  WithFlag.displayName = `WithFlag(${Wrapped.displayName || Wrapped.name || 'Component'})`;
+  return WithFlag;
 }
 
 /* ========= Console Commands (Development) ========= */

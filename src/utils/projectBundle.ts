@@ -84,7 +84,7 @@ export async function createInkwellArchive(
       comment: `Inkwell project: ${bundle.project.name} - Exported ${new Date().toLocaleDateString()}`,
     });
 
-    const filename = `${sanitizeFilename(projectName || bundle.project.name)}-${new Date().toISOString().split('T')[0]}.inkwell`;
+    const filename = `${sanitizeFilename(projectName ?? bundle.project.name ?? 'untitled')}-${new Date().toISOString().split('T')[0]}.inkwell`;
 
     return {
       filename,
@@ -382,7 +382,7 @@ export async function listAvailableProjects(): Promise<
     // Extract unique project IDs
     keys.forEach((key) => {
       const parts = key.split(':');
-      if (parts.length >= 2) {
+      if (parts.length >= 2 && parts[1]) {
         projectIds.add(parts[1]);
       }
     });
@@ -391,20 +391,21 @@ export async function listAvailableProjects(): Promise<
 
     for (const projectId of projectIds) {
       try {
-        const meta = await storage.get(`project:${projectId}:meta`);
+        const meta = (await storage.get(`project:${projectId}:meta`)) as Record<string, any> | null;
         const chapters = (await storage.get(`project:${projectId}:chapters`)) || [];
+        const chapterArray = Array.isArray(chapters) ? chapters : [];
 
         if (meta && meta.name) {
           projects.push({
             id: projectId,
-            name: meta.name,
-            description: meta.description,
-            lastModified: new Date(meta.updatedAt || meta.createdAt),
-            wordCount: chapters.reduce(
-              (total: number, ch: any) => total + (ch.totalWordCount || 0),
+            name: String(meta.name),
+            description: meta.description ? String(meta.description) : undefined,
+            lastModified: new Date(meta.updatedAt || meta.createdAt || Date.now()),
+            wordCount: chapterArray.reduce(
+              (total: number, ch: any) => total + (ch?.totalWordCount ?? 0),
               0,
             ),
-            chapterCount: chapters.length,
+            chapterCount: chapterArray.length,
           });
         }
       } catch (error) {

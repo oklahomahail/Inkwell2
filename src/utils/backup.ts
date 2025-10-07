@@ -70,31 +70,44 @@ export async function createProjectBackup(
     const projectMeta = (await storage.get(`project:${projectId}:meta`)) || {};
     const settings = (await storage.get(`project:${projectId}:settings`)) || {};
 
+    // Ensure projectMeta is an object
+    const meta = (projectMeta as Partial<Project>) ?? {};
+    const projectSettings = (settings as Partial<Project['settings']>) ?? {};
+
     // Construct the project object
     const project: Project = createVersionedData({
       id: projectId,
-      name: projectMeta.name || 'Untitled Project',
-      description: projectMeta.description || '',
-      chapters: options.chaptersOnly ? chapters : chapters,
-      characters: options.includeCharacters ? characters : [],
-      timelineEvents: options.includeTimeline ? timelineEvents : [],
-      writingSessions: writingSessions,
+      name: String(meta.name ?? 'Untitled Project'),
+      description: String(meta.description ?? ''),
+      chapters: Array.isArray(chapters) ? chapters : [],
+      characters: options.includeCharacters ? (Array.isArray(characters) ? characters : []) : [],
+      timelineEvents: options.includeTimeline
+        ? Array.isArray(timelineEvents)
+          ? timelineEvents
+          : []
+        : [],
+      writingSessions: Array.isArray(writingSessions) ? writingSessions : [],
       metadata: {
-        totalWordCount: chapters.reduce(
-          (total, chapter) => total + (chapter.totalWordCount || 0),
-          0,
+        totalWordCount: Number(
+          meta.metadata?.totalWordCount ??
+            (Array.isArray(chapters)
+              ? chapters.reduce(
+                  (total: number, chapter: any) => total + (chapter?.totalWordCount ?? 0),
+                  0,
+                )
+              : 0),
         ),
-        targetWordCount: projectMeta.targetWordCount,
-        genre: projectMeta.genre,
-        tags: projectMeta.tags || [],
+        targetWordCount: Number(meta.metadata?.targetWordCount ?? 0),
+        genre: String(meta.metadata?.genre ?? ''),
+        tags: Array.isArray(meta.metadata?.tags) ? meta.metadata.tags : [],
       },
       settings: {
-        autoSaveEnabled: settings.autoSaveEnabled ?? true,
-        autoSaveInterval: settings.autoSaveInterval ?? 30000,
-        backupEnabled: settings.backupEnabled ?? true,
-        theme: settings.theme || 'dark',
+        autoSaveEnabled: Boolean(projectSettings.autoSaveEnabled ?? true),
+        autoSaveInterval: Number(projectSettings.autoSaveInterval ?? 30000),
+        backupEnabled: Boolean(projectSettings.backupEnabled ?? true),
+        theme: (projectSettings.theme ?? 'dark') as 'light' | 'dark',
       },
-      createdAt: new Date(projectMeta.createdAt || Date.now()),
+      createdAt: new Date(meta.createdAt ?? Date.now()),
       updatedAt: new Date(),
     });
 
@@ -130,9 +143,10 @@ export async function createProjectBackup(
       manifest,
       project,
     };
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     const backupError: BackupError = new Error(
-      `Failed to create project backup: ${error.message}`,
+      `Failed to create project backup: ${message}`,
     ) as BackupError;
     backupError.code = 'CORRUPTED_DATA';
     backupError.recoverable = false;
@@ -233,8 +247,9 @@ export async function validateProjectBundle(
         }
       });
     }
-  } catch (error) {
-    errors.push(`Validation failed with error: ${error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`Validation failed with error: ${message}`);
     canRecover = false;
   }
 
@@ -326,13 +341,14 @@ export async function restoreProjectBackup(
 
     console.log(`✅ Restored project "${repairedProject.name}" with ID: ${projectId}`);
     return projectId;
-  } catch (error) {
-    if (error.code) {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error) {
       throw error; // Re-throw BackupError
     }
 
+    const message = error instanceof Error ? error.message : String(error);
     const backupError: BackupError = new Error(
-      `Failed to restore project: ${error.message}`,
+      `Failed to restore project: ${message}`,
     ) as BackupError;
     backupError.code = 'CORRUPTED_DATA';
     backupError.recoverable = true;
@@ -409,9 +425,10 @@ export async function importProjectBundle(file: File | Blob): Promise<ProjectBun
     }
 
     return bundle;
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     const backupError: BackupError = new Error(
-      `Failed to import bundle: ${error.message}`,
+      `Failed to import bundle: ${message}`,
     ) as BackupError;
     backupError.code = 'INVALID_FORMAT';
     backupError.recoverable = false;
