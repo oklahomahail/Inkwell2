@@ -144,7 +144,7 @@ export default defineConfig({
   },
 
   build: {
-    sourcemap: false,
+    sourcemap: true,
     target: 'es2020', // Ensure consistent target
     rollupOptions: {
       output: {

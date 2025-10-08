@@ -1,6 +1,8 @@
 import React from 'react';
 
-import { InkwellLogo, useBrandTheme, BRAND_CLASSES } from './index';
+import { useBrandTheme } from './BrandThemeProvider';
+import { BRAND_CLASSES } from './constants';
+import { InkwellLogo } from './InkwellLogo';
 
 /**
  * BrandShowcase - Demonstrates the new Inkwell brand system

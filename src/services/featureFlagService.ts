@@ -22,6 +22,7 @@ class FeatureFlagService {
   private readonly STORAGE_KEY = 'inkwell_feature_flags';
   private config: FeatureFlagConfig;
   private listeners: Array<(flags: Record<string, boolean>) => void> = [];
+  private warned = new Set<string>();
 
   // Define all available feature flags
   private readonly DEFAULT_FLAGS: FeatureFlag[] = [
@@ -127,6 +128,92 @@ class FeatureFlagService {
       enabled: false,
       category: 'experimental',
     },
+
+    // Missing flags that are being called in the app
+    {
+      key: 'performanceMonitoring',
+      name: 'Performance Monitoring',
+      description: 'Monitor app performance metrics',
+      enabled: false,
+      category: 'performance',
+    },
+    {
+      key: 'plotBoards',
+      name: 'Plot Boards',
+      description: 'Kanban-style story organization',
+      enabled: true,
+      category: 'ui',
+    },
+    {
+      key: 'advancedExport',
+      name: 'Advanced Export',
+      description: 'Custom export formats and batch operations',
+      enabled: true,
+      category: 'ui',
+    },
+    {
+      key: 'aiWritingAssistant',
+      name: 'AI Writing Assistant',
+      description: 'AI-powered writing assistance features',
+      enabled: true,
+      category: 'ai',
+    },
+    {
+      key: 'timelineConsistency',
+      name: 'Timeline Consistency',
+      description: 'Timeline consistency checking',
+      enabled: true,
+      category: 'ai',
+    },
+    {
+      key: 'characterConsistency',
+      name: 'Character Consistency',
+      description: 'Character consistency tracking',
+      enabled: true,
+      category: 'ai',
+    },
+    {
+      key: 'advancedTextAnalysis',
+      name: 'Advanced Text Analysis',
+      description: 'Sentiment analysis and style metrics',
+      enabled: false,
+      category: 'experimental',
+    },
+    {
+      key: 'collaboration',
+      name: 'Real-time Collaboration',
+      description: 'Share projects and collaborate with other writers',
+      enabled: false,
+      category: 'experimental',
+    },
+    {
+      key: 'distractionFreeMode',
+      name: 'Distraction-Free Mode',
+      description: 'Hide all UI elements except the editor',
+      enabled: false,
+      category: 'ui',
+    },
+    {
+      key: 'debugStorage',
+      name: 'Storage Debug Info',
+      description: 'Show detailed storage operation logs',
+      enabled: false,
+      category: 'experimental',
+    },
+    {
+      key: 'debugState',
+      name: 'State Debug Panel',
+      description: 'Show current app state in debug panel',
+      enabled: false,
+      category: 'experimental',
+    },
+    {
+      key: 'ui_showPowerMenu',
+      name: 'Power Tools Menu',
+      description: 'Show the power tools menu in navigation',
+      enabled: true,
+      category: 'ui',
+    },
   ];
 
   constructor() {
@@ -139,7 +226,14 @@ class FeatureFlagService {
    */
   isEnabled(flagKey: string): boolean {
     const flag = this.getFlag(flagKey);
-    if (!flag) return false;
+    if (!flag) {
+      // Warn only once per unknown flag
+      if (!this.warned.has(flagKey)) {
+        console.warn(`Unknown feature flag: ${flagKey}`);
+        this.warned.add(flagKey);
+      }
+      return false; // Safe default for unknown flags
+    }
 
     // Check environment overrides first
     if (this.config.overrides[flagKey] !== undefined) {
