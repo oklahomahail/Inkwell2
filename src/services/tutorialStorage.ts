@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 
 import { useProfile } from '../context/ProfileContext';
-import { useDB, defineStores } from '../data/dbFactory';
+import { useMaybeDB, defineStores } from '../data/dbFactory';
 
 export interface TutorialProgress {
   slug: string;
@@ -43,12 +43,15 @@ export interface CompletionChecklist {
  */
 export function useTutorialStorage() {
   const { active: activeProfile } = useProfile();
-  const db = useDB(); // Already per-profile DB from the profile system
+  const db = useMaybeDB(); // Lenient DB access for global providers
   const stores = defineStores();
+  
+  // Flag to indicate if profile is active and DB is available
+  const isProfileActive = !!(activeProfile?.id && db);
 
   const getProgress = useCallback(
     async (slug: string): Promise<TutorialProgress | null> => {
-      if (!activeProfile?.id) return null;
+      if (!db || !activeProfile?.id) return null;
 
       try {
         const progressKey = `${stores.tutorials}_${slug}`;
@@ -64,7 +67,7 @@ export function useTutorialStorage() {
 
   const setProgress = useCallback(
     async (slug: string, progress: TutorialProgress['progress']) => {
-      if (!activeProfile?.id) return;
+      if (!db || !activeProfile?.id) return;
 
       try {
         const tutorialProgress: TutorialProgress = {
@@ -84,7 +87,7 @@ export function useTutorialStorage() {
 
   const clearProgress = useCallback(
     async (slug?: string) => {
-      if (!activeProfile?.id) return;
+      if (!db || !activeProfile?.id) return;
 
       try {
         if (slug) {
@@ -105,7 +108,7 @@ export function useTutorialStorage() {
   );
 
   const getPreferences = useCallback(async (): Promise<TutorialPreferences | null> => {
-    if (!activeProfile?.id) return null;
+    if (!db || !activeProfile?.id) return null;
 
     try {
       const result = await db.get<TutorialPreferences>(stores.tutorialPreferences);
@@ -118,7 +121,7 @@ export function useTutorialStorage() {
 
   const setPreferences = useCallback(
     async (preferences: TutorialPreferences) => {
-      if (!activeProfile?.id) return;
+      if (!db || !activeProfile?.id) return;
 
       try {
         const data = {
@@ -134,7 +137,7 @@ export function useTutorialStorage() {
   );
 
   const getChecklist = useCallback(async (): Promise<CompletionChecklist | null> => {
-    if (!activeProfile?.id) return null;
+    if (!db || !activeProfile?.id) return null;
 
     try {
       const result = await db.get<CompletionChecklist>(stores.tutorialChecklist);
@@ -147,7 +150,7 @@ export function useTutorialStorage() {
 
   const setChecklist = useCallback(
     async (checklist: CompletionChecklist) => {
-      if (!activeProfile?.id) return;
+      if (!db || !activeProfile?.id) return;
 
       try {
         const data = {
@@ -163,7 +166,7 @@ export function useTutorialStorage() {
   );
 
   const getAllProgress = useCallback(async (): Promise<TutorialProgress[]> => {
-    if (!activeProfile?.id) return [];
+    if (!db || !activeProfile?.id) return [];
 
     try {
       const keys = await db.list(stores.tutorials);
@@ -200,7 +203,7 @@ export function useTutorialStorage() {
 
     // Profile context
     profileId: activeProfile?.id || null,
-    isProfileActive: !!activeProfile?.id,
+    isProfileActive,
   };
 }
 

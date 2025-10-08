@@ -1,9 +1,9 @@
 // src/routes/shell/ProfileGate.tsx - Guards app shell to ensure valid profile
 
-import React, { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, Navigate } from 'react-router-dom';
 
-import { useProfileContext } from '../../context/ProfileContext';
+import { useProfile } from '../../context/ProfileContext';
 
 interface ProfileGateProps {
   children: React.ReactNode;
@@ -14,53 +14,57 @@ interface ProfileGateProps {
  * 1. A valid profile ID is present in the URL
  * 2. The profile exists in the system
  * 3. The profile is set as active
+ * 4. Forces remount when profile changes to prevent stale DB connections
  *
  * If any condition fails, redirects to profile picker
  */
 export function ProfileGate({ children }: ProfileGateProps) {
   const { profileId } = useParams<{ profileId: string }>();
-  const navigate = useNavigate();
-  const { profiles, activeProfile, isLoading, setActiveProfile } = useProfileContext();
+  const { profiles, activeProfile, setActiveProfile } = useProfile();
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (isLoading) return;
+    // Wait for profiles to load from localStorage (one tick)
+    const timer = setTimeout(() => setReady(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
 
-    // No profile ID in URL - redirect to profile picker
-    if (!profileId) {
-      navigate('/profiles', { replace: true });
-      return;
-    }
-
-    // Check if profile exists
-    const profile = profiles.find((p) => p.id === profileId);
-    if (!profile) {
-      console.warn(`Profile ${profileId} not found, redirecting to profile picker`);
-      navigate('/profiles', { replace: true });
-      return;
-    }
-
-    // Profile exists but is not active - set it as active
-    if (!activeProfile || activeProfile.id !== profileId) {
+  useEffect(() => {
+    if (!profileId || !ready) return;
+    
+    const foundProfile = profiles.find(p => p.id === profileId);
+    if (foundProfile && (!activeProfile || activeProfile.id !== foundProfile.id)) {
       setActiveProfile(profileId).catch((error) => {
         console.error('Failed to set active profile:', error);
-        navigate('/profiles', { replace: true });
       });
     }
-  }, [profileId, profiles, activeProfile, isLoading, setActiveProfile, navigate]);
+  }, [profileId, profiles, activeProfile?.id, setActiveProfile, ready]);
 
-  // Show loading while profiles are being loaded
-  if (isLoading) {
+  // Still resolving profile list / active profile
+  if (!ready) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profiles...</p>
+          <p className="text-gray-600">Initializing...</p>
         </div>
       </div>
     );
   }
 
-  // Show loading while setting active profile
+  // No profile ID in URL
+  if (!profileId) {
+    return <Navigate to="/profiles" replace />;
+  }
+
+  // Profile doesn't exist
+  const profileExists = profiles.some(p => p.id === profileId);
+  if (!profileExists) {
+    console.warn(`Profile ${profileId} not found, redirecting to profile picker`);
+    return <Navigate to="/profiles" replace />;
+  }
+
+  // Profile not yet active
   if (!activeProfile || activeProfile.id !== profileId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -72,6 +76,6 @@ export function ProfileGate({ children }: ProfileGateProps) {
     );
   }
 
-  // All checks passed - render children
-  return <>{children}</>;
+  // Key children so the app fully remounts when profile changes
+  return <div key={activeProfile.id}>{children}</div>;
 }

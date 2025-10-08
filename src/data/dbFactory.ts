@@ -108,18 +108,33 @@ export function getDbForProfile(profileId: ProfileId): ProfileStorageManager {
 }
 
 /**
- * Hook to get the current profile's database
+ * Lenient hook: returns null until profile is ready
+ * Use this in components that can mount outside/above ProfileGate
+ */
+export function useMaybeDB(): ProfileStorageManager | null {
+  const { activeProfile } = useProfileContext();
+  
+  if (!activeProfile?.id) {
+    return null;
+  }
+  
+  return getDbForProfile(activeProfile.id);
+}
+
+/**
+ * Strict hook: throws if used without an active profile
+ * Use this for core screens that are guaranteed to be inside ProfileGate
  */
 export function useDB(): ProfileStorageManager {
-  const { activeProfile } = useProfileContext();
-
-  if (!activeProfile) {
+  const db = useMaybeDB();
+  
+  if (!db) {
     throw new Error(
       'No active profile - cannot access database. Make sure ProfileGate is wrapping your component.',
     );
   }
-
-  return getDbForProfile(activeProfile.id);
+  
+  return db;
 }
 
 /**
