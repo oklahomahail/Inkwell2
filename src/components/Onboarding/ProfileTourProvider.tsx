@@ -161,6 +161,36 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
     loadProfileData();
   }, [activeProfile?.id, tutorialStorage]);
 
+  // Define logAnalytics first to avoid temporal dead zone errors
+  const logAnalytics = useCallback(
+    (event: string, data: any = {}) => {
+      try {
+        // Enhanced analytics with profile context
+        const analyticsEvent = {
+          event,
+          data: {
+            ...data,
+            profileId: activeProfile?.id,
+            tourType: tourState.tourType,
+            step: tourState.currentStep,
+          },
+          timestamp: Date.now(),
+        };
+
+        // Log to console in dev mode
+        if (import.meta.env.DEV) {
+          console.log('Tutorial Analytics:', event, analyticsEvent.data);
+        }
+
+        // TODO: Send to external analytics service if needed
+        // analyticsService.track(event, analyticsEvent.data);
+      } catch (error) {
+        console.warn('Failed to log tutorial analytics:', error);
+      }
+    },
+    [activeProfile?.id, tourState],
+  );
+
   const startTour = useCallback(
     async (type: TourState['tourType'], steps?: TourStep[]) => {
       if (!tutorialStorage.isProfileActive) return;
@@ -186,7 +216,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
         await tutorialStorage.setPreferences(updatedPrefs);
       }
     },
-    [tutorialStorage, preferences],
+    [tutorialStorage, preferences, logAnalytics],
   );
 
   const nextStep = useCallback(async () => {
@@ -203,7 +233,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
         };
       }
     });
-  }, []);
+  }, [completeTour]);
 
   const previousStep = useCallback(() => {
     setTourState((prev) => ({
@@ -267,7 +297,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
         lastActiveAt: Date.now(),
       });
     }
-  }, [tutorialStorage, tourState, preferences]);
+  }, [tutorialStorage, tourState, preferences, logAnalytics]);
 
   const completeStep = useCallback(
     async (stepId: string) => {
@@ -347,7 +377,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
     setPreferences(updatedPrefs);
     await tutorialStorage.setPreferences(updatedPrefs);
     logAnalytics('tour_never_show_again');
-  }, [preferences, tutorialStorage]);
+  }, [preferences, tutorialStorage, logAnalytics]);
 
   const setRemindMeLater = useCallback(
     async (hours: number = 24) => {
@@ -365,7 +395,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
       await tutorialStorage.setPreferences(updatedPrefs);
       logAnalytics('tour_remind_me_later', { hours, dismissalCount: updatedPrefs.tourDismissals });
     },
-    [preferences, tutorialStorage],
+    [preferences, tutorialStorage, logAnalytics],
   );
 
   const shouldShowTourPrompt = useCallback((): boolean => {
@@ -396,7 +426,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
       await tutorialStorage.setChecklist(updatedChecklist);
       logAnalytics('checklist_item_completed', { item });
     },
-    [checklist, tutorialStorage],
+    [checklist, tutorialStorage, logAnalytics],
   );
 
   const getChecklistProgress = useCallback(() => {
@@ -406,35 +436,6 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
     const completed = items.filter(Boolean).length;
     return { completed, total: items.length };
   }, [checklist]);
-
-  const logAnalytics = useCallback(
-    (event: string, data: any = {}) => {
-      try {
-        // Enhanced analytics with profile context
-        const analyticsEvent = {
-          event,
-          data: {
-            ...data,
-            profileId: activeProfile?.id,
-            tourType: tourState.tourType,
-            step: tourState.currentStep,
-          },
-          timestamp: Date.now(),
-        };
-
-        // Log to console in dev mode
-        if (import.meta.env.DEV) {
-          console.log('Tutorial Analytics:', event, analyticsEvent.data);
-        }
-
-        // TODO: Send to external analytics service if needed
-        // analyticsService.track(event, analyticsEvent.data);
-      } catch (error) {
-        console.warn('Failed to log tutorial analytics:', error);
-      }
-    },
-    [activeProfile?.id, tourState],
-  );
 
   const canShowContextualTour = useCallback(
     (tourType: string): boolean => {

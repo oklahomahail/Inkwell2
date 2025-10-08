@@ -1,0 +1,28 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Inkwell Logo">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#0C5C3D"/>
+  
+  <!-- Inkwell base -->
+  <ellipse cx="256" cy="380" rx="120" ry="40" fill="#2E2E2E"/>
+  
+  <!-- Inkwell body -->
+  <path d="M180 280 C180 320, 210 360, 256 360 C302 360, 332 320, 332 280 L320 200 C320 180, 300 160, 280 160 L232 160 C212 160, 192 180, 192 200 L180 280 Z" fill="#2E2E2E"/>
+  
+  <!-- Ink surface -->
+  <ellipse cx="256" cy="280" rx="60" ry="15" fill="#1a1a1a"/>
+  
+  <!-- Quill feather -->
+  <path d="M300 120 C330 100, 360 110, 380 140 C390 155, 385 170, 375 180 L320 235 C315 240, 308 242, 302 240 L285 235 C280 233, 278 227, 281 223 L300 120 Z" fill="#D4A537"/>
+  
+  <!-- Quill shaft -->
+  <rect x="285" y="235" width="8" height="80" fill="#8B4513" transform="rotate(45 289 275)"/>
+  
+  <!-- Quill tip -->
+  <path d="M275 285 L285 275 L290 285 L280 295 Z" fill="#4A4A4A"/>
+  
+  <!-- Ink drop -->
+  <circle cx="270" cy="300" r="3" fill="#1a1a1a"/>
+  
+  <!-- Text "Inkwell" -->
+  <text x="256" y="450" text-anchor="middle" font-family="serif" font-size="48" font-weight="bold" fill="#D4A537">Inkwell</text>
+</svg>
