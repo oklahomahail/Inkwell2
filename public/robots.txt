@@ -1,0 +1,28 @@
+# Robots.txt for Inkwell
+# https://inkwell.leadwithnexus.com/robots.txt
+
+User-agent: *
+Allow: /
+
+# Allow crawling of the home page and public pages
+Allow: /$
+Allow: /profiles$
+
+# Block crawling of private profile areas and sensitive paths
+Disallow: /p/
+Disallow: /login
+Disallow: /health
+Disallow: /*?*
+
+# Common bot restrictions
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /settings/
+
+# Sitemap location
+Sitemap: https://inkwell.leadwithnexus.com/sitemap.xml
+
+# Rate limiting for aggressive crawlers
+Crawl-delay: 1

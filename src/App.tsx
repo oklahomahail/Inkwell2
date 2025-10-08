@@ -1,5 +1,6 @@
-// src/App.tsx — provider composition at the root + clean AppShell
+// src/App.tsx — provider composition at the root + profile-based routing
 import React, { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // UI + panels
 import ClaudeAssistant from './components/ClaudeAssistant';
@@ -26,6 +27,9 @@ import ViewSwitcher from './components/ViewSwitcher';
 import { useAppContext } from './context/AppContext';
 import { useEditorContext } from './context/EditorContext';
 import Login from './pages/Login';
+// Profile routing components
+import { ProfileGate } from './routes/shell/ProfileGate';
+import { ProfilePicker } from './routes/shell/ProfilePicker';
 // Error boundaries
 // Services
 import { connectivityService } from './services/connectivityService';
@@ -45,23 +49,42 @@ type QueuedOperation = {
 
 // All app logic lives here, safely *inside* the providers.
 function AppShell() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Health check route */}
+        <Route path="/health" element={<HealthCheck />} />
+
+        {/* Login route */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Profile picker */}
+        <Route path="/profiles" element={<ProfilePicker />} />
+
+        {/* Profile-specific routes */}
+        <Route
+          path="/p/:profileId/*"
+          element={
+            <ProfileGate>
+              <ProfileAppShell />
+            </ProfileGate>
+          }
+        />
+
+        {/* Root redirect */}
+        <Route path="/" element={<Navigate to="/profiles" replace />} />
+
+        {/* Catch-all redirect */}
+        <Route path="*" element={<Navigate to="/profiles" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+// Profile-specific app shell (the original app logic)
+function ProfileAppShell() {
   const { claude, currentProject } = useAppContext();
   const { insertText } = useEditorContext();
-
-  // Check for health route (for CI testing)
-  const isHealthRoute =
-    window.location.pathname === '/health' || window.location.search.includes('health=true');
-
-  if (isHealthRoute) {
-    return <HealthCheck />;
-  }
-
-  // Check for login route
-  const isLoginRoute = window.location.pathname === '/login';
-
-  if (isLoginRoute) {
-    return <Login />;
-  }
 
   // storage recovery
   const { showRecoveryBanner, dismissRecoveryBanner } = useStorageRecovery();

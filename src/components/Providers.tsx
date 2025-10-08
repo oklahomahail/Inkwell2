@@ -5,6 +5,7 @@ import { AppProvider } from '@/context/AppContext';
 import { ClaudeProvider } from '@/context/ClaudeProvider';
 import { EditorProvider } from '@/context/EditorContext';
 import { NavProvider } from '@/context/NavContext';
+import { ProfileProvider } from '@/context/ProfileContext';
 import { ToastProvider } from '@/context/ToastContext';
 
 import { CommandPaletteProvider } from './CommandPalette/CommandPaletteProvider';
@@ -21,30 +22,33 @@ interface ProvidersProps {
  *
  * Provider hierarchy (outermost to innermost):
  * 1. ToastProvider - Global notifications
- * 2. NavProvider - Navigation state management
- * 3. EditorProvider - Text editor context
- * 4. ClaudeProvider - AI assistant integration
- * 5. TourProvider - Tour and onboarding system
- * 6. FeatureDiscoveryProvider - Contextual hints
- * 7. AppProvider - Main application state
- * 8. CommandPaletteProvider - Command palette functionality
+ * 2. ProfileProvider - Profile state management (must be early for data isolation)
+ * 3. NavProvider - Navigation state management
+ * 4. EditorProvider - Text editor context
+ * 5. ClaudeProvider - AI assistant integration
+ * 6. TourProvider - Tour and onboarding system
+ * 7. FeatureDiscoveryProvider - Contextual hints
+ * 8. AppProvider - Main application state
+ * 9. CommandPaletteProvider - Command palette functionality
  */
 export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   return (
     <ToastProvider>
-      <NavProvider>
-        <EditorProvider>
-          <ClaudeProvider>
-            <TourProvider>
-              <FeatureDiscoveryProvider>
-                <AppProvider>
-                  <CommandPaletteProvider>{children}</CommandPaletteProvider>
-                </AppProvider>
-              </FeatureDiscoveryProvider>
-            </TourProvider>
-          </ClaudeProvider>
-        </EditorProvider>
-      </NavProvider>
+      <ProfileProvider>
+        <NavProvider>
+          <EditorProvider>
+            <ClaudeProvider>
+              <TourProvider>
+                <FeatureDiscoveryProvider>
+                  <AppProvider>
+                    <CommandPaletteProvider>{children}</CommandPaletteProvider>
+                  </AppProvider>
+                </FeatureDiscoveryProvider>
+              </TourProvider>
+            </ClaudeProvider>
+          </EditorProvider>
+        </NavProvider>
+      </ProfileProvider>
     </ToastProvider>
   );
 };

@@ -21,6 +21,7 @@ import { useAppContext, View } from '@/context/AppContext';
 import { cn } from '@/utils/cn';
 import { useFeatureFlag } from '@/utils/flags';
 
+import { ProfileSwitcher } from '../ProfileSwitcher';
 import { PWAOfflineIndicator } from '../PWA';
 
 interface MainLayoutProps {
@@ -347,17 +348,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <PWAOfflineIndicator variant="badge" />
-                <button className="btn btn-ghost btn-sm" aria-label="Open command palette">
-                  <Command className="w-4 h-4" />
-                </button>
-                <button className="btn btn-ghost btn-sm" aria-label="Search">
-                  <Search className="w-4 h-4" />
-                </button>
-                <button className="btn btn-ghost btn-sm" aria-label="Notifications">
-                  <Bell className="w-4 h-4" />
-                </button>
+                <ProfileSwitcher />
+                <div className="flex items-center gap-2">
+                  <button className="btn btn-ghost btn-sm" aria-label="Open command palette">
+                    <Command className="w-4 h-4" />
+                  </button>
+                  <button className="btn btn-ghost btn-sm" aria-label="Search">
+                    <Search className="w-4 h-4" />
+                  </button>
+                  <button className="btn btn-ghost btn-sm" aria-label="Notifications">
+                    <Bell className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
