@@ -370,6 +370,51 @@ describe('TutorialStorage', () => {
     });
   });
 
+  describe('No Active Profile', () => {
+    it('should handle gracefully when no active profile exists', async () => {
+      mockedUseProfile.mockReturnValue({ active: null });
+      mockedUseMaybeDB.mockReturnValue(null);
+
+      const { result } = renderHook(() => useTutorialStorage());
+
+      expect(result.current.profileId).toBe(null);
+      expect(result.current.isProfileActive).toBe(false);
+
+      // All operations should return null gracefully
+      const progress = await result.current.getProgress('test');
+      expect(progress).toBe(null);
+
+      const preferences = await result.current.getPreferences();
+      expect(preferences).toBe(null);
+
+      const checklist = await result.current.getChecklist();
+      expect(checklist).toBe(null);
+
+      // Set operations should no-op without throwing
+      await expect(
+        result.current.setProgress('test', {
+          currentStep: 1,
+          completedSteps: ['step1'],
+          tourType: 'full-onboarding' as const,
+          startedAt: Date.now(),
+          isCompleted: false,
+          totalSteps: 5,
+          lastActiveAt: Date.now(),
+        }),
+      ).resolves.toBeUndefined();
+
+      await expect(
+        result.current.setPreferences({
+          neverShowAgain: true,
+          remindMeLater: false,
+          completedTours: [],
+          tourDismissals: 0,
+          updatedAt: Date.now(),
+        }),
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe('Error Handling', () => {
     it('should handle database errors gracefully', async () => {
       mockDb.get.mockRejectedValue(new Error('Database error'));
