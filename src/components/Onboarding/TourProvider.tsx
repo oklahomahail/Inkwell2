@@ -179,6 +179,39 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
     }
   }, [checklist]);
 
+  // Define logAnalytics first to avoid temporal dead zone errors
+  const logAnalytics = (event: string, data: any = {}) => {
+    try {
+      // Store analytics locally (could be sent to external service later)
+      const existing = localStorage.getItem(ANALYTICS_KEY);
+      const analytics = existing ? JSON.parse(existing) : [];
+
+      const analyticsEvent = {
+        event,
+        data,
+        timestamp: Date.now(),
+        tourType: tourState.tourType,
+        step: tourState.currentStep,
+      };
+
+      analytics.push(analyticsEvent);
+
+      // Keep only last 100 events to prevent storage bloat
+      if (analytics.length > 100) {
+        analytics.splice(0, analytics.length - 100);
+      }
+
+      localStorage.setItem(ANALYTICS_KEY, JSON.stringify(analytics));
+
+      // Also log to console in dev mode
+      if (import.meta.env.DEV) {
+        console.log('Tour Analytics:', event, data);
+      }
+    } catch (error) {
+      console.warn('Failed to log analytics:', error);
+    }
+  };
+
   const startTour = (type: TourState['tourType'], steps?: TourStep[]) => {
     logAnalytics('tour_started', { tourType: type, stepCount: steps?.length || 0 });
 
@@ -338,38 +371,6 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
     const items = Object.values(checklist);
     const completed = items.filter(Boolean).length;
     return { completed, total: items.length };
-  };
-
-  const logAnalytics = (event: string, data: any = {}) => {
-    try {
-      // Store analytics locally (could be sent to external service later)
-      const existing = localStorage.getItem(ANALYTICS_KEY);
-      const analytics = existing ? JSON.parse(existing) : [];
-
-      const analyticsEvent = {
-        event,
-        data,
-        timestamp: Date.now(),
-        tourType: tourState.tourType,
-        step: tourState.currentStep,
-      };
-
-      analytics.push(analyticsEvent);
-
-      // Keep only last 100 events to prevent storage bloat
-      if (analytics.length > 100) {
-        analytics.splice(0, analytics.length - 100);
-      }
-
-      localStorage.setItem(ANALYTICS_KEY, JSON.stringify(analytics));
-
-      // Also log to console in dev mode
-      if (import.meta.env.DEV) {
-        console.log('Tour Analytics:', event, data);
-      }
-    } catch (error) {
-      console.warn('Failed to log analytics:', error);
-    }
   };
 
   const canShowContextualTour = (tourType: string): boolean => {
