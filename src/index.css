@@ -363,7 +363,9 @@ body {
   }
 
   .text-inkwell-gold {
-    @apply text-inkwell-gold font-serif font-semibold;
+    color: theme('colors.inkwell.gold');
+    font-family: theme('fontFamily.serif');
+    font-weight: theme('fontWeight.semibold');
   }
 
   /* Legacy Inkwell Button Styles (for backward compatibility) */
