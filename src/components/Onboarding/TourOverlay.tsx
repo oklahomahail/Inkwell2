@@ -2,7 +2,7 @@
 import { X, ChevronLeft, SkipForward, CheckCircle, ArrowRight, Lightbulb } from 'lucide-react';
 import React, { useEffect, useState, useRef } from 'react';
 
-import { useTour, TourStep } from './TourProvider';
+import { useTour, TourStep } from './ProfileTourProvider';
 
 interface TourOverlayProps {
   onClose?: () => void;

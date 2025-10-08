@@ -1,0 +1,54 @@
+INKWELL DATA & PRIVACY NOTICE
+
+Last Updated: October 2025
+
+DATA STORAGE
+============
+• No authentication required - completely local operation
+• All data stored locally in your browser (IndexedDB & localStorage)  
+• Each profile maintains completely isolated data storage
+• Zero data sharing between profiles on same device
+• No external data transmission except for optional AI features
+
+PROFILE SYSTEM
+===============
+• Profiles created locally with UUID identifiers
+• Profile switching maintains complete data isolation
+• Profile data persists in browser storage until manually deleted
+• No cloud sync or external profile storage (local-first design)
+
+AI FEATURES (OPTIONAL)
+======================
+• AI features require explicit activation and API key configuration
+• AI requests sent directly to configured provider (Claude/OpenAI)
+• Content sent to AI providers subject to their privacy policies
+• AI features can be completely disabled - app remains fully functional
+• Mock mode available for testing without external API calls
+
+ANALYTICS & MONITORING  
+======================
+• Anonymous usage analytics for feature optimization (privacy-first)
+• Error monitoring via Sentry (optional, configurable)
+• No personal data, email addresses, or account information collected
+• All analytics data aggregated and anonymized
+
+FUTURE FEATURES
+===============
+• Optional link mode may sync via workspace key (not yet implemented)
+• Link-based sharing would be explicit opt-in per profile
+• Workspace keys should never be shared publicly
+• All features remain local-first by default
+
+CONTACT
+=======
+For questions about this privacy notice:
+• GitHub Issues: https://github.com/oklahomahail/Inkwell2/issues
+• Documentation: https://github.com/oklahomahail/Inkwell2
+
+CHANGES
+=======
+Updates to this notice will be reflected in the application and documentation.
+Continued use constitutes acceptance of any changes.
+
+---
+© 2025 Inkwell Authors | MIT License

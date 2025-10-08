@@ -25,6 +25,9 @@ importers:
       '@reduxjs/toolkit':
         specifier: ^2.9.0
         version: 2.9.0(react-redux@9.2.0(@types/react@19.1.11)(react@19.1.0)(redux@5.0.1))(react@19.1.0)
+      '@sentry/react':
+        specifier: ^10.18.0
+        version: 10.18.0(react@19.1.0)
       '@tanstack/react-virtual':
         specifier: ^3.13.12
         version: 3.13.12(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1438,6 +1441,36 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
+
+  '@sentry-internal/browser-utils@10.18.0':
+    resolution: {integrity: sha512-6Y5VkNcj5ecIFsKdL8/7hrLt7pCuWR4BRLsKOHAmhdCnXtobf7v6DeBow2Hk5yEYO0AwjP5mqvoBAewbS+h3GA==}
+    engines: {node: '>=18'}
+
+  '@sentry-internal/feedback@10.18.0':
+    resolution: {integrity: sha512-uuupIivGPCpRStMU1I3sYPgD+pl8PqNV1DSVgVS5LF99h8tqjmRGS1xkCrUaUhVhVmsnxzbnvXb1hsOaCXX7DA==}
+    engines: {node: '>=18'}
+
+  '@sentry-internal/replay-canvas@10.18.0':
+    resolution: {integrity: sha512-asp1biXA+F5HAKl7RvPbf5s087bg1bpxMB9E69xWc1ECUfFMPrFRNS7mAJ5A8DTd1K74E9cFsLl6zO29HpH4+w==}
+    engines: {node: '>=18'}
+
+  '@sentry-internal/replay@10.18.0':
+    resolution: {integrity: sha512-ixr3K19q4oTRgM0xANi+8ThDUbxV5iixUIgvJrT7c1L6yyidovIwO0D82ZY3phUfMkgE+mX3cxX46gXTRTglKQ==}
+    engines: {node: '>=18'}
+
+  '@sentry/browser@10.18.0':
+    resolution: {integrity: sha512-JrPfxjCsuVYUe16U4fo4W2Fn0f9BwRev3G28a4ZIkwKwJo+qSnIk1mT8Eam8nwNCU8MZjB4KNE9w2p0kaoQxvQ==}
+    engines: {node: '>=18'}
+
+  '@sentry/core@10.18.0':
+    resolution: {integrity: sha512-zlhAlzc/Qpza8f/CMUb7zg/9FOhWouKAm9zyV9jZlx9lL6WceVbUEwQ3rq8ncGgM+LMwlASCOjsz5a728vAhCw==}
+    engines: {node: '>=18'}
+
+  '@sentry/react@10.18.0':
+    resolution: {integrity: sha512-mLVJzF/+VFTNkqVqApU9QLrTAahASLKLaPreJ5LUXhEbCEiBUTQNZIn8Js+tDisHwbdy9k94XC1/OLxld3Calg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      react: 19.1.0
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
@@ -6634,6 +6667,41 @@ snapshots:
     optional: true
 
   '@rtsao/scc@1.1.0': {}
+
+  '@sentry-internal/browser-utils@10.18.0':
+    dependencies:
+      '@sentry/core': 10.18.0
+
+  '@sentry-internal/feedback@10.18.0':
+    dependencies:
+      '@sentry/core': 10.18.0
+
+  '@sentry-internal/replay-canvas@10.18.0':
+    dependencies:
+      '@sentry-internal/replay': 10.18.0
+      '@sentry/core': 10.18.0
+
+  '@sentry-internal/replay@10.18.0':
+    dependencies:
+      '@sentry-internal/browser-utils': 10.18.0
+      '@sentry/core': 10.18.0
+
+  '@sentry/browser@10.18.0':
+    dependencies:
+      '@sentry-internal/browser-utils': 10.18.0
+      '@sentry-internal/feedback': 10.18.0
+      '@sentry-internal/replay': 10.18.0
+      '@sentry-internal/replay-canvas': 10.18.0
+      '@sentry/core': 10.18.0
+
+  '@sentry/core@10.18.0': {}
+
+  '@sentry/react@10.18.0(react@19.1.0)':
+    dependencies:
+      '@sentry/browser': 10.18.0
+      '@sentry/core': 10.18.0
+      hoist-non-react-statics: 3.3.2
+      react: 19.1.0
 
   '@standard-schema/spec@1.0.0': {}
 

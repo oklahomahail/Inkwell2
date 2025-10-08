@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 
 import { CompletionChecklistComponent } from './CompletionChecklist';
+import { useTour, TOUR_MAP } from './ProfileTourProvider';
 import { TourNudgeManager } from './TourNudges';
 import TourOverlay from './TourOverlay';
-import { useTour, TOUR_MAP } from './TourProvider';
 import WelcomeModal from './WelcomeModal';
 
 interface OnboardingOrchestratorProps {

@@ -13,6 +13,7 @@ import ExportDialog from './components/ExportDialog';
 import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
 import OnboardingOrchestrator from './components/Onboarding/OnboardingOrchestrator';
+import { TutorialRouter } from './components/Onboarding/TutorialRouter';
 import Providers from './components/Providers';
 import { PWAInstallButton, PWAUpdateNotification } from './components/PWA';
 import {
@@ -22,6 +23,7 @@ import {
 } from './components/Recovery/StorageRecoveryBanner';
 import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
+import { WhatsNewPanel } from './components/WhatsNew/WhatsNewPanel';
 // Pages
 // Context and providers
 import { useAppContext } from './context/AppContext';
@@ -66,7 +68,13 @@ function AppShell() {
           path="/p/:profileId/*"
           element={
             <ProfileGate>
-              <ProfileAppShell />
+              <Routes>
+                {/* Tutorial routes */}
+                <Route path="tutorials/*" element={<TutorialRouter />} />
+
+                {/* Main app routes */}
+                <Route path="*" element={<ProfileAppShell />} />
+              </Routes>
             </ProfileGate>
           }
         />
@@ -209,6 +217,9 @@ function ProfileAppShell() {
         {import.meta.env.DEV && <DebugSearchPanel />}
         {import.meta.env.DEV && <StorageDebugPanel />}
       </MainLayout>
+
+      {/* What's New Panel - shown once per profile */}
+      <WhatsNewPanel />
     </>
   );
 }

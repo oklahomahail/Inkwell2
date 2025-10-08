@@ -1,5 +1,6 @@
 // src/data/migrateToProfiles.ts - Migration utility for profile-specific data
 
+import { migrateLegacyTutorialData } from '../services/tutorialStorage';
 import { Profile } from '../types/profile';
 import { storage } from '../utils/storage';
 
@@ -29,6 +30,11 @@ const LEGACY_KEYS_TO_MIGRATE = [
   'analytics_data',
   // Add patterns for writing chapters
   /^inkwell_writing_chapters_/,
+  // Tutorial/onboarding data (old localStorage keys)
+  'inkwell-tour-progress',
+  'inkwell-tour-progress-preferences',
+  'inkwell-completion-checklist',
+  'inkwell-tour-analytics',
   // Add other legacy keys/patterns here
 ];
 
@@ -62,9 +68,10 @@ export async function migrateLegacyToProfile(
   options: {
     dryRun?: boolean;
     preserveLegacyData?: boolean;
+    isFirstProfile?: boolean;
   } = {},
 ): Promise<MigrationResult> {
-  const { dryRun = false, preserveLegacyData = true } = options;
+  const { dryRun = false, preserveLegacyData = true, isFirstProfile = false } = options;
   const profileDb = getDbForProfile(targetProfile.id);
 
   const result: MigrationResult = {
@@ -129,6 +136,22 @@ export async function migrateLegacyToProfile(
       skipped: result.skippedKeys.length,
       errors: result.errors.length,
     });
+
+    // Migrate tutorial/onboarding data
+    if (!dryRun) {
+      try {
+        console.log('Migrating tutorial data...');
+        await migrateLegacyTutorialData(targetProfile.id, profileDb, isFirstProfile);
+        console.log('Tutorial data migration completed');
+      } catch (error) {
+        console.error('Tutorial migration failed:', error);
+        result.errors.push({
+          key: 'TUTORIAL_MIGRATION_ERROR',
+          error: error instanceof Error ? error.message : String(error),
+        });
+        // Don't fail the entire migration for tutorial errors
+      }
+    }
   } catch (error) {
     console.error('Migration failed:', error);
     result.success = false;

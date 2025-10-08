@@ -51,6 +51,7 @@
 - **📦 Legacy Data Migration** — Automatic migration of existing data to profile-specific storage
 - **🛡️ Profile-Aware Routing** — ProfileGate ensures valid profile access across the application
 - **💾 Persistent Profile State** — Profile selection survives page reloads and browser sessions
+- **🎓 Profile-Aware Tutorials** — Each profile has isolated tutorial progress and preferences
 
 ### Project Management & Organization
 
@@ -72,6 +73,11 @@
   - **Opinionated starter templates** with beginner/intermediate/advanced complexity
   - **Activation funnel analytics** with A1-A4 conversion tracking and nudges
   - **UI mode toggle** - seamless switching between Beginner and Pro interfaces
+- **🎓 Profile-Aware Tutorial System** — Complete tutorial isolation per profile:
+  - **Deep-linkable tutorials** with URLs like `/p/profile-id/tutorials/getting-started/2`
+  - **Per-profile progress tracking** — each workspace has its own tutorial state
+  - **Legacy migration** — existing tutorial progress automatically migrated to first profile
+  - **Shareable tutorial links** — send colleagues to specific tutorial steps with profile context
 - **🎪 Enhanced First-Run Experience** — Smart welcome modal with user choice (Start tour, Remind later, Never show)
 - **📋 Layered Tour System** — 60-90 second core tour plus contextual mini-tours for each panel
 - **💡 Interactive Completion Checklist** — Track mastery of 7 key features with progress celebration
@@ -264,7 +270,9 @@ src/
 │   ├── Writing/         # Editor components
 │   ├── ProfileSwitcher.tsx  # Profile switching dropdown component
 │   ├── Onboarding/      # Enhanced tour and onboarding system
-│   │   ├── TourProvider.tsx          # Enhanced tour state & analytics
+│   │   ├── ProfileTourProvider.tsx   # Profile-aware tour state & analytics
+│   │   ├── TutorialRouter.tsx        # Profile-aware tutorial routing system
+│   │   ├── TourProvider.tsx          # Legacy tour provider (compatibility)
 │   │   ├── TourOverlay.tsx           # Accessible tour with spotlight
 │   │   ├── FeatureDiscovery.tsx      # Contextual hints system
 │   │   ├── WelcomeModal.tsx          # First-run experience with options
@@ -335,6 +343,7 @@ src/
 │   ├── storyArchitectService.ts   # Story outline & templates
 │   ├── timelineService.ts         # Basic timeline management
 │   ├── enhancedTimelineService.ts # Advanced timeline features
+│   ├── tutorialStorage.ts         # Profile-aware tutorial storage
 │   ├── storageService.ts          # Data persistence
 │   ├── searchService.ts           # Full-text search
 │   └── backupService.ts           # Backup & recovery
@@ -351,6 +360,7 @@ src/
 ├── utils/               # Shared utilities
 │   ├── flags.ts         # Feature flag system
 │   ├── storage.ts       # Enhanced storage with IndexedDB + compatibility layer
+│   ├── tutorialLinks.ts # Profile-aware tutorial URL generation utilities
 │   └── trace.ts         # Comprehensive tracing system (performance, user actions, storage)
 ├── types/              # TypeScript definitions
 │   └── profile.ts       # Profile types and interfaces

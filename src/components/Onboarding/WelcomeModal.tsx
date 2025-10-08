@@ -2,7 +2,7 @@
 import { BookOpen, Clock, X, ArrowRight, CheckCircle, Lightbulb } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { useTour, CORE_TOUR_STEPS } from './TourProvider';
+import { useTour, CORE_TOUR_STEPS } from './ProfileTourProvider';
 
 interface WelcomeModalProps {
   isOpen: boolean;

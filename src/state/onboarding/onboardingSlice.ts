@@ -16,7 +16,7 @@ export interface ProjectOnboardingState {
 }
 
 export interface OnboardingState {
-  byProject: Record<string, ProjectOnboardingState>;
+  byProject: Record<string, Record<string, ProjectOnboardingState>>; // profileId -> projectId -> state
   globalSettings: {
     hasSeenWelcome: boolean;
     preferredUIMode: 'beginner' | 'pro';
@@ -42,12 +42,17 @@ const onboardingSlice = createSlice({
   reducers: {
     initializeProject: (
       state: OnboardingState,
-      action: PayloadAction<{ projectId: string; uiMode?: 'beginner' | 'pro' }>,
+      action: PayloadAction<{ profileId: string; projectId: string; uiMode?: 'beginner' | 'pro' }>,
     ) => {
-      const { projectId, uiMode = 'beginner' } = action.payload;
+      const { profileId, projectId, uiMode = 'beginner' } = action.payload;
 
-      if (!state.byProject[projectId]) {
-        state.byProject[projectId] = {
+      // Initialize profile if it doesn't exist
+      if (!state.byProject[profileId]) {
+        state.byProject[profileId] = {};
+      }
+
+      if (!state.byProject[profileId][projectId]) {
+        state.byProject[profileId][projectId] = {
           current: 'project',
           completed: {},
           startedAt: Date.now(),
@@ -59,15 +64,19 @@ const onboardingSlice = createSlice({
 
         // Track project creation
         analyticsService.track('A1_PROJECT_CREATED', {
+          profileId,
           projectId,
           projectName: projectId,
         });
       }
     },
 
-    advanceStep: (state: OnboardingState, action: PayloadAction<{ projectId: string }>) => {
-      const { projectId } = action.payload;
-      const project = state.byProject[projectId];
+    advanceStep: (
+      state: OnboardingState,
+      action: PayloadAction<{ profileId: string; projectId: string }>,
+    ) => {
+      const { profileId, projectId } = action.payload;
+      const project = state.byProject[profileId]?.[projectId];
 
       if (!project || !project.isInFirstDraftPath) return;
 
@@ -79,6 +88,7 @@ const onboardingSlice = createSlice({
 
         // Track step advancement
         analyticsService.track('first_draft_step_started', {
+          profileId,
           projectId,
           step: nextStep,
           stepIndex: currentIndex + 1,
@@ -88,10 +98,10 @@ const onboardingSlice = createSlice({
 
     markStepCompleted: (
       state: OnboardingState,
-      action: PayloadAction<{ projectId: string; step: OnboardingStep }>,
+      action: PayloadAction<{ profileId: string; projectId: string; step: OnboardingStep }>,
     ) => {
-      const { projectId, step } = action.payload;
-      const project = state.byProject[projectId];
+      const { profileId, projectId, step } = action.payload;
+      const project = state.byProject[profileId]?.[projectId];
 
       if (!project) return;
 
@@ -101,6 +111,7 @@ const onboardingSlice = createSlice({
 
       // Track step completion
       analyticsService.track('first_draft_step_completed', {
+        profileId,
         projectId,
         step,
         stepIndex: FIRST_DRAFT_STEPS.indexOf(step),
@@ -111,6 +122,7 @@ const onboardingSlice = createSlice({
       switch (step) {
         case 'scene':
           analyticsService.track('A2_SCENE_CREATED', {
+            profileId,
             projectId,
             sceneType: 'first_scene',
           });
@@ -119,6 +131,7 @@ const onboardingSlice = createSlice({
         case 'focusWrite':
           if (project.wordCount >= TARGET_WORD_COUNT) {
             analyticsService.track('A3_300_WORDS_SAVED', {
+              profileId,
               projectId,
               wordCount: project.wordCount,
               timeToReach: Date.now() - project.startedAt,
@@ -128,6 +141,7 @@ const onboardingSlice = createSlice({
 
         case 'export':
           analyticsService.track('A4_EXPORTED', {
+            profileId,
             projectId,
             exportFormat: 'first_draft',
           });
@@ -145,6 +159,7 @@ const onboardingSlice = createSlice({
           // Completed all steps
           project.isInFirstDraftPath = false;
           analyticsService.track('first_draft_path_completed', {
+            profileId,
             projectId,
             totalDuration: Date.now() - project.startedAt,
             stepsCompleted: FIRST_DRAFT_STEPS.length,
@@ -153,9 +168,12 @@ const onboardingSlice = createSlice({
       }
     },
 
-    updateWordCount: (state, action: PayloadAction<{ projectId: string; wordCount: number }>) => {
-      const { projectId, wordCount } = action.payload;
-      const project = state.byProject[projectId];
+    updateWordCount: (
+      state,
+      action: PayloadAction<{ profileId: string; projectId: string; wordCount: number }>,
+    ) => {
+      const { profileId, projectId, wordCount } = action.payload;
+      const project = state.byProject[profileId]?.[projectId];
 
       if (!project) return;
 
@@ -166,6 +184,7 @@ const onboardingSlice = createSlice({
       if (previousCount === 0 && wordCount > 0) {
         const timeToFirstKeystroke = Date.now() - project.startedAt;
         analyticsService.track('TIME_TO_FIRST_KEYSTROKE_MS', {
+          profileId,
           projectId,
           timeMs: timeToFirstKeystroke,
         });
@@ -176,7 +195,7 @@ const onboardingSlice = createSlice({
         if (!project.completed.focusWrite) {
           onboardingSlice.caseReducers.markStepCompleted(state, {
             type: 'onboarding/markStepCompleted',
-            payload: { projectId, step: 'focusWrite' },
+            payload: { profileId, projectId, step: 'focusWrite' },
           });
         }
       }
@@ -185,13 +204,14 @@ const onboardingSlice = createSlice({
     trackFrictionIndicator: (
       state,
       action: PayloadAction<{
+        profileId: string;
         projectId: string;
         indicator: 'panel_opened' | 'settings_visited' | 'power_tools_opened';
         details?: string;
       }>,
     ) => {
-      const { projectId, indicator, details } = action.payload;
-      const project = state.byProject[projectId];
+      const { profileId, projectId, indicator, details } = action.payload;
+      const project = state.byProject[profileId]?.[projectId];
 
       if (!project) return;
 
@@ -200,6 +220,7 @@ const onboardingSlice = createSlice({
         switch (indicator) {
           case 'panel_opened':
             analyticsService.track('PANELS_OPENED_BEFORE_FIRST_SAVE', {
+              profileId,
               projectId,
               panelCount: 1,
               panels: [details || 'unknown'],
@@ -208,6 +229,7 @@ const onboardingSlice = createSlice({
 
           case 'settings_visited':
             analyticsService.track('SETTINGS_VISITS_BEFORE_DRAFT', {
+              profileId,
               projectId,
               visitCount: 1,
             });
@@ -215,6 +237,7 @@ const onboardingSlice = createSlice({
 
           case 'power_tools_opened':
             analyticsService.track('POWER_TOOLS_BEFORE_DRAFT', {
+              profileId,
               projectId,
               from: 'menu',
             });
@@ -225,16 +248,21 @@ const onboardingSlice = createSlice({
 
     exitFirstDraftPath: (
       state,
-      action: PayloadAction<{ projectId: string; reason: 'user_choice' | 'ui_mode_change' }>,
+      action: PayloadAction<{
+        profileId: string;
+        projectId: string;
+        reason: 'user_choice' | 'ui_mode_change';
+      }>,
     ) => {
-      const { projectId, reason } = action.payload;
-      const project = state.byProject[projectId];
+      const { profileId, projectId, reason } = action.payload;
+      const project = state.byProject[profileId]?.[projectId];
 
       if (!project) return;
 
       project.isInFirstDraftPath = false;
 
       analyticsService.track('first_draft_path_exited', {
+        profileId,
         projectId,
         lastStep: project.current,
         exitReason: reason,
@@ -248,9 +276,9 @@ const onboardingSlice = createSlice({
       Object.assign(state.globalSettings, action.payload);
     },
 
-    checkForNudge: (state, action: PayloadAction<{ projectId: string }>) => {
-      const { projectId } = action.payload;
-      const project = state.byProject[projectId];
+    checkForNudge: (state, action: PayloadAction<{ profileId: string; projectId: string }>) => {
+      const { profileId, projectId } = action.payload;
+      const project = state.byProject[profileId]?.[projectId];
 
       if (!project) return;
 
@@ -265,6 +293,7 @@ const onboardingSlice = createSlice({
         !project.completed.focusWrite
       ) {
         analyticsService.track('nudge_banner_shown', {
+          profileId,
           projectId,
           nudgeType: 'comeback_reminder',
           timingMs: timeSinceCreation,
@@ -290,19 +319,28 @@ export default onboardingSlice.reducer;
 // Selectors
 export const selectProjectOnboarding = (
   state: { onboarding: OnboardingState },
+  profileId: string,
   projectId: string,
-) => state.onboarding.byProject[projectId];
+) => state.onboarding.byProject[profileId]?.[projectId];
 
 export const selectIsInFirstDraftPath = (
   state: { onboarding: OnboardingState },
+  profileId: string,
   projectId: string,
-) => state.onboarding.byProject[projectId]?.isInFirstDraftPath ?? false;
+) => state.onboarding.byProject[profileId]?.[projectId]?.isInFirstDraftPath ?? false;
 
-export const selectCurrentStep = (state: { onboarding: OnboardingState }, projectId: string) =>
-  state.onboarding.byProject[projectId]?.current ?? 'project';
+export const selectCurrentStep = (
+  state: { onboarding: OnboardingState },
+  profileId: string,
+  projectId: string,
+) => state.onboarding.byProject[profileId]?.[projectId]?.current ?? 'project';
 
-export const selectStepProgress = (state: { onboarding: OnboardingState }, projectId: string) => {
-  const project = state.onboarding.byProject[projectId];
+export const selectStepProgress = (
+  state: { onboarding: OnboardingState },
+  profileId: string,
+  projectId: string,
+) => {
+  const project = state.onboarding.byProject[profileId]?.[projectId];
   if (!project) return { current: 0, total: 0, percentage: 0 };
 
   const currentIndex = FIRST_DRAFT_STEPS.indexOf(project.current);
@@ -318,9 +356,10 @@ export const selectStepProgress = (state: { onboarding: OnboardingState }, proje
 
 export const selectWordCountProgress = (
   state: { onboarding: OnboardingState },
+  profileId: string,
   projectId: string,
 ) => {
-  const project = state.onboarding.byProject[projectId];
+  const project = state.onboarding.byProject[profileId]?.[projectId];
   if (!project) return { current: 0, target: TARGET_WORD_COUNT, percentage: 0 };
 
   return {
@@ -336,9 +375,10 @@ export const selectGlobalOnboardingSettings = (state: { onboarding: OnboardingSt
 
 export const selectShouldShowNudge = (
   state: { onboarding: OnboardingState },
+  profileId: string,
   projectId: string,
 ) => {
-  const project = state.onboarding.byProject[projectId];
+  const project = state.onboarding.byProject[profileId]?.[projectId];
   if (!project) return false;
 
   const timeSinceCreation = Date.now() - project.startedAt;

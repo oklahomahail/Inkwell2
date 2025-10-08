@@ -15,6 +15,16 @@ All notable changes to this project are documented here.
 - **Beautiful profile creation flow** with customizable colors and avatar support
 - **SEO optimization** with comprehensive meta tags, robots.txt, and sitemap.xml
 
+#### **Profile-Aware Tutorial System**
+
+- **Complete tutorial isolation per profile** with independent progress tracking
+- **Deep-linkable tutorial URLs** with routes like `/p/{profileId}/tutorials/{slug}/{step}`
+- **Automatic profile switching** resets tutorial UI to that profile's state
+- **Legacy tutorial migration** moves existing progress to first created profile
+- **Shareable tutorial links** with profile context for team onboarding
+- **Profile-scoped Redux state** with updated onboarding slice structure
+- **Tutorial entry point guards** ensuring all tutorial access requires active profile
+
 ### ✨ New Components
 
 - `ProfileContext.tsx` - Complete profile state management with React Context
@@ -24,6 +34,11 @@ All notable changes to this project are documented here.
 - `dbFactory.ts` - Profile-specific database factory with data isolation
 - `migrateToProfiles.ts` - Utility for migrating existing data to profile system
 - `profile.ts` - TypeScript definitions for profile types and interfaces
+- `ProfileTourProvider.tsx` - Profile-aware tour provider replacing original TourProvider
+- `TutorialRouter.tsx` - Dedicated routing system for profile-aware tutorials
+- `tutorialStorage.ts` - Profile-isolated tutorial storage service with migration
+- `tutorialLinks.ts` - Utility functions for profile-aware tutorial URL generation
+- `tutorialStorage.test.ts` - Comprehensive test suite for tutorial isolation
 
 ### 🔧 Architecture Improvements
 

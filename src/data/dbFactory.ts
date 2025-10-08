@@ -2,7 +2,7 @@
 
 import { useProfileContext } from '../context/ProfileContext';
 import { ProfileId } from '../types/profile';
-import { StorageAdapter, StorageOptions } from '../utils/storage';
+import { StorageAdapter, StorageOptions, storage } from '../utils/storage';
 
 // Profile-specific storage adapter that prefixes all keys
 class ProfileStorageAdapter implements StorageAdapter {
@@ -92,9 +92,6 @@ class ProfileStorageManager {
   }
 }
 
-// Import the main storage instance
-import { storage } from '../utils/storage';
-
 // Database instances per profile
 const dbInstances = new Map<ProfileId, ProfileStorageManager>();
 
@@ -157,6 +154,11 @@ export const defineStores = () => {
 
     // Analytics data
     analytics: 'analytics_data',
+
+    // Tutorial/onboarding data (profile-specific)
+    tutorials: 'tutorial_progress',
+    tutorialPreferences: 'tutorial_preferences',
+    tutorialChecklist: 'tutorial_checklist',
   };
 };
 
