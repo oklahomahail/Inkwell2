@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Brand System
-import { BrandThemeProvider } from './components/brand';
+import { BrandThemeProvider } from '@/components/Brand';
+
 // UI + panels
 import ClaudeAssistant from './components/ClaudeAssistant';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';

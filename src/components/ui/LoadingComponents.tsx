@@ -2,7 +2,7 @@
 import { Loader2, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import React from 'react';
 
-import { InkwellLogo } from '../brand';
+import { InkwellLogo } from '@/components/Brand';
 
 // ==========================================
 // LOADING SPINNER COMPONENTS

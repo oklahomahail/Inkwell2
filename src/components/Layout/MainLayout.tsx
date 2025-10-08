@@ -18,11 +18,11 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
+import { InkwellLogo } from '@/components/Brand';
 import { useAppContext, View } from '@/context/AppContext';
 import { cn } from '@/utils/cn';
 import { useFeatureFlag } from '@/utils/flags';
 
-import { InkwellLogo } from '../brand';
 import { ProfileSwitcher } from '../ProfileSwitcher';
 import { PWAOfflineIndicator } from '../PWA';
 

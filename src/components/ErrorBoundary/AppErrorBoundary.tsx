@@ -2,7 +2,7 @@
 import { AlertTriangle, RefreshCw, Bug, Mail, Copy } from 'lucide-react';
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 
-import { InkwellLogo } from '../brand';
+import { InkwellLogo } from '@/components/Brand';
 
 interface Props {
   children: ReactNode;

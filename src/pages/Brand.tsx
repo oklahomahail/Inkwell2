@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import { BrandShowcase } from '../components/brand';
+import { BrandShowcase } from '@/components/Brand';
 
 export default function BrandPage() {
   return (
@@ -78,7 +78,7 @@ export default function BrandPage() {
               <h3 className="font-medium mb-2 text-slate-900 dark:text-white">Quick Usage</h3>
               <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 text-sm font-mono">
                 <div className="text-slate-600 dark:text-slate-400">// Import brand components</div>
-                <div>import {'{ InkwellLogo, useBrandTheme }'} from './components/brand';</div>
+                <div>import {'{ InkwellLogo, useBrandTheme }'} from '@/components/Brand';</div>
                 <br />
                 <div className="text-slate-600 dark:text-slate-400">// Use brand colors</div>
                 <div>className="text-inkwell-gold bg-inkwell-navy"</div>
