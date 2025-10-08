@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
+// Brand System
+import { BrandThemeProvider } from './components/brand';
 // UI + panels
 import ClaudeAssistant from './components/ClaudeAssistant';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
@@ -28,6 +30,7 @@ import { WhatsNewPanel } from './components/WhatsNew/WhatsNewPanel';
 // Context and providers
 import { useAppContext } from './context/AppContext';
 import { useEditorContext } from './context/EditorContext';
+import BrandPage from './pages/Brand';
 import Login from './pages/Login';
 // Profile routing components
 import { ProfileGate } from './routes/shell/ProfileGate';
@@ -71,6 +74,9 @@ function AppShell() {
               <Routes>
                 {/* Tutorial routes */}
                 <Route path="tutorials/*" element={<TutorialRouter />} />
+
+                {/* Brand showcase route */}
+                <Route path="brand" element={<BrandPage />} />
 
                 {/* Main app routes */}
                 <Route path="*" element={<ProfileAppShell />} />
@@ -390,9 +396,11 @@ function StorageDebugPanel() {
 export default function App() {
   return (
     <AppErrorBoundary level="app">
-      <Providers>
-        <AppShell />
-      </Providers>
+      <BrandThemeProvider defaultTheme="light" storageKey="inkwell-brand-theme">
+        <Providers>
+          <AppShell />
+        </Providers>
+      </BrandThemeProvider>
     </AppErrorBoundary>
   );
 }

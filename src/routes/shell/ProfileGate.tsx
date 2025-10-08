@@ -25,14 +25,22 @@ export function ProfileGate({ children }: ProfileGateProps) {
 
   useEffect(() => {
     // Wait for profiles to load from localStorage (one tick)
-    const timer = setTimeout(() => setReady(true), 0);
+    // This prevents accessing services before the profile system is ready
+    const timer = setTimeout(() => {
+      try {
+        setReady(true);
+      } catch (error) {
+        console.error('Error during ProfileGate initialization:', error);
+        setReady(true); // Still proceed to avoid blocking
+      }
+    }, 0);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     if (!profileId || !ready) return;
-    
-    const foundProfile = profiles.find(p => p.id === profileId);
+
+    const foundProfile = profiles.find((p) => p.id === profileId);
     if (foundProfile && (!activeProfile || activeProfile.id !== foundProfile.id)) {
       setActiveProfile(profileId).catch((error) => {
         console.error('Failed to set active profile:', error);
@@ -58,7 +66,7 @@ export function ProfileGate({ children }: ProfileGateProps) {
   }
 
   // Profile doesn't exist
-  const profileExists = profiles.some(p => p.id === profileId);
+  const profileExists = profiles.some((p) => p.id === profileId);
   if (!profileExists) {
     console.warn(`Profile ${profileId} not found, redirecting to profile picker`);
     return <Navigate to="/profiles" replace />;

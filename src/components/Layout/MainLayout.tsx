@@ -14,6 +14,7 @@ import {
   Command,
   Plus,
   Kanban,
+  Palette,
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
@@ -21,6 +22,7 @@ import { useAppContext, View } from '@/context/AppContext';
 import { cn } from '@/utils/cn';
 import { useFeatureFlag } from '@/utils/flags';
 
+import { InkwellLogo } from '../brand';
 import { ProfileSwitcher } from '../ProfileSwitcher';
 import { PWAOfflineIndicator } from '../PWA';
 
@@ -77,6 +79,18 @@ const baseNavigationItems = [
     view: View.Settings,
     shortcut: '⌘,',
     description: 'Application preferences',
+  },
+];
+
+// Brand-specific navigation items (dev/admin only)
+const brandNavigationItems = [
+  {
+    id: 'brand',
+    label: 'Brand System',
+    icon: Palette,
+    href: '/brand',
+    shortcut: '⌘⇧B',
+    description: 'Design system and brand showcase',
   },
 ];
 
@@ -166,27 +180,26 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
           'sidebar',
           'fixed left-0 top-0 h-full z-40',
           'transition-all duration-300 ease-in-out',
-          'bg-white dark:bg-slate-800',
-          'border-r border-slate-200 dark:border-slate-700',
+          'bg-white dark:bg-inkwell-charcoal',
+          'border-r border-inkwell-gold/20 dark:border-inkwell-gold/30',
           sidebarCollapsed ? 'w-16' : 'w-64',
         )}
       >
         {/* Sidebar Header */}
-        <div className="sidebar-header p-4 border-b border-slate-200 dark:border-slate-700">
+        <div className="sidebar-header p-4 border-b border-inkwell-gold/20 bg-inkwell-navy dark:bg-inkwell-navy">
           <div className="flex items-center justify-between">
             <div className={cn('flex items-center gap-3', sidebarCollapsed && 'justify-center')}>
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                  <PenTool className="w-5 h-5 text-white" />
-                </div>
+                {sidebarCollapsed ? (
+                  <InkwellLogo variant="icon" size="sm" className="text-inkwell-gold" />
+                ) : (
+                  <InkwellLogo variant="wordmark" size="sm" className="text-white" />
+                )}
               </div>
               {!sidebarCollapsed && (
-                <div className="flex flex-col">
-                  <h1 className="text-heading-sm text-slate-900 dark:text-white font-semibold">
-                    Inkwell
-                  </h1>
-                  <p className="text-caption text-slate-500 dark:text-slate-400 truncate">
-                    {currentProject?.name || 'No project'}
+                <div className="flex flex-col ml-2">
+                  <p className="text-xs text-inkwell-gold/80 truncate">
+                    {currentProject?.name || 'Select a project'}
                   </p>
                 </div>
               )}
@@ -197,7 +210,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                 'btn-ghost btn-sm',
                 'w-8 h-8 p-0',
                 'flex items-center justify-center',
-                'hover:bg-slate-100 dark:hover:bg-slate-700',
+                'hover:bg-inkwell-gold/20 text-white hover:text-inkwell-gold',
                 'focus-ring',
               )}
               aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -245,8 +258,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                     'nav-item w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all',
                     'focus-ring',
                     isActive
-                      ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white',
+                      ? 'bg-inkwell-gold/20 text-inkwell-gold border border-inkwell-gold/30'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-inkwell-gold/10 dark:hover:bg-inkwell-gold/20 hover:text-inkwell-gold dark:hover:text-inkwell-gold',
                     sidebarCollapsed && 'justify-center',
                   )}
                   title={sidebarCollapsed ? `${item.label} (${item.shortcut})` : undefined}
@@ -268,31 +281,44 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
         {/* Quick Actions */}
         {!sidebarCollapsed && (
-          <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+          <div className="p-4 border-t border-inkwell-gold/20 dark:border-inkwell-gold/30">
             <div className="space-y-2">
               <button
-                className="w-full btn btn-primary btn-sm"
+                className="w-full bg-inkwell-gold hover:bg-inkwell-gold/90 text-inkwell-navy font-medium px-4 py-2 rounded-md text-sm transition-colors"
                 onClick={() => {
                   // TODO: Implement create project
                   console.log('Create new project');
                 }}
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 inline mr-2" />
                 New Project
               </button>
-              <div className="flex items-center gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={toggleDarkMode}
-                  className="flex-1 btn btn-ghost btn-sm"
+                  className="btn btn-ghost btn-sm text-slate-700 dark:text-slate-300 hover:text-inkwell-gold dark:hover:text-inkwell-gold"
                   aria-label="Toggle dark mode"
                 >
                   {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                   {isDarkMode ? 'Light' : 'Dark'}
                 </button>
-                <button className="btn btn-ghost btn-sm p-2" aria-label="Notifications">
+                <button
+                  className="btn btn-ghost btn-sm text-slate-700 dark:text-slate-300 hover:text-inkwell-gold dark:hover:text-inkwell-gold"
+                  aria-label="Notifications"
+                >
                   <Bell className="w-4 h-4" />
                 </button>
               </div>
+              {/* Brand showcase link for developers */}
+              {import.meta.env.DEV && (
+                <a
+                  href="./brand"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-inkwell-gold dark:hover:text-inkwell-gold hover:bg-inkwell-gold/10 dark:hover:bg-inkwell-gold/20 rounded-md transition-colors"
+                >
+                  <Palette className="w-4 h-4" />
+                  Brand System
+                </a>
+              )}
             </div>
           </div>
         )}
@@ -331,7 +357,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         )}
       >
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
+        <header className="sticky top-0 z-30 bg-white/80 dark:bg-inkwell-charcoal/80 backdrop-blur-sm border-b border-inkwell-gold/20 dark:border-inkwell-gold/30">
           <div className="px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">

@@ -2,6 +2,8 @@
 import { AlertTriangle, RefreshCw, Bug, Mail, Copy } from 'lucide-react';
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 
+import { InkwellLogo } from '../brand';
+
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
@@ -193,14 +195,14 @@ ${JSON.stringify(errorReport, null, 2)}`;
       // Feature-level error UI
       if (level === 'feature') {
         return (
-          <div className="min-h-[400px] flex items-center justify-center p-8 bg-red-50 border border-red-200 rounded-lg">
+          <div className="min-h-[400px] flex items-center justify-center p-8 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             <div className="text-center max-w-md">
               <div className="mb-6">
                 <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-red-900 mb-2">
+                <h3 className="text-lg font-serif font-semibold text-red-900 dark:text-red-100 mb-2">
                   {featureName || 'Feature'} Error
                 </h3>
-                <p className="text-red-700 text-sm">
+                <p className="text-red-700 dark:text-red-300 text-sm font-serif">
                   This feature encountered an error and couldn't load. You can try again or continue
                   using other parts of Inkwell.
                 </p>
@@ -209,21 +211,25 @@ ${JSON.stringify(errorReport, null, 2)}`;
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={this.handleRetry}
-                  className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-inkwell-gold hover:bg-inkwell-gold/90 text-inkwell-navy rounded-lg transition-colors font-medium"
                 >
                   <RefreshCw className="w-4 h-4" />
                   Try Again
                 </button>
                 <button
                   onClick={this.handleReportIssue}
-                  className="flex items-center justify-center gap-2 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-2 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                 >
                   <Bug className="w-4 h-4" />
                   Report Issue
                 </button>
               </div>
 
-              {errorId && <div className="mt-4 text-xs text-red-600">Error ID: {errorId}</div>}
+              {errorId && (
+                <div className="mt-4 text-xs text-red-600 dark:text-red-400 font-mono">
+                  Error ID: {errorId}
+                </div>
+              )}
             </div>
           </div>
         );
@@ -231,12 +237,19 @@ ${JSON.stringify(errorReport, null, 2)}`;
 
       // App-level error UI
       return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-lg w-full p-8">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-inkwell-charcoal dark:to-slate-900 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-inkwell-charcoal rounded-xl shadow-2xl max-w-lg w-full p-8 border border-slate-200 dark:border-inkwell-gold/20">
             <div className="text-center mb-6">
-              <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h1>
-              <p className="text-gray-600">
+              <div className="relative mb-6">
+                <div className="absolute inset-0 bg-red-500/20 rounded-full blur-xl" />
+                <div className="relative">
+                  <InkwellLogo variant="icon" size="lg" className="mx-auto mb-4 text-red-500" />
+                </div>
+              </div>
+              <h1 className="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-2">
+                Something went wrong
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 font-serif">
                 Inkwell encountered an unexpected error. We apologize for the inconvenience.
               </p>
             </div>
@@ -252,7 +265,7 @@ ${JSON.stringify(errorReport, null, 2)}`;
             <div className="flex flex-col gap-3">
               <button
                 onClick={this.handleReload}
-                className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-inkwell-gold hover:bg-inkwell-gold/90 text-inkwell-navy rounded-lg transition-colors font-medium"
               >
                 <RefreshCw className="w-4 h-4" />
                 Reload Inkwell
@@ -261,13 +274,13 @@ ${JSON.stringify(errorReport, null, 2)}`;
               <div className="flex gap-3">
                 <button
                   onClick={this.handleRetry}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-inkwell-gold/30 dark:border-inkwell-gold/30 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-inkwell-gold/10 dark:hover:bg-inkwell-gold/20 transition-colors"
                 >
                   Try Again
                 </button>
                 <button
                   onClick={this.handleReportIssue}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-inkwell-gold/30 dark:border-inkwell-gold/30 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-inkwell-gold/10 dark:hover:bg-inkwell-gold/20 transition-colors"
                 >
                   <Mail className="w-4 h-4" />
                   Report

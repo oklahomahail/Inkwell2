@@ -6,34 +6,45 @@ export const LazyPlotBoards = React.lazy(() =>
   import(
     /* webpackChunkName: "plot-boards" */
     '../../features/plotboards'
-  ).then((module) => ({ default: module.PlotBoards })),
+  )
+    .then((module) => ({ default: module.PlotBoards }))
+    .catch((error) => {
+      console.error('Failed to load PlotBoards:', error);
+      return { default: () => <div>Failed to load Plot Boards</div> };
+    }),
 );
 
 // Timeline View - Complex timeline management
-export const LazyTimelineView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "timeline-view" */
-      '../../components/Views/TimelineView'
-    ),
+export const LazyTimelineView = React.lazy(() =>
+  import(
+    /* webpackChunkName: "timeline-view" */
+    '../../components/Views/TimelineView'
+  ).catch((error) => {
+    console.error('Failed to load TimelineView:', error);
+    return { default: () => <div>Failed to load Timeline View</div> };
+  }),
 );
 
 // Analytics View - Heavy charting and calculations
-export const LazyAnalyticsView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "analytics-view" */
-      '../../components/Analytics/WritingAnalyticsView'
-    ),
+export const LazyAnalyticsView = React.lazy(() =>
+  import(
+    /* webpackChunkName: "analytics-view" */
+    '../../components/Analytics/WritingAnalyticsView'
+  ).catch((error) => {
+    console.error('Failed to load Analytics View:', error);
+    return { default: () => <div>Failed to load Analytics View</div> };
+  }),
 );
 
 // Timeline Panel - Sidebar panel component
-export const LazyTimelinePanel = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "timeline-panel" */
-      '../../components/Panels/TimelinePanel'
-    ),
+export const LazyTimelinePanel = React.lazy(() =>
+  import(
+    /* webpackChunkName: "timeline-panel" */
+    '../../components/Panels/TimelinePanel'
+  ).catch((error) => {
+    console.error('Failed to load Timeline Panel:', error);
+    return { default: () => <div>Failed to load Timeline Panel</div> };
+  }),
 );
 
 // Performance Charts - Heavy visualization library (if it exists)

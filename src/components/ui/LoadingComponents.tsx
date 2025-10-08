@@ -2,6 +2,8 @@
 import { Loader2, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import React from 'react';
 
+import { InkwellLogo } from '../brand';
+
 // ==========================================
 // LOADING SPINNER COMPONENTS
 // ==========================================
@@ -21,7 +23,7 @@ export const Spinner: React.FC<SpinnerProps> = ({ size = 'md', className = '' })
 
   return (
     <Loader2
-      className={`animate-spin text-blue-600 dark:text-blue-400 ${sizeClasses[size]} ${className}`}
+      className={`animate-spin text-inkwell-gold dark:text-inkwell-gold ${sizeClasses[size]} ${className}`}
     />
   );
 };
@@ -32,7 +34,7 @@ export const LoadingSpinner: React.FC<{ text?: string; size?: 'sm' | 'md' | 'lg'
 }) => (
   <div className="flex items-center justify-center gap-3 p-4">
     <Spinner size={size} />
-    <span className="text-sm text-slate-600 dark:text-slate-400">{text}</span>
+    <span className="text-sm text-slate-600 dark:text-slate-400 font-serif">{text}</span>
   </div>
 );
 
@@ -62,13 +64,14 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
     'inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
 
   const variantClasses = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500',
+    primary:
+      'bg-inkwell-gold hover:bg-inkwell-gold/90 text-inkwell-navy focus:ring-inkwell-gold/50',
     secondary:
-      'bg-slate-200 hover:bg-slate-300 text-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-100 focus:ring-slate-500',
+      'bg-slate-200 hover:bg-slate-300 text-slate-900 dark:bg-inkwell-charcoal dark:hover:bg-inkwell-charcoal/80 dark:text-slate-100 focus:ring-inkwell-gold/50',
     ghost:
-      'hover:bg-slate-100 text-slate-700 dark:hover:bg-slate-800 dark:text-slate-300 focus:ring-slate-500',
+      'hover:bg-inkwell-gold/10 text-slate-700 dark:hover:bg-inkwell-gold/20 dark:text-slate-300 focus:ring-inkwell-gold/50',
     outline:
-      'border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 focus:ring-slate-500',
+      'border border-inkwell-gold/30 bg-white hover:bg-inkwell-gold/5 text-inkwell-navy dark:border-inkwell-gold/30 dark:bg-inkwell-charcoal dark:hover:bg-inkwell-gold/10 dark:text-inkwell-gold focus:ring-inkwell-gold/50',
     danger: 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500',
   };
 
@@ -163,12 +166,19 @@ export const ChapterListSkeleton: React.FC = () => (
 export const PageLoader: React.FC<{ message?: string }> = ({
   message = 'Loading your writing workspace...',
 }) => (
-  <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-    <div className="text-center space-y-4">
-      <Spinner size="xl" />
-      <div>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Inkwell</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{message}</p>
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-inkwell-charcoal dark:to-slate-900">
+    <div className="text-center space-y-6 p-8">
+      <div className="relative">
+        <div className="absolute inset-0 bg-inkwell-gold/20 dark:bg-inkwell-gold/30 rounded-full blur-xl animate-pulse" />
+        <div className="relative">
+          <InkwellLogo variant="full" size="lg" className="mx-auto" />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Spinner size="lg" className="mx-auto" />
+        <p className="text-sm text-slate-600 dark:text-slate-400 font-serif max-w-xs mx-auto">
+          {message}
+        </p>
       </div>
     </div>
   </div>

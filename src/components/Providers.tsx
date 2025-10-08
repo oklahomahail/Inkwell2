@@ -1,12 +1,12 @@
 // src/components/Providers.tsx
 import React from 'react';
 
-import { AppProvider } from '@/context/AppContext';
-import { ClaudeProvider } from '@/context/ClaudeProvider';
-import { EditorProvider } from '@/context/EditorContext';
-import { NavProvider } from '@/context/NavContext';
-import { ProfileProvider } from '@/context/ProfileContext';
-import { ToastProvider } from '@/context/ToastContext';
+import { AppProvider } from '../context/AppContext';
+import { ClaudeProvider } from '../context/ClaudeProvider';
+import { EditorProvider } from '../context/EditorContext';
+import { NavProvider } from '../context/NavContext';
+import { ProfileProvider } from '../context/ProfileContext';
+import { ToastProvider } from '../context/ToastContext';
 
 import { CommandPaletteProvider } from './CommandPalette/CommandPaletteProvider';
 import { FeatureDiscoveryProvider } from './Onboarding/FeatureDiscovery';

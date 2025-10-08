@@ -122,8 +122,13 @@ class FeatureFlagManager {
   private urlParams: URLSearchParams;
 
   constructor() {
-    this.urlParams = new URLSearchParams(window.location.search);
-    this.initializeFromURL();
+    try {
+      this.urlParams = new URLSearchParams(window.location.search);
+      this.initializeFromURL();
+    } catch (error) {
+      console.warn('Failed to initialize feature flags:', error);
+      this.urlParams = new URLSearchParams();
+    }
   }
 
   /**
@@ -160,7 +165,13 @@ class FeatureFlagManager {
       return this.cache.get(flagKey)!;
     }
 
-    const flag = FEATURE_FLAGS[flagKey];
+    // Find flag by key (checking both main keys and flag.key values)
+    let flag = FEATURE_FLAGS[flagKey];
+    if (!flag) {
+      // Try to find by the key property within flags
+      flag = Object.values(FEATURE_FLAGS).find((f) => f.key === flagKey);
+    }
+
     if (!flag) {
       console.warn(`Unknown feature flag: ${flagKey}`);
       return false;
@@ -292,12 +303,35 @@ class FeatureFlagManager {
 }
 
 /* ========= Singleton Instance ========= */
-export const featureFlags = new FeatureFlagManager();
+let _featureFlags: FeatureFlagManager | null = null;
+
+function getFeatureFlags(): FeatureFlagManager {
+  if (!_featureFlags) {
+    _featureFlags = new FeatureFlagManager();
+  }
+  return _featureFlags;
+}
+
+export const featureFlags = getFeatureFlags();
+
+/* ========= Simple Export Functions ========= */
+/**
+ * Simple feature flag check function that avoids initialization issues
+ */
+export function isEnabled(flagKey: string): boolean {
+  try {
+    return getFeatureFlags().isEnabled(flagKey);
+  } catch (error) {
+    console.warn(`Feature flag check failed for ${flagKey}:`, error);
+    // Return default based on flag definition
+    const flag = Object.values(FEATURE_FLAGS).find((f) => f.key === flagKey);
+    return flag?.defaultValue ?? false;
+  }
+}
 
 /* ========= React Hook (optional) ========= */
 export function useFeatureFlag(flagKey: string): boolean {
-  // Simple implementation - could be enhanced with reactive updates
-  return featureFlags.isEnabled(flagKey);
+  return isEnabled(flagKey);
 }
 
 /* ========= Utility Functions ========= */

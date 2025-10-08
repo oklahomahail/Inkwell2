@@ -5,7 +5,14 @@ module.exports = {
 theme: {
     extend: {
       colors: {
-        // Inkwell Brand Color System
+        // New Inkwell Brand Color System (2024)
+        inkwell: {
+          navy: '#0C5C3D',
+          gold: '#D4A537', 
+          charcoal: '#2E2E2E',
+          white: '#F9F9F9'
+        },
+        // Legacy ink colors (maintained for compatibility)
         ink: {
           primary: '#5B8CFF',
           accent: '#FFD580',
@@ -19,8 +26,8 @@ theme: {
         },
         // Legacy colors (for compatibility)
         primary: {
-          DEFAULT: '#5B8CFF', // Updated to Inkwell primary
-          dark: '#4338ca',
+          DEFAULT: '#0C5C3D', // Updated to new Inkwell navy
+          dark: '#0A4A31',
         },
         gray: {
           50: '#f9fafb',
@@ -28,11 +35,12 @@ theme: {
         },
       },
       fontFamily: {
-        // Inkwell brand fonts
-        'display': ['Inter Tight', 'ui-sans-serif', 'system-ui'],
+        // New Inkwell brand fonts (Source Serif Pro + Inter)
+        'serif': ['Source Serif Pro', 'ui-serif', 'Georgia', 'serif'],
+        'display': ['Source Serif Pro', 'ui-serif', 'Georgia', 'serif'],
         'body': ['Inter', 'ui-sans-serif', 'system-ui'], 
         'mono': ['JetBrains Mono', 'ui-monospace', 'monospace'],
-        // Legacy font (updated to Inkwell standard)
+        // Legacy font (updated to new Inkwell standard)
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       borderRadius: {

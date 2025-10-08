@@ -35,22 +35,37 @@ class TraceLogger {
   private isEnabled = false;
 
   constructor() {
-    this.checkEnabled();
+    try {
+      this.checkEnabled();
 
-    // Re-check when URL changes
-    if (typeof window !== 'undefined') {
-      window.addEventListener('popstate', () => this.checkEnabled());
+      // Re-check when URL changes
+      if (typeof window !== 'undefined') {
+        window.addEventListener('popstate', () => this.checkEnabled());
+      }
+    } catch (error) {
+      console.warn('Failed to initialize trace logger:', error);
+      this.isEnabled = false;
     }
   }
 
   private checkEnabled(): void {
-    this.isEnabled =
-      featureFlags.isEnabled('performanceMonitoring') ||
-      featureFlags.isDebugMode() ||
-      new URLSearchParams(window.location.search).get('trace') === '1';
+    try {
+      this.isEnabled =
+        featureFlags.isEnabled('performanceMonitoring') ||
+        featureFlags.isDebugMode() ||
+        new URLSearchParams(window.location.search).get('trace') === '1';
 
-    if (this.isEnabled) {
-      console.log('📊 Trace logging enabled');
+      if (this.isEnabled) {
+        console.log('📊 Trace logging enabled');
+      }
+    } catch (error) {
+      console.warn('Failed to check trace enabled state:', error);
+      // Fallback to URL parameter only
+      try {
+        this.isEnabled = new URLSearchParams(window.location.search).get('trace') === '1';
+      } catch {
+        this.isEnabled = false;
+      }
     }
   }
 
@@ -267,7 +282,32 @@ class TraceLogger {
 }
 
 /* ========= Singleton Instance ========= */
-export const trace = new TraceLogger();
+let _trace: TraceLogger | null = null;
+
+function getTrace(): TraceLogger {
+  if (!_trace) {
+    _trace = new TraceLogger();
+  }
+  return _trace;
+}
+
+export const trace = {
+  start: (name: string, type: TraceEvent['type'], metadata?: Record<string, any>) =>
+    getTrace().start(name, type, metadata),
+  end: (id: string, additionalMetadata?: Record<string, any>) =>
+    getTrace().end(id, additionalMetadata),
+  log: (
+    name: string,
+    type: TraceEvent['type'],
+    level?: TraceEvent['level'],
+    metadata?: Record<string, any>,
+  ) => getTrace().log(name, type, level, metadata),
+  getEvents: (type?: TraceEvent['type'], limit?: number) => getTrace().getEvents(type, limit),
+  getPerformanceMetrics: () => getTrace().getPerformanceMetrics(),
+  getSummary: () => getTrace().getSummary(),
+  clear: () => getTrace().clear(),
+  export: () => getTrace().export(),
+};
 
 /* ========= Higher-Order Functions ========= */
 
