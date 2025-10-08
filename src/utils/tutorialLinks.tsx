@@ -77,7 +77,7 @@ export const TutorialLinks = {
    */
   extractProfileId: (url: string): string | null => {
     const match = url.match(/^\/p\/([^/]+)\/tutorials/);
-    return match ? match[1] : null;
+    return match?.[1] ?? null;
   },
 
   /**
@@ -85,7 +85,7 @@ export const TutorialLinks = {
    */
   extractSlug: (url: string): string | null => {
     const match = url.match(/^\/p\/[^/]+\/tutorials\/([^/]+)/);
-    return match ? match[1] : null;
+    return match?.[1] ?? null;
   },
 
   /**
@@ -93,7 +93,7 @@ export const TutorialLinks = {
    */
   extractStep: (url: string): number | null => {
     const match = url.match(/^\/p\/[^/]+\/tutorials\/[^/]+\/(\d+)/);
-    return match ? parseInt(match[1], 10) : null;
+    return match?.[1] ? parseInt(match[1], 10) : null;
   },
 };
 

@@ -111,6 +111,16 @@ export function useProfileContext(): ProfileContextType {
   return context;
 }
 
+// Alias for tutorial storage compatibility
+export function useProfile() {
+  const context = useProfileContext();
+  return {
+    active: context.activeProfile,
+    activeProfileId: context.activeProfile?.id || null,
+    ...context,
+  };
+}
+
 // Provider component
 interface ProfileProviderProps {
   children: React.ReactNode;
