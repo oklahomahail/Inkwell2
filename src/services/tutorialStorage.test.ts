@@ -2,6 +2,9 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { useProfile } from '../context/ProfileContext';
+import { useMaybeDB } from '../data/dbFactory';
+
 import {
   useTutorialStorage,
   migrateLegacyTutorialData,
@@ -24,11 +27,28 @@ vi.mock('../data/dbFactory', () => ({
 }));
 
 // Import after mocking
-import { useProfile } from '../context/ProfileContext';
-import { useMaybeDB } from '../data/dbFactory';
 
 const mockedUseProfile = vi.mocked(useProfile);
 const mockedUseMaybeDB = vi.mocked(useMaybeDB);
+
+// Helper to create a mock useProfile return value
+function createMockUseProfileReturn(active: any) {
+  return {
+    profiles: [],
+    activeProfile: active,
+    isLoading: false,
+    error: null,
+    createProfile: vi.fn(),
+    deleteProfile: vi.fn(),
+    updateProfile: vi.fn(),
+    setActiveProfile: vi.fn(),
+    switchProfile: vi.fn(),
+    loadProfiles: vi.fn(),
+    clearActiveProfile: vi.fn(),
+    active,
+    activeProfileId: active?.id || null,
+  };
+}
 
 describe('TutorialStorage', () => {
   let mockDb: any;
@@ -36,14 +56,29 @@ describe('TutorialStorage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Set default mock return values
-    mockedUseProfile.mockReturnValue({ active: { id: 'profile-1', name: 'Test Profile' } });
+    const now = new Date();
+    mockedUseProfile.mockReturnValue(
+      createMockUseProfileReturn({
+        id: 'profile-1',
+        name: 'Test Profile',
+        createdAt: now,
+        updatedAt: now,
+      }),
+    );
 
     // Create a mock database with the right interface
     mockDb = {
+      // Legacy methods
       get: vi.fn().mockResolvedValue(null),
       put: vi.fn().mockResolvedValue(undefined),
       delete: vi.fn().mockResolvedValue(undefined),
       list: vi.fn().mockResolvedValue([]),
+      clear: vi.fn().mockResolvedValue(undefined),
+      // New interface methods
+      getItem: vi.fn().mockResolvedValue(null),
+      setItem: vi.fn().mockResolvedValue(undefined),
+      removeItem: vi.fn().mockResolvedValue(undefined),
+      getAllKeys: vi.fn().mockResolvedValue([]),
     };
 
     mockedUseMaybeDB.mockReturnValue(mockDb);
@@ -156,7 +191,7 @@ describe('TutorialStorage', () => {
 
     it('should handle cases when no active profile exists', async () => {
       // Mock no active profile
-      mockedUseProfile.mockReturnValue({ active: null });
+      mockedUseProfile.mockReturnValue(createMockUseProfileReturn(null));
       mockedUseMaybeDB.mockReturnValue(null);
 
       const { result } = renderHook(() => useTutorialStorage());
@@ -172,8 +207,14 @@ describe('TutorialStorage', () => {
   describe('Profile Isolation', () => {
     it('should isolate tutorial data between different profiles', async () => {
       // Test with profile 1
-      const profile1 = { id: 'profile-1', name: 'Profile 1' };
-      mockedUseProfile.mockReturnValue({ active: profile1 });
+      const now = new Date();
+      const profile1 = {
+        id: 'profile-1',
+        name: 'Profile 1',
+        createdAt: now,
+        updatedAt: now,
+      };
+      mockedUseProfile.mockReturnValue(createMockUseProfileReturn(profile1));
 
       const { result: result1 } = renderHook(() => useTutorialStorage());
 
@@ -192,8 +233,13 @@ describe('TutorialStorage', () => {
       });
 
       // Test with profile 2
-      const profile2 = { id: 'profile-2', name: 'Profile 2' };
-      mockedUseProfile.mockReturnValue({ active: profile2 });
+      const profile2 = {
+        id: 'profile-2',
+        name: 'Profile 2',
+        createdAt: now,
+        updatedAt: now,
+      };
+      mockedUseProfile.mockReturnValue(createMockUseProfileReturn(profile2));
 
       const { result: result2 } = renderHook(() => useTutorialStorage());
 
@@ -372,7 +418,7 @@ describe('TutorialStorage', () => {
 
   describe('No Active Profile', () => {
     it('should handle gracefully when no active profile exists', async () => {
-      mockedUseProfile.mockReturnValue({ active: null });
+      mockedUseProfile.mockReturnValue(createMockUseProfileReturn(null));
       mockedUseMaybeDB.mockReturnValue(null);
 
       const { result } = renderHook(() => useTutorialStorage());
@@ -409,7 +455,6 @@ describe('TutorialStorage', () => {
           remindMeLater: false,
           completedTours: [],
           tourDismissals: 0,
-          updatedAt: Date.now(),
         }),
       ).resolves.toBeUndefined();
     });

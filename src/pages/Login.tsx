@@ -24,7 +24,7 @@ export default function Login() {
       const q = new URLSearchParams(location.search);
       const next = q.get('next') || '/';
       location.replace(next);
-    } catch (_err) {
+    } catch {
       setError('Network error');
       setLoading(false);
     }

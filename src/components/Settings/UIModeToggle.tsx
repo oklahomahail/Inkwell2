@@ -3,6 +3,7 @@ import { BookOpen, Eye, EyeOff, Info, Settings, Wrench, Sparkles } from 'lucide-
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useProfile } from '../../context/ProfileContext';
 import { analyticsService } from '../../services/analyticsService';
 import { featureFlagService } from '../../services/featureFlagService';
 import { getPresetForMode, presetToFlags, UIMode } from '../../services/featureFlagService.presets';
@@ -28,6 +29,7 @@ export function UIModeToggle({
   showDescription = true,
 }: UIModeToggleProps) {
   const [isChanging, setIsChanging] = useState(false);
+  const { activeProfileId } = useProfile();
   const dispatch = useDispatch();
 
   const handleModeChange = async (newMode: UIMode) => {
@@ -38,6 +40,7 @@ export function UIModeToggle({
     try {
       // Track the mode change
       analyticsService.track('ui_mode_changed', {
+        profileId: activeProfileId || 'anonymous',
         oldMode: currentMode,
         newMode: newMode,
         reason: 'settings_toggle',
@@ -56,6 +59,7 @@ export function UIModeToggle({
       if (newMode === 'pro' && projectId) {
         dispatch(
           exitFirstDraftPath({
+            profileId: activeProfileId || 'anonymous',
             projectId,
             reason: 'ui_mode_change',
           }),
@@ -65,6 +69,7 @@ export function UIModeToggle({
       // Update global preference
       dispatch(
         updateGlobalSettings({
+          profileId: activeProfileId || 'anonymous',
           preferredUIMode: newMode,
         }),
       );
@@ -81,6 +86,7 @@ export function UIModeToggle({
       console.error('Failed to change UI mode:', error);
 
       analyticsService.track('ui_mode_change_failed', {
+        profileId: activeProfileId || 'anonymous',
         attemptedMode: newMode,
         error: error instanceof Error ? error.message : 'Unknown error',
       });

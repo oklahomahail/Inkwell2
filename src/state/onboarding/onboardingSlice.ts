@@ -271,9 +271,10 @@ const onboardingSlice = createSlice({
 
     updateGlobalSettings: (
       state,
-      action: PayloadAction<Partial<OnboardingState['globalSettings']>>,
+      action: PayloadAction<Partial<OnboardingState['globalSettings']> & { profileId?: string }>,
     ) => {
-      Object.assign(state.globalSettings, action.payload);
+      const { profileId: _profileId, ...settings } = action.payload;
+      Object.assign(state.globalSettings, settings);
     },
 
     checkForNudge: (state, action: PayloadAction<{ profileId: string; projectId: string }>) => {

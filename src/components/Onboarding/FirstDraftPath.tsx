@@ -3,6 +3,7 @@ import { CheckCircle, Circle, Clock } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { useProfile } from '../../context/ProfileContext';
 import { analyticsService } from '../../services/analyticsService';
 import {
   OnboardingStep,
@@ -79,12 +80,21 @@ export function FirstDraftPath({
   onExitPath,
 }: FirstDraftPathProps) {
   const dispatch = useDispatch();
-  const projectOnboarding = useSelector((state: any) => selectProjectOnboarding(state, projectId));
-  const currentStep = useSelector((state: any) => selectCurrentStep(state, projectId));
-  const stepProgress = useSelector((state: any) => selectStepProgress(state, projectId));
-  const wordProgress = useSelector((state: any) => selectWordCountProgress(state, projectId));
+  const { activeProfileId } = useProfile();
+  const projectOnboarding = useSelector((state: any) =>
+    selectProjectOnboarding(state, activeProfileId || 'anonymous', projectId),
+  );
+  const currentStep = useSelector((state: any) =>
+    selectCurrentStep(state, activeProfileId || 'anonymous', projectId),
+  );
+  const stepProgress = useSelector((state: any) =>
+    selectStepProgress(state, activeProfileId || 'anonymous', projectId),
+  );
+  const wordProgress = useSelector((state: any) =>
+    selectWordCountProgress(state, activeProfileId || 'anonymous', projectId),
+  );
   const isInFirstDraftPath = useSelector((state: any) =>
-    selectIsInFirstDraftPath(state, projectId),
+    selectIsInFirstDraftPath(state, activeProfileId || 'anonymous', projectId),
   );
 
   const [_startTime] = useState(Date.now());
@@ -94,6 +104,7 @@ export function FirstDraftPath({
 
     // Track step starts
     analyticsService.track('first_draft_step_viewed', {
+      profileId: activeProfileId || 'anonymous',
       projectId,
       step: currentStep,
       stepIndex: STEPS_DATA.findIndex((s) => s.key === currentStep),
@@ -101,7 +112,7 @@ export function FirstDraftPath({
   }, [currentStep, projectId, projectOnboarding]);
 
   const handleStepComplete = (step: OnboardingStep) => {
-    dispatch(markStepCompleted({ projectId, step }));
+    dispatch(markStepCompleted({ profileId: activeProfileId || 'anonymous', projectId, step }));
     onStepComplete?.(step);
 
     // Check if this was the final step
@@ -111,11 +122,12 @@ export function FirstDraftPath({
   };
 
   const handleAdvanceStep = () => {
-    dispatch(advanceStep({ projectId }));
+    dispatch(advanceStep({ profileId: activeProfileId || 'anonymous', projectId }));
   };
 
   const handlePathComplete = () => {
     analyticsService.track('first_draft_path_completed', {
+      profileId: activeProfileId || 'anonymous',
       projectId,
       totalDuration: Date.now() - (projectOnboarding?.startedAt || Date.now()),
       stepsCompleted: STEPS_DATA.length,
@@ -124,7 +136,13 @@ export function FirstDraftPath({
   };
 
   const handleExitPath = () => {
-    dispatch(exitFirstDraftPath({ projectId, reason: 'user_choice' }));
+    dispatch(
+      exitFirstDraftPath({
+        profileId: activeProfileId || 'anonymous',
+        projectId,
+        reason: 'user_choice',
+      }),
+    );
     onExitPath?.();
   };
 
@@ -334,10 +352,15 @@ export function FirstDraftChecklist({
   projectId: string;
   className?: string;
 }) {
-  const stepProgress = useSelector((state: any) => selectStepProgress(state, projectId));
-  const currentStep = useSelector((state: any) => selectCurrentStep(state, projectId));
+  const { activeProfileId } = useProfile();
+  const stepProgress = useSelector((state: any) =>
+    selectStepProgress(state, activeProfileId || 'anonymous', projectId),
+  );
+  const currentStep = useSelector((state: any) =>
+    selectCurrentStep(state, activeProfileId || 'anonymous', projectId),
+  );
   const isInFirstDraftPath = useSelector((state: any) =>
-    selectIsInFirstDraftPath(state, projectId),
+    selectIsInFirstDraftPath(state, activeProfileId || 'anonymous', projectId),
   );
 
   if (!isInFirstDraftPath) return null;

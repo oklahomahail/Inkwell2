@@ -18,6 +18,9 @@ import {
   type CompletionChecklist,
 } from '../../services/tutorialStorage';
 
+// Re-export the CompletionChecklist type for use in other components
+export type { CompletionChecklist } from '../../services/tutorialStorage';
+
 // Re-export types from the original TourProvider for compatibility
 export interface TourStep {
   id: string;

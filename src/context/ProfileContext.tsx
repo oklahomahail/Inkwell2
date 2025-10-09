@@ -139,11 +139,23 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     async (name: string, options: Partial<Profile> = {}): Promise<Profile> => {
       dispatch({ type: 'SET_ERROR', payload: null });
 
+      const trimmedName = name.trim();
+
+      // Check if profile already exists (idempotent)
+      const existingProfile = state.profiles.find(
+        (p) => p.name.toLowerCase() === trimmedName.toLowerCase(),
+      );
+
+      if (existingProfile) {
+        console.log('Profile already exists, returning existing:', existingProfile.name);
+        return existingProfile;
+      }
+
       const now = new Date();
       const profile: Profile = {
         id: uuidv4(),
-        name: name.trim(),
-        displayName: options.displayName || name.trim(),
+        name: trimmedName,
+        displayName: options.displayName || trimmedName,
         createdAt: now,
         updatedAt: now,
         color: options.color || `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,

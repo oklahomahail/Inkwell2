@@ -1,7 +1,7 @@
 // src/routes/shell/ProfilePicker.tsx - Profile creation and selection
 
 import { Plus, User, Palette } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useProfileContext } from '../../context/ProfileContext';
@@ -25,6 +25,7 @@ export function ProfilePicker() {
   const [newProfileName, setNewProfileName] = useState('');
   const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0]);
   const [formError, setFormError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
   const handleSelectProfile = async (profile: Profile) => {
     try {
@@ -38,6 +39,8 @@ export function ProfilePicker() {
 
   const handleCreateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pending) return; // Prevent double submission
+
     const name = newProfileName.trim();
 
     if (!name) {
@@ -45,24 +48,53 @@ export function ProfilePicker() {
       return;
     }
 
-    if (profiles.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
-      setFormError('A profile with this name already exists');
-      return;
-    }
-
+    setPending(true);
     setFormError(null);
 
     try {
-      const profile = await createProfile(name, {
-        color: selectedColor,
-        displayName: name,
-      });
+      // Check if profile already exists - if so, use it instead of creating
+      const existingProfile = profiles.find((p) => p.name.toLowerCase() === name.toLowerCase());
 
-      await setActiveProfile(profile.id);
-      navigate(`/p/${profile.id}/dashboard`);
-    } catch (error) {
+      let profile: Profile;
+      if (existingProfile) {
+        profile = existingProfile;
+        console.log('Using existing profile:', profile.name);
+      } else {
+        profile = await createProfile(name, {
+          color: selectedColor,
+          displayName: name,
+        });
+      }
+
+      // If create/find succeeded, try to activate. Don't show create error if this fails
+      try {
+        await setActiveProfile(profile.id);
+        navigate(`/p/${profile.id}/dashboard`);
+      } catch (activationError) {
+        console.warn('Profile created/found but failed to set active:', activationError);
+        // Still navigate - the profile exists, activation can be retried
+        navigate(`/p/${profile.id}/dashboard`);
+      }
+    } catch (error: any) {
       console.error('Failed to create profile:', error);
+
+      // Handle "already exists" as success if we missed it in the check above
+      if (error?.code === 'PROFILE_EXISTS' || /exists/i.test(error?.message ?? '')) {
+        const existingProfile = profiles.find((p) => p.name.toLowerCase() === name.toLowerCase());
+        if (existingProfile) {
+          try {
+            await setActiveProfile(existingProfile.id);
+            navigate(`/p/${existingProfile.id}/dashboard`);
+            return;
+          } catch (activationError) {
+            console.warn('Found existing profile but failed to activate:', activationError);
+          }
+        }
+      }
+
       setFormError('Failed to create profile. Please try again.');
+    } finally {
+      setPending(false);
     }
   };
 
@@ -70,8 +102,16 @@ export function ProfilePicker() {
     setNewProfileName('');
     setSelectedColor(PRESET_COLORS[0]);
     setFormError(null);
+    setPending(false);
     setIsCreating(false);
   };
+
+  // Clear form error when profiles list changes (successful creation)
+  useEffect(() => {
+    if (profiles.length > 0) {
+      setFormError(null);
+    }
+  }, [profiles.length]);
 
   if (isLoading) {
     return (
@@ -189,9 +229,15 @@ export function ProfilePicker() {
               <div className="flex gap-2 pt-2">
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                  disabled={pending}
+                  aria-busy={pending}
+                  className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+                    pending
+                      ? 'bg-blue-400 text-blue-100 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                 >
-                  Create Profile
+                  {pending ? 'Creating…' : 'Create Profile'}
                 </button>
                 <button
                   type="button"

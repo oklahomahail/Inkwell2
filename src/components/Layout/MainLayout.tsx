@@ -90,7 +90,7 @@ const baseNavigationItems = [
 ];
 
 // Brand-specific navigation items (dev/admin only)
-const brandNavigationItems = [
+const _brandNavigationItems = [
   {
     id: 'brand',
     label: 'Brand System',

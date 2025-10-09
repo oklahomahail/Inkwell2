@@ -53,7 +53,7 @@ interface TourContextValue {
 const TourContext = createContext<TourContextValue | undefined>(undefined);
 
 const STORAGE_KEY = 'inkwell-tour-progress';
-const ANALYTICS_KEY = 'inkwell-tour-analytics';
+const _ANALYTICS_KEY = 'tutorial_analytics';
 const CHECKLIST_KEY = 'inkwell-completion-checklist';
 
 // Enhanced tour state with new capabilities

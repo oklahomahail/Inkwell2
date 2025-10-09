@@ -3,6 +3,7 @@ import { BookOpen, Clock, Target, TrendingUp, X, ArrowRight } from 'lucide-react
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
+import { useProfile } from '../../context/ProfileContext';
 import { analyticsService } from '../../services/analyticsService';
 import {
   selectProjectOnboarding,
@@ -23,10 +24,19 @@ interface ActivationNudgeProps {
 
 export function ActivationNudge({ projectId, onContinue, onDismiss }: ActivationNudgeProps) {
   const [isDismissed, setIsDismissed] = useState(false);
-  const shouldShow = useSelector((state: any) => selectShouldShowNudge(state, projectId));
-  const projectOnboarding = useSelector((state: any) => selectProjectOnboarding(state, projectId));
-  const wordProgress = useSelector((state: any) => selectWordCountProgress(state, projectId));
-  const currentStep = useSelector((state: any) => selectCurrentStep(state, projectId));
+  const { activeProfileId } = useProfile();
+  const shouldShow = useSelector((state: any) =>
+    selectShouldShowNudge(state, activeProfileId || 'anonymous', projectId),
+  );
+  const projectOnboarding = useSelector((state: any) =>
+    selectProjectOnboarding(state, activeProfileId || 'anonymous', projectId),
+  );
+  const wordProgress = useSelector((state: any) =>
+    selectWordCountProgress(state, activeProfileId || 'anonymous', projectId),
+  );
+  const currentStep = useSelector((state: any) =>
+    selectCurrentStep(state, activeProfileId || 'anonymous', projectId),
+  );
 
   useEffect(() => {
     // Check if nudge was previously dismissed for this session
@@ -46,6 +56,7 @@ export function ActivationNudge({ projectId, onContinue, onDismiss }: Activation
     sessionStorage.setItem('dismissed_nudges', JSON.stringify(dismissedNudges));
 
     analyticsService.track('nudge_dismissed', {
+      profileId: activeProfileId || 'anonymous',
       projectId,
       nudgeType: 'activation_comeback',
       wordCount: wordProgress.current,
@@ -58,6 +69,7 @@ export function ActivationNudge({ projectId, onContinue, onDismiss }: Activation
 
   const handleContinue = () => {
     analyticsService.track('nudge_clicked', {
+      profileId: activeProfileId || 'anonymous',
       projectId,
       nudgeType: 'activation_comeback',
       action: 'continue_writing',
@@ -154,8 +166,13 @@ export function ActivationAnalytics({ projectId }: { projectId: string }) {
     success: false,
   });
 
-  const projectOnboarding = useSelector((state: any) => selectProjectOnboarding(state, projectId));
-  const wordProgress = useSelector((state: any) => selectWordCountProgress(state, projectId));
+  const { activeProfileId } = useProfile();
+  const projectOnboarding = useSelector((state: any) =>
+    selectProjectOnboarding(state, activeProfileId || 'anonymous', projectId),
+  );
+  const wordProgress = useSelector((state: any) =>
+    selectWordCountProgress(state, activeProfileId || 'anonymous', projectId),
+  );
 
   useEffect(() => {
     if (!projectOnboarding) return;
@@ -256,7 +273,10 @@ export function ActivationAnalytics({ projectId }: { projectId: string }) {
 // Hook for showing nudges at appropriate times
 export function useActivationNudges(projectId: string) {
   const [showNudge, setShowNudge] = useState(false);
-  const shouldShow = useSelector((state: any) => selectShouldShowNudge(state, projectId));
+  const { activeProfileId } = useProfile();
+  const shouldShow = useSelector((state: any) =>
+    selectShouldShowNudge(state, activeProfileId || 'anonymous', projectId),
+  );
 
   useEffect(() => {
     if (shouldShow) {

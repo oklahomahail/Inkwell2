@@ -101,7 +101,7 @@ export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = 
   };
 
   const getItemStyle = (item: ChecklistItemConfig) => {
-    const isCompleted = checklist[item.key as keyof typeof checklist];
+    const isCompleted = checklist?.[item.key as keyof typeof checklist] || false;
     const canStartTour = item.tourTrigger && canShowContextualTour(item.tourTrigger);
 
     return {
@@ -169,7 +169,7 @@ export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = 
           <div className="space-y-2">
             {CHECKLIST_ITEMS.map((item) => {
               const Icon = item.icon;
-              const isCompleted = checklist[item.key as keyof typeof checklist];
+              const isCompleted = checklist?.[item.key as keyof typeof checklist] || false;
               const canStartTour = item.tourTrigger && canShowContextualTour(item.tourTrigger);
 
               return (

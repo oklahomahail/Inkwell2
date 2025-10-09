@@ -37,8 +37,11 @@ export function ExportMenu({ html, plain, title = 'My Story' }: ExportMenuProps)
         .set({
           filename: `${title}.pdf`,
           margin: 10,
-          format: [210, 297], // A4 size in mm
-          orientation: 'portrait',
+          jsPDF: {
+            unit: 'mm',
+            format: [210, 297], // A4 size in mm
+            orientation: 'portrait',
+          },
         })
         .save();
     } catch (error) {

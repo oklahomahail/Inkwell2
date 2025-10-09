@@ -13,10 +13,10 @@ import snapshotService from '@/services/snapshotAdapter';
 // Modal components
 
 export type TopbarProps = {
-  onOpenNotifications?: () => void;
-  onToggleTheme?: () => void;
-  onToggleClaude?: () => void;
-  theme?: 'light' | 'dark';
+  _onOpenNotifications?: () => void;
+  _onToggleTheme?: () => void;
+  _onToggleClaude?: () => void;
+  _theme?: 'light' | 'dark';
   projectName?: string;
 };
 
@@ -43,10 +43,10 @@ function getTimeAgo(date: Date) {
 }
 
 export default function Topbar({
-  onOpenNotifications,
-  onToggleTheme,
-  onToggleClaude,
-  theme,
+  _onOpenNotifications,
+  _onToggleTheme,
+  _onToggleClaude,
+  _theme,
   projectName,
 }: TopbarProps) {
   // Modal states
@@ -58,12 +58,12 @@ export default function Topbar({
   // Real auto-save state
   const { state } = useAppContext();
   const { autoSave } = state;
-  const { isFocusMode, toggleFocusMode } = useFocusMode();
+  const { isFocusMode: _isFocusMode, toggleFocusMode: _toggleFocusMode } = useFocusMode();
   const { project } = useCurrentProject();
 
   const effectiveName = projectName ?? project?.name ?? 'Inkwell';
 
-  const handleSaveSnapshot = useCallback(async () => {
+  const _handleSaveSnapshot = useCallback(async () => {
     if (!project) return;
     await snapshotService.makeSnapshot(project, { label: 'Manual Snapshot' });
     // Optionally trigger a toast if your app exposes one via context

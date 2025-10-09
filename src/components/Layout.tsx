@@ -49,10 +49,10 @@ export default function Layout({
           <div className={cn('Topbar', isFocusMode && 'hidden')}>
             <Topbar
               projectName={projectName}
-              theme={theme}
-              onToggleTheme={onToggleTheme}
-              onToggleClaude={onToggleClaude}
-              onOpenNotifications={onOpenNotifications}
+              _theme={theme}
+              _onToggleTheme={onToggleTheme}
+              _onToggleClaude={onToggleClaude}
+              _onOpenNotifications={onOpenNotifications}
             />
           </div>
 

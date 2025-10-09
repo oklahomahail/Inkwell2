@@ -5,6 +5,7 @@ interface BaseEvent {
   timestamp: number;
   sessionId: string;
   userId?: string; // Optional, hashed if provided
+  profileId?: string; // Profile identifier for profile-specific analytics
   version: string;
   platform: string;
 }
@@ -83,7 +84,10 @@ export interface AnalyticsEvents {
     updatedFields: string[];
   };
 
-  ai_config_cleared: BaseEvent;
+  ai_config_cleared: BaseEvent & {
+    previousProvider?: string;
+    reason?: string;
+  };
 
   // AI Setup Events
   ai_setup_abandoned: BaseEvent & {
@@ -154,7 +158,10 @@ export interface AnalyticsEvents {
     lastError: string;
   };
 
-  ai_circuit_breaker_manual_reset: BaseEvent;
+  ai_circuit_breaker_manual_reset: BaseEvent & {
+    previousFailureCount?: number;
+    state?: string;
+  };
 
   ai_status_changed: BaseEvent & {
     statusCode: string;
@@ -290,9 +297,15 @@ export interface AnalyticsEvents {
     overrides: string[];
   };
 
-  demo_mode_disabled: BaseEvent;
+  demo_mode_disabled: BaseEvent & {
+    previousFlags?: string[];
+    reason?: string;
+  };
 
-  feature_flags_reset: BaseEvent;
+  feature_flags_reset: BaseEvent & {
+    previousFlags?: string[];
+    reason?: string;
+  };
 }
 
 export type EventName = keyof AnalyticsEvents;
@@ -357,11 +370,12 @@ class AnalyticsService {
     this.cleanupOldData();
   }
 
-  private getBaseEvent(): BaseEvent {
+  private getBaseEvent(profileId?: string): BaseEvent {
     return {
       timestamp: Date.now(),
       sessionId: this.sessionId,
       userId: this.userId ?? undefined,
+      profileId: profileId ?? undefined,
       version: import.meta.env.REACT_APP_VERSION || '1.0.0',
       platform: this.getPlatform(),
     };
@@ -375,12 +389,16 @@ class AnalyticsService {
   }
 
   // Public API for tracking events
-  track<T extends EventName>(eventName: T, eventData: Omit<EventData<T>, keyof BaseEvent>) {
+  track<T extends EventName>(
+    eventName: T,
+    eventData: Omit<EventData<T>, keyof BaseEvent> & { profileId?: string },
+  ) {
     if (!this.isEnabled) return;
 
+    const { profileId, ...restData } = eventData;
     const event = {
-      ...this.getBaseEvent(),
-      ...eventData,
+      ...this.getBaseEvent(profileId),
+      ...restData,
     };
 
     // Store event locally for batch processing
