@@ -26,6 +26,8 @@ import { useFeatureFlag } from '@/utils/flags';
 import { ProfileSwitcher } from '../ProfileSwitcher';
 import { PWAOfflineIndicator } from '../PWA';
 
+import { Footer } from './Footer';
+
 interface MainLayoutProps {
   children: React.ReactNode;
   className?: string;
@@ -393,9 +395,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         </header>
 
         {/* Page Content */}
-        <div className="p-6">
+        <div className="p-6 pb-0">
           <div className="max-w-7xl mx-auto">{children}</div>
         </div>
+
+        {/* Footer */}
+        <Footer />
       </main>
     </div>
   );
