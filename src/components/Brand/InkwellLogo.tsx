@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface InkwellLogoProps {
-  variant?: 'full' | 'mark' | 'wordmark';
+  variant?: 'full' | 'mark' | 'icon' | 'wordmark';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   color?: 'navy' | 'gold' | 'white' | 'auto';
   className?: string;
@@ -27,7 +27,7 @@ export const InkwellLogo: React.FC<InkwellLogoProps> = ({
     auto: '', // Let the current context determine color
   };
 
-  if (variant === 'mark') {
+  if (variant === 'mark' || variant === 'icon') {
     return (
       <svg
         className={`${sizeClasses[size]} ${colorClasses[color]} ${className}`}

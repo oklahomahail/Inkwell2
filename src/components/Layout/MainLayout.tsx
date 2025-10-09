@@ -235,51 +235,67 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const currentProject = state.projects.find((p) => p.id === state.currentProjectId);
 
   return (
-    <div className={cn('main-layout', className)}>
+    <div
+      className={cn('main-layout', className)}
+      style={{
+        // 16rem = 256px expanded; 4rem = 64px rail
+        ['--sidebar-w' as any]: sidebarCollapsed ? '4rem' : '16rem',
+      }}
+    >
       {/* Sidebar */}
       <aside
         className={cn(
           'sidebar',
           'fixed left-0 top-0 h-full z-40',
-          'transition-all duration-300 ease-in-out',
+          'transition-[width] duration-300 ease-out',
           'bg-white dark:bg-inkwell-charcoal',
           'border-r border-inkwell-gold/20 dark:border-inkwell-gold/30',
-          sidebarCollapsed ? 'w-16' : 'w-64',
+          'overflow-x-hidden', // Prevent content overflow
         )}
+        style={{ width: 'var(--sidebar-w)' }}
       >
         {/* Sidebar Header */}
-        <div className="sidebar-header p-4 border-b border-inkwell-gold/20 bg-inkwell-navy dark:bg-inkwell-navy">
-          <div className="flex items-center justify-between">
-            <div className={cn('flex items-center gap-3', sidebarCollapsed && 'justify-center')}>
-              <div className="flex-shrink-0">
-                {sidebarCollapsed ? (
-                  <InkwellLogo variant="icon" size="sm" className="text-inkwell-gold" />
-                ) : (
-                  <InkwellLogo variant="wordmark" size="sm" className="text-white" />
-                )}
-              </div>
-              {!sidebarCollapsed && (
-                <div className="flex flex-col ml-2">
-                  <p className="text-xs text-inkwell-gold/80 truncate">
-                    {currentProject?.name || 'Select a project'}
-                  </p>
-                </div>
-              )}
+        <div className="sidebar-header relative p-4 border-b border-inkwell-gold/20 bg-inkwell-navy dark:bg-inkwell-navy">
+          <div className="flex items-center">
+            {/* Brand icon - always visible */}
+            <div className="flex-shrink-0">
+              <InkwellLogo variant="mark" size="sm" className="text-inkwell-gold" />
             </div>
-            <button
-              onClick={toggleSidebar}
+
+            {/* Wordmark - hidden when collapsed */}
+            <div
               className={cn(
-                'btn-ghost btn-sm',
-                'w-8 h-8 p-0',
-                'flex items-center justify-center',
-                'hover:bg-inkwell-gold/20 text-white hover:text-inkwell-gold',
-                'focus-ring',
+                'wordmark-transition',
+                'ml-2 transition-all duration-300 ease-out overflow-hidden',
+                sidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-auto opacity-100',
               )}
-              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              <Menu className="w-4 h-4" />
-            </button>
+              <span className="font-serif font-semibold tracking-wide text-white whitespace-nowrap">
+                Inkwell
+              </span>
+              <div className="flex flex-col">
+                <p className="text-xs text-inkwell-gold/80 truncate">
+                  {currentProject?.name || 'Select a project'}
+                </p>
+              </div>
+            </div>
           </div>
+
+          {/* Always-visible hamburger, positioned outside the shrinking area */}
+          <button
+            onClick={toggleSidebar}
+            className={cn(
+              'sidebar-toggle',
+              'absolute -right-3 top-1/2 -translate-y-1/2',
+              'w-8 h-8 rounded-full shadow-md border bg-white dark:bg-slate-900',
+              'flex items-center justify-center z-50',
+              'hover:bg-slate-50 dark:hover:bg-slate-800',
+              'focus-ring border-inkwell-gold/30',
+            )}
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <Menu className="w-4 h-4 text-slate-700 dark:text-slate-300" />
+          </button>
         </div>
 
         {/* Search/Command Palette */}
@@ -414,10 +430,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       <main
         className={cn(
           'main-content',
-          'min-h-screen transition-all duration-300',
+          'min-h-screen transition-[margin] duration-300 ease-out',
           'bg-slate-50 dark:bg-slate-900',
-          sidebarCollapsed ? 'ml-16' : 'ml-64',
         )}
+        style={{ marginLeft: 'var(--sidebar-w)' }}
       >
         {/* Top Bar */}
         <header className="sticky top-0 z-30 bg-white/80 dark:bg-inkwell-charcoal/80 backdrop-blur-sm border-b border-inkwell-gold/20 dark:border-inkwell-gold/30">

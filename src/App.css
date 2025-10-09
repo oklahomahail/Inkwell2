@@ -85,6 +85,35 @@
 /* Reserved for future component-level overrides */
 
 /* ========================================
+   SIDEBAR OPTIMIZATION STYLES
+   ======================================== */
+
+/* Ensure smooth transitions for sidebar collapse */
+.sidebar {
+  will-change: width;
+}
+
+/* Prevent wordmark text selection during transitions */
+.sidebar .wordmark-transition {
+  user-select: none;
+  user-select: none;
+}
+
+/* Hamburger button hover enhancement */
+.sidebar-toggle {
+  transition: all 0.2s ease;
+  transform-origin: center;
+}
+
+.sidebar-toggle:hover {
+  transform: scale(1.05);
+}
+
+.sidebar-toggle:active {
+  transform: scale(0.95);
+}
+
+/* ========================================
    COMMAND PALETTE STYLES
    ======================================== */
 

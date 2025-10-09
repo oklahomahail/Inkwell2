@@ -8,6 +8,8 @@ import React, {
   useCallback,
 } from 'react';
 
+import { useOnboardingGate } from '@/hooks/useOnboardingGate';
+
 import { useProfile } from '../../context/ProfileContext';
 import { analyticsService } from '../../services/analyticsService';
 import {
@@ -106,6 +108,7 @@ interface ProfileTourProviderProps {
 export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ children }) => {
   const { active: activeProfile } = useProfile();
   const tutorialStorage = useTutorialStorage();
+  const { setTourActive, completeOnboarding } = useOnboardingGate();
 
   const [tourState, setTourState] = useState<TourState>(defaultTourState);
   const [preferences, setPreferences] = useState<TutorialPreferences | null>(null);
@@ -276,7 +279,13 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
         lastActiveAt: Date.now(),
       });
     }
-  }, [tutorialStorage, tourState, preferences, logAnalytics]);
+
+    // Clear gate state - tour is no longer active and onboarding is complete
+    setTourActive(false);
+    if (tourState.tourType === 'full-onboarding') {
+      completeOnboarding();
+    }
+  }, [tutorialStorage, tourState, preferences, logAnalytics, setTourActive, completeOnboarding]);
 
   const startTour = useCallback(
     async (type: TourState['tourType'], steps?: TourStep[]) => {
@@ -340,7 +349,10 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
       isActive: false,
       isFirstTimeUser: false,
     }));
-  }, [tourState, logAnalytics]);
+
+    // Clear gate state - tour is no longer active
+    setTourActive(false);
+  }, [tourState, logAnalytics, setTourActive]);
 
   const completeStep = useCallback(
     async (stepId: string) => {

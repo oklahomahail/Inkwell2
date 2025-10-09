@@ -41,6 +41,11 @@ import { ProfilePicker } from './routes/shell/ProfilePicker';
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
 
+// Debug utilities (development only)
+if (import.meta.env.DEV) {
+  import('./utils/debugOnboardingGate');
+}
+
 interface ConnectivityStatus {
   isOnline: boolean;
   queuedWrites: number;

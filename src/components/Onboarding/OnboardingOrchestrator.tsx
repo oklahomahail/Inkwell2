@@ -1,6 +1,8 @@
 // src/components/Onboarding/OnboardingOrchestrator.tsx
 import React, { useState, useEffect } from 'react';
 
+import { useOnboardingGate } from '@/hooks/useOnboardingGate';
+
 import { CompletionChecklistComponent } from './CompletionChecklist';
 import { useTour, TOUR_MAP } from './ProfileTourProvider';
 import { TourNudgeManager } from './TourNudges';
@@ -17,15 +19,9 @@ export const OnboardingOrchestrator: React.FC<OnboardingOrchestratorProps> = ({
   autoShowWelcome = true,
   delayWelcomeMs = 2000,
 }) => {
-  const {
-    startTour,
-    setTourSteps,
-    shouldShowTourPrompt,
-    tourState,
-    logAnalytics,
-    updateChecklist,
-  } = useTour();
+  const { startTour, setTourSteps, tourState, logAnalytics, updateChecklist } = useTour();
 
+  const { shouldShowModal } = useOnboardingGate();
   const [showWelcome, setShowWelcome] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
 
@@ -35,7 +31,8 @@ export const OnboardingOrchestrator: React.FC<OnboardingOrchestratorProps> = ({
 
     let timeoutId: NodeJS.Timeout;
 
-    if (shouldShowTourPrompt()) {
+    // Use gate logic instead of tour provider - this prevents re-entrant opens
+    if (shouldShowModal()) {
       timeoutId = setTimeout(() => {
         setShowWelcome(true);
         logAnalytics('welcome_modal_auto_shown');
@@ -45,7 +42,7 @@ export const OnboardingOrchestrator: React.FC<OnboardingOrchestratorProps> = ({
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [shouldShowTourPrompt, autoShowWelcome, delayWelcomeMs, logAnalytics]);
+  }, [shouldShowModal, autoShowWelcome, delayWelcomeMs, logAnalytics]);
 
   // Handle starting different types of tours
   const handleStartTour = (tourType: string) => {

@@ -2,6 +2,8 @@
 import { BookOpen, Clock, X, ArrowRight, CheckCircle, Lightbulb } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { useOnboardingGate } from '@/hooks/useOnboardingGate';
+
 import { useTour, CORE_TOUR_STEPS } from './ProfileTourProvider';
 
 interface WelcomeModalProps {
@@ -18,6 +20,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   onOpenChecklist,
 }) => {
   const { setNeverShowAgain, setRemindMeLater, logAnalytics, preferences } = useTour();
+  const { setTourActive, snoozeModal, dismissModal } = useOnboardingGate();
   const [selectedOption, setSelectedOption] = useState<'tour' | 'checklist' | 'later' | 'never'>(
     'tour',
   );
@@ -26,8 +29,20 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
 
   const handleStartTour = () => {
     logAnalytics('welcome_modal_start_tour');
-    onStartTour('core-onboarding');
+
+    // 1. Prevent modal re-opening during tour
+    setTourActive(true);
+
+    // 2. Snooze modal for 7 days (will be set to completed when tour finishes)
+    snoozeModal(7 * 24); // 7 days
+
+    // 3. Close modal first to release focus trap
     onClose();
+
+    // 4. Start tour on next tick so modal is fully unmounted
+    queueMicrotask(() => {
+      onStartTour('core-onboarding');
+    });
   };
 
   const handleOpenChecklist = () => {
@@ -39,12 +54,14 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   const handleRemindLater = () => {
     logAnalytics('welcome_modal_remind_later');
     setRemindMeLater(24); // Remind in 24 hours
+    snoozeModal(24); // Also update gate
     onClose();
   };
 
   const handleNeverShow = () => {
     logAnalytics('welcome_modal_never_show');
     setNeverShowAgain();
+    dismissModal(); // Also update gate
     onClose();
   };
 
@@ -277,7 +294,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
         </div>
 
         {/* Show dismissal count if user has dismissed before */}
-        {preferences.tourDismissals > 0 && (
+        {preferences && preferences.tourDismissals > 0 && (
           <div className="px-6 pb-2">
             <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg">
               <Lightbulb className="w-3 h-3" />

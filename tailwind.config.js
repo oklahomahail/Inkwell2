@@ -7,10 +7,11 @@ theme: {
       colors: {
         // New Inkwell Brand Color System (2024)
         inkwell: {
-          navy: '#0C1C3D',
-          gold: '#D4A537', 
-          charcoal: '#222222',
-          paper: '#FFFFFF'
+          navy: '#0C5C3D',    // Deep Navy (corrected)
+          gold: '#D4A537',    // Warm Gold  
+          charcoal: '#2E2E2E', // Charcoal (corrected)
+          white: '#F9F9F9',   // Soft White
+          paper: '#FFFFFF'    // Pure White
         },
         // Legacy ink colors (maintained for compatibility)
         ink: {
