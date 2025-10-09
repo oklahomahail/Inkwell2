@@ -10,7 +10,7 @@ interface BrandProps {
 
 export function Brand({ collapsed = false, variant = 'light' }: BrandProps) {
   return (
-    <div className="px-3 py-3">
+    <div className="px-3 py-3 overflow-hidden">
       <BrandMark collapsed={collapsed} variant={variant} size="md" />
     </div>
   );

@@ -47,7 +47,7 @@ export default function Sidebar() {
       aria-expanded={!sidebarCollapsed}
     >
       {/* Brand Header */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
+      <div className="border-b border-gray-200 dark:border-gray-700 overflow-hidden">
         <Brand collapsed={sidebarCollapsed} />
 
         {/* Toggle Button */}

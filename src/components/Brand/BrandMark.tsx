@@ -31,19 +31,21 @@ export function BrandMark({
   };
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div className={cn('flex items-center gap-2 overflow-hidden', className)}>
       <img
         src={featherSrc}
         alt="Inkwell feather"
         className={cn('transition-all duration-200', sizes[size].feather)}
       />
-      {!collapsed && (
-        <img
-          src={wordmarkSrc}
-          alt="Inkwell"
-          className={cn('transition-all duration-200', sizes[size].wordmark)}
-        />
-      )}
+      <img
+        src={wordmarkSrc}
+        alt="Inkwell"
+        className={cn(
+          'transition-all duration-200',
+          sizes[size].wordmark,
+          collapsed ? 'opacity-0 w-0' : 'opacity-100',
+        )}
+      />
     </div>
   );
 }
