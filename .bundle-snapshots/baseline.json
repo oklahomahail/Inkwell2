@@ -1,0 +1,116 @@
+{
+  "timestamp": "2025-10-09T00:23:32.145Z",
+  "version": "1.0.2",
+  "totalSize": 1920287,
+  "chunkCount": 11,
+  "criticalModules": {
+    "analyticsService": {
+      "found": false,
+      "chunkName": null,
+      "size": 0,
+      "imports": [],
+      "exports": []
+    },
+    "pwaService": {
+      "found": false,
+      "chunkName": null,
+      "size": 0,
+      "imports": [],
+      "exports": []
+    },
+    "tutorialStorage": {
+      "found": false,
+      "chunkName": null,
+      "size": 0,
+      "imports": [],
+      "exports": []
+    },
+    "TourProvider": {
+      "found": false,
+      "chunkName": null,
+      "size": 0,
+      "imports": [],
+      "exports": []
+    },
+    "ProfileTourProvider": {
+      "found": false,
+      "chunkName": null,
+      "size": 0,
+      "imports": [],
+      "exports": []
+    }
+  },
+  "dependencyGraph": {
+    "staticImports": {},
+    "dynamicImports": {},
+    "circularDependencies": []
+  },
+  "chunks": [
+    {
+      "name": "chunk-BMmsFJuw.js",
+      "size": 2670,
+      "type": "js",
+      "modules": 0
+    },
+    {
+      "name": "chunk-BVWd4mJf.js",
+      "size": 60107,
+      "type": "js",
+      "modules": 0
+    },
+    {
+      "name": "chunk-Bh0h-Ybb.js",
+      "size": 70559,
+      "type": "js",
+      "modules": 0
+    },
+    {
+      "name": "chunk-Dq3ZW92c.js",
+      "size": 61897,
+      "type": "js",
+      "modules": 0
+    },
+    {
+      "name": "chunk-Tt9FPAzf.js",
+      "size": 12513,
+      "type": "js",
+      "modules": 0
+    },
+    {
+      "name": "chunk-UYGduY4g.js",
+      "size": 246802,
+      "type": "js",
+      "modules": 0
+    },
+    {
+      "name": "index-BRMNvodi.js",
+      "size": 472189,
+      "type": "js",
+      "modules": 0
+    },
+    {
+      "name": "index-C7AgXCUd.js",
+      "size": 824080,
+      "type": "js",
+      "modules": 0
+    },
+    {
+      "name": "phraseWorker-CRliZYzB.js",
+      "size": 3573,
+      "type": "js",
+      "modules": 0
+    },
+    {
+      "name": "workbox-window.prod.es5.mjs-CwtvwXb3.js",
+      "size": 5825,
+      "type": "js",
+      "modules": 0
+    },
+    {
+      "name": "index-DaZfR-w1.css",
+      "size": 160072,
+      "type": "css",
+      "modules": 0
+    }
+  ]
+}

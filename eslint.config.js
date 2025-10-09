@@ -89,6 +89,23 @@ export default [
       'import/no-cycle': ['error', { maxDepth: 1 }],
       'import/no-self-import': 'error',
 
+      // TDZ Prevention: Prevent dynamic imports of core services to avoid initialization order issues
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ImportExpression[source.value=/analyticsService/]',
+          message: 'Dynamic import of analyticsService is not allowed. Use static imports to prevent TDZ errors.',
+        },
+        {
+          selector: 'ImportExpression[source.value=/pwaService/]',
+          message: 'Dynamic import of pwaService is not allowed. Use static imports to prevent TDZ errors.',
+        },
+        {
+          selector: 'ImportExpression[source.value=/tutorialStorage/]',
+          message: 'Dynamic import of tutorialStorage is not allowed. Use static imports to prevent TDZ errors.',
+        },
+      ],
+
       // Prevent typical loops and keep layers clean:
       // target = folder doing the importing; from = folder being imported
       'import/no-restricted-paths': [

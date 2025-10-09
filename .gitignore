@@ -62,6 +62,8 @@ eslint.config.js.backup
 # build/share archives
 inkwell-src-*.zip
 
+# Bundle analysis snapshots (keep baseline, ignore current)
+.bundle-snapshots/current.json
 
 .env*
 reports/*.clean.txt

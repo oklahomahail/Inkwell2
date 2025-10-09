@@ -6,6 +6,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';
 
+import { analyticsService } from '../../../services/analyticsService';
 import { ProfileTourProvider, useTour as useProfileTour } from '../ProfileTourProvider';
 import { TourProvider, useTour } from '../TourProvider';
 
@@ -55,11 +56,11 @@ describe('TDZ Regression Tests', () => {
     });
 
     it('should not throw when accessing logAnalytics during initialization', () => {
-      let tourContext: any;
+      let _tourContext: any;
 
       function TestComponent() {
         const context = useTour();
-        tourContext = context;
+        _tourContext = context;
         return null;
       }
 
@@ -72,15 +73,15 @@ describe('TDZ Regression Tests', () => {
       }).not.toThrow();
 
       // Verify logAnalytics is accessible
-      expect(typeof tourContext?.logAnalytics).toBe('function');
+      expect(typeof _tourContext?.logAnalytics).toBe('function');
     });
 
     it('should handle early logAnalytics calls without TDZ errors', () => {
-      let tourContext: any;
+      let _tourContext: any;
 
       function TestComponent() {
         const context = useTour();
-        tourContext = context;
+        _tourContext = context;
 
         // This should not throw even if called immediately
         React.useEffect(() => {
@@ -112,11 +113,11 @@ describe('TDZ Regression Tests', () => {
     });
 
     it('should not throw when accessing logAnalytics during initialization', async () => {
-      let tourContext: any;
+      let _tourContext: any;
 
       function TestComponent() {
         const context = useProfileTour();
-        tourContext = context;
+        _tourContext = context;
         return null;
       }
 
@@ -132,15 +133,15 @@ describe('TDZ Regression Tests', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Verify logAnalytics is accessible
-      expect(typeof tourContext?.logAnalytics).toBe('function');
+      expect(typeof _tourContext?.logAnalytics).toBe('function');
     });
 
     it('should handle early logAnalytics calls without TDZ errors', async () => {
-      let tourContext: any;
+      let _tourContext: any;
 
       function TestComponent() {
         const context = useProfileTour();
-        tourContext = context;
+        _tourContext = context;
 
         // This should not throw even if called immediately during profile loading
         React.useEffect(() => {
@@ -200,6 +201,66 @@ describe('TDZ Regression Tests', () => {
               <div>Nested content</div>
             </ProfileTourProvider>
           </TourProvider>,
+        );
+      }).not.toThrow();
+    });
+  });
+
+  describe('Async Import Safety', () => {
+    it('should not throw even when TourProvider is imported asynchronously', async () => {
+      const mod = await import('../TourProvider');
+      expect(mod).toBeTruthy();
+      expect(mod.TourProvider).toBeDefined();
+      expect(mod.useTour).toBeDefined();
+
+      // Verify the provider can be rendered after async import
+      expect(() => {
+        render(
+          <mod.TourProvider>
+            <div>Async imported content</div>
+          </mod.TourProvider>,
+        );
+      }).not.toThrow();
+    });
+
+    it('should not throw even when ProfileTourProvider is imported asynchronously', async () => {
+      const mod = await import('../ProfileTourProvider');
+      expect(mod).toBeTruthy();
+      expect(mod.ProfileTourProvider).toBeDefined();
+      expect(mod.useTour).toBeDefined();
+
+      // Verify the provider can be rendered after async import
+      expect(() => {
+        render(
+          <mod.ProfileTourProvider>
+            <div>Async imported content</div>
+          </mod.ProfileTourProvider>,
+        );
+      }).not.toThrow();
+    });
+
+    it('should maintain analytics service integrity across async imports', async () => {
+      const [tourMod, profileTourMod] = await Promise.all([
+        import('../TourProvider'),
+        import('../ProfileTourProvider'),
+      ]);
+
+      // All modules should be loaded successfully
+      expect(tourMod.TourProvider).toBeDefined();
+      expect(profileTourMod.ProfileTourProvider).toBeDefined();
+
+      // Analytics service should be available via static import (no dynamic import needed)
+      expect(analyticsService).toBeDefined();
+      expect(typeof analyticsService.track).toBe('function');
+
+      // Should be able to render both providers without conflicts
+      expect(() => {
+        render(
+          <tourMod.TourProvider>
+            <profileTourMod.ProfileTourProvider>
+              <div>Multi-async imported content</div>
+            </profileTourMod.ProfileTourProvider>
+          </tourMod.TourProvider>,
         );
       }).not.toThrow();
     });
