@@ -20,11 +20,16 @@ import React, { useState, useEffect } from 'react';
 
 import { InkwellLogo } from '@/components/Brand';
 import { useAppContext, View } from '@/context/AppContext';
+import { useCommands } from '@/hooks/useCommands';
+import { useSmartSearch } from '@/hooks/useSmartSearch';
 import { cn } from '@/utils/cn';
 import { useFeatureFlag } from '@/utils/flags';
 
+import { CommandPalette } from '../CommandPalette/CommandPalette';
+import NotificationsPanel from '../NotificationsPanel';
 import { ProfileSwitcher } from '../ProfileSwitcher';
 import { PWAOfflineIndicator } from '../PWA';
+import { SmartSearchModal } from '../Search/SmartSearchModal';
 
 import { Footer } from './Footer';
 
@@ -100,6 +105,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const { state, dispatch } = useAppContext();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  // Command Palette
+  const commands = useCommands(undefined, (commandId) => {
+    console.log(`Executed command: ${commandId}`);
+  });
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+
+  // Smart Search
+  const smartSearch = useSmartSearch({
+    onNavigate: (result) => {
+      console.log('Navigate to:', result);
+      // Add navigation logic based on result type
+    },
+  });
 
   // Feature flags
   const isPlotBoardsEnabled = useFeatureFlag('plotBoards');
@@ -153,6 +173,47 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Cmd+K or Ctrl+K for Command Palette
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault();
+        setShowCommandPalette(true);
+        return;
+      }
+
+      // Cmd+Shift+F or Ctrl+Shift+F for Search (handled by useSmartSearch hook)
+      // Bell notifications with Cmd+Shift+N
+      if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'n') {
+        event.preventDefault();
+        setShowNotifications((prev) => !prev);
+        return;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Close notifications when clicking outside
+  useEffect(() => {
+    if (!showNotifications) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (
+        !target.closest('[data-notifications-panel]') &&
+        !target.closest('[data-notifications-trigger]')
+      ) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showNotifications]);
 
   const handleViewChange = (view: View) => {
     dispatch({ type: 'SET_VIEW', payload: view });
@@ -234,6 +295,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                 'transition-colors focus-ring',
               )}
               aria-label="Open command palette"
+              onClick={() => setShowCommandPalette(true)}
             >
               <Search className="w-4 h-4" />
               <span className="flex-1 text-left">Search or command...</span>
@@ -379,15 +441,43 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                 <PWAOfflineIndicator variant="badge" />
                 <ProfileSwitcher />
                 <div className="flex items-center gap-2">
-                  <button className="btn btn-ghost btn-sm" aria-label="Open command palette">
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    aria-label="Open command palette (⌘K)"
+                    onClick={() => setShowCommandPalette(true)}
+                  >
                     <Command className="w-4 h-4" />
                   </button>
-                  <button className="btn btn-ghost btn-sm" aria-label="Search">
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    aria-label="Search (⌘⇧F)"
+                    onClick={() => smartSearch.openSearch()}
+                  >
                     <Search className="w-4 h-4" />
                   </button>
-                  <button className="btn btn-ghost btn-sm" aria-label="Notifications">
-                    <Bell className="w-4 h-4" />
-                  </button>
+                  <div className="relative">
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      aria-label="Notifications (⌘⇧N)"
+                      onClick={() => setShowNotifications((prev) => !prev)}
+                      data-notifications-trigger
+                    >
+                      <Bell className="w-4 h-4" />
+                    </button>
+                    {showNotifications && (
+                      <div className="absolute right-0 top-full mt-2 z-50" data-notifications-panel>
+                        <NotificationsPanel
+                          onClose={() => setShowNotifications(false)}
+                          onMarkAsRead={(id) => console.log('Mark as read:', id)}
+                          onMarkAllAsRead={() => console.log('Mark all as read')}
+                          onNotificationClick={(notification) => {
+                            console.log('Notification clicked:', notification);
+                            setShowNotifications(false);
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -402,6 +492,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         {/* Footer */}
         <Footer />
       </main>
+
+      {/* Modals */}
+      <CommandPalette
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        commands={commands}
+        placeholder="Search commands..."
+      />
+
+      <SmartSearchModal
+        isOpen={smartSearch.isOpen}
+        onClose={smartSearch.closeSearch}
+        onNavigate={smartSearch.handleNavigate}
+        initialQuery={smartSearch.query}
+      />
     </div>
   );
 };
