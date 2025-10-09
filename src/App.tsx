@@ -163,6 +163,12 @@ function ProfileAppShell() {
 
   return (
     <>
+      {/* Stable tour anchor - always present for tour steps */}
+      <div
+        id="tour-viewport-anchor"
+        style={{ position: 'fixed', inset: 0, pointerEvents: 'none' }}
+      />
+
       {/* Storage Recovery Banner */}
       {showRecoveryBanner && <StorageRecoveryBanner onDismiss={dismissRecoveryBanner} />}
 

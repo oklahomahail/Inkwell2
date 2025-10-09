@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 
 import { useTour, CORE_TOUR_STEPS } from './ProfileTourProvider';
+import { startTourSafely, getSafeTourSteps } from './utils/tourSafety';
 
 interface WelcomeModalProps {
   isOpen: boolean;
@@ -19,7 +20,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   onStartTour,
   onOpenChecklist,
 }) => {
-  const { setNeverShowAgain, setRemindMeLater, logAnalytics, preferences } = useTour();
+  const { setNeverShowAgain, setRemindMeLater, logAnalytics, preferences, startTour } = useTour();
   const { setTourActive, snoozeModal, dismissModal } = useOnboardingGate();
   const [selectedOption, setSelectedOption] = useState<'tour' | 'checklist' | 'later' | 'never'>(
     'tour',
@@ -27,21 +28,31 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleStartTour = () => {
+  const handleStartTour = async () => {
     logAnalytics('welcome_modal_start_tour');
 
-    // 1. Prevent modal re-opening during tour
+    // 1. Store hide preference
+    localStorage.setItem('hideWelcome', 'true');
+
+    // 2. Prevent modal re-opening during tour
     setTourActive(true);
 
-    // 2. Snooze modal for 7 days (will be set to completed when tour finishes)
+    // 3. Snooze modal for 7 days (will be set to completed when tour finishes)
     snoozeModal(7 * 24); // 7 days
 
-    // 3. Close modal first to release focus trap
+    // 4. Close modal first to release focus trap
     onClose();
 
-    // 4. Start tour on next tick so modal is fully unmounted
-    queueMicrotask(() => {
-      onStartTour('core-onboarding');
+    // 5. Start tour safely on next frame so modal is fully unmounted
+    requestAnimationFrame(async () => {
+      try {
+        const safeTourSteps = getSafeTourSteps(CORE_TOUR_STEPS);
+        await startTourSafely(safeTourSteps, startTour);
+      } catch (error) {
+        console.error('Failed to start tour:', error);
+        // Fallback to the original method if safe start fails
+        onStartTour('core-onboarding');
+      }
     });
   };
 

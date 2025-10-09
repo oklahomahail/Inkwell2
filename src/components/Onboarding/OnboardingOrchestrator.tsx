@@ -7,6 +7,7 @@ import { CompletionChecklistComponent } from './CompletionChecklist';
 import { useTour, TOUR_MAP } from './ProfileTourProvider';
 import { TourNudgeManager } from './TourNudges';
 import TourOverlay from './TourOverlay';
+import { shouldSuppressWelcomeDialog } from './utils/tourSafety';
 import WelcomeModal from './WelcomeModal';
 
 interface OnboardingOrchestratorProps {
@@ -28,6 +29,9 @@ export const OnboardingOrchestrator: React.FC<OnboardingOrchestratorProps> = ({
   // Auto-show welcome modal for first-time users
   useEffect(() => {
     if (!autoShowWelcome) return;
+
+    // Don't show if user has previously dismissed it
+    if (shouldSuppressWelcomeDialog()) return;
 
     let timeoutId: NodeJS.Timeout;
 
