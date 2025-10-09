@@ -1,6 +1,8 @@
 // src/components/Onboarding/TourProvider.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+import { analyticsService } from '../../services/analyticsService';
+
 export interface TourStep {
   id: string;
   title: string;
@@ -182,33 +184,65 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
   // Define logAnalytics first to avoid temporal dead zone errors
   const logAnalytics = (event: string, data: any = {}) => {
     try {
-      // Store analytics locally (could be sent to external service later)
-      const existing = localStorage.getItem(ANALYTICS_KEY);
-      const analytics = existing ? JSON.parse(existing) : [];
-
+      // Enhanced analytics with tour context
       const analyticsEvent = {
-        event,
-        data,
-        timestamp: Date.now(),
+        ...data,
         tourType: tourState.tourType,
         step: tourState.currentStep,
       };
 
-      analytics.push(analyticsEvent);
-
-      // Keep only last 100 events to prevent storage bloat
-      if (analytics.length > 100) {
-        analytics.splice(0, analytics.length - 100);
+      // Track tour-specific events with the proper analytics service
+      switch (event) {
+        case 'tour_started':
+          analyticsService.trackTourStarted(data.tourType || 'feature_tour', 'tour_provider');
+          break;
+        case 'tour_completed':
+          analyticsService.trackTourCompleted(
+            tourState.tourType,
+            data.totalSteps || tourState.steps.length,
+            data.totalTime || 0,
+            data.stepsSkipped || 0,
+          );
+          break;
+        case 'tour_skipped':
+          analyticsService.trackTourAbandoned(
+            tourState.tourType,
+            tourState.currentStep,
+            tourState.steps.length,
+            data.timeBeforeAbandon || 0,
+          );
+          break;
+        case 'tour_step_completed':
+          analyticsService.trackTourStepCompleted(
+            tourState.tourType,
+            tourState.currentStep,
+            data.stepName || `step_${tourState.currentStep}`,
+            data.timeOnStep || 0,
+          );
+          break;
+        default:
+          // Generic event tracking
+          analyticsService.track(event as any, analyticsEvent);
+          break;
       }
 
-      localStorage.setItem(ANALYTICS_KEY, JSON.stringify(analytics));
-
-      // Also log to console in dev mode
+      // Log to console in dev mode
       if (import.meta.env.DEV) {
-        console.log('Tour Analytics:', event, data);
+        console.log('Tour Analytics:', event, analyticsEvent);
       }
     } catch (error) {
       console.warn('Failed to log analytics:', error);
+      // Track telemetry errors
+      try {
+        analyticsService.track('analytics_error' as any, {
+          error: error instanceof Error ? error.message : String(error),
+          event,
+          context: 'TourProvider.logAnalytics',
+        });
+      } catch (telemetryError) {
+        // Silent fail for telemetry errors to avoid infinite loops
+        console.warn('Telemetry error:', telemetryError);
+      }
     }
   };
 

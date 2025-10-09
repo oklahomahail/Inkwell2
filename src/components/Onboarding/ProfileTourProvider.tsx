@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 
 import { useProfile } from '../../context/ProfileContext';
+import { analyticsService } from '../../services/analyticsService';
 import {
   useTutorialStorage,
   type TutorialPreferences,
@@ -167,29 +168,115 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
       try {
         // Enhanced analytics with profile context
         const analyticsEvent = {
-          event,
-          data: {
-            ...data,
-            profileId: activeProfile?.id,
-            tourType: tourState.tourType,
-            step: tourState.currentStep,
-          },
-          timestamp: Date.now(),
+          ...data,
+          profileId: activeProfile?.id,
+          tourType: tourState.tourType,
+          step: tourState.currentStep,
         };
+
+        // Track tour-specific events with the proper analytics service
+        switch (event) {
+          case 'tour_started':
+            analyticsService.trackTourStarted(
+              data.tourType || 'feature_tour',
+              'profile_tour_provider',
+            );
+            break;
+          case 'tour_completed':
+            analyticsService.trackTourCompleted(
+              tourState.tourType,
+              data.totalSteps || tourState.steps.length,
+              data.totalTime || 0,
+              data.stepsSkipped || 0,
+            );
+            break;
+          case 'tour_skipped':
+            analyticsService.trackTourAbandoned(
+              tourState.tourType,
+              tourState.currentStep,
+              tourState.steps.length,
+              data.timeBeforeAbandon || 0,
+            );
+            break;
+          case 'tour_step_completed':
+            analyticsService.trackTourStepCompleted(
+              tourState.tourType,
+              tourState.currentStep,
+              data.stepName || `step_${tourState.currentStep}`,
+              data.timeOnStep || 0,
+            );
+            break;
+          default:
+            // Generic event tracking
+            analyticsService.track(event as any, analyticsEvent);
+            break;
+        }
 
         // Log to console in dev mode
         if (import.meta.env.DEV) {
-          console.log('Tutorial Analytics:', event, analyticsEvent.data);
+          console.log('Tutorial Analytics:', event, analyticsEvent);
         }
-
-        // TODO: Send to external analytics service if needed
-        // analyticsService.track(event, analyticsEvent.data);
       } catch (error) {
         console.warn('Failed to log tutorial analytics:', error);
+        // Track telemetry errors
+        try {
+          analyticsService.track('analytics_error' as any, {
+            error: error instanceof Error ? error.message : String(error),
+            event,
+            context: 'ProfileTourProvider.logAnalytics',
+          });
+        } catch (telemetryError) {
+          // Silent fail for telemetry errors to avoid infinite loops
+          console.warn('Telemetry error:', telemetryError);
+        }
       }
     },
     [activeProfile?.id, tourState],
   );
+
+  const completeTour = useCallback(async () => {
+    if (!tutorialStorage.isProfileActive) return;
+
+    logAnalytics('tour_completed', {
+      tourType: tourState.tourType,
+      stepsCompleted: tourState.steps.length,
+      totalSteps: tourState.steps.length,
+    });
+
+    // Update preferences
+    const updatedPrefs: TutorialPreferences = {
+      ...(preferences || defaultPreferences),
+      completedTours: [...new Set([...(preferences?.completedTours || []), tourState.tourType])],
+    };
+    setPreferences(updatedPrefs);
+    await tutorialStorage.setPreferences(updatedPrefs);
+
+    // Mark all steps as completed
+    const newCompletedSteps = [
+      ...new Set([...tourState.completedSteps, ...tourState.steps.map((s) => s.id)]),
+    ];
+
+    setTourState((prev) => ({
+      ...prev,
+      isActive: false,
+      isFirstTimeUser: false,
+      completedSteps: newCompletedSteps,
+    }));
+
+    // Save individual step progress
+    for (const step of tourState.steps) {
+      await tutorialStorage.setProgress(step.id, {
+        currentStep: tourState.steps.length - 1,
+        completedSteps: tourState.steps.map((s) => s.id),
+        tourType: tourState.tourType,
+        startedAt: Date.now(),
+        completedAt: Date.now(),
+        isCompleted: true,
+        totalSteps: tourState.steps.length,
+        lastActiveAt: Date.now(),
+      });
+    }
+  }, [tutorialStorage, tourState, preferences, logAnalytics]);
 
   const startTour = useCallback(
     async (type: TourState['tourType'], steps?: TourStep[]) => {
@@ -254,50 +341,6 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
       isFirstTimeUser: false,
     }));
   }, [tourState, logAnalytics]);
-
-  const completeTour = useCallback(async () => {
-    if (!tutorialStorage.isProfileActive) return;
-
-    logAnalytics('tour_completed', {
-      tourType: tourState.tourType,
-      stepsCompleted: tourState.steps.length,
-      totalSteps: tourState.steps.length,
-    });
-
-    // Update preferences
-    const updatedPrefs: TutorialPreferences = {
-      ...(preferences || defaultPreferences),
-      completedTours: [...new Set([...(preferences?.completedTours || []), tourState.tourType])],
-    };
-    setPreferences(updatedPrefs);
-    await tutorialStorage.setPreferences(updatedPrefs);
-
-    // Mark all steps as completed
-    const newCompletedSteps = [
-      ...new Set([...tourState.completedSteps, ...tourState.steps.map((s) => s.id)]),
-    ];
-
-    setTourState((prev) => ({
-      ...prev,
-      isActive: false,
-      isFirstTimeUser: false,
-      completedSteps: newCompletedSteps,
-    }));
-
-    // Save individual step progress
-    for (const step of tourState.steps) {
-      await tutorialStorage.setProgress(step.id, {
-        currentStep: tourState.steps.length - 1,
-        completedSteps: tourState.steps.map((s) => s.id),
-        tourType: tourState.tourType,
-        startedAt: Date.now(),
-        completedAt: Date.now(),
-        isCompleted: true,
-        totalSteps: tourState.steps.length,
-        lastActiveAt: Date.now(),
-      });
-    }
-  }, [tutorialStorage, tourState, preferences, logAnalytics]);
 
   const completeStep = useCallback(
     async (stepId: string) => {

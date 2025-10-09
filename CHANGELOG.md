@@ -2,6 +2,60 @@
 
 All notable changes to this project are documented here.
 
+## [vNext] - 2025-10-08
+
+### 🐛 Critical Bug Fixes
+
+#### **Fixed Production JavaScript Crashes**
+
+- **Fixed TDZ crash in TourProvider/ProfileTourProvider** (logAnalytics init order)
+  - Resolved temporal dead zone `ReferenceError: Cannot access 'L' before initialization`
+  - Moved function declarations before first usage to prevent hoisting issues
+  - Added comprehensive TDZ regression tests to prevent future occurrences
+  - Both tour providers now safely handle function initialization order
+
+- **Repaired PWA icon assets** (SVG→PNG conversion)
+  - Fixed invalid PWA manifest icons that were SVG files mislabeled as PNG
+  - Generated proper PNG icons at all required sizes (72x72, 96x96, 128x128, 144x144, 152x152, 192x192, 384x384, 512x512)
+  - Resolved Progressive Web App installation failures across all browsers
+  - Used company branding colors (#0C5C3D navy, #D4A537 gold) for consistent icon design
+
+### 🔧 Developer Experience Improvements
+
+- **Enabled source maps for production debugging**
+  - Added source map generation in vite.config.ts for enhanced error tracking
+  - Improved production debugging capabilities while maintaining performance
+
+### 📊 Enhanced Telemetry & Analytics
+
+- **Extended telemetry coverage in logAnalytics functions**
+  - Integrated with existing analyticsService for proper event tracking
+  - Added error tracking for telemetry failures with fallback mechanisms
+  - Enhanced tour event tracking with structured analytics (tour_started, tour_completed, tour_skipped, tour_step_completed)
+  - Dynamic import fallbacks prevent circular dependencies
+
+### 🧪 Testing & Quality Assurance
+
+- **Added comprehensive TDZ regression tests**
+  - Tests ensure tour providers can mount without throwing ReferenceError exceptions
+  - Validates early logAnalytics calls during component initialization
+  - Covers both TourProvider and ProfileTourProvider with mocked dependencies
+  - Cross-provider compatibility testing for nested provider scenarios
+
+- **Bundle size audit completed**
+  - Verified no import chain inflation after refactoring
+  - Total bundle size remains reasonable at ~2.19 MB (gzipped: ~457 KB)
+  - Analytics service properly integrated without bundle bloat
+
+### 💻 Technical Improvements
+
+- **All tests passing**: 223 tests across 12 test files ✅
+- **Production build successful**: Clean compilation with no errors ✅
+- **Enhanced error handling**: Telemetry errors are tracked and handled gracefully ✅
+- **Source maps enabled**: Better debugging in production environments ✅
+
+---
+
 ## [1.2.0] - 2025-10-08
 
 ### 🚀 Major Features
