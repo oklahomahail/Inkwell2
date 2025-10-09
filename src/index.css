@@ -12,19 +12,36 @@
 :root {
   --font-serif: 'Source Serif Pro', ui-serif, georgia, serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --color-navy: #0c5c3d;
+  --color-navy: #0c1c3d;
   --color-gold: #d4a537;
-  --color-charcoal: #2e2e2e;
-  --color-white: #f9f9f9;
+  --color-charcoal: #222;
+  --color-paper: #fff;
+
+  /* Text hierarchy */
+  --ink-fg: #0c1c3d;
+  --ink-fg-muted: #475569;
+  --ink-bg: #0b0e13;
+  --ink-paper: #fff;
 }
 
 /* Global font fallback and base layout tweaks */
 body {
   font-family: var(--font-sans);
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-  background-color: var(--color-white);
-  color: var(--color-navy);
+  background-color: var(--color-paper);
+  color: var(--ink-fg);
   line-height: 1.6;
+}
+
+/* Brand typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+  color: var(--ink-fg);
 }
 
 #root {

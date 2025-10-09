@@ -103,29 +103,34 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full">
+    <div className="fixed inset-0 z-50 grid place-items-center">
+      <div className="absolute inset-0 bg-black/40" />
+      <div
+        className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl ring-1 ring-black/5"
+        role="dialog"
+        aria-modal="true"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4">
+        <div className="flex items-center justify-between pb-4">
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg ${config.bgColor}`}>
               <Icon className={`w-6 h-6 ${config.iconColor}`} />
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
+            <h3 className="text-lg font-semibold text-inkwell-navy">{title}</h3>
           </div>
 
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-50"
+            className="text-slate-500 hover:text-inkwell-navy disabled:opacity-50"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="px-6 pb-6">
-          <p className="text-slate-600 dark:text-slate-400 mb-4">{message}</p>
+        <div className="pb-6">
+          <p className="text-slate-700 mb-4">{message}</p>
 
           {/* Details */}
           {details && details.length > 0 && (
@@ -160,15 +165,15 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           )}
 
           {/* Actions */}
-          <div className="flex gap-3 justify-end">
+          <div className="flex items-center gap-3 mt-6">
+            <button className="ink-btn ink-btn-primary">OK</button>
             <button
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
+              className="ink-btn ink-btn-ghost text-[color:var(--ink-fg-muted)]"
             >
               {cancelText}
             </button>
-
             <button
               onClick={handleConfirm}
               disabled={!isConfirmEnabled || isLoading}

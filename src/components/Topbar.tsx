@@ -1,9 +1,16 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
+import { AccountMenu } from '@/components/Modals/AccountMenu';
+import { CommandPalette } from '@/components/Modals/CommandPalette';
+import { NotificationsPanel } from '@/components/Modals/NotificationsPanel';
+import { ShortcutsModal } from '@/components/Modals/ShortcutsModal';
+import { Avatar } from '@/components/ui/Avatar';
 import { useAppContext } from '@/context/AppContext';
 import { useCurrentProject } from '@/context/AppContext';
 import { useFocusMode } from '@/hooks/useFocusMode';
 import snapshotService from '@/services/snapshotAdapter';
+
+// Modal components
 
 export type TopbarProps = {
   onOpenNotifications?: () => void;
@@ -42,6 +49,12 @@ export default function Topbar({
   theme,
   projectName,
 }: TopbarProps) {
+  // Modal states
+  const [openAccount, setOpenAccount] = useState(false);
+  const [openSearch, setOpenSearch] = useState(false);
+  const [openShortcuts, setOpenShortcuts] = useState(false);
+  const [openNotifications, setOpenNotifications] = useState(false);
+
   // Real auto-save state
   const { state } = useAppContext();
   const { autoSave } = state;
@@ -104,61 +117,56 @@ export default function Topbar({
         {effectiveName}
       </div>
 
-      {/* Right: save status, snapshot, focus toggle, theme/Claude/notifications */}
-      <div className="flex items-center gap-3">
-        {/* Enhanced save status */}
-        <div className="min-w-[110px] text-right">{renderSaveStatus()}</div>
+      {/* Right: status pill, user account, buttons */}
+      <div className="flex items-center gap-2">
+        {/* Status Pill */}
+        <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full">
+          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+          <span className="text-xs text-slate-600 dark:text-slate-300">{renderSaveStatus()}</span>
+        </div>
 
-        {/* Save Snapshot */}
-        <button
-          onClick={handleSaveSnapshot}
-          className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-          title="Save a manual snapshot"
-        >
-          Save Snapshot
+        {/* Account Button */}
+        <button onClick={() => setOpenAccount(true)} className="topbar-btn">
+          <Avatar initials="D" />
+          <span>Dave Hail</span>
         </button>
 
-        {/* Focus toggle */}
+        {/* Keyboard shortcuts */}
         <button
-          onClick={toggleFocusMode}
-          className={`px-2 py-1 text-sm border rounded-lg transition-colors ${
-            isFocusMode
-              ? 'border-blue-500 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20'
-              : 'border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'
-          }`}
-          aria-pressed={isFocusMode}
-          title={isFocusMode ? 'Exit focus mode' : 'Enter focus mode'}
+          onClick={() => setOpenShortcuts(true)}
+          className="topbar-icon"
+          aria-label="Keyboard shortcuts"
+          title="Keyboard shortcuts (⌘K)"
         >
-          {isFocusMode ? 'Exit Focus' : 'Focus'}
+          ⌘
         </button>
 
-        {/* Theme toggle */}
+        {/* Search */}
         <button
-          className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-          onClick={onToggleTheme}
-          title="Toggle theme"
+          onClick={() => setOpenSearch(true)}
+          className="topbar-icon"
+          aria-label="Search"
+          title="Search (⌘⇧P)"
         >
-          {theme === 'dark' ? 'Light' : 'Dark'}
-        </button>
-
-        {/* Claude toggle */}
-        <button
-          className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-          onClick={onToggleClaude}
-          title="Toggle Claude assistant"
-        >
-          Claude
+          🔍
         </button>
 
         {/* Notifications */}
         <button
-          className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-          onClick={onOpenNotifications}
-          title="Open notifications"
+          onClick={() => setOpenNotifications(true)}
+          className="topbar-icon"
+          aria-label="Notifications"
+          title="Notifications"
         >
-          Notifications
+          🔔
         </button>
       </div>
+
+      {/* Modals */}
+      {openAccount && <AccountMenu onClose={() => setOpenAccount(false)} />}
+      {openSearch && <CommandPalette onClose={() => setOpenSearch(false)} />}
+      {openShortcuts && <ShortcutsModal onClose={() => setOpenShortcuts(false)} />}
+      {openNotifications && <NotificationsPanel onClose={() => setOpenNotifications(false)} />}
     </header>
   );
 }

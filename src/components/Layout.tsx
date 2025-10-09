@@ -4,6 +4,7 @@ import React from 'react';
 import Sidebar from '@/components/Sidebar';
 import Topbar from '@/components/Topbar';
 import { useFocusMode } from '@/hooks/useFocusMode';
+import { useUI } from '@/hooks/useUI';
 import { cn } from '@/utils/cn';
 
 type LayoutProps = {
@@ -24,6 +25,7 @@ export default function Layout({
   onOpenNotifications,
 }: LayoutProps) {
   const { isFocusMode } = useFocusMode();
+  const { sidebarCollapsed } = useUI();
 
   return (
     <div
@@ -33,18 +35,16 @@ export default function Layout({
       )}
     >
       <div className="flex h-screen w-full overflow-hidden">
-        {/* Sidebar */}
-        <aside
+        {/* Sidebar - rendered but positioned fixed */}
+        {!isFocusMode && <Sidebar />}
+
+        {/* Main column with responsive margin */}
+        <main
           className={cn(
-            'Sidebar h-full w-64 shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur',
-            isFocusMode && 'hidden',
+            'transition-[margin-left] duration-200 min-h-screen flex-1',
+            !isFocusMode && (sidebarCollapsed ? 'ml-14' : 'ml-64'),
           )}
         >
-          <Sidebar />
-        </aside>
-
-        {/* Main column */}
-        <div className="flex min-w-0 flex-1 flex-col">
           {/* Topbar */}
           <div className={cn('Topbar', isFocusMode && 'hidden')}>
             <Topbar
@@ -57,7 +57,7 @@ export default function Layout({
           </div>
 
           {/* Content */}
-          <main
+          <div
             className={cn(
               'WritingArea relative flex-1 overflow-auto',
               // comfortable padding; reduced when chrome is hidden
@@ -65,8 +65,8 @@ export default function Layout({
             )}
           >
             {children}
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
     </div>
   );

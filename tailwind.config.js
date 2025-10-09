@@ -7,10 +7,10 @@ theme: {
       colors: {
         // New Inkwell Brand Color System (2024)
         inkwell: {
-          navy: '#0C5C3D',
+          navy: '#0C1C3D',
           gold: '#D4A537', 
-          charcoal: '#2E2E2E',
-          white: '#F9F9F9'
+          charcoal: '#222222',
+          paper: '#FFFFFF'
         },
         // Legacy ink colors (maintained for compatibility)
         ink: {
@@ -26,8 +26,8 @@ theme: {
         },
         // Legacy colors (for compatibility)
         primary: {
-          DEFAULT: '#0C5C3D', // Updated to new Inkwell navy
-          dark: '#0A4A31',
+          DEFAULT: '#0C1C3D', // Updated to new Inkwell navy
+          dark: '#0A1631',
         },
         gray: {
           50: '#f9fafb',

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 140" width="1400" height="280">
+  <title>Inkwell Lockup</title>
+  <style>
+    @font-face {
+      font-family: 'Source Serif Pro';
+      src: local('Source Serif Pro'), local('SourceSerifPro-Regular');
+    }
+    .mark {
+      font-family: 'Source Serif Pro', serif;
+      font-size: 92px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      fill: #0C1C3D;
+    }
+  </style>
+  <g transform="translate(18,10) scale(4.5)">
+    <path d="M16.8 1.2c-2.9 0-5.8 1.2-8.1 3.4C5.1 8.1 2.6 13.4 2 19.2c-.1.7.5 1.3 1.2 1.2 5.8-.6 11.1-3.1 14.6-6.7 2.2-2.3 3.4-5.2 3.4-8.1 0-2.1-.8-3.9-2.2-5.3C18.8 1.9 17.9 1.2 16.8 1.2z M7.3 12.9l5.2-5.2c.3-.3.8-.3 1.1 0 .3.3.3.8 0 1.1l-5.2 5.2 3.3-.2c.5 0 .8.3.8.8 0 .4-.3.7-.7.8l-5.3.3c-.2 0-.4-.1-.6-.2-.2-.2-.3-.4-.2-.6l.3-5.3c0-.4.4-.7.8-.7.5 0 .8.3.8.8l-.2 3.3z" fill="#D4A537"/>
+  </g>
+  <text x="150" y="98" class="mark">Inkwell</text>
+</svg>

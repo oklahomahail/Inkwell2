@@ -3,6 +3,85 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ========================================
+   INKWELL DESIGN TOKENS
+   ======================================== */
+
+:root {
+  /* Inkwell Brand Colors */
+  --ink-deep-navy: #0c5c3d;
+  --ink-warm-gold: #d4a537;
+  --ink-charcoal: #22e22e;
+
+  /* Text Colors */
+  --ink-fg-strong: #0b1020;
+  --ink-fg: #1f2937; /* slate-800 */
+  --ink-fg-muted: #6b7280; /* slate-500 */
+
+  /* Sidebar */
+  --ink-sidebar-bg: #fff;
+
+  /* Button Classes */
+  --ink-btn-primary-bg: var(--ink-deep-navy);
+  --ink-btn-primary-hover: #0a4f35;
+  --ink-btn-secondary-bg: transparent;
+  --ink-btn-secondary-border: #d1d5db;
+  --ink-btn-ghost-hover: #f3f4f6;
+}
+
+.dark {
+  --ink-fg-strong: #e5e7eb; /* slate-200 */
+  --ink-fg: #cbd5e1; /* slate-300 */
+  --ink-fg-muted: #94a3b8; /* slate-400 */
+  --ink-sidebar-bg: #1f2937;
+}
+
+/* Button Components */
+.ink-btn {
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.ink-btn-primary {
+  background-color: var(--ink-btn-primary-bg);
+
+  @apply text-white hover:opacity-90 focus:ring-blue-500;
+}
+
+.ink-btn-secondary {
+  @apply border text-gray-700 hover:bg-gray-50 focus:ring-gray-500;
+
+  border-color: var(--ink-btn-secondary-border);
+  background-color: var(--ink-btn-secondary-bg);
+}
+
+.ink-btn-ghost {
+  @apply text-gray-600 hover:bg-gray-100 focus:ring-gray-500;
+}
+
+.dark .ink-btn-secondary {
+  @apply border-gray-600 text-gray-300 hover:bg-gray-800;
+}
+
+.dark .ink-btn-ghost {
+  @apply text-gray-400 hover:bg-gray-800;
+}
+
+/* Topbar Buttons */
+.topbar-btn {
+  @apply inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-1.5 hover:bg-white/5;
+}
+
+.topbar-icon {
+  @apply grid h-9 w-9 place-items-center rounded-xl border border-white/10 hover:bg-white/5;
+}
+
+/* White Editor Placeholder */
+[contenteditable]:empty::before {
+  content: attr(data-placeholder);
+  color: #94a3b8; /* slate-400 */
+  cursor: text;
+}
+
 /* Reserved for future component-level overrides */
 
 /* ========================================
