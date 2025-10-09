@@ -142,9 +142,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     if (savedDarkMode) {
       setIsDarkMode(JSON.parse(savedDarkMode));
     } else {
-      // Default to system preference
-      const systemDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setIsDarkMode(systemDarkMode);
+      // Default to light mode
+      setIsDarkMode(false);
     }
   }, []);
 

@@ -61,7 +61,7 @@ type AppAction =
 // ===== INITIAL STATE =====
 const initialState: AppState = {
   view: View.Dashboard,
-  theme: 'dark',
+  theme: 'light',
   projects: [],
   currentProjectId: null,
   isLoading: false,
@@ -198,7 +198,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     }
 
     try {
-      const theme = (localStorage.getItem('inkwell_theme') as 'light' | 'dark') || 'dark';
+      const theme = (localStorage.getItem('inkwell_theme') as 'light' | 'dark') || 'light';
       dispatch({ type: 'SET_THEME', payload: theme });
       document.documentElement.classList.toggle('dark', theme === 'dark');
     } catch (error) {

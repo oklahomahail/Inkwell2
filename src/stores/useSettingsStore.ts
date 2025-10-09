@@ -40,7 +40,7 @@ export interface SettingsStore extends SettingsStoreState {
 }
 
 const initialState: SettingsStoreState = {
-  theme: 'dark',
+  theme: 'light',
   autoSave: {
     enabled: true,
     interval: 30000, // 30 seconds
