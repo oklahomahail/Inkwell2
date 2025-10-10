@@ -2,6 +2,7 @@
 
 import { ManuscriptDraft } from '../exportTypes';
 import { countWords } from '../manuscriptAssembler';
+
 import {
   ProofreadReport,
   ProofreadSuggestion,
@@ -9,8 +10,7 @@ import {
   ProofreadProgress,
   ReadabilityMetrics,
   DEFAULT_PROOFREAD_OPTIONS,
-  ProofreadServiceError,
-  ProofreadQuotaError
+  ProofreadServiceError
 } from './proofreadTypes';
 
 // Mock Claude service - in production this would import from your actual Claude integration

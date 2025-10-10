@@ -4,13 +4,11 @@ import {
   ExportJob, 
   ExportResult, 
   ExportFormat,
-  StylePresetMeta,
-  ManuscriptDraft,
   ExportError,
   ExportValidationError 
 } from './exportTypes';
-import { assembleManuscript, validateManuscriptForExport } from './manuscriptAssembler';
 import { generateFileName, createDownloadUrl } from './exportUtils';
+import { assembleManuscript, validateManuscriptForExport } from './manuscriptAssembler';
 
 // Analytics integration - would import from your analytics service
 interface AnalyticsService {

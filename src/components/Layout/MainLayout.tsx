@@ -14,18 +14,21 @@ import {
   Palette,
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+
 import { InkwellLogo } from '@/components/Brand';
 import { InkwellFeather } from '@/components/icons/InkwellFeather';
+import { useFeatureFlag } from '@/config/features';
 import { useAppContext, View } from '@/context/AppContext';
 import { useCommands } from '@/hooks/useCommands';
 import { useSmartSearch } from '@/hooks/useSmartSearch';
 import { cn } from '@/utils/cn';
-import { useFeatureFlag } from '@/config/features';
+
 import { CommandPalette } from '../CommandPalette/CommandPalette';
 import NotificationsPanel from '../NotificationsPanel';
 import { ProfileSwitcher } from '../ProfileSwitcher';
 import { PWAOfflineIndicator } from '../PWA';
 import { SmartSearchModal } from '../Search/SmartSearchModal';
+
 import { Footer } from './Footer';
 
 interface MainLayoutProps {

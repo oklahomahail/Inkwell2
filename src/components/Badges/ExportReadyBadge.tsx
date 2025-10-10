@@ -1,7 +1,8 @@
 // ExportReadyBadge.tsx - Badge that appears when manuscript is ready for export
 
-import React, { useMemo } from 'react';
 import { CheckCircle, AlertCircle, FileText, Clock, Users, BookOpen } from 'lucide-react';
+import React, { useMemo } from 'react';
+
 import { ExportReadinessCheck } from '@/exports/exportTypes';
 import { cn } from '@/utils/cn';
 
