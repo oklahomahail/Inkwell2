@@ -20,7 +20,7 @@ import { useAppContext, View } from '@/context/AppContext';
 import { useCommands } from '@/hooks/useCommands';
 import { useSmartSearch } from '@/hooks/useSmartSearch';
 import { cn } from '@/utils/cn';
-import { useFeatureFlag } from '@/utils/flags';
+import { useFeatureFlag } from '@/config/features';
 import { CommandPalette } from '../CommandPalette/CommandPalette';
 import NotificationsPanel from '../NotificationsPanel';
 import { ProfileSwitcher } from '../ProfileSwitcher';
