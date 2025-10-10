@@ -2,7 +2,43 @@
 
 All notable changes to this project are documented here.
 
-## [vNext] - 2025-10-08
+## [vNext] - 2025-10-10
+
+### 🎨 Brand System Update
+
+#### **New Blue & Gold Visual Identity**
+
+- **Complete color system overhaul** with navy blue primary and warm gold accents
+- **Extended color scales** with 50-900 variants for design flexibility
+- **WCAG AA accessibility compliance** maintained across all color combinations
+- **Brand asset integration** with 6 professional PNG variations and optimized SVG assets
+- **Updated all components** to use new Inkwell navy (#0C5C3D) and gold (#D4A537) colors
+
+#### **Enhanced Brand Components**
+
+- **Flexible Logo component** with 8 variants (mark-light/dark, wordmark-light/dark, outline variations, SVG options)
+- **Branded empty states** with subtle navy/gold gradients and professional styling
+- **Professional login page** with split-screen navy brand panel design
+- **Dashboard welcome hero** with branded logo circles and theme-appropriate variants
+- **Updated PWA manifest** with navy theme color for native app integration
+
+#### **New Brand Documentation**
+
+- **Color System Guide** (`docs/COLORS.md`) with accessibility guidelines and usage examples
+- **Brand Update Summary** (`docs/BRAND_UPDATE_SUMMARY.md`) with implementation guide and component usage
+- **Updated Branding Guide** (`docs/BRANDING_GUIDE.md`) with new color tokens and design patterns
+- **Comprehensive Tailwind integration** with `inkwell-navy`, `inkwell-gold`, and extended color scales
+
+#### **Technical Implementation**
+
+- **Tailwind config extended** with complete navy (50-900) and gold (50-700) color scales
+- **Component updates** across Logo, Welcome, EmptyStates, Login, and BrandedEmptyState
+- **Backward compatibility** maintained with legacy `ink` color tokens
+- **Professional brand assets** organized in `public/brand/` with proper naming conventions
+
+---
+
+## [v1.2.1] - 2025-10-08
 
 ### 🐛 Critical Bug Fixes
 

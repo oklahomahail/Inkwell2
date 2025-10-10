@@ -1,8 +1,10 @@
 # Inkwell Branding Guide
 
-Version: 1.0  
+Version: 2.0 - **Blue & Gold Brand Update**  
 Status: Active  
 Last Updated: October 2025
+
+> **🎨 Brand Update:** Inkwell has transitioned from the previous color palette to a sophisticated blue and gold system. The new navy blue (#0C5C3D) serves as the primary brand color with warm gold (#D4A537) accents, creating a more professional and accessible visual identity.
 
 ---
 
@@ -45,19 +47,49 @@ The brand should feel **modern, focused, and intelligent**, never busy or perfor
 
 ## 🎨 Color System
 
-### Core Palette
+### Core Brand Palette (2024 Update)
 
-| Token           | Hex       | Usage                              |
-| --------------- | --------- | ---------------------------------- |
-| `--ink-primary` | `#5B8CFF` | Primary brand color, buttons, CTAs |
-| `--ink-accent`  | `#FFD580` | Highlights, links, subtle emphasis |
-| `--ink-bg`      | `#0B0E13` | Dark background surfaces           |
-| `--ink-surface` | `#1A1E2B` | Card surfaces, panels              |
-| `--ink-text`    | `#E6E8EE` | Primary text color                 |
-| `--ink-muted`   | `#9EA4B8` | Secondary text                     |
-| `--ink-border`  | `#2C3242` | Dividers, outlines                 |
-| `--ink-success` | `#52E19F` | Success states                     |
-| `--ink-error`   | `#FF5C7A` | Errors, alerts                     |
+| Token                | Hex       | Usage                                     |
+| -------------------- | --------- | ----------------------------------------- |
+| `--inkwell-navy`     | `#0C5C3D` | **Primary brand navy** - buttons, headers |
+| `--inkwell-gold`     | `#D4A537` | **Warm gold accent** - highlights, CTAs   |
+| `--inkwell-charcoal` | `#22E22E` | **Rich charcoal** - body text, neutrals   |
+
+### Extended Navy Scale
+
+| Token                | Hex       | Usage                               |
+| -------------------- | --------- | ----------------------------------- |
+| `--inkwell-navy-50`  | `#f1f5f9` | Very light backgrounds              |
+| `--inkwell-navy-100` | `#e2e8f0` | Card backgrounds, subtle sections   |
+| `--inkwell-navy-200` | `#cbd5e1` | Borders, inactive states            |
+| `--inkwell-navy-500` | `#334155` | Secondary text on light backgrounds |
+| `--inkwell-navy-600` | `#0C5C3D` | Primary brand color                 |
+| `--inkwell-navy-700` | `#1e293b` | Hover states, darker accents        |
+| `--inkwell-navy-800` | `#0f172a` | Dark theme backgrounds              |
+| `--inkwell-navy-900` | `#020617` | Darkest navy, high contrast text    |
+
+### Extended Gold Scale
+
+| Token                | Hex       | Usage                       |
+| -------------------- | --------- | --------------------------- |
+| `--inkwell-gold-50`  | `#fef7e0` | Light gold backgrounds      |
+| `--inkwell-gold-100` | `#fde68a` | Subtle gold accents         |
+| `--inkwell-gold-500` | `#D4A537` | Primary gold                |
+| `--inkwell-gold-700` | `#92750f` | Deep gold for text on light |
+
+### Legacy Colors (Maintained)
+
+| Token           | Hex       | Usage                         |
+| --------------- | --------- | ----------------------------- |
+| `--ink-primary` | `#5B8CFF` | Legacy blue (compatibility)   |
+| `--ink-accent`  | `#FFD580` | Legacy accent (compatibility) |
+| `--ink-bg`      | `#0B0E13` | Dark background surfaces      |
+| `--ink-surface` | `#1A1E2B` | Card surfaces, panels         |
+| `--ink-text`    | `#E6E8EE` | Primary text color            |
+| `--ink-muted`   | `#9EA4B8` | Secondary text                |
+| `--ink-border`  | `#2C3242` | Dividers, outlines            |
+| `--ink-success` | `#52E19F` | Success states                |
+| `--ink-error`   | `#FF5C7A` | Errors, alerts                |
 
 **Implementation (Tailwind theme extension):**
 
@@ -65,6 +97,27 @@ The brand should feel **modern, focused, and intelligent**, never busy or perfor
 theme: {
   extend: {
     colors: {
+      // New Inkwell Brand Colors (2024)
+      inkwell: {
+        navy: '#0C5C3D',    // Primary brand navy
+        gold: '#D4A537',    // Warm gold accent
+        charcoal: '#22E22E', // Rich charcoal neutral
+        // Extended navy scale
+        'navy-50': '#f1f5f9',
+        'navy-100': '#e2e8f0',
+        'navy-200': '#cbd5e1',
+        'navy-500': '#334155',
+        'navy-600': '#0C5C3D', // Primary
+        'navy-700': '#1e293b',
+        'navy-800': '#0f172a',
+        'navy-900': '#020617',
+        // Extended gold scale
+        'gold-50': '#fef7e0',
+        'gold-100': '#fde68a',
+        'gold-500': '#D4A537', // Primary
+        'gold-700': '#92750f',
+      },
+      // Legacy colors (maintained for compatibility)
       ink: {
         primary: '#5B8CFF',
         accent: '#FFD580',
@@ -83,19 +136,39 @@ theme: {
 
 ### Color Discipline
 
-- Use `--ink-primary` for action emphasis only (buttons, links).
-- Avoid brand color saturation in backgrounds—let dark neutrals dominate.
-- Keep overall contrast ≥ 4.5:1 for accessibility.
+- **Primary Actions**: Use `bg-inkwell-navy` for primary buttons and CTAs
+- **Accent Highlights**: Use `text-inkwell-gold` for highlights and decorative elements
+- **Text Hierarchy**: Use `text-inkwell-charcoal` for body text, `text-inkwell-navy` for headings
+- **Backgrounds**: Use navy-50/100 variants for subtle sections, avoid saturated backgrounds
+- **Accessibility**: All combinations maintain WCAG AA compliance (≥ 4.5:1 contrast)
+- **Dark Theme**: Use lighter navy variants (navy-100/200) for proper contrast
 
 ---
 
 ## ✍️ Typography
 
-| Role               | Font             | Weight  | Usage                         |
-| ------------------ | ---------------- | ------- | ----------------------------- |
-| Display / Headings | Inter Tight      | 600     | Titles, splash headers        |
-| Body / UI          | Inter or Manrope | 400–500 | Body text, form labels        |
-| Monospace / Code   | JetBrains Mono   | 400     | Technical docs, code snippets |
+### Inkwell Type System (2024 Update)
+
+| Role               | Font                 | Weight  | Usage                         |
+| ------------------ | -------------------- | ------- | ----------------------------- |
+| Display / Headings | **Source Serif Pro** | 600-700 | Brand headlines, hero text    |
+| Body / UI          | **Inter**            | 400–500 | UI text, form labels, buttons |
+| Monospace / Code   | **JetBrains Mono**   | 400     | Technical docs, code snippets |
+
+### Brand Font Implementation
+
+```css
+/* Import from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
+/* Tailwind font family config */
+fontFamily: {
+  serif: ['Source Serif Pro', 'ui-serif', 'Georgia', 'serif'],
+  sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+  display: ['Source Serif Pro', 'ui-serif', 'Georgia', 'serif'],
+  mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+}
+```
 
 **Hierarchy Example:**
 
@@ -192,17 +265,22 @@ Motion should reflect precision and focus, like ink spreading on paper — smoot
 
 ```tsx
 <div className="flex items-center space-x-2 px-4 py-3">
-  <img src="/assets/icon-inkwell.svg" alt="Inkwell" className="w-6 h-6" />
-  <span className="text-ink-text font-medium tracking-wide">inkwell</span>
+  <Logo variant="svg-feather-navy" size={24} />
+  <span className="text-inkwell-navy dark:text-white font-medium tracking-wide font-serif">
+    Inkwell
+  </span>
 </div>
 ```
 
 ### Splash / Loading
 
 ```tsx
-<div className="flex flex-col items-center justify-center h-screen bg-ink-bg text-ink-text">
-  <img src="/assets/inkwell-mark.svg" className="w-20 h-20 mb-4 animate-pulse" />
-  <p className="text-lg tracking-wide">Where stories take shape</p>
+<div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-ink-bg text-inkwell-navy dark:text-ink-text">
+  <div className="mb-6 p-6 rounded-full bg-gradient-to-br from-inkwell-navy-50 to-inkwell-gold-50 dark:from-inkwell-navy-800 dark:to-inkwell-gold-700/20">
+    <Logo variant="mark-light" size={64} className="animate-pulse" />
+  </div>
+  <h1 className="text-2xl font-serif font-semibold mb-2">Welcome to Inkwell</h1>
+  <p className="text-lg text-inkwell-charcoal dark:text-ink-muted">Where stories take shape</p>
 </div>
 ```
 

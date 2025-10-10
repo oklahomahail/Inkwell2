@@ -2,7 +2,8 @@
 
 **Inkwell** is a local-first fiction writing platform built for novelists, screenwriters, and storytellers who need professional-grade tools. Combining distraction-free writing with intelligent AI assistance and visual story management, Inkwell helps authors plan, write, and refine their stories from concept to publication.
 
-**Built with React + TypeScript + TailwindCSS** • **Powered by Claude AI** • **Local-first & Private**
+**Built with React + TypeScript + TailwindCSS** • **Powered by Claude AI** • **Local-first & Private**  
+**🎨 Professional Blue & Gold Brand Identity** • **Accessible Design** • **PWA Ready**
 
 ---
 
@@ -399,7 +400,9 @@ MIT License © 2025 Inkwell Authors
 🚀 **[Deployment Guide](DEPLOYMENT.md)** - Instructions for deploying to production  
 🔐 **[Multi-Profile System Guide](docs/MULTI_PROFILE_SYSTEM.md)** - Complete multi-user workspace isolation with seamless profile switching  
 🎓 **[Beginner Mode Integration Guide](docs/BEGINNER_MODE_INTEGRATION.md)** - Revolutionary 15-minute onboarding system with 60%+ activation improvement  
-🪶 **[Inkwell Brand Guide](docs/BRANDING_GUIDE.md)** - Complete visual identity system with colors, typography, motion, and components  
+🩶 **[Inkwell Brand Guide](docs/BRANDING_GUIDE.md)** - Complete visual identity system with blue & gold colors, typography, motion, and components  
+🎨 **[Brand Colors Guide](docs/COLORS.md)** - New blue & gold color system with accessibility guidelines  
+🎆 **[Brand Update Summary](docs/BRAND_UPDATE_SUMMARY.md)** - Implementation guide for the new color system
 🤖 **[AI Services Guide](docs/AI_SERVICES.md)** - Enhanced Claude AI system with robust error handling
 ⚡ **[Performance Guardrails Guide](docs/PERFORMANCE_GUARDRAILS.md)** - Optimization system for large projects  
 🎨 **[Plot Boards Guide](docs/PLOT_BOARDS.md)** - Complete documentation for the Plot Boards feature  

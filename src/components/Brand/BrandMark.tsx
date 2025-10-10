@@ -1,11 +1,7 @@
 // src/components/Brand/BrandMark.tsx
 import React from 'react';
 
-// Import brand assets
-import FeatherGold from '@/assets/brand/inkwell-feather-gold.svg';
-import FeatherNavy from '@/assets/brand/inkwell-feather-navy.svg';
-import WordmarkGold from '@/assets/brand/inkwell-wordmark-gold.svg';
-import WordmarkNavy from '@/assets/brand/inkwell-wordmark-navy.svg';
+import Logo from '@/components/Logo';
 import { cn } from '@/utils/cn';
 
 interface BrandMarkProps {
@@ -21,31 +17,29 @@ export function BrandMark({
   size = 'md',
   className,
 }: BrandMarkProps) {
-  const featherSrc = variant === 'light' ? FeatherNavy : FeatherGold;
-  const wordmarkSrc = variant === 'light' ? WordmarkNavy : WordmarkGold;
+  const featherVariant = variant === 'light' ? 'svg-feather-navy' : 'svg-feather-gold';
+  const wordmarkVariant = variant === 'light' ? 'wordmark-light' : 'wordmark-dark';
 
   const sizes = {
-    sm: { feather: 'h-4 w-auto', wordmark: 'h-3 w-auto' },
-    md: { feather: 'h-5 w-auto', wordmark: 'h-4 w-auto' },
-    lg: { feather: 'h-6 w-auto', wordmark: 'h-5 w-auto' },
+    sm: { feather: 16, wordmark: 12 },
+    md: { feather: 20, wordmark: 16 },
+    lg: { feather: 24, wordmark: 20 },
   };
 
   return (
     <div className={cn('flex items-center gap-2 overflow-hidden', className)}>
-      <img
-        src={featherSrc}
-        alt="Inkwell feather"
-        className={cn('transition-all duration-200', sizes[size].feather)}
+      <Logo
+        variant={featherVariant}
+        size={sizes[size].feather}
+        className="transition-all duration-200 shrink-0"
       />
-      <img
-        src={wordmarkSrc}
-        alt="Inkwell"
-        className={cn(
-          'transition-all duration-200',
-          sizes[size].wordmark,
-          collapsed ? 'opacity-0 w-0' : 'opacity-100',
-        )}
-      />
+      {!collapsed && (
+        <Logo
+          variant={wordmarkVariant}
+          size={sizes[size].wordmark}
+          className="transition-all duration-200"
+        />
+      )}
     </div>
   );
 }

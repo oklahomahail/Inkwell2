@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import React from 'react';
 
-import { InkwellFeather } from '@/components/icons/InkwellFeather';
+import Logo from '@/components/Logo';
 
 import { KeyboardShortcut } from './KeyboardHints';
 
@@ -134,46 +134,96 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 // SPECIFIC EMPTY STATES
 // ==========================================
 
-// No Projects Empty State
+// No Projects Empty State - Custom branded version
 export const NoProjectsEmptyState: React.FC<{
   onCreateProject: () => void;
   onOpenHelp: () => void;
 }> = ({ onCreateProject, onOpenHelp }) => (
-  <EmptyState
-    icon={InkwellFeather}
-    title="Welcome to Inkwell"
-    description="Start your writing journey by creating your first project. Inkwell helps you organize chapters, track progress, and bring your stories to life."
-    primaryAction={{
-      label: 'Create Your First Project',
-      onClick: onCreateProject,
-      shortcut: ['⌘', 'N'],
-    }}
-    secondaryAction={{
-      label: 'View Tutorial',
-      onClick: onOpenHelp,
-      shortcut: ['?'],
-    }}
-    suggestions={[
-      {
-        icon: Sparkles,
-        title: 'Start with a template',
-        description: 'Choose from novel, screenplay, or blog templates',
-        onClick: onCreateProject,
-      },
-      {
-        icon: Target,
-        title: 'Set writing goals',
-        description: 'Track daily word counts and deadlines',
-        onClick: onCreateProject,
-      },
-      {
-        icon: BarChart3,
-        title: 'Monitor progress',
-        description: 'View analytics and writing streaks',
-        onClick: onCreateProject,
-      },
-    ]}
-  />
+  <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+    {/* Branded Logo Circle */}
+    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-inkwell-navy-50 to-inkwell-gold-50 dark:from-inkwell-navy-800 dark:to-inkwell-gold-700/20 border border-inkwell-navy-200 dark:border-inkwell-navy-700">
+      <Logo variant="mark-light" size={48} className="opacity-90" />
+    </div>
+
+    {/* Content */}
+    <div className="max-w-md">
+      <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+        Welcome to Inkwell
+      </h3>
+      <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+        Start your writing journey by creating your first project. Inkwell helps you organize
+        chapters, track progress, and bring your stories to life.
+      </p>
+
+      {/* Actions */}
+      <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+        <button
+          onClick={onCreateProject}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-inkwell-navy text-white rounded-lg hover:bg-inkwell-navy-700 transition-colors shadow-sm hover:shadow-md"
+        >
+          <span>Create Your First Project</span>
+          <KeyboardShortcut keys={['⌘', 'N']} size="sm" variant="subtle" />
+        </button>
+
+        <button
+          onClick={onOpenHelp}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+        >
+          <span>View Tutorial</span>
+          <KeyboardShortcut keys={['?']} size="sm" variant="subtle" />
+        </button>
+      </div>
+
+      {/* Suggestions */}
+      <div className="space-y-3">
+        <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+          Get started with:
+        </h4>
+        <div className="space-y-2">
+          {[
+            {
+              icon: Sparkles,
+              title: 'Start with a template',
+              description: 'Choose from novel, screenplay, or blog templates',
+              onClick: onCreateProject,
+            },
+            {
+              icon: Target,
+              title: 'Set writing goals',
+              description: 'Track daily word counts and deadlines',
+              onClick: onCreateProject,
+            },
+            {
+              icon: BarChart3,
+              title: 'Monitor progress',
+              description: 'View analytics and writing streaks',
+              onClick: onCreateProject,
+            },
+          ].map((suggestion, index) => {
+            const SuggestionIcon = suggestion.icon;
+            return (
+              <button
+                key={index}
+                onClick={suggestion.onClick}
+                className="w-full flex items-center gap-3 p-3 text-left bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group"
+              >
+                <SuggestionIcon className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                    {suggestion.title}
+                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
+                    {suggestion.description}
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </div>
 );
 
 // No Chapters Empty State

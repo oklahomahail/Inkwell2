@@ -68,13 +68,13 @@ export default defineConfig({
         // Ensure core application assets are precached
         additionalManifestEntries: [{ url: '/', revision: Date.now().toString() }],
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png'],
       manifest: {
         name: 'Inkwell - Professional Writing Studio',
         short_name: 'Inkwell',
         description:
           'A sophisticated writing environment for authors, novelists, and creative writers',
-        theme_color: '#2563eb',
+        theme_color: '#0C5C3D', // Navy blue
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait-primary',
@@ -82,13 +82,13 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'icons/icon-192x192.png',
+            src: 'icon-192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'maskable any',
           },
           {
-            src: 'icons/icon-512x512.png',
+            src: 'icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable any',

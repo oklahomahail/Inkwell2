@@ -3,6 +3,7 @@ import { PlusCircle, FileText, Clock, BarChart3, BookOpen } from 'lucide-react';
 import React from 'react';
 
 // Import the context hook directly - make sure there's only one import
+import Welcome from '@/components/Dashboard/Welcome';
 import { useAppContext } from '@/context/AppContext';
 
 const DashboardPanel: React.FC = () => {
@@ -22,17 +23,23 @@ const DashboardPanel: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <button
-          onClick={createNewProject}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <PlusCircle className="w-4 h-4" />
-          New Project
-        </button>
-      </div>
+    <div className="space-y-8">
+      {/* Branded welcome section */}
+      <Welcome onCreateProject={createNewProject} hasProjects={state.projects.length > 0} />
+
+      {/* Quick action header */}
+      {state.projects.length > 0 && (
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Projects</h2>
+          <button
+            onClick={createNewProject}
+            className="flex items-center gap-2 px-4 py-2 bg-inkwell-navy text-white rounded-lg hover:bg-inkwell-navy-700 transition-colors"
+          >
+            <PlusCircle className="w-4 h-4" />
+            New Project
+          </button>
+        </div>
+      )}
 
       {/* Current Project */}
       {currentProject ? (
