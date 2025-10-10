@@ -175,6 +175,27 @@ export interface AnalyticsEvents {
     persistent: boolean;
   };
 
+  // Plot analysis events
+  plot_analysis_run: BaseEvent & {
+    projectId: string;
+    scenes: number;
+    model: string;
+    qualityScore: number;
+    issuesFound: number;
+  };
+
+  plot_analysis_failed: BaseEvent & {
+    projectId: string;
+    scenes: number;
+    error: string;
+  };
+
+  plot_issue_resolved: BaseEvent & {
+    issueId: string;
+    issueType: string;
+    projectId?: string;
+  };
+
   // Nudge and engagement events
   nudge_clicked: BaseEvent & {
     projectId?: string;
@@ -488,6 +509,31 @@ class AnalyticsService {
       wordsWritten,
       savedManually,
       exitMethod,
+    });
+  }
+
+  // Plot analysis tracking methods
+  trackPlotAnalysisRun(
+    projectId: string,
+    scenes: number,
+    model: string,
+    qualityScore: number,
+    issuesFound: number,
+  ) {
+    this.track('plot_analysis_run', {
+      projectId,
+      scenes,
+      model,
+      qualityScore,
+      issuesFound,
+    });
+  }
+
+  trackPlotIssueResolved(issueId: string, issueType: string, projectId?: string) {
+    this.track('plot_issue_resolved', {
+      issueId,
+      issueType,
+      projectId,
     });
   }
 

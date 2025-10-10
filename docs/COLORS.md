@@ -4,7 +4,7 @@ This document defines the updated Inkwell brand colors, replacing the previous g
 
 ## Primary Brand Colors
 
-### Navy Blue (`#0C5C3D`)
+### Navy Blue (`#0A2F4E`)
 
 - **Use**: Primary brand color, buttons, headers, logos
 - **Accessibility**: High contrast on white backgrounds
@@ -31,7 +31,7 @@ navy-50:  #f1f5f9  /* Light backgrounds, subtle accents */
 navy-100: #e2e8f0  /* Card backgrounds, dividers */
 navy-200: #cbd5e1  /* Borders, inactive states */
 navy-500: #334155  /* Secondary text on light backgrounds */
-navy-600: #0C5C3D  /* Primary brand color */
+navy-600: #0A2F4E  /* Primary brand color */
 navy-700: #1e293b  /* Hover states, darker accents */
 navy-800: #0f172a  /* Dark theme backgrounds */
 navy-900: #020617  /* Darkest navy, high contrast text */
@@ -80,7 +80,7 @@ All colors are defined in `tailwind.config.js` under the `inkwell` color family:
 ```javascript
 colors: {
   inkwell: {
-    navy: '#0C5C3D',
+    navy: '#0A2F4E',
     gold: '#D4A537',
     charcoal: '#22E22E',
     // ... extended scales

@@ -7,7 +7,7 @@ theme: {
       colors: {
         // New Inkwell Brand Color System (2024) - Blue & Gold
         inkwell: {
-          navy: '#0C5C3D',    // Deep Navy Blue (primary brand) 
+          navy: '#0A2F4E',    // Deep Navy Blue (primary brand) 
           gold: '#D4A537',    // Warm Gold (accent)
           charcoal: '#22E22E', // Rich Charcoal (neutral)
           // New accessible color variations for navy-blue theme
@@ -15,7 +15,7 @@ theme: {
           'navy-100': '#e2e8f0',  // Light navy-blue for subtle accents  
           'navy-200': '#cbd5e1',  // Medium light navy-blue
           'navy-500': '#334155',  // Medium navy for text on light backgrounds
-          'navy-600': '#0C5C3D',  // Primary navy (your brand color)
+          'navy-600': '#0A2F4E',  // Primary navy (your brand color)
           'navy-700': '#1e293b',  // Darker navy with blue undertones
           'navy-800': '#0f172a',  // Very dark navy-blue
           'navy-900': '#020617',  // Almost black navy-blue

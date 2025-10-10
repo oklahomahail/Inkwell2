@@ -22,7 +22,7 @@
 
 ```javascript
 inkwell: {
-  navy: '#0C5C3D',    // Deep Navy (corrected from #0C1C3D)
+  navy: '#0A2F4E',    // Deep Navy (corrected from #0C1C3D)
   gold: '#D4A537',    // Warm Gold
   charcoal: '#2E2E2E', // Charcoal (corrected from #222222)
   white: '#F9F9F9',   // Soft White (added)
@@ -45,7 +45,7 @@ For documentation/marketing pages:
 
 ### **Design Specs Met:**
 
-- ✅ **Deep Navy background** (`#0C5C3D`)
+- ✅ **Deep Navy background** (`#0A2F4E`)
 - ✅ **Warm Gold feather logo** (`#D4A537`)
 - ✅ **Soft White text** (`#F9F9F9`)
 - ✅ **Source Serif Pro** for "Inkwell" wordmark
@@ -88,7 +88,7 @@ import { FooterLight } from '@/components/Layout/FooterLight';
 - ✅ "© 2025 Inkwell by Nexus Partners"
 - ✅ nexuspartners.com link
 - ✅ Proper golden feather + wordmark
-- ✅ Correct Deep Navy (#0C5C3D)
+- ✅ Correct Deep Navy (#0A2F4E)
 - ✅ Brand-compliant typography
 - ✅ Enhanced accessibility
 

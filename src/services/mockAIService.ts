@@ -1,5 +1,8 @@
 // src/services/mockAIService.ts
+import { generateId } from '../utils/id';
+
 import type { ClaudeResponse, ClaudeMessage } from './claudeService';
+import type { AnalyzeBoardInput, PlotAnalysis } from '../types/plotAnalysis';
 
 interface MockResponse {
   delay: number;
@@ -379,6 +382,71 @@ class MockAIService {
       keyMasked: 'sk-ant-mock-••••••••••••',
     };
   }
+}
+
+/**
+ * Mock plot analysis for development and testing
+ */
+export async function mockAnalyzeBoard(input: AnalyzeBoardInput): Promise<PlotAnalysis> {
+  // Simulate some processing delay
+  await new Promise((resolve) => setTimeout(resolve, Math.random() * 1000 + 500));
+
+  const pacing = input.scenes.map((s, i) => ({
+    sceneId: s.id,
+    index: i,
+    tension: Math.abs(Math.sin(i)),
+    pace: Math.abs(Math.cos(i)),
+  }));
+
+  return {
+    id: generateId('analysis'),
+    profileId: input.profileId,
+    projectId: input.projectId,
+    model: 'mock',
+    updatedAt: Date.now(),
+    summary:
+      'Mock analysis summary. This is a demonstration of the AI plot analysis feature with realistic-looking insights.',
+    qualityScore: Math.floor(Math.random() * 30) + 65, // 65-95 range
+    issues: [
+      {
+        id: generateId('issue'),
+        type: 'continuity_gap',
+        severity: 'medium',
+        title: 'Time jump between scenes needs clarification',
+        description:
+          "There's an unclear time passage between scenes that could confuse readers. Consider adding a transition or time anchor.",
+        sceneIds: input.scenes
+          .slice(
+            Math.max(0, Math.floor(input.scenes.length / 2) - 1),
+            Math.floor(input.scenes.length / 2) + 1,
+          )
+          .map((s) => s.id),
+        suggestions: [
+          'Add a time anchor line at the beginning of the later scene',
+          'Show consequences from the previous scene to bridge the gap',
+        ],
+      },
+      {
+        id: generateId('issue'),
+        type: 'pacing_spike',
+        severity: 'low',
+        title: 'Pacing could be more varied',
+        description:
+          'Consider varying sentence length and paragraph structure to create more dynamic pacing.',
+        sceneIds: input.scenes.slice(0, 2).map((s) => s.id),
+        suggestions: [
+          'Mix short, punchy sentences with longer descriptive ones',
+          'Use paragraph breaks to control reading rhythm',
+        ],
+      },
+    ],
+    pacing,
+    conflictHeatmap: pacing.map((p, i) => ({
+      row: Math.floor(i / 3),
+      col: i % 3,
+      value: p.tension * 0.7 + Math.random() * 0.3,
+    })),
+  };
 }
 
 export const mockAIService = new MockAIService();

@@ -1,10 +1,10 @@
-# Enhanced AI Services System
+# AI Services Developer Guide
 
 > **Production-ready Claude AI integration with robust error handling, mock modes, and comprehensive monitoring.**
 
 ## Overview
 
-The Inkwell AI Services System provides a comprehensive, production-ready integration with AI providers (primarily Claude, with OpenAI and custom endpoint support). The system is built for reliability, demo-friendliness, and excellent user experience.
+The Inkwell AI Services System provides a comprehensive, production-ready integration with AI providers (primarily Claude, with OpenAI and custom endpoint support). The system is built for reliability, demo-friendliness, and excellent developer experience.
 
 ## Architecture
 
@@ -18,32 +18,11 @@ AI Services System
 └── 📈 analyticsService.ts      # Privacy-first event tracking
 ```
 
-## Key Features
+## Core Services
 
-### 🎭 **Demo-Safe Mock Mode**
+### 🚀 Feature Flag Service
 
-- **No API Keys Required**: Full AI functionality for presentations
-- **Realistic Responses**: 8+ response types for different AI operations
-- **Configurable Delays**: Simulate real API response times
-- **Error Simulation**: Test error handling with configurable failure rates
-
-### 🛡️ **Production Reliability**
-
-- **Circuit Breaker Pattern**: Prevents cascading failures
-- **Exponential Backoff**: Smart retry logic with jitter
-- **Multi-Provider Support**: Claude, OpenAI, custom endpoints
-- **Real-time Monitoring**: Health checks and performance metrics
-
-### ⚙️ **Flexible Configuration**
-
-- **Encrypted Storage**: Secure API key management
-- **Environment Overrides**: Development vs production settings
-- **Validation System**: API key format and connectivity testing
-- **Fallback Modes**: Graceful degradation when services unavailable
-
-## Services Detail
-
-### 🚀 Feature Flag Service (`featureFlagService.ts`)
+**Location**: `src/services/featureFlagService.ts`
 
 Manages feature toggles for AI functionality with categorized flags and environment overrides.
 
@@ -67,7 +46,9 @@ const aiFlags = featureFlagService.getFlagsByCategory('ai');
 - `ui`: User interface enhancements (PWA, analytics)
 - `experimental`: Beta and demo features
 
-### 🎭 Mock AI Service (`mockAIService.ts`)
+### 🎭 Mock AI Service
+
+**Location**: `src/services/mockAIService.ts`
 
 Provides realistic AI responses without API costs for demos and development.
 
@@ -94,9 +75,10 @@ if (mockAIService.shouldUseMockMode()) {
 - `brainstorm`: Creative brainstorming
 - `story_outline`: Story structure generation
 - `consistency`: Consistency checking
-- `plot_analysis`: Comprehensive plot structure analysis with pacing and conflict insights
 
-### 🔄 AI Retry Service (`aiRetryService.ts`)
+### 🔄 AI Retry Service
+
+**Location**: `src/services/aiRetryService.ts`
 
 Implements robust retry logic with circuit breaker protection.
 
@@ -123,7 +105,9 @@ if (status.state === 'open') {
 - **Failure Analysis**: Track error patterns and response times
 - **Manual Override**: Reset circuit breaker when needed
 
-### ⚙️ AI Configuration Service (`aiConfigService.ts`)
+### ⚙️ AI Configuration Service
+
+**Location**: `src/services/aiConfigService.ts`
 
 Manages AI provider configurations with validation and secure storage.
 
@@ -153,7 +137,9 @@ const status = aiConfigService.getStatus();
 - **OpenAI GPT**: GPT-4, GPT-4-turbo, GPT-3.5-turbo
 - **Custom Endpoints**: Flexible configuration for custom APIs
 
-### 📊 AI Status Monitor (`aiStatusMonitor.ts`)
+### 📊 AI Status Monitor
+
+**Location**: `src/services/aiStatusMonitor.ts`
 
 Real-time monitoring of AI service health with user feedback.
 
@@ -165,7 +151,7 @@ aiStatusMonitor.subscribe((status) => {
 });
 
 // Subscribe to user feedback
-aiStatusMonitor.subscribeTo Feedback((feedback) => {
+aiStatusMonitor.subscribeToFeedback((feedback) => {
   showUserNotification(feedback);
 });
 
@@ -174,42 +160,73 @@ const status = aiStatusMonitor.getStatus();
 const recommendations = aiStatusMonitor.getRecommendations();
 ```
 
-**Monitoring Features:**
+## Development Workflow
 
-- **Health Checks**: Periodic connectivity and performance testing
-- **Rate Limit Tracking**: Monitor API usage and limits
-- **Circuit Breaker Integration**: Real-time failure state monitoring
-- **User Feedback**: Contextual notifications and recommendations
+### 1. Setting Up AI for Development
 
-### 📊 AI Plot Analysis Service (`aiPlotAnalysisService.ts`)
+```bash
+# Clone and install
+git clone https://github.com/oklahomahail/Inkwell2
+cd Inkwell2
+pnpm install
 
-Provides comprehensive plot structure analysis with visual insights and actionable suggestions.
+# Enable mock mode for development
+echo "VITE_AI_MOCK_MODE=true" >> .env.local
 
-```typescript
-// Analyze entire plot board
-const analysis = await analyzeBoard({
-  profileId: 'user-123',
-  projectId: 'project-456',
-  scenes: [
-    { id: 's1', title: 'Opening', text: 'Story content...', order: 0 },
-    { id: 's2', title: 'Rising Action', text: 'More content...', order: 1 },
-  ],
-  structure: 'three_act',
-});
-
-console.log('Quality Score:', analysis.qualityScore);
-console.log('Issues Found:', analysis.issues.length);
+# Start development server
+pnpm dev
 ```
 
-**Analysis Features:**
+### 2. Testing AI Integration
 
-- **Plot Structure**: Identifies plot holes, pacing issues, continuity gaps
-- **Character Consistency**: Detects character development inconsistencies
-- **Timeline Validation**: Finds timeline conflicts and narrative flow issues
-- **Pacing Analysis**: Visual graphs of tension and pace across scenes
-- **Conflict Mapping**: Heatmap visualization of story conflict density
-- **Quality Scoring**: Overall story quality metric (0-100)
-- **Actionable Suggestions**: Specific recommendations for improvement
+```typescript
+// Basic AI integration pattern
+import { aiConfigService, aiRetryService, mockAIService } from '@/services';
+
+// Check if AI is configured
+if (aiConfigService.isConfigured()) {
+  // Use real AI
+  const response = await aiRetryService.executeWithRetry(() =>
+    claudeService.generateResponse(prompt),
+  );
+} else if (featureFlagService.isEnabled('ai_mock_mode')) {
+  // Use mock AI
+  const response = await mockAIService.generateMockResponse(prompt);
+} else {
+  // Prompt user to configure AI
+  showAISetupDialog();
+}
+```
+
+### 3. Error Handling Patterns
+
+```typescript
+try {
+  const response = await aiRetryService.executeWithRetry(
+    () => claudeService.generateResponse(prompt),
+    'user_request',
+  );
+  handleSuccess(response);
+} catch (error) {
+  // Circuit breaker is open or retries exhausted
+  if (featureFlagService.isEnabled('ai_mock_mode')) {
+    // Fallback to mock
+    const mockResponse = await mockAIService.generateMockResponse(prompt);
+    handleMockResponse(mockResponse);
+  } else {
+    // Show error to user
+    showErrorMessage('AI temporarily unavailable. Please try again later.');
+  }
+}
+```
+
+### 4. Adding New AI Features
+
+1. **Define Feature Flag**: Add to `featureFlagService.presets.ts`
+2. **Implement Service**: Create service in `src/services/`
+3. **Add Mock Support**: Extend `mockAIService.ts` with new response types
+4. **Update UI**: Create components in `src/components/AI/`
+5. **Add Tests**: Create tests in `__tests__/` directories
 
 ## Configuration
 
@@ -236,78 +253,6 @@ Default flags for AI system:
   ai_enhanced_toolbar: true,     // Advanced AI tools
   ai_retry_logic: true,          // Retry with backoff
   ai_circuit_breaker: true,      // Circuit breaker protection
-}
-```
-
-## Usage Patterns
-
-### Basic AI Integration
-
-```typescript
-import { aiConfigService, aiRetryService, mockAIService } from './services';
-
-// Check if AI is configured
-if (aiConfigService.isConfigured()) {
-  // Use real AI
-  const response = await aiRetryService.executeWithRetry(() =>
-    claudeService.generateResponse(prompt),
-  );
-} else if (featureFlagService.isEnabled('ai_mock_mode')) {
-  // Use mock AI
-  const response = await mockAIService.generateMockResponse(prompt);
-} else {
-  // Prompt user to configure AI
-  showAISetupDialog();
-}
-```
-
-### Error Handling
-
-```typescript
-try {
-  const response = await aiRetryService.executeWithRetry(
-    () => claudeService.generateResponse(prompt),
-    'user_request',
-  );
-  handleSuccess(response);
-} catch (error) {
-  // Circuit breaker is open or retries exhausted
-  if (featureFlagService.isEnabled('ai_mock_mode')) {
-    // Fallback to mock
-    const mockResponse = await mockAIService.generateMockResponse(prompt);
-    handleMockResponse(mockResponse);
-  } else {
-    // Show error to user
-    showErrorMessage('AI temporarily unavailable. Please try again later.');
-  }
-}
-```
-
-### Status Monitoring UI
-
-```typescript
-// React component example
-function AIStatusIndicator() {
-  const [status, setStatus] = useState(null);
-
-  useEffect(() => {
-    return aiStatusMonitor.subscribe(setStatus);
-  }, []);
-
-  const getStatusColor = (status) => {
-    switch (status?.statusCode) {
-      case 'operational': return 'green';
-      case 'degraded': return 'yellow';
-      case 'outage': return 'red';
-      default: return 'gray';
-    }
-  };
-
-  return (
-    <div className={`status-indicator ${getStatusColor(status)}`}>
-      {status?.message || 'AI Status Unknown'}
-    </div>
-  );
 }
 ```
 
@@ -345,24 +290,6 @@ describe('AI Retry Service', () => {
 });
 ```
 
-## Analytics & Privacy
-
-The AI services system includes privacy-first analytics tracking:
-
-- **No Personal Data**: Only interaction patterns and performance metrics
-- **User Consent**: Analytics can be disabled via feature flags
-- **Local Storage**: All analytics data stays on device
-- **Aggregate Insights**: Help improve the system without compromising privacy
-
-## Future Enhancements
-
-- **Multi-Model Support**: Support for multiple models per provider
-- **Cost Tracking**: Monitor API usage costs
-- **Advanced Caching**: Intelligent response caching
-- **Streaming Responses**: Real-time response streaming
-- **Custom Prompts**: User-defined prompt templates
-- **A/B Testing**: Test different AI configurations
-
 ## Troubleshooting
 
 ### Common Issues
@@ -394,4 +321,53 @@ Enable debug logging:
 localStorage.setItem('inkwell_debug', 'ai,circuit-breaker,config');
 ```
 
-This comprehensive AI services system ensures reliable, demo-friendly, and user-centric AI integration for Inkwell.
+## Component Integration
+
+### AI Writing Toolbar
+
+**Location**: `src/components/Writing/EnhancedAIWritingToolbar.tsx`
+
+```typescript
+import { useAIService } from '@/hooks/useAIService';
+
+function AIToolbar() {
+  const { generateResponse, isLoading, error } = useAIService();
+
+  const handleImproveText = async () => {
+    const response = await generateResponse('improve', selectedText);
+    applyTextChanges(response.content);
+  };
+
+  return (
+    <div className="ai-toolbar">
+      <button onClick={handleImproveText} disabled={isLoading}>
+        {isLoading ? 'Improving...' : 'Improve Text'}
+      </button>
+      {error && <span className="error">{error.message}</span>}
+    </div>
+  );
+}
+```
+
+### Just-in-Time AI Setup
+
+**Location**: `src/components/AI/JustInTimeAI.tsx`
+
+Contextual AI setup component that appears when AI features are first accessed.
+
+```typescript
+import { JustInTimeAI } from '@/components/AI/JustInTimeAI';
+
+function WritingPanel() {
+  const { isAIConfigured } = useAIService();
+
+  return (
+    <div>
+      {!isAIConfigured && <JustInTimeAI onSetup={handleAISetup} />}
+      <WritingEditor />
+    </div>
+  );
+}
+```
+
+This comprehensive AI services system ensures reliable, demo-friendly, and developer-centric AI integration for Inkwell.

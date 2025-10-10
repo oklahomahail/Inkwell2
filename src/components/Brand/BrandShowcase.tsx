@@ -88,7 +88,7 @@ export const BrandShowcase: React.FC = () => {
               {
                 name: 'Deep Navy',
                 class: 'bg-inkwell-navy',
-                hex: '#0C5C3D',
+                hex: '#0A2F4E',
                 textClass: 'text-white',
               },
               {

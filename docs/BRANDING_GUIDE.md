@@ -4,7 +4,7 @@ Version: 2.0 - **Blue & Gold Brand Update**
 Status: Active  
 Last Updated: October 2025
 
-> **🎨 Brand Update:** Inkwell has transitioned from the previous color palette to a sophisticated blue and gold system. The new navy blue (#0C5C3D) serves as the primary brand color with warm gold (#D4A537) accents, creating a more professional and accessible visual identity.
+> **🎨 Brand Update:** Inkwell has transitioned from the previous color palette to a sophisticated blue and gold system. The new navy blue (#0A2F4E) serves as the primary brand color with warm gold (#D4A537) accents, creating a more professional and accessible visual identity.
 
 ---
 
@@ -51,7 +51,7 @@ The brand should feel **modern, focused, and intelligent**, never busy or perfor
 
 | Token                | Hex       | Usage                                     |
 | -------------------- | --------- | ----------------------------------------- |
-| `--inkwell-navy`     | `#0C5C3D` | **Primary brand navy** - buttons, headers |
+| `--inkwell-navy`     | `#0A2F4E` | **Primary brand navy** - buttons, headers |
 | `--inkwell-gold`     | `#D4A537` | **Warm gold accent** - highlights, CTAs   |
 | `--inkwell-charcoal` | `#22E22E` | **Rich charcoal** - body text, neutrals   |
 
@@ -63,7 +63,7 @@ The brand should feel **modern, focused, and intelligent**, never busy or perfor
 | `--inkwell-navy-100` | `#e2e8f0` | Card backgrounds, subtle sections   |
 | `--inkwell-navy-200` | `#cbd5e1` | Borders, inactive states            |
 | `--inkwell-navy-500` | `#334155` | Secondary text on light backgrounds |
-| `--inkwell-navy-600` | `#0C5C3D` | Primary brand color                 |
+| `--inkwell-navy-600` | `#0A2F4E` | Primary brand color                 |
 | `--inkwell-navy-700` | `#1e293b` | Hover states, darker accents        |
 | `--inkwell-navy-800` | `#0f172a` | Dark theme backgrounds              |
 | `--inkwell-navy-900` | `#020617` | Darkest navy, high contrast text    |
@@ -99,7 +99,7 @@ theme: {
     colors: {
       // New Inkwell Brand Colors (2024)
       inkwell: {
-        navy: '#0C5C3D',    // Primary brand navy
+        navy: '#0A2F4E',    // Primary brand navy
         gold: '#D4A537',    // Warm gold accent
         charcoal: '#22E22E', // Rich charcoal neutral
         // Extended navy scale
@@ -107,7 +107,7 @@ theme: {
         'navy-100': '#e2e8f0',
         'navy-200': '#cbd5e1',
         'navy-500': '#334155',
-        'navy-600': '#0C5C3D', // Primary
+        'navy-600': '#0A2F4E', // Primary
         'navy-700': '#1e293b',
         'navy-800': '#0f172a',
         'navy-900': '#020617',

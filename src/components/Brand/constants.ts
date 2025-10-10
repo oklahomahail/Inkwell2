@@ -1,7 +1,7 @@
 // Inkwell Brand System Constants (Blue & Gold Theme)
 export const INKWELL_BRAND = {
   colors: {
-    navy: '#0C5C3D', // Deep Navy Blue (primary)
+    navy: '#0A2F4E', // Deep Navy Blue (primary)
     gold: '#D4A537', // Warm Gold (accent)
     charcoal: '#22E22E', // Rich Charcoal (neutral)
     white: '#F9F9F9', // Soft White

@@ -21,6 +21,7 @@
 - **🤖 Enhanced AI System** — Production-ready Claude integration with mock mode for demos
 - **🛡️ Robust AI Infrastructure** — Circuit breaker, retry logic, and real-time status monitoring
 - **🎭 Demo-Safe Mock Mode** — Full AI functionality without API keys for presentations
+- **📊 AI Plot Analysis** — Comprehensive plot structure analysis with pacing graphs, conflict heatmaps, and actionable insights
 - **Story Architect Mode** — Generate complete story outlines from premise to scene details
 - **Consistency Guardian** — AI analysis of character, timeline, and plot consistency
 - **AI Writing Toolbar** — Context-aware suggestions for continuing scenes and improving flow
@@ -39,7 +40,7 @@
 ### Visual Story Management
 
 - **Timeline View** — Map story events across POV lanes with filtering and drag-reorder
-- **Plot Boards** — Kanban-style story structure visualization with collaborative editing, real-time sync, and comprehensive export/import
+- **Plot Boards** — Kanban-style story structure visualization with AI-powered Insights tab featuring plot analysis, pacing graphs, and conflict heatmaps
 - **Story Structure Visualizer** — Professional story health analytics and pacing insights
 - **Planning Tools** — Beat sheet templates, character profiles, and project analytics
 
@@ -368,6 +369,170 @@ src/
 └── styles/             # CSS modules and globals
 ```
 
+### System Architecture Overview
+
+```mermaid
+graph TB
+    %% User Interface Layer
+    subgraph "🎨 User Interface Layer"
+        UI["React + TypeScript UI"]
+        Router["Profile-Aware Routing"]
+        Profiles["Multi-Profile System"]
+    end
+
+    %% Feature Layer
+    subgraph "🚀 Feature Layer"
+        Writing["📝 Writing Engine\n(TipTap Editor)"]
+        Planning["📋 Planning Tools\n(Timeline, Plot Boards)"]
+        AI["🤖 AI Services\n(Claude Integration)"]
+        Analytics["📊 Analytics\n(Writing Insights)"]
+        Onboarding["🎓 Onboarding\n(Tours & Tutorials)"]
+    end
+
+    %% Service Layer
+    subgraph "⚙️ Service Layer"
+        FeatureFlags["🎯 Feature Flags"]
+        Search["🔍 Search Service"]
+        Export["📤 Export Engine"]
+        Backup["💾 Backup System"]
+        AIRetry["🔄 AI Retry Logic"]
+    end
+
+    %% Data Layer
+    subgraph "💾 Data Layer"
+        IndexedDB["🗄️ IndexedDB\n(Profile Isolated)"]
+        LocalStorage["💿 localStorage\n(Preferences)"]
+        Migration["🔄 Data Migration"]
+    end
+
+    %% External Services
+    subgraph "🌐 External Services"
+        ClaudeAPI["🤖 Claude API"]
+        MockAI["🎭 Mock AI Service"]
+    end
+
+    %% Data Flow
+    UI --> Router
+    Router --> Profiles
+    Profiles --> Writing
+    Profiles --> Planning
+    Profiles --> AI
+    Profiles --> Analytics
+    Profiles --> Onboarding
+
+    Writing --> FeatureFlags
+    Planning --> Search
+    AI --> AIRetry
+    Analytics --> Export
+    Onboarding --> Backup
+
+    FeatureFlags --> IndexedDB
+    Search --> IndexedDB
+    Export --> LocalStorage
+    Backup --> Migration
+    AIRetry --> ClaudeAPI
+    AIRetry --> MockAI
+
+    Migration --> IndexedDB
+    Migration --> LocalStorage
+
+    %% Profile Isolation
+    IndexedDB -.-> |"profile_123_*"| IndexedDB
+    IndexedDB -.-> |"profile_456_*"| IndexedDB
+    IndexedDB -.-> |"profile_789_*"| IndexedDB
+
+    %% Styling
+    classDef userInterface fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef feature fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef service fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef data fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef external fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+
+    class UI,Router,Profiles userInterface
+    class Writing,Planning,AI,Analytics,Onboarding feature
+    class FeatureFlags,Search,Export,Backup,AIRetry service
+    class IndexedDB,LocalStorage,Migration data
+    class ClaudeAPI,MockAI external
+```
+
+**Key Architectural Principles:**
+
+- **Profile Isolation**: Complete data separation with prefixed storage keys
+- **Feature Flag Driven**: All major features controlled by toggles
+- **AI-First Design**: Mock and production AI services with circuit breakers
+- **Local-First**: All data stored locally with optional cloud AI
+- **Progressive Enhancement**: Works offline with graceful AI degradation
+- **Accessible by Design**: WCAG AA compliant throughout
+
+---
+
+## Getting Started for Contributors
+
+### Quick Setup
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/oklahomahail/Inkwell2.git
+cd Inkwell2
+
+# 2. Install dependencies (pnpm required)
+pnpm install
+
+# 3. Start the development server
+pnpm dev
+
+# 4. Open http://localhost:5173
+```
+
+### First Time Setup Workflow
+
+When you first open Inkwell, you'll go through a quick setup:
+
+1. **Create Your First Profile** — Choose a name and color for your workspace
+2. **Choose Your Experience Level** — Select Beginner Mode (recommended) or Pro Mode
+3. **Optional Tour** — Take a 60-90 second tour of the main features
+4. **Start Writing** — Either create a blank project or use the guided First Draft Path
+
+### Developer Workflow
+
+```bash
+# Development commands
+pnpm dev           # Start with hot reload
+pnpm build         # Production build
+pnpm preview       # Test production build
+pnpm test          # Run test suite in watch mode
+
+# Code quality
+pnpm typecheck     # TypeScript compilation check
+pnpm lint          # ESLint (strict mode)
+pnpm lint:fix      # Auto-fix ESLint issues
+pnpm test:run      # Run all tests once
+pnpm test:coverage # Generate coverage report
+```
+
+### Understanding the Profile System
+
+Inkwell uses a multi-profile system where each "profile" is an isolated workspace:
+
+- **URLs**: All routes are profile-scoped: `/p/{profileId}/dashboard`
+- **Data**: Each profile has its own database with prefixed keys
+- **Features**: Profiles can have different feature flag settings (Beginner vs Pro)
+- **Tours**: Tutorial progress is tracked per profile
+
+### Testing Your Changes
+
+1. **Create Test Profiles** — Use different profiles to test isolation
+2. **Test Both Modes** — Switch between Beginner and Pro modes
+3. **Test the Onboarding** — Clear your localStorage to test first-run experience
+4. **Run the Test Suite** — Ensure all 200+ tests still pass
+
+### Key Development Areas
+
+- **`src/components/`** — React components organized by feature
+- **`src/services/`** — Business logic and external integrations
+- **`src/features/`** — Self-contained feature modules (e.g., Plot Boards)
+- **`docs/dev/`** — Developer documentation for each system
+
 ---
 
 ## Contributing
@@ -396,20 +561,40 @@ MIT License © 2025 Inkwell Authors
 
 ## Documentation
 
+### For Writers & Users
+
 📚 **[User Guide](USER_GUIDE.md)** - Complete guide for writers using Inkwell  
-🚀 **[Deployment Guide](DEPLOYMENT.md)** - Instructions for deploying to production  
-🔐 **[Multi-Profile System Guide](docs/MULTI_PROFILE_SYSTEM.md)** - Complete multi-user workspace isolation with seamless profile switching  
-🎓 **[Beginner Mode Integration Guide](docs/BEGINNER_MODE_INTEGRATION.md)** - Revolutionary 15-minute onboarding system with 60%+ activation improvement  
-🩶 **[Inkwell Brand Guide](docs/BRANDING_GUIDE.md)** - Complete visual identity system with blue & gold colors, typography, motion, and components  
-🎨 **[Brand Colors Guide](docs/COLORS.md)** - New blue & gold color system with accessibility guidelines  
-🎆 **[Brand Update Summary](docs/BRAND_UPDATE_SUMMARY.md)** - Implementation guide for the new color system
-🤖 **[AI Services Guide](docs/AI_SERVICES.md)** - Enhanced Claude AI system with robust error handling
-⚡ **[Performance Guardrails Guide](docs/PERFORMANCE_GUARDRAILS.md)** - Optimization system for large projects  
-🎨 **[Plot Boards Guide](docs/PLOT_BOARDS.md)** - Complete documentation for the Plot Boards feature  
-🎯 **[Enhanced Onboarding System Guide](src/components/Onboarding/README.md)** - World-class 8-layer onboarding system with accessibility and analytics
-📂 **[Project Management Guide](src/components/ProjectManagement/README.md)** - Enhanced project organization and search system  
-🔧 **[ESLint Migration Guide](docs/ESLINT_MIGRATION.md)** - Technical details about ESLint 9 upgrade  
-📊 **[Trace System Guide](docs/TRACE_SYSTEM.md)** - Performance monitoring and debugging system documentation
+🚀 **[Getting Started](README.md#getting-started-for-contributors)** - Quick setup and first-time user workflow
+
+### For Developers
+
+🏗️ **[Architecture Overview](README.md#system-architecture-overview)** - System design and component relationships  
+🤖 **[AI Services](docs/dev/ai-services.md)** - Claude integration, retry logic, and mock services  
+💾 **[Storage System](docs/dev/storage.md)** - Profile isolation, IndexedDB, and backup strategies  
+🎓 **[Onboarding & Tours](docs/dev/onboarding.md)** - Tutorial system, first draft path, and analytics
+
+### Feature Documentation
+
+🔐 **[Multi-Profile System](docs/MULTI_PROFILE_SYSTEM.md)** - Complete multi-user workspace isolation  
+🎓 **[Beginner Mode Integration](docs/BEGINNER_MODE_INTEGRATION.md)** - 15-minute onboarding system  
+🎨 **[Plot Boards](docs/PLOT_BOARDS.md)** - Kanban-style story organization with collaboration  
+🎯 **[Enhanced Onboarding](src/components/Onboarding/README.md)** - 8-layer onboarding system  
+📂 **[Project Management](src/components/ProjectManagement/README.md)** - Project organization and search  
+⚡ **[Performance Guardrails](docs/PERFORMANCE_GUARDRAILS.md)** - Optimization for large projects
+
+### Brand & Design
+
+🩶 **[Brand Guide](docs/BRANDING_GUIDE.md)** - Complete visual identity system  
+🎨 **[Brand Colors](docs/COLORS.md)** - Blue & gold color system with accessibility  
+🏷️ **[Brand Assets](public/brand/README.md)** - Logo, color, and asset directory  
+🎆 **[Brand Update Summary](docs/BRAND_UPDATE_SUMMARY.md)** - Implementation guide
+
+### Deployment & Operations
+
+🚀 **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions  
+🔧 **[ESLint Migration](docs/ESLINT_MIGRATION.md)** - Technical migration details  
+📊 **[Trace System](docs/TRACE_SYSTEM.md)** - Performance monitoring and debugging  
+🤖 **[AI Services (Legacy)](docs/AI_SERVICES.md)** - Original AI documentation
 
 ---
 

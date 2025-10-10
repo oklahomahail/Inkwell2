@@ -37,7 +37,7 @@ import { InkwellFeather, InkwellFeatherSimple } from '@/components/icons/Inkwell
 
 The InkwellFeather component uses Inkwell's brand colors and follows the design system:
 
-- Deep Navy (`#0C5C3D`)
+- Deep Navy (`#0A2F4E`)
 - Warm Gold (`#D4A537`)
 - Charcoal (`#22E22E`)
 

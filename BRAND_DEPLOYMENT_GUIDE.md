@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides step-by-step instructions for deploying the new Inkwell brand identity throughout your application. The system includes Deep Navy (#0C5C3D), Warm Gold (#D4A537), Charcoal (#2E2E2E), and typography using Source Serif Pro + Inter.
+This guide provides step-by-step instructions for deploying the new Inkwell brand identity throughout your application. The system includes Deep Navy (#0A2F4E), Warm Gold (#D4A537), Charcoal (#2E2E2E), and typography using Source Serif Pro + Inter.
 
 ## ✅ Completed Setup
 
@@ -122,7 +122,7 @@ Update external templates:
 
 ```html
 <!-- Email template header -->
-<div style="background-color: #0C5C3D; padding: 20px; text-align: center;">
+<div style="background-color: #0A2F4E; padding: 20px; text-align: center;">
   <img src="https://yoursite.com/assets/inkwell-logo-white.png" alt="Inkwell" height="40" />
 </div>
 ```

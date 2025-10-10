@@ -29,6 +29,8 @@ import {
   PlotProgressMetrics,
 } from './utils/integration';
 
+import type { PlotAnalysis } from '../../types/plotAnalysis';
+
 /* ========= Store State Interface ========= */
 export interface PlotBoardStore {
   // State
@@ -37,6 +39,11 @@ export interface PlotBoardStore {
   templates: Record<string, PlotBoardTemplate>;
   isLoading: boolean;
   lastError: string | null;
+
+  // Analysis State
+  analysisByProjectId: Record<string, PlotAnalysis | undefined>;
+  setAnalysis: (projectId: string, analysis: PlotAnalysis) => void;
+  clearAnalysis: (projectId: string) => void;
 
   // Board Operations
   createBoard: (projectId: string, title: string, templateId?: string) => Promise<PlotBoard>;
@@ -179,6 +186,17 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
   isLoading: false,
   lastError: null,
   autoSyncConfig: { ...DEFAULT_SYNC_CONFIG },
+
+  // Analysis State
+  analysisByProjectId: {},
+  setAnalysis: (projectId, analysis) =>
+    set((s) => ({ analysisByProjectId: { ...s.analysisByProjectId, [projectId]: analysis } })),
+  clearAnalysis: (projectId) =>
+    set((s) => {
+      const copy = { ...s.analysisByProjectId };
+      delete copy[projectId];
+      return { analysisByProjectId: copy };
+    }),
 
   // Board Operations
   createBoard: async (projectId: string, title: string, templateId?: string) => {

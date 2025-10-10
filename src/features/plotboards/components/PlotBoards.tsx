@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useChaptersStore } from '../../../stores/useChaptersStore';
 import { useSettingsStore } from '../../../stores/useSettingsStore';
-import { useFeatureFlag } from '../../../utils/flags';
+import { useFeatureFlag, isEnabled } from '../../../utils/flags';
 import { usePlotBoardIntegration } from '../hooks/usePlotBoardIntegration';
 import { usePlotBoardStore, initializePlotBoardStore } from '../store';
 import {
@@ -15,6 +15,7 @@ import {
   PlotTemplateCategory,
 } from '../types';
 
+import { PlotAnalysisPanel } from './Insights/PlotAnalysisPanel';
 import { PlotBoard } from './PlotBoard';
 
 interface PlotBoardsProps {
@@ -107,6 +108,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
   const [_selectedCard, setSelectedCard] = useState<PlotCardType | null>(null);
   const [_selectedColumn, setSelectedColumn] = useState<PlotColumnType | null>(null);
   const [_selectedBoard, setSelectedBoard] = useState<PlotBoardType | null>(null);
+  const [activeTab, setActiveTab] = useState<'board' | 'insights'>('board');
 
   // Initialize store
   useEffect(() => {
@@ -612,6 +614,51 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
     );
   }
 
+  // Create tabs configuration
+  const tabs = [
+    {
+      id: 'board',
+      label: 'Plot Board',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2z"
+          />
+        </svg>
+      ),
+      content: (
+        <PlotBoard
+          board={currentBoard}
+          onEditCard={setSelectedCard}
+          onEditColumn={setSelectedColumn}
+          onEditBoard={setSelectedBoard}
+        />
+      ),
+    },
+  ];
+
+  // Add Insights tab if feature is enabled
+  if (isEnabled('aiPlotAnalysis')) {
+    tabs.push({
+      id: 'insights',
+      label: 'Insights',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
+        </svg>
+      ),
+      content: <PlotAnalysisPanel profileId="default" projectId={projectId} />,
+    });
+  }
+
   return (
     <div className="h-full flex flex-col">
       {/* Top Navigation */}
@@ -663,14 +710,30 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
         </div>
       </div>
 
-      {/* Main Board Area */}
-      <div className="flex-1">
-        <PlotBoard
-          board={currentBoard}
-          onEditCard={setSelectedCard}
-          onEditColumn={setSelectedColumn}
-          onEditBoard={setSelectedBoard}
-        />
+      {/* Tabbed Content */}
+      <div className="flex-1 bg-white flex flex-col">
+        {/* Tab Header */}
+        <div className="flex border-b border-gray-200 bg-white">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as 'board' | 'insights')}
+              className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+                activeTab === tab.id
+                  ? 'text-[#0C5C3D] border-[#D4A537]'
+                  : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {tab.icon}
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content */}
+        <div className="flex-1 overflow-hidden">
+          {tabs.find((tab) => tab.id === activeTab)?.content}
+        </div>
       </div>
 
       {/* Modals */}

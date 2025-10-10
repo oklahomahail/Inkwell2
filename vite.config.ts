@@ -74,7 +74,7 @@ export default defineConfig({
         short_name: 'Inkwell',
         description:
           'A sophisticated writing environment for authors, novelists, and creative writers',
-        theme_color: '#0C5C3D', // Navy blue
+        theme_color: '#0A2F4E', // Navy blue
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait-primary',

@@ -79,6 +79,15 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
     category: 'experimental',
   },
 
+  // AI plot analysis
+  AI_PLOT_ANALYSIS: {
+    key: 'aiPlotAnalysis',
+    name: 'AI Plot Analysis',
+    description: 'AI-powered plot structure analysis with insights and recommendations',
+    defaultValue: true,
+    category: 'core',
+  },
+
   // Real-time collaboration (future feature)
   COLLABORATION: {
     key: 'collaboration',

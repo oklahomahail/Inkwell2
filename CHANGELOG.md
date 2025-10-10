@@ -12,7 +12,7 @@ All notable changes to this project are documented here.
 - **Extended color scales** with 50-900 variants for design flexibility
 - **WCAG AA accessibility compliance** maintained across all color combinations
 - **Brand asset integration** with 6 professional PNG variations and optimized SVG assets
-- **Updated all components** to use new Inkwell navy (#0C5C3D) and gold (#D4A537) colors
+- **Updated all components** to use new Inkwell navy (#0A2F4E) and gold (#D4A537) colors
 
 #### **Enhanced Brand Components**
 
@@ -54,7 +54,7 @@ All notable changes to this project are documented here.
   - Fixed invalid PWA manifest icons that were SVG files mislabeled as PNG
   - Generated proper PNG icons at all required sizes (72x72, 96x96, 128x128, 144x144, 152x152, 192x192, 384x384, 512x512)
   - Resolved Progressive Web App installation failures across all browsers
-  - Used company branding colors (#0C5C3D navy, #D4A537 gold) for consistent icon design
+  - Used company branding colors (#0A2F4E navy, #D4A537 gold) for consistent icon design
 
 ### 🔧 Developer Experience Improvements
 

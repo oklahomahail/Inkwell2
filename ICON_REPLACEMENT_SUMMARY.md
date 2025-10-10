@@ -52,7 +52,7 @@ Successfully replaced the generic BookOpen icon from Lucide React with a custom 
 The InkwellFeather icon better represents Inkwell's identity as a professional writing platform:
 
 - **Symbolism**: Feathers represent writing, creativity, and the craft of storytelling
-- **Brand Colors**: Supports Inkwell's Deep Navy (#0C5C3D), Warm Gold (#D4A537), and Charcoal (#22E22E)
+- **Brand Colors**: Supports Inkwell's Deep Navy (#0A2F4E), Warm Gold (#D4A537), and Charcoal (#22E22E)
 - **Consistency**: Creates a more cohesive visual experience across the app
 
 ## Technical Details

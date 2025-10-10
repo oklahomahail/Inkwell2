@@ -22,7 +22,7 @@ Your Inkwell application has been successfully updated with the new blue and gol
 
 ### 3. **PWA & Assets**
 
-- ✅ Updated theme color to navy (#0C5C3D)
+- ✅ Updated theme color to navy (#0A2F4E)
 - ✅ Favicon and app icons remain gold feather for visibility
 
 ## 🎨 New Color Classes Available
