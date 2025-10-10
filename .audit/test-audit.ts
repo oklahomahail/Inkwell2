@@ -13,7 +13,12 @@ const CURRENT_PATH = join(AUDIT_DIR, 'coverage-current.json');
 
 function run(cmd: string) {
   console.log(`\n$ ${cmd}`);
-  execSync(cmd, { stdio: 'inherit' });
+  try {
+    execSync(cmd, { stdio: 'inherit' });
+  } catch (e: any) {
+    // Continue even if tests fail - we just need the coverage report
+    if (e.status !== 1) throw e;
+  }
 }
 
 function readJson<T = any>(p: string): T {
@@ -29,11 +34,16 @@ function vitestWithCoverage(outPath: string) {
   // Run Vitest with coverage and capture summary
   run(`pnpm vitest --run --coverage --coverage.reporter=json-summary`);
   const summaryPath = 'coverage/coverage-summary.json';
-  if (!existsSync(summaryPath)) {
-    throw new Error('coverage/coverage-summary.json not found. Is coverage enabled?');
+  try {
+    if (!existsSync(summaryPath)) {
+      throw new Error('coverage/coverage-summary.json not found. Is coverage enabled?');
+    }
+    const cov = readJson<CovSummary>(summaryPath);
+    writeJson(outPath, cov);
+  } catch (e) {
+    console.error('Failed to process coverage report:', e);
+    throw e;
   }
-  const cov = readJson<CovSummary>(summaryPath);
-  writeJson(outPath, cov);
 }
 
 function listFromEnvOrArgs(): string[] {
