@@ -1,0 +1,704 @@
+
+> inkwell@1.0.2 test:run /Users/davehail/Developer/inkwell
+> vitest run "--reporter=verbose"
+
+
+ RUN  v3.2.4 /Users/davehail/Developer/inkwell
+
+stdout | src/utils/flags.test.ts
+🚩 Feature flags available at window.__inkwellFlags
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Project Analysis > should analyze a project with default options
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Project Analysis > should analyze with custom options
+Analyzing project test-project-123 with options: {
+  includeChapters: [ [32m'chapter1'[39m, [32m'chapter2'[39m ],
+  focusAreas: [ [32m'pacing'[39m, [32m'conflicts'[39m ],
+  detailLevel: [32m'detailed'[39m,
+  mockMode: [33mtrue[39m
+}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Project Analysis > should generate unique analysis IDs
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Project Analysis > should generate unique analysis IDs
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Project Analysis > should force mock mode when requested
+Analyzing project test-project-123 with options: { mockMode: [33mtrue[39m }
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Analysis Structure > should have valid pacing analysis
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Analysis Structure > should have valid conflict analysis
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Analysis Structure > should have valid character analysis
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Analysis Structure > should have valid theme analysis
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Analysis Structure > should have valid suggestions
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Pacing Issues > should validate pacing issue structure
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Conflict Analysis > should validate conflict structure
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Character Analysis > should validate character data structure
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Character Analysis > should validate relationship structure
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Theme Analysis > should validate theme structure
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Analysis History > should return empty history for new project
+Getting analysis history for project test-project-123
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Save Analysis > should save analysis without error
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Save Analysis > should save analysis without error
+Saving analysis: analysis_test-project-123_1760138940882_8j6ncjg
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Error Handling > should handle invalid project ID gracefully
+Analyzing project  with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Performance > should complete analysis in reasonable time
+Analyzing project test-project-123 with options: {}
+
+stdout | src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Performance > should handle multiple concurrent analyses
+Analyzing project project-0 with options: {}
+Analyzing project project-1 with options: {}
+Analyzing project project-2 with options: {}
+Analyzing project project-3 with options: {}
+Analyzing project project-4 with options: {}
+
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Service Status > should report service status correctly 2ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Service Status > should indicate mock mode in development 1ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Project Analysis > should analyze a project with default options 4ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Project Analysis > should analyze with custom options 1ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Project Analysis > should generate unique analysis IDs 1ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Project Analysis > should force mock mode when requested 0ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Analysis Structure > should have valid pacing analysis 1ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Analysis Structure > should have valid conflict analysis 1ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Analysis Structure > should have valid character analysis 1ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Analysis Structure > should have valid theme analysis 0ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Analysis Structure > should have valid suggestions 1ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Pacing Issues > should validate pacing issue structure 0ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Conflict Analysis > should validate conflict structure 0ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Character Analysis > should validate character data structure 0ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Character Analysis > should validate relationship structure 0ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Theme Analysis > should validate theme structure 0ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Analysis History > should return empty history for new project 0ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Save Analysis > should save analysis without error 0ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Error Handling > should handle invalid project ID gracefully 0ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Performance > should complete analysis in reasonable time 0ms
+ ✓ src/services/aiPlotAnalysisService.test.ts > AI Plot Analysis Service > Performance > should handle multiple concurrent analyses 0ms
+stdout | src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should allow setting flag values and persist them
+🚩 Flag exportWizard set to false
+
+stdout | src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should reset flags to defaults
+🚩 Flag exportWizard set to false
+🚩 Flag collaborationUI set to true
+⚠️ Feature Enhanced Collaboration UI requires page reload to take effect
+🚩 Flag exportWizard reset to default (true)
+
+stdout | src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should handle URL parameters correctly
+🚩 Flag exportWizard set to false via URL
+🚩 Flag collaborationUI set to true via URL
+
+stdout | src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should export modified flags as URL parameters
+🚩 Flag exportWizard set to false
+🚩 Flag collaborationUI set to true
+⚠️ Feature Enhanced Collaboration UI requires page reload to take effect
+
+stdout | src/utils/flags.test.ts > Enhanced Feature Flags System > withFeatureFlag Utility > should return null when flag is disabled
+🚩 Flag collaborationUI set to false
+⚠️ Feature Enhanced Collaboration UI requires page reload to take effect
+
+stdout | src/utils/flags.test.ts > Enhanced Feature Flags System > withFeatureFlag Utility > should return fallback when flag is disabled
+🚩 Flag collaborationUI set to false
+⚠️ Feature Enhanced Collaboration UI requires page reload to take effect
+
+stdout | src/utils/flags.test.ts > Enhanced Feature Flags System > Debug Mode Features > should enable debug mode correctly
+🚩 Flag performanceMonitoring set to true
+🚩 Flag debugStorage set to true
+🚩 Flag debugState set to true
+🐛 Debug mode enabled - all debug flags activated
+
+stdout | src/utils/flags.test.ts > Enhanced Feature Flags System > Debug Mode Features > should disable debug mode correctly
+🚩 Flag performanceMonitoring set to true
+🚩 Flag debugStorage set to true
+🚩 Flag debugState set to true
+🐛 Debug mode enabled - all debug flags activated
+🚩 Flag performanceMonitoring set to false
+🚩 Flag debugStorage set to false
+🚩 Flag debugState set to false
+🐛 Debug mode disabled
+
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > New Feature Flags > should have Export Wizard flag 1ms
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > New Feature Flags > should have AI Plot Analysis flag 0ms
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > New Feature Flags > should have Insights Tab flag 0ms
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > New Feature Flags > should have Enhanced Collaboration UI flag 0ms
+ × src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should return correct default values for new flags 6ms
+   → expected false to be true // Object.is equality
+ × src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should allow setting flag values and persist them 1ms
+   → expected undefined to be 'false' // Object.is equality
+ × src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should reset flags to defaults 0ms
+   → expected false to be true // Object.is equality
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should categorize flags correctly 1ms
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should handle URL parameters correctly 1ms
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should export modified flags as URL parameters 1ms
+ × src/utils/flags.test.ts > Enhanced Feature Flags System > useFeatureFlag Hook > should return flag values correctly 0ms
+   → expected false to be true // Object.is equality
+ × src/utils/flags.test.ts > Enhanced Feature Flags System > withFeatureFlag Utility > should return component when flag is enabled 0ms
+   → expected null to be 'TestComponent' // Object.is equality
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > withFeatureFlag Utility > should return null when flag is disabled 0ms
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > withFeatureFlag Utility > should return fallback when flag is disabled 0ms
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > Debug Mode Features > should enable debug mode correctly 0ms
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > Debug Mode Features > should disable debug mode correctly 0ms
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > Unknown Flags Handling > should handle unknown flags gracefully 0ms
+ ✓ src/utils/flags.test.ts > Enhanced Feature Flags System > Console Commands > should expose flag management functions in development 0ms
+ × src/components/Layout/MainLayout.footer.test.tsx > MainLayout Footer > should render footer with complete Inkwell branding 59ms
+   → Found multiple elements with the text: Inkwell
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<h1[39m
+  [33mclass[39m=[32m"text-heading-sm text-slate-900 dark:text-white font-semibold truncate"[39m
+[36m>[39m
+  [0mInkwell[0m
+[36m</h1>[39m
+
+Ignored nodes: comments, script, style
+[36m<span[39m
+  [33mclass[39m=[32m"font-medium"[39m
+[36m>[39m
+  [0mInkwell[0m
+[36m</span>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"main-layout flex"[39m
+    [36m>[39m
+      [36m<aside[39m
+        [33maria-hidden[39m=[32m"false"[39m
+        [33mclass[39m=[32m"sidebar fixed left-0 top-0 h-full z-40 transition-all duration-300 ease-in-out bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col w-64"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"sidebar-header p-4 border-b border-slate-200 dark:border-slate-700"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center justify-between"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex-shrink-0"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"logo-svg-feather-gold"[39m
+                  [33mstyle[39m=[32m"width: 32px; height: 32px;"[39m
+                [36m>[39m
+                  [0mLogo [0m
+                  [0msvg-feather-gold[0m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col min-w-0 flex-1"[39m
+              [36m>[39m
+                [36m<h1[39m
+                  [33mclass[39m=[32m"text-heading-sm text-slate-900 dark:text-white font-semibold truncate"[39m
+                [36m>[39m
+                  [0mInkwell[0m
+                [36m</h1>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-caption text-slate-500 dark:text-slate-400 truncate"[39m
+                [36m>[39m
+                  [0mNo project[0m
+                [36m</p>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<button[39m
+              [33maria-expanded[39m=[32m"true"[39m
+              [33maria-label[39m=[32m"Collapse sidebar"[39m
+              [33mclass[39m=[32m"btn-ghost btn-sm w-8 h-8 p-0 flex-shrink-0 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800 rounded-md ml-2"[39m
+              [33mtabindex[39m=[32m"0"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-menu w-4 h-4 transition-transform duration-200"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M4 12h16"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M4 18h16"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M4 6h16"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"p-4"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33maria-label[39m=[32m"Open command palette"[39m
+            [33mclass[39m=[32m"w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus-ring"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-search w-4 h-4"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m21 21-4.34-4.34"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"11"[39m
+                [33mcy[39m=[32m"11"[39m
+                [33mr[39m=[32m"8"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-left"[39m
+            [36m>[39m
+              [0mSearch or command...[0m
+            [36m</span>[39m
+            [36m<kbd[39m
+              [33mclass[39m=[32m"px-1.5 py-0.5 text-xs font-mono bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded"[39m
+            [36m>[39m
+              [0m⌘K[0m
+            [36m</kbd>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<nav[39m
+          [33mclass[39m=[32m"flex-1 p-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"space-y-1"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nav-item w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all focus-ring bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-house w-5 h-5 flex-shrink-0"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+                [36m/>[39m
+                [36m<pa...
+ ✓ src/components/Layout/MainLayout.footer.test.tsx > MainLayout Footer > should position footer at the bottom of the layout 8ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > Icon Registry > should have consistent icon registry with expected icons 1ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > Icon Registry > should have all icons as valid React components 39ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > Size and Color Variants > should have all size variants defined and working 6ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > Size and Color Variants > should have all color variants defined and working 1ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > InkwellFeather Component > should render valid icon with default props 1ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > InkwellFeather Component > should apply custom className alongside default classes 0ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > InkwellFeather Component > should set proper accessibility attributes 1ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > InkwellFeather Component > should use default aria-label from icon name when not provided 0ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > InkwellFeather Component > should handle invalid icon names gracefully 1ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > InkwellFeather Component > should return null for invalid icon names 0ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > Icon Name Type Safety > should accept all valid icon names from registry 18ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > Integration Tests > should render different icon combinations correctly 2ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > Integration Tests > should handle edge cases with special characters in icon names 1ms
+ ✓ src/components/icons/InkwellFeather.test.tsx > InkwellFeather Icon System > Exports > should export all necessary types and components 0ms
+stdout | src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > Duplicate Tour Prevention > should prevent duplicate tour launches
+[Analytics] tour_started: {
+  timestamp: [33m1760138941160[39m,
+  sessionId: [32m'session_1760138941093_ti3w0i7yi'[39m,
+  userId: [90mundefined[39m,
+  profileId: [90mundefined[39m,
+  version: [32m'1.0.0'[39m,
+  platform: [32m'desktop'[39m,
+  tourType: [32m'full-onboarding'[39m,
+  entryPoint: [32m'tour_provider'[39m
+}
+Tour Analytics: tour_started { tourType: [32m'full-onboarding'[39m, stepCount: [33m8[39m, step: [33m0[39m }
+
+stdout | src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > Duplicate Tour Prevention > should set session marker when tour starts
+[Analytics] tour_started: {
+  timestamp: [33m1760138941166[39m,
+  sessionId: [32m'session_1760138941093_ti3w0i7yi'[39m,
+  userId: [90mundefined[39m,
+  profileId: [90mundefined[39m,
+  version: [32m'1.0.0'[39m,
+  platform: [32m'desktop'[39m,
+  tourType: [32m'full-onboarding'[39m,
+  entryPoint: [32m'tour_provider'[39m
+}
+Tour Analytics: tour_started { tourType: [32m'full-onboarding'[39m, stepCount: [33m8[39m, step: [33m0[39m }
+
+stdout | src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > Never Show Persistence > should persist never show again preference
+[Analytics] tour_never_show_again: {
+  timestamp: [33m1760138941181[39m,
+  sessionId: [32m'session_1760138941093_ti3w0i7yi'[39m,
+  userId: [90mundefined[39m,
+  profileId: [90mundefined[39m,
+  version: [32m'1.0.0'[39m,
+  platform: [32m'desktop'[39m,
+  tourType: [32m'full-onboarding'[39m,
+  step: [33m0[39m
+}
+Tour Analytics: tour_never_show_again { tourType: [32m'full-onboarding'[39m, step: [33m0[39m }
+
+ ✓ src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > Duplicate Tour Prevention > should prevent duplicate tour launches 17ms
+ ✓ src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > Duplicate Tour Prevention > should set session marker when tour starts 3ms
+ ✓ src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > Duplicate Tour Prevention > should not show tour prompt if already prompted this session 1ms
+ ✓ src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > First-run Flow Guards > should show prompt for first-time users 1ms
+ ✓ src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > First-run Flow Guards > should not show prompt if user said never show again 1ms
+ ✓ src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > First-run Flow Guards > should not show prompt during remind me later period 1ms
+ ✓ src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > First-run Flow Guards > should show prompt after remind me later period expires 1ms
+ × src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > OnboardingOrchestrator Session Guards > should prevent welcome modal from showing multiple times in same session 6ms
+   → useTour must be used within a ProfileTourProvider
+ ✓ src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > Never Show Persistence > should persist never show again preference 2ms
+ ✓ src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > Target Element Waiting > should handle missing target elements gracefully 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should return correct default values for new flags
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ src/utils/flags.test.ts:55:54
+     53|   describe('Feature Flag Manager', () => {
+     54|     it('should return correct default values for new flags', () => {
+     55|       expect(featureFlags.isEnabled('exportWizard')).toBe(true);
+       |                                                      ^
+     56|       expect(featureFlags.isEnabled('aiPlotAnalysis')).toBe(true);
+     57|       expect(featureFlags.isEnabled('insightsTab')).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should allow setting flag values and persist them
+AssertionError: expected undefined to be 'false' // Object.is equality
+
+[32m- Expected:[39m 
+"false"
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ src/utils/flags.test.ts:65:65
+     63|       featureFlags.setEnabled('exportWizard', false);
+     64|       expect(featureFlags.isEnabled('exportWizard')).toBe(false);
+     65|       expect(localStorage.getItem('inkwell_flag_exportWizard')).toBe('…
+       |                                                                 ^
+     66| 
+     67|       // Test setting a flag to true
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/utils/flags.test.ts > Enhanced Feature Flags System > Feature Flag Manager > should reset flags to defaults
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ src/utils/flags.test.ts:80:54
+     78|       // Reset specific flag
+     79|       featureFlags.reset('exportWizard');
+     80|       expect(featureFlags.isEnabled('exportWizard')).toBe(true); // De…
+       |                                                      ^
+     81|       expect(localStorage.getItem('inkwell_flag_exportWizard')).toBeNu…
+     82| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/utils/flags.test.ts > Enhanced Feature Flags System > useFeatureFlag Hook > should return flag values correctly
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ src/utils/flags.test.ts:135:46
+    133|   describe('useFeatureFlag Hook', () => {
+    134|     it('should return flag values correctly', () => {
+    135|       expect(useFeatureFlag('exportWizard')).toBe(true);
+       |                                              ^
+    136|       expect(useFeatureFlag('collaborationUI')).toBe(false);
+    137| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/utils/flags.test.ts > Enhanced Feature Flags System > withFeatureFlag Utility > should return component when flag is enabled
+AssertionError: expected null to be 'TestComponent' // Object.is equality
+
+[32m- Expected:[39m 
+"TestComponent"
+
+[31m+ Received:[39m 
+null
+
+ ❯ src/utils/flags.test.ts:148:22
+    146|       const TestComponent = 'TestComponent';
+    147|       const result = withFeatureFlag('exportWizard', TestComponent);
+    148|       expect(result).toBe(TestComponent);
+       |                      ^
+    149|     });
+    150| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  src/components/Layout/MainLayout.footer.test.tsx > MainLayout Footer > should render footer with complete Inkwell branding
+TestingLibraryElementError: Found multiple elements with the text: Inkwell
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<h1[39m
+  [33mclass[39m=[32m"text-heading-sm text-slate-900 dark:text-white font-semibold truncate"[39m
+[36m>[39m
+  [0mInkwell[0m
+[36m</h1>[39m
+
+Ignored nodes: comments, script, style
+[36m<span[39m
+  [33mclass[39m=[32m"font-medium"[39m
+[36m>[39m
+  [0mInkwell[0m
+[36m</span>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"main-layout flex"[39m
+    [36m>[39m
+      [36m<aside[39m
+        [33maria-hidden[39m=[32m"false"[39m
+        [33mclass[39m=[32m"sidebar fixed left-0 top-0 h-full z-40 transition-all duration-300 ease-in-out bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col w-64"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"sidebar-header p-4 border-b border-slate-200 dark:border-slate-700"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center justify-between"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex-shrink-0"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"logo-svg-feather-gold"[39m
+                  [33mstyle[39m=[32m"width: 32px; height: 32px;"[39m
+                [36m>[39m
+                  [0mLogo [0m
+                  [0msvg-feather-gold[0m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col min-w-0 flex-1"[39m
+              [36m>[39m
+                [36m<h1[39m
+                  [33mclass[39m=[32m"text-heading-sm text-slate-900 dark:text-white font-semibold truncate"[39m
+                [36m>[39m
+                  [0mInkwell[0m
+                [36m</h1>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-caption text-slate-500 dark:text-slate-400 truncate"[39m
+                [36m>[39m
+                  [0mNo project[0m
+                [36m</p>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<button[39m
+              [33maria-expanded[39m=[32m"true"[39m
+              [33maria-label[39m=[32m"Collapse sidebar"[39m
+              [33mclass[39m=[32m"btn-ghost btn-sm w-8 h-8 p-0 flex-shrink-0 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800 rounded-md ml-2"[39m
+              [33mtabindex[39m=[32m"0"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-menu w-4 h-4 transition-transform duration-200"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M4 12h16"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M4 18h16"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M4 6h16"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"p-4"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33maria-label[39m=[32m"Open command palette"[39m
+            [33mclass[39m=[32m"w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus-ring"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-search w-4 h-4"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m21 21-4.34-4.34"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"11"[39m
+                [33mcy[39m=[32m"11"[39m
+                [33mr[39m=[32m"8"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-left"[39m
+            [36m>[39m
+              [0mSearch or command...[0m
+            [36m</span>[39m
+            [36m<kbd[39m
+              [33mclass[39m=[32m"px-1.5 py-0.5 text-xs font-mono bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded"[39m
+            [36m>[39m
+              [0m⌘K[0m
+            [36m</kbd>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<nav[39m
+          [33mclass[39m=[32m"flex-1 p-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"space-y-1"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nav-item w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all focus-ring bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-house w-5 h-5 flex-shrink-0"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+                [36m/>[39m
+                [36m<pa...
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/components/Layout/MainLayout.footer.test.tsx:95:19
+     93| 
+     94|     // Check for complete branding - the user-visible behavior that ma…
+     95|     expect(screen.getByText('Inkwell')).toBeInTheDocument();
+       |                   ^
+     96|     expect(screen.getByText('by')).toBeInTheDocument();
+     97|     expect(screen.getByText('Nexus Partners')).toBeInTheDocument();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  src/components/Onboarding/TourGating.test.tsx > Tour Gating + First-run Flow (A1) > OnboardingOrchestrator Session Guards > should prevent welcome modal from showing multiple times in same session
+Error: useTour must be used within a ProfileTourProvider
+ ❯ useTour src/components/Onboarding/ProfileTourProvider.tsx:548:11
+    546|   const context = useContext(TourContext);
+    547|   if (!context) {
+    548|     throw new Error('useTour must be used within a ProfileTourProvider…
+       |           ^
+    549|   }
+    550|   return context;
+ ❯ WelcomeModal src/components/Onboarding/WelcomeModal.tsx:24:89
+ ❯ Object.react-stack-bottom-frame node_modules/.pnpm/react-dom@19.1.0_react@19.1.0/node_modules/react-dom/cjs/react-dom-client.development.js:23863:20
+ ❯ renderWithHooks node_modules/.pnpm/react-dom@19.1.0_react@19.1.0/node_modules/react-dom/cjs/react-dom-client.development.js:5529:22
+ ❯ updateFunctionComponent node_modules/.pnpm/react-dom@19.1.0_react@19.1.0/node_modules/react-dom/cjs/react-dom-client.development.js:8897:19
+ ❯ beginWork node_modules/.pnpm/react-dom@19.1.0_react@19.1.0/node_modules/react-dom/cjs/react-dom-client.development.js:10522:18
+ ❯ runWithFiberInDEV node_modules/.pnpm/react-dom@19.1.0_react@19.1.0/node_modules/react-dom/cjs/react-dom-client.development.js:1522:13
+ ❯ performUnitOfWork node_modules/.pnpm/react-dom@19.1.0_react@19.1.0/node_modules/react-dom/cjs/react-dom-client.development.js:15140:22
+ ❯ workLoopSync node_modules/.pnpm/react-dom@19.1.0_react@19.1.0/node_modules/react-dom/cjs/react-dom-client.development.js:14956:41
+ ❯ renderRootSync node_modules/.pnpm/react-dom@19.1.0_react@19.1.0/node_modules/react-dom/cjs/react-dom-client.development.js:14936:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  3 failed | 2 passed (5)
+      Tests  7 failed | 58 passed (65)
+   Start at  18:29:00
+   Duration  1.06s (transform 291ms, setup 472ms, collect 889ms, tests 203ms, environment 1.81s, prepare 411ms)
+
+ ELIFECYCLE  Command failed with exit code 1.
