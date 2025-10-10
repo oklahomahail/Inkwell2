@@ -1,1 +1,130 @@
-// src/components/ViewSwitcher.tsx - Fixed import React, { useState, useCallback } from 'react'; import { useAppContext, View } from '@/context/AppContext'; import { PlotBoards } from '../features/plotboards'; import { useFeatureDiscovery } from '../hooks/useAnalyticsTracking'; // Error boundaries // Import enhanced components import EnhancedDashboard from './Dashboard/EnhancedDashboard'; import { FeatureErrorBoundary } from './ErrorBoundary'; import AnalysisPanel from './Panels/AnalysisPanel'; import SettingsPanel from './Panels/SettingsPanel'; import TimelinePanel from './Panels/TimelinePanel'; import StoryPlanningView from './Views/StoryPlanningView'; import EnhancedWritingPanel from './Writing/EnhancedWritingPanel'; // Feature-flagged imports const ViewSwitcher: React.FC = () => { const { state, currentProject, updateProject } = useAppContext(); const { recordFeatureUse } = useFeatureDiscovery(); const [_selectedText, _setSelectedText] = useState(''); // Get current project content or default const _draftText = currentProject?.content || ''; // Handle text changes and save to current project const _handleTextChange = useCallback( (value: string) => { if (currentProject) { const updatedProject = { ...currentProject, content: value, updatedAt: Date.now(), }; updateProject(updatedProject); } }, [currentProject, updateProject], ); // Handle text selection for Claude integration const _handleTextSelect = useCallback(() => { if (typeof window !== 'undefined') { const selection = window.getSelection(); const selected = selection?.toString() || ''; _setSelectedText(selected); } }, []); const currentView = state.view; // Track feature usage when switching views React.useEffect(() => { switch (currentView) { case View.PlotBoards: recordFeatureUse('plot_boards'); break; case View.Timeline: recordFeatureUse('timeline'); break; case View.Analysis: recordFeatureUse('analytics'); break; case View.Writing: recordFeatureUse('writing_mode'); break; } }, [currentView, recordFeatureUse]); switch (currentView) { case View.Dashboard: return ( <FeatureErrorBoundary featureName="Dashboard"> <EnhancedDashboard /> </FeatureErrorBoundary> ); case View.Writing: return ( <FeatureErrorBoundary featureName="Writing Editor"> <EnhancedWritingPanel /> </FeatureErrorBoundary> ); case View.Timeline: return ( <FeatureErrorBoundary featureName="Timeline"> <TimelinePanel /> </FeatureErrorBoundary> ); case View.Analysis: return ( <FeatureErrorBoundary featureName="Analytics"> <AnalysisPanel /> </FeatureErrorBoundary> ); case View.Planning: return ( <FeatureErrorBoundary featureName="Story Planning"> <StoryPlanningView /> </FeatureErrorBoundary> ); case View.PlotBoards: return currentProject ? ( <FeatureErrorBoundary featureName="Plot Boards"> <PlotBoards projectId={currentProject.id} /> </FeatureErrorBoundary> ) : ( <div className="flex items-center justify-center h-full"> <p className="text-gray-500">Please select a project to use Plot Boards</p> </div> ); case View.Settings: return ( <FeatureErrorBoundary featureName="Settings"> <SettingsPanel /> </FeatureErrorBoundary> ); default: return ( <FeatureErrorBoundary featureName="Dashboard"> <EnhancedDashboard /> </FeatureErrorBoundary> ); } }; export default ViewSwitcher; 
+// src/components/ViewSwitcher.tsx - Fixed
+import React, { useState, useCallback } from 'react';
+
+import { useAppContext, View } from '@/context/AppContext';
+
+import { PlotBoards } from '../features/plotboards';
+import { useFeatureDiscovery } from '../hooks/useAnalyticsTracking';
+
+// Error boundaries
+
+// Import enhanced components
+
+import EnhancedDashboard from './Dashboard/EnhancedDashboard';
+import { FeatureErrorBoundary } from './ErrorBoundary';
+import AnalysisPanel from './Panels/AnalysisPanel';
+import SettingsPanel from './Panels/SettingsPanel';
+import TimelinePanel from './Panels/TimelinePanel';
+import StoryPlanningView from './Views/StoryPlanningView';
+import EnhancedWritingPanel from './Writing/EnhancedWritingPanel';
+// Feature-flagged imports
+
+const ViewSwitcher: React.FC = () => {
+  const { state, currentProject, updateProject } = useAppContext();
+  const { recordFeatureUse } = useFeatureDiscovery();
+  const [_selectedText, _setSelectedText] = useState('');
+
+  // Get current project content or default
+  const _draftText = currentProject?.content || '';
+
+  // Handle text changes and save to current project
+  const _handleTextChange = useCallback(
+    (value: string) => {
+      if (currentProject) {
+        const updatedProject = {
+          ...currentProject,
+          content: value,
+          updatedAt: Date.now(),
+        };
+        updateProject(updatedProject);
+      }
+    },
+    [currentProject, updateProject],
+  );
+
+  // Handle text selection for Claude integration
+  const _handleTextSelect = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const selection = window.getSelection();
+      const selected = selection?.toString() || '';
+      _setSelectedText(selected);
+    }
+  }, []);
+
+  const currentView = state.view;
+
+  // Track feature usage when switching views
+  React.useEffect(() => {
+    switch (currentView) {
+      case View.PlotBoards:
+        recordFeatureUse('plot_boards');
+        break;
+      case View.Timeline:
+        recordFeatureUse('timeline');
+        break;
+      case View.Analysis:
+        recordFeatureUse('analytics');
+        break;
+      case View.Writing:
+        recordFeatureUse('writing_mode');
+        break;
+    }
+  }, [currentView, recordFeatureUse]);
+
+  switch (currentView) {
+    case View.Dashboard:
+      return (
+        <FeatureErrorBoundary featureName="Dashboard">
+          <EnhancedDashboard />
+        </FeatureErrorBoundary>
+      );
+    case View.Writing:
+      return (
+        <FeatureErrorBoundary featureName="Writing Editor">
+          <EnhancedWritingPanel />
+        </FeatureErrorBoundary>
+      );
+    case View.Timeline:
+      return (
+        <FeatureErrorBoundary featureName="Timeline">
+          <TimelinePanel />
+        </FeatureErrorBoundary>
+      );
+    case View.Analysis:
+      return (
+        <FeatureErrorBoundary featureName="Analytics">
+          <AnalysisPanel />
+        </FeatureErrorBoundary>
+      );
+    case View.Planning:
+      return (
+        <FeatureErrorBoundary featureName="Story Planning">
+          <StoryPlanningView />
+        </FeatureErrorBoundary>
+      );
+    case View.PlotBoards:
+      return currentProject ? (
+        <FeatureErrorBoundary featureName="Plot Boards">
+          <PlotBoards projectId={currentProject.id} />
+        </FeatureErrorBoundary>
+      ) : (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500">Please select a project to use Plot Boards</p>
+        </div>
+      );
+    case View.Settings:
+      return (
+        <FeatureErrorBoundary featureName="Settings">
+          <SettingsPanel />
+        </FeatureErrorBoundary>
+      );
+    default:
+      return (
+        <FeatureErrorBoundary featureName="Dashboard">
+          <EnhancedDashboard />
+        </FeatureErrorBoundary>
+      );
+  }
+};
+
+export default ViewSwitcher;
