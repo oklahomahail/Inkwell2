@@ -1,0 +1,29 @@
+{
+  "id": "classic-manuscript",
+  "label": "Classic Manuscript",
+  "description": "12pt Garamond, double-spaced, traditional margins - industry standard for submissions",
+  "baseFont": "Garamond",
+  "fontSizePt": 12,
+  "lineSpacing": 2,
+  "marginsIn": { 
+    "top": 1, 
+    "right": 1, 
+    "bottom": 1, 
+    "left": 1.25 
+  },
+  "header": { 
+    "left": "{author}", 
+    "center": "", 
+    "right": "{title} — {page}" 
+  },
+  "footer": { 
+    "center": "" 
+  },
+  "sceneBreak": "***",
+  "chapterPageBreak": true,
+  "watermark": { 
+    "svgPath": "shared/watermark.svg", 
+    "opacity": 0.05, 
+    "position": "center" 
+  }
+}

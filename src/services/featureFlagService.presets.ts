@@ -1,5 +1,4 @@
-// src/services/featureFlagService.presets.ts
-
+// src/services/featureFlagService.presets.ts 
 export interface FeatureFlagPreset {
   ui: {
     showPowerMenu: boolean;
@@ -7,7 +6,6 @@ export interface FeatureFlagPreset {
     showAdvancedExport: boolean;
     showAdvancedSettings: boolean;
     showKeyboardShortcuts: boolean;
-    showThemeSelector: boolean;
   };
   features: {
     // Core writing features (always enabled)
@@ -16,7 +14,6 @@ export interface FeatureFlagPreset {
     scenes: boolean;
     notesBasic: boolean;
     exportBasic: boolean;
-
     // Advanced features (gated in Beginner mode)
     plotBoards: boolean;
     timeline: boolean;
@@ -50,7 +47,6 @@ export const BeginnerPreset: FeatureFlagPreset = {
     showAdvancedExport: false,
     showAdvancedSettings: false,
     showKeyboardShortcuts: false,
-    showThemeSelector: false,
   },
   features: {
     // Core writing features - always available
@@ -59,7 +55,6 @@ export const BeginnerPreset: FeatureFlagPreset = {
     scenes: true,
     notesBasic: true,
     exportBasic: true,
-
     // Advanced features - hidden until Pro mode
     plotBoards: false,
     timeline: false,
@@ -93,7 +88,6 @@ export const ProPreset: FeatureFlagPreset = {
     showAdvancedExport: true,
     showAdvancedSettings: true,
     showKeyboardShortcuts: true,
-    showThemeSelector: true,
   },
   features: {
     // All features enabled

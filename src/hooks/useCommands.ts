@@ -8,8 +8,7 @@ export function useCommands(
   selectedText?: string,
   onCommandExecute?: (commandId: string) => void,
 ): Command[] {
-  const { setView, addProject, currentProject, claudeActions, setTheme } = useAppContext();
-
+  const { setView, addProject, currentProject, claudeActions } = useAppContext();
   const { showToast } = useToast();
 
   return useMemo(() => {
@@ -82,7 +81,6 @@ export function useCommands(
           showToast('Switched to Settings', 'success');
         },
       },
-
       // ========================================
       // PROJECT COMMANDS
       // ========================================
@@ -110,36 +108,6 @@ export function useCommands(
             onCommandExecute?.('project-new');
             showToast(`Created project: ${projectName}`, 'success');
           }
-        },
-      },
-
-      // ========================================
-      // THEME COMMANDS
-      // ========================================
-      {
-        id: 'theme-light',
-        label: 'Light Theme',
-        description: 'Switch to light theme',
-        icon: '☀️',
-        category: 'navigation',
-        keywords: ['light', 'theme', 'bright'],
-        action: () => {
-          setTheme('light');
-          onCommandExecute?.('theme-light');
-          showToast('Switched to Light Theme', 'success');
-        },
-      },
-      {
-        id: 'theme-dark',
-        label: 'Dark Theme',
-        description: 'Switch to dark theme',
-        icon: '🌙',
-        category: 'navigation',
-        keywords: ['dark', 'theme', 'night'],
-        action: () => {
-          setTheme('dark');
-          onCommandExecute?.('theme-dark');
-          showToast('Switched to Dark Theme', 'success');
         },
       },
     ];
@@ -266,7 +234,6 @@ export function useCommands(
     setView,
     addProject,
     claudeActions,
-    setTheme,
     showToast,
     onCommandExecute,
   ]);

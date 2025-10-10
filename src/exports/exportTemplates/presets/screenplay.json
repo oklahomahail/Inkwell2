@@ -1,0 +1,22 @@
+{
+  "id": "screenplay",
+  "label": "Screenplay Format",
+  "description": "12pt Courier, industry standard screenplay formatting",
+  "baseFont": "Times New Roman",
+  "fontSizePt": 12,
+  "lineSpacing": 1,
+  "marginsIn": { 
+    "top": 1, 
+    "right": 1, 
+    "bottom": 0.5, 
+    "left": 1.5 
+  },
+  "header": { 
+    "right": "{page}." 
+  },
+  "footer": { 
+    "center": "" 
+  },
+  "sceneBreak": "",
+  "chapterPageBreak": false
+}

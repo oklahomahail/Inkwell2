@@ -8,15 +8,12 @@ import {
   Menu,
   Search,
   Bell,
-  Sun,
-  Moon,
   Command,
   Plus,
   Kanban,
   Palette,
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-
 import { InkwellLogo } from '@/components/Brand';
 import { InkwellFeather } from '@/components/icons/InkwellFeather';
 import { useAppContext, View } from '@/context/AppContext';
@@ -24,13 +21,11 @@ import { useCommands } from '@/hooks/useCommands';
 import { useSmartSearch } from '@/hooks/useSmartSearch';
 import { cn } from '@/utils/cn';
 import { useFeatureFlag } from '@/utils/flags';
-
 import { CommandPalette } from '../CommandPalette/CommandPalette';
 import NotificationsPanel from '../NotificationsPanel';
 import { ProfileSwitcher } from '../ProfileSwitcher';
 import { PWAOfflineIndicator } from '../PWA';
 import { SmartSearchModal } from '../Search/SmartSearchModal';
-
 import { Footer } from './Footer';
 
 interface MainLayoutProps {
@@ -104,7 +99,6 @@ const _brandNavigationItems = [
 const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const { state, dispatch } = useAppContext();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
   // Command Palette
@@ -139,7 +133,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         shortcut: '⌘6',
         description: 'Kanban-style plot and scene organization (Experimental)',
       };
-
       items.splice(planningIndex + 1, 0, plotBoardsItem);
 
       // Update shortcut numbers for items after Plot Boards
@@ -155,24 +148,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   // Load preferences from localStorage
   useEffect(() => {
     const savedCollapsed = localStorage.getItem('inkwell-sidebar-collapsed');
-    const savedDarkMode = localStorage.getItem('inkwell-dark-mode');
-
     if (savedCollapsed) {
       setSidebarCollapsed(JSON.parse(savedCollapsed));
     }
-
-    if (savedDarkMode) {
-      setIsDarkMode(JSON.parse(savedDarkMode));
-    } else {
-      // Default to light mode
-      setIsDarkMode(false);
-    }
   }, []);
-
-  // Apply dark mode to document
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDarkMode);
-  }, [isDarkMode]);
 
   // Global keyboard shortcuts
   useEffect(() => {
@@ -184,7 +163,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         return;
       }
 
-      // Cmd+Shift+F or Ctrl+Shift+F for Search (handled by useSmartSearch hook)
       // Bell notifications with Cmd+Shift+N
       if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'n') {
         event.preventDefault();
@@ -225,13 +203,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     localStorage.setItem('inkwell-sidebar-collapsed', JSON.stringify(newCollapsed));
   };
 
-  const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
-    localStorage.setItem('inkwell-dark-mode', JSON.stringify(newDarkMode));
-    dispatch({ type: 'SET_THEME', payload: newDarkMode ? 'dark' : 'light' });
-  };
-
   const currentProject = state.projects.find((p) => p.id === state.currentProjectId);
 
   return (
@@ -248,14 +219,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
           'sidebar',
           'fixed left-0 top-0 h-full z-40',
           'transition-[width] duration-300 ease-out',
-          'bg-white dark:bg-inkwell-charcoal',
-          'border-r border-inkwell-gold/20 dark:border-inkwell-gold/30',
+          'bg-white',
+          'border-r border-inkwell-gold/20',
           'overflow-x-hidden', // Prevent content overflow
         )}
         style={{ width: 'var(--sidebar-w)' }}
       >
         {/* Sidebar Header */}
-        <div className="sidebar-header relative p-4 border-b border-inkwell-gold/20 bg-inkwell-navy dark:bg-inkwell-navy">
+        <div className="sidebar-header relative p-4 border-b border-inkwell-gold/20 bg-inkwell-navy">
           <div className="flex items-center">
             {/* Brand icon - always visible */}
             <div className="flex-shrink-0">
@@ -267,7 +238,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
               className={cn(
                 'wordmark-transition',
                 'ml-2 transition-all duration-300 ease-out overflow-hidden',
-                sidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-auto opacity-100',
+                sidebarCollapsed
+                  ? 'w-0 opacity-0 pointer-events-none'
+                  : 'w-auto opacity-100',
               )}
             >
               <span className="font-serif font-semibold tracking-wide text-white whitespace-nowrap">
@@ -287,14 +260,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             className={cn(
               'sidebar-toggle',
               'absolute -right-3 top-1/2 -translate-y-1/2',
-              'w-8 h-8 rounded-full shadow-md border bg-white dark:bg-slate-900',
+              'w-8 h-8 rounded-full shadow-md border bg-white',
               'flex items-center justify-center z-50',
-              'hover:bg-slate-50 dark:hover:bg-slate-800',
+              'hover:bg-slate-50',
               'focus-ring border-inkwell-gold/30',
             )}
             aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            <Menu className="w-4 h-4 text-slate-700 dark:text-slate-300" />
+            <Menu className="w-4 h-4 text-slate-700" />
           </button>
         </div>
 
@@ -304,10 +277,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             <button
               className={cn(
                 'w-full flex items-center gap-3',
-                'px-3 py-2 text-sm text-slate-600 dark:text-slate-400',
-                'bg-slate-50 dark:bg-slate-700/50',
-                'border border-slate-200 dark:border-slate-600',
-                'rounded-md hover:bg-slate-100 dark:hover:bg-slate-700',
+                'px-3 py-2 text-sm text-slate-600',
+                'bg-slate-50',
+                'border border-slate-200',
+                'rounded-md hover:bg-slate-100',
                 'transition-colors focus-ring',
               )}
               aria-label="Open command palette"
@@ -315,7 +288,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             >
               <Search className="w-4 h-4" />
               <span className="flex-1 text-left">Search or command...</span>
-              <kbd className="px-1.5 py-0.5 text-xs font-mono bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded">
+              <kbd className="px-1.5 py-0.5 text-xs font-mono bg-white border border-slate-300 rounded">
                 ⌘K
               </kbd>
             </button>
@@ -338,16 +311,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                     'focus-ring',
                     isActive
                       ? 'bg-inkwell-gold/20 text-inkwell-gold border border-inkwell-gold/30'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-inkwell-gold/10 dark:hover:bg-inkwell-gold/20 hover:text-inkwell-gold dark:hover:text-inkwell-gold',
+                      : 'text-slate-700 hover:bg-inkwell-gold/10 hover:text-inkwell-gold',
                     sidebarCollapsed && 'justify-center',
                   )}
                   title={sidebarCollapsed ? `${item.label} (${item.shortcut})` : undefined}
                 >
-                  <Icon className={cn('w-5 h-5', sidebarCollapsed ? 'mx-auto' : 'flex-shrink-0')} />
+                  <Icon
+                    className={cn(
+                      'w-5 h-5',
+                      sidebarCollapsed ? 'mx-auto' : 'flex-shrink-0',
+                    )}
+                  />
                   {!sidebarCollapsed && (
                     <>
                       <span className="flex-1 text-left">{item.label}</span>
-                      <kbd className="text-xs text-slate-400 dark:text-slate-500 font-mono">
+                      <kbd className="text-xs text-slate-400 font-mono">
                         {item.shortcut}
                       </kbd>
                     </>
@@ -360,7 +338,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
         {/* Quick Actions */}
         {!sidebarCollapsed && (
-          <div className="p-4 border-t border-inkwell-gold/20 dark:border-inkwell-gold/30">
+          <div className="p-4 border-t border-inkwell-gold/20">
             <div className="space-y-2">
               <button
                 className="w-full bg-inkwell-gold hover:bg-inkwell-gold/90 text-inkwell-navy font-medium px-4 py-2 rounded-md text-sm transition-colors"
@@ -372,27 +350,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                 <Plus className="w-4 h-4 inline mr-2" />
                 New Project
               </button>
+              
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={toggleDarkMode}
-                  className="btn btn-ghost btn-sm text-slate-700 dark:text-slate-300 hover:text-inkwell-gold dark:hover:text-inkwell-gold"
-                  aria-label="Toggle dark mode"
-                >
-                  {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                  {isDarkMode ? 'Light' : 'Dark'}
-                </button>
-                <button
-                  className="btn btn-ghost btn-sm text-slate-700 dark:text-slate-300 hover:text-inkwell-gold dark:hover:text-inkwell-gold"
+                  className="btn btn-ghost btn-sm text-slate-700 hover:text-inkwell-gold"
                   aria-label="Notifications"
                 >
                   <Bell className="w-4 h-4" />
                 </button>
               </div>
+
               {/* Brand showcase link for developers */}
               {import.meta.env.DEV && (
                 <a
                   href="./brand"
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-inkwell-gold dark:hover:text-inkwell-gold hover:bg-inkwell-gold/10 dark:hover:bg-inkwell-gold/20 rounded-md transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:text-inkwell-gold hover:bg-inkwell-gold/10 rounded-md transition-colors"
                 >
                   <Palette className="w-4 h-4" />
                   Brand System
@@ -404,7 +376,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
         {/* Collapsed mode quick actions */}
         {sidebarCollapsed && (
-          <div className="p-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
+          <div className="p-2 border-t border-slate-200 space-y-2">
             <button
               className="w-full btn btn-primary btn-sm p-2"
               onClick={() => {
@@ -415,13 +387,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             >
               <Plus className="w-4 h-4" />
             </button>
-            <button
-              onClick={toggleDarkMode}
-              className="w-full btn btn-ghost btn-sm p-2"
-              title="Toggle dark mode"
-            >
-              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
           </div>
         )}
       </aside>
@@ -431,24 +396,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         className={cn(
           'main-content',
           'min-h-screen transition-[margin] duration-300 ease-out',
-          'bg-slate-50 dark:bg-slate-900',
+          'bg-slate-50',
         )}
         style={{ marginLeft: 'var(--sidebar-w)' }}
       >
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white/80 dark:bg-inkwell-charcoal/80 backdrop-blur-sm border-b border-inkwell-gold/20 dark:border-inkwell-gold/30">
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-sm border-b border-inkwell-gold/20">
           <div className="px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <h2 className="text-heading-lg text-slate-900 dark:text-white">
-                  {navigationItems.find((item) => item.view === state.view)?.label || 'Dashboard'}
+                <h2 className="text-heading-lg text-slate-900">
+                  {navigationItems.find((item) => item.view === state.view)?.label ||
+                    'Dashboard'}
                 </h2>
                 {currentProject && (
-                  <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full">
+                  <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-slate-600 dark:text-slate-300">
-                      {currentProject.name}
-                    </span>
+                    <span className="text-sm text-slate-600">{currentProject.name}</span>
                   </div>
                 )}
               </div>
@@ -456,6 +420,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
               <div className="flex items-center gap-3">
                 <PWAOfflineIndicator variant="badge" />
                 <ProfileSwitcher />
+
                 <div className="flex items-center gap-2">
                   <button
                     className="btn btn-ghost btn-sm"
@@ -464,6 +429,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                   >
                     <Command className="w-4 h-4" />
                   </button>
+
                   <button
                     className="btn btn-ghost btn-sm"
                     aria-label="Search (⌘⇧F)"
@@ -471,6 +437,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                   >
                     <Search className="w-4 h-4" />
                   </button>
+
                   <div className="relative">
                     <button
                       className="btn btn-ghost btn-sm"
@@ -481,7 +448,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                       <Bell className="w-4 h-4" />
                     </button>
                     {showNotifications && (
-                      <div className="absolute right-0 top-full mt-2 z-50" data-notifications-panel>
+                      <div
+                        className="absolute right-0 top-full mt-2 z-50"
+                        data-notifications-panel
+                      >
                         <NotificationsPanel
                           onClose={() => setShowNotifications(false)}
                           onMarkAsRead={(id) => console.log('Mark as read:', id)}

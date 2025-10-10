@@ -29,7 +29,6 @@ export interface Project {
 export interface AppState {
   claude: any;
   view: View;
-  theme: 'light' | 'dark';
   projects: Project[];
   currentProjectId: string | null;
   isLoading: boolean;
@@ -45,7 +44,6 @@ export interface AppState {
 // ===== ACTIONS =====
 type AppAction =
   | { type: 'SET_VIEW'; payload: View }
-  | { type: 'SET_THEME'; payload: 'light' | 'dark' }
   | { type: 'ADD_PROJECT'; payload: Project }
   | { type: 'UPDATE_PROJECT'; payload: Project }
   | { type: 'DELETE_PROJECT'; payload: string }
@@ -61,7 +59,6 @@ type AppAction =
 // ===== INITIAL STATE =====
 const initialState: AppState = {
   view: View.Dashboard,
-  theme: 'light',
   projects: [],
   currentProjectId: null,
   isLoading: false,
@@ -80,8 +77,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'SET_VIEW':
       return { ...state, view: action.payload };
-    case 'SET_THEME':
-      return { ...state, theme: action.payload };
     case 'ADD_PROJECT':
       return { ...state, projects: [...state.projects, action.payload] };
     case 'UPDATE_PROJECT':
@@ -109,7 +104,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'SET_AUTO_SAVE_SAVING':
       return {
         ...state,
-        autoSave: { ...state.autoSave, isSaving: action.payload },
+        autoSave: {
+          ...state.autoSave,
+          isSaving: action.payload,
+        },
       };
     case 'SET_AUTO_SAVE_SUCCESS':
       return {
@@ -123,7 +121,11 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'SET_AUTO_SAVE_ERROR':
       return {
         ...state,
-        autoSave: { ...state.autoSave, isSaving: false, error: action.payload },
+        autoSave: {
+          ...state.autoSave,
+          isSaving: false,
+          error: action.payload,
+        },
       };
     default:
       return state;
@@ -137,7 +139,6 @@ export interface AppContextValue {
   currentProject: Project | null;
   projects: Project[];
   setView: (view: View) => void;
-  setTheme: (theme: 'light' | 'dark') => void;
   addProject: (project: Project) => void;
   updateProject: (project: Project) => void;
   deleteProject: (id: string) => void;
@@ -197,14 +198,6 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       console.warn('Failed to parse projects from localStorage:', error);
     }
 
-    try {
-      const theme = (localStorage.getItem('inkwell_theme') as 'light' | 'dark') || 'light';
-      dispatch({ type: 'SET_THEME', payload: theme });
-      document.documentElement.classList.toggle('dark', theme === 'dark');
-    } catch (error) {
-      console.warn('Failed to load theme from localStorage:', error);
-    }
-
     // Load current project ID from localStorage
     try {
       const storedProjectId = localStorage.getItem('inkwell_current_project_id');
@@ -224,16 +217,6 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       console.warn('Failed to save projects to localStorage:', error);
     }
   }, [state.projects]);
-
-  // Persist & apply theme
-  useEffect(() => {
-    try {
-      localStorage.setItem('inkwell_theme', state.theme);
-      document.documentElement.classList.toggle('dark', state.theme === 'dark');
-    } catch (error) {
-      console.warn('Failed to save theme to localStorage:', error);
-    }
-  }, [state.theme]);
 
   // Persist current project ID
   useEffect(() => {
@@ -256,7 +239,6 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     currentProject,
     projects: state.projects,
     setView: (view) => dispatch({ type: 'SET_VIEW', payload: view }),
-    setTheme: (theme) => dispatch({ type: 'SET_THEME', payload: theme }),
     addProject: (project) => dispatch({ type: 'ADD_PROJECT', payload: project }),
     updateProject: (project) => dispatch({ type: 'UPDATE_PROJECT', payload: project }),
     deleteProject: (id) => dispatch({ type: 'DELETE_PROJECT', payload: id }),
@@ -274,17 +256,13 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       suggestContinuation: claudeContext.suggestContinuation,
       improveText: async (text: string, goal?: string) => {
         if (goal) {
-          const prompt = `Please improve this text with the goal of ${goal}:
-
-${text}`;
+          const prompt = `Please improve this text with the goal of ${goal}: ${text}`;
           return claudeContext.sendMessage(prompt);
         }
         if (claudeContext.improveText) {
           return claudeContext.improveText(text);
         }
-        const prompt = `Please improve this text:
-
-${text}`;
+        const prompt = `Please improve this text: ${text}`;
         return claudeContext.sendMessage(prompt);
       },
       analyzeWritingStyle: claudeContext.analyzeWritingStyle,
@@ -292,9 +270,7 @@ ${text}`;
       analyzeCharacter:
         claudeContext.analyzeCharacter ||
         (async (character: string) => {
-          const prompt = `Please analyze this character:
-
-${character}`;
+          const prompt = `Please analyze this character: ${character}`;
           return claudeContext.sendMessage(prompt);
         }),
       brainstormIdeas: claudeContext.brainstormIdeas,

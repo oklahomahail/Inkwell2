@@ -2,9 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-// Brand System
-import { BrandThemeProvider } from '@/components/Brand';
-
 // UI + panels
 import ClaudeAssistant from './components/ClaudeAssistant';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
@@ -26,16 +23,18 @@ import {
 } from './components/Recovery/StorageRecoveryBanner';
 import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
-import { WhatsNewPanel } from './components/WhatsNew/WhatsNewPanel';
+
 // Pages
 // Context and providers
 import { useAppContext } from './context/AppContext';
 import { useEditorContext } from './context/EditorContext';
 import BrandPage from './pages/Brand';
 import Login from './pages/Login';
+
 // Profile routing components
 import { ProfileGate } from './routes/shell/ProfileGate';
 import { ProfilePicker } from './routes/shell/ProfilePicker';
+
 // Error boundaries
 // Services
 import { connectivityService } from './services/connectivityService';
@@ -215,7 +214,10 @@ function ProfileAppShell() {
 
         {/* Offline Queue Modal */}
         {showOfflineQueue && (
-          <OfflineQueueModal isOpen={showOfflineQueue} onClose={() => setShowOfflineQueue(false)} />
+          <OfflineQueueModal
+            isOpen={showOfflineQueue}
+            onClose={() => setShowOfflineQueue(false)}
+          />
         )}
 
         {/* Command Palette UI */}
@@ -236,8 +238,6 @@ function ProfileAppShell() {
         {import.meta.env.DEV && <StorageDebugPanel />}
       </MainLayout>
 
-      {/* What's New Panel - shown once per profile */}
-      <WhatsNewPanel />
     </>
   );
 }
@@ -258,20 +258,19 @@ function OfflineQueueModal(props: { isOpen: boolean; onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Queued Operations</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             ×
           </button>
         </div>
-
         <div className="space-y-2 max-h-60 overflow-y-auto">
           {queuedOperations.length === 0 ? (
             <p className="text-gray-500">No operations queued</p>
           ) : (
             queuedOperations.map((op) => (
-              <div key={String(op.id)} className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
+              <div key={String(op.id)} className="p-2 bg-gray-100 rounded">
                 <div className="text-sm font-medium">{op.operation}</div>
                 <div className="text-xs text-gray-500">
                   {new Date(op.timestamp).toLocaleTimeString()}
@@ -281,7 +280,6 @@ function OfflineQueueModal(props: { isOpen: boolean; onClose: () => void }) {
             ))
           )}
         </div>
-
         <div className="mt-4 flex justify-end gap-2">
           <button
             onClick={async () => {
@@ -337,7 +335,6 @@ function StorageDebugPanel() {
         >
           Storage: {mb(stats.storageUsed)} MB
         </button>
-
         {isExpanded && (
           <div className="px-3 pb-3 space-y-1 border-t border-gray-700 pt-2">
             <div>Projects: {stats.totalProjects}</div>
@@ -408,11 +405,9 @@ function StorageDebugPanel() {
 export default function App() {
   return (
     <AppErrorBoundary level="app">
-      <BrandThemeProvider defaultTheme="light" storageKey="inkwell-brand-theme">
-        <Providers>
-          <AppShell />
-        </Providers>
-      </BrandThemeProvider>
+      <Providers>
+        <AppShell />
+      </Providers>
     </AppErrorBoundary>
   );
 }

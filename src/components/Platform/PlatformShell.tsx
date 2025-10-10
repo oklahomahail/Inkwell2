@@ -1,16 +1,3 @@
 import React from 'react';
 
-import Sidebar from '@/components/Sidebar';
-import Topbar from '@/components/Topbar';
-
-export default function PlatformShell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="grid grid-cols-[auto_1fr] h-screen">
-      <Sidebar />
-      <div className="flex flex-col min-w-0">
-        <Topbar />
-        <main className="min-w-0 flex-1 overflow-auto">{children}</main>
-      </div>
-    </div>
-  );
-}
+ import Sidebar from '@/components/Sidebar'; import Topbar from '@/components/Topbar'; export default function PlatformShell({ children }: { children: React.ReactNode }) { return ( <div className="grid grid-cols-[auto_1fr] h-screen"> <Sidebar /> <div className="flex flex-col min-w-0"> <Topbar /> <main className="min-w-0 flex-1 overflow-auto">{children}</main> </div> </div> ); } 
