@@ -180,7 +180,16 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
   }, [checklist]);
 
   const startTour = (type: TourState['tourType'], steps?: TourStep[]) => {
+    // Prevent duplicate tours
+    if (tourState.isActive) {
+      console.warn('Tour already active, ignoring duplicate start request');
+      return;
+    }
+
     logAnalytics('tour_started', { tourType: type, stepCount: steps?.length || 0 });
+
+    // Mark that we've prompted in this session
+    sessionStorage.setItem('inkwell-tour-prompted-this-session', 'true');
 
     setTourState((prev) => ({
       ...prev,
@@ -322,6 +331,14 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
       preferences.remindMeLaterUntil &&
       Date.now() < preferences.remindMeLaterUntil
     ) {
+      return false;
+    }
+
+    // Don't show if a tour is already active (prevents duplicates)
+    if (tourState.isActive) return false;
+
+    // Don't show if user has already been prompted in this session
+    if (sessionStorage.getItem('inkwell-tour-prompted-this-session')) {
       return false;
     }
 

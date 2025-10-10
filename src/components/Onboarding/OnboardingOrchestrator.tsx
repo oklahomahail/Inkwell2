@@ -33,11 +33,17 @@ export const OnboardingOrchestrator: React.FC<OnboardingOrchestratorProps> = ({
   useEffect(() => {
     if (!autoShowWelcome) return;
 
+    // Prevent multiple launches in the same session
+    if (sessionStorage.getItem('inkwell-welcome-shown-this-session')) {
+      return;
+    }
+
     let timeoutId: NodeJS.Timeout;
 
-    if (shouldShowTourPrompt()) {
+    if (shouldShowTourPrompt() && !showWelcome) {
       timeoutId = setTimeout(() => {
         setShowWelcome(true);
+        sessionStorage.setItem('inkwell-welcome-shown-this-session', 'true');
         logAnalytics('welcome_modal_auto_shown');
       }, delayWelcomeMs);
     }
@@ -45,7 +51,7 @@ export const OnboardingOrchestrator: React.FC<OnboardingOrchestratorProps> = ({
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [shouldShowTourPrompt, autoShowWelcome, delayWelcomeMs, logAnalytics]);
+  }, [shouldShowTourPrompt, autoShowWelcome, delayWelcomeMs, logAnalytics, showWelcome]);
 
   // Handle starting different types of tours
   const handleStartTour = (tourType: string) => {

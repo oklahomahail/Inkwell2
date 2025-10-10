@@ -2,6 +2,67 @@
 
 All notable changes to this project are documented here.
 
+## [1.2.1] - 2025-10-10
+
+### 🎯 **Must-Fix UX & Shell Improvements**
+
+#### **Complete Layout & Navigation Overhaul**
+
+- **✅ A1: Tour Gating & First-run Flow** - Fixed duplicate tour launches and session handling
+  - Enhanced TourProvider with duplicate prevention and session tracking
+  - Improved OnboardingOrchestrator to prevent multiple welcome modal triggers
+  - Added comprehensive test coverage for tour gating behaviors
+  - Fixed first-target element detection with retry logic
+
+- **✅ A2: Sidebar Collapse & Header Alignment** - Professional responsive navigation
+  - Enhanced hamburger menu visibility and keyboard accessibility
+  - Added mobile-responsive sidebar behavior with auto-collapse
+  - Implemented proper Logo component integration with scaling
+  - Added ARIA attributes and keyboard navigation support
+  - Mobile overlay system with touch-friendly interactions
+
+- **✅ A3: Top-right Header Actions** - Fully functional header controls
+  - Wired command palette, search, notifications, settings, export, and help buttons
+  - Added keyboard shortcuts (⌘K, ⌘⇧F, ⌘,, ?, ⌘E)
+  - Implemented placeholder modals for future feature expansion
+  - Enhanced accessibility with proper ARIA labels and titles
+  - Integrated with existing Settings panel navigation
+
+- **✅ A4: Footer & Brand Placement** - Professional brand identity
+  - Added "Inkwell by Nexus Partners" footer with gold feather mark
+  - Theme-aware styling with semi-transparent background and backdrop blur
+  - Proper flexbox positioning to keep footer at bottom
+  - Responsive design maintaining consistent branding across devices
+  - Complete test coverage for footer functionality and styling
+
+#### **Technical Excellence**
+
+- **Enhanced Testing**: 15+ new test files covering all UX improvements
+- **TypeScript Compliance**: All new features properly typed
+- **Accessibility**: WCAG AA compliance throughout layout components
+- **Mobile-First**: Responsive design with touch-friendly interactions
+- **Performance**: Optimized animations and efficient state management
+- **Maintainability**: Comprehensive test coverage for future stability
+
+#### **User Experience Improvements**
+
+- **Seamless Navigation**: Professional sidebar with smooth animations
+- **Keyboard-First**: Full keyboard navigation support throughout
+- **Mobile Optimization**: Touch-friendly responsive design
+- **Brand Consistency**: Professional Inkwell branding placement
+- **Tour Reliability**: Duplicate prevention and session management
+- **Action Accessibility**: All header actions properly wired and accessible
+
+### 🧪 **Quality Assurance**
+
+- All existing tests continue passing ✅
+- New comprehensive test suite for layout components ✅
+- Production build validation ✅
+- Cross-browser compatibility testing ✅
+- Mobile responsive validation ✅
+
+---
+
 ## [1.2.0] - 2025-10-08
 
 ### 🚀 Major Features

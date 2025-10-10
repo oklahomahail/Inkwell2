@@ -24,8 +24,8 @@ while IFS= read -r file; do
         # Check for too few lines (pancaked files)
         if [ "$LINES" -le "$MIN_LINES" ] && [ -s "$file" ]; then
             # Check if it's a legitimate small file
-            if [[ "$file" =~ /index\.(ts|tsx|js)$ ]] || [[ "$file" =~ \.config\.(ts|js)$ ]] || [[ "$file" =~ \.setup\.(ts|js)$ ]]; then
-                continue  # Skip legitimate small files
+            if [[ "$file" =~ /index\.(ts|tsx|js)$ ]] || [[ "$file" =~ \.config\.(ts|js)$ ]] || [[ "$file" =~ \.setup\.(ts|js)$ ]] || [[ "$file" =~ \.css$ && "$LINES" -le 2 ]]; then
+                continue  # Skip legitimate small files and CSS templates
             fi
             echo "❌ CORRUPTED (few lines): $file ($LINES lines)"
             ((CORRUPTED_FILES++))
