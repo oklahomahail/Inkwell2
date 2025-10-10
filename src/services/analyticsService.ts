@@ -196,6 +196,106 @@ export interface AnalyticsEvents {
     projectId?: string;
   };
 
+  // Export Analytics Events
+  export_wizard_opened: BaseEvent & {
+    projectId: string;
+    source: 'menu' | 'badge' | 'keyboard' | 'dashboard';
+    projectWordCount: number;
+    projectChapterCount: number;
+  };
+
+  export_format_selected: BaseEvent & {
+    projectId: string;
+    format: 'PDF' | 'DOCX' | 'EPUB';
+    previousFormat?: string;
+  };
+
+  export_style_selected: BaseEvent & {
+    projectId: string;
+    format: string;
+    style: string;
+    previousStyle?: string;
+  };
+
+  export_proofread_toggled: BaseEvent & {
+    projectId: string;
+    enabled: boolean;
+    reason?: 'time_saving' | 'confidence' | 'requirement';
+  };
+
+  export_started: BaseEvent & {
+    projectId: string;
+    format: 'PDF' | 'DOCX' | 'EPUB';
+    style: string;
+    includeProofread: boolean;
+    projectWordCount: number;
+    projectChapterCount: number;
+  };
+
+  export_progress: BaseEvent & {
+    projectId: string;
+    format: string;
+    phase: 'assembling' | 'proofreading' | 'rendering' | 'finalizing';
+    percentage: number;
+  };
+
+  export_completed: BaseEvent & {
+    projectId: string;
+    format: 'PDF' | 'DOCX' | 'EPUB';
+    durationMs: number;
+    artifactSize: number;
+    includeProofread: boolean;
+    proofreadSuggestions?: number;
+    success: boolean;
+  };
+
+  export_failed: BaseEvent & {
+    projectId: string;
+    format: 'PDF' | 'DOCX' | 'EPUB';
+    phase: string;
+    error: string;
+    durationMs: number;
+  };
+
+  export_downloaded: BaseEvent & {
+    projectId: string;
+    format: string;
+    fileName: string;
+    fileSize: number;
+    timeToDownload: number; // Time from export completion to download
+  };
+
+  export_wizard_abandoned: BaseEvent & {
+    projectId: string;
+    lastStep: 'format' | 'style' | 'proofread' | 'review';
+    timeInWizard: number;
+    reason?: 'close' | 'navigation' | 'error';
+  };
+
+  export_readiness_checked: BaseEvent & {
+    projectId: string;
+    readinessScore: number;
+    isReady: boolean;
+    blockingIssues: string[];
+    wordCount: number;
+    chapterCount: number;
+  };
+
+  proofreading_report_generated: BaseEvent & {
+    projectId: string;
+    suggestionCount: number;
+    gradeLevel: number;
+    categories: string[];
+    processingTime: number;
+  };
+
+  proofreading_suggestion_applied: BaseEvent & {
+    projectId: string;
+    suggestionId: string;
+    category: 'grammar' | 'style' | 'clarity' | 'tone';
+    severity: 'note' | 'suggestion' | 'warning';
+  };
+
   // Nudge and engagement events
   nudge_clicked: BaseEvent & {
     projectId?: string;

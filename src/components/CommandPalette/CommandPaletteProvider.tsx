@@ -254,9 +254,9 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       },
 
       {
-        id: 'export-dialog',
+        id: 'export-wizard',
         label: 'Export Project...',
-        description: 'Open export dialog with all format options',
+        description: 'Open professional export wizard with publishing options',
         category: 'export',
         shortcut: '⌘⇧E',
         action: openExportDialog,

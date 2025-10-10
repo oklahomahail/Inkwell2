@@ -6,10 +6,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ClaudeAssistant from './components/ClaudeAssistant';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
 import CommandPaletteUI from './components/CommandPalette/CommandPaletteUI';
-// New professional layout and components
 import DebugSearchPanel from './components/DebugSearchPanel';
 import { AppErrorBoundary } from './components/ErrorBoundary';
-import ExportDialog from './components/ExportDialog';
+import { ExportWizardModal } from './components/ExportWizard/ExportWizardModal';
 import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
 import OnboardingOrchestrator from './components/Onboarding/OnboardingOrchestrator';
@@ -23,19 +22,15 @@ import {
 } from './components/Recovery/StorageRecoveryBanner';
 import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
-
-// Pages
 // Context and providers
 import { useAppContext } from './context/AppContext';
 import { useEditorContext } from './context/EditorContext';
+// Pages
 import BrandPage from './pages/Brand';
 import Login from './pages/Login';
-
 // Profile routing components
 import { ProfileGate } from './routes/shell/ProfileGate';
 import { ProfilePicker } from './routes/shell/ProfilePicker';
-
-// Error boundaries
 // Services
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
@@ -202,22 +197,18 @@ function ProfileAppShell() {
           </ClaudeErrorBoundary>
         )}
 
-        {/* Export Dialog */}
+        {/* Export Wizard */}
         {currentProject && (
-          <ExportDialog
+          <ExportWizardModal
             isOpen={isExportDialogOpen}
-            onClose={closeExportDialog}
             projectId={currentProject.id}
-            projectName={currentProject.name}
+            onClose={closeExportDialog}
           />
         )}
 
         {/* Offline Queue Modal */}
         {showOfflineQueue && (
-          <OfflineQueueModal
-            isOpen={showOfflineQueue}
-            onClose={() => setShowOfflineQueue(false)}
-          />
+          <OfflineQueueModal isOpen={showOfflineQueue} onClose={() => setShowOfflineQueue(false)} />
         )}
 
         {/* Command Palette UI */}
@@ -237,7 +228,6 @@ function ProfileAppShell() {
         {import.meta.env.DEV && <DebugSearchPanel />}
         {import.meta.env.DEV && <StorageDebugPanel />}
       </MainLayout>
-
     </>
   );
 }

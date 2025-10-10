@@ -1,8 +1,9 @@
 // src/components/Panels/DashboardPanel.tsx - Fixed imports
-import { PlusCircle, FileText, Clock, BarChart3, BookOpen } from 'lucide-react';
+import { PlusCircle, FileText, Clock, BarChart3, BookOpen, Download } from 'lucide-react';
 import React from 'react';
 
 // Import the context hook directly - make sure there's only one import
+import ExportReadyBadge from '@/components/Badges/ExportReadyBadge';
 import Welcome from '@/components/Dashboard/Welcome';
 import { useAppContext } from '@/context/AppContext';
 
@@ -44,8 +45,20 @@ const DashboardPanel: React.FC = () => {
       {/* Current Project */}
       {currentProject ? (
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold mb-2">{currentProject.name}</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-4">{currentProject.description}</p>
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-semibold mb-2">{currentProject.name}</h2>
+              <p className="text-gray-600 dark:text-gray-300">{currentProject.description}</p>
+            </div>
+            <ExportReadyBadge
+              projectId={currentProject.id}
+              variant="badge"
+              onExportClick={() => {
+                const btn = document.getElementById('global-export-trigger');
+                if (btn) btn.click();
+              }}
+            />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-3">
               <FileText className="w-5 h-5 text-blue-500" />
@@ -70,6 +83,19 @@ const DashboardPanel: React.FC = () => {
                 <p className="font-semibold">In Progress</p>
               </div>
             </div>
+          </div>
+          <div className="mt-4 flex gap-3">
+            <button
+              onClick={() => {
+                // Trigger the global export dialog
+                const btn = document.getElementById('global-export-trigger');
+                if (btn) btn.click();
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Export Project
+            </button>
           </div>
         </div>
       ) : (
