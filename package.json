@@ -28,7 +28,7 @@
     "test:baseline": "tsx src/test/runBaseline.ts",
     "bench": "vitest bench",
     "bundle:snapshot": "node scripts/bundle-snapshot.js",
-    "bundle:compare": "node scripts/bundle-snapshot.js --compare",
+    "bundle:compare:legacy": "node scripts/bundle-snapshot.js --compare",
     "bundle:update": "node scripts/bundle-snapshot.js --update",
     "audit:knip": "knip --dependencies --files --reporter symbols --no-exit-code --tsConfig tsconfig.json",
     "audit:depcheck": "depcheck --skip-missing=true || true",
@@ -40,7 +40,11 @@
     "lint:relaxed": "eslint \"src/**/*.{ts,tsx}\" --fix --cache --cache-location node_modules/.cache/eslint --rule '@typescript-eslint/no-explicit-any: off' --rule '@typescript-eslint/no-unused-vars: [warn, {\"argsIgnorePattern\":\"^_\",\"varsIgnorePattern\":\"^_\"}]' --rule 'react-hooks/exhaustive-deps: off' --rule 'react-refresh/only-export-components: off' --rule 'import/order: warn'",
     "pretypecheck": "npm run lint:relaxed",
     "check": "npm run lint:relaxed && npm run typecheck",
-    "check:corruption": "./scripts/check-file-corruption.sh"
+    "check:corruption": "./scripts/check-file-corruption.sh",
+    "test:smoke": "playwright test",
+    "bundle:analyze": "node scripts/track-bundle-size.js",
+    "bundle:baseline": "node scripts/track-bundle-size.js --save-baseline",
+    "bundle:compare": "pnpm build && node scripts/track-bundle-size.js --compare"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -92,6 +96,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
@@ -126,11 +131,13 @@
     "madge": "^8.0.0",
     "postcss": "^8.4.35",
     "prettier": "^3.6.2",
+    "rollup-plugin-bundle-stats": "^4.21.5",
     "stylelint": "^16.10.0",
     "stylelint-config-standard": "^36.0.1",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.9.2",
     "vite": "^7.0.6",
+    "vite-bundle-analyzer": "^1.2.3",
     "vite-plugin-pwa": "^1.0.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
