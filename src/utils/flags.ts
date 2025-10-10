@@ -25,6 +25,15 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
     requiresReload: true,
   },
 
+  // Export Wizard - 3-step export process
+  EXPORT_WIZARD: {
+    key: 'exportWizard',
+    name: 'Export Wizard',
+    description: '3-step export wizard (format → style → review)',
+    defaultValue: true,
+    category: 'core',
+  },
+
   // Advanced exports
   ADVANCED_EXPORT: {
     key: 'advancedExport',
@@ -32,6 +41,15 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
     description: 'PDF generation and advanced formatting options',
     defaultValue: false,
     category: 'experimental',
+  },
+
+  // AI Plot Analysis - intelligent story analysis
+  AI_PLOT_ANALYSIS: {
+    key: 'aiPlotAnalysis',
+    name: 'AI Plot Analysis',
+    description: 'AI-powered plot analysis with pacing, conflicts, and character insights',
+    defaultValue: true,
+    category: 'core',
   },
 
   // AI-powered features
@@ -79,11 +97,31 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
     category: 'experimental',
   },
 
+  // Project Insights Tab - analytics and metrics
+  INSIGHTS_TAB: {
+    key: 'insightsTab',
+    name: 'Project Insights Tab',
+    description: 'Analytics dashboard with writing metrics, progress tracking, and insights',
+    defaultValue: true,
+    category: 'core',
+  },
+
   // Real-time collaboration (future feature)
   COLLABORATION: {
     key: 'collaboration',
     name: 'Real-time Collaboration',
     description: 'Share projects and collaborate with other writers',
+    defaultValue: false,
+    category: 'experimental',
+    requiresReload: true,
+  },
+
+  // Enhanced Collaboration UI
+  COLLABORATION_UI: {
+    key: 'collaborationUI',
+    name: 'Enhanced Collaboration UI',
+    description:
+      'Advanced collaboration interface with presence, comments, and conflict resolution',
     defaultValue: false,
     category: 'experimental',
     requiresReload: true,
@@ -160,7 +198,7 @@ class FeatureFlagManager {
       return this.cache.get(flagKey)!;
     }
 
-    const flag = FEATURE_FLAGS[flagKey];
+    const flag = Object.values(FEATURE_FLAGS).find((f) => f.key === flagKey);
     if (!flag) {
       console.warn(`Unknown feature flag: ${flagKey}`);
       return false;
@@ -185,7 +223,7 @@ class FeatureFlagManager {
    * Set a feature flag value (persists to localStorage)
    */
   setEnabled(flagKey: string, enabled: boolean): void {
-    const flag = FEATURE_FLAGS[flagKey];
+    const flag = Object.values(FEATURE_FLAGS).find((f) => f.key === flagKey);
     if (!flag) {
       console.warn(`Unknown feature flag: ${flagKey}`);
       return;
@@ -207,7 +245,7 @@ class FeatureFlagManager {
    * Reset a flag to its default value
    */
   reset(flagKey: string): void {
-    const flag = FEATURE_FLAGS[flagKey];
+    const flag = Object.values(FEATURE_FLAGS).find((f) => f.key === flagKey);
     if (!flag) {
       console.warn(`Unknown feature flag: ${flagKey}`);
       return;
@@ -245,8 +283,8 @@ class FeatureFlagManager {
     const modifiedFlags = this.getAllFlags().filter((flag) => flag.enabled !== flag.defaultValue);
 
     // Clear existing flag parameters
-    Object.keys(FEATURE_FLAGS).forEach((key) => {
-      url.searchParams.delete(key);
+    Object.values(FEATURE_FLAGS).forEach((flag) => {
+      url.searchParams.delete(flag.key);
     });
 
     // Add modified flags
@@ -344,7 +382,10 @@ export function withFlag<P extends Record<string, any>>(
 }
 
 /* ========= Console Commands (Development) ========= */
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+if (
+  typeof window !== 'undefined' &&
+  (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test')
+) {
   // Add global flag management functions for console access
   (window as any).__inkwellFlags = {
     list: () => featureFlags.getAllFlags(),

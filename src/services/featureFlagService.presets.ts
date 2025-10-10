@@ -24,8 +24,12 @@ export interface FeatureFlagPreset {
     templatesEditor: boolean;
     bulkImport: boolean;
     collaboration: boolean;
+    collaborationUI: boolean;
     advancedAnalytics: boolean;
     customStructures: boolean;
+    exportWizard: boolean;
+    aiPlotAnalysis: boolean;
+    insightsTab: boolean;
   };
   ai: {
     enableInlineAssist: boolean;
@@ -67,8 +71,13 @@ export const BeginnerPreset: FeatureFlagPreset = {
     templatesEditor: false,
     bulkImport: false,
     collaboration: false,
+    collaborationUI: false,
     advancedAnalytics: false,
     customStructures: false,
+    // Core features enabled in Beginner mode
+    exportWizard: true,
+    aiPlotAnalysis: true,
+    insightsTab: true,
   },
   ai: {
     enableInlineAssist: true, // Simple "Tighten this paragraph" button
@@ -108,8 +117,12 @@ export const ProPreset: FeatureFlagPreset = {
     templatesEditor: true,
     bulkImport: true,
     collaboration: true,
+    collaborationUI: true,
     advancedAnalytics: true,
     customStructures: true,
+    exportWizard: true,
+    aiPlotAnalysis: true,
+    insightsTab: true,
   },
   ai: {
     enableInlineAssist: true,

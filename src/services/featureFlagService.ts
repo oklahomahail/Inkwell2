@@ -98,6 +98,35 @@ class FeatureFlagService {
 
     // UI Features
     {
+      key: 'export_wizard',
+      name: 'Export Wizard',
+      description: '3-step export wizard (format → style → review)',
+      enabled: true,
+      category: 'ui',
+    },
+    {
+      key: 'insights_tab',
+      name: 'Project Insights Tab',
+      description: 'Analytics dashboard with writing metrics and insights',
+      enabled: true,
+      category: 'ui',
+    },
+    {
+      key: 'ai_plot_analysis',
+      name: 'AI Plot Analysis',
+      description: 'AI-powered plot analysis with pacing and character insights',
+      enabled: true,
+      category: 'ai',
+      dependencies: ['ai_enabled'],
+    },
+    {
+      key: 'collaboration_ui',
+      name: 'Enhanced Collaboration UI',
+      description: 'Advanced collaboration interface with presence and comments',
+      enabled: false,
+      category: 'experimental',
+    },
+    {
       key: 'pwa_features',
       name: 'PWA Features',
       description: 'Progressive Web App capabilities',
