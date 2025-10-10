@@ -2,34 +2,28 @@
 import {
   Home,
   PenTool,
+  BookOpen,
   Clock,
   BarChart3,
   Settings,
   Menu,
   Search,
   Bell,
+  Sun,
+  Moon,
   Command,
   Plus,
   Kanban,
-  Palette,
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-import { InkwellLogo } from '@/components/Brand';
-import { InkwellFeather } from '@/components/icons/InkwellFeather';
-import { useFeatureFlag } from '@/config/features';
+import Logo from '@/components/Logo';
 import { useAppContext, View } from '@/context/AppContext';
-import { useCommands } from '@/hooks/useCommands';
-import { useSmartSearch } from '@/hooks/useSmartSearch';
 import { cn } from '@/utils/cn';
+import { useFeatureFlag } from '@/utils/flags';
 
-import { CommandPalette } from '../CommandPalette/CommandPalette';
-import NotificationsPanel from '../NotificationsPanel';
 import { ProfileSwitcher } from '../ProfileSwitcher';
 import { PWAOfflineIndicator } from '../PWA';
-import { SmartSearchModal } from '../Search/SmartSearchModal';
-
-import { Footer } from './Footer';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -56,7 +50,7 @@ const baseNavigationItems = [
   {
     id: 'planning',
     label: 'Planning',
-    icon: InkwellFeather,
+    icon: BookOpen,
     view: View.Planning,
     shortcut: '⌘3',
     description: 'Story structure and outlines',
@@ -87,36 +81,17 @@ const baseNavigationItems = [
   },
 ];
 
-// Brand-specific navigation items (dev/admin only)
-const _brandNavigationItems = [
-  {
-    id: 'brand',
-    label: 'Brand System',
-    icon: Palette,
-    href: '/brand',
-    shortcut: '⌘⇧B',
-    description: 'Design system and brand showcase',
-  },
-];
-
 const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const { state, dispatch } = useAppContext();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Command Palette
-  const commands = useCommands(undefined, (commandId) => {
-    console.log(`Executed command: ${commandId}`);
-  });
-  const [showCommandPalette, setShowCommandPalette] = useState(false);
-
-  // Smart Search
-  const smartSearch = useSmartSearch({
-    onNavigate: (result) => {
-      console.log('Navigate to:', result);
-      // Add navigation logic based on result type
-    },
-  });
+  // Modal states for header actions
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   // Feature flags
   const isPlotBoardsEnabled = useFeatureFlag('plotBoards');
@@ -136,6 +111,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         shortcut: '⌘6',
         description: 'Kanban-style plot and scene organization (Experimental)',
       };
+
       items.splice(planningIndex + 1, 0, plotBoardsItem);
 
       // Update shortcut numbers for items after Plot Boards
@@ -148,53 +124,79 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     return items;
   }, [isPlotBoardsEnabled]);
 
-  // Load preferences from localStorage
+  // Load preferences and detect mobile
   useEffect(() => {
     const savedCollapsed = localStorage.getItem('inkwell-sidebar-collapsed');
+    const savedDarkMode = localStorage.getItem('inkwell-dark-mode');
+
+    // Mobile detection
+    const checkMobile = () => {
+      const isMobileSize = window.innerWidth < 768;
+      setIsMobile(isMobileSize);
+      // Auto-collapse on mobile
+      if (isMobileSize && !sidebarCollapsed) {
+        setSidebarCollapsed(true);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
     if (savedCollapsed) {
       setSidebarCollapsed(JSON.parse(savedCollapsed));
     }
+
+    if (savedDarkMode) {
+      setIsDarkMode(JSON.parse(savedDarkMode));
+    } else {
+      // Default to system preference
+      const systemDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDarkMode(systemDarkMode);
+    }
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
 
-  // Global keyboard shortcuts
+  // Apply dark mode to document
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Cmd+K or Ctrl+K for Command Palette
-      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
-        event.preventDefault();
-        setShowCommandPalette(true);
-        return;
-      }
+    document.documentElement.classList.toggle('dark', isDarkMode);
+  }, [isDarkMode]);
 
-      // Bell notifications with Cmd+Shift+N
-      if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'n') {
-        event.preventDefault();
-        setShowNotifications((prev) => !prev);
-        return;
+  // Keyboard shortcuts for header actions
+  useEffect(() => {
+    const handleKeydown = (e: KeyboardEvent) => {
+      // Command/Ctrl + K for command palette
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        handleOpenCommandPalette();
+      }
+      // Command/Ctrl + Shift + F for search
+      else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'F') {
+        e.preventDefault();
+        handleOpenSearch();
+      }
+      // Command/Ctrl + , for settings
+      else if ((e.metaKey || e.ctrlKey) && e.key === ',') {
+        e.preventDefault();
+        handleOpenSettings();
+      }
+      // ? for help
+      else if (e.key === '?' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        handleOpenHelp();
+      }
+      // Command/Ctrl + E for export
+      else if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
+        e.preventDefault();
+        handleExport();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeydown);
+    return () => document.removeEventListener('keydown', handleKeydown);
   }, []);
-
-  // Close notifications when clicking outside
-  useEffect(() => {
-    if (!showNotifications) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (
-        !target.closest('[data-notifications-panel]') &&
-        !target.closest('[data-notifications-trigger]')
-      ) {
-        setShowNotifications(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showNotifications]);
 
   const handleViewChange = (view: View) => {
     dispatch({ type: 'SET_VIEW', payload: view });
@@ -206,92 +208,151 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     localStorage.setItem('inkwell-sidebar-collapsed', JSON.stringify(newCollapsed));
   };
 
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('inkwell-dark-mode', JSON.stringify(newDarkMode));
+    dispatch({ type: 'SET_THEME', payload: newDarkMode ? 'dark' : 'light' });
+  };
+
+  // Header action handlers
+  const handleOpenCommandPalette = () => {
+    setIsCommandPaletteOpen(true);
+  };
+
+  const handleOpenSearch = () => {
+    setIsSearchModalOpen(true);
+  };
+
+  const handleOpenNotifications = () => {
+    setIsNotificationsOpen(true);
+  };
+
+  const handleOpenSettings = () => {
+    handleViewChange(View.Settings);
+  };
+
+  const handleOpenHelp = () => {
+    setIsHelpModalOpen(true);
+  };
+
+  const handleExport = () => {
+    // Trigger the global export button
+    const exportButton = document.getElementById('global-export-trigger');
+    if (exportButton) {
+      exportButton.click();
+    }
+  };
+
   const currentProject = state.projects.find((p) => p.id === state.currentProjectId);
 
   return (
-    <div
-      className={cn('main-layout', className)}
-      style={{
-        // 16rem = 256px expanded; 4rem = 64px rail
-        ['--sidebar-w' as any]: sidebarCollapsed ? '4rem' : '16rem',
-      }}
-    >
+    <div className={cn('main-layout flex', className)}>
+      {/* Mobile sidebar overlay */}
+      {isMobile && !sidebarCollapsed && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm"
+          onClick={() => setSidebarCollapsed(true)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Sidebar */}
       <aside
         className={cn(
           'sidebar',
           'fixed left-0 top-0 h-full z-40',
-          'transition-[width] duration-300 ease-out',
-          'bg-white',
-          'border-r border-inkwell-gold/20',
-          'overflow-x-hidden', // Prevent content overflow
+          'transition-all duration-300 ease-in-out',
+          'bg-white dark:bg-slate-800',
+          'border-r border-slate-200 dark:border-slate-700',
+          'flex flex-col',
+          // Desktop behavior
+          !isMobile && (sidebarCollapsed ? 'w-16' : 'w-64'),
+          // Mobile behavior - slide in/out
+          isMobile && (sidebarCollapsed ? '-translate-x-full w-64' : 'translate-x-0 w-64'),
         )}
-        style={{ width: 'var(--sidebar-w)' }}
+        aria-hidden={isMobile && sidebarCollapsed}
       >
         {/* Sidebar Header */}
-        <div className="sidebar-header relative p-4 border-b border-inkwell-gold/20 bg-inkwell-navy">
-          <div className="flex items-center">
-            {/* Brand icon - always visible */}
-            <div className="flex-shrink-0">
-              <InkwellLogo variant="mark" size="sm" className="text-inkwell-gold" />
-            </div>
-
-            {/* Wordmark - hidden when collapsed */}
-            <div
-              className={cn(
-                'wordmark-transition',
-                'ml-2 transition-all duration-300 ease-out overflow-hidden',
-                sidebarCollapsed
-                  ? 'w-0 opacity-0 pointer-events-none'
-                  : 'w-auto opacity-100',
-              )}
-            >
-              <span className="font-serif font-semibold tracking-wide text-white whitespace-nowrap">
-                Inkwell
-              </span>
-              <div className="flex flex-col">
-                <p className="text-xs text-inkwell-gold/80 truncate">
-                  {currentProject?.name || 'Select a project'}
-                </p>
+        <div className="sidebar-header p-4 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between">
+            <div className={cn('flex items-center gap-3', sidebarCollapsed && 'justify-center')}>
+              <div className="flex-shrink-0">
+                {sidebarCollapsed ? (
+                  <Logo
+                    variant="svg-feather-gold"
+                    size={32}
+                    className="transition-all duration-300"
+                  />
+                ) : (
+                  <Logo
+                    variant="svg-feather-gold"
+                    size={32}
+                    className="transition-all duration-300"
+                  />
+                )}
               </div>
+              {!sidebarCollapsed && (
+                <div className="flex flex-col min-w-0 flex-1">
+                  <h1 className="text-heading-sm text-slate-900 dark:text-white font-semibold truncate">
+                    Inkwell
+                  </h1>
+                  <p className="text-caption text-slate-500 dark:text-slate-400 truncate">
+                    {currentProject?.name || 'No project'}
+                  </p>
+                </div>
+              )}
             </div>
+            <button
+              onClick={toggleSidebar}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  toggleSidebar();
+                }
+              }}
+              className={cn(
+                'btn-ghost btn-sm',
+                'w-8 h-8 p-0 flex-shrink-0',
+                'flex items-center justify-center',
+                'hover:bg-slate-100 dark:hover:bg-slate-700',
+                'transition-all duration-200',
+                'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800',
+                'rounded-md',
+                sidebarCollapsed ? 'ml-auto' : 'ml-2',
+              )}
+              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              aria-expanded={!sidebarCollapsed}
+              tabIndex={0}
+            >
+              <Menu
+                className={cn(
+                  'w-4 h-4 transition-transform duration-200',
+                  sidebarCollapsed && 'rotate-180',
+                )}
+              />
+            </button>
           </div>
-
-          {/* Always-visible hamburger, positioned outside the shrinking area */}
-          <button
-            onClick={toggleSidebar}
-            className={cn(
-              'sidebar-toggle',
-              'absolute -right-3 top-1/2 -translate-y-1/2',
-              'w-8 h-8 rounded-full shadow-md border bg-white',
-              'flex items-center justify-center z-50',
-              'hover:bg-slate-50',
-              'focus-ring border-inkwell-gold/30',
-            )}
-            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            <Menu className="w-4 h-4 text-slate-700" />
-          </button>
         </div>
 
         {/* Search/Command Palette */}
         {!sidebarCollapsed && (
           <div className="p-4">
             <button
+              onClick={handleOpenCommandPalette}
               className={cn(
                 'w-full flex items-center gap-3',
-                'px-3 py-2 text-sm text-slate-600',
-                'bg-slate-50',
-                'border border-slate-200',
-                'rounded-md hover:bg-slate-100',
+                'px-3 py-2 text-sm text-slate-600 dark:text-slate-400',
+                'bg-slate-50 dark:bg-slate-700/50',
+                'border border-slate-200 dark:border-slate-600',
+                'rounded-md hover:bg-slate-100 dark:hover:bg-slate-700',
                 'transition-colors focus-ring',
               )}
               aria-label="Open command palette"
-              onClick={() => setShowCommandPalette(true)}
             >
               <Search className="w-4 h-4" />
               <span className="flex-1 text-left">Search or command...</span>
-              <kbd className="px-1.5 py-0.5 text-xs font-mono bg-white border border-slate-300 rounded">
+              <kbd className="px-1.5 py-0.5 text-xs font-mono bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded">
                 ⌘K
               </kbd>
             </button>
@@ -313,22 +374,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                     'nav-item w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all',
                     'focus-ring',
                     isActive
-                      ? 'bg-inkwell-gold/20 text-inkwell-gold border border-inkwell-gold/30'
-                      : 'text-slate-700 hover:bg-inkwell-gold/10 hover:text-inkwell-gold',
+                      ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white',
                     sidebarCollapsed && 'justify-center',
                   )}
                   title={sidebarCollapsed ? `${item.label} (${item.shortcut})` : undefined}
                 >
-                  <Icon
-                    className={cn(
-                      'w-5 h-5',
-                      sidebarCollapsed ? 'mx-auto' : 'flex-shrink-0',
-                    )}
-                  />
+                  <Icon className={cn('w-5 h-5', sidebarCollapsed ? 'mx-auto' : 'flex-shrink-0')} />
                   {!sidebarCollapsed && (
                     <>
                       <span className="flex-1 text-left">{item.label}</span>
-                      <kbd className="text-xs text-slate-400 font-mono">
+                      <kbd className="text-xs text-slate-400 dark:text-slate-500 font-mono">
                         {item.shortcut}
                       </kbd>
                     </>
@@ -341,45 +397,38 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
         {/* Quick Actions */}
         {!sidebarCollapsed && (
-          <div className="p-4 border-t border-inkwell-gold/20">
+          <div className="p-4 border-t border-slate-200 dark:border-slate-700">
             <div className="space-y-2">
               <button
-                className="w-full bg-inkwell-gold hover:bg-inkwell-gold/90 text-inkwell-navy font-medium px-4 py-2 rounded-md text-sm transition-colors"
+                className="w-full btn btn-primary btn-sm"
                 onClick={() => {
                   // TODO: Implement create project
                   console.log('Create new project');
                 }}
               >
-                <Plus className="w-4 h-4 inline mr-2" />
+                <Plus className="w-4 h-4" />
                 New Project
               </button>
-              
-              <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-2">
                 <button
-                  className="btn btn-ghost btn-sm text-slate-700 hover:text-inkwell-gold"
-                  aria-label="Notifications"
+                  onClick={toggleDarkMode}
+                  className="flex-1 btn btn-ghost btn-sm"
+                  aria-label="Toggle dark mode"
                 >
+                  {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  {isDarkMode ? 'Light' : 'Dark'}
+                </button>
+                <button className="btn btn-ghost btn-sm p-2" aria-label="Notifications">
                   <Bell className="w-4 h-4" />
                 </button>
               </div>
-
-              {/* Brand showcase link for developers */}
-              {import.meta.env.DEV && (
-                <a
-                  href="./brand"
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:text-inkwell-gold hover:bg-inkwell-gold/10 rounded-md transition-colors"
-                >
-                  <Palette className="w-4 h-4" />
-                  Brand System
-                </a>
-              )}
             </div>
           </div>
         )}
 
         {/* Collapsed mode quick actions */}
         {sidebarCollapsed && (
-          <div className="p-2 border-t border-slate-200 space-y-2">
+          <div className="p-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
             <button
               className="w-full btn btn-primary btn-sm p-2"
               onClick={() => {
@@ -390,6 +439,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             >
               <Plus className="w-4 h-4" />
             </button>
+            <button
+              onClick={toggleDarkMode}
+              className="w-full btn btn-ghost btn-sm p-2"
+              title="Toggle dark mode"
+            >
+              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
           </div>
         )}
       </aside>
@@ -397,25 +453,39 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       {/* Main Content */}
       <main
         className={cn(
-          'main-content',
-          'min-h-screen transition-[margin] duration-300 ease-out',
-          'bg-slate-50',
+          'main-content flex-1 flex flex-col',
+          'min-h-screen transition-all duration-300',
+          'bg-slate-50 dark:bg-slate-900',
+          // Desktop spacing
+          !isMobile && (sidebarCollapsed ? 'ml-16' : 'ml-64'),
+          // Mobile - no margin (sidebar overlays)
+          isMobile && 'ml-0',
         )}
-        style={{ marginLeft: 'var(--sidebar-w)' }}
       >
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-sm border-b border-inkwell-gold/20">
-          <div className="px-6 py-4">
+        <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
+          <div className="px-4 md:px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <h2 className="text-heading-lg text-slate-900">
-                  {navigationItems.find((item) => item.view === state.view)?.label ||
-                    'Dashboard'}
+                {/* Mobile hamburger menu */}
+                {isMobile && (
+                  <button
+                    onClick={toggleSidebar}
+                    className="btn btn-ghost btn-sm p-2 md:hidden"
+                    aria-label="Toggle navigation menu"
+                  >
+                    <Menu className="w-5 h-5" />
+                  </button>
+                )}
+                <h2 className="text-heading-lg text-slate-900 dark:text-white truncate">
+                  {navigationItems.find((item) => item.view === state.view)?.label || 'Dashboard'}
                 </h2>
                 {currentProject && (
-                  <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full">
+                  <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-slate-600">{currentProject.name}</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-300">
+                      {currentProject.name}
+                    </span>
                   </div>
                 )}
               </div>
@@ -423,50 +493,79 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
               <div className="flex items-center gap-3">
                 <PWAOfflineIndicator variant="badge" />
                 <ProfileSwitcher />
-
                 <div className="flex items-center gap-2">
                   <button
+                    onClick={handleOpenCommandPalette}
                     className="btn btn-ghost btn-sm"
                     aria-label="Open command palette (⌘K)"
-                    onClick={() => setShowCommandPalette(true)}
+                    title="Command Palette (⌘K)"
                   >
                     <Command className="w-4 h-4" />
                   </button>
-
                   <button
+                    onClick={handleOpenSearch}
                     className="btn btn-ghost btn-sm"
                     aria-label="Search (⌘⇧F)"
-                    onClick={() => smartSearch.openSearch()}
+                    title="Search (⌘⇧F)"
                   >
                     <Search className="w-4 h-4" />
                   </button>
-
-                  <div className="relative">
+                  <button
+                    onClick={handleOpenNotifications}
+                    className="btn btn-ghost btn-sm"
+                    aria-label="Notifications"
+                    title="Notifications"
+                  >
+                    <Bell className="w-4 h-4" />
+                  </button>
+                  {/* Settings Button */}
+                  <button
+                    onClick={handleOpenSettings}
+                    className="btn btn-ghost btn-sm"
+                    aria-label="Settings (⌘,)"
+                    title="Settings (⌘,)"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
+                  {/* Export Button */}
+                  {currentProject && (
                     <button
+                      onClick={handleExport}
                       className="btn btn-ghost btn-sm"
-                      aria-label="Notifications (⌘⇧N)"
-                      onClick={() => setShowNotifications((prev) => !prev)}
-                      data-notifications-trigger
+                      aria-label="Export (⌘E)"
+                      title="Export Project (⌘E)"
                     >
-                      <Bell className="w-4 h-4" />
-                    </button>
-                    {showNotifications && (
-                      <div
-                        className="absolute right-0 top-full mt-2 z-50"
-                        data-notifications-panel
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
-                        <NotificationsPanel
-                          onClose={() => setShowNotifications(false)}
-                          onMarkAsRead={(id) => console.log('Mark as read:', id)}
-                          onMarkAllAsRead={() => console.log('Mark all as read')}
-                          onNotificationClick={(notification) => {
-                            console.log('Notification clicked:', notification);
-                            setShowNotifications(false);
-                          }}
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                         />
-                      </div>
-                    )}
-                  </div>
+                      </svg>
+                    </button>
+                  )}
+                  {/* Help Button */}
+                  <button
+                    onClick={handleOpenHelp}
+                    className="btn btn-ghost btn-sm"
+                    aria-label="Help (?)"
+                    title="Help & Support (?)"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -474,28 +573,190 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         </header>
 
         {/* Page Content */}
-        <div className="p-6 pb-0">
+        <div className="p-6 flex-1">
           <div className="max-w-7xl mx-auto">{children}</div>
         </div>
 
         {/* Footer */}
-        <Footer />
+        <footer className="mt-auto border-t border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-2">
+                <Logo variant="svg-feather-gold" size={18} className="opacity-80" />
+                <span className="font-medium">Inkwell</span>
+              </div>
+              <span className="text-slate-300 dark:text-slate-600">by</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">Nexus Partners</span>
+            </div>
+          </div>
+        </footer>
       </main>
 
-      {/* Modals */}
-      <CommandPalette
-        isOpen={showCommandPalette}
-        onClose={() => setShowCommandPalette(false)}
-        commands={commands}
-        placeholder="Search commands..."
-      />
+      {/* Modal Components */}
 
-      <SmartSearchModal
-        isOpen={smartSearch.isOpen}
-        onClose={smartSearch.closeSearch}
-        onNavigate={smartSearch.handleNavigate}
-        initialQuery={smartSearch.query}
-      />
+      {/* Command Palette Modal */}
+      {isCommandPaletteOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                  Command Palette
+                </h2>
+                <button
+                  onClick={() => setIsCommandPaletteOpen(false)}
+                  className="btn btn-ghost btn-sm p-2"
+                  aria-label="Close command palette"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <p className="text-slate-600 dark:text-slate-400">
+                Command palette coming soon! Use ⌘K to open.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Search Modal */}
+      {isSearchModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Search</h2>
+                <button
+                  onClick={() => setIsSearchModalOpen(false)}
+                  className="btn btn-ghost btn-sm p-2"
+                  aria-label="Close search"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <input
+                type="text"
+                placeholder="Search your projects and content..."
+                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                autoFocus
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notifications Modal */}
+      {isNotificationsOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                  Notifications
+                </h2>
+                <button
+                  onClick={() => setIsNotificationsOpen(false)}
+                  className="btn btn-ghost btn-sm p-2"
+                  aria-label="Close notifications"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <p className="text-slate-600 dark:text-slate-400 text-center">No new notifications</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Help Modal */}
+      {isHelpModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                  Help & Support
+                </h2>
+                <button
+                  onClick={() => setIsHelpModalOpen(false)}
+                  className="btn btn-ghost btn-sm p-2"
+                  aria-label="Close help"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                  <kbd className="px-2 py-1 text-xs font-mono bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded">
+                    ⌘K
+                  </kbd>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">Command Palette</p>
+                </div>
+                <div className="text-center p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                  <kbd className="px-2 py-1 text-xs font-mono bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded">
+                    ⌘,
+                  </kbd>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">Settings</p>
+                </div>
+                <div className="text-center p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                  <kbd className="px-2 py-1 text-xs font-mono bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded">
+                    ⌘E
+                  </kbd>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">Export</p>
+                </div>
+                <div className="text-center p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                  <kbd className="px-2 py-1 text-xs font-mono bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded">
+                    ?
+                  </kbd>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">Help</p>
+                </div>
+              </div>
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Welcome to Inkwell! Use the keyboard shortcuts above to navigate quickly, or
+                  explore the sidebar for all features.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

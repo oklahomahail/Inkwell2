@@ -2,6 +2,46 @@
 
 All notable changes to this project are documented here.
 
+## [v1.2.4] - 2025-10-10
+
+### 🎯 **Critical Issues Resolution & Platform Stability**
+
+#### **Dark Mode Conflicts Fixed**
+
+- **Unified Theme Service** - Created single source of truth theme management (`src/services/theme.ts`)
+- **Resolved Multiple Theme Systems** - Eliminated conflicts between Tailwind darkMode:'class', prefers-color-scheme watchers, and localStorage values
+- **Fixed Theme Persistence** - Consistent theme behavior across app restarts and browser sessions
+- **Removed Conflicting Code** - Cleaned up duplicate theme management in CompleteWritingPlatform
+
+#### **Profile Creation Enhanced**
+
+- **Fixed Error Toast Issues** - Proper async handling prevents success operations showing error toasts
+- **Added Toast Integration** - ProfilePicker now uses unified toast system for user feedback
+- **Enhanced Loading States** - Proper loading indicators and double-submit prevention
+- **Improved Error Handling** - Better error messages and async operation handling
+
+#### **Deployment Verification**
+
+- **Verified Live Site** - Confirmed inkwell.leadwithnexus.com serves correct content with 200 status
+- **DNS Configuration Validated** - Proper CNAME setup to cname.vercel-dns.com
+- **Production Build Success** - Latest deployment working correctly
+
+#### **Data Integrity & Analysis Tools**
+
+- **Corruption Detection System** - Added comprehensive data integrity monitoring with `CorruptionSentinels`
+- **Analysis Components** - New analysis tools for plot, character, theme, and conflict analysis
+- **Export Enhancements** - Enhanced ExportWizard with comprehensive testing and validation
+- **Recovery Mechanisms** - Automatic data corruption detection and recovery systems
+
+#### **User Experience Improvements**
+
+- **Better Loading States** - Enhanced user feedback throughout ProfilePicker workflow
+- **Unified Toast System** - Consistent success/error messaging across the application
+- **Theme Stability** - Dark mode no longer "comes back" unexpectedly
+- **Reliable Profile Creation** - Smooth profile creation workflow with proper error handling
+
+---
+
 ## [v1.2.3] - 2025-10-10
 
 ### 🚀 3B Publishing & Professional Exports

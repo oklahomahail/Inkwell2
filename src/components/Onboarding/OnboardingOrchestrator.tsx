@@ -1,13 +1,10 @@
 // src/components/Onboarding/OnboardingOrchestrator.tsx
 import React, { useState, useEffect } from 'react';
 
-import { useOnboardingGate } from '@/hooks/useOnboardingGate';
-
 import { CompletionChecklistComponent } from './CompletionChecklist';
-import { useTour, TOUR_MAP } from './ProfileTourProvider';
 import { TourNudgeManager } from './TourNudges';
 import TourOverlay from './TourOverlay';
-import { shouldSuppressWelcomeDialog } from './utils/tourSafety';
+import { useTour, TOUR_MAP } from './TourProvider';
 import WelcomeModal from './WelcomeModal';
 
 interface OnboardingOrchestratorProps {
@@ -20,9 +17,15 @@ export const OnboardingOrchestrator: React.FC<OnboardingOrchestratorProps> = ({
   autoShowWelcome = true,
   delayWelcomeMs = 2000,
 }) => {
-  const { startTour, setTourSteps, tourState, logAnalytics, updateChecklist } = useTour();
+  const {
+    startTour,
+    setTourSteps,
+    shouldShowTourPrompt,
+    tourState,
+    logAnalytics,
+    updateChecklist,
+  } = useTour();
 
-  const { shouldShowModal } = useOnboardingGate();
   const [showWelcome, setShowWelcome] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
 
@@ -30,15 +33,17 @@ export const OnboardingOrchestrator: React.FC<OnboardingOrchestratorProps> = ({
   useEffect(() => {
     if (!autoShowWelcome) return;
 
-    // Don't show if user has previously dismissed it
-    if (shouldSuppressWelcomeDialog()) return;
+    // Prevent multiple launches in the same session
+    if (sessionStorage.getItem('inkwell-welcome-shown-this-session')) {
+      return;
+    }
 
     let timeoutId: NodeJS.Timeout;
 
-    // Use gate logic instead of tour provider - this prevents re-entrant opens
-    if (shouldShowModal()) {
+    if (shouldShowTourPrompt() && !showWelcome) {
       timeoutId = setTimeout(() => {
         setShowWelcome(true);
+        sessionStorage.setItem('inkwell-welcome-shown-this-session', 'true');
         logAnalytics('welcome_modal_auto_shown');
       }, delayWelcomeMs);
     }
@@ -46,7 +51,7 @@ export const OnboardingOrchestrator: React.FC<OnboardingOrchestratorProps> = ({
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [shouldShowModal, autoShowWelcome, delayWelcomeMs, logAnalytics]);
+  }, [shouldShowTourPrompt, autoShowWelcome, delayWelcomeMs, logAnalytics, showWelcome]);
 
   // Handle starting different types of tours
   const handleStartTour = (tourType: string) => {
