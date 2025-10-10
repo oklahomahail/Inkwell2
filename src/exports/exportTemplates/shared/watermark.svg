@@ -1,0 +1,14 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Inkwell gold feather watermark -->
+  <g fill="#D4A537" fill-opacity="0.1">
+    <!-- Feather outline -->
+    <path d="M100 20 C120 25, 140 35, 150 55 C155 65, 155 75, 150 85 L140 100 C135 110, 130 120, 125 130 L120 140 C115 150, 110 160, 105 170 L100 180 C95 170, 90 160, 85 150 L80 140 C75 130, 70 120, 65 110 L60 100 C55 85, 55 75, 60 65 C70 35, 80 25, 100 20 Z"/>
+    
+    <!-- Feather details/barbs -->
+    <path d="M100 30 L120 40 M100 40 L125 50 M100 50 L130 60 M100 60 L125 70 M100 70 L120 80 M100 80 L115 90 M100 90 L110 100 M100 100 L105 110" stroke="#D4A537" stroke-width="1" stroke-opacity="0.1" fill="none"/>
+    <path d="M100 30 L80 40 M100 40 L75 50 M100 50 L70 60 M100 60 L75 70 M100 70 L80 80 M100 80 L85 90 M100 90 L90 100 M100 100 L95 110" stroke="#D4A537" stroke-width="1" stroke-opacity="0.1" fill="none"/>
+    
+    <!-- Central shaft -->
+    <line x1="100" y1="20" x2="100" y2="180" stroke="#D4A537" stroke-width="2" stroke-opacity="0.15"/>
+  </g>
+</svg>

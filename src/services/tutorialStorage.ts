@@ -45,7 +45,7 @@ export function useTutorialStorage() {
   const { active: activeProfile } = useProfile();
   const db = useMaybeDB(); // Lenient DB access for global providers
   const stores = defineStores();
-  
+
   // Flag to indicate if profile is active and DB is available
   const isProfileActive = !!(activeProfile?.id && db);
 

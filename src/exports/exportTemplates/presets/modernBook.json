@@ -1,0 +1,22 @@
+{
+  "id": "modern-book",
+  "label": "Modern Book",
+  "description": "Readable serif, 1.5 spacing, subtle headers - perfect for self-publishing",
+  "baseFont": "Georgia",
+  "fontSizePt": 11,
+  "lineSpacing": 1.5,
+  "marginsIn": { 
+    "top": 0.9, 
+    "right": 0.8, 
+    "bottom": 0.9, 
+    "left": 0.9 
+  },
+  "header": { 
+    "center": "{chapterTitle}" 
+  },
+  "footer": { 
+    "center": "{page}" 
+  },
+  "sceneBreak": "⁂",
+  "chapterPageBreak": true
+}

@@ -2,7 +2,33 @@
 
 All notable changes to this project are documented here.
 
-## [vNext] - 2025-10-10
+## [v1.2.2] - 2025-10-10
+
+### 🧹 Major Codebase Cleanup & Optimization
+
+#### **System-wide Bloat Reduction**
+
+- **Removed 6MB+ of unused presentation assets** - Eliminated large PNG branding files that weren't referenced in code
+- **Simplified feature flag infrastructure** - Replaced complex provider/hook systems with simple constants in `src/config/features.ts`
+- **Deleted legacy components** - Removed unused Platform components, CompleteWritingPlatform, and EnhancedDashboardV2
+- **Consolidated UI system** - Confirmed canonical Button/Card/Toast components in `src/components/ui/` are properly used
+- **Unified icon system** - Added Icon adapter for lucide-react with 80+ components already using it consistently
+- **Removed dark mode remnants** - Cleaned up leftover `dark:` classes and theme infrastructure
+
+#### **Architecture Improvements**
+
+- **Feature flags now use simple `FEATURES` constants** instead of complex provider/hook systems
+- **Icon system unified on lucide-react** with adapter for future flexibility
+- **Component system already well-architected** with canonical ui components
+- **Analytics system kept as-is** - already well-designed with typed events
+- **Build verification confirmed** - all core functionality remains intact
+
+#### **Developer Experience**
+
+- **Removed What's New modal system** - Eliminated unnecessary feature announcement infrastructure
+- **Deleted dead routes and panels** - Cleaned up unused routing components and legacy dashboard variants
+- **Streamlined build process** - Build succeeds cleanly despite some minified file parsing issues
+- **Maintained backward compatibility** - All existing functionality preserved
 
 ### 🎨 Brand System Update
 

@@ -8,19 +8,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Inkwell Brand CSS Variables */
+/* Inkwell Brand CSS Variables - Light Theme Only */
 :root {
   --font-serif: 'Source Serif Pro', ui-serif, georgia, serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  
+  /* Brand Colors */
   --color-navy: #0c1c3d;
   --color-gold: #d4a537;
   --color-charcoal: #222;
   --color-paper: #fff;
-
+  
   /* Text hierarchy */
   --ink-fg: #0c1c3d;
   --ink-fg-muted: #475569;
-  --ink-bg: #0b0e13;
+  --ink-bg: #fff;
   --ink-paper: #fff;
 }
 
@@ -34,12 +36,7 @@ body {
 }
 
 /* Brand typography */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif);
   color: var(--ink-fg);
 }
@@ -69,7 +66,6 @@ h6 {
   from {
     transform: rotate(0deg);
   }
-
   to {
     transform: rotate(360deg);
   }
@@ -83,40 +79,34 @@ h6 {
 
 /* Writing Editor Custom Prose Styling */
 .prose {
-  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+  @apply bg-white text-gray-900;
 }
 
 .prose p {
-  @apply text-gray-900 dark:text-gray-100;
+  @apply text-gray-900;
 }
 
-.prose h1,
-.prose h2,
-.prose h3,
-.prose h4,
-.prose h5,
-.prose h6 {
-  @apply text-gray-900 dark:text-white;
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  @apply text-gray-900;
 }
 
 .prose strong {
-  @apply text-gray-900 dark:text-white;
+  @apply text-gray-900;
 }
 
 .prose em {
-  @apply text-gray-700 dark:text-gray-300;
+  @apply text-gray-700;
 }
 
 .prose blockquote {
-  @apply text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600;
+  @apply text-gray-700 border-gray-300;
 }
 
 .prose code {
-  @apply text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-800;
+  @apply text-gray-800 bg-gray-100;
 }
 
 /* Analytics Component Styles */
-
 /* Add this to src/styles/components.css or src/index.css */
 
 /* Analytics View Container */
@@ -130,11 +120,11 @@ h6 {
 }
 
 .analytics-title {
-  @apply text-3xl font-bold text-slate-900 dark:text-slate-100;
+  @apply text-3xl font-bold text-slate-900;
 }
 
 .analytics-subtitle {
-  @apply text-lg text-slate-600 dark:text-slate-400;
+  @apply text-lg text-slate-600;
 }
 
 .analytics-controls {
@@ -142,7 +132,7 @@ h6 {
 }
 
 .analytics-select {
-  @apply px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500;
+  @apply px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500;
 }
 
 /* Analytics Cards Grid */
@@ -151,7 +141,7 @@ h6 {
 }
 
 .analytics-card {
-  @apply bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 transition-all duration-200 hover:shadow-md;
+  @apply bg-white rounded-lg border border-slate-200 p-4 transition-all duration-200 hover:shadow-md;
 }
 
 .analytics-card-header {
@@ -159,11 +149,11 @@ h6 {
 }
 
 .analytics-card-icon {
-  @apply p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400;
+  @apply p-2 rounded-lg bg-blue-50 text-blue-600;
 }
 
 .analytics-card-title {
-  @apply text-sm font-medium text-slate-600 dark:text-slate-400;
+  @apply text-sm font-medium text-slate-600;
 }
 
 .analytics-card-content {
@@ -171,7 +161,7 @@ h6 {
 }
 
 .analytics-card-value {
-  @apply text-2xl font-bold text-slate-900 dark:text-slate-100;
+  @apply text-2xl font-bold text-slate-900;
 }
 
 .analytics-card-trend {
@@ -179,28 +169,28 @@ h6 {
 }
 
 .analytics-card-trend.positive {
-  @apply text-green-600 dark:text-green-400;
+  @apply text-green-600;
 }
 
 .analytics-card-trend.negative {
-  @apply text-red-600 dark:text-red-400;
+  @apply text-red-600;
 }
 
 /* Special card styles */
 .streak-card {
-  @apply bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-orange-200 dark:border-orange-800;
+  @apply bg-gradient-to-r from-orange-50 to-red-50 border-orange-200;
 }
 
 .streak-card .analytics-card-icon {
-  @apply bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400;
+  @apply bg-orange-100 text-orange-600;
 }
 
 .goal-complete {
-  @apply bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800;
+  @apply bg-gradient-to-r from-green-50 to-emerald-50 border-green-200;
 }
 
 .goal-complete .analytics-card-icon {
-  @apply bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400;
+  @apply bg-green-100 text-green-600;
 }
 
 /* Charts Section */
@@ -209,7 +199,7 @@ h6 {
 }
 
 .analytics-chart-card {
-  @apply bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6;
+  @apply bg-white rounded-lg border border-slate-200 p-6;
 }
 
 .chart-header {
@@ -217,11 +207,11 @@ h6 {
 }
 
 .chart-header h3 {
-  @apply text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1;
+  @apply text-lg font-semibold text-slate-900 mb-1;
 }
 
 .chart-header p {
-  @apply text-sm text-slate-600 dark:text-slate-400;
+  @apply text-sm text-slate-600;
 }
 
 .chart-container {
@@ -238,11 +228,11 @@ h6 {
 }
 
 .section-header h3 {
-  @apply text-xl font-semibold text-slate-900 dark:text-slate-100 mb-1;
+  @apply text-xl font-semibold text-slate-900 mb-1;
 }
 
 .section-header p {
-  @apply text-slate-600 dark:text-slate-400;
+  @apply text-slate-600;
 }
 
 /* Chapter Progress */
@@ -251,7 +241,7 @@ h6 {
 }
 
 .chapter-progress-card {
-  @apply bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4;
+  @apply bg-white rounded-lg border border-slate-200 p-4;
 }
 
 .chapter-progress-header {
@@ -259,23 +249,23 @@ h6 {
 }
 
 .chapter-progress-header h4 {
-  @apply font-medium text-slate-900 dark:text-slate-100 truncate;
+  @apply font-medium text-slate-900 truncate;
 }
 
 .chapter-progress-percentage {
-  @apply text-sm font-semibold text-blue-600 dark:text-blue-400;
+  @apply text-sm font-semibold text-blue-600;
 }
 
 .chapter-progress-bar {
-  @apply w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-3;
+  @apply w-full bg-slate-200 rounded-full h-2 mb-3;
 }
 
 .chapter-progress-fill {
-  @apply bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-500;
+  @apply bg-blue-600 h-2 rounded-full transition-all duration-500;
 }
 
 .chapter-progress-stats {
-  @apply flex justify-between text-xs text-slate-600 dark:text-slate-400;
+  @apply flex justify-between text-xs text-slate-600;
 }
 
 /* Writing Sessions */
@@ -284,11 +274,11 @@ h6 {
 }
 
 .session-item {
-  @apply bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between;
+  @apply bg-white rounded-lg border border-slate-200 p-4 flex items-center justify-between;
 }
 
 .session-date {
-  @apply flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400;
+  @apply flex items-center gap-2 text-sm text-slate-600;
 }
 
 .session-stats {
@@ -296,11 +286,11 @@ h6 {
 }
 
 .session-stat {
-  @apply flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400;
+  @apply flex items-center gap-1 text-sm text-slate-600;
 }
 
 .session-productivity {
-  @apply flex items-center gap-1 text-sm font-medium text-green-600 dark:text-green-400;
+  @apply flex items-center gap-1 text-sm font-medium text-green-600;
 }
 
 /* Empty State */
@@ -309,21 +299,18 @@ h6 {
 }
 
 .analytics-empty-icon {
-  @apply w-16 h-16 text-slate-400 dark:text-slate-600 mb-4;
+  @apply w-16 h-16 text-slate-400 mb-4;
 }
 
 .analytics-empty h2 {
-  @apply text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2;
+  @apply text-xl font-semibold text-slate-900 mb-2;
 }
 
 .analytics-empty p {
-  @apply text-slate-600 dark:text-slate-400;
+  @apply text-slate-600;
 }
 
-/* ===================
-   INKWELL BRAND UTILITIES
-   =================== */
-
+/* =================== INKWELL BRAND UTILITIES =================== */
 @layer utilities {
   /* Inkwell Motion Utilities */
   .transition-ink {
@@ -362,8 +349,8 @@ h6 {
     @apply bg-white border border-gray-200 rounded-lg p-6 transition-all duration-200 hover:shadow-lg;
   }
 
-  .card-inkwell-dark {
-    @apply bg-inkwell-navy border border-inkwell-gold/20 rounded-lg p-6 transition-all duration-200 hover:shadow-lg;
+  .card-inkwell-navy {
+    @apply bg-inkwell-navy border border-inkwell-gold/20 rounded-lg p-6 transition-all duration-200 hover:shadow-lg text-white;
   }
 
   /* New Inkwell Text Styles */
@@ -419,7 +406,6 @@ h6 {
     opacity: 0.5;
     transform: scale(1);
   }
-
   to {
     opacity: 1;
     transform: scale(1.02);
@@ -431,7 +417,6 @@ h6 {
     background-position: 0% 100%;
     opacity: 0;
   }
-
   to {
     background-position: 0% 0%;
     opacity: 1;
@@ -443,12 +428,10 @@ h6 {
     transform: scale(0.8);
     opacity: 0;
   }
-
   50% {
     transform: scale(1.1);
     opacity: 0.6;
   }
-
   100% {
     transform: scale(1);
     opacity: 1;

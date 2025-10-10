@@ -16,7 +16,7 @@ This guide provides step-by-step instructions for deploying the new Inkwell bran
 ### 2. **Core Components Created**
 
 - ✅ `InkwellLogo` - Scalable logo component with variants (full, mark, wordmark)
-- ✅ `BrandThemeProvider` - Theme management with light/dark/auto modes
+- ✅ `InkwellLogo` - Scalable logo component with variants (full, mark, wordmark)
 - ✅ `BrandShowcase` - Comprehensive demonstration component
 - ✅ Brand utility classes and constants for consistent usage
 
@@ -101,18 +101,17 @@ cp your-brand-assets/favicon.svg public/assets/
 # Recommended sizes: 72, 96, 128, 144, 152, 192, 384, 512px
 ```
 
-### 7. **Dark Mode Enhancement**
+### 7. **Light Mode Optimization**
+
+Inkwell uses a professional light theme optimized for writing focus:
 
 ```css
-/* Additional dark mode styles in index.css */
-.dark {
-  --color-bg-primary: #0c5c3d;
-  --color-text-primary: #f9f9f9;
+/* Core light theme styles */
+:root {
+  --color-bg-primary: #ffffff;
+  --color-text-primary: #1f2937;
   --color-accent: #d4a537;
-}
-
-.dark .card-inkwell {
-  @apply bg-inkwell-navy/20 border-inkwell-gold/20;
+  --color-navy: #0c5c3d;
 }
 ```
 
@@ -132,7 +131,7 @@ Update external templates:
 ### Pre-Deployment
 
 - [ ] Review `BrandShowcase` component for visual verification
-- [ ] Test light/dark theme switching
+- [ ] Verify light theme consistency
 - [ ] Verify logo displays correctly at all sizes
 - [ ] Check color contrast ratios for accessibility
 
@@ -157,7 +156,7 @@ Update external templates:
 
 - [ ] Cross-browser compatibility
 - [ ] Mobile responsiveness
-- [ ] Dark mode functionality
+- [ ] Light theme consistency
 - [ ] Accessibility compliance (WCAG AA)
 - [ ] Performance impact assessment
 
@@ -184,20 +183,15 @@ Update external templates:
 <InkwellLogo variant="mark" size="sm" color="gold" />
 ```
 
-### Theme Integration
+### Brand Color Usage
 
 ```tsx
-// In settings or theme switcher
-import { useBrandTheme } from './components/brand';
-
-const ThemeSwitcher = () => {
-  const { theme, toggleTheme } = useBrandTheme();
-
-  return (
-    <button onClick={toggleTheme} className={BRAND_CLASSES.buttons.secondary}>
-      Theme: {theme}
-    </button>
-  );
+// Professional light theme colors
+const BrandColors = {
+  navy: '#0c5c3d',    // Deep Navy for headers
+  gold: '#d4a537',    // Warm Gold for accents
+  charcoal: '#2e2e2e', // Charcoal for body text
+  white: '#ffffff'     // Clean white background
 };
 ```
 

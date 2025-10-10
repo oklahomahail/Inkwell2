@@ -1,0 +1,155 @@
+/* typography.css - Base typography for professional exports */
+
+/* Font imports for web fonts */
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* Base typography reset */
+* {
+  box-sizing: border-box;
+}
+
+/* Professional manuscript typography */
+.manuscript-body {
+  font-feature-settings: "liga", "kern";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Chapter styling */
+.chapter {
+  page-break-inside: avoid;
+  orphans: 2;
+  widows: 2;
+}
+
+.chapter-title {
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  page-break-after: avoid;
+}
+
+/* Paragraph styling */
+p {
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+}
+
+p + p {
+  text-indent: 0.5in;
+}
+
+/* First paragraph after chapter title or scene break */
+.chapter-title + div p:first-child,
+.scene-break + p,
+.scene p:first-child {
+  text-indent: 0;
+}
+
+/* Scene breaks */
+.scene-break {
+  letter-spacing: 0.2em;
+  font-weight: normal;
+  line-height: 1;
+}
+
+/* Emphasis and strong text */
+em {
+  font-style: italic;
+}
+
+strong {
+  font-weight: 600;
+}
+
+/* Quotes and dialogue */
+blockquote {
+  margin: 1em 0;
+  padding-left: 1em;
+  border-left: none;
+  font-style: italic;
+}
+
+/* Front and back matter */
+.front-matter,
+.back-matter {
+  text-align: left;
+}
+
+.front-matter h2,
+.back-matter h2 {
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1.2em;
+  margin-bottom: 1.5em;
+}
+
+.dedication {
+  text-align: center;
+  font-style: italic;
+  margin: 3em 0;
+}
+
+.acknowledgements p,
+.about-author p,
+.notes p {
+  text-indent: 0;
+  margin-bottom: 1em;
+}
+
+/* Headers and footers */
+.running-header {
+  font-size: 0.9em;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.running-footer {
+  font-size: 0.9em;
+  font-weight: normal;
+}
+
+/* Page numbers */
+.page-number {
+  font-feature-settings: "tnum";
+}
+
+/* Special characters and symbols */
+.ellipsis {
+  letter-spacing: 0.1em;
+}
+
+.em-dash {
+  letter-spacing: -0.05em;
+}
+
+/* Print optimizations */
+@media print {
+  /* Avoid breaking inside elements */
+  .scene,
+  .front-matter > div,
+  .back-matter > div {
+    page-break-inside: avoid;
+  }
+  
+  /* Ensure proper hyphenation */
+  p {
+    hyphens: auto;
+  }
+  
+  /* Optimize for print rendering */
+  body {
+    print-color-adjust: exact;
+  }
+}
+
+/* Screen preview optimizations */
+@media screen {
+  /* Add subtle shadow for preview */
+  .manuscript-body {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    background: white;
+  }
+}

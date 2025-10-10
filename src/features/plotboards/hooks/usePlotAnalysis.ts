@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react';
 
+import { isEnabled } from '../../../config/features';
 import { analyzeBoard } from '../../../services/aiPlotAnalysisService';
 import { analyticsService } from '../../../services/analyticsService';
-import { isEnabled } from '../../../utils/flags';
 import { usePlotBoardStore } from '../store';
 
 export function usePlotAnalysis(profileId: string, projectId: string) {

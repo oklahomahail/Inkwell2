@@ -31,10 +31,10 @@ export const DEFAULT_PHRASE_HYGIENE_SETTINGS: PhraseHygieneSettings = {
   thresholds: {
     low: 0.5,
     medium: 1.0,
-    high: 2.0
+    high: 2.0,
   },
   stopWords: [],
-  customStoplist: []
+  customStoplist: [],
 };
 
 class PhraseAnalysisService {
@@ -47,19 +47,18 @@ class PhraseAnalysisService {
 
   private initWorker() {
     try {
-      this.worker = new Worker(
-        new URL('../workers/phraseWorker.ts', import.meta.url),
-        { type: 'module' }
-      );
+      this.worker = new Worker(new URL('../workers/phraseWorker.ts', import.meta.url), {
+        type: 'module',
+      });
     } catch (error) {
       console.warn('Failed to initialize phrase analysis worker:', error);
     }
   }
 
   async analyzeText(
-    text: string, 
-    projectId: string, 
-    settings?: Partial<PhraseHygieneSettings>
+    text: string,
+    projectId: string,
+    settings?: Partial<PhraseHygieneSettings>,
   ): Promise<PhraseAnalysisResponse['results']> {
     if (!this.worker) {
       throw new Error('Phrase analysis worker not available');
@@ -76,8 +75,8 @@ class PhraseAnalysisService {
         ngramSizes: finalSettings.ngramSizes,
         minOccurrences: finalSettings.minOccurrences,
         stopWords: finalSettings.stopWords,
-        customStoplist: finalSettings.customStoplist
-      }
+        customStoplist: finalSettings.customStoplist,
+      },
     };
 
     return new Promise((resolve, reject) => {
@@ -92,7 +91,7 @@ class PhraseAnalysisService {
 
       const handleMessage = (event: MessageEvent) => {
         const response = event.data;
-        
+
         if (response.type === 'analysis-complete' && response.projectId === projectId) {
           clearTimeout(timeout);
           this.worker?.removeEventListener('message', handleMessage);
@@ -137,14 +136,14 @@ class PhraseAnalysisService {
     const settings = this.getSettings(projectId);
     const updatedStoplist = [...settings.customStoplist, phrase.toLowerCase()];
     this.saveSettings(projectId, {
-      customStoplist: [...new Set(updatedStoplist)] // Remove duplicates
+      customStoplist: [...new Set(updatedStoplist)], // Remove duplicates
     });
   }
 
   removeFromCustomStoplist(projectId: string, phrase: string): void {
     const settings = this.getSettings(projectId);
     const updatedStoplist = settings.customStoplist.filter(
-      p => p.toLowerCase() !== phrase.toLowerCase()
+      (p) => p.toLowerCase() !== phrase.toLowerCase(),
     );
     this.saveSettings(projectId, { customStoplist: updatedStoplist });
   }

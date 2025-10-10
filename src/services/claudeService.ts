@@ -168,7 +168,7 @@ Context: You have access to the user's current project and any selected text. Al
       };
     } catch (error) {
       console.error('❌ Claude API Error:', error);
-      
+
       if ((error as Error)?.name === 'ClaudeError') {
         throw error;
       }
@@ -183,11 +183,11 @@ Context: You have access to the user's current project and any selected text. Al
   // 🆕 Story Architect specific method
   async generateStoryOutline(prompt: string): Promise<string> {
     console.log('🎯 Story Architect: Generating outline with Claude API');
-    
+
     const response = await this.sendMessage(prompt, {
       maxTokens: 4000, // Higher token limit for story generation
     });
-    
+
     return response.content;
   }
 
