@@ -1,6 +1,5 @@
 // src/components/ui/EmptyStates.tsx
 import {
-  BookOpen,
   Edit3,
   Calendar,
   BarChart3,
@@ -13,6 +12,8 @@ import {
   Play,
 } from 'lucide-react';
 import React from 'react';
+
+import { InkwellFeather } from '@/components/icons/InkwellFeather';
 
 import { KeyboardShortcut } from './KeyboardHints';
 
@@ -139,7 +140,7 @@ export const NoProjectsEmptyState: React.FC<{
   onOpenHelp: () => void;
 }> = ({ onCreateProject, onOpenHelp }) => (
   <EmptyState
-    icon={BookOpen}
+    icon={InkwellFeather}
     title="Welcome to Inkwell"
     description="Start your writing journey by creating your first project. Inkwell helps you organize chapters, track progress, and bring your stories to life."
     primaryAction={{

@@ -1,7 +1,8 @@
 // src/components/Onboarding/WelcomeModal.tsx
-import { BookOpen, Clock, X, ArrowRight, CheckCircle, Lightbulb } from 'lucide-react';
+import { Clock, X, ArrowRight, CheckCircle, Lightbulb } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { InkwellFeather } from '@/components/icons/InkwellFeather';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 
 import { useTour, CORE_TOUR_STEPS } from './ProfileTourProvider';
@@ -93,7 +94,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
 
           <div className="flex items-center gap-4 mb-4">
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-              <BookOpen className="w-6 h-6 text-white" />
+              <InkwellFeather className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="text-2xl font-bold">Welcome to Inkwell!</h1>

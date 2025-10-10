@@ -1,17 +1,9 @@
 // src/components/Sidebar.tsx
-import {
-  Home,
-  Settings,
-  BarChart3,
-  Clock,
-  PenTool,
-  BookOpen,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+import { Home, Settings, BarChart3, Clock, PenTool, ChevronLeft, ChevronRight } from 'lucide-react';
 import React from 'react';
 
 import { Brand } from '@/components/Brand/Brand';
+import { InkwellFeather } from '@/components/icons/InkwellFeather';
 import { useAppContext, View } from '@/context/AppContext';
 import { useUI } from '@/hooks/useUI';
 import { cn } from '@/utils/cn';
@@ -20,7 +12,7 @@ import { focusWritingEditor } from '@/utils/focusUtils';
 const sidebarLinks = [
   { view: View.Dashboard, label: 'Dashboard', icon: Home },
   { view: View.Writing, label: 'Writing', icon: PenTool },
-  { view: View.Planning, label: 'Planning', icon: BookOpen }, // ✨ NEW: Added Planning
+  { view: View.Planning, label: 'Planning', icon: InkwellFeather }, // ✨ NEW: Added Planning
   { view: View.Timeline, label: 'Timeline', icon: Clock },
   { view: View.Analysis, label: 'Analytics', icon: BarChart3 },
   { view: View.Settings, label: 'Settings', icon: Settings },

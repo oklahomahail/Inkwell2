@@ -1,6 +1,5 @@
 // src/components/CompleteWritingPlatform.tsx - CLEANED VERSION
 import {
-  BookOpen,
   Calendar,
   BarChart3,
   Settings,
@@ -20,6 +19,7 @@ import {
 } from 'lucide-react';
 import React, { useState, Suspense, useEffect, useCallback, JSX } from 'react';
 
+import { InkwellFeather } from '@/components/icons/InkwellFeather';
 import WritingPanel from '@/components/Panels/WritingPanel';
 import ViewRouter from '@/components/Platform/ViewRouter';
 import { SmartSearchModal, SmartSearchTrigger } from '@/components/Search';
@@ -287,7 +287,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="sidebar-header">
         <div className="sidebar-header-content">
           <div className="sidebar-logo">
-            <BookOpen className="logo-icon" />
+            <InkwellFeather className="logo-icon" />
           </div>
           {!isCollapsed && (
             <div className="sidebar-title">
@@ -519,7 +519,7 @@ const _DashboardContent: React.FC = () => {
           <CardContent>
             <div className="stat-item">
               <div className="stat-icon stat-icon-blue">
-                <BookOpen className="icon" />
+                <InkwellFeather className="icon" />
               </div>
               <div className="stat-content">
                 <p className="stat-label">Total Words</p>
@@ -632,7 +632,7 @@ const _WritingInterface: React.FC = () => {
         <div className="placeholder-content page-transition h-full">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <BookOpen className="placeholder-icon" />
+              <InkwellFeather className="placeholder-icon" />
               <h2 className="placeholder-title">Writing Interface</h2>
               <p className="placeholder-text">Your existing writing components will go here</p>
             </div>

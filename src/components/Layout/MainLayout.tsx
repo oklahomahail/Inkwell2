@@ -2,7 +2,6 @@
 import {
   Home,
   PenTool,
-  BookOpen,
   Clock,
   BarChart3,
   Settings,
@@ -19,6 +18,7 @@ import {
 import React, { useState, useEffect } from 'react';
 
 import { InkwellLogo } from '@/components/Brand';
+import { InkwellFeather } from '@/components/icons/InkwellFeather';
 import { useAppContext, View } from '@/context/AppContext';
 import { useCommands } from '@/hooks/useCommands';
 import { useSmartSearch } from '@/hooks/useSmartSearch';
@@ -58,7 +58,7 @@ const baseNavigationItems = [
   {
     id: 'planning',
     label: 'Planning',
-    icon: BookOpen,
+    icon: InkwellFeather,
     view: View.Planning,
     shortcut: '⌘3',
     description: 'Story structure and outlines',

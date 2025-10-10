@@ -1,16 +1,8 @@
 // src/components/Dashboard/EnhancedDashboard.tsx
-import {
-  PlusCircle,
-  FileText,
-  BarChart3,
-  BookOpen,
-  Target,
-  Zap,
-  Star,
-  ArrowRight,
-} from 'lucide-react';
+import { PlusCircle, FileText, BarChart3, Target, Zap, Star, ArrowRight } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { InkwellFeather } from '@/components/icons/InkwellFeather';
 import { useAppContext, View } from '@/context/AppContext';
 
 const EnhancedDashboard: React.FC = () => {
@@ -96,7 +88,7 @@ const EnhancedDashboard: React.FC = () => {
       id: 'plan-story',
       title: 'Plan Your Story',
       description: 'Organize characters, plots, and story structure',
-      icon: BookOpen,
+      icon: InkwellFeather,
       color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
       action: () => navigateToView(View.Planning),
     },
@@ -110,7 +102,7 @@ const EnhancedDashboard: React.FC = () => {
           {/* Welcome Header */}
           <div className="mb-12">
             <div className="w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <BookOpen className="w-10 h-10 text-primary-600 dark:text-primary-400" />
+              <InkwellFeather className="w-10 h-10 text-primary-600 dark:text-primary-400" />
             </div>
             <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
               Welcome to Inkwell
@@ -250,7 +242,7 @@ const EnhancedDashboard: React.FC = () => {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                  <InkwellFeather className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-1">
