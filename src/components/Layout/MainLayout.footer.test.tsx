@@ -1,4 +1,8 @@
-// src/components/Layout/MainLayout.footer.test.tsx
+// @type unit
+// @domain layout
+// MainLayout Footer - Behavioral Tests
+// Tests user-visible footer behavior, not implementation details
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
@@ -76,31 +80,29 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 describe('MainLayout Footer', () => {
-  it('should render the footer with Inkwell branding', () => {
+  it('should render footer with complete Inkwell branding', () => {
     render(
       <MainLayout>
         <div>Test Content</div>
       </MainLayout>,
     );
 
-    // Check for footer element
+    // Check for footer landmark - this is what screen readers and users expect
     const footer = screen.getByRole('contentinfo');
     expect(footer).toBeInTheDocument();
 
-    // Check for branding text within footer
-    const inkwellTexts = screen.getAllByText('Inkwell');
-    const footerInkwell = inkwellTexts.find((el) => footer.contains(el));
-    expect(footerInkwell).toBeInTheDocument();
-
+    // Check for complete branding within the footer - the user-visible behavior that matters
+    const footerInkwellText = screen.getAllByText('Inkwell').find((el) => footer.contains(el));
+    expect(footerInkwellText).toBeInTheDocument();
     expect(screen.getByText('by')).toBeInTheDocument();
     expect(screen.getByText('Nexus Partners')).toBeInTheDocument();
 
-    // Check for logo (should have multiple with same test ID)
+    // Logo should be visible as part of branding
     const logos = screen.getAllByTestId('logo-svg-feather-gold');
     expect(logos.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('should position footer at bottom of main content', () => {
+  it('should position footer at the bottom of the layout', () => {
     render(
       <MainLayout>
         <div>Test Content</div>
@@ -110,62 +112,9 @@ describe('MainLayout Footer', () => {
     const footer = screen.getByRole('contentinfo');
     const main = footer.closest('main');
 
-    // Check that main has flex classes
+    // Test the essential layout behavior - footer should be at bottom
+    // We test this through the flex container structure that achieves it
     expect(main).toHaveClass('flex', 'flex-col');
-
-    // Check that footer has mt-auto class for bottom positioning
     expect(footer).toHaveClass('mt-auto');
-  });
-
-  it('should have proper styling for both light and dark modes', () => {
-    render(
-      <MainLayout>
-        <div>Test Content</div>
-      </MainLayout>,
-    );
-
-    const footer = screen.getByRole('contentinfo');
-
-    // Check for theme-aware classes
-    expect(footer).toHaveClass(
-      'border-t',
-      'border-slate-200',
-      'dark:border-slate-700',
-      'bg-white/50',
-      'dark:bg-slate-800/50',
-      'backdrop-blur-sm',
-    );
-  });
-
-  it('should center the branding content', () => {
-    render(
-      <MainLayout>
-        <div>Test Content</div>
-      </MainLayout>,
-    );
-
-    // Find the footer and then the branding container within it
-    const footer = screen.getByRole('contentinfo');
-    const brandingContainer = footer.querySelector('.flex.items-center.justify-center');
-    expect(brandingContainer).toBeInTheDocument();
-    expect(brandingContainer).toHaveClass('flex', 'items-center', 'justify-center');
-  });
-
-  it('should have appropriate text sizing and spacing', () => {
-    render(
-      <MainLayout>
-        <div>Test Content</div>
-      </MainLayout>,
-    );
-
-    // Find the footer and then the branding container within it
-    const footer = screen.getByRole('contentinfo');
-    const brandingContainer = footer.querySelector('.flex.items-center.justify-center');
-
-    // Check text sizing
-    expect(brandingContainer).toHaveClass('text-sm');
-
-    // Check gap between elements
-    expect(brandingContainer).toHaveClass('gap-3');
   });
 });
