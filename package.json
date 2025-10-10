@@ -39,7 +39,8 @@
     "ci:audit": "mkdir -p reports && pnpm -s audit:knip | tee reports/knip.txt && pnpm -s audit:depcheck | tee reports/depcheck.txt && pnpm -s audit:orphans | tee reports/madge-orphans.txt && pnpm -s audit:cycles | tee reports/madge-cycles.txt",
     "lint:relaxed": "eslint \"src/**/*.{ts,tsx}\" --fix --cache --cache-location node_modules/.cache/eslint --rule '@typescript-eslint/no-explicit-any: off' --rule '@typescript-eslint/no-unused-vars: [warn, {\"argsIgnorePattern\":\"^_\",\"varsIgnorePattern\":\"^_\"}]' --rule 'react-hooks/exhaustive-deps: off' --rule 'react-refresh/only-export-components: off' --rule 'import/order: warn'",
     "pretypecheck": "npm run lint:relaxed",
-    "check": "npm run lint:relaxed && npm run typecheck"
+    "check": "npm run lint:relaxed && npm run typecheck",
+    "check:corruption": "./scripts/check-file-corruption.sh"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -118,7 +119,7 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "eslint-plugin-unused-imports": "^4.2.0",
     "globals": "^16.3.0",
-    "husky": "^8.0.0",
+    "husky": "^8.0.3",
     "jsdom": "^26.1.0",
     "knip": "^5.63.0",
     "lint-staged": "^15.2.0",
