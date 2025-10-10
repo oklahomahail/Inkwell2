@@ -36,7 +36,8 @@
     "ci:audit": "mkdir -p reports && pnpm -s audit:knip | tee reports/knip.txt && pnpm -s audit:depcheck | tee reports/depcheck.txt && pnpm -s audit:orphans | tee reports/madge-orphans.txt && pnpm -s audit:cycles | tee reports/madge-cycles.txt",
     "lint:relaxed": "eslint \"src/**/*.{ts,tsx}\" --fix --cache --cache-location node_modules/.cache/eslint --rule '@typescript-eslint/no-explicit-any: off' --rule '@typescript-eslint/no-unused-vars: [warn, {\"argsIgnorePattern\":\"^_\",\"varsIgnorePattern\":\"^_\"}]' --rule 'react-hooks/exhaustive-deps: off' --rule 'react-refresh/only-export-components: off' --rule 'import/order: warn'",
     "pretypecheck": "npm run lint:relaxed",
-    "check": "npm run lint:relaxed && npm run typecheck"
+    "check": "npm run lint:relaxed && npm run typecheck",
+    "check:corruption": "./scripts/check-corruption.sh"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
