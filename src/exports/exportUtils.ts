@@ -2,6 +2,18 @@
 
 import { ExportFormat } from './exportTypes';
 
+// Re-export functions without underscore prefixes
+export const sanitizeFileName = _sanitizeFileName;
+export const generateFileName = _generateFileName;
+export const createDownloadUrl = _createDownloadUrl;
+export const cleanupDownloadUrls = _cleanupDownloadUrls;
+export const downloadBlob = _downloadBlob;
+export const getMimeType = _getMimeType;
+export const estimateFileSize = _estimateFileSize;
+export const formatFileSize = _formatFileSize;
+export const formatDuration = _formatDuration;
+export const validateExportSettings = _validateExportSettings;
+
 /**
  * Sanitizes a string for use in filenames
  */
