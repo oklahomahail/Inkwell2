@@ -14,18 +14,18 @@ interface KeyboardNavigationState {
 }
 
 interface KeyboardNavigationActions {
-  setFocus: (cardId: string | null, columnId: string | null) => void;
-  startDrag: (cardId: string) => void;
-  completeDrop: (targetColumnId: string, newOrder: number) => void;
+  setFocus: (_cardId: string | null, _columnId: string | null) => void;
+  startDrag: (_cardId: string) => void;
+  completeDrop: (_targetColumnId: string, _newOrder: number) => void;
   cancelDrag: () => void;
-  announce: (message: string) => void;
+  announce: (_message: string) => void;
   clearAnnouncements: () => void;
 }
 
 interface UseKeyboardNavigationProps {
   board: PlotBoard;
-  onMoveCard: (cardId: string, targetColumnId: string, newOrder: number) => void;
-  onReorderColumns: (columnIds: string[]) => void;
+  onMoveCard: (_cardId: string, _targetColumnId: string, _newOrder: number) => void;
+  onReorderColumns: (_columnIds: string[]) => void;
 }
 
 export const useKeyboardNavigation = ({
@@ -55,8 +55,8 @@ export const useKeyboardNavigation = ({
       columnIndex: number;
     }> = [];
 
-    board.columns.forEach((column, columnIndex) => {
-      column.cards.forEach((card, cardIndex) => {
+    board.columns.forEach((column, _columnIndex) => {
+      column.cards.forEach((card, _cardIndex) => {
         cards.push({ card, column, cardIndex, columnIndex });
       });
     });
@@ -223,7 +223,7 @@ export const useKeyboardNavigation = ({
   }, [handleKeyDown]);
 
   // Actions
-  const setFocus = useCallback((cardId: string | null, columnId: string | null) => {
+  const setFocus = useCallback((cardId: string | null, _columnId: string | null) => {
     setState((prev) => ({ ...prev, focusedCardId: cardId, focusedColumnId: columnId }));
     lastFocusRef.current = { cardId, columnId };
   }, []);
@@ -247,7 +247,7 @@ export const useKeyboardNavigation = ({
   );
 
   const completeDrop = useCallback(
-    (targetColumnId: string, newOrder: number) => {
+    (targetColumnId: string, _newOrder: number) => {
       if (!state.draggedCardId) return;
 
       const draggedCard = findCardPosition(state.draggedCardId);
@@ -308,7 +308,7 @@ export const useKeyboardNavigation = ({
 };
 
 // Hook for managing ARIA live region announcements
-export const useAriaLiveRegion = (announcements: string[]) => {
+export const useAriaLiveRegion = (_announcements: string[]) => {
   const [currentAnnouncement, setCurrentAnnouncement] = useState<string>('');
 
   useEffect(() => {

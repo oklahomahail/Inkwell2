@@ -5,7 +5,7 @@ import type { StoryPremise, GeneratedOutline } from '@/services/storyArchitectSe
 // Options Step Component
 interface OptionsStepProps {
   premise: StoryPremise;
-  onChange: (premise: StoryPremise) => void;
+  onChange: (_premise: StoryPremise) => void;
   onNext: () => void;
   onPrevious: () => void;
   onGenerate: () => void;
@@ -14,11 +14,11 @@ interface OptionsStepProps {
 
 export const OptionsStep: React.FC<OptionsStepProps> = ({
   premise,
-  onChange,
-  onNext,
-  onPrevious,
-  onGenerate,
-  isGenerating,
+  _onChange,
+  _onNext,
+  _onPrevious,
+  _onGenerate,
+  _isGenerating,
 }) => {
   return <div>{/* Options step implementation */}</div>;
 };
@@ -33,9 +33,9 @@ interface ReviewStepProps {
 
 export const ReviewStep: React.FC<ReviewStepProps> = ({
   outline,
-  onNext,
-  onPrevious,
-  onRegenerate,
+  _onNext,
+  _onPrevious,
+  _onRegenerate,
 }) => {
   return <div>{/* Review step implementation */}</div>;
 };
@@ -50,7 +50,7 @@ interface IntegrationStepProps {
     createChapters: boolean;
     preserveExisting: boolean;
   };
-  onOptionsChange: (options: any) => void;
+  onOptionsChange: (_options: any) => void;
   onIntegrate: () => void;
   onPrevious: () => void;
   currentProject: any;
@@ -58,11 +58,11 @@ interface IntegrationStepProps {
 
 export const IntegrationStep: React.FC<IntegrationStepProps> = ({
   outline,
-  options,
-  onOptionsChange,
-  onIntegrate,
-  onPrevious,
-  currentProject,
+  _options,
+  _onOptionsChange,
+  _onIntegrate,
+  _onPrevious,
+  _currentProject,
 }) => {
   return <div>{/* Integration step implementation */}</div>;
 };

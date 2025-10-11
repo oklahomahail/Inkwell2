@@ -63,7 +63,7 @@ const CharacterManager: React.FC = () => {
   };
 
   // Delete character
-  const deleteCharacter = (characterId: string) => {
+  const deleteCharacter = (_characterId: string) => {
     if (confirm('Delete this character? This cannot be undone.')) {
       setCharacters(characters.filter((c) => c.id !== characterId));
       if (selectedCharacter?.id === characterId) {
@@ -74,7 +74,7 @@ const CharacterManager: React.FC = () => {
   };
 
   // Update selected character
-  const updateCharacter = (updates: Partial<Character>) => {
+  const updateCharacter = (_updates: Partial<Character>) => {
     if (!selectedCharacter) return;
 
     setSelectedCharacter({
@@ -85,7 +85,7 @@ const CharacterManager: React.FC = () => {
   };
 
   // Role colors and icons
-  const getRoleStyle = (role: Character['role']) => {
+  const getRoleStyle = (_role: Character['role']) => {
     switch (role) {
       case 'protagonist':
         return { color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/20' };
@@ -266,7 +266,7 @@ const CharacterManager: React.FC = () => {
                     <input
                       type="text"
                       value={selectedCharacter.name}
-                      onChange={(e) => updateCharacter({ name: e.target.value })}
+                      onChange={(_e) => updateCharacter({ name: e.target.value })}
                       disabled={!isEditing}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:bg-gray-50 dark:disabled:bg-gray-700"
                       placeholder="Character name"
@@ -279,7 +279,7 @@ const CharacterManager: React.FC = () => {
                     </label>
                     <select
                       value={selectedCharacter.role}
-                      onChange={(e) =>
+                      onChange={(_e) =>
                         updateCharacter({ role: e.target.value as Character['role'] })
                       }
                       disabled={!isEditing}
@@ -302,7 +302,7 @@ const CharacterManager: React.FC = () => {
                     </label>
                     <textarea
                       value={selectedCharacter.description}
-                      onChange={(e) => updateCharacter({ description: e.target.value })}
+                      onChange={(_e) => updateCharacter({ description: e.target.value })}
                       disabled={!isEditing}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:bg-gray-50 dark:disabled:bg-gray-700 resize-none"
@@ -317,7 +317,7 @@ const CharacterManager: React.FC = () => {
                     </label>
                     <textarea
                       value={selectedCharacter.motivation}
-                      onChange={(e) => updateCharacter({ motivation: e.target.value })}
+                      onChange={(_e) => updateCharacter({ motivation: e.target.value })}
                       disabled={!isEditing}
                       rows={2}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:bg-gray-50 dark:disabled:bg-gray-700 resize-none"
@@ -332,7 +332,7 @@ const CharacterManager: React.FC = () => {
                     </label>
                     <textarea
                       value={selectedCharacter.conflict}
-                      onChange={(e) => updateCharacter({ conflict: e.target.value })}
+                      onChange={(_e) => updateCharacter({ conflict: e.target.value })}
                       disabled={!isEditing}
                       rows={2}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:bg-gray-50 dark:disabled:bg-gray-700 resize-none"
@@ -347,7 +347,7 @@ const CharacterManager: React.FC = () => {
                     </label>
                     <textarea
                       value={selectedCharacter.arc}
-                      onChange={(e) => updateCharacter({ arc: e.target.value })}
+                      onChange={(_e) => updateCharacter({ arc: e.target.value })}
                       disabled={!isEditing}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:bg-gray-50 dark:disabled:bg-gray-700 resize-none"
@@ -362,7 +362,7 @@ const CharacterManager: React.FC = () => {
                     </label>
                     <textarea
                       value={selectedCharacter.notes}
-                      onChange={(e) => updateCharacter({ notes: e.target.value })}
+                      onChange={(_e) => updateCharacter({ notes: e.target.value })}
                       disabled={!isEditing}
                       rows={4}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:bg-gray-50 dark:disabled:bg-gray-700 resize-none"

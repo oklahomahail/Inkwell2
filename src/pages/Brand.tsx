@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 import { BrandShowcase } from '@/components/Brand';
 
-export default function BrandPage() {
+export default function _BrandPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}

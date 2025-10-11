@@ -13,8 +13,8 @@ import { cn } from '@/utils/cn';
 
 type Props = {
   value: string;
-  onChange: (html: string) => void;
-  onWordCountChange?: (count: number) => void;
+  onChange: (_html: string) => void;
+  onWordCountChange?: (_count: number) => void;
   placeholder?: string;
   readOnly?: boolean;
   className?: string;
@@ -22,7 +22,7 @@ type Props = {
   wordCountGoal?: number;
 };
 
-export default function TipTapEditor({
+export default function _TipTapEditor({
   value,
   onChange,
   onWordCountChange,
@@ -127,7 +127,7 @@ export default function TipTapEditor({
       let currentParagraphIndex = 0;
       let found = false;
 
-      editor.state.doc.descendants((node, pos) => {
+      editor.state.doc.descendants((node, _pos) => {
         if (found) return false;
         if (node.type.name === 'paragraph') {
           if (pos <= currentPos && currentPos <= pos + node.nodeSize) {
@@ -140,7 +140,7 @@ export default function TipTapEditor({
       });
 
       // Highlight active paragraph
-      paragraphEls.forEach((p, idx) => {
+      paragraphEls.forEach((p, _idx) => {
         p.classList.toggle('is-editor-focused', idx === currentParagraphIndex);
       });
 

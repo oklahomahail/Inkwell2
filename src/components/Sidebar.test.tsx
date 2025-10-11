@@ -9,7 +9,7 @@ import Sidebar from './Sidebar';
 
 // Keep icon replacement lightweight
 vi.mock('@/components/icons', () => ({
-  InkwellFeather: vi.fn(({ name, size, color, ...props }) => (
+  InkwellFeather: vi.fn(({ name, _size, _color, ...props }) => (
     <span data-testid={`icon-${name}`} data-size={size} data-color={color} {...props} />
   )),
 }));
@@ -20,7 +20,7 @@ vi.mock('@/utils/focusUtils', () => ({
 }));
 
 describe('Sidebar Component', () => {
-  const renderWithProviders = (opts?: {
+  const renderWithProviders = (_opts?: {
     appView?: View;
     uiCollapsed?: boolean;
     toggle?: () => void;

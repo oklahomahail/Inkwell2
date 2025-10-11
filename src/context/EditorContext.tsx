@@ -5,13 +5,13 @@ import type { Editor } from '@tiptap/react';
 
 interface EditorContextValue {
   currentEditor: Editor | null;
-  setCurrentEditor: (editor: Editor | null) => void;
-  insertText: (text: string) => void;
+  setCurrentEditor: (_editor: Editor | null) => void;
+  insertText: (_text: string) => void;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
 
-export function useEditorContext(): EditorContextValue {
+export function _useEditorContext(): EditorContextValue {
   const context = useContext(EditorContext);
   if (!context) {
     throw new Error('useEditorContext must be used within an EditorProvider');
@@ -19,14 +19,14 @@ export function useEditorContext(): EditorContextValue {
   return context;
 }
 
-export function EditorProvider({ children }: { children: ReactNode }) {
+export function _EditorProvider({ children }: { children: ReactNode }) {
   const currentEditorRef = useRef<Editor | null>(null);
 
-  const setCurrentEditor = (editor: Editor | null) => {
+  const setCurrentEditor = (_editor: Editor | null) => {
     currentEditorRef.current = editor;
   };
 
-  const insertText = (text: string) => {
+  const insertText = (_text: string) => {
     const editor = currentEditorRef.current;
     if (!editor) {
       console.warn('No active editor available for text insertion');

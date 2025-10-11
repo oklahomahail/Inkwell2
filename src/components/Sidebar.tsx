@@ -23,11 +23,11 @@ const sidebarLinks = [
   { view: View.Settings, label: 'Settings', icon: Settings },
 ];
 
-export default function Sidebar() {
+export default function _Sidebar() {
   const { state, dispatch } = useAppContext();
   const { sidebarCollapsed, toggleSidebar } = useUI();
 
-  const handleViewChange = (view: View) => {
+  const handleViewChange = (_view: View) => {
     dispatch({ type: 'SET_VIEW', payload: view });
     if (view === View.Writing) {
       setTimeout(focusWritingEditor, 100);
@@ -61,7 +61,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="p-4 flex-1 space-y-1">
-        {sidebarLinks.map(({ view, label, icon: Icon }) => (
+        {sidebarLinks.map(({ view, _label, _icon: Icon }) => (
           <button
             key={view}
             onClick={() => handleViewChange(view)}

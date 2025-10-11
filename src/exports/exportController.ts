@@ -12,12 +12,12 @@ import { assembleManuscript, validateManuscriptForExport } from './manuscriptAss
 
 // Analytics integration - would import from your analytics service
 interface AnalyticsService {
-  track: (event: string, data: any) => void;
+  track: (_event: string, _data: any) => void;
 }
 
 // Mock analytics - replace with actual service
 const analytics: AnalyticsService = {
-  track: (event: string, data: any) => {
+  track: (_event: string, _data: any) => {
     console.log(`Analytics: ${event}`, data);
   },
 };
@@ -25,7 +25,7 @@ const analytics: AnalyticsService = {
 // Job queue for managing exports
 class ExportJobQueue {
   private jobs = new Map<string, ExportJob>();
-  private listeners = new Map<string, Set<(job: ExportJob) => void>>();
+  private listeners = new Map<string, Set<(_job: ExportJob) => void>>();
 
   add(job: ExportJob) {
     this.jobs.set(job.id, job);
@@ -49,7 +49,7 @@ class ExportJobQueue {
     return Array.from(this.jobs.values());
   }
 
-  subscribe(jobId: string, callback: (job: ExportJob) => void) {
+  subscribe(_jobId: string, _callback: (job: ExportJob) => void) {
     if (!this.listeners.has(jobId)) {
       this.listeners.set(jobId, new Set());
     }
@@ -71,7 +71,7 @@ const jobQueue = new ExportJobQueue();
 /**
  * Creates and queues a new export job
  */
-export function createExportJob(
+export function _createExportJob(
   projectId: string,
   format: ExportFormat,
   styleId: string,
@@ -94,28 +94,28 @@ export function createExportJob(
 /**
  * Gets the current status of an export job
  */
-export function getExportJob(jobId: string): ExportJob | undefined {
+export function _getExportJob(jobId: string): ExportJob | undefined {
   return jobQueue.get(jobId);
 }
 
 /**
  * Gets all export jobs for a project
  */
-export function getExportJobsForProject(projectId: string): ExportJob[] {
+export function _getExportJobsForProject(projectId: string): ExportJob[] {
   return jobQueue.getAll().filter((job) => job.projectId === projectId);
 }
 
 /**
  * Subscribes to job updates
  */
-export function subscribeToJob(jobId: string, callback: (job: ExportJob) => void) {
+export function _subscribeToJob(_jobId: string, _callback: (job: ExportJob) => void) {
   return jobQueue.subscribe(jobId, callback);
 }
 
 /**
  * Updates job progress
  */
-function updateJobProgress(
+function _updateJobProgress(
   jobId: string,
   phase: 'assembling' | 'proofreading' | 'rendering' | 'finalizing',
   percentage: number,
@@ -129,7 +129,7 @@ function updateJobProgress(
 /**
  * Main export function that orchestrates the entire pipeline
  */
-export async function runExport(jobId: string): Promise<ExportResult> {
+export async function _runExport(jobId: string): Promise<ExportResult> {
   const job = jobQueue.get(jobId);
   if (!job) {
     throw new ExportError('Job not found', 'JOB_NOT_FOUND', 'assembling');
@@ -313,7 +313,7 @@ export async function runExport(jobId: string): Promise<ExportResult> {
 /**
  * Cancels a running export job
  */
-export function cancelExportJob(jobId: string): boolean {
+export function _cancelExportJob(jobId: string): boolean {
   const job = jobQueue.get(jobId);
   if (!job || job.status !== 'running') {
     return false;
@@ -336,7 +336,7 @@ export function cancelExportJob(jobId: string): boolean {
 /**
  * Gets export statistics for a project
  */
-export function getExportStats(projectId: string) {
+export function _getExportStats(projectId: string) {
   const jobs = getExportJobsForProject(projectId);
 
   const stats = {
@@ -347,7 +347,7 @@ export function getExportStats(projectId: string) {
     formatBreakdown: {} as Record<ExportFormat, number>,
     recentExports: jobs
       .filter((j) => j.status === 'succeeded')
-      .sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0))
+      .sort((a, _b) => (b.finishedAt || 0) - (a.finishedAt || 0))
       .slice(0, 5),
   };
 
@@ -358,7 +358,7 @@ export function getExportStats(projectId: string) {
 
   if (successfulJobs.length > 0) {
     const totalDuration = successfulJobs.reduce(
-      (sum, job) => sum + (job.finishedAt! - job.startedAt!),
+      (sum, _job) => sum + (job.finishedAt! - job.startedAt!),
       0,
     );
     stats.averageDuration = totalDuration / successfulJobs.length;

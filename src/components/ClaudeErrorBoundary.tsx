@@ -6,7 +6,7 @@ type Props = {
   /** Optional: called when user clicks "Restart Assistant" */
   onReset?: () => void;
   /** Optional: called when an error is captured */
-  onReport?: (error: Error, info: ErrorInfo) => void;
+  onReport?: (_error: Error, _info: ErrorInfo) => void;
 };
 
 type State = {

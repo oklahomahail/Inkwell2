@@ -20,7 +20,7 @@ type WritingAPI = {
   dispatch: Dispatch<WritingAction>; // Added missing dispatch
 };
 
-function writingReducer(state: WritingState, action: WritingAction): WritingState {
+function _writingReducer(state: WritingState, action: WritingAction): WritingState {
   switch (action.type) {
     case 'SET_CHAPTERS':
       return { ...state, chapters: action.payload };
@@ -43,7 +43,7 @@ function writingReducer(state: WritingState, action: WritingAction): WritingStat
   }
 }
 
-export default function useWriting(): WritingAPI {
+export default function _useWriting(): WritingAPI {
   const { currentProject } = useAppContext();
 
   // Initialize state with currentProject ID

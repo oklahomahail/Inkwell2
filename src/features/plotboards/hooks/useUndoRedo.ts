@@ -29,10 +29,10 @@ interface UndoRedoState {
 
 interface UndoRedoActions {
   pushEntry: (
-    operation: string,
-    board: PlotBoard,
-    description: string,
-    metadata?: Record<string, any>,
+    _operation: string,
+    _board: PlotBoard,
+    _description: string,
+    _metadata?: Record<string, any>,
   ) => Promise<void>;
   undo: () => Promise<HistoryEntry | null>;
   redo: () => Promise<HistoryEntry | null>;
@@ -46,8 +46,8 @@ const MAX_HISTORY_SIZE = 50;
 const STORAGE_KEY_PREFIX = 'plotboard_history_';
 
 export const useUndoRedo = (
-  boardId: string,
-  onRestoreBoard: (board: PlotBoard) => Promise<void>,
+  _boardId: string,
+  _onRestoreBoard: (board: PlotBoard) => Promise<void>,
 ): UndoRedoState & UndoRedoActions => {
   const [state, setState] = useState<UndoRedoState>({
     undoStack: [],

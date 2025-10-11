@@ -16,7 +16,7 @@ const BrandThemeContext = createContext<BrandTheme>(defaultTheme);
 
 export const BrandThemeProvider: React.FC<{ children: React.ReactNode; theme?: BrandTheme }> = ({
   children,
-  theme = defaultTheme,
+  _theme = defaultTheme,
 }) => {
   return <BrandThemeContext.Provider value={theme}>{children}</BrandThemeContext.Provider>;
 };

@@ -7,7 +7,7 @@ interface StatusBadgeProps {
   error: string | null;
 }
 
-const StatusBadge: React.FC<StatusBadgeProps> = ({ isConfigured, isLoading, error }) => {
+const StatusBadge: React.FC<StatusBadgeProps> = ({ isConfigured, _isLoading, error }) => {
   if (isLoading) {
     return (
       <span className="px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded">

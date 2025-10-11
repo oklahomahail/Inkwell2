@@ -174,12 +174,12 @@ class TraceLogger {
   getEvents(type?: TraceEvent['type'], limit?: number): TraceEvent[] {
     let events = type ? this.events.filter((e) => e.type === type) : this.events;
     if (limit) events = events.slice(-limit);
-    return events.sort((a, b) => b.startTime - a.startTime);
+    return events.sort((a, _b) => b.startTime - a.startTime);
   }
 
   getPerformanceMetrics(): PerformanceMetrics[] {
     return Array.from(this.performanceMetrics.values()).sort(
-      (a, b) => b.averageRenderTime - a.averageRenderTime,
+      (a, _b) => b.averageRenderTime - a.averageRenderTime,
     );
   }
 
@@ -218,11 +218,11 @@ class TraceLogger {
     const withDuration = this.events.filter((e) => e.duration != null);
     const averageEventDuration =
       withDuration.length > 0
-        ? withDuration.reduce((sum, e) => sum + (e.duration || 0), 0) / withDuration.length
+        ? withDuration.reduce((sum, _e) => sum + (e.duration || 0), 0) / withDuration.length
         : 0;
 
     const slowestEvent =
-      withDuration.sort((a, b) => (b.duration || 0) - (a.duration || 0))[0] || null;
+      withDuration.sort((a, _b) => (b.duration || 0) - (a.duration || 0))[0] || null;
 
     return {
       totalEvents: this.events.length,
@@ -237,23 +237,23 @@ class TraceLogger {
 
 /* ========= Singleton Instance ========= */
 let _trace: TraceLogger | null = null;
-function getTrace(): TraceLogger {
+function _getTrace(): TraceLogger {
   if (!_trace) _trace = new TraceLogger();
   return _trace;
 }
 
 export const trace = {
-  start: (name: string, type: TraceEvent['type'], metadata?: Record<string, unknown>) =>
+  start: (_name: string, _type: TraceEvent['type'], _metadata?: Record<string, unknown>) =>
     getTrace().start(name, type, metadata),
-  end: (id: string, additionalMetadata?: Record<string, unknown>) =>
+  end: (_id: string, _additionalMetadata?: Record<string, unknown>) =>
     getTrace().end(id, additionalMetadata),
   log: (
-    name: string,
-    type: TraceEvent['type'],
-    level?: TraceEvent['level'],
-    metadata?: Record<string, unknown>,
+    _name: string,
+    _type: TraceEvent['type'],
+    _level?: TraceEvent['level'],
+    _metadata?: Record<string, unknown>,
   ) => getTrace().log(name, type, level, metadata),
-  getEvents: (type?: TraceEvent['type'], limit?: number) => getTrace().getEvents(type, limit),
+  getEvents: (_type?: TraceEvent['type'], _limit?: number) => getTrace().getEvents(type, limit),
   getPerformanceMetrics: () => getTrace().getPerformanceMetrics(),
   getSummary: () => getTrace().getSummary(),
   clear: () => getTrace().clear(),
@@ -306,9 +306,9 @@ export function traceFunction<T extends (...args: unknown[]) => unknown>(
  *  - traceStoreAction('settings:setIncludeMetadata', { include })
  *  - traceStoreAction('settings', 'setIncludeMetadata', { include })
  */
-export function traceStoreAction(action: string, payload?: unknown): string;
-export function traceStoreAction(storeName: string, actionName: string, payload?: unknown): string;
-export function traceStoreAction(a: string, b?: string | unknown, c?: unknown): string {
+export function _traceStoreAction(action: string, payload?: unknown): string;
+export function _traceStoreAction(storeName: string, actionName: string, payload?: unknown): string;
+export function _traceStoreAction(a: string, b?: string | unknown, c?: unknown): string {
   // Normalize arguments to storeName + actionName + payload
   let storeName: string;
   let actionName: string;
@@ -348,7 +348,7 @@ export function traceStoreAction(a: string, b?: string | unknown, c?: unknown): 
 /**
  * Trace component render
  */
-export function traceComponentRender(componentName: string, props?: unknown): string {
+export function _traceComponentRender(componentName: string, props?: unknown): string {
   return trace.start(componentName, 'component_render', {
     propsCount: props && typeof props === 'object' ? Object.keys(props as object).length : 0,
     propsSize: props ? JSON.stringify(props).length : 0,
@@ -358,7 +358,7 @@ export function traceComponentRender(componentName: string, props?: unknown): st
 /**
  * React Hook for tracing component renders
  */
-export function useTraceRender(componentName: string, dependencies?: unknown[]): void {
+export function _useTraceRender(componentName: string, dependencies?: unknown[]): void {
   if (!featureFlags.isEnabled?.('performanceMonitoring')) return;
 
   const traceId = React.useRef<string>('');
@@ -380,9 +380,9 @@ export function useTraceRender(componentName: string, dependencies?: unknown[]):
 /**
  * React Hook for tracing store actions
  */
-export function useTraceStore(storeName: string) {
+export function _useTraceStore(storeName: string) {
   return React.useCallback(
-    (actionName: string, payload?: unknown) => {
+    (actionName: string, _payload?: unknown) => {
       const id = traceStoreAction(storeName, actionName, payload);
       return () => trace.end(id);
     },
@@ -393,12 +393,12 @@ export function useTraceStore(storeName: string) {
 /* ========= Console Commands (Development) ========= */
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   (window as any).__inkwellTrace = {
-    getEvents: (type?: string, limit?: number) => trace.getEvents(type as any, limit),
+    getEvents: (_type?: string, _limit?: number) => trace.getEvents(type as any, limit),
     getMetrics: () => trace.getPerformanceMetrics(),
     getSummary: () => trace.getSummary(),
     clear: () => trace.clear(),
     export: () => trace.export(),
-    log: (name: string, type: string, level?: string, metadata?: unknown) =>
+    log: (_name: string, _type: string, _level?: string, _metadata?: unknown) =>
       trace.log(name, type as any, level as any, metadata as any),
   };
 

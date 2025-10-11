@@ -50,7 +50,7 @@ export interface UIStateConfig {
 
 export interface UIContextState extends UIStateConfig {
   toggleSidebar: () => void;
-  setTheme: (theme: 'light' | 'dark') => void;
-  setZoomLevel: (level: number) => void;
-  dismissAlert: (id: string) => void;
+  setTheme: (_theme: 'light' | 'dark') => void;
+  setZoomLevel: (_level: number) => void;
+  dismissAlert: (_id: string) => void;
 }

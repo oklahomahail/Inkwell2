@@ -5,14 +5,14 @@ import React, { ReactNode } from 'react';
 /**
  * Custom render function that wraps components with necessary providers
  */
-export function render(ui: ReactNode, { ...options } = {}) {
+export function _render(ui: ReactNode, { ...options } = {}) {
   return rtlRender(<>{ui}</>, options);
 }
 
 /**
  * Create a wrapper component that renders children with necessary providers
  */
-export function createWrapper() {
+export function _createWrapper() {
   return ({ children }: { children: ReactNode }) => {
     return <>{children}</>;
   };

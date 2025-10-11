@@ -199,7 +199,7 @@ const TimelinePanel: React.FC = () => {
   );
 
   const handleNavigateToScene = useCallback(
-    (sceneId: string, chapterId: string) => {
+    (sceneId: string, _chapterId: string) => {
       if (currentProject) {
         navigateToScene(currentProject.id, chapterId, sceneId);
         setSelectedSceneId(sceneId);
@@ -218,7 +218,7 @@ const TimelinePanel: React.FC = () => {
   );
 
   const handleLinkAccepted = useCallback(
-    (sceneId: string, chapterId: string, eventIds: string[]) => {
+    (sceneId: string, _chapterId: string, _eventIds: string[]) => {
       showToast(`Successfully linked scene to ${eventIds.length} timeline event(s)`, 'success');
       // Reload timeline to reflect changes
       if (currentProject) {

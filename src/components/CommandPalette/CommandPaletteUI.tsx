@@ -36,14 +36,14 @@ const CommandPaletteUI: React.FC = () => {
   }, [isOpen]);
 
   // Handle backdrop click
-  const handleBackdropClick = (e: React.MouseEvent) => {
+  const handleBackdropClick = (_e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       close();
     }
   };
 
   // Get category icon
-  const getCategoryIcon = (category: string) => {
+  const getCategoryIcon = (_category: string) => {
     switch (category) {
       case 'navigation':
         return Navigation;
@@ -61,7 +61,7 @@ const CommandPaletteUI: React.FC = () => {
   };
 
   // Get category color
-  const getCategoryColor = (category: string) => {
+  const getCategoryColor = (_category: string) => {
     switch (category) {
       case 'navigation':
         return 'text-blue-500';
@@ -81,7 +81,7 @@ const CommandPaletteUI: React.FC = () => {
   if (!isOpen) return null;
 
   // Group commands by category (light typing to avoid `any`)
-  const grouped = filteredCommands.reduce<Record<string, typeof filteredCommands>>((acc, cmd) => {
+  const grouped = filteredCommands.reduce<Record<string, typeof filteredCommands>>((acc, _cmd) => {
     const category = (cmd as { category: string }).category;
     (acc[category] ||= []).push(cmd);
     return acc;

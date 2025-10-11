@@ -1,12 +1,18 @@
 interface ProofreadStepProps {
   value: boolean;
-  onChange: (include: boolean) => void;
+  onChange: (_include: boolean) => void;
   onNext: () => void;
   onBack: () => void;
   canProceed: boolean;
 }
 
-export function ProofreadStep({ value, onChange, onNext, onBack, canProceed }: ProofreadStepProps) {
+export function _ProofreadStep({
+  value,
+  onChange,
+  onNext,
+  onBack,
+  canProceed,
+}: ProofreadStepProps) {
   return (
     <div className="space-y-6">
       <div>

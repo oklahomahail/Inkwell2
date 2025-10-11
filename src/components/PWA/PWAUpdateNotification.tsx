@@ -12,8 +12,8 @@ interface PWAUpdateNotificationProps {
 
 export const PWAUpdateNotification: React.FC<PWAUpdateNotificationProps> = ({
   className = '',
-  position = 'top',
-  autoShow = true,
+  _position = 'top',
+  _autoShow = true,
 }) => {
   const { needsRefresh, updateApp, isOfflineReady } = usePWA();
   const [show, setShow] = useState(false);

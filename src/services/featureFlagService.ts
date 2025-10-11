@@ -21,7 +21,7 @@ export interface FeatureFlagConfig {
 class FeatureFlagService {
   private readonly STORAGE_KEY = 'inkwell_feature_flags';
   private config: FeatureFlagConfig;
-  private listeners: Array<(flags: Record<string, boolean>) => void> = [];
+  private listeners: Array<(_flags: Record<string, boolean>) => void> = [];
 
   // Define all available feature flags
   private readonly DEFAULT_FLAGS: FeatureFlag[] = [

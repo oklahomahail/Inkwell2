@@ -11,7 +11,7 @@ interface PrivacyControlsProps {
 
 export const PrivacyControls: React.FC<PrivacyControlsProps> = ({
   className = '',
-  detailed = false,
+  _detailed = false,
 }) => {
   const { isEnabled } = useAnalytics();
   const [analyticsEnabled, setAnalyticsEnabled] = useState(isEnabled);
@@ -66,7 +66,7 @@ export const PrivacyControls: React.FC<PrivacyControlsProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  const formatBytes = (bytes: number) => {
+  const formatBytes = (_bytes: number) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -75,7 +75,7 @@ export const PrivacyControls: React.FC<PrivacyControlsProps> = ({
   };
 
   const getEventCount = () => {
-    return Object.values(localAnalytics).reduce((total, events) => total + events.length, 0);
+    return Object.values(localAnalytics).reduce((total, _events) => total + events.length, 0);
   };
 
   if (!detailed) {

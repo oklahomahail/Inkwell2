@@ -216,13 +216,13 @@ export class EnhancedStorageService {
     try {
       const projects = this.loadAllProjects();
       const totalWordCount = projects.reduce(
-        (total, project) => total + (project.currentWordCount || 0),
+        (total, _project) => total + (project.currentWordCount || 0),
         0,
       );
       const quotaInfo = await quotaAwareStorage.getQuotaInfo();
       const snapshotUsage = snapshotService.getSnapshotStorageUsage();
       const writingSessions = projects.reduce(
-        (total, project) => total + (project.sessions?.length || 0),
+        (total, _project) => total + (project.sessions?.length || 0),
         0,
       );
 
@@ -312,7 +312,7 @@ export class EnhancedStorageService {
       }
 
       return allSessions
-        .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
+        .sort((a, _b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
         .slice(0, limit);
     } catch (error) {
       console.error('Failed to get recent writing sessions:', error);

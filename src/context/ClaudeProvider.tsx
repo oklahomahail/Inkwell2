@@ -14,16 +14,16 @@ interface ClaudeState {
 
 interface ClaudeContextValue {
   claude: ClaudeState;
-  sendMessage: (content: string, selectedText?: string) => Promise<string>;
+  sendMessage: (_content: string, _selectedText?: string) => Promise<string>;
   clearMessages: () => void;
   toggleVisibility: () => void;
-  configureApiKey: (apiKey: string) => void;
-  suggestContinuation: (selectedText: string) => Promise<string>;
-  improveText: (selectedText: string) => Promise<string>;
-  analyzeWritingStyle: (selectedText: string) => Promise<string>;
-  generatePlotIdeas: (context?: string) => Promise<string>;
-  analyzeCharacter: (characterName: string) => Promise<string>;
-  brainstormIdeas: (topic: string) => Promise<string>;
+  configureApiKey: (_apiKey: string) => void;
+  suggestContinuation: (_selectedText: string) => Promise<string>;
+  improveText: (_selectedText: string) => Promise<string>;
+  analyzeWritingStyle: (_selectedText: string) => Promise<string>;
+  generatePlotIdeas: (_context?: string) => Promise<string>;
+  analyzeCharacter: (_characterName: string) => Promise<string>;
+  brainstormIdeas: (_topic: string) => Promise<string>;
 }
 
 const ClaudeContext = createContext<ClaudeContextValue | null>(null);
@@ -211,7 +211,7 @@ export const ClaudeProvider = ({ children }: { children: ReactNode }) => {
 
 ClaudeProvider.displayName = 'ClaudeProvider';
 
-export function useClaude() {
+export function _useClaude() {
   const context = useContext(ClaudeContext);
   if (!context) throw new Error('useClaude must be used within ClaudeProvider');
   return context;

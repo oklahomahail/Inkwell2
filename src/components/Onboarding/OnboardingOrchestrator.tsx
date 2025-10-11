@@ -13,7 +13,7 @@ import type { TourType } from './steps/Step.types';
  * - If no param: auto-start full-onboarding when not completed and not snoozed
  */
 
-export default function OnboardingOrchestrator() {
+export default function _OnboardingOrchestrator() {
   const { getProgress, getPreferences, profileId } = useTutorialStorage();
   const [open, setOpen] = useState(false);
   const [tourType, setTourType] = useState<TourType>('full-onboarding');
@@ -31,7 +31,7 @@ export default function OnboardingOrchestrator() {
 
   // listen for programmatic starts
   useEffect(() => {
-    function handler(e: Event) {
+    function _handler(e: Event) {
       const detail = (e as CustomEvent<{ tourType?: TourType }>).detail;
       const t = detail?.tourType ?? 'full-onboarding';
       try {

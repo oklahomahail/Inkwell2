@@ -19,7 +19,7 @@ export type PhraseAnalysisResponse = {
 // Mark as a module
 export {};
 
-self.onmessage = async (e) => {
+self.onmessage = async (_e) => {
   // Worker implementation here
   // ...
 

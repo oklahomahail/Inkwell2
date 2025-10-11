@@ -11,12 +11,12 @@ interface ProfileSwitcherProps {
   className?: string;
 }
 
-export function ProfileSwitcher({ className = '' }: ProfileSwitcherProps) {
+export function _ProfileSwitcher({ className = '' }: ProfileSwitcherProps) {
   const navigate = useNavigate();
   const { profiles, activeProfile, setActiveProfile } = useProfileContext();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleProfileSwitch = async (profile: Profile) => {
+  const handleProfileSwitch = async (_profile: Profile) => {
     try {
       await setActiveProfile(profile.id);
       navigate(`/p/${profile.id}/dashboard`);

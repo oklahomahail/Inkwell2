@@ -34,10 +34,10 @@ class IndexedDBAdapter implements StorageAdapter {
   async init(): Promise<void> {
     if (this.db) return;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const request = indexedDB.open(this.dbName, this.version);
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = (_event) => {
         const db = (event.target as IDBOpenDBRequest).result;
         if (!db.objectStoreNames.contains(this.storeName)) {
           db.createObjectStore(this.storeName);
@@ -56,7 +56,7 @@ class IndexedDBAdapter implements StorageAdapter {
   async get<T>(key: string): Promise<T | null> {
     await this.init();
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
       const request = store.get(key);
@@ -73,7 +73,7 @@ class IndexedDBAdapter implements StorageAdapter {
   async put<T>(key: string, value: T): Promise<void> {
     await this.init();
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const data = {
@@ -92,7 +92,7 @@ class IndexedDBAdapter implements StorageAdapter {
   async delete(key: string): Promise<void> {
     await this.init();
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.delete(key);
@@ -105,7 +105,7 @@ class IndexedDBAdapter implements StorageAdapter {
   async list(prefix?: string): Promise<string[]> {
     await this.init();
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
       const request = store.getAllKeys();
@@ -122,7 +122,7 @@ class IndexedDBAdapter implements StorageAdapter {
   async clear(): Promise<void> {
     await this.init();
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.clear();
@@ -259,7 +259,7 @@ class StorageManager {
   /**
    * Perform a transactional operation
    */
-  async transact(operations: Array<() => Promise<void>>): Promise<void> {
+  async transact(_operations: Array<() => Promise<void>>): Promise<void> {
     // Simple implementation - could be enhanced with proper transactions
     for (const operation of operations) {
       await operation();
@@ -323,7 +323,7 @@ export const storage = new StorageManager();
 /* ========= Legacy Compatibility Layer ========= */
 // Keep existing API for gradual migration
 export const legacyStorage = {
-  saveWritingContent: async (data: { title: string; content: string }) => {
+  saveWritingContent: async (_data: { title: string; content: string }) => {
     await storage.put('writing_content', data);
   },
 
@@ -331,7 +331,7 @@ export const legacyStorage = {
     return storage.get('writing_content');
   },
 
-  saveTimeline: async (scenes: any[]) => {
+  saveTimeline: async (_scenes: any[]) => {
     await storage.put('timeline_scenes', scenes);
   },
 

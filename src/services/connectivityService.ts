@@ -164,13 +164,13 @@ class ConnectivityService {
    * Get queued operations for display
    */
   getQueuedOperations(): QueuedWrite[] {
-    return [...this.queue].sort((a, b) => a.timestamp - b.timestamp);
+    return [...this.queue].sort((a, _b) => a.timestamp - b.timestamp);
   }
 
   /**
    * Subscribe to connectivity changes
    */
-  onStatusChange(callback: (status: ConnectivityStatus) => void): () => void {
+  onStatusChange(_callback: (status: ConnectivityStatus) => void): () => void {
     this.listeners.push(callback);
     // Immediately call with current status
     callback(this.getStatus());

@@ -12,27 +12,27 @@ import { PlotCard as PlotCardType, PlotCardStatus, PlotCardPriority } from '../t
 interface PlotCardProps {
   card: PlotCardType;
   isDragOverlay?: boolean;
-  onEdit?: (card: PlotCardType) => void;
-  onDelete?: (cardId: string) => void;
+  onEdit?: (_card: PlotCardType) => void;
+  onDelete?: (_cardId: string) => void;
   showSceneLink?: boolean;
   showTimeline?: boolean;
   isFocused?: boolean;
   isDraggedCard?: boolean;
-  onFocus?: (cardId: string) => void;
-  onKeyboardDragStart?: (cardId: string) => void;
+  onFocus?: (_cardId: string) => void;
+  onKeyboardDragStart?: (_cardId: string) => void;
 }
 
 export const PlotCard: React.FC<PlotCardProps> = ({
   card,
-  isDragOverlay = false,
-  onEdit,
-  onDelete,
-  showSceneLink = true,
-  showTimeline = true,
-  isFocused = false,
-  isDraggedCard = false,
-  onFocus,
-  onKeyboardDragStart,
+  _isDragOverlay = false,
+  _onEdit,
+  _onDelete,
+  _showSceneLink = true,
+  _showTimeline = true,
+  _isFocused = false,
+  _isDraggedCard = false,
+  _onFocus,
+  _onKeyboardDragStart,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { updateCard } = usePlotBoardStore();
@@ -87,11 +87,11 @@ export const PlotCard: React.FC<PlotCardProps> = ({
     }
   };
 
-  const handleStatusChange = async (newStatus: PlotCardStatus) => {
+  const handleStatusChange = async (_newStatus: PlotCardStatus) => {
     await updateCard(card.id, { status: newStatus });
   };
 
-  const handlePriorityChange = async (newPriority: PlotCardPriority) => {
+  const handlePriorityChange = async (_newPriority: PlotCardPriority) => {
     await updateCard(card.id, { priority: newPriority });
   };
 
@@ -131,7 +131,7 @@ export const PlotCard: React.FC<PlotCardProps> = ({
       aria-describedby={`card-${card.id}-details`}
       aria-grabbed={isDraggedCard}
       onFocus={() => onFocus?.(card.id)}
-      onKeyDown={(e) => {
+      onKeyDown={(_e) => {
         if (e.key === ' ' || e.key === 'Spacebar') {
           e.preventDefault();
           onKeyboardDragStart?.(card.id);
@@ -280,9 +280,9 @@ export const PlotCard: React.FC<PlotCardProps> = ({
       <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
         <select
           value={card.status}
-          onChange={(e) => handleStatusChange(e.target.value as PlotCardStatus)}
+          onChange={(_e) => handleStatusChange(e.target.value as PlotCardStatus)}
           className="text-xs border-none bg-transparent text-gray-600 focus:outline-none cursor-pointer"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(_e) => e.stopPropagation()}
         >
           {Object.values(PlotCardStatus).map((status) => (
             <option key={status} value={status}>
@@ -293,9 +293,9 @@ export const PlotCard: React.FC<PlotCardProps> = ({
 
         <select
           value={card.priority}
-          onChange={(e) => handlePriorityChange(e.target.value as PlotCardPriority)}
+          onChange={(_e) => handlePriorityChange(e.target.value as PlotCardPriority)}
           className="text-xs border-none bg-transparent text-gray-600 focus:outline-none cursor-pointer"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(_e) => e.stopPropagation()}
         >
           {Object.values(PlotCardPriority).map((priority) => (
             <option key={priority} value={priority}>

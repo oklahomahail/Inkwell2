@@ -15,7 +15,7 @@ type Session = {
   productivity?: number;
 };
 
-export default function WritingAnalyticsView() {
+export default function _WritingAnalyticsView() {
   const { currentProject } = useAppContext();
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
 
@@ -39,12 +39,12 @@ export default function WritingAnalyticsView() {
 
   // Totals and summary metrics
   const totalWords = trendRows.reduce(
-    (sum, d) => sum + (typeof d.words === 'number' ? d.words : 0),
+    (sum, _d) => sum + (typeof d.words === 'number' ? d.words : 0),
     0,
   );
   const averageWordsPerDay = trendRows.length ? Math.round(totalWords / trendRows.length) : 0;
 
-  const totalWritingTimeMin = sessions.reduce((sum, s) => sum + (s.focusTime ?? 0), 0);
+  const totalWritingTimeMin = sessions.reduce((sum, _s) => sum + (s.focusTime ?? 0), 0);
 
   const writingStreak = computeStreak(sessions);
 
@@ -200,7 +200,7 @@ export default function WritingAnalyticsView() {
   );
 }
 
-function computeStreak(sessions: Session[]): number {
+function _computeStreak(sessions: Session[]): number {
   try {
     const dayHasWords = new Set<string>();
     for (const s of sessions) {
@@ -228,7 +228,7 @@ function computeStreak(sessions: Session[]): number {
   }
 }
 
-function StatCard({
+function _StatCard({
   icon,
   label,
   value,

@@ -53,9 +53,9 @@ type BackupPayload = {
 };
 
 // Turn any project-ish object into a strict InkwellProject
-function normalizeProject(input: unknown): InkwellProject {
+function _normalizeProject(input: unknown): InkwellProject {
   const raw = RawProjectSchema.parse(input);
-  const chapters: NormalizedChapter[] = (raw.chapters || []).map((ch, idx) => ({
+  const chapters: NormalizedChapter[] = (raw.chapters || []).map((ch, _idx) => ({
     id: ch.id ?? `ch-${idx + 1}`,
     title: ch.title ?? `Chapter ${idx + 1}`,
     scenes: Array.isArray(ch.scenes) ? ch.scenes : [],
@@ -75,9 +75,9 @@ function normalizeProject(input: unknown): InkwellProject {
 /**
  * Create and download a backup of a project
  */
-export async function performBackup(project: unknown): Promise<void> {
+export async function _performBackup(project: unknown): Promise<void> {
   const safe = normalizeProject(project);
-  const words = safe.chapters.reduce((acc, ch) => acc + (ch.wordCount || 0), 0);
+  const words = safe.chapters.reduce((acc, _ch) => acc + (ch.wordCount || 0), 0);
 
   const payload: BackupPayload = {
     version: 1,
@@ -97,7 +97,7 @@ export async function performBackup(project: unknown): Promise<void> {
 /**
  * Import a project from a backup file
  */
-export async function performImport(projectId: string): Promise<void> {
+export async function _performImport(projectId: string): Promise<void> {
   return new Promise<void>((resolve) => {
     const input = document.createElement('input');
     input.type = 'file';

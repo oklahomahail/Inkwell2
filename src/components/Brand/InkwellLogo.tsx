@@ -9,9 +9,9 @@ interface InkwellLogoProps {
 
 export const InkwellLogo: React.FC<InkwellLogoProps> = ({
   variant = 'full',
-  size = 'md',
-  color = 'auto',
-  className = '',
+  _size = 'md',
+  _color = 'auto',
+  _className = '',
 }) => {
   const sizeClasses = {
     sm: 'h-6 w-auto',

@@ -48,25 +48,25 @@ interface TourContextValue {
   tourState: TourState;
   preferences: TutorialPreferences | null;
   checklist: CompletionChecklist | null;
-  startTour: (type: TourState['tourType'], steps?: TourStep[]) => void;
+  startTour: (_type: TourState['tourType'], _steps?: TourStep[]) => void;
   nextStep: () => void;
   previousStep: () => void;
   skipTour: () => void;
   completeTour: () => void;
-  completeStep: (stepId: string) => void;
-  goToStep: (stepIndex: number) => void;
-  setTourSteps: (steps: TourStep[]) => void;
-  isStepCompleted: (stepId: string) => boolean;
+  completeStep: (_stepId: string) => void;
+  goToStep: (_stepIndex: number) => void;
+  setTourSteps: (_steps: TourStep[]) => void;
+  isStepCompleted: (_stepId: string) => boolean;
   getCurrentStep: () => TourStep | null;
   resetTour: () => void;
   // New methods for enhanced functionality
   setNeverShowAgain: () => void;
-  setRemindMeLater: (hours?: number) => void;
+  setRemindMeLater: (_hours?: number) => void;
   shouldShowTourPrompt: () => boolean;
-  updateChecklist: (item: keyof CompletionChecklist) => void;
+  updateChecklist: (_item: keyof CompletionChecklist) => void;
   getChecklistProgress: () => { completed: number; total: number };
-  logAnalytics: (event: string, data?: any) => void;
-  canShowContextualTour: (tourType: string) => boolean;
+  logAnalytics: (_event: string, _data?: any) => void;
+  canShowContextualTour: (_tourType: string) => boolean;
   // Profile context
   profileId: string | null;
   isLoading: boolean;
@@ -170,7 +170,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
 
   // Define logAnalytics first to avoid temporal dead zone errors
   const logAnalytics = useCallback(
-    (event: string, data: any = {}) => {
+    (event: string, _data: any = {}) => {
       try {
         // Enhanced analytics with profile context
         const analyticsEvent = {
@@ -273,7 +273,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
     for (const step of tourState.steps) {
       await tutorialStorage.setProgress(step.id, {
         currentStep: tourState.steps.length - 1,
-        completedSteps: tourState.steps.map((s) => s.id),
+        _completedSteps: tourState.steps.map((s) => s.id),
         tourType: tourState.tourType,
         startedAt: Date.now(),
         completedAt: Date.now(),
@@ -291,7 +291,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
   }, [tutorialStorage, tourState, preferences, logAnalytics, setTourActive, completeOnboarding]);
 
   const startTour = useCallback(
-    async (type: TourState['tourType'], steps?: TourStep[]) => {
+    async (type: TourState['tourType'], _steps?: TourStep[]) => {
       if (!tutorialStorage.isProfileActive) return;
 
       logAnalytics('tour_started', { tourType: type, stepCount: steps?.length || 0 });
@@ -391,7 +391,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
   const setTourSteps = useCallback((steps: TourStep[]) => {
     setTourState((prev) => ({
       ...prev,
-      steps: [...steps].sort((a, b) => a.order - b.order),
+      _steps: [...steps].sort((a, _b) => a.order - b.order),
     }));
   }, []);
 

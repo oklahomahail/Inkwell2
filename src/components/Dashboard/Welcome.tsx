@@ -7,7 +7,7 @@ interface WelcomeProps {
   hasProjects?: boolean;
 }
 
-export default function Welcome({ onCreateProject, hasProjects = false }: WelcomeProps) {
+export default function _Welcome({ onCreateProject, hasProjects = false }: WelcomeProps) {
   return (
     <section className="mx-auto max-w-3xl text-center py-8">
       <h1 className="text-4xl font-bold text-slate-900 mb-3">

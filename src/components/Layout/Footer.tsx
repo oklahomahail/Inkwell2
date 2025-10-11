@@ -4,7 +4,7 @@ import React from 'react';
 // Import Inkwell brand assets
 import InkwellFeather from '@/assets/brand/inkwell-feather-gold.svg';
 
-export function Footer() {
+export function _Footer() {
   return (
     <footer
       className="

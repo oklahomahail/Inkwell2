@@ -16,8 +16,8 @@ export const BrandShowcase: React.FC = () => {
           <InkwellLogo variant="full" size="xl" className="mx-auto mb-6" />
           <h1 className={`text-4xl mb-4 ${BRAND_CLASSES.text.brand}`}>Inkwell Brand System</h1>
           <p className={`text-xl ${BRAND_CLASSES.text.body} max-w-2xl mx-auto`}>
-            A comprehensive design system showcasing the new Inkwell brand identity 
-            with Deep Navy, Warm Gold, and sophisticated typography.
+            A comprehensive design system showcasing the new Inkwell brand identity with Deep Navy,
+            Warm Gold, and sophisticated typography.
           </p>
         </header>
 
@@ -53,40 +53,36 @@ export const BrandShowcase: React.FC = () => {
             {[
               {
                 name: 'Deep Navy',
-                class: 'bg-inkwell-navy',
-                hex: '#0A2F4E',
-                textClass: 'text-white',
+                _class: 'bg-inkwell-navy',
+                _hex: '#0A2F4E',
+                _textClass: 'text-white',
               },
               {
                 name: 'Warm Gold',
-                class: 'bg-inkwell-gold',
-                hex: '#D4A537',
-                textClass: 'text-inkwell-navy',
+                _class: 'bg-inkwell-gold',
+                _hex: '#D4A537',
+                _textClass: 'text-inkwell-navy',
               },
               {
                 name: 'Charcoal',
-                class: 'bg-inkwell-charcoal',
-                hex: '#2E2E2E',
-                textClass: 'text-white',
+                _class: 'bg-inkwell-charcoal',
+                _hex: '#2E2E2E',
+                _textClass: 'text-white',
               },
               {
                 name: 'Soft White',
-                class: 'bg-inkwell-white border border-gray-200',
-                hex: '#F9F9F9',
-                textClass: 'text-inkwell-navy',
+                _class: 'bg-inkwell-white border border-gray-200',
+                _hex: '#F9F9F9',
+                _textClass: 'text-inkwell-navy',
               },
             ].map((color) => (
               <div key={color.name} className="text-center">
-                <div 
+                <div
                   className={`${color.class} h-24 rounded-lg mb-3 flex items-center justify-center`}
                 >
-                  <span className={`font-mono text-sm ${color.textClass}`}>
-                    {color.hex}
-                  </span>
+                  <span className={`font-mono text-sm ${color.textClass}`}>{color.hex}</span>
                 </div>
-                <h3 className={`font-medium ${BRAND_CLASSES.text.body}`}>
-                  {color.name}
-                </h3>
+                <h3 className={`font-medium ${BRAND_CLASSES.text.body}`}>{color.name}</h3>
               </div>
             ))}
           </div>
@@ -113,13 +109,11 @@ export const BrandShowcase: React.FC = () => {
               </div>
             </div>
             <div>
-              <h3 className={`text-lg mb-3 ${BRAND_CLASSES.text.gold}`}>
-                Body Text (Inter)
-              </h3>
+              <h3 className={`text-lg mb-3 ${BRAND_CLASSES.text.gold}`}>Body Text (Inter)</h3>
               <div className="space-y-2">
                 <p className={`text-base ${BRAND_CLASSES.text.body}`}>
-                  Regular body text for general content and user interface elements. 
-                  Inter provides excellent readability across all device sizes.
+                  Regular body text for general content and user interface elements. Inter provides
+                  excellent readability across all device sizes.
                 </p>
                 <p className="text-sm font-medium text-inkwell-charcoal">
                   Medium weight text for emphasis and labels.
@@ -136,15 +130,9 @@ export const BrandShowcase: React.FC = () => {
         <div className={`${BRAND_CLASSES.cards.default} mb-8`}>
           <h2 className={`text-2xl mb-6 ${BRAND_CLASSES.text.heading}`}>Button Styles</h2>
           <div className="flex flex-wrap gap-4">
-            <button className={BRAND_CLASSES.buttons.primary}>
-              Primary Action
-            </button>
-            <button className={BRAND_CLASSES.buttons.secondary}>
-              Secondary Action
-            </button>
-            <button className={BRAND_CLASSES.buttons.gold}>
-              Gold Accent
-            </button>
+            <button className={BRAND_CLASSES.buttons.primary}>Primary Action</button>
+            <button className={BRAND_CLASSES.buttons.secondary}>Secondary Action</button>
+            <button className={BRAND_CLASSES.buttons.gold}>Gold Accent</button>
             <button className="px-4 py-2 text-inkwell-navy border border-current rounded-lg hover:bg-current hover:text-white transition-all duration-200">
               Ghost Button
             </button>
@@ -154,21 +142,17 @@ export const BrandShowcase: React.FC = () => {
         {/* Cards and Components */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className={BRAND_CLASSES.cards.default}>
-            <h3 className={`text-xl mb-4 ${BRAND_CLASSES.text.heading}`}>
-              Light Card
-            </h3>
+            <h3 className={`text-xl mb-4 ${BRAND_CLASSES.text.heading}`}>Light Card</h3>
             <p className={BRAND_CLASSES.text.body}>
-              This is a standard light card with the default Inkwell styling. 
-              Perfect for content organization and visual hierarchy.
+              This is a standard light card with the default Inkwell styling. Perfect for content
+              organization and visual hierarchy.
             </p>
           </div>
           <div className="bg-inkwell-navy rounded-lg p-6 border border-gray-200 text-white">
-            <h3 className="text-xl mb-4 font-serif font-semibold">
-              Navy Card
-            </h3>
+            <h3 className="text-xl mb-4 font-serif font-semibold">Navy Card</h3>
             <p className="text-gray-200 font-sans leading-relaxed">
-              This is a navy variant card with light text and gold accents. 
-              Ideal for featured content or highlighting important information.
+              This is a navy variant card with light text and gold accents. Ideal for featured
+              content or highlighting important information.
             </p>
           </div>
         </div>

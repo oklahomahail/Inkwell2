@@ -58,7 +58,7 @@ export const MockAppProvider: React.FC<{
   children: React.ReactNode;
   state?: Partial<AppState>;
   ctxOverrides?: Partial<AppContextValue>;
-}> = ({ children, state = {}, ctxOverrides }) => {
+}> = ({ children, _state = {}, ctxOverrides }) => {
   const mockState = createMockAppState(state);
   const mockCtx = createMockAppContextValue(mockState, ctxOverrides);
   return <AppContext.Provider value={mockCtx}>{children}</AppContext.Provider>;
@@ -73,7 +73,7 @@ const defaultUI: UIContextValue = {
 export const MockUIProvider: React.FC<{
   children: React.ReactNode;
   ui?: Partial<UIContextValue>;
-}> = ({ children, ui = {} }) => {
+}> = ({ children, _ui = {} }) => {
   const value: UIContextValue = { ...defaultUI, ...ui };
   return <UIContext.Provider value={value}>{children}</UIContext.Provider>;
 };
@@ -84,7 +84,7 @@ export const TestWrapper: React.FC<{
   appState?: Partial<AppState>;
   appCtxOverrides?: Partial<AppContextValue>;
   ui?: Partial<UIContextValue>;
-}> = ({ children, appState = {}, appCtxOverrides, ui = {} }) => {
+}> = ({ children, _appState = {}, _appCtxOverrides, _ui = {} }) => {
   return (
     <MockAppProvider state={appState} ctxOverrides={appCtxOverrides}>
       <MockUIProvider ui={ui}>{children}</MockUIProvider>
@@ -93,9 +93,9 @@ export const TestWrapper: React.FC<{
 };
 
 // Misc test helpers
-export const createTestId = (name: string) => `test-${name}`;
+export const createTestId = (_name: string) => `test-${name}`;
 
-export const mockLucideIcon = (name: string) =>
+export const mockLucideIcon = (_name: string) =>
   vi
     .fn()
     .mockImplementation((props) => <span data-testid={createTestId(`icon-${name}`)} {...props} />);

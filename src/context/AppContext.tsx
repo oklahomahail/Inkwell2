@@ -77,7 +77,7 @@ export const initialState: AppState = {
 };
 
 // ===== REDUCER =====
-function appReducer(state: AppState, action: AppAction): AppState {
+function _appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'SET_VIEW':
       return { ...state, view: action.payload };
@@ -145,28 +145,28 @@ export interface AppContextValue {
   dispatch: React.Dispatch<AppAction>;
   currentProject: Project | null;
   projects: Project[];
-  setView: (view: View) => void;
-  setTheme: (theme: Theme) => void;
-  addProject: (project: Project) => void;
-  updateProject: (project: Project) => void;
-  deleteProject: (id: string) => void;
-  setCurrentProjectId: (id: string | null) => void;
+  setView: (_view: View) => void;
+  setTheme: (_theme: Theme) => void;
+  addProject: (_project: Project) => void;
+  updateProject: (_project: Project) => void;
+  deleteProject: (_id: string) => void;
+  setCurrentProjectId: (_id: string | null) => void;
   // Auto-save actions
-  setAutoSaveSaving: (saving: boolean) => void;
-  setAutoSaveSuccess: (date: Date) => void;
-  setAutoSaveError: (error: string | null) => void;
+  setAutoSaveSaving: (_saving: boolean) => void;
+  setAutoSaveSuccess: (_date: Date) => void;
+  setAutoSaveError: (_error: string | null) => void;
   claude: ReturnType<typeof useClaude>['claude'];
   claudeActions: {
-    sendMessage: (message: string) => Promise<string>;
+    sendMessage: (_message: string) => Promise<string>;
     clearMessages: () => void;
     toggleVisibility: () => void;
-    configureApiKey: (apiKey: string) => void;
-    suggestContinuation: (text: string) => Promise<string>;
-    improveText: (text: string, goal?: string) => Promise<string>;
-    analyzeWritingStyle: (text: string) => Promise<string>;
-    generatePlotIdeas: (prompt: string) => Promise<string>;
-    analyzeCharacter: (character: string) => Promise<string>;
-    brainstormIdeas: (topic: string) => Promise<string>;
+    configureApiKey: (_apiKey: string) => void;
+    suggestContinuation: (_text: string) => Promise<string>;
+    improveText: (_text: string, _goal?: string) => Promise<string>;
+    analyzeWritingStyle: (_text: string) => Promise<string>;
+    generatePlotIdeas: (_prompt: string) => Promise<string>;
+    analyzeCharacter: (_character: string) => Promise<string>;
+    brainstormIdeas: (_topic: string) => Promise<string>;
   };
 }
 
@@ -174,20 +174,20 @@ export interface AppContextValue {
 export const AppContext = createContext<AppContextValue | null>(null);
 
 // ===== CUSTOM HOOKS =====
-export function useAppContext(): AppContextValue {
+export function _useAppContext(): AppContextValue {
   const context = useContext(AppContext);
   if (!context) throw new Error('useAppContext must be used within an AppProvider');
   return context;
 }
 
-export function useCurrentProject() {
+export function _useCurrentProject() {
   const { state } = useAppContext();
   const project = state.projects.find((p) => p.id === state.currentProjectId) || null;
   return { project };
 }
 
 // ===== INNER PROVIDER COMPONENT =====
-function AppProviderInner({ children }: { children: ReactNode }) {
+function _AppProviderInner({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const claudeContext = useClaude();
 
@@ -243,15 +243,15 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     dispatch,
     currentProject,
     projects: state.projects,
-    setView: (view) => dispatch({ type: 'SET_VIEW', payload: view }),
-    setTheme: (theme) => dispatch({ type: 'SET_THEME', payload: theme }),
-    addProject: (project) => dispatch({ type: 'ADD_PROJECT', payload: project }),
-    updateProject: (project) => dispatch({ type: 'UPDATE_PROJECT', payload: project }),
-    deleteProject: (id) => dispatch({ type: 'DELETE_PROJECT', payload: id }),
-    setCurrentProjectId: (id) => dispatch({ type: 'SET_CURRENT_PROJECT', payload: id }),
-    setAutoSaveSaving: (saving) => dispatch({ type: 'SET_AUTO_SAVE_SAVING', payload: saving }),
-    setAutoSaveSuccess: (date) => dispatch({ type: 'SET_AUTO_SAVE_SUCCESS', payload: date }),
-    setAutoSaveError: (error) => dispatch({ type: 'SET_AUTO_SAVE_ERROR', payload: error }),
+    setView: (_view) => dispatch({ type: 'SET_VIEW', payload: view }),
+    setTheme: (_theme) => dispatch({ type: 'SET_THEME', payload: theme }),
+    addProject: (_project) => dispatch({ type: 'ADD_PROJECT', payload: project }),
+    updateProject: (_project) => dispatch({ type: 'UPDATE_PROJECT', payload: project }),
+    deleteProject: (_id) => dispatch({ type: 'DELETE_PROJECT', payload: id }),
+    setCurrentProjectId: (_id) => dispatch({ type: 'SET_CURRENT_PROJECT', payload: id }),
+    setAutoSaveSaving: (_saving) => dispatch({ type: 'SET_AUTO_SAVE_SAVING', payload: saving }),
+    setAutoSaveSuccess: (_date) => dispatch({ type: 'SET_AUTO_SAVE_SUCCESS', payload: date }),
+    setAutoSaveError: (_error) => dispatch({ type: 'SET_AUTO_SAVE_ERROR', payload: error }),
     claude: claudeContext.claude,
     claudeActions: {
       sendMessage: claudeContext.sendMessage,
@@ -259,7 +259,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       toggleVisibility: claudeContext.toggleVisibility,
       configureApiKey: claudeContext.configureApiKey,
       suggestContinuation: claudeContext.suggestContinuation,
-      improveText: async (text: string, goal?: string) => {
+      improveText: async (_text: string, _goal?: string) => {
         if (goal) {
           const prompt = `Please improve this text with the goal of ${goal}: ${text}`;
           return claudeContext.sendMessage(prompt);
@@ -286,6 +286,6 @@ function AppProviderInner({ children }: { children: ReactNode }) {
 }
 
 // ===== MAIN PROVIDER COMPONENT =====
-export function AppProvider({ children }: { children: ReactNode }) {
+export function _AppProvider({ children }: { children: ReactNode }) {
   return <AppProviderInner>{children}</AppProviderInner>;
 }

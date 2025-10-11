@@ -387,12 +387,12 @@ export const featureFlags = FeatureFlagManager.getInstance();
 export const isEnabled = (flagKey: string): boolean => featureFlags.isEnabled(flagKey);
 
 /* ========= React Hook ========= */
-export function useFeatureFlag(flagKey: string): boolean {
+export function _useFeatureFlag(flagKey: string): boolean {
   const [enabled, setEnabled] = React.useState(() => featureFlags.isEnabled(flagKey));
 
   React.useEffect(() => {
     // Listen for storage events that might change the flag
-    const handleStorageChange = (e: StorageEvent) => {
+    const handleStorageChange = (_e: StorageEvent) => {
       if (e.key === `inkwell_flag_${flagKey}`) {
         setEnabled(featureFlags.isEnabled(flagKey));
       }
@@ -422,7 +422,7 @@ export function createFeatureFlaggedComponent<P extends Record<string, any>>(
   Component: React.ComponentType<P>,
   FallbackComponent?: React.ComponentType<P>,
 ): React.ComponentType<P> {
-  return function FeatureFlaggedComponent(props: P) {
+  return function _FeatureFlaggedComponent(props: P) {
     if (featureFlags.isEnabled(flagKey)) {
       return React.createElement(Component, props as any);
     }
@@ -439,7 +439,7 @@ export function createFeatureFlaggedComponent<P extends Record<string, any>>(
 export function withFlag<P extends Record<string, any>>(
   Wrapped: React.ComponentType<P>,
 ): React.ComponentType<P> {
-  const WithFlag = (props: P) => {
+  const WithFlag = (_props: P) => {
     // Flag logic could go here
     return React.createElement(Wrapped, props);
   };
@@ -456,9 +456,9 @@ if (
   // Add global flag management functions for console access
   (window as any).__inkwellFlags = {
     list: () => featureFlags.getAllFlags(),
-    enable: (key: string) => featureFlags.setEnabled(key, true),
-    disable: (key: string) => featureFlags.setEnabled(key, false),
-    reset: (key: string) => featureFlags.reset(key),
+    enable: (_key: string) => featureFlags.setEnabled(key, true),
+    disable: (_key: string) => featureFlags.setEnabled(key, false),
+    reset: (_key: string) => featureFlags.reset(key),
     debug: () => featureFlags.enableDebugMode(),
     export: () => featureFlags.exportAsURL(),
   };

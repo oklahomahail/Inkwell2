@@ -33,18 +33,18 @@ import { VirtualizedColumn } from './VirtualizedColumn';
 
 interface PlotBoardProps {
   board: PlotBoardType;
-  onEditCard?: (card: PlotCardType) => void;
-  onEditColumn?: (column: PlotColumnType) => void;
-  onEditBoard?: (board: PlotBoardType) => void;
+  onEditCard?: (_card: PlotCardType) => void;
+  onEditColumn?: (_column: PlotColumnType) => void;
+  onEditBoard?: (_board: PlotBoardType) => void;
   className?: string;
 }
 
 export const PlotBoard: React.FC<PlotBoardProps> = ({
   board,
-  onEditCard,
-  onEditColumn,
-  onEditBoard,
-  className = '',
+  _onEditCard,
+  _onEditColumn,
+  _onEditBoard,
+  _className = '',
 }) => {
   // Store actions
   const { moveCard, reorderColumns, deleteColumn, createColumn, updateBoard } = usePlotBoardStore();
@@ -56,10 +56,10 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
   // Keyboard navigation and accessibility
   const keyboardNav = useKeyboardNavigation({
     board,
-    onMoveCard: async (cardId, targetColumnId, newOrder) => {
+    _onMoveCard: async (cardId, _targetColumnId, _newOrder) => {
       await moveCard(cardId, targetColumnId, newOrder);
     },
-    onReorderColumns: async (columnIds) => {
+    onReorderColumns: async (_columnIds) => {
       await reorderColumns(board.id, columnIds);
     },
   });
@@ -94,7 +94,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
   );
 
   // Sort columns by order
-  const sortedColumns = [...board.columns].sort((a, b) => a.order - b.order);
+  const sortedColumns = [...board.columns].sort((a, _b) => a.order - b.order);
   const columnIds = sortedColumns.map((col) => col.id);
 
   // Helper to find card and its column
@@ -112,7 +112,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
   );
 
   // Drag start handler
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = (_event: DragStartEvent) => {
     const { active } = event;
 
     // Check if dragging a card
@@ -132,7 +132,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
   };
 
   // Drag over handler (for visual feedback)
-  const handleDragOver = (event: DragOverEvent) => {
+  const handleDragOver = (_event: DragOverEvent) => {
     const { active, over } = event;
 
     if (!over || active.id === over.id) return;
@@ -150,7 +150,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
   };
 
   // Drag end handler
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = async (_event: DragEndEvent) => {
     const { active, over } = event;
 
     setActiveCard(null);
@@ -240,7 +240,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
   };
 
   // Column management
-  const handleDeleteColumn = async (columnId: string) => {
+  const handleDeleteColumn = async (_columnId: string) => {
     const column = board.columns.find((col) => col.id === columnId);
     if (!column) return;
 
@@ -302,12 +302,12 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
           {/* Board Stats */}
           <div className="flex items-center space-x-4 text-sm text-gray-500">
             <span>{board.columns.length} columns</span>
-            <span>{board.columns.reduce((sum, col) => sum + col.cards.length, 0)} cards</span>
+            <span>{board.columns.reduce((sum, _col) => sum + col.cards.length, 0)} cards</span>
             {settings.showWordCounts && (
               <span>
                 {board.columns
                   .flatMap((col) => col.cards)
-                  .reduce((sum, card) => sum + (card.wordCount || 0), 0)
+                  .reduce((sum, _card) => sum + (card.wordCount || 0), 0)
                   .toLocaleString()}{' '}
                 words
               </span>
@@ -380,7 +380,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
                         draggedCardId={keyboardNav.draggedCardId}
                         onCardFocus={(cardId) => keyboardNav.setFocus(cardId, column.id)}
                         onKeyboardDragStart={keyboardNav.startDrag}
-                        onBeforeCardDelete={async (cardId, cardTitle) => {
+                        onBeforeCardDelete={async (_cardId, _cardTitle) => {
                           await undoRedo.pushEntry(
                             'deleteCard',
                             board,
@@ -388,7 +388,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
                             { cardId, cardData: column.cards.find((c) => c.id === cardId) },
                           );
                         }}
-                        onBeforeCardCreate={async (columnTitle, cardTitle) => {
+                        onBeforeCardCreate={async (_columnTitle, _cardTitle) => {
                           await undoRedo.pushEntry(
                             'createCard',
                             board,
@@ -414,7 +414,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
                         draggedCardId={keyboardNav.draggedCardId}
                         onCardFocus={(cardId) => keyboardNav.setFocus(cardId, column.id)}
                         onKeyboardDragStart={keyboardNav.startDrag}
-                        onBeforeCardDelete={async (cardId, cardTitle) => {
+                        onBeforeCardDelete={async (_cardId, _cardTitle) => {
                           await undoRedo.pushEntry(
                             'deleteCard',
                             board,
@@ -422,7 +422,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
                             { cardId, cardData: column.cards.find((c) => c.id === cardId) },
                           );
                         }}
-                        onBeforeCardCreate={async (columnTitle, cardTitle) => {
+                        onBeforeCardCreate={async (_columnTitle, _cardTitle) => {
                           await undoRedo.pushEntry(
                             'createCard',
                             board,

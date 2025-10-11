@@ -2,7 +2,7 @@ import { ExportFormat } from '@/exports/exportTypes';
 
 interface StyleStepProps {
   value: string;
-  onChange: (style: string) => void;
+  onChange: (_style: string) => void;
   selectedFormat: ExportFormat;
   onNext: () => void;
   onBack: () => void;
@@ -46,7 +46,7 @@ const styleOptions = [
   },
 ];
 
-export function StyleStep({
+export function _StyleStep({
   value,
   onChange,
   selectedFormat,

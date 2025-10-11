@@ -42,78 +42,80 @@ export interface PlotBoardStore {
 
   // Analysis State
   analysisByProjectId: Record<string, PlotAnalysis | undefined>;
-  setAnalysis: (projectId: string, analysis: PlotAnalysis) => void;
-  clearAnalysis: (projectId: string) => void;
+  setAnalysis: (_projectId: string, _analysis: PlotAnalysis) => void;
+  clearAnalysis: (_projectId: string) => void;
 
   // Board Operations
-  createBoard: (projectId: string, title: string, templateId?: string) => Promise<PlotBoard>;
-  updateBoard: (boardId: string, updates: Partial<PlotBoard>) => Promise<void>;
-  deleteBoard: (boardId: string) => Promise<void>;
-  duplicateBoard: (boardId: string, newTitle?: string) => Promise<PlotBoard>;
-  setActiveBoard: (boardId: string | null) => void;
-  getBoardsByProject: (projectId: string) => PlotBoard[];
+  createBoard: (_projectId: string, _title: string, _templateId?: string) => Promise<PlotBoard>;
+  updateBoard: (_boardId: string, _updates: Partial<PlotBoard>) => Promise<void>;
+  deleteBoard: (_boardId: string) => Promise<void>;
+  duplicateBoard: (_boardId: string, _newTitle?: string) => Promise<PlotBoard>;
+  setActiveBoard: (_boardId: string | null) => void;
+  getBoardsByProject: (_projectId: string) => PlotBoard[];
 
   // Column Operations
   createColumn: (
-    boardId: string,
-    title: string,
-    type?: PlotColumnType,
-    color?: string,
+    _boardId: string,
+    _title: string,
+    _type?: PlotColumnType,
+    _color?: string,
   ) => Promise<PlotColumn>;
-  updateColumn: (columnId: string, updates: Partial<PlotColumn>) => Promise<void>;
-  deleteColumn: (columnId: string) => Promise<void>;
-  reorderColumns: (boardId: string, columnIds: string[]) => Promise<void>;
+  updateColumn: (_columnId: string, _updates: Partial<PlotColumn>) => Promise<void>;
+  deleteColumn: (_columnId: string) => Promise<void>;
+  reorderColumns: (_boardId: string, _columnIds: string[]) => Promise<void>;
 
   // Card Operations
-  createCard: (columnId: string, title: string, description?: string) => Promise<PlotCard>;
-  updateCard: (cardId: string, updates: Partial<PlotCard>) => Promise<void>;
-  deleteCard: (cardId: string) => Promise<void>;
-  moveCard: (cardId: string, destinationColumnId: string, newOrder: number) => Promise<void>;
-  reorderCards: (columnId: string, cardIds: string[]) => Promise<void>;
-  linkCardToScene: (cardId: string, sceneId: string, chapterId: string) => Promise<void>;
-  unlinkCardFromScene: (cardId: string) => Promise<void>;
-  linkCardToTimeline: (cardId: string, eventIds: string[]) => Promise<void>;
+  createCard: (_columnId: string, _title: string, _description?: string) => Promise<PlotCard>;
+  updateCard: (_cardId: string, _updates: Partial<PlotCard>) => Promise<void>;
+  deleteCard: (_cardId: string) => Promise<void>;
+  moveCard: (_cardId: string, _destinationColumnId: string, _newOrder: number) => Promise<void>;
+  reorderCards: (_columnId: string, _cardIds: string[]) => Promise<void>;
+  linkCardToScene: (_cardId: string, _sceneId: string, _chapterId: string) => Promise<void>;
+  unlinkCardFromScene: (_cardId: string) => Promise<void>;
+  linkCardToTimeline: (_cardId: string, _eventIds: string[]) => Promise<void>;
 
   // Template Operations
   createTemplate: (
-    template: Omit<PlotBoardTemplate, 'id' | 'isBuiltIn'>,
+    _template: Omit<PlotBoardTemplate, 'id' | 'isBuiltIn'>,
   ) => Promise<PlotBoardTemplate>;
-  updateTemplate: (templateId: string, updates: Partial<PlotBoardTemplate>) => Promise<void>;
-  deleteTemplate: (templateId: string) => Promise<void>;
-  getTemplatesByCategory: (category?: string) => PlotBoardTemplate[];
+  updateTemplate: (_templateId: string, _updates: Partial<PlotBoardTemplate>) => Promise<void>;
+  deleteTemplate: (_templateId: string) => Promise<void>;
+  getTemplatesByCategory: (_category?: string) => PlotBoardTemplate[];
 
   // Batch Operations
-  importBoard: (boardData: Partial<PlotBoard>) => Promise<PlotBoard>;
-  exportBoard: (boardId: string) => PlotBoard | null;
-  bulkUpdateCards: (cardIds: string[], updates: Partial<PlotCard>) => Promise<void>;
+  importBoard: (_boardData: Partial<PlotBoard>) => Promise<PlotBoard>;
+  exportBoard: (_boardId: string) => PlotBoard | null;
+  bulkUpdateCards: (_cardIds: string[], _updates: Partial<PlotCard>) => Promise<void>;
 
   // Chapter/Scene Integration
-  syncWithChapters: (boardId: string, chapters: Record<string, any>) => Promise<void>;
+  syncWithChapters: (_boardId: string, _chapters: Record<string, any>) => Promise<void>;
   createCardsFromChapters: (
-    boardId: string,
-    chapterIds: string[],
-    chapters: Record<string, any>,
+    _boardId: string,
+    _chapterIds: string[],
+    _chapters: Record<string, any>,
   ) => Promise<void>;
   autoSyncWithTimeline: (
-    boardId: string,
-    timelineEvents: any[],
-    chapters: Record<string, any>,
+    _boardId: string,
+    _timelineEvents: any[],
+    _chapters: Record<string, any>,
   ) => Promise<void>;
   getProgressMetrics: (
-    boardId: string,
-    chapters: Record<string, any>,
+    _boardId: string,
+    _chapters: Record<string, any>,
   ) => PlotProgressMetrics | null;
 
   // Auto-sync Configuration
   autoSyncConfig: AutoSyncConfig;
-  setAutoSyncConfig: (config: Partial<AutoSyncConfig>) => void;
+  setAutoSyncConfig: (_config: Partial<AutoSyncConfig>) => void;
 
   // Utility
-  findCardById: (cardId: string) => { card: PlotCard; column: PlotColumn; board: PlotBoard } | null;
-  findColumnById: (columnId: string) => { column: PlotColumn; board: PlotBoard } | null;
-  getCardsByStatus: (boardId: string, status: PlotCardStatus) => PlotCard[];
-  getCardsByPriority: (boardId: string, priority: PlotCardPriority) => PlotCard[];
-  searchCards: (query: string, boardId?: string) => PlotCard[];
+  findCardById: (
+    _cardId: string,
+  ) => { card: PlotCard; column: PlotColumn; board: PlotBoard } | null;
+  findColumnById: (_columnId: string) => { column: PlotColumn; board: PlotBoard } | null;
+  getCardsByStatus: (_boardId: string, _status: PlotCardStatus) => PlotCard[];
+  getCardsByPriority: (_boardId: string, _priority: PlotCardPriority) => PlotCard[];
+  searchCards: (_query: string, _boardId?: string) => PlotCard[];
 }
 
 /* ========= Helper Functions ========= */
@@ -172,12 +174,12 @@ const createPlotBoard = (projectId: string, title: string): PlotBoard => ({
 });
 
 /* ========= Store Implementation ========= */
-export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
+export const usePlotBoardStore = create<PlotBoardStore>()((set, _get) => ({
   // Initial State
   boards: {},
-  activeBoard: null,
-  templates: DEFAULT_PLOT_TEMPLATES.reduce(
-    (acc, template) => {
+  _activeBoard: null,
+  _templates: DEFAULT_PLOT_TEMPLATES.reduce(
+    (acc, _template) => {
       acc[template.id] = template;
       return acc;
     },
@@ -189,9 +191,9 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
 
   // Analysis State
   analysisByProjectId: {},
-  setAnalysis: (projectId, analysis) =>
+  setAnalysis: (_projectId, _analysis) =>
     set((s) => ({ analysisByProjectId: { ...s.analysisByProjectId, [projectId]: analysis } })),
-  clearAnalysis: (projectId) =>
+  clearAnalysis: (_projectId) =>
     set((s) => {
       const copy = { ...s.analysisByProjectId };
       delete copy[projectId];
@@ -199,7 +201,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }),
 
   // Board Operations
-  createBoard: async (projectId: string, title: string, templateId?: string) => {
+  createBoard: async (_projectId: string, _title: string, _templateId?: string) => {
     trace.log('createBoard', 'store_action', 'debug', { projectId, title, templateId });
 
     try {
@@ -212,7 +214,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
         const template = get().templates[templateId];
         if (template) {
           const _colors = generateColors();
-          board.columns = template.columns.map((colTemplate, index) => {
+          board.columns = template.columns.map((colTemplate, _index) => {
             const column = createPlotColumn(
               board.id,
               colTemplate.title,
@@ -224,7 +226,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
 
             // Add default cards if specified
             if (colTemplate.defaultCards) {
-              column.cards = colTemplate.defaultCards.map((cardTemplate, cardIndex) => {
+              column.cards = colTemplate.defaultCards.map((cardTemplate, _cardIndex) => {
                 const card = createPlotCard(
                   column.id,
                   cardTemplate.title,
@@ -259,7 +261,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  updateBoard: async (boardId: string, updates: Partial<PlotBoard>) => {
+  updateBoard: async (_boardId: string, _updates: Partial<PlotBoard>) => {
     trace.log('updateBoard', 'store_action', 'debug', { boardId, updates });
 
     try {
@@ -287,7 +289,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  deleteBoard: async (boardId: string) => {
+  deleteBoard: async (_boardId: string) => {
     trace.log('deleteBoard', 'store_action', 'debug', { boardId });
 
     try {
@@ -313,7 +315,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  duplicateBoard: async (boardId: string, newTitle?: string) => {
+  duplicateBoard: async (_boardId: string, _newTitle?: string) => {
     trace.log('duplicateBoard', 'store_action', 'debug', { boardId, newTitle });
 
     try {
@@ -358,21 +360,21 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  setActiveBoard: (boardId: string | null) => {
+  setActiveBoard: (_boardId: string | null) => {
     trace.log('setActiveBoard', 'store_action', 'debug', { boardId });
     set({ activeBoard: boardId });
   },
 
-  getBoardsByProject: (projectId: string) => {
+  getBoardsByProject: (_projectId: string) => {
     return Object.values(get().boards).filter((board) => board.projectId === projectId);
   },
 
   // Column Operations
   createColumn: async (
-    boardId: string,
-    title: string,
-    type: PlotColumnType = PlotColumnType.CUSTOM,
-    color?: string,
+    _boardId: string,
+    _title: string,
+    _type: PlotColumnType = PlotColumnType.CUSTOM,
+    _color?: string,
   ) => {
     trace.log('createColumn', 'store_action', 'debug', { boardId, title, type, color });
 
@@ -404,7 +406,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  updateColumn: async (columnId: string, updates: Partial<PlotColumn>) => {
+  updateColumn: async (_columnId: string, _updates: Partial<PlotColumn>) => {
     trace.log('updateColumn', 'store_action', 'debug', { columnId, updates });
 
     try {
@@ -434,7 +436,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  deleteColumn: async (columnId: string) => {
+  deleteColumn: async (_columnId: string) => {
     trace.log('deleteColumn', 'store_action', 'debug', { columnId });
 
     try {
@@ -463,7 +465,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  reorderColumns: async (boardId: string, columnIds: string[]) => {
+  reorderColumns: async (_boardId: string, _columnIds: string[]) => {
     trace.log('reorderColumns', 'store_action', 'debug', { boardId, columnIds });
 
     try {
@@ -472,7 +474,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
         throw new Error(`Board ${boardId} not found`);
       }
 
-      const reorderedColumns = columnIds.map((id, index) => {
+      const reorderedColumns = columnIds.map((id, _index) => {
         const column = board.columns.find((col) => col.id === id);
         if (!column) {
           throw new Error(`Column ${id} not found in board`);
@@ -499,7 +501,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
   },
 
   // Card Operations
-  createCard: async (columnId: string, title: string, description?: string) => {
+  createCard: async (_columnId: string, _title: string, _description?: string) => {
     trace.log('createCard', 'store_action', 'debug', { columnId, title, description });
 
     try {
@@ -536,7 +538,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  updateCard: async (cardId: string, updates: Partial<PlotCard>) => {
+  updateCard: async (_cardId: string, _updates: Partial<PlotCard>) => {
     trace.log('updateCard', 'store_action', 'debug', { cardId, updates });
 
     try {
@@ -571,7 +573,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  deleteCard: async (cardId: string) => {
+  deleteCard: async (_cardId: string) => {
     trace.log('deleteCard', 'store_action', 'debug', { cardId });
 
     try {
@@ -605,7 +607,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  moveCard: async (cardId: string, destinationColumnId: string, newOrder: number) => {
+  moveCard: async (_cardId: string, _destinationColumnId: string, _newOrder: number) => {
     trace.log('moveCard', 'store_action', 'debug', { cardId, destinationColumnId, newOrder });
 
     try {
@@ -627,7 +629,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
         reorderedCards.splice(newOrder, 0, { ...card, order: newOrder });
 
         // Update order for all cards
-        reorderedCards.forEach((c, idx) => {
+        reorderedCards.forEach((c, _idx) => {
           c.order = idx;
         });
 
@@ -654,7 +656,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
 
         const updatedDestCards = [...destColumn.cards];
         updatedDestCards.splice(newOrder, 0, updatedCard);
-        updatedDestCards.forEach((c, idx) => {
+        updatedDestCards.forEach((c, _idx) => {
           c.order = idx;
         });
 
@@ -686,7 +688,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  reorderCards: async (columnId: string, cardIds: string[]) => {
+  reorderCards: async (_columnId: string, _cardIds: string[]) => {
     trace.log('reorderCards', 'store_action', 'debug', { columnId, cardIds });
 
     try {
@@ -697,7 +699,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
 
       const { column, board } = result;
 
-      const reorderedCards = cardIds.map((id, index) => {
+      const reorderedCards = cardIds.map((id, _index) => {
         const card = column.cards.find((c) => c.id === id);
         if (!card) {
           throw new Error(`Card ${id} not found in column`);
@@ -724,7 +726,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  linkCardToScene: async (cardId: string, sceneId: string, chapterId: string) => {
+  linkCardToScene: async (_cardId: string, _sceneId: string, _chapterId: string) => {
     trace.log('linkCardToScene', 'store_action', 'debug', { cardId, sceneId, chapterId });
 
     await get().updateCard(cardId, {
@@ -733,7 +735,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     });
   },
 
-  unlinkCardFromScene: async (cardId: string) => {
+  unlinkCardFromScene: async (_cardId: string) => {
     trace.log('unlinkCardFromScene', 'store_action', 'debug', { cardId });
 
     await get().updateCard(cardId, {
@@ -742,7 +744,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     });
   },
 
-  linkCardToTimeline: async (cardId: string, eventIds: string[]) => {
+  linkCardToTimeline: async (_cardId: string, _eventIds: string[]) => {
     trace.log('linkCardToTimeline', 'store_action', 'debug', { cardId, eventIds });
 
     await get().updateCard(cardId, {
@@ -751,7 +753,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
   },
 
   // Template Operations
-  createTemplate: async (template: Omit<PlotBoardTemplate, 'id' | 'isBuiltIn'>) => {
+  createTemplate: async (_template: Omit<PlotBoardTemplate, 'id' | 'isBuiltIn'>) => {
     trace.log('createTemplate', 'store_action', 'debug', { template });
 
     const newTemplate: PlotBoardTemplate = {
@@ -768,7 +770,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     return newTemplate;
   },
 
-  updateTemplate: async (templateId: string, updates: Partial<PlotBoardTemplate>) => {
+  updateTemplate: async (_templateId: string, _updates: Partial<PlotBoardTemplate>) => {
     trace.log('updateTemplate', 'store_action', 'debug', { templateId, updates });
 
     const template = get().templates[templateId];
@@ -789,7 +791,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     await storage.setItem(`plottemplate_${templateId}`, updatedTemplate);
   },
 
-  deleteTemplate: async (templateId: string) => {
+  deleteTemplate: async (_templateId: string) => {
     trace.log('deleteTemplate', 'store_action', 'debug', { templateId });
 
     const template = get().templates[templateId];
@@ -808,13 +810,13 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     await storage.removeItem(`plottemplate_${templateId}`);
   },
 
-  getTemplatesByCategory: (category?: string) => {
+  getTemplatesByCategory: (_category?: string) => {
     const templates = Object.values(get().templates);
     return category ? templates.filter((t) => t.category === category) : templates;
   },
 
   // Batch Operations
-  importBoard: async (boardData: Partial<PlotBoard>) => {
+  importBoard: async (_boardData: Partial<PlotBoard>) => {
     trace.log('importBoard', 'store_action', 'debug', { boardData });
 
     const board = createPlotBoard(
@@ -834,11 +836,11 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     return board;
   },
 
-  exportBoard: (boardId: string) => {
+  exportBoard: (_boardId: string) => {
     return get().boards[boardId] || null;
   },
 
-  bulkUpdateCards: async (cardIds: string[], updates: Partial<PlotCard>) => {
+  bulkUpdateCards: async (_cardIds: string[], _updates: Partial<PlotCard>) => {
     trace.log('bulkUpdateCards', 'store_action', 'debug', { cardIds, updates });
 
     try {
@@ -884,7 +886,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
   },
 
   // Utility Functions
-  findCardById: (cardId: string) => {
+  findCardById: (_cardId: string) => {
     const boards = get().boards;
 
     for (const board of Object.values(boards)) {
@@ -899,7 +901,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     return null;
   },
 
-  findColumnById: (columnId: string) => {
+  findColumnById: (_columnId: string) => {
     const boards = get().boards;
 
     for (const board of Object.values(boards)) {
@@ -912,14 +914,14 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     return null;
   },
 
-  getCardsByStatus: (boardId: string, status: PlotCardStatus) => {
+  getCardsByStatus: (_boardId: string, _status: PlotCardStatus) => {
     const board = get().boards[boardId];
     if (!board) return [];
 
     return board.columns.flatMap((column) => column.cards.filter((card) => card.status === status));
   },
 
-  getCardsByPriority: (boardId: string, priority: PlotCardPriority) => {
+  getCardsByPriority: (_boardId: string, _priority: PlotCardPriority) => {
     const board = get().boards[boardId];
     if (!board) return [];
 
@@ -928,7 +930,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     );
   },
 
-  searchCards: (query: string, boardId?: string) => {
+  searchCards: (_query: string, _boardId?: string) => {
     const lowerQuery = query.toLowerCase();
     const boards = boardId ? { [boardId]: get().boards[boardId] } : get().boards;
 
@@ -955,7 +957,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
   },
 
   // Chapter/Scene Integration Methods
-  syncWithChapters: async (boardId: string, chapters: Record<string, any>) => {
+  syncWithChapters: async (_boardId: string, _chapters: Record<string, any>) => {
     trace.log('syncWithChapters', 'store_action', 'debug', { boardId });
 
     try {
@@ -1009,9 +1011,9 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
   },
 
   createCardsFromChapters: async (
-    boardId: string,
-    chapterIds: string[],
-    chapters: Record<string, any>,
+    _boardId: string,
+    _chapterIds: string[],
+    _chapters: Record<string, any>,
   ) => {
     trace.log('createCardsFromChapters', 'store_action', 'debug', { boardId, chapterIds });
 
@@ -1056,9 +1058,9 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
   },
 
   autoSyncWithTimeline: async (
-    boardId: string,
-    timelineEvents: any[],
-    chapters: Record<string, any>,
+    _boardId: string,
+    _timelineEvents: any[],
+    _chapters: Record<string, any>,
   ) => {
     trace.log('autoSyncWithTimeline', 'store_action', 'debug', { boardId });
 
@@ -1082,7 +1084,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     }
   },
 
-  getProgressMetrics: (boardId: string, chapters: Record<string, any>) => {
+  getProgressMetrics: (_boardId: string, _chapters: Record<string, any>) => {
     const board = get().boards[boardId];
     if (!board) return null;
 
@@ -1090,7 +1092,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
     return calculatePlotProgress(allCards, chapters);
   },
 
-  setAutoSyncConfig: (config: Partial<AutoSyncConfig>) => {
+  setAutoSyncConfig: (_config: Partial<AutoSyncConfig>) => {
     trace.log('setAutoSyncConfig', 'store_action', 'debug', { config });
 
     set((state) => ({
@@ -1115,7 +1117,7 @@ export const initializePlotBoardStore = async () => {
       templates: {
         ...state.templates,
         ...customTemplates.reduce(
-          (acc, template) => {
+          (acc, _template) => {
             acc[template.id] = template;
             return acc;
           },

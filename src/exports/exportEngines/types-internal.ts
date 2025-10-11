@@ -7,7 +7,7 @@ export interface ExportEngine {
 export interface RenderContext {
   draft: ManuscriptDraft;
   style: StylePresetMeta;
-  progress?: (phase: string, percentage: number, message?: string) => void;
+  progress?: (_phase: string, _percentage: number, _message?: string) => void;
 }
 
 export interface EngineCapabilities {
@@ -30,7 +30,7 @@ export abstract class BaseExportEngine implements ExportEngine {
   abstract render(draft: ManuscriptDraft, style: StylePresetMeta): Promise<Blob>;
 
   protected reportProgress(
-    progress: ((phase: string, percentage: number, message?: string) => void) | undefined,
+    _progress: ((phase: string, _percentage: number, _message?: string) => void) | undefined,
     phase: string,
     percentage: number,
     message?: string,

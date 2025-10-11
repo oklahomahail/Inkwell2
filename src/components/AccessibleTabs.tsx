@@ -12,15 +12,15 @@ interface Tab {
 interface AccessibleTabsProps {
   tabs: Tab[];
   initialSelectedId?: string;
-  onChange?: (selectedId: string) => void;
+  onChange?: (_selectedId: string) => void;
   className?: string;
 }
 
 const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
   tabs,
-  initialSelectedId,
-  onChange,
-  className = '',
+  _initialSelectedId,
+  _onChange,
+  _className = '',
 }) => {
   const [selectedId, setSelectedId] = useState(initialSelectedId || tabs[0]?.id || '');
 
@@ -30,7 +30,7 @@ const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
     }
   }, [initialSelectedId, selectedId]);
 
-  const handleTabChange = (id: string) => {
+  const handleTabChange = (_id: string) => {
     const tab = tabs.find((tab) => tab.id === id);
     if (tab && !tab.disabled) {
       setSelectedId(id);
@@ -38,7 +38,7 @@ const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, id: string) => {
+  const handleKeyDown = (_e: React.KeyboardEvent, _id: string) => {
     if (tabs.length === 0) return;
 
     const currentIndex = tabs.findIndex((tab) => tab.id === id);
@@ -113,7 +113,7 @@ const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
             aria-disabled={tab.disabled}
             tabIndex={selectedId === tab.id ? 0 : -1}
             onClick={() => handleTabChange(tab.id)}
-            onKeyDown={(e) => handleKeyDown(e, tab.id)}
+            onKeyDown={(_e) => handleKeyDown(e, tab.id)}
             disabled={tab.disabled}
             className={`flex-1 px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#0073E6] focus:ring-inset ${
               selectedId === tab.id

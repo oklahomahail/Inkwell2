@@ -10,7 +10,7 @@ interface CommandPaletteProps {
   placeholder?: string;
 }
 
-export function CommandPalette({
+export function _CommandPalette({
   isOpen,
   onClose,
   commands,
@@ -165,7 +165,7 @@ export function CommandPalette({
             ref={inputRef}
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(_e) => setSearch(e.target.value)}
             placeholder={placeholder}
             className="w-full px-4 py-2 text-lg font-semibold bg-transparent border-0 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-500"
             aria-label="Search commands"

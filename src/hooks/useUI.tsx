@@ -13,11 +13,11 @@ const defaultValue: UIContextValue = {
 
 export const UIContext = createContext<UIContextValue>(defaultValue);
 
-export function useUI(): UIContextValue {
+export function _useUI(): UIContextValue {
   return useContext(UIContext);
 }
 
-export function UIProvider({
+export function _UIProvider({
   children,
   initialCollapsed = false,
 }: {
@@ -29,7 +29,7 @@ export function UIProvider({
   const value = useMemo<UIContextValue>(
     () => ({
       sidebarCollapsed,
-      toggleSidebar: () => setSidebarCollapsed((c) => !c),
+      _toggleSidebar: () => setSidebarCollapsed((c) => !c),
     }),
     [sidebarCollapsed],
   );

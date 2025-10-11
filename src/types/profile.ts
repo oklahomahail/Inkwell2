@@ -26,10 +26,10 @@ export interface ProfileState {
 }
 
 export interface ProfileActions {
-  createProfile: (name: string, options?: Partial<Profile>) => Promise<Profile>;
-  deleteProfile: (profileId: ProfileId) => Promise<void>;
-  updateProfile: (profileId: ProfileId, updates: Partial<Profile>) => Promise<Profile>;
-  setActiveProfile: (profileId: ProfileId) => Promise<void>;
+  createProfile: (_name: string, _options?: Partial<Profile>) => Promise<Profile>;
+  deleteProfile: (_profileId: ProfileId) => Promise<void>;
+  updateProfile: (_profileId: ProfileId, _updates: Partial<Profile>) => Promise<Profile>;
+  setActiveProfile: (_profileId: ProfileId) => Promise<void>;
   loadProfiles: () => Promise<void>;
   clearActiveProfile: () => void;
 }

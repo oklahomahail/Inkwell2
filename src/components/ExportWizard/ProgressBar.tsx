@@ -6,7 +6,7 @@ interface ProgressBarProps {
   progress?: number;
 }
 
-export function ProgressBar({
+export function _ProgressBar({
   currentStep,
   totalSteps,
   labels,
@@ -16,7 +16,7 @@ export function ProgressBar({
   return (
     <div className="mt-4">
       <div className="flex items-center justify-between">
-        {labels.map((label, index) => (
+        {labels.map((label, _index) => (
           <div key={label} className="flex items-center">
             <div
               className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${

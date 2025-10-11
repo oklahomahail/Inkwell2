@@ -100,9 +100,9 @@ const BeatSheetPlanner: React.FC = () => {
   };
 
   // Initialize beat sheet from template
-  const createBeatSheetFromTemplate = (template: keyof typeof templates) => {
+  const createBeatSheetFromTemplate = (_template: keyof typeof templates) => {
     const templateBeats = templates[template];
-    const beats: Beat[] = templateBeats.map((beat, index) => ({
+    const beats: Beat[] = templateBeats.map((beat, _index) => ({
       id: `beat_${Date.now()}_${index}`,
       title: beat.title,
       description: beat.description,
@@ -134,7 +134,7 @@ const BeatSheetPlanner: React.FC = () => {
   }, [currentProject]);
 
   // Update beat content
-  const updateBeat = (beatId: string, updates: Partial<Beat>) => {
+  const updateBeat = (_beatId: string, _updates: Partial<Beat>) => {
     if (!currentBeatSheet) return;
 
     const updatedBeats = currentBeatSheet.beats.map((beat) =>
@@ -301,7 +301,7 @@ const BeatSheetPlanner: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                {currentBeatSheet.beats.map((beat, index) => (
+                {currentBeatSheet.beats.map((beat, _index) => (
                   <div
                     key={beat.id}
                     className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:border-gray-300 dark:hover:border-gray-500 transition-colors"

@@ -10,10 +10,10 @@ import { snapshotAdapter as snapshotService, SnapshotMeta } from '@/services/sna
 
 interface SnapshotHistoryDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
 }
 
-export default function SnapshotHistoryDialog({ open, onOpenChange }: SnapshotHistoryDialogProps) {
+export default function _SnapshotHistoryDialog({ open, onOpenChange }: SnapshotHistoryDialogProps) {
   const { project } = useCurrentProject();
   const [snapshots, setSnapshots] = useState<SnapshotMeta[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,13 +33,13 @@ export default function SnapshotHistoryDialog({ open, onOpenChange }: SnapshotHi
   const totalWords = useMemo(() => {
     return (
       project?.chapters?.reduce(
-        (acc: any, ch: { wordCount: any }) => acc + (ch.wordCount || 0),
+        (acc: any, _ch: { wordCount: any }) => acc + (ch.wordCount || 0),
         0,
       ) ?? 0
     );
   }, [project]);
 
-  const handleRestore = async (id: string) => {
+  const handleRestore = async (_id: string) => {
     if (!projectId) return;
     if (!confirm('Restore this snapshot? Your current project state will be replaced.')) return;
     setRestoringId(id);
@@ -52,7 +52,7 @@ export default function SnapshotHistoryDialog({ open, onOpenChange }: SnapshotHi
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (_id: string) => {
     if (!confirm('Delete this snapshot permanently?')) return;
     const next = snapshots.filter((s) => s.id !== id);
     setSnapshots(next);

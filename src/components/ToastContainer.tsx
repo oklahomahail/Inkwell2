@@ -6,7 +6,7 @@ export type ToastContainerProps = {
   className?: string;
 };
 
-export function ToastContainer({ className = '' }: ToastContainerProps) {
+export function _ToastContainer({ className = '' }: ToastContainerProps) {
   const { toasts, removeToast } = useToast();
 
   return (

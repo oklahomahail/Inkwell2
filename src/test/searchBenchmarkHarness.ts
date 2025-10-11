@@ -66,7 +66,7 @@ export interface BenchmarkResult {
 
 interface QueryPattern {
   type: QueryType;
-  generator: (corpus: GeneratedCorpus) => string[];
+  generator: (_corpus: GeneratedCorpus) => string[];
   weight: number;
 }
 
@@ -77,7 +77,7 @@ class SearchBenchmarkHarness {
     {
       type: 'single-word',
       weight: 0.4,
-      generator: (corpus) => [
+      generator: (_corpus) => [
         ...this.extractCommonWords(corpus, 1, 50), // Most common single words
         'mystery',
         'school',
@@ -96,7 +96,7 @@ class SearchBenchmarkHarness {
     {
       type: 'character-name',
       weight: 0.25,
-      generator: (corpus) => {
+      generator: (_corpus) => {
         const names: string[] = [];
         corpus.characters.forEach((c) => {
           if (c.name && c.name.trim()) {
@@ -113,7 +113,7 @@ class SearchBenchmarkHarness {
     {
       type: 'multi-word',
       weight: 0.2,
-      generator: (corpus) => [
+      generator: (_corpus) => [
         ...this.extractCommonWords(corpus, 2, 30), // Common two-word phrases
         'art hallway',
         'science class',
@@ -130,7 +130,7 @@ class SearchBenchmarkHarness {
     {
       type: 'phrase',
       weight: 0.1,
-      generator: (corpus) => [
+      generator: (_corpus) => [
         ...this.extractCommonWords(corpus, 3, 15), // Three+ word phrases
         'solve the mystery',
         'figure this out',
@@ -143,7 +143,7 @@ class SearchBenchmarkHarness {
     {
       type: 'rare-word',
       weight: 0.05,
-      generator: (corpus) => this.extractRareWords(corpus, 20),
+      generator: (_corpus) => this.extractRareWords(corpus, 20),
     },
   ];
 
@@ -316,7 +316,7 @@ class SearchBenchmarkHarness {
   ): BenchmarkResult {
     const successfulResults = results.filter((r) => r.success);
     const latencies = successfulResults.map((r) => r.latency);
-    latencies.sort((a, b) => a - b);
+    latencies.sort((a, _b) => a - b);
 
     // Calculate percentiles
     const p50 = this.percentile(latencies, 0.5);
@@ -335,14 +335,14 @@ class SearchBenchmarkHarness {
       const typeResults = successfulResults.filter((r) => r.type === type);
       if (typeResults.length > 0) {
         const typeLatencies = typeResults.map((r) => r.latency);
-        typeLatencies.sort((a, b) => a - b);
+        typeLatencies.sort((a, _b) => a - b);
 
         detailsByQueryType[type] = {
           count: typeResults.length,
           p50: this.percentile(typeLatencies, 0.5),
           p95: this.percentile(typeLatencies, 0.95),
           averageResults:
-            typeResults.reduce((sum, r) => sum + r.resultCount, 0) / typeResults.length,
+            typeResults.reduce((sum, _r) => sum + r.resultCount, 0) / typeResults.length,
         };
       }
     }
@@ -417,7 +417,7 @@ class SearchBenchmarkHarness {
         p95,
         p99,
         averageResultCount:
-          successfulResults.reduce((sum, r) => sum + r.resultCount, 0) / successfulResults.length,
+          successfulResults.reduce((sum, _r) => sum + r.resultCount, 0) / successfulResults.length,
         failureRate: (results.length - successfulResults.length) / results.length,
       },
       memoryUsage: {
@@ -461,7 +461,7 @@ class SearchBenchmarkHarness {
     });
 
     return Array.from(wordFreq.entries())
-      .sort((a, b) => b[1] - a[1])
+      .sort((a, _b) => b[1] - a[1])
       .slice(0, limit)
       .map(([word]) => word);
   }
@@ -485,7 +485,7 @@ class SearchBenchmarkHarness {
 
     return Array.from(wordFreq.entries())
       .filter(([, freq]) => freq <= 3) // Rare words appear 3 times or less
-      .sort((a, b) => a[1] - b[1]) // Sort by frequency (ascending)
+      .sort((a, _b) => a[1] - b[1]) // Sort by frequency (ascending)
       .slice(0, limit)
       .map(([word]) => word);
   }
@@ -515,7 +515,7 @@ class SearchBenchmarkHarness {
 }
 
 // Convenience functions for running benchmarks
-export async function runQuickBenchmark(): Promise<BenchmarkResult> {
+export async function _runQuickBenchmark(): Promise<BenchmarkResult> {
   const harness = new SearchBenchmarkHarness();
   return harness.runBenchmark({
     warmupQueries: 10,
@@ -530,7 +530,7 @@ export async function runQuickBenchmark(): Promise<BenchmarkResult> {
   });
 }
 
-export async function runFullBenchmark(): Promise<BenchmarkResult> {
+export async function _runFullBenchmark(): Promise<BenchmarkResult> {
   const harness = new SearchBenchmarkHarness();
   return harness.runBenchmark({
     warmupQueries: 50,
@@ -551,7 +551,7 @@ export async function runFullBenchmark(): Promise<BenchmarkResult> {
   });
 }
 
-export async function runStressBenchmark(): Promise<BenchmarkResult> {
+export async function _runStressBenchmark(): Promise<BenchmarkResult> {
   const harness = new SearchBenchmarkHarness();
   return harness.runBenchmark({
     warmupQueries: 100,

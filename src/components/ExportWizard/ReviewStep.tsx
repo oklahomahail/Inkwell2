@@ -16,7 +16,7 @@ const styleLabels: Record<string, string> = {
   screenplay: 'Screenplay',
 };
 
-export function ReviewStep({
+export function _ReviewStep({
   format,
   style,
   includeProofread,

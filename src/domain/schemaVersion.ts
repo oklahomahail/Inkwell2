@@ -4,12 +4,12 @@
 export const CURRENT_SCHEMA_VERSION = 1;
 
 // Migration function type
-export type MigrationFn = (data: any) => Promise<any>;
+export type MigrationFn = (_data: any) => Promise<any>;
 
 // Migration registry - add new migrations here as the schema evolves
 export const MIGRATIONS: Record<number, MigrationFn> = {
   // Example: Migration from version 1 to 2
-  // 2: async (data) => {
+  // 2: async (_data) => {
   //   // Add new field to all chapters
   //   if (data.chapters) {
   //     data.chapters = data.chapters.map(chapter => ({
@@ -24,7 +24,7 @@ export const MIGRATIONS: Record<number, MigrationFn> = {
 /**
  * Run migrations to upgrade data from oldVersion to CURRENT_SCHEMA_VERSION
  */
-export async function runMigrations(data: any, fromVersion: number): Promise<any> {
+export async function _runMigrations(data: any, fromVersion: number): Promise<any> {
   let currentData = data;
   let currentVersion = fromVersion;
 
@@ -54,7 +54,7 @@ export async function runMigrations(data: any, fromVersion: number): Promise<any
 /**
  * Check if data needs migration
  */
-export function needsMigration(data: any): boolean {
+export function _needsMigration(data: any): boolean {
   const dataVersion = data?.schemaVersion || 0;
   return dataVersion < CURRENT_SCHEMA_VERSION;
 }
@@ -62,7 +62,7 @@ export function needsMigration(data: any): boolean {
 /**
  * Validate schema version compatibility
  */
-export function validateSchemaVersion(version: number): void {
+export function _validateSchemaVersion(version: number): void {
   if (version > CURRENT_SCHEMA_VERSION) {
     throw new Error(
       `Data was created with schema version ${version}, but this app only supports up to version ${CURRENT_SCHEMA_VERSION}. Please update the app.`,
@@ -77,7 +77,7 @@ export function validateSchemaVersion(version: number): void {
 /**
  * Get schema version from data, with fallback to 0 for legacy data
  */
-export function getSchemaVersion(data: any): number {
+export function _getSchemaVersion(data: any): number {
   return data?.schemaVersion || 0;
 }
 

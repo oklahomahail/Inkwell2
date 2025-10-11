@@ -10,10 +10,10 @@ export interface NavigationState {
 }
 
 export interface NavigationActions {
-  navigateToView: (view: NavigationState['currentView']) => void;
-  navigateToProject: (projectId: string) => void;
-  navigateToChapter: (projectId: string, chapterId: string) => void;
-  navigateToScene: (projectId: string, chapterId: string, sceneId: string) => void;
+  navigateToView: (_view: NavigationState['currentView']) => void;
+  navigateToProject: (_projectId: string) => void;
+  navigateToChapter: (_projectId: string, _chapterId: string) => void;
+  navigateToScene: (_projectId: string, _chapterId: string, _sceneId: string) => void;
   toggleFocusMode: () => void;
   goBack: () => void;
   canGoBack: boolean;
@@ -34,7 +34,7 @@ interface NavProviderProps {
  * Replaces global event listeners and provides a single source of truth for navigation.
  * Includes safe fallbacks for stale IDs and deep linking support.
  */
-export function NavProvider({ children, initialState = {} }: NavProviderProps) {
+export function _NavProvider({ children, initialState = {} }: NavProviderProps) {
   const [state, setState] = useState<NavigationState>({
     currentView: 'dashboard',
     currentProjectId: null,
@@ -134,7 +134,7 @@ export function NavProvider({ children, initialState = {} }: NavProviderProps) {
   );
 
   const navigateToChapter = useCallback(
-    (projectId: string, chapterId: string) => {
+    (projectId: string, _chapterId: string) => {
       // Validate that the chapter exists (basic safety check)
       if (!chapterId || !projectId) {
         console.warn('NavContext: Invalid chapter navigation parameters');
@@ -154,7 +154,7 @@ export function NavProvider({ children, initialState = {} }: NavProviderProps) {
   );
 
   const navigateToScene = useCallback(
-    (projectId: string, chapterId: string, sceneId: string) => {
+    (projectId: string, _chapterId: string, _sceneId: string) => {
       // Validate parameters
       if (!sceneId || !chapterId || !projectId) {
         console.warn('NavContext: Invalid scene navigation parameters');
@@ -209,7 +209,7 @@ export function NavProvider({ children, initialState = {} }: NavProviderProps) {
 /**
  * Hook to access navigation context
  */
-export function useNavigation(): NavContextValue {
+export function _useNavigation(): NavContextValue {
   const context = useContext(NavContext);
   if (!context) {
     // Fail-soft in production so UI doesn't white-screen
@@ -226,18 +226,18 @@ export function useNavigation(): NavContextValue {
         currentChapterId: null,
         currentSceneId: null,
         focusMode: false,
-        navigateToView: (view) => {
+        navigateToView: (_view) => {
           console.warn(`[navigation] Navigation attempted without provider: ${view}`);
         },
-        navigateToProject: (projectId) => {
+        navigateToProject: (_projectId) => {
           console.warn(`[navigation] Project navigation attempted without provider: ${projectId}`);
         },
-        navigateToChapter: (projectId, chapterId) => {
+        navigateToChapter: (_projectId, _chapterId) => {
           console.warn(
             `[navigation] Chapter navigation attempted without provider: ${projectId}/${chapterId}`,
           );
         },
-        navigateToScene: (projectId, chapterId, sceneId) => {
+        navigateToScene: (_projectId, _chapterId, _sceneId) => {
           console.warn(
             `[navigation] Scene navigation attempted without provider: ${projectId}/${chapterId}/${sceneId}`,
           );
@@ -263,10 +263,10 @@ export const NavigationHelpers = {
    * Navigate to a scene with automatic fallback if the scene/chapter doesn't exist
    */
   navigateToSceneWithFallback: async (
-    navigation: NavContextValue,
-    projectId: string,
-    chapterId: string,
-    sceneId: string,
+    _navigation: NavContextValue,
+    _projectId: string,
+    _chapterId: string,
+    _sceneId: string,
   ) => {
     try {
       // Here you would validate that the scene exists in your storage service
@@ -289,9 +289,9 @@ export const NavigationHelpers = {
    * Navigate to a chapter with automatic fallback if the chapter doesn't exist
    */
   navigateToChapterWithFallback: async (
-    navigation: NavContextValue,
-    projectId: string,
-    chapterId: string,
+    _navigation: NavContextValue,
+    _projectId: string,
+    _chapterId: string,
   ) => {
     try {
       navigation.navigateToChapter(projectId, chapterId);
@@ -316,7 +316,7 @@ export const NavigationHelpers = {
   /**
    * Parse URL parameters and navigate accordingly
    */
-  handleDeepLink: (navigation: NavContextValue, url: string) => {
+  handleDeepLink: (_navigation: NavContextValue, _url: string) => {
     try {
       const urlObj = new URL(url);
       const params = new URLSearchParams(urlObj.search);

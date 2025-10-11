@@ -35,11 +35,11 @@ const EnhancedDashboard: React.FC = () => {
     }
   };
 
-  const navigateToView = (view: View) => {
+  const navigateToView = (_view: View) => {
     dispatch({ type: 'SET_VIEW', payload: view });
   };
 
-  const formatDate = (timestamp: number) => {
+  const formatDate = (_timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -47,12 +47,12 @@ const EnhancedDashboard: React.FC = () => {
     });
   };
 
-  const getProjectWordCount = (project: any) => {
+  const getProjectWordCount = (_project: any) => {
     if (!project.content) return 0;
     return project.content.split(' ').filter((word: string) => word.length > 0).length;
   };
 
-  const getDaysAgo = (timestamp: number) => {
+  const getDaysAgo = (_timestamp: number) => {
     const days = Math.floor((Date.now() - timestamp) / (1000 * 60 * 60 * 24));
     if (days === 0) return 'Today';
     if (days === 1) return '1 day ago';

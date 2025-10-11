@@ -94,16 +94,16 @@ const TOUR_NUDGES: TourNudge[] = [
 
 interface TourNudgeProps {
   nudge: TourNudge;
-  onStartTour: (tourType: string) => void;
-  onDismiss: (nudgeId: string) => void;
+  onStartTour: (_tourType: string) => void;
+  onDismiss: (_nudgeId: string) => void;
   onClose: () => void;
 }
 
 const TourNudgeComponent: React.FC<TourNudgeProps> = ({
   nudge,
-  onStartTour,
-  onDismiss,
-  onClose,
+  _onStartTour,
+  _onDismiss,
+  _onClose,
 }) => {
   const Icon = nudge.icon;
 
@@ -221,7 +221,7 @@ const TourNudgeComponent: React.FC<TourNudgeProps> = ({
 };
 
 interface TourNudgeManagerProps {
-  onStartTour: (tourType: string) => void;
+  onStartTour: (_tourType: string) => void;
 }
 
 export const TourNudgeManager: React.FC<TourNudgeManagerProps> = ({ onStartTour }) => {
@@ -265,7 +265,7 @@ export const TourNudgeManager: React.FC<TourNudgeManagerProps> = ({ onStartTour 
   }, [activeNudge, nudgeQueue, dismissedNudges, canShowContextualTour, logAnalytics]);
 
   // Function to trigger a nudge (called by other components)
-  const triggerNudge = (action: string, conditions: Record<string, any> = {}) => {
+  const triggerNudge = (_action: string, _conditions: Record<string, any> = {}) => {
     const matchingNudges = TOUR_NUDGES.filter((nudge) => {
       if (nudge.trigger.action !== action) return false;
       if (dismissedNudges.includes(nudge.id)) return false;
@@ -291,13 +291,13 @@ export const TourNudgeManager: React.FC<TourNudgeManagerProps> = ({ onStartTour 
 
     if (matchingNudges.length > 0) {
       // Sort by priority and add to queue
-      const sortedNudges = matchingNudges.sort((a, b) => {
+      const sortedNudges = matchingNudges.sort((a, _b) => {
         const priorityOrder = { high: 3, medium: 2, low: 1 };
         return priorityOrder[b.priority] - priorityOrder[a.priority];
       });
 
       // Add delays and queue nudges
-      sortedNudges.forEach((nudge, index) => {
+      sortedNudges.forEach((nudge, _index) => {
         const delay = (nudge.trigger.delay || 0) + index * 500; // Stagger multiple nudges
         setTimeout(() => {
           setNudgeQueue((prev) => [...prev, nudge]);
@@ -306,7 +306,7 @@ export const TourNudgeManager: React.FC<TourNudgeManagerProps> = ({ onStartTour 
     }
   };
 
-  const handleStartTour = (tourType: string) => {
+  const handleStartTour = (_tourType: string) => {
     if (activeNudge) {
       logAnalytics('nudge_tour_started', {
         nudgeId: activeNudge.id,
@@ -316,7 +316,7 @@ export const TourNudgeManager: React.FC<TourNudgeManagerProps> = ({ onStartTour 
     onStartTour(tourType);
   };
 
-  const handleDismissNudge = (nudgeId: string) => {
+  const handleDismissNudge = (_nudgeId: string) => {
     setDismissedNudges((prev) => [...prev, nudgeId]);
     logAnalytics('nudge_dismissed', { nudgeId });
   };
@@ -349,7 +349,7 @@ export const TourNudgeManager: React.FC<TourNudgeManagerProps> = ({ onStartTour 
 };
 
 // Helper function for other components to trigger nudges
-export const triggerTourNudge = (action: string, conditions: Record<string, any> = {}) => {
+export const triggerTourNudge = (_action: string, _conditions: Record<string, any> = {}) => {
   const triggerFn = (window as any).__inkwellTriggerNudge;
   if (triggerFn) {
     triggerFn(action, conditions);

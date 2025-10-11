@@ -10,7 +10,7 @@ interface FocusModeControlsProps {
 
 export const FocusModeControls: React.FC<FocusModeControlsProps> = ({
   currentWordCount,
-  className = '',
+  _className = '',
 }) => {
   const { isFocusMode, enableFocusMode, sprint, startSprint, formatTime } = useAdvancedFocusMode();
 

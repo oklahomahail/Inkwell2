@@ -3,12 +3,12 @@ import React from 'react';
 
 import { SceneStatus } from '@/types/writing';
 
-export function SceneHeader({
+export function _SceneHeader({
   title,
-  status = SceneStatus.DRAFT,
-  wordGoal,
-  words = 0,
-  onChange,
+  _status = SceneStatus.DRAFT,
+  _wordGoal,
+  _words = 0,
+  _onChange,
 }: {
   title: string;
   status?: SceneStatus;
@@ -39,7 +39,7 @@ export function SceneHeader({
       <select
         className="border rounded px-2 py-1 text-sm"
         value={status}
-        onChange={(e) => onChange({ status: e.target.value as SceneStatus })}
+        onChange={(_e) => onChange({ status: e.target.value as SceneStatus })}
       >
         <option value={SceneStatus.DRAFT}>Draft</option>
         <option value={SceneStatus.REVISION}>Revision</option>
@@ -53,7 +53,7 @@ export function SceneHeader({
         min={0}
         placeholder="Goal"
         value={wordGoal ?? ''}
-        onChange={(e) =>
+        onChange={(_e) =>
           onChange({
             wordGoal: e.target.value ? Number(e.target.value) : undefined,
           })

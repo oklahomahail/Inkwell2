@@ -14,7 +14,7 @@ interface ExportDialogProps {
   title: string;
 }
 
-const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, type, data, title }) => {
+const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, _onClose, _type, _data, title }) => {
   const [format, setFormat] = useState<ExportFormat>('markdown');
   const [includeMetadata, setIncludeMetadata] = useState(true);
   const [includeWordCounts, setIncludeWordCounts] = useState(true);
@@ -152,7 +152,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, type, data
                 <input
                   type="checkbox"
                   checked={includeMetadata}
-                  onChange={(e) => setIncludeMetadata(e.target.checked)}
+                  onChange={(_e) => setIncludeMetadata(e.target.checked)}
                   className="rounded"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -164,7 +164,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, type, data
                 <input
                   type="checkbox"
                   checked={includeWordCounts}
-                  onChange={(e) => setIncludeWordCounts(e.target.checked)}
+                  onChange={(_e) => setIncludeWordCounts(e.target.checked)}
                   className="rounded"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300">

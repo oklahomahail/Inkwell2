@@ -25,7 +25,7 @@ const StoryPlanningView: React.FC = () => {
     { id: 'world' as const, label: 'World Building', icon: Map },
   ];
 
-  const handleStoryArchitectComplete = (outline: GeneratedOutline) => {
+  const handleStoryArchitectComplete = (_outline: GeneratedOutline) => {
     // Story has been successfully integrated by the StoryArchitectFlow
     setShowArchitectFlow(false);
     setActiveTab('beats'); // Navigate to beat sheet to see results
@@ -121,7 +121,7 @@ const StoryPlanningView: React.FC = () => {
 
 // Enhanced Overview Tab with Story Architect integration
 const OverviewTab: React.FC<{
-  onNavigateToTab: (tab: PlanningTab) => void;
+  onNavigateToTab: (_tab: PlanningTab) => void;
   onOpenArchitectFlow: () => void;
 }> = ({ onNavigateToTab, onOpenArchitectFlow }) => {
   return (
@@ -145,7 +145,7 @@ const OverviewTab: React.FC<{
                   </span>
                 </h3>
                 <p className="text-gray-700 dark:text-gray-300 text-sm mb-4">
-                  Generate a complete story outline with chapters, scenes, and characters from just
+                  Generate a complete story outline with chapters, _scenes, and characters from just
                   your premise. Perfect for getting started or breaking through planning blocks.
                 </p>
                 <button
@@ -167,7 +167,7 @@ const OverviewTab: React.FC<{
                   </span>
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                  Get professional insights on your story's structure, pacing, and character
+                  Get professional insights on your story's structure, _pacing, and character
                   development.
                 </p>
                 <button

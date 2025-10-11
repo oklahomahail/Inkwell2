@@ -15,7 +15,7 @@ interface ExportReadyBadgeProps {
 }
 
 // Mock function to check export readiness - would integrate with actual project data
-function checkExportReadiness(projectId: string): ExportReadinessCheck {
+function _checkExportReadiness(projectId: string): ExportReadinessCheck {
   // This would integrate with your actual project state management
   // For now, returning mock data
   const mockProject = {
@@ -24,7 +24,7 @@ function checkExportReadiness(projectId: string): ExportReadinessCheck {
     chapterCount: 12,
     hasContent: true,
     chaptersWithTitles: 10,
-    totalChapters: 12
+    totalChapters: 12,
   };
 
   const criteria = {
@@ -33,7 +33,7 @@ function checkExportReadiness(projectId: string): ExportReadinessCheck {
     hasChapters: mockProject.chapterCount > 0,
     minWordCount: mockProject.wordCount >= 1000, // Minimum for export
     chaptersHaveTitles: mockProject.chaptersWithTitles >= mockProject.totalChapters * 0.8, // 80% of chapters
-    noBlockingIssues: true // Would check for validation errors
+    noBlockingIssues: true, // Would check for validation errors
   };
 
   const criteriaCount = Object.values(criteria).filter(Boolean).length;
@@ -42,7 +42,7 @@ function checkExportReadiness(projectId: string): ExportReadinessCheck {
   const isReady = score >= 80; // 80% threshold for "ready"
 
   const recommendations: string[] = [];
-  
+
   if (!criteria.hasTitle) {
     recommendations.push('Add a title to your project');
   }
@@ -60,16 +60,16 @@ function checkExportReadiness(projectId: string): ExportReadinessCheck {
     isReady,
     score,
     criteria,
-    recommendations
+    recommendations,
   };
 }
 
 const ExportReadyBadge: React.FC<ExportReadyBadgeProps> = ({
   projectId,
-  className = '',
-  variant = 'badge',
-  showDetails = false,
-  onExportClick
+  _className = '',
+  _variant = 'badge',
+  _showDetails = false,
+  onExportClick,
 }) => {
   const readiness = useMemo(() => checkExportReadiness(projectId), [projectId]);
 
@@ -84,7 +84,7 @@ const ExportReadyBadge: React.FC<ExportReadyBadgeProps> = ({
           'bg-green-100 text-green-800 text-sm font-medium',
           'border border-green-200 rounded-full',
           'cursor-pointer hover:bg-green-200 transition-colors',
-          className
+          className,
         )}
         onClick={onExportClick}
       >
@@ -101,10 +101,8 @@ const ExportReadyBadge: React.FC<ExportReadyBadgeProps> = ({
         className={cn(
           'flex items-center justify-between p-4',
           'rounded-lg border',
-          readiness.isReady
-            ? 'bg-green-50 border-green-200'
-            : 'bg-amber-50 border-amber-200',
-          className
+          readiness.isReady ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200',
+          className,
         )}
       >
         <div className="flex items-center gap-3">
@@ -117,22 +115,16 @@ const ExportReadyBadge: React.FC<ExportReadyBadgeProps> = ({
             <h3
               className={cn(
                 'font-semibold',
-                readiness.isReady ? 'text-green-900' : 'text-amber-900'
+                readiness.isReady ? 'text-green-900' : 'text-amber-900',
               )}
             >
               {readiness.isReady
                 ? 'Your manuscript is ready for export!'
                 : 'Almost ready for export'}
             </h3>
-            <p
-              className={cn(
-                'text-sm',
-                readiness.isReady ? 'text-green-700' : 'text-amber-700'
-              )}
-            >
+            <p className={cn('text-sm', readiness.isReady ? 'text-green-700' : 'text-amber-700')}>
               Export readiness: {readiness.score}%
-              {!readiness.isReady &&
-                ` • ${readiness.recommendations.length} items to complete`}
+              {!readiness.isReady && ` • ${readiness.recommendations.length} items to complete`}
             </p>
           </div>
         </div>
@@ -151,12 +143,7 @@ const ExportReadyBadge: React.FC<ExportReadyBadgeProps> = ({
 
   // Card variant with full details
   return (
-    <div
-      className={cn(
-        'bg-white rounded-lg border shadow-sm',
-        className
-      )}
-    >
+    <div className={cn('bg-white rounded-lg border shadow-sm', className)}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-3">
@@ -184,7 +171,7 @@ const ExportReadyBadge: React.FC<ExportReadyBadgeProps> = ({
           <div
             className={cn(
               'text-2xl font-bold',
-              readiness.isReady ? 'text-green-600' : 'text-amber-600'
+              readiness.isReady ? 'text-green-600' : 'text-amber-600',
             )}
           >
             {readiness.score}%
@@ -199,7 +186,7 @@ const ExportReadyBadge: React.FC<ExportReadyBadgeProps> = ({
           <div
             className={cn(
               'h-2 rounded-full transition-all duration-500',
-              readiness.score >= 80 ? 'bg-green-500' : 'bg-amber-500'
+              readiness.score >= 80 ? 'bg-green-500' : 'bg-amber-500',
             )}
             style={{ width: `${readiness.score}%` }}
           />
@@ -237,11 +224,9 @@ const ExportReadyBadge: React.FC<ExportReadyBadgeProps> = ({
       {/* Recommendations */}
       {readiness.recommendations.length > 0 && (
         <div className="px-4 pb-4">
-          <h4 className="text-sm font-medium text-gray-900 mb-2">
-            To improve export readiness:
-          </h4>
+          <h4 className="text-sm font-medium text-gray-900 mb-2">To improve export readiness:</h4>
           <ul className="space-y-1">
-            {readiness.recommendations.slice(0, 3).map((rec, index) => (
+            {readiness.recommendations.slice(0, 3).map((rec, _index) => (
               <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-amber-400 rounded-full flex-shrink-0" />
                 {rec}
@@ -271,12 +256,12 @@ const CriteriaItem: React.FC<{
   icon: React.ReactNode;
   label: string;
   completed: boolean;
-}> = ({ icon, label, completed }) => (
+}> = ({ icon, _label, completed }) => (
   <div className="flex items-center gap-3">
     <div
       className={cn(
         'w-6 h-6 rounded-full flex items-center justify-center',
-        completed ? 'bg-green-100' : 'bg-gray-100'
+        completed ? 'bg-green-100' : 'bg-gray-100',
       )}
     >
       {completed ? (
@@ -286,17 +271,8 @@ const CriteriaItem: React.FC<{
       )}
     </div>
     <div className="flex-1 flex items-center gap-2">
-      <div className={cn('text-gray-400', completed && 'text-green-600')}>
-        {icon}
-      </div>
-      <span
-        className={cn(
-          'text-sm',
-          completed ? 'text-gray-900' : 'text-gray-600'
-        )}
-      >
-        {label}
-      </span>
+      <div className={cn('text-gray-400', completed && 'text-green-600')}>{icon}</div>
+      <span className={cn('text-sm', completed ? 'text-gray-900' : 'text-gray-600')}>{label}</span>
     </div>
   </div>
 );

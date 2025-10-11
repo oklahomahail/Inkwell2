@@ -7,7 +7,7 @@ import { useAnalytics } from '../services/analyticsService';
 // Feature usage tracking
 const featureFirstUseMap = new Map<string, boolean>();
 
-export function useAnalyticsTracking() {
+export function _useAnalyticsTracking() {
   const analytics = useAnalytics();
   const { state } = useAppContext();
   const sessionStartTime = useRef(Date.now());
@@ -28,8 +28,8 @@ export function useAnalyticsTracking() {
   const trackWritingSessionStart = useCallback(
     (
       projectType: 'new' | 'existing',
-      wordCount: number,
-      entryMethod: 'dashboard' | 'quick_write' | 'project_list' | 'recent',
+      _wordCount: number,
+      _entryMethod: 'dashboard' | 'quick_write' | 'project_list' | 'recent',
     ) => {
       sessionStartTime.current = Date.now();
       analytics.trackWritingSessionStarted(projectType, wordCount, entryMethod);
@@ -40,8 +40,8 @@ export function useAnalyticsTracking() {
   const trackWritingSessionEnd = useCallback(
     (
       wordsWritten: number,
-      savedManually: boolean,
-      exitMethod: 'navigation' | 'close' | 'timeout' | 'error' = 'navigation',
+      _savedManually: boolean,
+      _exitMethod: 'navigation' | 'close' | 'timeout' | 'error' = 'navigation',
     ) => {
       const sessionDuration = Date.now() - sessionStartTime.current;
       analytics.trackWritingSessionEnded(sessionDuration, wordsWritten, savedManually, exitMethod);
@@ -59,8 +59,8 @@ export function useAnalyticsTracking() {
         | 'export'
         | 'claude_assistant'
         | 'writing_mode',
-      discoveryMethod: 'tour' | 'exploration' | 'suggestion' | 'shortcut' = 'exploration',
-      timeToFirstUse?: number,
+      _discoveryMethod: 'tour' | 'exploration' | 'suggestion' | 'shortcut' = 'exploration',
+      _timeToFirstUse?: number,
     ) => {
       if (!featureFirstUseMap.has(featureName)) {
         featureFirstUseMap.set(featureName, true);
@@ -99,7 +99,7 @@ export function useAnalyticsTracking() {
 }
 
 // Hook for writing session tracking
-export function useWritingSessionTracking() {
+export function _useWritingSessionTracking() {
   const { trackWritingSessionStart, trackWritingSessionEnd } = useAnalyticsTracking();
   const { currentProject } = useAppContext();
   const sessionRef = useRef<{
@@ -172,7 +172,7 @@ export function useWritingSessionTracking() {
 }
 
 // Hook for tour/onboarding tracking
-export function useTourTracking() {
+export function _useTourTracking() {
   const { trackTourStarted, trackTourStepCompleted, trackTourAbandoned, trackTourCompleted } =
     useAnalyticsTracking();
   const tourStateRef = useRef<{
@@ -187,8 +187,8 @@ export function useTourTracking() {
   const startTour = useCallback(
     (
       tourType: 'first_time' | 'feature_tour' | 'help_requested',
-      entryPoint: string,
-      totalSteps: number,
+      _entryPoint: string,
+      _totalSteps: number,
     ) => {
       tourStateRef.current = {
         tourType,
@@ -205,7 +205,7 @@ export function useTourTracking() {
   );
 
   const completeStep = useCallback(
-    (stepName: string, skipped = false) => {
+    (stepName: string, _skipped = false) => {
       if (!tourStateRef.current) return;
 
       const timeOnStep = Date.now() - tourStateRef.current.stepStartTime;
@@ -269,7 +269,7 @@ export function useTourTracking() {
 }
 
 // Hook for feature discovery tracking
-export function useFeatureDiscovery() {
+export function _useFeatureDiscovery() {
   const { trackFeatureFirstUse } = useAnalyticsTracking();
 
   const recordFeatureUse = useCallback(
@@ -281,7 +281,7 @@ export function useFeatureDiscovery() {
         | 'export'
         | 'claude_assistant'
         | 'writing_mode',
-      discoveryMethod: 'tour' | 'exploration' | 'suggestion' | 'shortcut' = 'exploration',
+      _discoveryMethod: 'tour' | 'exploration' | 'suggestion' | 'shortcut' = 'exploration',
     ) => {
       trackFeatureFirstUse(featureName, discoveryMethod);
     },

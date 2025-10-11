@@ -16,14 +16,14 @@ export interface IconProps extends React.SVGProps<SVGSVGElement> {
  * Provides a single interface for all icons in the app
  * Can be easily swapped to a different icon library if needed
  */
-export function Icon({ name, ...props }: IconProps) {
+export function _Icon({ name, ...props }: IconProps) {
   const IconComponent = L[name] as React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  
+
   if (!IconComponent) {
     console.warn(`Icon "${String(name)}" not found in lucide-react`);
     return null;
   }
-  
+
   return <IconComponent {...props} />;
 }
 

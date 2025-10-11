@@ -72,7 +72,7 @@ class PhraseAnalysisService {
       projectId,
     } as any;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       if (!this.worker) {
         reject(new Error('Worker not available'));
         return;
@@ -82,7 +82,7 @@ class PhraseAnalysisService {
         reject(new Error('Analysis timeout'));
       }, 30000); // 30 second timeout
 
-      const handleMessage = (event: MessageEvent) => {
+      const handleMessage = (_event: MessageEvent) => {
         const response = event.data;
 
         if (response.type === 'ANALYSIS_COMPLETE') {
@@ -152,7 +152,7 @@ class PhraseAnalysisService {
 // Global instance
 export const phraseAnalysisService = new PhraseAnalysisService();
 
-export function analyzeText(content: string): TextStats {
+export function _analyzeText(content: string): TextStats {
   const words = content.trim().split(/\s+/).filter(Boolean);
   const sentences = content.split(/[.!?]+/).filter((s) => s.trim().length > 0);
   const paragraphs = content.split(/\n\s*\n/).filter((p) => p.trim().length > 0);

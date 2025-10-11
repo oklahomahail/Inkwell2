@@ -3,16 +3,16 @@ import { useCallback } from 'react';
 import { useAppContext } from '@/context/AppContext';
 
 export interface AssistantActions {
-  suggestContinuation: (text: string) => Promise<void>;
-  improveText: (text: string, goal?: string) => Promise<void>;
-  analyzeStyle: (text: string) => Promise<void>;
-  brainstorm: (topic: string) => Promise<void>;
-  send: (message: string) => Promise<void>;
+  suggestContinuation: (_text: string) => Promise<void>;
+  improveText: (_text: string, _goal?: string) => Promise<void>;
+  analyzeStyle: (_text: string) => Promise<void>;
+  brainstorm: (_topic: string) => Promise<void>;
+  send: (_message: string) => Promise<void>;
   clear: () => void;
   toggle: () => void;
 }
 
-export default function useWritingAssistant(): AssistantActions {
+export default function _useWritingAssistant(): AssistantActions {
   const { claudeActions } = useAppContext();
 
   const send = useCallback(
@@ -38,7 +38,7 @@ export default function useWritingAssistant(): AssistantActions {
   );
 
   const improveText = useCallback(
-    async (text: string, goal?: string) => {
+    async (text: string, _goal?: string) => {
       await claudeActions.improveText(text, goal);
     },
     [claudeActions],

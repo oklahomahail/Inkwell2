@@ -18,7 +18,7 @@ interface PlotBoardIntegration {
   // Sync operations
   syncWithChapters: () => Promise<void>;
   syncWithTimeline: () => Promise<void>;
-  createCardsFromChapters: (chapterIds: string[]) => Promise<void>;
+  createCardsFromChapters: (_chapterIds: string[]) => Promise<void>;
 
   // Progress tracking
   getProgressMetrics: () => any | null;
@@ -72,7 +72,7 @@ export const usePlotBoardIntegration = (
 
       // Convert chapters array to record for integration utils
       const chaptersRecord = projectChapters.reduce(
-        (acc: Record<string, any>, chapter: any) => {
+        (acc: Record<string, any>, _chapter: any) => {
           acc[chapter.id] = chapter;
           return acc;
         },
@@ -116,7 +116,7 @@ export const usePlotBoardIntegration = (
       });
 
       const chaptersRecord = projectChapters.reduce(
-        (acc: Record<string, any>, chapter: any) => {
+        (acc: Record<string, any>, _chapter: any) => {
           acc[chapter.id] = chapter;
           return acc;
         },
@@ -140,7 +140,7 @@ export const usePlotBoardIntegration = (
 
       try {
         const chaptersRecord = projectChapters.reduce(
-          (acc: Record<string, any>, chapter: any) => {
+          (acc: Record<string, any>, _chapter: any) => {
             acc[chapter.id] = chapter;
             return acc;
           },
@@ -159,7 +159,7 @@ export const usePlotBoardIntegration = (
     if (!boardId) return null;
 
     const chaptersRecord = projectChapters.reduce(
-      (acc: Record<string, any>, chapter: any) => {
+      (acc: Record<string, any>, _chapter: any) => {
         acc[chapter.id] = chapter;
         return acc;
       },

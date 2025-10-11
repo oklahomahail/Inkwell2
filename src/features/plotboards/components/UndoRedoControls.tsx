@@ -17,18 +17,18 @@ interface UndoRedoControlsProps {
 
 export const UndoRedoControls: React.FC<UndoRedoControlsProps> = ({
   canUndo,
-  canRedo,
-  undoDescription,
-  redoDescription,
-  onUndo,
-  onRedo,
-  isUndoing = false,
-  isRedoing = false,
-  className = '',
+  _canRedo,
+  _undoDescription,
+  _redoDescription,
+  _onUndo,
+  _onRedo,
+  _isUndoing = false,
+  _isRedoing = false,
+  _className = '',
 }) => {
   // Keyboard shortcuts
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (_event: KeyboardEvent) => {
       // Cmd/Ctrl + Z for undo
       if ((event.metaKey || event.ctrlKey) && event.key === 'z' && !event.shiftKey) {
         event.preventDefault();
@@ -166,9 +166,9 @@ export const HistoryViewer: React.FC<{
     operation: string;
     description: string;
   }>;
-  onJumpTo?: (historyId: string) => void;
+  onJumpTo?: (_historyId: string) => void;
   className?: string;
-}> = ({ history, onJumpTo, className = '' }) => {
+}> = ({ history, _onJumpTo, _className = '' }) => {
   if (history.length === 0) {
     return (
       <div className={`text-center text-gray-500 py-4 ${className}`}>
@@ -180,7 +180,7 @@ export const HistoryViewer: React.FC<{
   return (
     <div className={`max-h-64 overflow-y-auto ${className}`}>
       <div className="space-y-1">
-        {history.map((entry, index) => (
+        {history.map((entry, _index) => (
           <div
             key={entry.id}
             className={`

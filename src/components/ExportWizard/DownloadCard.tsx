@@ -11,7 +11,7 @@ interface DownloadCardProps {
   onClose?: () => void;
 }
 
-function formatFileSize(bytes: number): string {
+function _formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
 
   const k = 1024;
@@ -21,7 +21,13 @@ function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-export function DownloadCard({ url, fileName, metadata, onStartOver, onClose }: DownloadCardProps) {
+export function _DownloadCard({
+  url,
+  fileName,
+  metadata,
+  onStartOver,
+  onClose,
+}: DownloadCardProps) {
   return (
     <div className="text-center py-8">
       <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">

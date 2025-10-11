@@ -1,7 +1,7 @@
 // src/dev/makeCorpus.ts
 
 /** Build a synthetic corpus with approximately `targetWords` words. */
-export function makeCorpus(targetWords: number, vocabParam?: readonly string[]): string {
+export function _makeCorpus(targetWords: number, vocabParam?: readonly string[]): string {
   const vocabDefault = [
     'alpha',
     'bravo',
@@ -65,7 +65,7 @@ export function makeCorpus(targetWords: number, vocabParam?: readonly string[]):
 }
 
 /** Quick approximate word counter for validation in benchmarks. */
-export function approxWordCount(s: string | null | undefined): number {
+export function _approxWordCount(s: string | null | undefined): number {
   if (!s) return 0;
   return s.trim().split(/\s+/).filter(Boolean).length;
 }

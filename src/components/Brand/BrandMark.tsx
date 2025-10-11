@@ -11,7 +11,7 @@ interface BrandMarkProps {
   className?: string;
 }
 
-export function BrandMark({
+export function _BrandMark({
   collapsed = false,
   variant = 'light',
   size = 'md',

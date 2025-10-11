@@ -21,7 +21,12 @@ interface FormatOption {
   recommended?: boolean;
 }
 
-const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, projectId, projectName }) => {
+const ExportDialog: React.FC<ExportDialogProps> = ({
+  isOpen,
+  _onClose,
+  _projectId,
+  projectName,
+}) => {
   const { showToast } = useToast();
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(ExportFormat.MARKDOWN);
   const [isExporting, setIsExporting] = useState(false);
@@ -60,7 +65,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, projectId,
   ];
 
   // Icon mapping
-  const getIcon = (iconName: string) => {
+  const getIcon = (_iconName: string) => {
     const icons = {
       FileText,
       File,
@@ -214,7 +219,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, projectId,
                       id="include-metadata"
                       type="checkbox"
                       checked={includeMetadata}
-                      onChange={(e) => setIncludeMetadata(e.target.checked)}
+                      onChange={(_e) => setIncludeMetadata(e.target.checked)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <label
@@ -230,7 +235,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, projectId,
                       id="include-synopsis"
                       type="checkbox"
                       checked={includeSynopsis}
-                      onChange={(e) => setIncludeSynopsis(e.target.checked)}
+                      onChange={(_e) => setIncludeSynopsis(e.target.checked)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <label
@@ -246,7 +251,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, projectId,
                       id="include-characters"
                       type="checkbox"
                       checked={includeCharacterNotes}
-                      onChange={(e) => setIncludeCharacterNotes(e.target.checked)}
+                      onChange={(_e) => setIncludeCharacterNotes(e.target.checked)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <label

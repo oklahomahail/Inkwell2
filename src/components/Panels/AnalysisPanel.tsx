@@ -38,12 +38,12 @@ const AnalysisPanel: React.FC = () => {
 
   // Simple Analytics View (your existing component, enhanced)
   const SimpleAnalyticsView = () => {
-    const totalWords = sessions.reduce((acc, session) => acc + (session.wordCount || 0), 0);
+    const totalWords = sessions.reduce((acc, _session) => acc + (session.wordCount || 0), 0);
     const totalDays = sessions.length;
     const averageWordsPerDay = totalDays > 0 ? Math.round(totalWords / totalDays) : 0;
 
     const sortedSessions = [...sessions].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      (a, _b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
 
     return (
@@ -161,7 +161,7 @@ const AnalysisPanel: React.FC = () => {
               {sortedSessions
                 .slice(-10)
                 .reverse()
-                .map((session, index) => (
+                .map((session, _index) => (
                   <div
                     key={`${session.date}-${index}`}
                     className="flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"

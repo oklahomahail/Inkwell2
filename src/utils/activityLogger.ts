@@ -76,15 +76,15 @@ class ActivityLogger {
 const activityLogger = new ActivityLogger();
 
 // Export the main functions
-export function logActivity(message: string, category: string = 'general'): void {
+export function _logActivity(message: string, category: string = 'general'): void {
   activityLogger.log(message, category);
 }
 
-export function getActivityLogs(category?: string): ActivityLog[] {
+export function _getActivityLogs(category?: string): ActivityLog[] {
   return activityLogger.getLogs(category);
 }
 
-export function clearActivityLogs(): void {
+export function _clearActivityLogs(): void {
   activityLogger.clearLogs();
 }
 

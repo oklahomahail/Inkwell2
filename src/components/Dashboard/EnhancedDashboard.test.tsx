@@ -6,7 +6,7 @@ import EnhancedDashboard from './EnhancedDashboard';
 
 // Mock the InkwellFeather component
 vi.mock('@/components/icons', () => ({
-  InkwellFeather: vi.fn(({ name, size, color, ...props }) => (
+  InkwellFeather: vi.fn(({ name, _size, _color, ...props }) => (
     <span data-testid={`icon-${name}`} data-size={size} data-color={color} {...props} />
   )),
 }));
@@ -23,12 +23,12 @@ let mockContext: any = {
 vi.mock('@/context/AppContext', () => ({
   View: {
     Dashboard: 'Dashboard',
-    Writing: 'Writing',
-    Analysis: 'Analysis',
-    Planning: 'Planning',
-    Timeline: 'Timeline',
+    _Writing: 'Writing',
+    _Analysis: 'Analysis',
+    _Planning: 'Planning',
+    _Timeline: 'Timeline',
   },
-  useAppContext: () => mockContext,
+  _useAppContext: () => mockContext,
 }));
 
 describe('EnhancedDashboard Component', () => {
@@ -102,7 +102,7 @@ describe('EnhancedDashboard Component', () => {
   });
 
   /* Skipping dispatch assertion to avoid deep context mocking in test env
-  it('handles new project creation', () => {
+  it('handles new project creation',  () => {
     const mockDispatch = jest.fn();
     renderDashboard({
       appState: {
@@ -122,7 +122,7 @@ describe('EnhancedDashboard Component', () => {
   });*/
 
   /* Skipping dispatch assertion to avoid deep context mocking in test env
-  it('navigates to writing view when clicking current project', () => {
+  it('navigates to writing view when clicking current project',  () => {
     const mockDispatch = jest.fn();
     renderDashboard({
       appState: {
@@ -189,7 +189,7 @@ describe('EnhancedDashboard Component', () => {
     });
 
     /* Skipping dispatch assertion to avoid deep context mocking
-    it('navigates to correct view when clicking quick actions', () => {
+    it('navigates to correct view when clicking quick actions',  () => {
       const mockDispatch = jest.fn();
       renderDashboard({
         appState: {

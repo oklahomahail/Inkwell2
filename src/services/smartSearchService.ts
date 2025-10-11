@@ -273,7 +273,7 @@ class SmartSearchService {
       suggestions.push(...this.generateRelatedSuggestions(query));
 
       // Sort by relevance and limit
-      return suggestions.sort((a, b) => b.score - a.score).slice(0, options.maxSuggestions || 8);
+      return suggestions.sort((a, _b) => b.score - a.score).slice(0, options.maxSuggestions || 8);
     } catch (error) {
       console.error('Failed to generate suggestions:', error);
       return [];
@@ -371,7 +371,7 @@ class SmartSearchService {
     parsedQuery: SearchQuery,
     options: SmartSearchOptions,
   ): SmartSearchResult[] {
-    return results.sort((a, b) => {
+    return results.sort((a, _b) => {
       // Base relevance score
       let scoreA = a.relevanceScore || a.score;
       let scoreB = b.relevanceScore || b.score;
@@ -450,15 +450,15 @@ class SmartSearchService {
     if (result.type === 'scene' || result.type === 'chapter') {
       actions.push({
         id: 'edit',
-        label: 'Edit',
-        action: () => this.navigateToEdit(result),
+        _label: 'Edit',
+        _action: () => this.navigateToEdit(result),
         icon: '✏️',
       });
 
       actions.push({
         id: 'view',
-        label: 'View',
-        action: () => this.navigateToView(result),
+        _label: 'View',
+        _action: () => this.navigateToView(result),
         icon: '👁️',
       });
     }
@@ -466,16 +466,16 @@ class SmartSearchService {
     if (result.type === 'character') {
       actions.push({
         id: 'view-profile',
-        label: 'View Profile',
-        action: () => this.navigateToCharacter(result),
+        _label: 'View Profile',
+        _action: () => this.navigateToCharacter(result),
         icon: '👤',
       });
     }
 
     actions.push({
       id: 'copy-link',
-      label: 'Copy Link',
-      action: () => this.copyResultLink(result),
+      _label: 'Copy Link',
+      _action: () => this.copyResultLink(result),
       icon: '🔗',
     });
 
@@ -587,13 +587,13 @@ class SmartSearchService {
     }
 
     // Sort by popularity and keep top 100
-    this.searchHistory.popularTerms.sort((a, b) => b.count - a.count);
+    this.searchHistory.popularTerms.sort((a, _b) => b.count - a.count);
     this.searchHistory.popularTerms = this.searchHistory.popularTerms.slice(0, 100);
   }
 
   // Suggestion generation methods
   private getRecentSearchSuggestions(): SearchSuggestion[] {
-    return this.searchHistory.recentSearches.slice(0, 3).map((query, index) => ({
+    return this.searchHistory.recentSearches.slice(0, 3).map((query, _index) => ({
       id: `recent-${query.id}`,
       query: query.raw,
       type: 'completion',
@@ -603,7 +603,7 @@ class SmartSearchService {
   }
 
   private getPopularSearchSuggestions(): SearchSuggestion[] {
-    return this.searchHistory.popularTerms.slice(0, 3).map((term, index) => ({
+    return this.searchHistory.popularTerms.slice(0, 3).map((term, _index) => ({
       id: `popular-${term.term}`,
       query: term.term,
       type: 'completion',
@@ -675,7 +675,7 @@ class SmartSearchService {
         .filter((term: string) => term.trim())
         .slice(0, 3);
 
-      return terms.map((term, index) => ({
+      return terms.map((term, _index) => ({
         id: `semantic-${index}`,
         query: term.trim(),
         type: 'semantic',
@@ -710,7 +710,7 @@ class SmartSearchService {
       }
     }
 
-    return suggestions.sort((a, b) => b.score - a.score).slice(0, 2);
+    return suggestions.sort((a, _b) => b.score - a.score).slice(0, 2);
   }
 
   // Helper methods
@@ -892,11 +892,11 @@ Format your response as JSON.`;
   ): SmartSearchResult[] {
     // Apply semantic analysis to re-rank results
     return results
-      .map((result, index) => ({
+      .map((result, _index) => ({
         ...this.basicToSmartResult(result),
         similarity: analysis.similarities?.[index] || result.score,
       }))
-      .sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
+      .sort((a, _b) => (b.similarity || 0) - (a.similarity || 0));
   }
 
   // Public API for search history

@@ -2,8 +2,8 @@
 
 // Type for the PWA register hook from vite-plugin-pwa
 type RegisterSWOptions = {
-  onRegistered?: (r: ServiceWorkerRegistration | undefined) => void;
-  onRegisterError?: (error: any) => void;
+  onRegistered?: (_r: ServiceWorkerRegistration | undefined) => void;
+  onRegisterError?: (_error: any) => void;
   onOfflineReady?: () => void;
   onNeedRefresh?: () => void;
 };
@@ -11,8 +11,8 @@ type RegisterSWOptions = {
 // Stub the PWA registration hook for development
 let useRegisterSW:
   | ((options: RegisterSWOptions) => {
-      offlineReady: [boolean, (value: boolean) => void];
-      needRefresh: [boolean, (value: boolean) => void];
+      offlineReady: [boolean, (_value: boolean) => void];
+      needRefresh: [boolean, (_value: boolean) => void];
       updateServiceWorker: () => Promise<void>;
     })
   | undefined;
@@ -33,8 +33,8 @@ export class PWAService {
   private deferredPrompt: PWAInstallPromptEvent | null = null;
   private isOffline = false;
   private listeners = {
-    installPrompt: [] as Array<(event: PWAInstallPromptEvent) => void>,
-    offline: [] as Array<(isOffline: boolean) => void>,
+    installPrompt: [] as Array<(_event: PWAInstallPromptEvent) => void>,
+    offline: [] as Array<(_isOffline: boolean) => void>,
     update: [] as Array<() => void>,
   };
 
@@ -101,7 +101,7 @@ export class PWAService {
   }
 
   // Listen for install prompt availability
-  onInstallPromptReady(callback: (event: PWAInstallPromptEvent) => void) {
+  onInstallPromptReady(_callback: (event: PWAInstallPromptEvent) => void) {
     this.listeners.installPrompt.push(callback);
 
     // If prompt is already available, call immediately
@@ -118,7 +118,7 @@ export class PWAService {
   }
 
   // Listen for offline status changes
-  onOfflineStatusChange(callback: (isOffline: boolean) => void) {
+  onOfflineStatusChange(_callback: (isOffline: boolean) => void) {
     this.listeners.offline.push(callback);
 
     // Call immediately with current status
@@ -133,7 +133,7 @@ export class PWAService {
   }
 
   // Listen for app updates
-  onUpdateAvailable(callback: () => void) {
+  onUpdateAvailable(_callback: () => void) {
     this.listeners.update.push(callback);
 
     return () => {
@@ -155,7 +155,7 @@ export const pwaService = new PWAService();
 
 // React hook for PWA functionality
 // Wrap the PWA functionality in a development-safe hook
-export function usePWA() {
+export function _usePWA() {
   const defaultState = {
     isOfflineReady: false,
     needsRefresh: false,

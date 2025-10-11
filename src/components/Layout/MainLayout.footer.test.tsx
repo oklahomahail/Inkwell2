@@ -13,14 +13,14 @@ import MainLayout from './MainLayout';
 vi.mock('@/context/AppContext', () => ({
   View: {
     Dashboard: 'dashboard',
-    Writing: 'writing',
-    Planning: 'planning',
-    Timeline: 'timeline',
-    Analysis: 'analysis',
-    Settings: 'settings',
-    PlotBoards: 'plotboards',
+    _Writing: 'writing',
+    _Planning: 'planning',
+    _Timeline: 'timeline',
+    _Analysis: 'analysis',
+    _Settings: 'settings',
+    _PlotBoards: 'plotboards',
   },
-  useAppContext: () => ({
+  _useAppContext: () => ({
     state: {
       view: 'dashboard',
       projects: [],
@@ -71,7 +71,7 @@ Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
 Object.defineProperty(window, 'sessionStorage', { value: mockSessionStorage });
 
 // Mock window.matchMedia for dark mode detection
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(_window, 'matchMedia', {
   value: vi.fn(() => ({
     matches: false,
     addListener: vi.fn(),

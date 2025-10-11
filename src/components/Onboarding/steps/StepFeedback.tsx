@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 
 import type { StepProps } from './Step.types';
 
-export default function StepFeedback({ onComplete, onPrevious, stepIndex, totalSteps }: StepProps) {
+export default function _StepFeedback({
+  onComplete,
+  onPrevious,
+  stepIndex,
+  totalSteps,
+}: StepProps) {
   const [text, setText] = useState('');
   return (
     <div className="p-6 max-w-xl">

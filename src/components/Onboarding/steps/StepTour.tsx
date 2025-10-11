@@ -2,7 +2,7 @@ import React from 'react';
 
 import type { StepProps } from './Step.types';
 
-export default function StepTour({ onNext, onPrevious, stepIndex, totalSteps }: StepProps) {
+export default function _StepTour({ onNext, onPrevious, stepIndex, totalSteps }: StepProps) {
   return (
     <div className="p-6 max-w-xl">
       <h2 className="text-2xl font-semibold mb-2">Core Areas</h2>

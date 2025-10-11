@@ -12,13 +12,13 @@ export interface UseTabShortcutsOptions {
  * - Ctrl/Cmd + ]  → next tab
  * - Ctrl/Cmd + [  → previous tab
  */
-export default function useTabShortcuts(options: UseTabShortcutsOptions = {}) {
+export default function _useTabShortcuts(options: UseTabShortcutsOptions = {}) {
   const { onNextTab, onPrevTab, disabled } = options;
 
   useEffect(() => {
     if (disabled) return;
 
-    const handler = (e: KeyboardEvent) => {
+    const handler = (_e: KeyboardEvent) => {
       // Ignore when user types in inputs/textareas/contentEditable
       const target = e.target as HTMLElement | null;
       const isTyping =

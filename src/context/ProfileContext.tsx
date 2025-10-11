@@ -19,7 +19,7 @@ type ProfileAction =
   | { type: 'DELETE_PROFILE'; payload: ProfileId }
   | { type: 'SET_ACTIVE_PROFILE'; payload: Profile | null };
 
-function profileReducer(state: ProfileState, action: ProfileAction): ProfileState {
+function _profileReducer(state: ProfileState, action: ProfileAction): ProfileState {
   switch (action.type) {
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
@@ -54,7 +54,7 @@ function profileReducer(state: ProfileState, action: ProfileAction): ProfileStat
 }
 
 // Storage utilities
-function saveProfilesToStorage(profiles: Profile[]) {
+function _saveProfilesToStorage(profiles: Profile[]) {
   try {
     localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
   } catch (error) {
@@ -62,7 +62,7 @@ function saveProfilesToStorage(profiles: Profile[]) {
   }
 }
 
-function loadProfilesFromStorage(): Profile[] {
+function _loadProfilesFromStorage(): Profile[] {
   try {
     const stored = localStorage.getItem(PROFILES_KEY);
     if (stored) {
@@ -79,7 +79,7 @@ function loadProfilesFromStorage(): Profile[] {
   return [];
 }
 
-function saveActiveProfileToStorage(profileId: ProfileId | null) {
+function _saveActiveProfileToStorage(profileId: ProfileId | null) {
   try {
     if (profileId) {
       localStorage.setItem(ACTIVE_PROFILE_KEY, profileId);
@@ -91,7 +91,7 @@ function saveActiveProfileToStorage(profileId: ProfileId | null) {
   }
 }
 
-function loadActiveProfileFromStorage(): ProfileId | null {
+function _loadActiveProfileFromStorage(): ProfileId | null {
   try {
     return localStorage.getItem(ACTIVE_PROFILE_KEY);
   } catch (error) {
@@ -103,7 +103,7 @@ function loadActiveProfileFromStorage(): ProfileId | null {
 // Context
 const ProfileContext = createContext<ProfileContextType | null>(null);
 
-export function useProfileContext(): ProfileContextType {
+export function _useProfileContext(): ProfileContextType {
   const context = useContext(ProfileContext);
   if (!context) {
     throw new Error('useProfileContext must be used within a ProfileProvider');
@@ -112,7 +112,7 @@ export function useProfileContext(): ProfileContextType {
 }
 
 // Alias for tutorial storage compatibility
-export function useProfile() {
+export function _useProfile() {
   const context = useProfileContext();
   return {
     active: context.activeProfile,
@@ -126,7 +126,7 @@ interface ProfileProviderProps {
   children: React.ReactNode;
 }
 
-export function ProfileProvider({ children }: ProfileProviderProps) {
+export function _ProfileProvider({ children }: ProfileProviderProps) {
   const [state, dispatch] = useReducer(profileReducer, {
     profiles: [],
     activeProfile: null,

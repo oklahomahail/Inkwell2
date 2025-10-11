@@ -11,7 +11,7 @@ import MessageBubble from './MessageBubble';
 
 interface ClaudeAssistantProps {
   selectedText?: string;
-  onInsertText?: (text: string) => void;
+  onInsertText?: (_text: string) => void;
 }
 
 const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', onInsertText }) => {
@@ -161,7 +161,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
     );
   }
 
-  const handleTabChange = (id: string) => {
+  const handleTabChange = (_id: string) => {
     if (id === 'chat' || id === 'quick-actions' || id === 'analysis') {
       setActiveMode(id);
     }
@@ -214,8 +214,8 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
               <input
                 ref={inputRef}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
+                onChange={(_e) => setInput(e.target.value)}
+                onKeyDown={(_e) => {
                   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                     e.preventDefault();
                     handleSend();
@@ -347,7 +347,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
               <input
                 id="character-name-input"
                 value={characterName}
-                onChange={(e) => setCharacterName(e.target.value)}
+                onChange={(_e) => setCharacterName(e.target.value)}
                 placeholder="Character name..."
                 disabled={!isConfigured}
                 className="flex-1 px-2 py-1 text-xs rounded bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6] disabled:opacity-50"
@@ -375,7 +375,7 @@ const ClaudeAssistant: React.FC<ClaudeAssistantProps> = ({ selectedText = '', on
               <input
                 id="brainstorm-topic-input"
                 value={brainstormTopic}
-                onChange={(e) => setBrainstormTopic(e.target.value)}
+                onChange={(_e) => setBrainstormTopic(e.target.value)}
                 placeholder="Topic to explore..."
                 disabled={!isConfigured}
                 className="flex-1 px-2 py-1 text-xs rounded bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6] disabled:opacity-50"

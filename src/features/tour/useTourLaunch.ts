@@ -4,7 +4,7 @@ import { usePrefs } from '../../services/prefsService'; // Adjust import path as
 
 import { useTourSafe } from './TourContext';
 
-export function useTourLaunchGate() {
+export function _useTourLaunchGate() {
   const { start, isActive } = useTourSafe();
   const { get, set } = usePrefs();
 

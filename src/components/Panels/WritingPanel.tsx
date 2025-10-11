@@ -21,16 +21,16 @@ import { generateId } from '@/utils/idUtils';
 
 interface WritingPanelProps {
   draftText: string;
-  onChangeText: (text: string) => void;
+  onChangeText: (_text: string) => void;
   _onTextSelect: () => void;
   selectedText: string;
 }
 
 const WritingPanel: React.FC<WritingPanelProps> = ({
   draftText,
-  onChangeText,
+  _onChangeText,
   _onTextSelect,
-  selectedText,
+  _selectedText,
 }) => {
   const { currentProject, updateProject } = useAppContext();
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
@@ -79,7 +79,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
   const currentSceneIndex = scenes.findIndex((s) => s.id === currentSceneId);
 
   const handleSceneUpdate = useCallback(
-    (sceneId: string, updates: Partial<Scene>) => {
+    (sceneId: string, _updates: Partial<Scene>) => {
       const updatedScenes = scenes.map((scene) =>
         scene.id === sceneId ? { ...scene, ...updates, updatedAt: new Date() } : scene,
       );
@@ -87,7 +87,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
       const updatedChapter = {
         ...chapter,
         scenes: updatedScenes,
-        totalWordCount: updatedScenes.reduce((sum, scene) => sum + scene.wordCount, 0),
+        totalWordCount: updatedScenes.reduce((sum, _scene) => sum + scene.wordCount, 0),
         updatedAt: new Date(),
       };
 
@@ -140,7 +140,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     setCurrentSceneId(newScene.id);
   };
 
-  const navigateToScene = (direction: 'prev' | 'next') => {
+  const navigateToScene = (_direction: 'prev' | 'next') => {
     const newIndex =
       direction === 'prev'
         ? Math.max(0, currentSceneIndex - 1)
@@ -167,7 +167,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     [currentScene, handleSceneUpdate],
   );
 
-  const handleInsertText = (text: string) => {
+  const handleInsertText = (_text: string) => {
     if (!currentScene) return;
     const newContent = currentScene.content + '\n\n' + text;
     handleSceneUpdate(currentScene.id, { content: newContent });
@@ -281,7 +281,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
             </div>
 
             <div className="p-2 space-y-1 max-h-full overflow-y-auto">
-              {scenes.map((scene, index) => (
+              {scenes.map((scene, _index) => (
                 <button
                   key={scene.id}
                   onClick={() => handleSceneSelect(scene.id)}
@@ -366,7 +366,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
                   status={currentScene.status}
                   wordGoal={currentScene.wordCountGoal}
                   words={currentScene.wordCount}
-                  onChange={(updates) => handleSceneUpdate(currentScene.id, updates)}
+                  onChange={(_updates) => handleSceneUpdate(currentScene.id, updates)}
                 />
               </div>
 

@@ -66,12 +66,12 @@ class ExportService {
     }
 
     // Main content
-    chapters.forEach((chapter, chapterIndex) => {
+    chapters.forEach((chapter, _chapterIndex) => {
       // Chapter header
       content += `# ${chapter.title}\n\n`;
 
       // Chapter scenes
-      chapter.scenes.forEach((scene, sceneIndex) => {
+      chapter.scenes.forEach((scene, _sceneIndex) => {
         if (scene.content) {
           // Scene separator (optional)
           if (sceneIndex > 0 && options.sceneSeparator) {

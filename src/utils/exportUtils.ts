@@ -11,14 +11,14 @@ export interface ExportOptions {
 }
 
 // Strip HTML tags for plain text formats
-function stripHtml(html: string): string {
+function _stripHtml(html: string): string {
   const div = document.createElement('div');
   div.innerHTML = html;
   return div.textContent || div.innerText || '';
 }
 
 // Convert HTML to Markdown (basic conversion)
-function htmlToMarkdown(html: string): string {
+function _htmlToMarkdown(html: string): string {
   return html
     .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n\n')
     .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n\n')
@@ -33,7 +33,7 @@ function htmlToMarkdown(html: string): string {
 }
 
 // Format scene metadata
-function formatSceneMetadata(scene: Scene, includeWordCounts: boolean): string {
+function _formatSceneMetadata(scene: Scene, includeWordCounts: boolean): string {
   const metadata: string[] = [];
 
   if (includeWordCounts) {
@@ -55,7 +55,7 @@ function formatSceneMetadata(scene: Scene, includeWordCounts: boolean): string {
 }
 
 // Export single scene
-export function exportScene(
+export function _exportScene(
   scene: Scene,
   options: ExportOptions,
 ): { content: string; filename: string } {
@@ -125,7 +125,7 @@ export function exportScene(
 }
 
 // Export full chapter
-export function exportChapter(
+export function _exportChapter(
   chapter: Chapter,
   options: ExportOptions,
 ): { content: string; filename: string } {
@@ -185,7 +185,7 @@ export function exportChapter(
   }
 
   // Add scenes
-  chapter.scenes.forEach((scene, index) => {
+  chapter.scenes.forEach((scene, _index) => {
     if (separateScenes && index > 0) {
       switch (format) {
         case 'markdown':
@@ -255,7 +255,7 @@ export function exportChapter(
 }
 
 // Download file
-export function downloadFile(
+export function _downloadFile(
   content: string,
   filename: string,
   mimeType: string = 'text/plain',
@@ -273,7 +273,7 @@ export function downloadFile(
 }
 
 // Main export function
-export function performExport(
+export function _performExport(
   type: 'scene' | 'chapter',
   data: Scene | Chapter,
   options: ExportOptions,

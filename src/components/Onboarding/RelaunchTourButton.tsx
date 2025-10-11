@@ -5,7 +5,7 @@ import { useTutorialStorage } from '@/services/tutorialStorage';
 import type { TourType } from './steps/Step.types';
 
 // Prefer the real hook if available
-let useTour: undefined | (() => { start: (t: TourType) => void; isActive?: boolean });
+let useTour: undefined | (() => { start: (_t: TourType) => void; isActive?: boolean });
 try {
   useTour = require('./TourProvider').useTour;
 } catch {
@@ -26,7 +26,7 @@ type Props = {
  * 2. Event dispatch for OnboardingOrchestrator
  * 3. URL param trigger (fallback)
  */
-export default function RelaunchTourButton({
+export default function _RelaunchTourButton({
   tourType = 'full-onboarding',
   className,
   label = 'Relaunch Onboarding',

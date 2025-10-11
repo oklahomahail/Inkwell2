@@ -10,7 +10,7 @@ import TourOverlay from './TourOverlay';
 /**
  * Tutorial page component that handles displaying tutorials with deep links
  */
-function TutorialPage() {
+function _TutorialPage() {
   const { slug, step } = useParams<{ slug: string; step?: string }>();
   const { active: activeProfile } = useProfile();
   const { startTour, setTourSteps, goToStep, tourState } = useTour();
@@ -115,7 +115,7 @@ function TutorialPage() {
               <div>
                 <h2 className="text-xl font-semibold mb-3">Steps in this tutorial:</h2>
                 <ol className="list-decimal list-inside space-y-2">
-                  {tourSteps.map((step, index) => (
+                  {tourSteps.map((step, _index) => (
                     <li
                       key={step.id}
                       className={`text-sm ${
@@ -173,11 +173,11 @@ function TutorialPage() {
 /**
  * Tutorial index page showing available tutorials
  */
-function TutorialIndex() {
+function _TutorialIndex() {
   const { active: activeProfile } = useProfile();
   const { startTour, setTourSteps, preferences } = useTour();
 
-  const handleStartTutorial = (slug: string) => {
+  const handleStartTutorial = (_slug: string) => {
     const tourSteps = TOUR_MAP[slug as keyof typeof TOUR_MAP];
     if (!tourSteps) return;
 
@@ -327,7 +327,7 @@ function TutorialIndex() {
 /**
  * Main tutorial router component
  */
-export function TutorialRouter() {
+export function _TutorialRouter() {
   return (
     <Routes>
       {/* Tutorial index */}

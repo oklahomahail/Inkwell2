@@ -9,18 +9,18 @@ export interface TimelineItem {
 
 export interface UseTimelineResult {
   items: TimelineItem[];
-  add: (item: TimelineItem) => void;
-  remove: (id: string) => void;
+  add: (_item: TimelineItem) => void;
+  remove: (_id: string) => void;
   clear: () => void;
 }
 
-export default function useTimeline(initial: TimelineItem[] = []): UseTimelineResult {
+export default function _useTimeline(initial: TimelineItem[] = []): UseTimelineResult {
   const [items, setItems] = useState<TimelineItem[]>(() =>
-    [...initial].sort((a, b) => a.timestamp - b.timestamp),
+    [...initial].sort((a, _b) => a.timestamp - b.timestamp),
   );
 
   const add = useCallback((item: TimelineItem) => {
-    setItems((prev) => [...prev, item].sort((a, b) => a.timestamp - b.timestamp));
+    setItems((prev) => [...prev, item].sort((a, _b) => a.timestamp - b.timestamp));
   }, []);
 
   const remove = useCallback((id: string) => {

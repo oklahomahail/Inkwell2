@@ -2,7 +2,7 @@ import React from 'react';
 
 import RelaunchTourButton from '../Onboarding/RelaunchTourButton';
 
-export function SettingsControls() {
+export function _SettingsControls() {
   return (
     <div className="space-y-4">
       {/* Other settings controls would go here */}

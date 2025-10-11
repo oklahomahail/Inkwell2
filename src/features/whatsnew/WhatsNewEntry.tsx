@@ -1,6 +1,6 @@
 import { usePrefs } from '../../services/prefsService'; // Adjust import path as needed
 
-export function WhatsNewEntry() {
+export function _WhatsNewEntry() {
   const { get } = usePrefs();
 
   // Temporarily disabled until tour launch loop is fixed

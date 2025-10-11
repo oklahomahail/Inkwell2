@@ -39,7 +39,7 @@ export interface CompletionChecklist {
 /**
  * Hook for managing tutorial progress, preferences, and checklist data.
  */
-export function useTutorialStorage() {
+export function _useTutorialStorage() {
   const { active: activeProfile } = useProfile();
   const db = useMaybeDB();
   const stores = defineStores(db);
@@ -56,7 +56,7 @@ export function useTutorialStorage() {
   );
 
   const setProgress = useCallback(
-    async (slug: string, progress: TutorialProgress['progress']) => {
+    async (slug: string, _progress: TutorialProgress['progress']) => {
       if (!isProfileActive) return;
       // TODO: implement IndexedDB put logic
     },
@@ -113,8 +113,8 @@ export function useTutorialStorage() {
   const resetProgress = useCallback(
     async (
       slug: string,
-      totalSteps?: number,
-      tourType: TutorialProgress['progress']['tourType'] = 'full-onboarding',
+      _totalSteps?: number,
+      _tourType: TutorialProgress['progress']['tourType'] = 'full-onboarding',
     ) => {
       if (!isProfileActive) return;
       const existing = await getProgress(slug);
@@ -225,7 +225,7 @@ export class LegacyTutorialStorage {
 /**
  * Migration helper – migrates old localStorage tutorial data into the new IndexedDB
  */
-export async function migrateLegacyTutorialData(
+export async function _migrateLegacyTutorialData(
   profileId: string,
   db: any, // Replace with the correct ProfileStorageManager type
   isFirstProfile = false,

@@ -14,21 +14,21 @@ import { PlotCard } from './PlotCard';
 interface VirtualizedColumnProps {
   column: PlotColumnType;
   cards: PlotCardType[];
-  onEditCard?: (card: PlotCardType) => void;
-  onAddCard?: (columnId: string) => void;
-  onEditColumn?: (column: PlotColumnType) => void;
-  onDeleteColumn?: (columnId: string) => void;
+  onEditCard?: (_card: PlotCardType) => void;
+  onAddCard?: (_columnId: string) => void;
+  onEditColumn?: (_column: PlotColumnType) => void;
+  onDeleteColumn?: (_columnId: string) => void;
   showSceneLinks?: boolean;
   showTimeline?: boolean;
   isCompact?: boolean;
   // Keyboard navigation props
   focusedCardId?: string | null;
   draggedCardId?: string | null;
-  onCardFocus?: (cardId: string) => void;
-  onKeyboardDragStart?: (cardId: string) => void;
+  onCardFocus?: (_cardId: string) => void;
+  onKeyboardDragStart?: (_cardId: string) => void;
   // Undo/redo props
-  onBeforeCardDelete?: (cardId: string, cardTitle: string) => Promise<void>;
-  onBeforeCardCreate?: (columnTitle: string, cardTitle: string) => Promise<void>;
+  onBeforeCardDelete?: (_cardId: string, _cardTitle: string) => Promise<void>;
+  onBeforeCardCreate?: (_columnTitle: string, _cardTitle: string) => Promise<void>;
   // Virtualization settings
   itemHeight?: number;
   maxHeight?: number;
@@ -37,21 +37,21 @@ interface VirtualizedColumnProps {
 
 export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
   column,
-  cards,
-  onEditCard,
-  onAddCard,
-  onEditColumn,
-  onDeleteColumn,
-  showSceneLinks = true,
-  showTimeline = true,
-  isCompact = false,
-  focusedCardId = null,
-  draggedCardId = null,
-  onCardFocus,
-  onKeyboardDragStart,
-  onBeforeCardDelete,
-  onBeforeCardCreate,
-  itemHeight = 140, // Estimated card height
+  _cards,
+  _onEditCard,
+  _onAddCard,
+  _onEditColumn,
+  _onDeleteColumn,
+  _showSceneLinks = true,
+  _showTimeline = true,
+  _isCompact = false,
+  _focusedCardId = null,
+  _draggedCardId = null,
+  _onCardFocus,
+  _onKeyboardDragStart,
+  _onBeforeCardDelete,
+  _onBeforeCardCreate,
+  _itemHeight = 140, // Estimated card height
   maxHeight = 600, // Max column height before virtualizing
   overscanCount = 5, // Cards to render outside visible area
 }) => {
@@ -92,7 +92,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
     setIsAddingCard(false);
   };
 
-  const handleDeleteCard = async (cardId: string) => {
+  const handleDeleteCard = async (_cardId: string) => {
     const card = cards.find((c) => c.id === cardId);
     if (card && onBeforeCardDelete) {
       await onBeforeCardDelete(cardId, card.title);
@@ -116,7 +116,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
   };
 
   // Sort cards and get IDs for DnD context
-  const sortedCards = useMemo(() => [...cards].sort((a, b) => a.order - b.order), [cards]);
+  const sortedCards = useMemo(() => [...cards].sort((a, _b) => a.order - b.order), [cards]);
   const cardIds = useMemo(() => sortedCards.map((card) => card.id), [sortedCards]);
 
   // Determine if virtualization is needed
@@ -126,7 +126,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
   // Set up virtualizer for large lists
   const virtualizer = useVirtualizer({
     count: shouldVirtualize ? sortedCards.length : 0,
-    getScrollElement: () => parentRef.current,
+    _getScrollElement: () => parentRef.current,
     estimateSize: () => itemHeight,
     overscan: overscanCount,
   });
@@ -283,7 +283,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
             placeholder="Card title..."
             className="w-full text-sm border-none outline-none resize-none"
             autoFocus
-            onKeyDown={(e) => {
+            onKeyDown={(_e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleQuickAdd();
@@ -427,7 +427,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
               <span>
                 {cards
                   .filter((c) => c.wordCount)
-                  .reduce((sum, c) => sum + (c.wordCount || 0), 0)
+                  .reduce((sum, _c) => sum + (c.wordCount || 0), 0)
                   .toLocaleString()}{' '}
                 words
               </span>

@@ -114,8 +114,8 @@ export type WorkerResponse =
 /** Pending operation tracker */
 type PendingOp = {
   type: WorkerMessage['type'];
-  resolve: (v: any) => void;
-  reject: (e: any) => void;
+  resolve: (_v: any) => void;
+  reject: (_e: any) => void;
   timeout: ReturnType<typeof setTimeout>;
 };
 
@@ -128,8 +128,8 @@ export class SearchWorkerService {
   private pendingByType = new Map<WorkerMessage['type'], string>();
   private queue: Array<{
     message: WorkerMessage;
-    resolve: (v: any) => void;
-    reject: (e: any) => void;
+    resolve: (_v: any) => void;
+    reject: (_e: any) => void;
   }> = [];
   private latencies: number[] = [];
   private queries: string[] = [];
@@ -196,7 +196,7 @@ export class SearchWorkerService {
 
   getPerformanceMetrics() {
     const avg = this.latencies.length
-      ? this.latencies.reduce((a, b) => a + b, 0) / this.latencies.length
+      ? this.latencies.reduce((a, _b) => a + b, 0) / this.latencies.length
       : 0;
     return {
       totalDocuments: 0,
@@ -239,7 +239,7 @@ export class SearchWorkerService {
     if (!this.worker || !this.ready) return Promise.reject(new Error('Search worker not ready'));
     const requestId = message.requestId ?? String(this.messageId++);
     message.requestId = requestId;
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const timeout = setTimeout(() => {
         this.pending.delete(requestId);
         reject(new Error('Worker request timeout'));
@@ -277,15 +277,15 @@ export class SearchWorkerService {
       requestId,
     };
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const timeout = setTimeout(() => {
         this.pending.delete(requestId);
         reject(new Error('Search timeout'));
       }, 30000);
 
-      this.pending.set(requestId, {
+      this.pending.set(_requestId, {
         type: message.type,
-        resolve: (response) => {
+        _resolve: (response) => {
           if (response.type === 'SEARCH_RESULT') {
             resolve(response.results);
           } else {

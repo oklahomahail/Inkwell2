@@ -45,7 +45,7 @@ class AIConfigurationService {
   private readonly VALIDATION_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
   private config: AIConfiguration | null = null;
-  private listeners: Array<(config: AIConfiguration | null) => void> = [];
+  private listeners: Array<(_config: AIConfiguration | null) => void> = [];
 
   // Supported AI providers
   private readonly PROVIDERS: Record<string, AIProvider> = {
@@ -364,7 +364,7 @@ Context: You have access to the user's current project and any selected text. Al
   /**
    * Subscribe to configuration changes
    */
-  subscribe(callback: (config: AIConfiguration | null) => void): () => void {
+  subscribe(_callback: (config: AIConfiguration | null) => void): () => void {
     this.listeners.push(callback);
 
     // Immediately notify with current config

@@ -33,7 +33,7 @@ export interface TimelineAnalytics {
   consistencyScore: number;
 }
 
-export function within(items: TimelineItem[], range: TimelineRange): TimelineItem[] {
+export function _within(items: TimelineItem[], range: TimelineRange): TimelineItem[] {
   return items.filter((item) => {
     const itemEnd = item.end ?? item.start;
     return item.start <= range.end && itemEnd >= range.start;
@@ -105,7 +105,7 @@ class TimelineService {
     });
 
     // Chapters & scenes
-    outline.chapters.forEach((chapter, chapterIndex) => {
+    outline.chapters.forEach((chapter, _chapterIndex) => {
       const chapterStart = orderIndex++;
       const chapterEnd = chapterStart + (chapter.scenes?.length || 0);
 
@@ -126,7 +126,7 @@ class TimelineService {
         updatedAt: new Date(),
       });
 
-      chapter.scenes?.forEach((scene, sceneIndex) => {
+      chapter.scenes?.forEach((scene, _sceneIndex) => {
         const sceneCharacters = scene.characters || [];
         const povCharacter = sceneCharacters[0];
 
@@ -151,7 +151,7 @@ class TimelineService {
     });
 
     // Character arcs
-    outline.characters?.forEach((character, charIndex) => {
+    outline.characters?.forEach((character, _charIndex) => {
       if (character.arc) {
         const arcStart = Math.floor(outline.chapters.length / 3) + 1;
         const arcEnd = Math.floor((outline.chapters.length * 2) / 3) + 1;
@@ -174,7 +174,7 @@ class TimelineService {
       }
     });
 
-    return items.sort((a, b) => a.start - b.start);
+    return items.sort((a, _b) => a.start - b.start);
   }
 
   /** Merge items from existing project chapters */
@@ -183,7 +183,7 @@ class TimelineService {
     const newItems: TimelineItem[] = [];
     let orderIndex = existingItems.length + 1;
 
-    project.chapters.forEach((chapter, chapterIndex) => {
+    project.chapters.forEach((chapter, _chapterIndex) => {
       const chapterExists = existingItems.some(
         (item) => item.chapterId === chapter.id || item.title.includes(chapter.title),
       );
@@ -210,7 +210,7 @@ class TimelineService {
         });
 
         if (chapter.scenes && Array.isArray(chapter.scenes)) {
-          chapter.scenes.forEach((scene: any, sceneIndex) => {
+          chapter.scenes.forEach((scene: any, _sceneIndex) => {
             newItems.push({
               id: `item_sync_scene_${chapterIndex}_${sceneIndex}_${Date.now()}`,
               title: scene.title || `Scene ${sceneIndex + 1}`,
@@ -234,7 +234,7 @@ class TimelineService {
     });
 
     if (newItems.length > 0) {
-      const allItems = [...existingItems, ...newItems].sort((a, b) => a.start - b.start);
+      const allItems = [...existingItems, ...newItems].sort((a, _b) => a.start - b.start);
       await this.saveProjectTimeline(projectId, allItems);
     }
   }
@@ -288,7 +288,7 @@ class TimelineService {
     });
 
     if (itemsToImport.length > 0) {
-      const allItems = [...existingItems, ...itemsToImport].sort((a, b) => a.start - b.start);
+      const allItems = [...existingItems, ...itemsToImport].sort((a, _b) => a.start - b.start);
       await this.saveProjectTimeline(projectId, allItems);
     }
 
@@ -315,11 +315,11 @@ class TimelineService {
     const povCharacters = items
       .map((i) => i.pov)
       .filter((pov): pov is string => pov !== undefined && pov !== null)
-      .filter((pov, index, arr) => arr.indexOf(pov) === index);
+      .filter((pov, _index, _arr) => arr.indexOf(pov) === index);
 
     // Aggregations
     const itemsByImportance = items.reduce(
-      (acc, item) => {
+      (acc, _item) => {
         acc[item.importance] = (acc[item.importance] || 0) + 1;
         return acc;
       },
@@ -327,7 +327,7 @@ class TimelineService {
     );
 
     const itemsByType = items.reduce(
-      (acc, item) => {
+      (acc, _item) => {
         acc[item.eventType] = (acc[item.eventType] || 0) + 1;
         return acc;
       },
@@ -338,12 +338,12 @@ class TimelineService {
     const startTimes = items
       .map((i) => i.start)
       .filter((n): n is number => typeof n === 'number')
-      .sort((a, b) => a - b);
+      .sort((a, _b) => a - b);
 
     const endTimes = items
       .map((i) => i.end ?? i.start)
       .filter((n): n is number => typeof n === 'number')
-      .sort((a, b) => a - b);
+      .sort((a, _b) => a - b);
 
     let timeSpan: TimelineRange | null = null;
     if (startTimes.length > 0 && endTimes.length > 0) {
@@ -589,7 +589,7 @@ class TimelineService {
     });
 
     // Check chronological order of linked scenes (simplified)
-    const linkedEvents = items.filter((item) => item.sceneId).sort((a, b) => a.start - b.start);
+    const linkedEvents = items.filter((item) => item.sceneId).sort((a, _b) => a.start - b.start);
     for (let i = 1; i < linkedEvents.length; i++) {
       const prev = linkedEvents[i - 1];
       const current = linkedEvents[i];
@@ -625,7 +625,7 @@ class TimelineService {
     next?: { sceneId: string; eventTitle: string };
   }> {
     const items = await this.getProjectTimeline(projectId);
-    const linkedEvents = items.filter((item) => item.sceneId).sort((a, b) => a.start - b.start);
+    const linkedEvents = items.filter((item) => item.sceneId).sort((a, _b) => a.start - b.start);
 
     const currentIndex = linkedEvents.findIndex((item) => item.sceneId === currentSceneId);
     if (currentIndex === -1) return {};

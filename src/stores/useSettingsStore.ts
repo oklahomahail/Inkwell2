@@ -8,34 +8,34 @@ import { traceStoreAction } from '../utils/trace';
 // Public API for components/tests
 export interface SettingsStore extends SettingsStoreState {
   // Theme
-  setTheme: (theme: 'light' | 'dark') => void;
+  setTheme: (_theme: 'light' | 'dark') => void;
 
   // Auto-save
-  setAutoSaveEnabled: (enabled: boolean) => void;
-  setAutoSaveInterval: (interval: number) => void;
+  setAutoSaveEnabled: (_enabled: boolean) => void;
+  setAutoSaveInterval: (_interval: number) => void;
 
   // Backup
-  setBackupEnabled: (enabled: boolean) => void;
-  setBackupFrequency: (frequency: 'daily' | 'weekly' | 'monthly') => void;
+  setBackupEnabled: (_enabled: boolean) => void;
+  setBackupFrequency: (_frequency: 'daily' | 'weekly' | 'monthly') => void;
 
   // Editor
-  setEditorFontSize: (size: number) => void;
-  setEditorFontFamily: (family: string) => void;
-  setEditorLineHeight: (height: number) => void;
-  setShowWordCount: (show: boolean) => void;
-  setShowCharacterCount: (show: boolean) => void;
+  setEditorFontSize: (_size: number) => void;
+  setEditorFontFamily: (_family: string) => void;
+  setEditorLineHeight: (_height: number) => void;
+  setShowWordCount: (_show: boolean) => void;
+  setShowCharacterCount: (_show: boolean) => void;
 
   // Export
-  setDefaultExportFormat: (format: ExportFormat) => void;
-  setIncludeMetadata: (include: boolean) => void;
-  setCompressImages: (compress: boolean) => void;
+  setDefaultExportFormat: (_format: ExportFormat) => void;
+  setIncludeMetadata: (_include: boolean) => void;
+  setCompressImages: (_compress: boolean) => void;
 
   // Feature flags
-  setFeatureFlag: (flag: string, enabled: boolean) => void;
+  setFeatureFlag: (_flag: string, _enabled: boolean) => void;
 
   // Status and errors
-  setIsLoading: (loading: boolean) => void;
-  setError: (message: string | null) => void;
+  setIsLoading: (_loading: boolean) => void;
+  setError: (_message: string | null) => void;
   clearError: () => void;
 
   // Reset
@@ -82,7 +82,7 @@ const isDev =
 export const useSettingsStore = create<SettingsStore>()(
   devtools(
     persist(
-      (set /* , _get */) => ({
+      (set /* ,  _get */) => ({
         ...initialState,
 
         // Theme
@@ -92,63 +92,63 @@ export const useSettingsStore = create<SettingsStore>()(
         },
 
         // Auto-save
-        setAutoSaveEnabled: (enabled) => {
+        setAutoSaveEnabled: (_enabled) => {
           traceStoreAction?.('settings:setAutoSaveEnabled', { enabled });
           set((s) => ({ ...s, autoSave: { ...s.autoSave, enabled } }));
         },
-        setAutoSaveInterval: (interval) => {
+        setAutoSaveInterval: (_interval) => {
           traceStoreAction?.('settings:setAutoSaveInterval', { interval });
           set((s) => ({ ...s, autoSave: { ...s.autoSave, interval } }));
         },
 
         // Backup
-        setBackupEnabled: (enabled) => {
+        setBackupEnabled: (_enabled) => {
           traceStoreAction?.('settings:setBackupEnabled', { enabled });
           set((s) => ({ ...s, backup: { ...s.backup, enabled } }));
         },
-        setBackupFrequency: (frequency) => {
+        setBackupFrequency: (_frequency) => {
           traceStoreAction?.('settings:setBackupFrequency', { frequency });
           set((s) => ({ ...s, backup: { ...s.backup, frequency } }));
         },
 
         // Editor
-        setEditorFontSize: (size) => {
+        setEditorFontSize: (_size) => {
           traceStoreAction?.('settings:setEditorFontSize', { size });
           set((s) => ({ ...s, editor: { ...s.editor, fontSize: size } }));
         },
-        setEditorFontFamily: (family) => {
+        setEditorFontFamily: (_family) => {
           traceStoreAction?.('settings:setEditorFontFamily', { family });
           set((s) => ({ ...s, editor: { ...s.editor, fontFamily: family } }));
         },
-        setEditorLineHeight: (height) => {
+        setEditorLineHeight: (_height) => {
           traceStoreAction?.('settings:setEditorLineHeight', { height });
           set((s) => ({ ...s, editor: { ...s.editor, lineHeight: height } }));
         },
-        setShowWordCount: (show) => {
+        setShowWordCount: (_show) => {
           traceStoreAction?.('settings:setShowWordCount', { show });
           set((s) => ({ ...s, editor: { ...s.editor, showWordCount: show } }));
         },
-        setShowCharacterCount: (show) => {
+        setShowCharacterCount: (_show) => {
           traceStoreAction?.('settings:setShowCharacterCount', { show });
           set((s) => ({ ...s, editor: { ...s.editor, showCharacterCount: show } }));
         },
 
         // Export
-        setDefaultExportFormat: (format) => {
+        setDefaultExportFormat: (_format) => {
           traceStoreAction?.('settings:setDefaultExportFormat', { format });
           set((s) => ({ ...s, export: { ...s.export, defaultFormat: format } }));
         },
-        setIncludeMetadata: (include) => {
+        setIncludeMetadata: (_include) => {
           traceStoreAction?.('settings:setIncludeMetadata', { include });
           set((s) => ({ ...s, export: { ...s.export, includeMetadata: include } }));
         },
-        setCompressImages: (compress) => {
+        setCompressImages: (_compress) => {
           traceStoreAction?.('settings:setCompressImages', { compress });
           set((s) => ({ ...s, export: { ...s.export, compressImages: compress } }));
         },
 
         // Feature flags
-        setFeatureFlag: (flag, enabled) => {
+        setFeatureFlag: (_flag, _enabled) => {
           traceStoreAction?.('settings:setFeatureFlag', { flag, enabled });
           set((s) => ({
             ...s,
@@ -157,11 +157,11 @@ export const useSettingsStore = create<SettingsStore>()(
         },
 
         // Status and errors
-        setIsLoading: (loading) => {
+        setIsLoading: (_loading) => {
           traceStoreAction?.('settings:setIsLoading', { loading });
           set((s) => ({ ...s, isLoading: loading }));
         },
-        setError: (message) => {
+        setError: (_message) => {
           traceStoreAction?.('settings:setError', { message });
           set((s) => ({ ...s, error: message }));
         },
@@ -180,7 +180,7 @@ export const useSettingsStore = create<SettingsStore>()(
         name: 'inkwell-settings',
         version: 1,
         // Keep persist payload minimal if you like:
-        // partialize: (state) => ({
+        // partialize: (_state) => ({
         //   theme: state.theme,
         //   autoSave: state.autoSave,
         //   backup: state.backup,
@@ -189,7 +189,7 @@ export const useSettingsStore = create<SettingsStore>()(
         //   featureFlags: state.featureFlags,
         // }),
         // You can add a migrate if future versions change shape
-        // migrate: (persisted, version) => persisted,
+        // migrate: (_persisted, _version) => persisted,
       },
     ),
     {

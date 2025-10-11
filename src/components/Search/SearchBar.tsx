@@ -4,7 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { useNavigation } from '@/context/NavContext';
 
 interface SearchBarProps {
-  onSearch: (query: string) => void;
+  onSearch: (_query: string) => void;
   isSearching?: boolean;
   placeholder?: string;
   className?: string;
@@ -12,9 +12,9 @@ interface SearchBarProps {
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
-  isSearching = false,
-  placeholder = 'Search scenes, characters, plot notes...',
-  className = '',
+  _isSearching = false,
+  _placeholder = 'Search scenes, _characters,  plot notes...',
+  _className = '',
 }) => {
   const [query, setQuery] = useState('');
   const _navigation = useNavigation();

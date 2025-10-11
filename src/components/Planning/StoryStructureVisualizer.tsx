@@ -34,7 +34,7 @@ interface StoryHealth {
 
 const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
   className = '',
-  compact = false,
+  _compact = false,
 }) => {
   const { currentProject } = useAppContext();
 
@@ -58,10 +58,10 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
     const chapters = currentProject.chapters || [];
 
     // Analyze chapters
-    const chaptersAnalysis: ChapterAnalysis[] = chapters.map((chapter: any, index: number) => {
+    const chaptersAnalysis: ChapterAnalysis[] = chapters.map((chapter: any, _index: number) => {
       // Safely access scenes with fallback
       const scenes = chapter.scenes || [];
-      const totalWords = scenes.reduce((sum: number, scene: any) => {
+      const totalWords = scenes.reduce((sum: number, _scene: any) => {
         // Handle different possible content properties
         const content = scene.content || scene.text || '';
         return sum + (typeof content === 'string' ? content.length : 0);
@@ -125,7 +125,7 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
     });
 
     // Calculate story health
-    const _totalWords = chaptersAnalysis.reduce((sum, ch) => sum + ch.wordCount, 0);
+    const _totalWords = chaptersAnalysis.reduce((sum, _ch) => sum + ch.wordCount, 0);
     const completedChapters = chaptersAnalysis.filter(
       (ch) => ch.completionStatus === 'complete',
     ).length;
@@ -135,7 +135,7 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
 
     // Overall pacing analysis
     const pacingDistribution = chaptersAnalysis.reduce(
-      (acc, ch) => {
+      (acc, _ch) => {
         acc[ch.pacing]++;
         return acc;
       },
@@ -157,7 +157,8 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
     // Character development analysis
     const avgCharacterCount =
       chaptersAnalysis.length > 0
-        ? chaptersAnalysis.reduce((sum, ch) => sum + ch.characterCount, 0) / chaptersAnalysis.length
+        ? chaptersAnalysis.reduce((sum, _ch) => sum + ch.characterCount, 0) /
+          chaptersAnalysis.length
         : 0;
 
     let characterDevelopment: StoryHealth['characterDevelopment'] = 'needs-attention';
@@ -192,7 +193,7 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
     };
   }, [currentProject]);
 
-  const getCompletionColor = (status: ChapterAnalysis['completionStatus']) => {
+  const getCompletionColor = (_status: ChapterAnalysis['completionStatus']) => {
     switch (status) {
       case 'complete':
         return 'bg-green-500';
@@ -205,7 +206,7 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
     }
   };
 
-  const getPacingColor = (pacing: ChapterAnalysis['pacing']) => {
+  const getPacingColor = (_pacing: ChapterAnalysis['pacing']) => {
     switch (pacing) {
       case 'fast':
         return 'text-red-600';
@@ -216,7 +217,7 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
     }
   };
 
-  const getHealthColor = (score: number) => {
+  const getHealthColor = (_score: number) => {
     if (score >= 80) return 'text-green-600';
     if (score >= 60) return 'text-yellow-600';
     return 'text-red-600';
@@ -261,7 +262,7 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
         <div className="space-y-2 mb-4">
           <div className="text-xs text-gray-600 dark:text-gray-400">Chapter Progress</div>
           <div className="grid grid-cols-5 gap-1">
-            {chaptersAnalysis.slice(0, 5).map((chapter, index) => (
+            {chaptersAnalysis.slice(0, 5).map((chapter, _index) => (
               <div
                 key={chapter.id}
                 className="h-8 rounded flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-700"
@@ -274,7 +275,7 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
               </div>
             ))}
             {/* Show placeholders if fewer than 5 chapters */}
-            {Array.from({ length: Math.max(0, 5 - chaptersAnalysis.length) }).map((_, index) => (
+            {Array.from({ length: Math.max(0, 5 - chaptersAnalysis.length) }).map((_, _index) => (
               <div
                 key={`placeholder-${index}`}
                 className="h-8 rounded flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-700"
@@ -383,7 +384,7 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
           </h3>
 
           <div className="space-y-3">
-            {chaptersAnalysis.map((chapter, index) => (
+            {chaptersAnalysis.map((chapter, _index) => (
               <div
                 key={chapter.id}
                 className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

@@ -53,7 +53,7 @@ type QueuedOperation = {
 };
 
 // All app logic lives here, safely *inside* the providers.
-function AppShell() {
+function _AppShell() {
   return (
     <BrowserRouter>
       <Routes>
@@ -96,7 +96,7 @@ function AppShell() {
 }
 
 // Profile-specific app shell (the original app logic)
-function ProfileAppShell() {
+function _ProfileAppShell() {
   const { claude, currentProject } = useAppContext();
   const { insertText } = useEditorContext();
 
@@ -233,7 +233,7 @@ function ProfileAppShell() {
 }
 
 // Offline Queue Management Modal
-function OfflineQueueModal(props: { isOpen: boolean; onClose: () => void }) {
+function _OfflineQueueModal(_props: { isOpen: boolean; onClose: () => void }) {
   const { isOpen, onClose } = props;
   const [queuedOperations, setQueuedOperations] = useState<QueuedOperation[]>([]);
 
@@ -293,7 +293,7 @@ function OfflineQueueModal(props: { isOpen: boolean; onClose: () => void }) {
 }
 
 // Development Storage Debug Panel
-function StorageDebugPanel() {
+function _StorageDebugPanel() {
   const [stats, setStats] = useState<any>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -314,7 +314,7 @@ function StorageDebugPanel() {
 
   if (!stats) return null;
 
-  const mb = (n: number) => (n > 0 ? (n / 1024 / 1024).toFixed(1) : '0.0');
+  const mb = (_n: number) => (n > 0 ? (n / 1024 / 1024).toFixed(1) : '0.0');
 
   return (
     <div className="fixed bottom-4 right-4 z-40">
@@ -362,7 +362,7 @@ function StorageDebugPanel() {
                       await Promise.all(
                         databases.map((db) => {
                           if (db.name) {
-                            return new Promise<void>((resolve, reject) => {
+                            return new Promise<void>((resolve, _reject) => {
                               const deleteReq = indexedDB.deleteDatabase(db.name!);
                               deleteReq.onsuccess = () => resolve();
                               deleteReq.onerror = () => reject(deleteReq.error);
@@ -392,7 +392,7 @@ function StorageDebugPanel() {
 }
 
 // Root export: use centralized Providers component for clean composition
-export default function App() {
+export default function _App() {
   return (
     <AppErrorBoundary level="app">
       <Providers>

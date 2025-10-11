@@ -204,7 +204,7 @@ class SearchService {
           Math.log((docCount - entry.documents.size + 0.5) / (entry.documents.size + 0.5)),
         );
 
-        entry.documents.forEach((termDoc, docId) => {
+        entry.documents.forEach((termDoc, _docId) => {
           if (!documents.has(docId)) return;
 
           const doc = documents.get(docId)!;
@@ -254,7 +254,7 @@ class SearchService {
       const stats = this.stats.get(projectId)!;
       stats.queryCount++;
       stats.averageLatency =
-        this.performanceMetrics.reduce((a, b) => a + b, 0) / this.performanceMetrics.length;
+        this.performanceMetrics.reduce((a, _b) => a + b, 0) / this.performanceMetrics.length;
 
       console.log(`Search completed: "${query}" -> ${results.length} results in ${latency}ms`);
 
@@ -317,7 +317,7 @@ class SearchService {
       return { p50: 0, p95: 0, queries: 0 };
     }
 
-    const sorted = [...this.performanceMetrics].sort((a, b) => a - b);
+    const sorted = [...this.performanceMetrics].sort((a, _b) => a - b);
     const p50Index = Math.floor(sorted.length * 0.5);
     const p95Index = Math.floor(sorted.length * 0.95);
 
@@ -343,7 +343,7 @@ class SearchService {
     const termCounts = new Map<string, number>();
 
     // Count term frequencies and positions
-    terms.forEach((term, position) => {
+    terms.forEach((term, _position) => {
       termCounts.set(term, (termCounts.get(term) || 0) + 1);
 
       if (!index.has(term)) {
@@ -394,7 +394,7 @@ class SearchService {
 
   private getAverageDocumentLength(documents: Map<string, SearchResult>): number {
     const lengths = Array.from(documents.values()).map((doc) => doc.content.length);
-    return lengths.reduce((sum, len) => sum + len, 0) / lengths.length;
+    return lengths.reduce((sum, _len) => sum + len, 0) / lengths.length;
   }
 
   private calculateIndexSize(index: Map<string, IndexEntry>): number {

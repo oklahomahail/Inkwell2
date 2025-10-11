@@ -2,7 +2,7 @@ import { ExportFormat } from '@/exports/exportTypes';
 
 interface FormatStepProps {
   value: ExportFormat;
-  onChange: (format: ExportFormat) => void;
+  onChange: (_format: ExportFormat) => void;
   onNext: () => void;
   canProceed: boolean;
 }
@@ -53,7 +53,7 @@ const formatOptions = [
   },
 ];
 
-export function FormatStep({ value, onChange, onNext, canProceed }: FormatStepProps) {
+export function _FormatStep({ value, onChange, onNext, canProceed }: FormatStepProps) {
   return (
     <div className="space-y-6">
       <div>

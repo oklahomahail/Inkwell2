@@ -14,7 +14,7 @@ export interface ExportEngine {
 /**
  * Compiles manuscript data into HTML with proper styling
  */
-function compileManuscriptToHTML(draft: ManuscriptDraft, style: StylePresetMeta): string {
+function _compileManuscriptToHTML(draft: ManuscriptDraft, style: StylePresetMeta): string {
   const css = generateCSS(style);
 
   // Generate watermark HTML if specified
@@ -89,7 +89,7 @@ function compileManuscriptToHTML(draft: ManuscriptDraft, style: StylePresetMeta)
   const chaptersHTML = draft.chapters
     .map((chapter) => {
       const scenesHTML = chapter.scenes
-        .map((scene, sceneIndex) => {
+        .map((scene, _sceneIndex) => {
           const isLastScene = sceneIndex === chapter.scenes.length - 1;
           const sceneBreakHTML =
             !isLastScene && style.sceneBreak
@@ -210,7 +210,7 @@ body {
 /**
  * Generates running header content
  */
-function generateRunningHeader(style: StylePresetMeta, draft: ManuscriptDraft) {
+function _generateRunningHeader(style: StylePresetMeta, draft: ManuscriptDraft) {
   const context = {
     title: draft.title,
     author: draft.author || '',
@@ -232,7 +232,7 @@ function generateRunningHeader(style: StylePresetMeta, draft: ManuscriptDraft) {
 /**
  * Generates running footer content
  */
-function generateRunningFooter(style: StylePresetMeta, draft: ManuscriptDraft) {
+function _generateRunningFooter(style: StylePresetMeta, draft: ManuscriptDraft) {
   const context = {
     title: draft.title,
     author: draft.author || '',
@@ -255,7 +255,7 @@ function generateRunningFooter(style: StylePresetMeta, draft: ManuscriptDraft) {
  * Converts HTML to PDF using browser's print functionality
  * In a real implementation, you might use puppeteer or similar
  */
-async function htmlToPDF(html: string): Promise<Blob> {
+async function _htmlToPDF(html: string): Promise<Blob> {
   // Create a temporary iframe for PDF generation
   const iframe = document.createElement('iframe');
   iframe.style.position = 'fixed';
@@ -295,7 +295,7 @@ async function htmlToPDF(html: string): Promise<Blob> {
  * Creates a mock PDF blob for demonstration
  * In production, this would be replaced with actual PDF generation
  */
-function createMockPDFBlob(html: string): Blob {
+function _createMockPDFBlob(html: string): Blob {
   // This is a mock implementation - in production you'd generate a real PDF
   const pdfHeader = '%PDF-1.4\n';
   const mockContent = `Mock PDF content generated from manuscript.

@@ -43,7 +43,7 @@ interface Scene {
  * - Cleaning up HTML structure
  * - Preserving intentional formatting
  */
-export function normalizeRichText(content: string): string {
+export function _normalizeRichText(content: string): string {
   if (!content) return '';
 
   let normalized = content
@@ -52,14 +52,14 @@ export function normalizeRichText(content: string): string {
     .replace(/\sdata-[^=]*="[^"]*"/g, '')
     .replace(/\sclass="[^"]*"/g, '')
     .replace(/\sstyle="[^"]*"/g, '')
-    
+
     // Convert smart quotes
     .replace(/[""]/g, '"')
     .replace(/['']/g, "'")
-    
+
     // Convert ellipses
     .replace(/\.\.\./g, '…')
-    
+
     // Clean up whitespace
     .replace(/\s+/g, ' ')
     .replace(/\n\s+/g, '\n')
@@ -81,7 +81,10 @@ export function normalizeRichText(content: string): string {
  * - ~250 words per page for double-spaced manuscript
  * - ~350 words per page for book formatting
  */
-export function estimatePageCount(wordCount: number, format: 'manuscript' | 'book' = 'manuscript'): number {
+export function _estimatePageCount(
+  wordCount: number,
+  format: 'manuscript' | 'book' = 'manuscript',
+): number {
   const wordsPerPage = format === 'manuscript' ? 250 : 350;
   return Math.ceil(wordCount / wordsPerPage);
 }
@@ -89,17 +92,17 @@ export function estimatePageCount(wordCount: number, format: 'manuscript' | 'boo
 /**
  * Counts words in text content, handling HTML
  */
-export function countWords(content: string): number {
+export function _countWords(content: string): number {
   if (!content) return 0;
-  
+
   // Strip HTML tags and count words
   const plainText = content
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-  
+
   if (!plainText) return 0;
-  
+
   return plainText.split(' ').length;
 }
 
@@ -107,11 +110,11 @@ export function countWords(content: string): number {
  * Retrieves project data - mock implementation
  * In real implementation, this would use your state selectors
  */
-async function getProjectData(projectId: string): Promise<Project> {
+async function _getProjectData(projectId: string): Promise<Project> {
   // Mock implementation - replace with actual data fetching
   // const project = selectProject(projectId);
   // if (!project) throw new Error(`Project ${projectId} not found`);
-  
+
   return {
     id: projectId,
     name: 'Sample Project',
@@ -125,10 +128,11 @@ async function getProjectData(projectId: string): Promise<Project> {
         scenes: [
           {
             id: 'sc1',
-            content: '<p>This is the opening scene with <em>some italic text</em> and <strong>bold text</strong>.</p><p>Here is another paragraph with more content to test word counting and formatting.</p>',
-            order: 1
-          }
-        ]
+            content:
+              '<p>This is the opening scene with <em>some italic text</em> and <strong>bold text</strong>.</p><p>Here is another paragraph with more content to test word counting and formatting.</p>',
+            order: 1,
+          },
+        ],
       },
       {
         id: 'ch2',
@@ -138,44 +142,43 @@ async function getProjectData(projectId: string): Promise<Project> {
           {
             id: 'sc2',
             content: '<p>This is the second chapter with additional content...</p>',
-            order: 1
-          }
-        ]
-      }
+            order: 1,
+          },
+        ],
+      },
     ],
     frontMatter: {
       dedication: 'For my readers',
-      acknowledgements: 'Thanks to everyone who supported this work'
+      acknowledgements: 'Thanks to everyone who supported this work',
     },
     backMatter: {
-      aboutAuthor: 'Sample Author is a writer who writes things.'
+      aboutAuthor: 'Sample Author is a writer who writes things.',
     },
     metadata: {
       genre: 'Fiction',
-      keywords: 'sample, test, export'
-    }
+      keywords: 'sample, test, export',
+    },
   };
 }
 
 /**
  * Assembles a complete manuscript draft from project data
  */
-export async function assembleManuscript(projectId: string): Promise<ManuscriptDraft> {
+export async function _assembleManuscript(projectId: string): Promise<ManuscriptDraft> {
   const project = await getProjectData(projectId);
-  
+
   if (!project) {
     throw new Error(`Project ${projectId} not found`);
   }
 
   // Sort chapters by order and compile scenes
-  const sortedChapters = (project.chapters || [])
-    .sort((a, b) => a.order - b.order);
+  const sortedChapters = (project.chapters || []).sort((a, _b) => a.order - b.order);
 
-  const chapters: ManuscriptChapter[] = sortedChapters.map((chapter, index) => {
+  const chapters: ManuscriptChapter[] = sortedChapters.map((chapter, _index) => {
     // Sort scenes by order and normalize content
     const sortedScenes = (chapter.scenes || [])
-      .sort((a, b) => a.order - b.order)
-      .map(scene => normalizeRichText(scene.content));
+      .sort((a, _b) => a.order - b.order)
+      .map((scene) => normalizeRichText(scene.content));
 
     // If chapter has direct content (no scenes), use that
     if (!sortedScenes.length && chapter.content) {
@@ -185,14 +188,14 @@ export async function assembleManuscript(projectId: string): Promise<ManuscriptD
     return {
       number: index + 1,
       title: chapter.title,
-      scenes: sortedScenes
+      scenes: sortedScenes,
     };
   });
 
   // Calculate total word count
   let totalWordCount = 0;
-  chapters.forEach(chapter => {
-    chapter.scenes.forEach(scene => {
+  chapters.forEach((chapter) => {
+    chapter.scenes.forEach((scene) => {
       totalWordCount += countWords(scene);
     });
   });
@@ -225,14 +228,14 @@ export async function assembleManuscript(projectId: string): Promise<ManuscriptD
     backMatter: project.backMatter,
     metadata: project.metadata || {},
     wordCount: totalWordCount,
-    estimatedPages
+    estimatedPages,
   };
 }
 
 /**
  * Validates a manuscript draft for export readiness
  */
-export function validateManuscriptForExport(draft: ManuscriptDraft): {
+export function _validateManuscriptForExport(draft: ManuscriptDraft): {
   isValid: boolean;
   errors: string[];
   warnings: string[];
@@ -262,13 +265,16 @@ export function validateManuscriptForExport(draft: ManuscriptDraft): {
     warnings.push('Manuscript is quite short (less than 1000 words)');
   }
 
-  const chaptersWithoutTitles = draft.chapters.filter(ch => !ch.title || ch.title.trim() === '');
+  const chaptersWithoutTitles = draft.chapters.filter((ch) => !ch.title || ch.title.trim() === '');
   if (chaptersWithoutTitles.length > 0) {
     warnings.push(`${chaptersWithoutTitles.length} chapters are missing titles`);
   }
 
-  const emptyChapters = draft.chapters.filter(ch => 
-    !ch.scenes || ch.scenes.length === 0 || ch.scenes.every(scene => !scene || scene.trim() === '')
+  const emptyChapters = draft.chapters.filter(
+    (ch) =>
+      !ch.scenes ||
+      ch.scenes.length === 0 ||
+      ch.scenes.every((scene) => !scene || scene.trim() === ''),
   );
   if (emptyChapters.length > 0) {
     warnings.push(`${emptyChapters.length} chapters are empty`);
@@ -277,33 +283,31 @@ export function validateManuscriptForExport(draft: ManuscriptDraft): {
   return {
     isValid: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }
 
 /**
  * Gets a summary of the manuscript for display
  */
-export function getManuscriptSummary(draft: ManuscriptDraft) {
+export function _getManuscriptSummary(draft: ManuscriptDraft) {
   const validation = validateManuscriptForExport(draft);
-  
+
   return {
     title: draft.title,
     author: draft.author || 'Unknown Author',
     chapterCount: draft.chapters.length,
-    sceneCount: draft.chapters.reduce((total, ch) => total + (ch.scenes?.length || 0), 0),
+    sceneCount: draft.chapters.reduce((total, _ch) => total + (ch.scenes?.length || 0), 0),
     wordCount: draft.wordCount,
     estimatedPages: draft.estimatedPages,
     estimatedReadingTime: Math.ceil(draft.wordCount / 200), // minutes at ~200 wpm
     hasValidation: validation,
-    hasFrontMatter: !!(draft.frontMatter && (
-      draft.frontMatter.dedication || 
-      draft.frontMatter.acknowledgements || 
-      draft.frontMatter.epigraph
-    )),
-    hasBackMatter: !!(draft.backMatter && (
-      draft.backMatter.aboutAuthor || 
-      draft.backMatter.notes
-    ))
+    hasFrontMatter: !!(
+      draft.frontMatter &&
+      (draft.frontMatter.dedication ||
+        draft.frontMatter.acknowledgements ||
+        draft.frontMatter.epigraph)
+    ),
+    hasBackMatter: !!(draft.backMatter && (draft.backMatter.aboutAuthor || draft.backMatter.notes)),
   };
 }

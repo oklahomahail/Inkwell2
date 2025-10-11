@@ -2,12 +2,12 @@ import { useState } from 'react';
 
 import Logo from '@/components/Logo';
 
-export default function Login() {
+export default function _Login() {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e: React.FormEvent) {
+  async function _onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);

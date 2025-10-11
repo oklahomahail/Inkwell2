@@ -76,13 +76,13 @@ const CHECKLIST_ITEMS: ChecklistItemConfig[] = [
 interface CompletionChecklistProps {
   isOpen: boolean;
   onClose: () => void;
-  onStartTour?: (tourType: string) => void;
+  onStartTour?: (_tourType: string) => void;
 }
 
 export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = ({
   isOpen,
-  onClose,
-  onStartTour,
+  _onClose,
+  _onStartTour,
 }) => {
   const { checklist, getChecklistProgress, canShowContextualTour, logAnalytics } = useTour();
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -92,7 +92,7 @@ export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = 
 
   if (!isOpen) return null;
 
-  const handleItemClick = (item: ChecklistItemConfig) => {
+  const handleItemClick = (_item: ChecklistItemConfig) => {
     if (item.tourTrigger && canShowContextualTour(item.tourTrigger)) {
       logAnalytics('checklist_tour_requested', { tourType: item.tourTrigger, item: item.key });
       onStartTour?.(item.tourTrigger);
@@ -100,7 +100,7 @@ export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = 
     }
   };
 
-  const getItemStyle = (item: ChecklistItemConfig) => {
+  const getItemStyle = (_item: ChecklistItemConfig) => {
     const isCompleted = checklist?.[item.key as keyof typeof checklist] || false;
     const canStartTour = item.tourTrigger && canShowContextualTour(item.tourTrigger);
 
@@ -188,7 +188,7 @@ export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = 
                   onMouseLeave={() => setHoveredItem(null)}
                   role={canStartTour ? 'button' : 'listitem'}
                   tabIndex={canStartTour ? 0 : undefined}
-                  onKeyDown={(e) => {
+                  onKeyDown={(_e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
                       handleItemClick(item);

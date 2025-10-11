@@ -16,13 +16,13 @@ import {
 
 // ===== Claude service interface (replace with your real integration) =====
 export interface ClaudeService {
-  sendMessage: (message: string) => Promise<string>;
+  sendMessage: (_message: string) => Promise<string>;
   isAvailable: () => boolean;
 }
 
 // Mock implementation, swap out with your real service in production
 const claudeService: ClaudeService = {
-  sendMessage: async (message: string) => {
+  sendMessage: async (_message: string) => {
     await new Promise((r) => setTimeout(r, 1000));
 
     if (message.includes('proofread') || message.includes('suggestions')) {
@@ -68,10 +68,10 @@ const claudeService: ClaudeService = {
 };
 
 // ===== Internal types =====
-type ProgressCallback = (progress: ProofreadProgress) => void;
+type ProgressCallback = (_progress: ProofreadProgress) => void;
 
 // ===== Helpers =====
-function chunkText(text: string, maxChunkSize: number = 2000): string[] {
+function _chunkText(text: string, maxChunkSize: number = 2000): string[] {
   const chunks: string[] = [];
   const paragraphs = text.split(/\n\s*\n/);
 
@@ -89,7 +89,7 @@ function chunkText(text: string, maxChunkSize: number = 2000): string[] {
   return chunks;
 }
 
-function generateProofreadPrompt(
+function _generateProofreadPrompt(
   text: string,
   options: ProofreadOptions,
   context: { chapterTitle?: string; chapterNumber?: number },
@@ -144,7 +144,7 @@ Please respond with a JSON object containing:
 }`;
 }
 
-function generateReadabilityPrompt(text: string): string {
+function _generateReadabilityPrompt(text: string): string {
   return `Analyze the readability of this text and provide detailed metrics:
 
 """
@@ -161,7 +161,7 @@ Please respond with a JSON object containing:
 }`;
 }
 
-function calculateTextStats(text: string) {
+function _calculateTextStats(text: string) {
   const words = text.match(/\b[\w’'-]+\b/g) ?? [];
   const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
   const paragraphs = text.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
@@ -173,7 +173,7 @@ function calculateTextStats(text: string) {
   };
 }
 
-function processClaudeResponse(
+function _processClaudeResponse(
   response: string,
   chapterNumber: number,
   sceneNumber: number,
@@ -239,7 +239,7 @@ function processClaudeResponse(
   }
 }
 
-function processReadabilityResponse(response: string): ReadabilityMetrics {
+function _processReadabilityResponse(response: string): ReadabilityMetrics {
   try {
     const parsed: unknown = JSON.parse(response);
     const r = parsed as Partial<ReadabilityMetrics> & {
@@ -287,7 +287,7 @@ function processReadabilityResponse(response: string): ReadabilityMetrics {
 }
 
 // ===== Main API =====
-export async function runProofread(
+export async function _runProofread(
   draft: ManuscriptDraft,
   options: ProofreadOptions = DEFAULT_PROOFREAD_OPTIONS,
   onProgress?: ProgressCallback,
@@ -461,7 +461,7 @@ export async function runProofread(
 }
 
 // ===== Report synthesis =====
-function generateReportSummary(
+function _generateReportSummary(
   suggestions: ProofreadSuggestion[],
   readability: ReadabilityMetrics,
   _stats: { totalWords: number; totalSentences: number; totalParagraphs: number },
@@ -493,7 +493,7 @@ function generateReportSummary(
   return summary;
 }
 
-function generateReportHighlights(
+function _generateReportHighlights(
   suggestions: ProofreadSuggestion[],
   readability: ReadabilityMetrics,
 ): string[] {
@@ -531,7 +531,7 @@ function generateReportHighlights(
 }
 
 // ===== Aggregate stats for UI =====
-export function getProofreadStats(reports: ProofreadReport[]) {
+export function _getProofreadStats(reports: ProofreadReport[]) {
   if (!reports || reports.length === 0) {
     return {
       totalReports: 0,
@@ -542,8 +542,8 @@ export function getProofreadStats(reports: ProofreadReport[]) {
     };
   }
 
-  const totalSuggestions = reports.reduce((sum, r) => sum + r.totalSuggestions, 0);
-  const totalGradeLevel = reports.reduce((sum, r) => sum + r.readability.gradeLevel, 0);
+  const totalSuggestions = reports.reduce((sum, _r) => sum + r.totalSuggestions, 0);
+  const totalGradeLevel = reports.reduce((sum, _r) => sum + r.readability.gradeLevel, 0);
 
   // Safely compute first-vs-last improvement
   const first = reports.at(0);

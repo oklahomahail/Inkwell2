@@ -152,7 +152,7 @@ const SettingsPanel: React.FC = () => {
     showToast(`Added "${customPhraseInput.trim()}" to stoplist`, 'success');
   };
 
-  const handleRemoveCustomPhrase = (phrase: string) => {
+  const handleRemoveCustomPhrase = (_phrase: string) => {
     if (!currentProject) return;
 
     phraseAnalysisService.removeFromCustomStoplist(currentProject.id, phrase);
@@ -279,7 +279,7 @@ const SettingsPanel: React.FC = () => {
                   <input
                     type={showApiKey ? 'text' : 'password'}
                     value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
+                    onChange={(_e) => setApiKey(e.target.value)}
                     placeholder={
                       claude.isConfigured ? 'Enter new API key to update...' : 'sk-ant-api03-...'
                     }
@@ -362,7 +362,7 @@ const SettingsPanel: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Model</label>
                 <select
                   value={claudeConfig.model}
-                  onChange={(e) => setClaudeConfig({ ...claudeConfig, model: e.target.value })}
+                  onChange={(_e) => setClaudeConfig({ ...claudeConfig, model: e.target.value })}
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6]"
                 >
                   <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
@@ -374,7 +374,7 @@ const SettingsPanel: React.FC = () => {
                 <input
                   type="number"
                   value={claudeConfig.maxTokens}
-                  onChange={(e) =>
+                  onChange={(_e) =>
                     setClaudeConfig({
                       ...claudeConfig,
                       maxTokens: parseInt(e.target.value) || 1000,
@@ -390,7 +390,7 @@ const SettingsPanel: React.FC = () => {
                 <input
                   type="number"
                   value={claudeConfig.temperature}
-                  onChange={(e) =>
+                  onChange={(_e) =>
                     setClaudeConfig({
                       ...claudeConfig,
                       temperature: parseFloat(e.target.value) || 0.7,
@@ -424,7 +424,7 @@ const SettingsPanel: React.FC = () => {
               <input
                 type="checkbox"
                 checked={appSettings.autoSave}
-                onChange={(e) => setAppSettings({ ...appSettings, autoSave: e.target.checked })}
+                onChange={(_e) => setAppSettings({ ...appSettings, autoSave: e.target.checked })}
                 className="w-4 h-4 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"
               />
             </div>
@@ -437,7 +437,7 @@ const SettingsPanel: React.FC = () => {
                 <input
                   type="number"
                   value={appSettings.autoSaveInterval}
-                  onChange={(e) =>
+                  onChange={(_e) =>
                     setAppSettings({
                       ...appSettings,
                       autoSaveInterval: parseInt(e.target.value) || 30,
@@ -458,7 +458,7 @@ const SettingsPanel: React.FC = () => {
               <input
                 type="checkbox"
                 checked={appSettings.showWordCount}
-                onChange={(e) =>
+                onChange={(_e) =>
                   setAppSettings({ ...appSettings, showWordCount: e.target.checked })
                 }
                 className="w-4 h-4 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"
@@ -473,7 +473,7 @@ const SettingsPanel: React.FC = () => {
               <input
                 type="checkbox"
                 checked={appSettings.showReadingTime}
-                onChange={(e) =>
+                onChange={(_e) =>
                   setAppSettings({ ...appSettings, showReadingTime: e.target.checked })
                 }
                 className="w-4 h-4 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"
@@ -523,7 +523,7 @@ const SettingsPanel: React.FC = () => {
                             <input
                               type="checkbox"
                               checked={phraseSettings.ngramSizes.includes(size)}
-                              onChange={(e) => {
+                              onChange={(_e) => {
                                 const newSizes = e.target.checked
                                   ? [...phraseSettings.ngramSizes, size].sort()
                                   : phraseSettings.ngramSizes.filter((s) => s !== size);
@@ -548,7 +548,7 @@ const SettingsPanel: React.FC = () => {
                         <input
                           type="number"
                           value={phraseSettings.minOccurrences}
-                          onChange={(e) =>
+                          onChange={(_e) =>
                             setPhraseSettings({
                               ...phraseSettings,
                               minOccurrences: Math.max(1, parseInt(e.target.value) || 2),
@@ -574,7 +574,7 @@ const SettingsPanel: React.FC = () => {
                           <input
                             type="number"
                             value={phraseSettings.thresholds.low}
-                            onChange={(e) =>
+                            onChange={(_e) =>
                               setPhraseSettings({
                                 ...phraseSettings,
                                 thresholds: {
@@ -594,7 +594,7 @@ const SettingsPanel: React.FC = () => {
                           <input
                             type="number"
                             value={phraseSettings.thresholds.medium}
-                            onChange={(e) =>
+                            onChange={(_e) =>
                               setPhraseSettings({
                                 ...phraseSettings,
                                 thresholds: {
@@ -614,7 +614,7 @@ const SettingsPanel: React.FC = () => {
                           <input
                             type="number"
                             value={phraseSettings.thresholds.high}
-                            onChange={(e) =>
+                            onChange={(_e) =>
                               setPhraseSettings({
                                 ...phraseSettings,
                                 thresholds: {
@@ -640,9 +640,9 @@ const SettingsPanel: React.FC = () => {
                         <input
                           type="text"
                           value={customPhraseInput}
-                          onChange={(e) => setCustomPhraseInput(e.target.value)}
+                          onChange={(_e) => setCustomPhraseInput(e.target.value)}
                           placeholder="Enter phrase to ignore..."
-                          onKeyDown={(e) => e.key === 'Enter' && handleAddCustomPhrase()}
+                          onKeyDown={(_e) => e.key === 'Enter' && handleAddCustomPhrase()}
                           className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6]"
                         />
                         <button
@@ -655,7 +655,7 @@ const SettingsPanel: React.FC = () => {
                       </div>
                       {phraseSettings.customStoplist.length > 0 && (
                         <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
-                          {phraseSettings.customStoplist.map((phrase, index) => (
+                          {phraseSettings.customStoplist.map((phrase, _index) => (
                             <span
                               key={index}
                               className="inline-flex items-center gap-1 px-2 py-1 bg-gray-700 text-gray-300 rounded text-xs"

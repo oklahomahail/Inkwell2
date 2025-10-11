@@ -21,7 +21,7 @@ const LS = {
  * - Session-scoped tour active tracking
  * - Guard logic to prevent modal auto-opening during tours
  */
-export function useOnboardingGate() {
+export function _useOnboardingGate() {
   const readGate = useCallback((): Gate => {
     try {
       const stored = localStorage.getItem(LS.gate);

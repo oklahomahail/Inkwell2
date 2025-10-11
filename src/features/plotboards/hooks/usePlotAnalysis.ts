@@ -5,7 +5,7 @@ import { analyticsService } from '../../../services/analyticsService';
 import { isEnabled } from '../../../utils/flags';
 import { usePlotBoardStore } from '../store';
 
-export function usePlotAnalysis(profileId: string, projectId: string) {
+export function _usePlotAnalysis(profileId: string, projectId: string) {
   const { boards, activeBoard, analysisByProjectId, setAnalysis } = usePlotBoardStore();
 
   const analysis = analysisByProjectId[projectId];
@@ -18,7 +18,7 @@ export function usePlotAnalysis(profileId: string, projectId: string) {
     const allCards = board.columns.flatMap((col) => col.cards);
 
     // Convert cards to scenes format - use card content as scene text
-    return allCards.map((card, index) => ({
+    return allCards.map((card, _index) => ({
       id: card.id,
       title: card.title,
       text: card.description || card.notes || card.title, // Use available text content

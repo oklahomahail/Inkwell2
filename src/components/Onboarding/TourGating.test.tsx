@@ -13,7 +13,7 @@ import { ProfileTourProvider } from './ProfileTourProvider';
 import { TourProvider, useTour, CORE_TOUR_STEPS } from './TourProvider';
 
 // Mock component to access tour context
-function TestTourComponent({ onTourStart }: { onTourStart?: () => void }) {
+function _TestTourComponent({ onTourStart }: { onTourStart?: () => void }) {
   const { startTour, shouldShowTourPrompt, tourState } = useTour();
 
   return (

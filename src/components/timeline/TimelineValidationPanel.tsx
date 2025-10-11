@@ -13,9 +13,9 @@ import type { EnhancedProject } from '@/types/project';
 interface TimelineValidationPanelProps {
   projectId: string;
   project?: EnhancedProject;
-  onNavigateToEvent?: (eventId: string) => void;
-  onNavigateToScene?: (sceneId: string, chapterId: string) => void;
-  onAutoFix?: (conflictId: string) => void;
+  onNavigateToEvent?: (_eventId: string) => void;
+  onNavigateToScene?: (_sceneId: string, _chapterId: string) => void;
+  onAutoFix?: (_conflictId: string) => void;
 }
 
 type Severity = 'low' | 'medium' | 'high' | 'critical';
@@ -50,10 +50,10 @@ const conflictTypeIcons: Record<RuleKey, React.ReactNode> = {
 
 const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
   projectId,
-  project,
-  onNavigateToEvent,
-  onNavigateToScene,
-  onAutoFix,
+  _project,
+  _onNavigateToEvent,
+  _onNavigateToScene,
+  _onAutoFix,
 }) => {
   const [validationResult, setValidationResult] = useState<TimelineValidationResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);
@@ -79,7 +79,7 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
     }
   };
 
-  const handleAutoFix = async (conflict: TimelineConflict) => {
+  const handleAutoFix = async (_conflict: TimelineConflict) => {
     if (onAutoFix) {
       onAutoFix(conflict.id);
       // Re-validate after auto-fix
@@ -87,7 +87,7 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
     }
   };
 
-  const renderConflictCard = (conflict: TimelineConflict, _isWarning: boolean = false) => {
+  const renderConflictCard = (_conflict: TimelineConflict, _isWarning: boolean = false) => {
     const isExpanded = expandedConflict === conflict.id;
     const colorClass = severityColors[conflict.severity];
 
@@ -129,7 +129,7 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
                     <div>
                       <p className="text-sm font-medium">Evidence:</p>
                       <ul className="text-sm text-gray-600 list-disc list-inside space-y-1">
-                        {conflict.evidence.map((evidence: string, index: number) => (
+                        {conflict.evidence.map((evidence: string, _index: number) => (
                           <li key={index}>{evidence}</li>
                         ))}
                       </ul>
@@ -186,7 +186,7 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
     );
   };
 
-  const renderOptimizationCard = (optimization: TimelineOptimization) => {
+  const renderOptimizationCard = (_optimization: TimelineOptimization) => {
     const impactColors: Record<TimelineOptimization['impact'], string> = {
       low: 'bg-gray-100 text-gray-800',
       medium: 'bg-yellow-100 text-yellow-800',
@@ -240,7 +240,7 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
     );
   };
 
-  const getScoreColor = (score: number) => {
+  const getScoreColor = (_score: number) => {
     if (score >= 90) return 'text-green-600';
     if (score >= 70) return 'text-yellow-600';
     if (score >= 50) return 'text-orange-600';

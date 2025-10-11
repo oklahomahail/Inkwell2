@@ -193,7 +193,7 @@ class QuotaAwareStorage {
   /**
    * Subscribe to quota updates
    */
-  onQuotaUpdate(callback: (info: StorageQuotaInfo) => void): () => void {
+  onQuotaUpdate(_callback: (info: StorageQuotaInfo) => void): () => void {
     this.quotaListeners.push(callback);
     return () => {
       const index = this.quotaListeners.indexOf(callback);
@@ -206,7 +206,7 @@ class QuotaAwareStorage {
   /**
    * Subscribe to storage errors
    */
-  onStorageError(callback: (error: StorageError) => void): () => void {
+  onStorageError(_callback: (error: StorageError) => void): () => void {
     this.errorListeners.push(callback);
     return () => {
       const index = this.errorListeners.indexOf(callback);

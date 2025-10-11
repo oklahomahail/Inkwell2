@@ -27,7 +27,7 @@ const ASSET_MAP: Record<LogoVariant, { src: string; aspectRatio: number }> = {
   'svg-feather-navy': { src: '/brand/inkwell-feather-navy.svg', aspectRatio: 1 },
 };
 
-export default function Logo({ variant, size = 48, className }: Props) {
+export default function _Logo({ variant, size = 48, className }: Props) {
   const asset = ASSET_MAP[variant];
   const width = Math.round(size * asset.aspectRatio);
 

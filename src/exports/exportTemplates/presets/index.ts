@@ -11,39 +11,39 @@ import screenplay from './screenplay.json';
 const presets: Record<string, StylePresetMeta> = {
   'classic-manuscript': classicManuscript as StylePresetMeta,
   'modern-book': modernBook as StylePresetMeta,
-  'screenplay': screenplay as StylePresetMeta,
+  screenplay: screenplay as StylePresetMeta,
 };
 
 /**
  * Gets all available style presets
  */
-export function getAllStylePresets(): StylePresetMeta[] {
+export function _getAllStylePresets(): StylePresetMeta[] {
   return Object.values(presets);
 }
 
 /**
  * Gets a specific style preset by ID
  */
-export async function getStylePreset(id: string): Promise<StylePresetMeta | null> {
+export async function _getStylePreset(id: string): Promise<StylePresetMeta | null> {
   return presets[id] || null;
 }
 
 /**
  * Gets presets suitable for a specific format
  */
-export function getPresetsForFormat(format: 'PDF' | 'DOCX' | 'EPUB'): StylePresetMeta[] {
+export function _getPresetsForFormat(format: 'PDF' | 'DOCX' | 'EPUB'): StylePresetMeta[] {
   const allPresets = getAllStylePresets();
-  
+
   switch (format) {
     case 'PDF':
       // All presets work with PDF
       return allPresets;
     case 'DOCX':
       // DOCX works well with most presets
-      return allPresets.filter(p => p.id !== 'screenplay');
+      return allPresets.filter((p) => p.id !== 'screenplay');
     case 'EPUB':
       // EPUB prefers simpler styling
-      return allPresets.filter(p => ['modern-book', 'classic-manuscript'].includes(p.id));
+      return allPresets.filter((p) => ['modern-book', 'classic-manuscript'].includes(p.id));
     default:
       return allPresets;
   }
@@ -52,9 +52,9 @@ export function getPresetsForFormat(format: 'PDF' | 'DOCX' | 'EPUB'): StylePrese
 /**
  * Replaces template variables in a string
  */
-export function replaceTemplateVariables(template: string, context: TemplateContext): string {
+export function _replaceTemplateVariables(template: string, context: TemplateContext): string {
   if (!template) return '';
-  
+
   return template
     .replace(/\{title\}/g, context.title || '')
     .replace(/\{author\}/g, context.author || '')
@@ -69,7 +69,7 @@ export function replaceTemplateVariables(template: string, context: TemplateCont
 /**
  * Generates CSS from a style preset
  */
-export function generateCSS(preset: StylePresetMeta): string {
+export function _generateCSS(preset: StylePresetMeta): string {
   const marginTop = `${preset.marginsIn.top}in`;
   const marginRight = `${preset.marginsIn.right}in`;
   const marginBottom = `${preset.marginsIn.bottom}in`;
@@ -179,9 +179,9 @@ p.after-scene-break {
 /**
  * Generates HTML template for a manuscript
  */
-export function generateHTMLTemplate(preset: StylePresetMeta): string {
+export function _generateHTMLTemplate(preset: StylePresetMeta): string {
   const css = generateCSS(preset);
-  
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -268,7 +268,7 @@ ${css}
 /**
  * Gets the default preset for a format
  */
-export function getDefaultPresetForFormat(format: 'PDF' | 'DOCX' | 'EPUB'): string {
+export function _getDefaultPresetForFormat(format: 'PDF' | 'DOCX' | 'EPUB'): string {
   switch (format) {
     case 'PDF':
       return 'classic-manuscript';

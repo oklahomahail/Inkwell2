@@ -15,7 +15,7 @@ type Props = {
   persistKey?: string;
 };
 
-export default function TourOverlay({ tourType = 'full-onboarding', onClose, persistKey }: Props) {
+export default function _TourOverlay({ tourType = 'full-onboarding', onClose, persistKey }: Props) {
   const steps = useMemo(() => loadTourPreset(tourType), [tourType]);
   const total = steps.length;
   const [i, setI] = useState(0);
@@ -71,9 +71,9 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
     } catch {}
     // mark tour complete
     try {
-      void setProgress(slug, {
+      void setProgress(_slug, {
         currentStep: total - 1,
-        completedSteps: Array.from({ length: total }, (_, k) => `step-${k}`),
+        _completedSteps: Array.from({ length: total }, (_, _k) => `step-${k}`),
         tourType,
         startedAt: Date.now(),
         completedAt: Date.now(),

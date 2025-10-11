@@ -172,8 +172,10 @@ export const migrateProjectToLatest = (data: any): Project => {
   // Ensure required fields exist
   if (!data.currentWordCount) {
     data.currentWordCount =
-      data.chapters?.reduce((total: number, chapter: any) => total + (chapter.wordCount || 0), 0) ||
-      0;
+      data.chapters?.reduce(
+        (total: number, _chapter: any) => total + (chapter.wordCount || 0),
+        0,
+      ) || 0;
   }
 
   // Ensure timestamps
@@ -185,11 +187,11 @@ export const migrateProjectToLatest = (data: any): Project => {
   if (data.chapters) {
     data.chapters = data.chapters.map((chapter: any) => ({
       ...chapter,
-      createdAt: chapter.createdAt || now,
-      updatedAt: chapter.updatedAt || now,
-      wordCount:
+      _createdAt: chapter.createdAt || now,
+      _updatedAt: chapter.updatedAt || now,
+      _wordCount:
         chapter.wordCount ||
-        chapter.scenes?.reduce((total: number, scene: any) => total + (scene.wordCount || 0), 0) ||
+        chapter.scenes?.reduce((total: number, _scene: any) => total + (scene.wordCount || 0), 0) ||
         0,
       scenes:
         chapter.scenes?.map((scene: any) => ({

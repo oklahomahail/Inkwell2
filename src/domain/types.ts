@@ -208,8 +208,8 @@ export interface SettingsStoreState {
 
 /* ========= Action Types for Stores ========= */
 export interface StoreActions {
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
+  setLoading: (_loading: boolean) => void;
+  setError: (_error: string | null) => void;
   clearError: () => void;
 }
 

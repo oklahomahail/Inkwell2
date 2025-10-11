@@ -145,14 +145,14 @@ export type UIMode = 'beginner' | 'pro';
 /**
  * Get the appropriate preset for a UI mode
  */
-export function getPresetForMode(mode: UIMode): FeatureFlagPreset {
+export function _getPresetForMode(mode: UIMode): FeatureFlagPreset {
   return mode === 'beginner' ? BeginnerPreset : ProPreset;
 }
 
 /**
  * Convert preset to feature flag configuration
  */
-export function presetToFlags(preset: FeatureFlagPreset): Record<string, boolean> {
+export function _presetToFlags(preset: FeatureFlagPreset): Record<string, boolean> {
   const flags: Record<string, boolean> = {};
 
   // Map UI flags
@@ -241,7 +241,7 @@ export const StarterTemplates = {
 /**
  * Opinionated file naming convention
  */
-export function formatSceneFilename(
+export function _formatSceneFilename(
   projectName: string,
   chapterIndex: number,
   sceneIndex: number,
@@ -254,7 +254,7 @@ export function formatSceneFilename(
 /**
  * Default editor settings based on mode
  */
-export function getEditorDefaults(mode: UIMode) {
+export function _getEditorDefaults(mode: UIMode) {
   const preset = getPresetForMode(mode);
   return {
     focusMode: preset.editor.focusModeDefault,

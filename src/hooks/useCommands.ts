@@ -4,9 +4,9 @@ import { useAppContext, View } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
 import { Command } from '@/types/commands';
 
-export function useCommands(
-  selectedText?: string,
-  onCommandExecute?: (commandId: string) => void,
+export function _useCommands(
+  _selectedText?: string,
+  _onCommandExecute?: (commandId: string) => void,
 ): Command[] {
   const { setView, addProject, currentProject, claudeActions } = useAppContext();
   const { showToast } = useToast();
@@ -119,15 +119,15 @@ export function useCommands(
       commands.push(
         {
           id: 'claude-improve',
-          label: 'Improve Writing',
-          description: selectedText
+          _label: 'Improve Writing',
+          _description: selectedText
             ? 'Improve selected text with Claude AI'
             : 'Improve current writing with Claude AI',
-          icon: '✨',
-          category: 'claude',
-          keywords: ['improve', 'enhance', 'claude', 'ai'],
-          enabled: !!currentProject?.content || !!selectedText,
-          action: async () => {
+          _icon: '✨',
+          _category: 'claude',
+          _keywords: ['improve', 'enhance', 'claude', 'ai'],
+          _enabled: !!currentProject?.content || !!selectedText,
+          _action: async () => {
             try {
               onCommandExecute?.('claude-improve');
               const textToImprove = selectedText || currentProject?.content || '';

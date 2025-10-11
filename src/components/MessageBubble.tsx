@@ -10,9 +10,9 @@ interface MessageBubbleProps {
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({
   role,
-  content,
-  timestamp,
-  className = '',
+  _content,
+  _timestamp,
+  _className = '',
 }) => {
   const isUser = role === 'user';
 

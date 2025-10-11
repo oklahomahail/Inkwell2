@@ -13,7 +13,7 @@ declare var self: DedicatedWorkerGlobalScope;
 // Simple in-memory index for demo
 const index = new Map<string, { projectId: string; content: string }>();
 
-function buildIndex(message: Extract<WorkerMessage, { type: 'BUILD_INDEX' }>): void {
+function _buildIndex(message: Extract<WorkerMessage, { type: 'BUILD_INDEX' }>): void {
   const { projectId, project, chapters } = message;
 
   // Index project data
@@ -45,7 +45,7 @@ function buildIndex(message: Extract<WorkerMessage, { type: 'BUILD_INDEX' }>): v
   } satisfies WorkerResponse);
 }
 
-function search(message: Extract<WorkerMessage, { type: 'SEARCH_QUERY' }>): void {
+function _search(message: Extract<WorkerMessage, { type: 'SEARCH_QUERY' }>): void {
   const { projectId, query, options, requestId } = message;
 
   const results: SearchResult[] = [];

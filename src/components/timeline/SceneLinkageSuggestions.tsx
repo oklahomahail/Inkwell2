@@ -10,9 +10,9 @@ import type { TimelineItem } from '@/types/timeline';
 interface SceneLinkageSuggestionsProps {
   projectId: string;
   project: EnhancedProject;
-  onLinkAccepted?: (sceneId: string, chapterId: string, eventIds: string[]) => void;
-  onNavigateToScene?: (sceneId: string, chapterId: string) => void;
-  onNavigateToEvent?: (eventId: string) => void;
+  onLinkAccepted?: (_sceneId: string, _chapterId: string, _eventIds: string[]) => void;
+  onNavigateToScene?: (_sceneId: string, _chapterId: string) => void;
+  onNavigateToEvent?: (_eventId: string) => void;
 }
 
 interface LinkageSuggestion {
@@ -25,10 +25,10 @@ interface LinkageSuggestion {
 
 const SceneLinkageSuggestions: React.FC<SceneLinkageSuggestionsProps> = ({
   projectId,
-  project,
-  onLinkAccepted,
-  onNavigateToScene,
-  onNavigateToEvent,
+  _project,
+  _onLinkAccepted,
+  _onNavigateToScene,
+  _onNavigateToEvent,
 }) => {
   const [suggestions, setSuggestions] = useState<LinkageSuggestion[]>([]);
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
@@ -67,7 +67,7 @@ const SceneLinkageSuggestions: React.FC<SceneLinkageSuggestionsProps> = ({
     }
   };
 
-  const handleAcceptLinkage = async (suggestion: LinkageSuggestion) => {
+  const handleAcceptLinkage = async (_suggestion: LinkageSuggestion) => {
     const linkageKey = `${suggestion.sceneId}_${suggestion.suggestedEvents.join('_')}`;
     setProcessingLinks((prev) => new Set([...prev, linkageKey]));
 
@@ -99,32 +99,32 @@ const SceneLinkageSuggestions: React.FC<SceneLinkageSuggestionsProps> = ({
     }
   };
 
-  const handleDismissSuggestion = (suggestion: LinkageSuggestion) => {
+  const handleDismissSuggestion = (_suggestion: LinkageSuggestion) => {
     const suggestionId = `${suggestion.sceneId}_${suggestion.suggestedEvents.join('_')}`;
     setDismissedSuggestions((prev) => new Set([...prev, suggestionId]));
   };
 
-  const getScene = (sceneId: string, chapterId: string) => {
+  const getScene = (_sceneId: string, _chapterId: string) => {
     const chapter = project.chapters.find((c) => c.id === chapterId);
     return chapter?.scenes?.find((s: any) => s.id === sceneId);
   };
 
-  const getChapter = (chapterId: string) => {
+  const getChapter = (_chapterId: string) => {
     return project.chapters.find((c) => c.id === chapterId);
   };
 
-  const getTimelineEvent = (eventId: string) => {
+  const getTimelineEvent = (_eventId: string) => {
     return timelineItems.find((item) => item.id === eventId);
   };
 
-  const getConfidenceColor = (confidence: number) => {
+  const getConfidenceColor = (_confidence: number) => {
     if (confidence >= 0.8) return 'text-green-600 bg-green-50 border-green-200';
     if (confidence >= 0.6) return 'text-blue-600 bg-blue-50 border-blue-200';
     if (confidence >= 0.4) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
     return 'text-gray-600 bg-gray-50 border-gray-200';
   };
 
-  const getConfidenceLabel = (confidence: number) => {
+  const getConfidenceLabel = (_confidence: number) => {
     if (confidence >= 0.8) return 'High Confidence';
     if (confidence >= 0.6) return 'Medium Confidence';
     if (confidence >= 0.4) return 'Low Confidence';

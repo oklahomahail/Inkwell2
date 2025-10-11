@@ -12,9 +12,9 @@ interface AccessibilityAnnouncerProps {
 
 export const AccessibilityAnnouncer: React.FC<AccessibilityAnnouncerProps> = ({
   message,
-  assertiveness = 'assertive',
-  clearAfter = 5000,
-  className = '',
+  _assertiveness = 'assertive',
+  _clearAfter = 5000,
+  _className = '',
 }) => {
   const [announcement, setAnnouncement] = React.useState(message);
 

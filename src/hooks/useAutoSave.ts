@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 export interface UseAutoSaveOptions<T> {
   value: T;
   delay?: number; // ms
-  onSave: (value: T) => void | Promise<void>;
+  onSave: (_value: T) => void | Promise<void>;
   enabled?: boolean;
 }
 

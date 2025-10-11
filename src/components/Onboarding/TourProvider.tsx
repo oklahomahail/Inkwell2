@@ -29,25 +29,25 @@ interface TourContextValue {
   tourState: TourState;
   preferences: TourPreferences;
   checklist: CompletionChecklist;
-  startTour: (type: TourState['tourType'], steps?: TourStep[]) => void;
+  startTour: (_type: TourState['tourType'], _steps?: TourStep[]) => void;
   nextStep: () => void;
   previousStep: () => void;
   skipTour: () => void;
   completeTour: () => void;
-  completeStep: (stepId: string) => void;
-  goToStep: (stepIndex: number) => void;
-  setTourSteps: (steps: TourStep[]) => void;
-  isStepCompleted: (stepId: string) => boolean;
+  completeStep: (_stepId: string) => void;
+  goToStep: (_stepIndex: number) => void;
+  setTourSteps: (_steps: TourStep[]) => void;
+  isStepCompleted: (_stepId: string) => boolean;
   getCurrentStep: () => TourStep | null;
   resetTour: () => void;
   // New methods for enhanced functionality
   setNeverShowAgain: () => void;
-  setRemindMeLater: (hours?: number) => void;
+  setRemindMeLater: (_hours?: number) => void;
   shouldShowTourPrompt: () => boolean;
-  updateChecklist: (item: keyof CompletionChecklist) => void;
+  updateChecklist: (_item: keyof CompletionChecklist) => void;
   getChecklistProgress: () => { completed: number; total: number };
-  logAnalytics: (event: string, data?: any) => void;
-  canShowContextualTour: (tourType: string) => boolean;
+  logAnalytics: (_event: string, _data?: any) => void;
+  canShowContextualTour: (_tourType: string) => boolean;
 }
 
 const TourContext = createContext<TourContextValue | undefined>(undefined);
@@ -182,7 +182,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
   }, [checklist]);
 
   // Define logAnalytics first to avoid temporal dead zone errors
-  const logAnalytics = (event: string, data: any = {}) => {
+  const logAnalytics = (_event: string, _data: any = {}) => {
     try {
       // Enhanced analytics with tour context
       const analyticsEvent = {
@@ -246,7 +246,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
     }
   };
 
-  const startTour = (type: TourState['tourType'], steps?: TourStep[]) => {
+  const startTour = (_type: TourState['tourType'], _steps?: TourStep[]) => {
     // Prevent duplicate tours
     if (tourState.isActive) {
       console.warn('Tour already active, ignoring duplicate start request');
@@ -321,30 +321,30 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
 
     setTourState((prev) => ({
       ...prev,
-      isActive: false,
-      isFirstTimeUser: false,
-      completedSteps: [...new Set([...prev.completedSteps, ...prev.steps.map((s) => s.id)])],
+      _isActive: false,
+      _isFirstTimeUser: false,
+      _completedSteps: [...new Set([...prev.completedSteps, ...prev.steps.map((s) => s.id)])],
     }));
   };
 
-  const completeStep = (stepId: string) => {
+  const completeStep = (_stepId: string) => {
     setTourState((prev) => ({
       ...prev,
       completedSteps: [...new Set([...prev.completedSteps, stepId])],
     }));
   };
 
-  const goToStep = (stepIndex: number) => {
+  const goToStep = (_stepIndex: number) => {
     setTourState((prev) => ({
       ...prev,
       currentStep: Math.max(0, Math.min(stepIndex, prev.steps.length - 1)),
     }));
   };
 
-  const setTourSteps = (steps: TourStep[]) => {
+  const setTourSteps = (_steps: TourStep[]) => {
     setTourState((prev) => ({
       ...prev,
-      steps: [...steps].sort((a, b) => a.order - b.order),
+      _steps: [...steps].sort((a, _b) => a.order - b.order),
     }));
   };
 
@@ -377,7 +377,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
     logAnalytics('tour_never_show_again');
   };
 
-  const setRemindMeLater = (hours: number = 24) => {
+  const setRemindMeLater = (_hours: number = 24) => {
     const remindMeLaterUntil = Date.now() + hours * 60 * 60 * 1000;
     setPreferences((prev) => ({
       ...prev,
@@ -413,7 +413,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
     return tourState.isFirstTimeUser && !preferences.completedTours.includes('full-onboarding');
   };
 
-  const updateChecklist = (item: keyof CompletionChecklist) => {
+  const updateChecklist = (_item: keyof CompletionChecklist) => {
     setChecklist((prev) => ({ ...prev, [item]: true }));
     logAnalytics('checklist_item_completed', { item });
   };

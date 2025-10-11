@@ -6,12 +6,12 @@ import { useAppContext } from '@/context/AppContext';
 import { SmartSearchResult } from '../services/smartSearchService';
 
 interface UseSmartSearchOptions {
-  onNavigate?: (result: SmartSearchResult) => void;
+  onNavigate?: (_result: SmartSearchResult) => void;
   defaultQuery?: string;
   focusMode?: 'research' | 'writing' | 'editing' | 'analysis';
 }
 
-export const useSmartSearch = (options: UseSmartSearchOptions = {}) => {
+export const useSmartSearch = (_options: UseSmartSearchOptions = {}) => {
   const { onNavigate, defaultQuery = '', focusMode } = options;
   const { currentProject } = useAppContext();
 
@@ -70,7 +70,7 @@ export const useSmartSearch = (options: UseSmartSearchOptions = {}) => {
 
   // Keyboard shortcut handler
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (_event: KeyboardEvent) => {
       // Cmd+Shift+F or Ctrl+Shift+F to open search
       if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'f') {
         event.preventDefault();

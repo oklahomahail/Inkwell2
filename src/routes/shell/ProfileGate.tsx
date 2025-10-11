@@ -18,7 +18,7 @@ interface ProfileGateProps {
  *
  * If any condition fails, redirects to profile picker
  */
-export function ProfileGate({ children }: ProfileGateProps) {
+export function _ProfileGate({ children }: ProfileGateProps) {
   const { profileId } = useParams<{ profileId: string }>();
   const { profiles, activeProfile, setActiveProfile } = useProfile();
   const [ready, setReady] = useState(false);

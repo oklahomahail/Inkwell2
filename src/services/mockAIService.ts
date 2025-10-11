@@ -387,11 +387,11 @@ class MockAIService {
 /**
  * Mock plot analysis for development and testing
  */
-export async function mockAnalyzeBoard(input: AnalyzeBoardInput): Promise<PlotAnalysis> {
+export async function _mockAnalyzeBoard(input: AnalyzeBoardInput): Promise<PlotAnalysis> {
   // Simulate some processing delay
   await new Promise((resolve) => setTimeout(resolve, Math.random() * 1000 + 500));
 
-  const pacing = input.scenes.map((s, i) => ({
+  const pacing = input.scenes.map((s, _i) => ({
     sceneId: s.id,
     index: i,
     tension: Math.abs(Math.sin(i)),
@@ -441,7 +441,7 @@ export async function mockAnalyzeBoard(input: AnalyzeBoardInput): Promise<PlotAn
       },
     ],
     pacing,
-    conflictHeatmap: pacing.map((p, i) => ({
+    conflictHeatmap: pacing.map((p, _i) => ({
       row: Math.floor(i / 3),
       col: i % 3,
       value: p.tension * 0.7 + Math.random() * 0.3,

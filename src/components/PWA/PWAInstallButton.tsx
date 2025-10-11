@@ -7,15 +7,15 @@ import { usePWA, pwaService } from '../../services/pwaService';
 interface PWAInstallButtonProps {
   className?: string;
   variant?: 'button' | 'banner' | 'fab';
-  onInstall?: (success: boolean) => void;
+  onInstall?: (_success: boolean) => void;
   onDismiss?: () => void;
 }
 
 export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
   className = '',
-  variant = 'button',
-  onInstall,
-  onDismiss,
+  _variant = 'button',
+  _onInstall,
+  _onDismiss,
 }) => {
   const { installApp, canInstall } = usePWA();
   const [showPrompt, setShowPrompt] = useState(false);

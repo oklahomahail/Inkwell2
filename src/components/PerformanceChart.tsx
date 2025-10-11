@@ -17,7 +17,7 @@ export type PerformanceChartProps = {
   className?: string;
 };
 
-function toNumber(v: unknown): number | null {
+function _toNumber(v: unknown): number | null {
   if (typeof v === 'number') return Number.isFinite(v) ? v : null;
   if (typeof v === 'string') {
     const n = Number(v);
@@ -26,7 +26,7 @@ function toNumber(v: unknown): number | null {
   return null;
 }
 
-export default function PerformanceChart({
+export default function _PerformanceChart({
   title,
   type = 'trend',
   rows = [],

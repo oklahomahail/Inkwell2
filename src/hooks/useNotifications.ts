@@ -16,18 +16,18 @@ export interface UseNotificationsApi {
   toggle: () => void;
   notifications: NotificationItem[];
   add: (
-    n: Omit<NotificationItem, 'id' | 'timestamp' | 'read'> & {
+    _n: Omit<NotificationItem, 'id' | 'timestamp' | 'read'> & {
       id?: string;
       timestamp?: Date;
       read?: boolean;
     },
   ) => string;
-  markAsRead: (id: string) => void;
+  markAsRead: (_id: string) => void;
   markAllAsRead: () => void;
   clear: () => void;
 }
 
-export function useNotifications(): UseNotificationsApi {
+export function _useNotifications(): UseNotificationsApi {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>(() => seed());
   const idSeq = useRef(1000);
@@ -73,7 +73,7 @@ export function useNotifications(): UseNotificationsApi {
 }
 
 // simple starter data
-function seed(): NotificationItem[] {
+function _seed(): NotificationItem[] {
   return [
     {
       id: '1',

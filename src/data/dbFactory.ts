@@ -7,12 +7,12 @@ export interface DB {
   // add methods your code expects
 }
 
-export function useMaybeDB(): DB | null {
+export function _useMaybeDB(): DB | null {
   // return a memoized DB instance or null in SSR/CI
   return useMemo<DB | null>(() => null, []);
 }
 
-export function defineStores(_db: DB | null) {
+export function _defineStores(_db: DB | null) {
   // return the store API your services expect, or no-ops in SSR
   return {
     tutorials: {

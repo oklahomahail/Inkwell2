@@ -24,12 +24,12 @@ interface FeatureHint {
 }
 
 interface FeatureDiscoveryContextValue {
-  showHint: (hintId: string) => void;
-  hideHint: (hintId: string) => void;
-  dismissHint: (hintId: string) => void;
-  isHintVisible: (hintId: string) => boolean;
-  isHintDismissed: (hintId: string) => boolean;
-  registerHints: (hints: FeatureHint[]) => void;
+  showHint: (_hintId: string) => void;
+  hideHint: (_hintId: string) => void;
+  dismissHint: (_hintId: string) => void;
+  isHintVisible: (_hintId: string) => boolean;
+  isHintDismissed: (_hintId: string) => boolean;
+  registerHints: (_hints: FeatureHint[]) => void;
   activeHint: FeatureHint | null;
 }
 
@@ -161,33 +161,33 @@ export const FeatureDiscoveryProvider: React.FC<FeatureDiscoveryProviderProps> =
     }
   }, [dismissedHints]);
 
-  const showHint = (hintId: string) => {
+  const showHint = (_hintId: string) => {
     const hint = availableHints.find((h) => h.id === hintId);
     if (hint && !dismissedHints.includes(hintId)) {
       setActiveHint(hint);
     }
   };
 
-  const hideHint = (hintId: string) => {
+  const hideHint = (_hintId: string) => {
     if (activeHint?.id === hintId) {
       setActiveHint(null);
     }
   };
 
-  const dismissHint = (hintId: string) => {
+  const dismissHint = (_hintId: string) => {
     setDismissedHints((prev) => [...prev, hintId]);
     hideHint(hintId);
   };
 
-  const isHintVisible = (hintId: string) => {
+  const isHintVisible = (_hintId: string) => {
     return activeHint?.id === hintId;
   };
 
-  const isHintDismissed = (hintId: string) => {
+  const isHintDismissed = (_hintId: string) => {
     return dismissedHints.includes(hintId);
   };
 
-  const registerHints = (hints: FeatureHint[]) => {
+  const registerHints = (_hints: FeatureHint[]) => {
     setAvailableHints((prev) => [...prev, ...hints]);
   };
 
@@ -287,7 +287,7 @@ const FeatureHintOverlay: React.FC = () => {
     hideHint(activeHint.id);
   };
 
-  const getPriorityColor = (priority: FeatureHint['priority']) => {
+  const getPriorityColor = (_priority: FeatureHint['priority']) => {
     switch (priority) {
       case 'high':
         return 'border-blue-400 bg-blue-50 dark:bg-blue-900/20';
@@ -298,7 +298,7 @@ const FeatureHintOverlay: React.FC = () => {
     }
   };
 
-  const getPriorityIcon = (priority: FeatureHint['priority']) => {
+  const getPriorityIcon = (_priority: FeatureHint['priority']) => {
     switch (priority) {
       case 'high':
         return <Sparkles className="w-4 h-4 text-blue-500" />;
@@ -379,8 +379,8 @@ const FeatureHintOverlay: React.FC = () => {
 
 // Hook for triggering contextual hints based on conditions
 export const useContextualHints = (
-  currentView: string,
-  appState: {
+  _currentView: string,
+  _appState: {
     hasProjects: boolean;
     hasContent: boolean;
     userLevel: 'beginner' | 'intermediate' | 'advanced';
@@ -451,7 +451,7 @@ interface HintTriggerProps {
   className?: string;
 }
 
-export const HintTrigger: React.FC<HintTriggerProps> = ({ hintId, children, className = '' }) => {
+export const HintTrigger: React.FC<HintTriggerProps> = ({ hintId, _children, _className = '' }) => {
   const { showHint, hideHint, isHintDismissed } = useFeatureDiscovery();
 
   if (isHintDismissed(hintId)) {

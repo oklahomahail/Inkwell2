@@ -26,7 +26,7 @@ import {
 import { timelineService } from '@/services/timelineService';
 
 interface StoryArchitectFlowProps {
-  onComplete?: (outline: GeneratedOutline) => void;
+  onComplete?: (_outline: GeneratedOutline) => void;
   onClose?: () => void;
   initialProject?: any;
 }
@@ -51,7 +51,7 @@ const Stepper: React.FC<StepperProps> = ({ currentStep, completedSteps }) => {
 
   return (
     <div className="flex items-center justify-center mb-8">
-      {steps.map((step, index) => {
+      {steps.map((step, _index) => {
         const StepIcon = step.icon;
         const isActive = currentStep === step.id;
         const isCompleted = completedSteps.has(step.id as FlowStep);
@@ -131,8 +131,8 @@ const Stepper: React.FC<StepperProps> = ({ currentStep, completedSteps }) => {
 
 export const StoryArchitectFlow: React.FC<StoryArchitectFlowProps> = ({
   onComplete,
-  onClose,
-  initialProject,
+  _onClose,
+  _initialProject,
 }) => {
   const { currentProject, updateProject } = useAppContext();
   const { showToast } = useToast();
@@ -468,12 +468,12 @@ export const StoryArchitectFlow: React.FC<StoryArchitectFlowProps> = ({
 
 interface PremiseStepProps {
   premise: StoryPremise;
-  onChange: (premise: StoryPremise) => void;
+  onChange: (_premise: StoryPremise) => void;
   isValid: boolean;
   onNext: () => void;
 }
 
-const PremiseStep: React.FC<PremiseStepProps> = ({ premise, onChange, isValid, onNext }) => {
+const PremiseStep: React.FC<PremiseStepProps> = ({ premise, _onChange, _isValid, onNext }) => {
   return (
     <div className="space-y-6">
       <div>
@@ -482,7 +482,7 @@ const PremiseStep: React.FC<PremiseStepProps> = ({ premise, onChange, isValid, o
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
           Provide the basic details about your story and I'll generate a comprehensive outline with
-          characters, chapters, and scenes.
+          characters, _chapters, and scenes.
         </p>
       </div>
 
@@ -507,7 +507,7 @@ const PremiseStep: React.FC<PremiseStepProps> = ({ premise, onChange, isValid, o
             </label>
             <select
               value={premise.genre}
-              onChange={(e) => onChange({ ...premise, genre: e.target.value })}
+              onChange={(_e) => onChange({ ...premise, genre: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
               <option value="">Select genre...</option>
@@ -531,7 +531,7 @@ const PremiseStep: React.FC<PremiseStepProps> = ({ premise, onChange, isValid, o
             </label>
             <select
               value={premise.targetLength}
-              onChange={(e) =>
+              onChange={(_e) =>
                 onChange({
                   ...premise,
                   targetLength: e.target.value as StoryPremise['targetLength'],
@@ -553,7 +553,7 @@ const PremiseStep: React.FC<PremiseStepProps> = ({ premise, onChange, isValid, o
             <input
               type="text"
               value={premise.tone}
-              onChange={(e) => onChange({ ...premise, tone: e.target.value })}
+              onChange={(_e) => onChange({ ...premise, tone: e.target.value })}
               placeholder="e.g., Dark and mysterious, Light-hearted adventure, Romantic comedy"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
@@ -566,7 +566,7 @@ const PremiseStep: React.FC<PremiseStepProps> = ({ premise, onChange, isValid, o
           </label>
           <textarea
             value={premise.premise}
-            onChange={(e) => onChange({ ...premise, premise: e.target.value })}
+            onChange={(_e) => onChange({ ...premise, premise: e.target.value })}
             placeholder="Describe your story premise in 2-3 sentences. What is the main conflict? Who is the protagonist? What's at stake?"
             rows={8}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
@@ -598,9 +598,9 @@ interface GeneratingStepProps {
 
 const GeneratingStep: React.FC<GeneratingStepProps> = ({
   progress,
-  status,
-  estimatedTime,
-  onCancel,
+  _status,
+  _estimatedTime,
+  _onCancel,
 }) => {
   return (
     <div className="flex flex-col items-center justify-center space-y-8 py-12">

@@ -17,39 +17,39 @@ import { PlotCard } from './PlotCard';
 interface PlotColumnProps {
   column: PlotColumnInterface;
   cards: PlotCardType[];
-  onEditCard?: (card: PlotCardType) => void;
-  onAddCard?: (columnId: string) => void;
-  onEditColumn?: (column: PlotColumnInterface) => void;
-  onDeleteColumn?: (columnId: string) => void;
+  onEditCard?: (_card: PlotCardType) => void;
+  onAddCard?: (_columnId: string) => void;
+  onEditColumn?: (_column: PlotColumnInterface) => void;
+  onDeleteColumn?: (_columnId: string) => void;
   showSceneLinks?: boolean;
   showTimeline?: boolean;
   isCompact?: boolean;
   // Keyboard navigation props
   focusedCardId?: string | null;
   draggedCardId?: string | null;
-  onCardFocus?: (cardId: string) => void;
-  onKeyboardDragStart?: (cardId: string) => void;
+  onCardFocus?: (_cardId: string) => void;
+  onKeyboardDragStart?: (_cardId: string) => void;
   // Undo/redo props
-  onBeforeCardDelete?: (cardId: string, cardTitle: string) => Promise<void>;
-  onBeforeCardCreate?: (columnTitle: string, cardTitle: string) => Promise<void>;
+  onBeforeCardDelete?: (_cardId: string, _cardTitle: string) => Promise<void>;
+  onBeforeCardCreate?: (_columnTitle: string, _cardTitle: string) => Promise<void>;
 }
 
 export const PlotColumn: React.FC<PlotColumnProps> = ({
   column,
-  cards,
-  onEditCard,
-  onAddCard,
-  onEditColumn,
-  onDeleteColumn,
-  showSceneLinks = true,
-  showTimeline = true,
-  isCompact = false,
-  focusedCardId = null,
-  draggedCardId = null,
-  onCardFocus,
-  onKeyboardDragStart,
-  onBeforeCardDelete,
-  onBeforeCardCreate,
+  _cards,
+  _onEditCard,
+  _onAddCard,
+  _onEditColumn,
+  _onDeleteColumn,
+  _showSceneLinks = true,
+  _showTimeline = true,
+  _isCompact = false,
+  _focusedCardId = null,
+  _draggedCardId = null,
+  _onCardFocus,
+  _onKeyboardDragStart,
+  _onBeforeCardDelete,
+  _onBeforeCardCreate,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { deleteCard, createCard } = usePlotBoardStore();
@@ -87,7 +87,7 @@ export const PlotColumn: React.FC<PlotColumnProps> = ({
     setIsAddingCard(false);
   };
 
-  const handleDeleteCard = async (cardId: string) => {
+  const handleDeleteCard = async (_cardId: string) => {
     const card = cards.find((c) => c.id === cardId);
     if (card && onBeforeCardDelete) {
       await onBeforeCardDelete(cardId, card.title);
@@ -128,7 +128,7 @@ export const PlotColumn: React.FC<PlotColumnProps> = ({
     }
   };
 
-  const sortedCards = [...cards].sort((a, b) => a.order - b.order);
+  const sortedCards = [...cards].sort((a, _b) => a.order - b.order);
   const cardIds = sortedCards.map((card) => card.id);
 
   const columnClasses = `
@@ -271,7 +271,7 @@ export const PlotColumn: React.FC<PlotColumnProps> = ({
             placeholder="Card title..."
             className="w-full text-sm border-none outline-none resize-none"
             autoFocus
-            onKeyDown={(e) => {
+            onKeyDown={(_e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleQuickAdd();
@@ -357,7 +357,7 @@ export const PlotColumn: React.FC<PlotColumnProps> = ({
               <span>
                 {cards
                   .filter((c) => c.wordCount)
-                  .reduce((sum, c) => sum + (c.wordCount || 0), 0)
+                  .reduce((sum, _c) => sum + (c.wordCount || 0), 0)
                   .toLocaleString()}{' '}
                 words
               </span>

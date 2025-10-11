@@ -196,7 +196,7 @@ class MainThreadSearchEngine {
         const df = entry.documents.size;
         const idf = Math.log((docCount - df + 0.5) / (df + 0.5));
 
-        entry.documents.forEach((termDoc, docId) => {
+        entry.documents.forEach((termDoc, _docId) => {
           const doc = docs.get(docId);
           if (!doc || !types.includes(doc.type)) return;
 
@@ -324,7 +324,7 @@ class MainThreadSearchEngine {
   private indexDocument(index: Map<string, TermEntry>, docId: string, content: string): void {
     const terms = this.tokenize(content);
 
-    terms.forEach((term, position) => {
+    terms.forEach((term, _position) => {
       let entry = index.get(term);
       if (!entry) {
         entry = { term, documents: new Map<string, TermDocEntry>() };
@@ -357,13 +357,13 @@ class MainThreadSearchEngine {
     if (!escaped.length) return excerpt;
 
     const regex = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi');
-    return excerpt.replace(regex, (m) => `<mark>${m}</mark>`);
+    return excerpt.replace(_regex, (m) => `<mark>${m}</mark>`);
   }
 
   private getAverageDocumentLength(docs: Map<string, SearchResult>): number {
     const lengths = Array.from(docs.values()).map((d) => d.content.length || 0);
     if (!lengths.length) return 100;
-    const sum = lengths.reduce((a, b) => a + b, 0);
+    const sum = lengths.reduce((a, _b) => a + b, 0);
     return sum / lengths.length || 100;
   }
 
@@ -383,8 +383,8 @@ class MainThreadSearchEngine {
   /** Percentiles + query count kept separate from SearchStats */
   getPerformanceMetrics(): { p50: number; p95: number; queries: number } {
     if (this.performanceSamplesMs.length === 0) return { p50: 0, p95: 0, queries: 0 };
-    const sorted = [...this.performanceSamplesMs].sort((a, b) => a - b);
-    const at = (p: number) =>
+    const sorted = [...this.performanceSamplesMs].sort((a, _b) => a - b);
+    const at = (_p: number) =>
       sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))] ?? 0;
     return {
       p50: at(0.5),
@@ -551,7 +551,7 @@ declare global {
       getPerformanceMetrics: () => ReturnType<EnhancedSearchService['getPerformanceMetrics']>;
       enableWorker: () => void;
       disableWorker: () => void;
-      testSearch: (query: string, projectId: string) => Promise<SearchResult[]>;
+      testSearch: (_query: string, _projectId: string) => Promise<SearchResult[]>;
     };
   }
 }
@@ -565,7 +565,7 @@ if (typeof window !== 'undefined') {
     getPerformanceMetrics: () => enhancedSearchService.getPerformanceMetrics(),
     enableWorker: () => enhancedSearchService.setWorkerPreference(true),
     disableWorker: () => enhancedSearchService.setWorkerPreference(false),
-    testSearch: async (query: string, projectId: string) => {
+    testSearch: async (_query: string, _projectId: string) => {
       console.log('Testing search:', query);
       const start =
         typeof performance !== 'undefined' && 'now' in performance ? performance.now() : Date.now();
