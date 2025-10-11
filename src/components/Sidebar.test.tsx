@@ -85,8 +85,7 @@ describe('Sidebar Component', () => {
 
   it('toggles collapsed state', () => {
     const toggleSidebar = vi.fn();
-    mockUI = { sidebarCollapsed: false, toggleSidebar };
-    renderSidebar();
+    renderSidebar({ ui: { sidebarCollapsed: false, toggleSidebar } });
 
     const toggleButton = screen.getByRole('button', { name: /collapse sidebar/i });
     fireEvent.click(toggleButton);
