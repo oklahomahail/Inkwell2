@@ -4,7 +4,7 @@ import { CheckCircle, AlertCircle, FileText, Clock, Users, BookOpen } from 'luci
 import React, { useMemo } from 'react';
 
 import { ExportReadinessCheck } from '@/exports/exportTypes';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 interface ExportReadyBadgeProps {
   projectId: string;
