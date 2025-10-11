@@ -1,8 +1,7 @@
-import tsconfigPaths from 'vite-tsconfig-paths';
+// vitest.config.ts
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
   test: {
     environment: 'jsdom',
     globals: true, // enables test/expect/vi globals
@@ -13,12 +12,13 @@ export default defineConfig({
       enabled: true,
       provider: 'v8',
       reportsDirectory: './coverage',
-      reporter: ['text', 'json-summary', 'html'],
+      reporter: ['text', 'json-summary', 'html', 'lcov'],
 
-      // Only measure files touched by tests to avoid massive 0% counts
+      // Only measure files touched by tests
       all: false,
+      include: ['src/**/*.{ts,tsx}'],
 
-      // Realistic exclusions to match local dev and CI expectations
+      // Realistic exclusions
       exclude: [
         'node_modules/**',
         'dist/**',
@@ -35,14 +35,20 @@ export default defineConfig({
         'src/**/index.ts',
         'src/**/types.ts',
         'src/**/constants.ts',
+        'src/**/__test__/**',
+        'src/test/**',
+        'src/**/mocks/**',
+        'src/**/fixtures/**',
+        'src/**/stories/**',
+        'src/**/routes/**',
       ],
 
-      // Relax thresholds so the pre-push hook passes cleanly
-      thresholds: {
-        lines: 0,
-        functions: 0,
-        statements: 0,
-        branches: 0,
+      // Set reasonable thresholds
+      thresholds: { 
+        lines: 30,
+        functions: 30, 
+        branches: 25,
+        statements: 30
       },
     },
   },
