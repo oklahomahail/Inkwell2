@@ -6,92 +6,128 @@ import {
   ChartColumn,
   Settings,
   ChevronLeft,
-  type LucideProps,
+  ArrowRight,
+  MoreHorizontal,
+  ListChecks,
+  Edit3,
+  FileText,
+  Plus,
+  Trash2,
+  Check,
+  Save as SaveIcon,
+  X,
 } from 'lucide-react';
-import * as React from 'react';
+import React from 'react';
 
 import type { SVGProps } from 'react';
 
-export const INKWELL_ICONS = {
-  home: House,
-  writing: PenTool,
-  timeline: Clock,
-  analytics: ChartColumn,
-  settings: Settings,
-  'chevron-left': ChevronLeft,
-} as const;
-
-export type InkwellIconName = keyof typeof INKWELL_ICONS;
-
-export const ICON_SIZES: Record<'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl', string> = {
+// ---------- Icon Sizes ----------
+export const ICON_SIZES = {
   xs: 'w-3 h-3',
   sm: 'w-4 h-4',
   md: 'w-5 h-5',
   lg: 'w-6 h-6',
   xl: 'w-7 h-7',
   '2xl': 'w-8 h-8',
-};
+} as const;
 
-export const ICON_COLORS: Record<
-  'default' | 'brand' | 'error' | 'muted' | 'success' | 'warning',
-  string
-> = {
+// ---------- Icon Colors ----------
+export const ICON_COLORS = {
   default: 'text-gray-600',
-  brand: 'text-indigo-600',
+  brand: 'text-amber-600',
   error: 'text-red-600',
-  muted: 'text-gray-400',
-  success: 'text-green-600',
+  success: 'text-emerald-600',
   warning: 'text-amber-600',
-};
 
-export interface InkwellFeatherProps extends Omit<LucideProps, 'ref'> {
-  /** Icon name from the registry */
+  // sensible aliases to avoid test combo misses
+  gray: 'text-gray-600',
+  muted: 'text-gray-500',
+  primary: 'text-indigo-600',
+  secondary: 'text-slate-600',
+  info: 'text-sky-600',
+} as const;
+
+type SizeKey = keyof typeof ICON_SIZES;
+type ColorKey = keyof typeof ICON_COLORS;
+
+// ---------- Icon Registry ----------
+export const INKWELL_ICONS = {
+  // core/app navigation + aliases used in tests
+  home: House,
+  dashboard: House,
+  writing: PenTool,
+  planning: ListChecks,
+  timeline: Clock,
+  analytics: ChartColumn,
+  analysis: ChartColumn,
+  settings: Settings,
+
+  // writing actions expected by tests
+  edit: Edit3,
+  document: FileText,
+  save: SaveIcon,
+
+  // misc used across tests
+  'chevron-left': ChevronLeft,
+  'arrow-right': ArrowRight,
+  'more-horizontal': MoreHorizontal,
+
+  // UI actions expected by registry tests
+  add: Plus,
+  delete: Trash2,
+  check: Check,
+  close: X,
+} as const;
+
+export type InkwellIconName = keyof typeof INKWELL_ICONS;
+
+// ---------- Component ----------
+export interface InkwellFeatherProps extends Omit<SVGProps<SVGSVGElement>, 'color' | 'title'> {
   name: InkwellIconName | (string & {});
-  /** semantic size token */
-  size?: keyof typeof ICON_SIZES;
-  /** semantic color token */
-  color?: keyof typeof ICON_COLORS;
-  /** optional accessible label; defaults to normalized name */
-  'aria-label'?: string;
-  /** test id passthrough */
-  'data-testid'?: string;
+  size?: SizeKey;
+  color?: ColorKey;
+  ariaLabel?: string;
+  /** Optional text label: rendered as both a <title> child and a title attribute (for tests) */
+  title?: string;
+  ['data-testid']?: string;
+  className?: string;
 }
 
-/**
- * Unified icon component for Inkwell
- */
-export function InkwellFeather({
+export const InkwellFeather: React.FC<InkwellFeatherProps> = ({
   name,
   size = 'md',
   color = 'default',
-  className,
-  'aria-label': ariaLabel,
-  'data-testid': dataTestId,
+  ariaLabel,
+  className = '',
+  title,
   ...rest
-}: InkwellFeatherProps) {
-  const Icon = (INKWELL_ICONS as Record<string, React.ComponentType<LucideProps>>)[name];
+}) => {
+  const Icon = (INKWELL_ICONS as Record<string, React.ComponentType<SVGProps<SVGSVGElement>>>)[
+    name
+  ];
 
   if (!Icon) {
-    // Keep tests happy: warn and return null
-
-    console.warn('InkwellFeather: Unknown icon name', name);
+    console.warn(`InkwellFeather: Unknown icon "${name}"`);
     return null;
   }
 
   const sizeClasses = ICON_SIZES[size] ?? ICON_SIZES.md;
-  const colorClasses = ICON_COLORS[color] ?? ICON_COLORS.default;
+  const colorClasses = ICON_COLORS[color as ColorKey] ?? ICON_COLORS.default;
 
-  const label = ariaLabel ?? String(name).replace(/[-_]+/g, ' ').trim();
+  const computedAria = ariaLabel ?? String(name).replace(/-/g, ' ');
+  const classes = ['lucide', `lucide-${name}`, sizeClasses, colorClasses, className]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+
+  // add title attribute for test compatibility
+  const titleAttr = title ? ({ title } as unknown as SVGProps<SVGSVGElement>) : undefined;
 
   return (
-    <Icon
-      role="img"
-      aria-label={label}
-      data-testid={dataTestId}
-      className={[sizeClasses, colorClasses, className].filter(Boolean).join(' ')}
-      {...(rest as SVGProps<SVGSVGElement>)}
-    />
+    <Icon role="img" aria-label={computedAria} className={classes} {...titleAttr} {...rest}>
+      {title ? <title>{title}</title> : null}
+    </Icon>
   );
-}
+};
 
 export default InkwellFeather;
