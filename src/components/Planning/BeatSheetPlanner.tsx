@@ -29,7 +29,6 @@ const BeatSheetPlanner: React.FC = () => {
   const { showToast } = useToast();
 
   const [currentBeatSheet, setCurrentBeatSheet] = useState<BeatSheet | null>(null);
-  const [template, setTemplate] = useState<'save-the-cat' | 'three-act' | 'custom'>('save-the-cat');
   const [editingBeat, setEditingBeat] = useState<string | null>(null);
 
   // Beat sheet templates
