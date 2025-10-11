@@ -793,7 +793,7 @@ class AnalyticsService {
 export const analyticsService = new AnalyticsService();
 
 // React hook for analytics
-export function _useAnalytics() {
+function _useAnalytics() {
   return {
     track: analyticsService.track.bind(analyticsService),
     trackTourStarted: analyticsService.trackTourStarted.bind(analyticsService),
@@ -828,6 +828,14 @@ export function _initializeAnalytics() {
 export function _getAnalyticsData(): AnalyticsData[] {
   return [];
 }
+
+// Hook export
+export const useAnalytics = _useAnalytics;
+
+// Legacy function exports
+export const trackEvent = _trackEvent;
+export const initializeAnalytics = _initializeAnalytics;
+export const getAnalyticsData = _getAnalyticsData;
 
 export default {
   trackEvent,
