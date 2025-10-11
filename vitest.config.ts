@@ -5,10 +5,12 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true, // ← enables test/expect/vi globals
-    setupFiles: ['./vitest.setup.ts', './tests/setup.ts'],
+    setupFiles: ['./src/setupTests.ts'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'lcov', 'html'],
+      reporter: ['text', 'json-summary', 'html'],
+      reportsDirectory: './coverage',
+      enabled: true,
       all: true,
       thresholds: {
         lines: 85,
@@ -23,6 +25,7 @@ export default defineConfig({
         '**/*.config.{js,ts}',
         '**/coverage/**',
         '**/dist/**',
+        '.audit/**',
       ],
     },
     include: ['src/**/*.{test,spec}.ts?(x)'],
