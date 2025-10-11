@@ -96,7 +96,7 @@ describe('EnhancedDashboard Component', () => {
     };
     renderDashboard();
 
-    const icons = screen.getAllByTestId('icon-writing');
+    const icons = screen.getAllByTestId('icon-planning');
     const planningActionIcon = icons.find((el) => el.getAttribute('data-size') === 'sm');
     expect(planningActionIcon).toBeTruthy();
   });
