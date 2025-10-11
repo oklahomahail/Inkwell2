@@ -1,11 +1,18 @@
 // src/components/Sidebar.test.tsx
 
+// Define default mock values
+const defaultMockUI = { sidebarCollapsed: false, toggleSidebar: vi.fn() };
+const defaultMockState = { view: 'Dashboard' };
+let mockUI = { ...defaultMockUI };
+let mockState = { ...defaultMockState };
+const mockDispatch = vi.fn();
+
 vi.mock('@/utils/focusUtils', () => ({
   focusWritingEditor: vi.fn(),
 }));
 
 vi.mock('@/hooks/useUI', () => ({
-  useUI: () => ({ sidebarCollapsed: false, toggleSidebar: vi.fn() }),
+  useUI: () => mockUI,
 }));
 
 vi.mock('@/context/AppContext', () => ({
@@ -17,7 +24,7 @@ vi.mock('@/context/AppContext', () => ({
     Analysis: 'Analysis',
     Settings: 'Settings',
   },
-  useAppContext: () => ({ state: { view: 'Dashboard' }, dispatch: vi.fn() }),
+  useAppContext: () => ({ state: mockState, dispatch: mockDispatch }),
 }));
 
 vi.mock('@/components/Brand/Brand', () => ({
@@ -36,11 +43,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import Sidebar from './Sidebar';
-
-const defaultMockUI = { sidebarCollapsed: false, toggleSidebar: vi.fn() };
-const defaultMockState = { view: 'Dashboard' };
-let mockUI = { ...defaultMockUI };
-let mockState = { ...defaultMockState };
 
 describe('Sidebar Component', () => {
   const renderSidebar = (mocks = {}) => {
@@ -77,12 +79,14 @@ describe('Sidebar Component', () => {
   it('highlights the active view', () => {
     renderSidebar({ state: { view: 'Writing' } });
     const writingButton = screen.getByRole('button', { name: /writing/i });
-    expect(writingButton).toHaveClass('bg-indigo-50', 'text-indigo-600');
+    expect(writingButton).toHaveClass('bg-indigo-50');
+    expect(writingButton).toHaveClass('text-indigo-600');
   });
 
   it('toggles collapsed state', () => {
     const toggleSidebar = vi.fn();
-    renderSidebar({ ui: { ...defaultMockUI, toggleSidebar } });
+    mockUI = { sidebarCollapsed: false, toggleSidebar };
+    renderSidebar();
 
     const toggleButton = screen.getByRole('button', { name: /collapse sidebar/i });
     fireEvent.click(toggleButton);
@@ -109,7 +113,7 @@ describe('Sidebar Component', () => {
       renderSidebar({ ui: { sidebarCollapsed: false, toggleSidebar: vi.fn() } });
 
       const dashboardText = screen.getByText('Dashboard');
-      expect(dashboardText).toBeInTheDocument();
+      expect(dashboardText).not.toHaveClass('hidden');
     });
 
     it('adds correct classes for collapsed state', () => {
@@ -118,7 +122,9 @@ describe('Sidebar Component', () => {
       });
 
       const aside = container.querySelector('aside');
+      expect(aside).toBeInTheDocument();
       expect(aside).toHaveClass('w-14');
+      expect(aside).not.toHaveClass('w-64');
     });
   });
 });
