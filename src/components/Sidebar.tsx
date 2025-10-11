@@ -4,6 +4,7 @@ import React from 'react';
 
 import { Brand } from '@/components/Brand/Brand';
 import { InkwellFeather } from '@/components/icons';
+import type { InkwellIconName } from '@/components/icons/InkwellFeather';
 import { useAppContext, View } from '@/context/AppContext';
 import { useUI } from '@/hooks/useUI';
 import { cn } from '@/utils/cn';
@@ -15,9 +16,7 @@ const sidebarLinks = [
   {
     view: View.Planning,
     label: 'Planning',
-    icon: (props: React.ComponentProps<'svg'>) => (
-      <InkwellFeather name={'planning' as any} size="sm" {...props} />
-    ),
+    icon: () => <InkwellFeather name={'planning' as InkwellIconName} size="sm" />,
   },
   { view: View.Timeline, label: 'Timeline', icon: Clock },
   { view: View.Analysis, label: 'Analytics', icon: BarChart3 },

@@ -3,6 +3,7 @@ import { PlusCircle, FileText, BarChart3, Target, Zap, Star, ArrowRight } from '
 import React, { useState } from 'react';
 
 import { InkwellFeather } from '@/components/icons';
+import type { InkwellIconName } from '@/components/icons/InkwellFeather';
 import { useAppContext, View } from '@/context/AppContext';
 
 const EnhancedDashboard: React.FC = () => {
@@ -88,9 +89,7 @@ const EnhancedDashboard: React.FC = () => {
       id: 'plan-story',
       title: 'Plan Your Story',
       description: 'Organize characters, plots, and story structure',
-      icon: (props: React.ComponentProps<'svg'>) => (
-        <InkwellFeather name="writing" size="sm" {...props} />
-      ),
+      icon: () => <InkwellFeather name={'planning' as InkwellIconName} size="sm" />,
       color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
       action: () => navigateToView(View.Planning),
     },
