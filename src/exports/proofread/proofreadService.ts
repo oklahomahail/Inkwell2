@@ -1,4 +1,5 @@
-// proofreadService.ts - AI-powered proofreading using Claude integration
+// File: src/exports/proofread/proofreadService.ts
+// AI-powered proofreading using Claude integration
 
 import { ManuscriptDraft } from '../exportTypes';
 import { countWords } from '../manuscriptAssembler';
@@ -13,19 +14,17 @@ import {
   ProofreadServiceError,
 } from './proofreadTypes';
 
-// Mock Claude service - in production this would import from your actual Claude integration
-interface ClaudeService {
+// ===== Claude service interface (replace with your real integration) =====
+export interface ClaudeService {
   sendMessage: (message: string) => Promise<string>;
   isAvailable: () => boolean;
 }
 
-// Mock implementation - replace with actual service
+// Mock implementation, swap out with your real service in production
 const claudeService: ClaudeService = {
   sendMessage: async (message: string) => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((r) => setTimeout(r, 1000));
 
-    // Mock response based on the prompt
     if (message.includes('proofread') || message.includes('suggestions')) {
       return JSON.stringify({
         suggestions: [
@@ -51,7 +50,9 @@ const claudeService: ClaudeService = {
         summary:
           'The manuscript shows strong narrative voice with room for tightening prose and improving dialogue tags.',
       });
-    } else if (message.includes('readability')) {
+    }
+
+    if (message.includes('readability')) {
       return JSON.stringify({
         gradeLevel: 8.2,
         avgWordsPerSentence: 15.4,
@@ -66,59 +67,56 @@ const claudeService: ClaudeService = {
   isAvailable: () => true,
 };
 
-/**
- * Progress callback type for proofreading
- */
+// ===== Internal types =====
 type ProgressCallback = (progress: ProofreadProgress) => void;
 
-/**
- * Splits text into chunks for processing
- */
+// ===== Helpers =====
 function chunkText(text: string, maxChunkSize: number = 2000): string[] {
   const chunks: string[] = [];
   const paragraphs = text.split(/\n\s*\n/);
 
-  let currentChunk = '';
-
-  for (const paragraph of paragraphs) {
-    if (currentChunk.length + paragraph.length > maxChunkSize && currentChunk) {
-      chunks.push(currentChunk.trim());
-      currentChunk = paragraph;
+  let current = '';
+  for (const p of paragraphs) {
+    const add = current ? `\n\n${p}` : p;
+    if (current.length + add.length > maxChunkSize && current) {
+      chunks.push(current.trim());
+      current = p;
     } else {
-      currentChunk += (currentChunk ? '\n\n' : '') + paragraph;
+      current += add;
     }
   }
-
-  if (currentChunk) {
-    chunks.push(currentChunk.trim());
-  }
-
+  if (current) chunks.push(current.trim());
   return chunks;
 }
 
-/**
- * Generates proofreading prompt for Claude
- */
 function generateProofreadPrompt(
   text: string,
   options: ProofreadOptions,
   context: { chapterTitle?: string; chapterNumber?: number },
 ): string {
   const focusAreas = options.focusAreas.join(', ');
-  const audienceDescription = {
-    general: 'general adult readers',
-    young_adult: 'young adult readers (ages 13-18)',
-    literary: 'literary fiction readers who appreciate nuanced prose',
-    commercial: 'mainstream commercial fiction readers',
-  }[options.targetAudience];
+  const audienceDescription =
+    {
+      general: 'general adult readers',
+      young_adult: 'young adult readers (ages 13-18)',
+      literary: 'literary fiction readers who appreciate nuanced prose',
+      commercial: 'mainstream commercial fiction readers',
+    }[options.targetAudience] ?? 'general adult readers';
+
+  const chapterCtx =
+    context.chapterTitle && context.chapterTitle.trim().length > 0
+      ? `"${context.chapterTitle}"`
+      : `Chapter ${context.chapterNumber ?? 'Unknown'}`;
+
+  const maxSug = Math.min(options.maxSuggestions, 15);
 
   return `Please proofread the following text excerpt and provide specific suggestions for improvement. Focus on: ${focusAreas}.
 
 Target audience: ${audienceDescription}
-Chapter context: ${context.chapterTitle ? `"${context.chapterTitle}"` : `Chapter ${context.chapterNumber || 'Unknown'}`}
+Chapter context: ${chapterCtx}
 
 Guidelines:
-- Provide up to ${Math.min(options.maxSuggestions, 15)} specific suggestions
+- Provide up to ${maxSug} specific suggestions
 - Include exact before/after text for each suggestion
 - Explain the rationale for each change
 - Categorize suggestions as: clarity, conciseness, consistency, tone, grammar, style, or flow
@@ -146,9 +144,6 @@ Please respond with a JSON object containing:
 }`;
 }
 
-/**
- * Generates readability analysis prompt
- */
 function generateReadabilityPrompt(text: string): string {
   return `Analyze the readability of this text and provide detailed metrics:
 
@@ -158,19 +153,16 @@ ${text}
 
 Please respond with a JSON object containing:
 {
-  "gradeLevel": number (Flesch-Kincaid grade level),
+  "gradeLevel": number,
   "avgWordsPerSentence": number,
-  "avgSyllablesPerWord": number (estimate),
-  "passiveVoicePercentage": number (0-100),
-  "sentenceVariety": "low|medium|high" (based on sentence length and structure variation)
+  "avgSyllablesPerWord": number,
+  "passiveVoicePercentage": number,
+  "sentenceVariety": "low" | "medium" | "high"
 }`;
 }
 
-/**
- * Calculates basic text statistics
- */
 function calculateTextStats(text: string) {
-  const words = text.match(/\b\w+\b/g) || [];
+  const words = text.match(/\b[\w’'-]+\b/g) ?? [];
   const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
   const paragraphs = text.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
 
@@ -181,9 +173,6 @@ function calculateTextStats(text: string) {
   };
 }
 
-/**
- * Processes Claude response and creates ProofreadSuggestion objects
- */
 function processClaudeResponse(
   response: string,
   chapterNumber: number,
@@ -191,52 +180,101 @@ function processClaudeResponse(
   textOffset: number = 0,
 ): ProofreadSuggestion[] {
   try {
-    const parsed = JSON.parse(response);
+    const parsed: unknown = JSON.parse(response);
+    const obj = parsed as { suggestions?: Array<Record<string, unknown>> };
 
-    if (!parsed.suggestions || !Array.isArray(parsed.suggestions)) {
-      return [];
-    }
+    if (!obj.suggestions || !Array.isArray(obj.suggestions)) return [];
 
-    return parsed.suggestions.map(
-      (suggestion: any, index: number): ProofreadSuggestion => ({
+    return obj.suggestions.map((sugg, index): ProofreadSuggestion => {
+      const before = typeof sugg.before === 'string' ? sugg.before : '';
+      const after = typeof sugg.after === 'string' ? sugg.after : '';
+      const rationale = typeof sugg.rationale === 'string' ? sugg.rationale : '';
+      const categoryRaw = typeof sugg.category === 'string' ? sugg.category : 'style';
+      const severityRaw = typeof sugg.severity === 'string' ? sugg.severity : 'suggestion';
+      const confidenceRaw = typeof sugg.confidence === 'number' ? sugg.confidence : 70;
+
+      // Narrow category and severity to known union values
+      const category: ProofreadSuggestion['category'] = [
+        'clarity',
+        'conciseness',
+        'consistency',
+        'tone',
+        'grammar',
+        'style',
+        'flow',
+      ].includes(categoryRaw)
+        ? (categoryRaw as ProofreadSuggestion['category'])
+        : 'style';
+
+      const severity: ProofreadSuggestion['severity'] = [
+        'note',
+        'suggestion',
+        'warning',
+        'error',
+      ].includes(severityRaw)
+        ? (severityRaw as ProofreadSuggestion['severity'])
+        : 'suggestion';
+
+      const confidence = Math.min(100, Math.max(0, confidenceRaw));
+
+      return {
         id: `suggestion_${chapterNumber}_${sceneNumber}_${index}_${Date.now()}`,
         location: {
           chapter: chapterNumber,
           scene: sceneNumber,
           start: textOffset,
-          end: textOffset + (suggestion.before?.length || 0),
+          end: textOffset + before.length,
         },
-        before: suggestion.before || '',
-        after: suggestion.after || '',
-        rationale: suggestion.rationale || '',
-        category: suggestion.category || 'style',
-        severity: suggestion.severity || 'suggestion',
-        confidence: Math.min(100, Math.max(0, suggestion.confidence || 70)),
-      }),
-    );
-  } catch (error) {
-    console.warn('Failed to parse Claude response:', error);
+        before,
+        after,
+        rationale,
+        category,
+        severity,
+        confidence,
+      };
+    });
+  } catch (err) {
+    console.warn('Failed to parse Claude response:', err);
     return [];
   }
 }
 
-/**
- * Processes readability response
- */
 function processReadabilityResponse(response: string): ReadabilityMetrics {
   try {
-    const parsed = JSON.parse(response);
+    const parsed: unknown = JSON.parse(response);
+    const r = parsed as Partial<ReadabilityMetrics> & {
+      gradeLevel?: number;
+      avgWordsPerSentence?: number;
+      avgSyllablesPerWord?: number;
+      passiveVoicePercentage?: number;
+      sentenceVariety?: 'low' | 'medium' | 'high' | string;
+    };
+
+    const gradeLevel = Number.isFinite(r.gradeLevel) ? (r.gradeLevel as number) : 8;
+    const avgWordsPerSentence = Number.isFinite(r.avgWordsPerSentence)
+      ? (r.avgWordsPerSentence as number)
+      : 15;
+    const avgSyllablesPerWord = Number.isFinite(r.avgSyllablesPerWord)
+      ? (r.avgSyllablesPerWord as number)
+      : 1.5;
+    const passiveVoicePercentage = Number.isFinite(r.passiveVoicePercentage)
+      ? (r.passiveVoicePercentage as number)
+      : 10;
+    const variety: ReadabilityMetrics['sentenceVariety'] =
+      r.sentenceVariety === 'low' || r.sentenceVariety === 'medium' || r.sentenceVariety === 'high'
+        ? r.sentenceVariety
+        : 'medium';
 
     return {
-      gradeLevel: Math.max(1, Math.min(18, parsed.gradeLevel || 8)),
-      avgWordsPerSentence: Math.max(1, parsed.avgWordsPerSentence || 15),
-      avgSyllablesPerWord: Math.max(1, parsed.avgSyllablesPerWord || 1.5),
-      passiveVoicePercentage: Math.max(0, Math.min(100, parsed.passiveVoicePercentage || 10)),
-      readingTimeMinutes: 0, // Will be calculated separately
-      sentenceVariety: parsed.sentenceVariety || 'medium',
+      gradeLevel: Math.max(1, Math.min(18, gradeLevel)),
+      avgWordsPerSentence: Math.max(1, avgWordsPerSentence),
+      avgSyllablesPerWord: Math.max(1, avgSyllablesPerWord),
+      passiveVoicePercentage: Math.max(0, Math.min(100, passiveVoicePercentage)),
+      readingTimeMinutes: 0, // fill after we know wordCount
+      sentenceVariety: variety,
     };
-  } catch (error) {
-    // Return default metrics if parsing fails
+  } catch {
+    // Safe defaults
     return {
       gradeLevel: 8,
       avgWordsPerSentence: 15,
@@ -248,24 +286,20 @@ function processReadabilityResponse(response: string): ReadabilityMetrics {
   }
 }
 
-/**
- * Main proofreading function
- */
+// ===== Main API =====
 export async function runProofread(
   draft: ManuscriptDraft,
   options: ProofreadOptions = DEFAULT_PROOFREAD_OPTIONS,
   onProgress?: ProgressCallback,
 ): Promise<ProofreadReport> {
-  // Check if Claude service is available
   if (!claudeService.isAvailable()) {
     throw new ProofreadServiceError('Claude AI service is not available');
   }
 
-  const startTime = Date.now();
+  const start = Date.now();
   let allSuggestions: ProofreadSuggestion[] = [];
   let combinedText = '';
 
-  // Initialize progress
   onProgress?.({
     phase: 'analyzing',
     percentage: 0,
@@ -274,65 +308,69 @@ export async function runProofread(
   });
 
   try {
-    // Process each chapter
-    for (let chapterIndex = 0; chapterIndex < draft.chapters.length; chapterIndex++) {
+    const totalChapters = draft.chapters.length;
+
+    for (let chapterIndex = 0; chapterIndex < totalChapters; chapterIndex++) {
       const chapter = draft.chapters[chapterIndex];
       if (!chapter) continue;
 
+      const chapterNumber = chapter.number ?? chapterIndex + 1;
+      const chapterTitle = chapter.title ?? '';
+
       onProgress?.({
         phase: 'processing',
-        percentage: (chapterIndex / draft.chapters.length) * 70,
+        percentage: (chapterIndex / Math.max(1, totalChapters)) * 70,
         currentChapter: chapterIndex + 1,
-        totalChapters: draft.chapters.length,
-        message: `Processing ${chapter.title || `Chapter ${chapter.number}`}...`,
+        totalChapters,
+        message: `Processing ${chapterTitle || `Chapter ${chapterNumber}`}...`,
       });
 
-      // Process each scene in the chapter
-      for (let sceneIndex = 0; sceneIndex < chapter.scenes.length; sceneIndex++) {
-        const scene = chapter.scenes[sceneIndex];
-        combinedText += scene + '\n\n';
+      const scenes: string[] = Array.isArray(chapter.scenes) ? chapter.scenes : [];
+      for (let sceneIndex = 0; sceneIndex < scenes.length; sceneIndex++) {
+        const sceneText = scenes[sceneIndex] ?? '';
+        combinedText += sceneText + '\n\n';
 
-        // Only process scenes with substantial content
-        if (countWords(scene) < 50) continue;
+        if (countWords(sceneText) < 50) continue;
 
-        // Chunk the scene if it's too long
-        const chunks = chunkText(scene ?? '');
+        const chunks = chunkText(sceneText);
         let sceneOffset = 0;
 
         for (const chunk of chunks) {
           try {
             const prompt = generateProofreadPrompt(chunk, options, {
-              chapterTitle: chapter.title,
-              chapterNumber: chapter.number,
+              chapterTitle,
+              chapterNumber,
             });
 
             const response = await claudeService.sendMessage(prompt);
             const suggestions = processClaudeResponse(
               response,
-              chapter.number ?? chapterIndex + 1,
+              chapterNumber,
               sceneIndex + 1,
               sceneOffset,
             );
 
-            allSuggestions.push(...suggestions);
+            allSuggestions = allSuggestions.concat(suggestions);
             sceneOffset += chunk.length;
 
-            // Respect rate limits
-            await new Promise((resolve) => setTimeout(resolve, 100));
-          } catch (error) {
-            console.warn(`Failed to process chunk in chapter ${chapter.number}:`, error);
+            if (allSuggestions.length >= options.maxSuggestions) {
+              allSuggestions = allSuggestions.slice(0, options.maxSuggestions);
+              break;
+            }
+
+            // gentle pacing for rate limits
+            await new Promise((r) => setTimeout(r, 100));
+          } catch (err) {
+            console.warn(`Failed to process chunk in chapter ${chapterNumber}:`, err);
           }
         }
+
+        if (allSuggestions.length >= options.maxSuggestions) break;
       }
 
-      // Check if we've hit suggestion limit
-      if (allSuggestions.length >= options.maxSuggestions) {
-        allSuggestions = allSuggestions.slice(0, options.maxSuggestions);
-        break;
-      }
+      if (allSuggestions.length >= options.maxSuggestions) break;
     }
 
-    // Calculate readability metrics
     onProgress?.({
       phase: 'generating',
       percentage: 80,
@@ -341,12 +379,11 @@ export async function runProofread(
 
     let readability: ReadabilityMetrics;
     try {
-      const readabilityPrompt = generateReadabilityPrompt(
-        combinedText.slice(0, 5000), // Sample for readability analysis
-      );
+      const readabilitySample = combinedText.slice(0, 5000);
+      const readabilityPrompt = generateReadabilityPrompt(readabilitySample);
       const readabilityResponse = await claudeService.sendMessage(readabilityPrompt);
       readability = processReadabilityResponse(readabilityResponse);
-    } catch (error) {
+    } catch {
       readability = {
         gradeLevel: 8,
         avgWordsPerSentence: 15,
@@ -357,10 +394,13 @@ export async function runProofread(
       };
     }
 
-    // Calculate reading time (average 200 words per minute)
-    readability.readingTimeMinutes = Math.ceil(draft.wordCount / 200);
+    // Compute reading time (200 wpm) using draft.wordCount if present, else from combinedText
+    const wordCount =
+      typeof draft.wordCount === 'number' && Number.isFinite(draft.wordCount)
+        ? draft.wordCount
+        : calculateTextStats(combinedText).totalWords;
+    readability.readingTimeMinutes = Math.ceil(wordCount / 200);
 
-    // Calculate statistics
     const textStats = calculateTextStats(combinedText);
 
     const issuesByCategory: Record<ProofreadSuggestion['category'], number> = {
@@ -380,12 +420,11 @@ export async function runProofread(
       error: 0,
     };
 
-    allSuggestions.forEach((suggestion) => {
-      issuesByCategory[suggestion.category]++;
-      issuesBySeverity[suggestion.severity]++;
-    });
+    for (const s of allSuggestions) {
+      issuesByCategory[s.category] += 1;
+      issuesBySeverity[s.severity] += 1;
+    }
 
-    // Generate summary and highlights
     const summary = generateReportSummary(allSuggestions, readability, textStats);
     const highlights = generateReportHighlights(allSuggestions, readability);
 
@@ -395,7 +434,7 @@ export async function runProofread(
       message: 'Proofreading complete!',
     });
 
-    return {
+    const report: ProofreadReport = {
       id: `proofread_${draft.projectId}_${Date.now()}`,
       projectId: draft.projectId,
       generatedAt: Date.now(),
@@ -410,29 +449,25 @@ export async function runProofread(
         issuesBySeverity,
       },
     };
-  } catch (error) {
-    if (error instanceof ProofreadServiceError) {
-      throw error;
-    }
 
-    const err = error instanceof Error ? error : new Error(String(error));
+    return report;
+  } catch (e) {
+    const err = e instanceof Error ? e : new Error(String(e));
     throw new ProofreadServiceError(`Proofreading failed: ${err.message}`, {
       originalError: err,
-      duration: Date.now() - startTime,
+      duration: Date.now() - start,
     });
   }
 }
 
-/**
- * Generates a summary of the proofreading report
- */
+// ===== Report synthesis =====
 function generateReportSummary(
   suggestions: ProofreadSuggestion[],
   readability: ReadabilityMetrics,
-  stats: { totalWords: number; totalSentences: number; totalParagraphs: number },
+  _stats: { totalWords: number; totalSentences: number; totalParagraphs: number },
 ): string {
   if (suggestions.length === 0) {
-    return `Your manuscript is in excellent shape! The text shows strong readability (grade level ${readability.gradeLevel}) and clear, engaging prose. No significant issues were identified.`;
+    return `Your manuscript is in excellent shape. The text shows strong readability (grade level ${readability.gradeLevel}) and clear, engaging prose. No significant issues were identified.`;
   }
 
   const majorIssues = suggestions.filter(
@@ -443,78 +478,66 @@ function generateReportSummary(
   ).length;
   const grammarIssues = suggestions.filter((s) => s.category === 'grammar').length;
 
-  let summary = `Your manuscript shows ${majorIssues > 5 ? 'several areas' : 'minor areas'} for improvement. `;
+  const issueIntro =
+    majorIssues > 5 ? 'several areas' : majorIssues > 0 ? 'some areas' : 'minor areas';
 
+  let summary = `Your manuscript shows ${issueIntro} for improvement. `;
   if (grammarIssues > 0) {
     summary += `${grammarIssues} grammar and usage suggestions were identified. `;
   }
-
   if (styleIssues > 0) {
     summary += `${styleIssues} style and tone enhancements were suggested to strengthen your prose. `;
   }
-
   summary += `The text maintains a readable style (grade level ${readability.gradeLevel}) with ${readability.sentenceVariety} sentence variety.`;
 
   return summary;
 }
 
-/**
- * Generates key highlights for the report
- */
 function generateReportHighlights(
   suggestions: ProofreadSuggestion[],
   readability: ReadabilityMetrics,
 ): string[] {
   const highlights: string[] = [];
 
-  // Readability highlight
+  // Readability
   if (readability.gradeLevel <= 10) {
-    highlights.push(`📖 Excellent readability at ${readability.gradeLevel}th grade level`);
+    highlights.push(`Excellent readability at grade level ${readability.gradeLevel}.`);
   } else {
-    highlights.push(
-      `📚 Consider simplifying some sentences (grade level ${readability.gradeLevel})`,
-    );
+    highlights.push(`Consider simplifying some sentences (grade level ${readability.gradeLevel}).`);
   }
 
   // Passive voice
   if (readability.passiveVoicePercentage > 20) {
-    highlights.push(`⚠️ High passive voice usage (${readability.passiveVoicePercentage}%)`);
+    highlights.push(`High passive voice usage (${readability.passiveVoicePercentage}%).`);
   } else {
-    highlights.push(`✅ Good active voice usage (${readability.passiveVoicePercentage}% passive)`);
+    highlights.push(`Good active voice usage (${readability.passiveVoicePercentage}% passive).`);
   }
 
   // Sentence variety
   if (readability.sentenceVariety === 'high') {
-    highlights.push('🎯 Excellent sentence variety keeps readers engaged');
+    highlights.push('Strong sentence variety keeps readers engaged.');
   } else if (readability.sentenceVariety === 'low') {
-    highlights.push('📝 Consider varying sentence lengths for better flow');
+    highlights.push('Consider varying sentence lengths for better flow.');
   }
 
-  // Error summary
+  // Error / warning counts
   const errors = suggestions.filter((s) => s.severity === 'error').length;
   const warnings = suggestions.filter((s) => s.severity === 'warning').length;
 
-  if (errors > 0) {
-    highlights.push(`🔍 ${errors} errors require attention`);
-  }
-
-  if (warnings > 3) {
-    highlights.push(`💡 ${warnings} suggestions to strengthen your prose`);
-  }
+  if (errors > 0) highlights.push(`${errors} errors require attention.`);
+  if (warnings > 0) highlights.push(`${warnings} warnings identified.`);
 
   return highlights;
 }
 
-/**
- * Gets proofreading statistics for a project
- */
+// ===== Aggregate stats for UI =====
 export function getProofreadStats(reports: ProofreadReport[]) {
-  if (reports.length === 0) {
+  if (!reports || reports.length === 0) {
     return {
       totalReports: 0,
       avgSuggestions: 0,
       avgGradeLevel: 0,
-      commonIssues: [],
+      commonIssues: [] as string[],
       improvement: 0,
     };
   }
@@ -522,19 +545,18 @@ export function getProofreadStats(reports: ProofreadReport[]) {
   const totalSuggestions = reports.reduce((sum, r) => sum + r.totalSuggestions, 0);
   const totalGradeLevel = reports.reduce((sum, r) => sum + r.readability.gradeLevel, 0);
 
-  // Calculate improvement trend (first vs last report)
-  const improvement =
-    reports.length > 1
-      ? reports[0].totalSuggestions - reports[reports.length - 1].totalSuggestions
-      : 0;
+  // Safely compute first-vs-last improvement
+  const first = reports.at(0);
+  const last = reports.at(-1);
+  const improvement = first && last ? first.totalSuggestions - last.totalSuggestions : 0;
 
-  // Find most common issues
+  // Tally common issues
   const issueCategories: Record<string, number> = {};
-  reports.forEach((report) => {
-    Object.entries(report.stats.issuesByCategory).forEach(([category, count]) => {
-      issueCategories[category] = (issueCategories[category] || 0) + count;
-    });
-  });
+  for (const report of reports) {
+    for (const [cat, count] of Object.entries(report.stats.issuesByCategory)) {
+      issueCategories[cat] = (issueCategories[cat] ?? 0) + count;
+    }
+  }
 
   const commonIssues = Object.entries(issueCategories)
     .sort(([, a], [, b]) => b - a)

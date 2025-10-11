@@ -1,4 +1,4 @@
-// File: src/context/AppContext.tsx - Updated with auto-save state
+// File: src/context/AppContext.tsx
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
 
 import { useClaude } from './ClaudeProvider';
@@ -37,7 +37,7 @@ export interface AppState {
   isLoading: boolean;
   error: string | null;
   theme: Theme;
-  // 🆕 AUTO-SAVE STATE
+  // Auto-save state
   autoSave: {
     isSaving: boolean;
     lastSaved: Date | null;
@@ -56,7 +56,6 @@ type AppAction =
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'SET_THEME'; payload: Theme }
-  // 🆕 AUTO-SAVE ACTIONS
   | { type: 'SET_AUTO_SAVE_SAVING'; payload: boolean }
   | { type: 'SET_AUTO_SAVE_SUCCESS'; payload: Date }
   | { type: 'SET_AUTO_SAVE_ERROR'; payload: string | null };
@@ -69,7 +68,6 @@ export const initialState: AppState = {
   isLoading: false,
   error: null,
   theme: 'light',
-  // 🆕 AUTO-SAVE INITIAL STATE
   autoSave: {
     isSaving: false,
     lastSaved: null,
@@ -80,19 +78,19 @@ export const initialState: AppState = {
 
 // ===== REDUCER =====
 function appReducer(state: AppState, action: AppAction): AppState {
-  if (action.type === 'SET_THEME') {
-    return { ...state, theme: action.payload };
-  }
   switch (action.type) {
     case 'SET_VIEW':
       return { ...state, view: action.payload };
+
     case 'ADD_PROJECT':
       return { ...state, projects: [...state.projects, action.payload] };
+
     case 'UPDATE_PROJECT':
       return {
         ...state,
         projects: state.projects.map((p) => (p.id === action.payload.id ? action.payload : p)),
       };
+
     case 'DELETE_PROJECT': {
       const remaining = state.projects.filter((p) => p.id !== action.payload);
       return {
@@ -101,43 +99,41 @@ function appReducer(state: AppState, action: AppAction): AppState {
         currentProjectId: state.currentProjectId === action.payload ? null : state.currentProjectId,
       };
     }
+
     case 'SET_CURRENT_PROJECT':
       return { ...state, currentProjectId: action.payload };
+
     case 'SET_PROJECTS':
       return { ...state, projects: action.payload };
+
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
+
     case 'SET_ERROR':
       return { ...state, error: action.payload };
+
     case 'SET_THEME':
       return { ...state, theme: action.payload };
-    // 🆕 AUTO-SAVE REDUCER CASES
+
+    // Auto-save
     case 'SET_AUTO_SAVE_SAVING':
       return {
         ...state,
-        autoSave: {
-          ...state.autoSave,
-          isSaving: action.payload,
-        },
+        autoSave: { ...state.autoSave, isSaving: action.payload },
       };
+
     case 'SET_AUTO_SAVE_SUCCESS':
       return {
         ...state,
-        autoSave: {
-          isSaving: false,
-          lastSaved: action.payload,
-          error: null,
-        },
+        autoSave: { isSaving: false, lastSaved: action.payload, error: null },
       };
+
     case 'SET_AUTO_SAVE_ERROR':
       return {
         ...state,
-        autoSave: {
-          ...state.autoSave,
-          isSaving: false,
-          error: action.payload,
-        },
+        autoSave: { ...state.autoSave, isSaving: false, error: action.payload },
       };
+
     default:
       return state;
   }
@@ -155,7 +151,7 @@ export interface AppContextValue {
   updateProject: (project: Project) => void;
   deleteProject: (id: string) => void;
   setCurrentProjectId: (id: string | null) => void;
-  // 🆕 AUTO-SAVE ACTIONS
+  // Auto-save actions
   setAutoSaveSaving: (saving: boolean) => void;
   setAutoSaveSuccess: (date: Date) => void;
   setAutoSaveError: (error: string | null) => void;
@@ -177,16 +173,13 @@ export interface AppContextValue {
 // ===== CONTEXT CREATION =====
 export const AppContext = createContext<AppContextValue | null>(null);
 
-// ===== CUSTOM HOOK =====
+// ===== CUSTOM HOOKS =====
 export function useAppContext(): AppContextValue {
   const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useAppContext must be used within an AppProvider');
-  }
+  if (!context) throw new Error('useAppContext must be used within an AppProvider');
   return context;
 }
 
-// Convenience hook used by several components (Topbar, BackupControls, etc.)
 export function useCurrentProject() {
   const { state } = useAppContext();
   const project = state.projects.find((p) => p.id === state.currentProjectId) || null;
@@ -198,7 +191,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const claudeContext = useClaude();
 
-  // Load from localStorage on mount
+  // Load projects
   useEffect(() => {
     try {
       const stored = localStorage.getItem('inkwell_projects');
@@ -210,7 +203,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       console.warn('Failed to parse projects from localStorage:', error);
     }
 
-    // Load current project ID from localStorage
+    // Load current project ID
     try {
       const storedProjectId = localStorage.getItem('inkwell_current_project_id');
       if (storedProjectId) {
@@ -256,7 +249,6 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     updateProject: (project) => dispatch({ type: 'UPDATE_PROJECT', payload: project }),
     deleteProject: (id) => dispatch({ type: 'DELETE_PROJECT', payload: id }),
     setCurrentProjectId: (id) => dispatch({ type: 'SET_CURRENT_PROJECT', payload: id }),
-    // 🆕 AUTO-SAVE ACTION CREATORS
     setAutoSaveSaving: (saving) => dispatch({ type: 'SET_AUTO_SAVE_SAVING', payload: saving }),
     setAutoSaveSuccess: (date) => dispatch({ type: 'SET_AUTO_SAVE_SUCCESS', payload: date }),
     setAutoSaveError: (error) => dispatch({ type: 'SET_AUTO_SAVE_ERROR', payload: error }),
@@ -281,7 +273,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       analyzeWritingStyle: claudeContext.analyzeWritingStyle,
       generatePlotIdeas: claudeContext.generatePlotIdeas,
       analyzeCharacter:
-        claudeContext.analyzeCharacter ||
+        claudeContext.analyzeCharacter ??
         (async (character: string) => {
           const prompt = `Please analyze this character: ${character}`;
           return claudeContext.sendMessage(prompt);

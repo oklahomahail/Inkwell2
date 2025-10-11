@@ -1,5 +1,6 @@
+// File: src/utils/trace.ts
 // Observability and tracing system for Inkwell
-// Dev-only logger for store actions and editor render timings
+// Dev-only logger for store actions and component render timings
 
 import React from 'react';
 
@@ -13,7 +14,7 @@ export interface TraceEvent {
   startTime: number;
   endTime?: number;
   duration?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   category?: string;
   level: 'debug' | 'info' | 'warn' | 'error';
 }
@@ -27,6 +28,11 @@ export interface PerformanceMetrics {
   lastRender: number;
 }
 
+const now = () =>
+  typeof performance !== 'undefined' && typeof performance.now === 'function'
+    ? performance.now()
+    : Date.now();
+
 /* ========= Trace Logger ========= */
 class TraceLogger {
   private events: TraceEvent[] = [];
@@ -35,75 +41,56 @@ class TraceLogger {
   private isEnabled = false;
 
   constructor() {
-    try {
-      this.checkEnabled();
-
-      // Re-check when URL changes
-      if (typeof window !== 'undefined') {
-        window.addEventListener('popstate', () => this.checkEnabled());
-      }
-    } catch (error) {
-      console.warn('Failed to initialize trace logger:', error);
-      this.isEnabled = false;
+    this.checkEnabled();
+    if (typeof window !== 'undefined') {
+      window.addEventListener?.('popstate', () => this.checkEnabled());
     }
   }
 
   private checkEnabled(): void {
     try {
-      this.isEnabled =
-        featureFlags.isEnabled('performanceMonitoring') ||
-        featureFlags.isDebugMode() ||
+      const urlParamEnabled =
+        typeof window !== 'undefined' &&
         new URLSearchParams(window.location.search).get('trace') === '1';
+
+      this.isEnabled =
+        featureFlags.isEnabled?.('performanceMonitoring') ||
+        featureFlags.isDebugMode?.() ||
+        urlParamEnabled ||
+        false;
 
       if (this.isEnabled) {
         console.log('📊 Trace logging enabled');
       }
-    } catch (error) {
-      console.warn('Failed to check trace enabled state:', error);
-      // Fallback to URL parameter only
-      try {
-        this.isEnabled = new URLSearchParams(window.location.search).get('trace') === '1';
-      } catch {
-        this.isEnabled = false;
-      }
+    } catch {
+      this.isEnabled = false;
     }
   }
 
-  /**
-   * Start a new trace event
-   */
-  start(name: string, type: TraceEvent['type'], metadata?: Record<string, any>): string {
+  /** Start a new trace event */
+  start(name: string, type: TraceEvent['type'], metadata?: Record<string, unknown>): string {
     if (!this.isEnabled) return '';
-
-    const id = `${type}_${name}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `${type}_${name}_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
     const event: TraceEvent = {
       id,
       type,
       name,
-      startTime: performance.now(),
+      startTime: now(),
       metadata,
       level: 'debug',
     };
-
     this.activeTraces.set(id, event);
     return id;
   }
 
-  /**
-   * End a trace event
-   */
-  end(id: string, additionalMetadata?: Record<string, any>): void {
+  /** End a trace event */
+  end(id: string, additionalMetadata?: Record<string, unknown>): void {
     if (!this.isEnabled || !id) return;
-
     const event = this.activeTraces.get(id);
-    if (!event) {
-      console.warn(`Trace event ${id} not found`);
-      return;
-    }
+    if (!event) return;
 
-    event.endTime = performance.now();
-    event.duration = event.endTime - event.startTime;
-
+    event.endTime = now();
+    event.duration = (event.endTime ?? 0) - event.startTime;
     if (additionalMetadata) {
       event.metadata = { ...event.metadata, ...additionalMetadata };
     }
@@ -111,39 +98,35 @@ class TraceLogger {
     this.activeTraces.delete(id);
     this.events.push(event);
 
-    // Update performance metrics for renders
     if (event.type === 'component_render') {
       this.updateRenderMetrics(event);
     }
 
-    // Log slow operations
-    if (event.duration > 100) {
+    // Lightweight console hints for slow ops
+    if (event.duration && event.duration > 100) {
       console.warn(
         `🐌 Slow ${event.type}: ${event.name} took ${event.duration.toFixed(2)}ms`,
         event.metadata,
       );
-    } else if (event.duration > 16.67) {
-      // > 60fps threshold
+    } else if (event.duration && event.duration > 16.67) {
       console.log(
         `⚡ ${event.type}: ${event.name} took ${event.duration.toFixed(2)}ms`,
         event.metadata,
       );
     }
 
-    // Keep only last 1000 events to prevent memory leaks
+    // Cap memory
     if (this.events.length > 1000) {
       this.events = this.events.slice(-1000);
     }
   }
 
-  /**
-   * Log an instant event (no duration)
-   */
+  /** Log an instant event (no duration) */
   log(
     name: string,
     type: TraceEvent['type'],
     level: TraceEvent['level'] = 'info',
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): void {
     if (!this.isEnabled) return;
 
@@ -151,37 +134,27 @@ class TraceLogger {
       id: `${type}_${name}_${Date.now()}`,
       type,
       name,
-      startTime: performance.now(),
-      endTime: performance.now(),
+      startTime: now(),
+      endTime: now(),
       duration: 0,
       metadata,
       level,
     };
-
     this.events.push(event);
 
-    // Console output based on level
-    const emoji = {
-      debug: '🐛',
-      info: '📝',
-      warn: '⚠️',
-      error: '❌',
-    }[level];
-
-    console.log(`${emoji} ${type}: ${name}`, metadata);
+    console.log(
+      `${{ debug: '🐛', info: '📝', warn: '⚠️', error: '❌' }[level]} ${type}: ${name}`,
+      metadata,
+    );
   }
 
-  /**
-   * Update component render metrics
-   */
+  /** Update component render metrics */
   private updateRenderMetrics(event: TraceEvent): void {
     if (!event.duration || event.type !== 'component_render') return;
-
     const component = event.name;
     const existing = this.performanceMetrics.get(component);
-
     if (existing) {
-      existing.renderCount++;
+      existing.renderCount += 1;
       existing.totalRenderTime += event.duration;
       existing.averageRenderTime = existing.totalRenderTime / existing.renderCount;
       existing.slowestRender = Math.max(existing.slowestRender, event.duration);
@@ -198,41 +171,26 @@ class TraceLogger {
     }
   }
 
-  /**
-   * Get all trace events
-   */
   getEvents(type?: TraceEvent['type'], limit?: number): TraceEvent[] {
     let events = type ? this.events.filter((e) => e.type === type) : this.events;
-
-    if (limit) {
-      events = events.slice(-limit);
-    }
-
+    if (limit) events = events.slice(-limit);
     return events.sort((a, b) => b.startTime - a.startTime);
   }
 
-  /**
-   * Get performance metrics for components
-   */
   getPerformanceMetrics(): PerformanceMetrics[] {
     return Array.from(this.performanceMetrics.values()).sort(
       (a, b) => b.averageRenderTime - a.averageRenderTime,
     );
   }
 
-  /**
-   * Clear all trace data
-   */
   clear(): void {
     this.events = [];
     this.performanceMetrics.clear();
     this.activeTraces.clear();
+
     console.log('🧹 Trace data cleared');
   }
 
-  /**
-   * Export trace data as JSON
-   */
   export(): string {
     return JSON.stringify(
       {
@@ -245,9 +203,6 @@ class TraceLogger {
     );
   }
 
-  /**
-   * Get summary stats
-   */
   getSummary(): {
     totalEvents: number;
     storeActions: number;
@@ -260,15 +215,14 @@ class TraceLogger {
     const componentRenders = this.events.filter((e) => e.type === 'component_render').length;
     const apiCalls = this.events.filter((e) => e.type === 'api_call').length;
 
-    const eventsWithDuration = this.events.filter((e) => e.duration != null);
+    const withDuration = this.events.filter((e) => e.duration != null);
     const averageEventDuration =
-      eventsWithDuration.length > 0
-        ? eventsWithDuration.reduce((sum, e) => sum + (e.duration || 0), 0) /
-          eventsWithDuration.length
+      withDuration.length > 0
+        ? withDuration.reduce((sum, e) => sum + (e.duration || 0), 0) / withDuration.length
         : 0;
 
     const slowestEvent =
-      eventsWithDuration.sort((a, b) => (b.duration || 0) - (a.duration || 0))[0] || null;
+      withDuration.sort((a, b) => (b.duration || 0) - (a.duration || 0))[0] || null;
 
     return {
       totalEvents: this.events.length,
@@ -283,24 +237,21 @@ class TraceLogger {
 
 /* ========= Singleton Instance ========= */
 let _trace: TraceLogger | null = null;
-
 function getTrace(): TraceLogger {
-  if (!_trace) {
-    _trace = new TraceLogger();
-  }
+  if (!_trace) _trace = new TraceLogger();
   return _trace;
 }
 
 export const trace = {
-  start: (name: string, type: TraceEvent['type'], metadata?: Record<string, any>) =>
+  start: (name: string, type: TraceEvent['type'], metadata?: Record<string, unknown>) =>
     getTrace().start(name, type, metadata),
-  end: (id: string, additionalMetadata?: Record<string, any>) =>
+  end: (id: string, additionalMetadata?: Record<string, unknown>) =>
     getTrace().end(id, additionalMetadata),
   log: (
     name: string,
     type: TraceEvent['type'],
     level?: TraceEvent['level'],
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ) => getTrace().log(name, type, level, metadata),
   getEvents: (type?: TraceEvent['type'], limit?: number) => getTrace().getEvents(type, limit),
   getPerformanceMetrics: () => getTrace().getPerformanceMetrics(),
@@ -309,48 +260,83 @@ export const trace = {
   export: () => getTrace().export(),
 };
 
-/* ========= Higher-Order Functions ========= */
+/* ========= Overloads & Helpers ========= */
 
 /**
  * Trace a function execution
  */
-export function traceFunction<T extends (...args: any[]) => any>(
+export function traceFunction<T extends (...args: unknown[]) => unknown>(
   fn: T,
   name: string,
   type: TraceEvent['type'] = 'user_action',
 ): T {
-  return ((...args: any[]) => {
+  return ((...args: unknown[]) => {
     const traceId = trace.start(name, type, { args: args.length });
-
     try {
       const result = fn(...args);
-
-      // Handle promises
-      if (result && typeof result.then === 'function') {
-        return result
-          .then((value: any) => {
+      if (result && typeof (result as Promise<unknown>).then === 'function') {
+        return (result as Promise<unknown>)
+          .then((value) => {
             trace.end(traceId, { success: true, resultType: typeof value });
             return value;
           })
-          .catch((error: any) => {
-            trace.end(traceId, { success: false, error: error.message });
+          .catch((error: unknown) => {
+            trace.end(traceId, {
+              success: false,
+              error: (error as Error)?.message ?? String(error),
+            });
             throw error;
-          });
+          }) as unknown as ReturnType<T>;
       }
-
       trace.end(traceId, { success: true, resultType: typeof result });
-      return result;
-    } catch (error: any) {
-      trace.end(traceId, { success: false, error: error.message });
+      return result as ReturnType<T>;
+    } catch (error) {
+      trace.end(traceId, {
+        success: false,
+        error: (error as Error)?.message ?? String(error),
+      });
       throw error;
     }
   }) as T;
 }
 
 /**
- * Trace a store action
+ * Trace a store action (overloaded)
+ * Supports:
+ *  - traceStoreAction('settings:setIncludeMetadata', { include })
+ *  - traceStoreAction('settings', 'setIncludeMetadata', { include })
  */
-export function traceStoreAction(storeName: string, actionName: string, payload?: any): string {
+export function traceStoreAction(action: string, payload?: unknown): string;
+export function traceStoreAction(storeName: string, actionName: string, payload?: unknown): string;
+export function traceStoreAction(a: string, b?: string | unknown, c?: unknown): string {
+  // Normalize arguments to storeName + actionName + payload
+  let storeName: string;
+  let actionName: string;
+  let payload: unknown;
+
+  if (typeof b === 'string') {
+    // 3-arg form
+    storeName = a;
+    actionName = b;
+    payload = c;
+  } else {
+    // 2-arg form: a = "store:action" or "store.action" or just "action"
+    const raw = a;
+    if (raw.includes(':')) {
+      const [s, act] = raw.split(':', 2);
+      storeName = s || 'store';
+      actionName = act || 'action';
+    } else if (raw.includes('.')) {
+      const [s, act] = raw.split('.', 2);
+      storeName = s || 'store';
+      actionName = act || 'action';
+    } else {
+      storeName = 'store';
+      actionName = raw;
+    }
+    payload = b;
+  }
+
   return trace.start(`${storeName}.${actionName}`, 'store_action', {
     store: storeName,
     action: actionName,
@@ -362,9 +348,9 @@ export function traceStoreAction(storeName: string, actionName: string, payload?
 /**
  * Trace component render
  */
-export function traceComponentRender(componentName: string, props?: any): string {
+export function traceComponentRender(componentName: string, props?: unknown): string {
   return trace.start(componentName, 'component_render', {
-    propsCount: props ? Object.keys(props).length : 0,
+    propsCount: props && typeof props === 'object' ? Object.keys(props as object).length : 0,
     propsSize: props ? JSON.stringify(props).length : 0,
   });
 }
@@ -372,23 +358,21 @@ export function traceComponentRender(componentName: string, props?: any): string
 /**
  * React Hook for tracing component renders
  */
-export function useTraceRender(componentName: string, dependencies?: any[]): void {
-  if (!featureFlags.isEnabled('performanceMonitoring')) return;
+export function useTraceRender(componentName: string, dependencies?: unknown[]): void {
+  if (!featureFlags.isEnabled?.('performanceMonitoring')) return;
 
   const traceId = React.useRef<string>('');
   const renderCount = React.useRef(0);
 
   React.useEffect(() => {
-    renderCount.current++;
+    renderCount.current += 1;
     traceId.current = traceComponentRender(componentName, {
       renderNumber: renderCount.current,
       dependencyCount: dependencies?.length || 0,
     });
 
     return () => {
-      if (traceId.current) {
-        trace.end(traceId.current);
-      }
+      if (traceId.current) trace.end(traceId.current);
     };
   });
 }
@@ -398,11 +382,9 @@ export function useTraceRender(componentName: string, dependencies?: any[]): voi
  */
 export function useTraceStore(storeName: string) {
   return React.useCallback(
-    (actionName: string, payload?: any) => {
-      const traceId = traceStoreAction(storeName, actionName, payload);
-
-      // Return a function to end the trace
-      return () => trace.end(traceId);
+    (actionName: string, payload?: unknown) => {
+      const id = traceStoreAction(storeName, actionName, payload);
+      return () => trace.end(id);
     },
     [storeName],
   );
@@ -416,8 +398,8 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
     getSummary: () => trace.getSummary(),
     clear: () => trace.clear(),
     export: () => trace.export(),
-    log: (name: string, type: string, level?: string, metadata?: any) =>
-      trace.log(name, type as any, level as any, metadata),
+    log: (name: string, type: string, level?: string, metadata?: unknown) =>
+      trace.log(name, type as any, level as any, metadata as any),
   };
 
   console.log('📊 Trace utilities available at window.__inkwellTrace');

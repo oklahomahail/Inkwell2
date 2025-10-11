@@ -1,125 +1,111 @@
-// src/components/Sidebar.test.tsx
+// File: src/components/Sidebar.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-// Define default mock values
-const defaultMockUI = { sidebarCollapsed: false, toggleSidebar: vi.fn() };
-const defaultMockState = { view: 'Dashboard' };
-let mockUI = { ...defaultMockUI };
-let mockState = { ...defaultMockState };
-const mockDispatch = vi.fn();
+import { View } from '@/context/AppContext';
+import { TestWrapper } from '@/test-utils/component-mocks';
 
-vi.mock('@/utils/focusUtils', () => ({
-  focusWritingEditor: vi.fn(),
-}));
+import Sidebar from './Sidebar';
 
-vi.mock('@/hooks/useUI', () => ({
-  useUI: () => mockUI,
-}));
-
-vi.mock('@/context/AppContext', () => ({
-  View: {
-    Dashboard: 'Dashboard',
-    Writing: 'Writing',
-    Planning: 'Planning',
-    Timeline: 'Timeline',
-    Analysis: 'Analysis',
-    Settings: 'Settings',
-  },
-  useAppContext: () => ({ state: mockState, dispatch: mockDispatch }),
-}));
-
-vi.mock('@/components/Brand/Brand', () => ({
-  Brand: ({ collapsed }: { collapsed?: boolean }) => (
-    <div data-testid="brand" data-collapsed={collapsed ? 'true' : 'false'} />
-  ),
-}));
-
+// Keep icon replacement lightweight
 vi.mock('@/components/icons', () => ({
   InkwellFeather: vi.fn(({ name, size, color, ...props }) => (
     <span data-testid={`icon-${name}`} data-size={size} data-color={color} {...props} />
   )),
 }));
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+// Optional: if Sidebar uses focus helpers, keep them inert
+vi.mock('@/utils/focusUtils', () => ({
+  focusWritingEditor: vi.fn(),
+}));
 
-import Sidebar from './Sidebar';
+// If your component calls useUI directly, we don't need to mock the module;
+// TestWrapper supplies a real UIContext. If you prefer to lock props, you can add:
+// vi.mock('@/hooks/useUI', async (orig) => {
+//   const mod = await orig();
+//   return { ...mod, useUI: () => ({ sidebarCollapsed: false, toggleSidebar: vi.fn() }) };
+// });
 
 describe('Sidebar Component', () => {
-  const renderSidebar = (mocks = {}) => {
-    mockUI = mocks.ui ? { ...defaultMockUI, ...mocks.ui } : { ...defaultMockUI };
-    mockState = mocks.state ? { ...defaultMockState, ...mocks.state } : { ...defaultMockState };
-    return render(<Sidebar />);
+  const renderWithProviders = (opts?: {
+    appView?: View;
+    uiCollapsed?: boolean;
+    toggle?: () => void;
+  }) => {
+    const appState = { view: opts?.appView ?? View.Dashboard };
+    const ui = {
+      sidebarCollapsed: Boolean(opts?.uiCollapsed),
+      toggleSidebar: opts?.toggle ?? vi.fn(),
+    };
+    return render(
+      <TestWrapper appState={appState} ui={ui}>
+        <Sidebar />
+      </TestWrapper>,
+    );
   };
 
   beforeEach(() => {
-    mockUI = { ...defaultMockUI };
-    mockState = { ...defaultMockState };
     vi.clearAllMocks();
-    vi.resetModules();
   });
 
   it('renders all navigation items', () => {
-    renderSidebar();
+    renderWithProviders();
 
+    // Label text should match your actual button labels in Sidebar
     expect(screen.getByRole('button', { name: /dashboard/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /writing/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /planning/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /timeline/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /analytics/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /analysis/i })).toBeInTheDocument(); // "Analysis", not "Analytics"
     expect(screen.getByRole('button', { name: /settings/i })).toBeInTheDocument();
   });
 
   it('renders InkwellFeather icon with correct props for Planning view', () => {
-    renderSidebar();
+    renderWithProviders();
     const planningIcon = screen.getByTestId('icon-planning');
     expect(planningIcon).toBeInTheDocument();
     expect(planningIcon).toHaveAttribute('data-size', 'sm');
   });
 
   it('highlights the active view', () => {
-    renderSidebar({ state: { view: 'Writing' } });
+    renderWithProviders({ appView: View.Writing });
     const writingButton = screen.getByRole('button', { name: /writing/i });
+
+    // Match the actual active classes used in your Sidebar component
     expect(writingButton).toHaveClass('bg-indigo-50');
     expect(writingButton).toHaveClass('text-indigo-600');
   });
 
   it('toggles collapsed state', () => {
     const toggleSidebar = vi.fn();
-    renderSidebar({ ui: { sidebarCollapsed: false, toggleSidebar } });
+    renderWithProviders({ uiCollapsed: false, toggle: toggleSidebar });
 
+    // Match the aria-label/title you use on the collapse trigger
     const toggleButton = screen.getByRole('button', { name: /collapse sidebar/i });
     fireEvent.click(toggleButton);
-
     expect(toggleSidebar).toHaveBeenCalled();
   });
 
   it('handles view change click without error', () => {
-    renderSidebar();
+    renderWithProviders();
     const writingButton = screen.getByRole('button', { name: /writing/i });
-
     expect(() => fireEvent.click(writingButton)).not.toThrow();
   });
 
   describe('Collapsed State', () => {
     it('hides navigation labels when collapsed', () => {
-      renderSidebar({ ui: { sidebarCollapsed: true, toggleSidebar: vi.fn() } });
-
-      const dashboardText = screen.queryByText('Dashboard');
-      expect(dashboardText).not.toBeInTheDocument();
+      renderWithProviders({ uiCollapsed: true });
+      expect(screen.queryByText(/dashboard/i)).not.toBeInTheDocument();
     });
 
     it('shows navigation labels when expanded', () => {
-      renderSidebar({ ui: { sidebarCollapsed: false, toggleSidebar: vi.fn() } });
-
-      const dashboardText = screen.getByText('Dashboard');
+      renderWithProviders({ uiCollapsed: false });
+      const dashboardText = screen.getByText(/dashboard/i);
       expect(dashboardText).not.toHaveClass('hidden');
     });
 
     it('adds correct classes for collapsed state', () => {
-      const { container } = renderSidebar({
-        ui: { sidebarCollapsed: true, toggleSidebar: vi.fn() },
-      });
-
+      const { container } = renderWithProviders({ uiCollapsed: true });
       const aside = container.querySelector('aside');
       expect(aside).toBeInTheDocument();
       expect(aside).toHaveClass('w-14');

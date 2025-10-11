@@ -1,67 +1,101 @@
-// src/test-utils/component-mocks.tsx
+// File: src/test-utils/component-mocks.tsx
 import React from 'react';
 import { vi } from 'vitest';
 
-import { AppContext, AppState, initialState } from '@/context/AppContext';
-import { UIContext } from '@/hooks/useUI';
+import {
+  AppContext,
+  type AppState,
+  type AppContextValue,
+  initialState,
+  View,
+} from '@/context/AppContext';
+import { UIContext, type UIContextValue } from '@/hooks/useUI';
 
-// Mock AppContext Provider
+// ----- AppContext helpers -----
 export const createMockAppState = (overrides?: Partial<AppState>): AppState => ({
   ...initialState,
   ...overrides,
 });
 
+export const createMockAppContextValue = (
+  state: AppState,
+  extra?: Partial<AppContextValue>,
+): AppContextValue => {
+  const dispatch = vi.fn();
+
+  return {
+    state,
+    dispatch,
+    currentProject: null,
+    projects: state.projects,
+    setView: vi.fn((view: View) => dispatch({ type: 'SET_VIEW', payload: view })),
+    setTheme: vi.fn((theme) => dispatch({ type: 'SET_THEME', payload: theme })),
+    addProject: vi.fn(),
+    updateProject: vi.fn(),
+    deleteProject: vi.fn(),
+    setCurrentProjectId: vi.fn(),
+    setAutoSaveSaving: vi.fn(),
+    setAutoSaveSuccess: vi.fn(),
+    setAutoSaveError: vi.fn(),
+    claude: null as any,
+    claudeActions: {
+      sendMessage: vi.fn(async () => ''),
+      clearMessages: vi.fn(),
+      toggleVisibility: vi.fn(),
+      configureApiKey: vi.fn(),
+      suggestContinuation: vi.fn(async () => ''),
+      improveText: vi.fn(async () => ''),
+      analyzeWritingStyle: vi.fn(async () => ''),
+      generatePlotIdeas: vi.fn(async () => ''),
+      analyzeCharacter: vi.fn(async () => ''),
+      brainstormIdeas: vi.fn(async () => ''),
+    },
+    ...(extra ?? {}),
+  };
+};
+
 export const MockAppProvider: React.FC<{
   children: React.ReactNode;
   state?: Partial<AppState>;
-}> = ({ children, state = {} }) => {
+  ctxOverrides?: Partial<AppContextValue>;
+}> = ({ children, state = {}, ctxOverrides }) => {
   const mockState = createMockAppState(state);
-  const dispatch = vi.fn();
-
-  return (
-    <AppContext.Provider value={{ state: mockState, dispatch }}>{children}</AppContext.Provider>
-  );
+  const mockCtx = createMockAppContextValue(mockState, ctxOverrides);
+  return <AppContext.Provider value={mockCtx}>{children}</AppContext.Provider>;
 };
 
-// Mock UI Context Provider
-export interface MockUIState {
-  sidebarCollapsed: boolean;
-  toggleSidebar: () => void;
-}
-
-const defaultUIState: MockUIState = {
+// ----- UIContext helpers -----
+const defaultUI: UIContextValue = {
   sidebarCollapsed: false,
   toggleSidebar: vi.fn(),
 };
 
 export const MockUIProvider: React.FC<{
   children: React.ReactNode;
-  state?: Partial<MockUIState>;
-}> = ({ children, state = {} }) => {
-  const mockState = { ...defaultUIState, ...state };
-
-  return <UIContext.Provider value={mockState as any}>{children}</UIContext.Provider>;
+  ui?: Partial<UIContextValue>;
+}> = ({ children, ui = {} }) => {
+  const value: UIContextValue = { ...defaultUI, ...ui };
+  return <UIContext.Provider value={value}>{children}</UIContext.Provider>;
 };
 
-// Composable test wrapper that includes common providers
+// ----- Composable wrapper for tests -----
 export const TestWrapper: React.FC<{
   children: React.ReactNode;
   appState?: Partial<AppState>;
-  uiState?: Partial<MockUIState>;
-}> = ({ children, appState = {}, uiState = {} }) => {
+  appCtxOverrides?: Partial<AppContextValue>;
+  ui?: Partial<UIContextValue>;
+}> = ({ children, appState = {}, appCtxOverrides, ui = {} }) => {
   return (
-    <MockAppProvider state={appState}>
-      <MockUIProvider state={uiState}>{children}</MockUIProvider>
+    <MockAppProvider state={appState} ctxOverrides={appCtxOverrides}>
+      <MockUIProvider ui={ui}>{children}</MockUIProvider>
     </MockAppProvider>
   );
 };
 
-// Mock component props
+// Misc test helpers
 export const createTestId = (name: string) => `test-${name}`;
 
-// Jest mock for Lucide icons used in InkwellFeather
-export const mockLucideIcon = (name: string) => {
-  return vi
+export const mockLucideIcon = (name: string) =>
+  vi
     .fn()
     .mockImplementation((props) => <span data-testid={createTestId(`icon-${name}`)} {...props} />);
-};
