@@ -1,7 +1,51 @@
+import { clsx } from 'clsx';
 import { Bell } from 'lucide-react';
 import { useState } from 'react';
 
-export default function TopbarBell() {
+import type { Notification } from '@/types/notifications';
+
+import { NotificationsPanel } from './NotificationsPanel';
+
+// Mock notifications - replace with real data later
+const mockNotifications: Notification[] = [
+  {
+    id: '1',
+    title: 'Welcome to Inkwell',
+    message: 'Get started with our quick tour of features.',
+    type: 'info',
+    read: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+  },
+  {
+    id: '2',
+    title: 'Autosave Enabled',
+    message: 'Your work will now be saved automatically.',
+    type: 'success',
+    read: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 15), // 15 minutes ago
+  },
+];
+
+interface TopbarBellProps {
+  className?: string;
+}
+
+export default function TopbarBell({ className = '' }: TopbarBellProps) {
+  // State
+  const [notifications] = useState<Notification[]>(mockNotifications);
+
+  // Handlers
+  const handleMarkAsRead = (id: string) => {
+    console.log('Mark as read:', id);
+  };
+
+  const handleMarkAllAsRead = () => {
+    console.log('Mark all as read');
+  };
+
+  const handleNotificationClick = (notification: Notification) => {
+    console.log('Clicked notification:', notification);
+  };
   const [open, setOpen] = useState(false);
 
   return (
@@ -9,33 +53,31 @@ export default function TopbarBell() {
       <button
         aria-label="Notifications"
         onClick={() => setOpen(true)}
-        className="p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+        className={`relative rounded-full p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${className}`}
       >
         <Bell className="w-5 h-5" />
+
+        {/* Notification badge */}
+        {notifications.some((n) => !n.read) && (
+          <span
+            className={clsx(
+              'absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center',
+              'rounded-full bg-red-600 text-xs font-medium text-white dark:text-gray-100',
+            )}
+          >
+            {notifications.filter((n) => !n.read).length}
+          </span>
+        )}
       </button>
 
       {open && (
-        <div
-          role="dialog"
-          aria-modal
-          className="fixed inset-0 bg-black/30 flex items-start justify-center pt-32 z-50"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setOpen(false);
-          }}
-        >
-          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Notifications</h3>
-            <p className="text-sm text-gray-600 mb-4">Nothing new yet.</p>
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => setOpen(false)}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+        <NotificationsPanel
+          notifications={notifications}
+          onClose={() => setOpen(false)}
+          onMarkAsRead={handleMarkAsRead}
+          onMarkAllAsRead={handleMarkAllAsRead}
+          onNotificationClick={handleNotificationClick}
+        />
       )}
     </>
   );
