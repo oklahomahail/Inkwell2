@@ -5,6 +5,13 @@ import { enhancedStorageService } from '../enhancedStorageService';
 
 describe('EnhancedStorageService', () => {
   beforeEach(() => {
+    // initialize service explicitly for tests
+    try {
+      enhancedStorageService.cleanup();
+    } catch {}
+    try {
+      enhancedStorageService.init();
+    } catch {}
     // Mock navigator.onLine
     Object.defineProperty(window.navigator, 'onLine', {
       value: true,
@@ -34,9 +41,16 @@ describe('EnhancedStorageService', () => {
 
   describe('Connectivity Integration', () => {
     it('should initialize connectivity monitoring', () => {
+      // Re-initialize with spy before init
+      vi.spyOn(connectivityService, 'onStatusChange');
+      enhancedStorageService.cleanup();
+      enhancedStorageService.init();
       const onStatusChangeSpy = vi.spyOn(connectivityService, 'onStatusChange');
 
       // Re-initialize service
+      enhancedStorageService.cleanup();
+      enhancedStorageService.init();
+
       const mockProject = {
         id: 'test-1',
         name: 'Test Project',
@@ -132,10 +146,9 @@ describe('EnhancedStorageService', () => {
       };
 
       const result = await enhancedStorageService.saveProjectSafe(mockProject);
-      expect(result).toEqual({
-        success: false,
-        error: mockError,
-      });
+      expect(result.success).toBe(false);
+      expect(result.error).toBeInstanceOf(Error);
+      expect(result.error?.message).toBe('Storage error');
     });
 
     it('should queue writes when offline', async () => {

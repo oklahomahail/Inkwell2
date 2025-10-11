@@ -27,6 +27,9 @@ export class EnhancedStorageService {
   private static CHAPTER_PREFIX = 'inkwell_chapter_';
   private static SCENE_PREFIX = 'inkwell_scene_';
 
+  private static _initialized = false;
+  private static _cleanup?: () => void;
+
   private static autoSnapshotEnabled = true;
   private static lastAutoSnapshot = Date.now();
   private static readonly autoSnapshotInterval = 10 * 60 * 1000; // 10 minutes
@@ -122,7 +125,7 @@ export class EnhancedStorageService {
    */
   static async saveProjectSafe(
     project: EnhancedProject,
-  ): Promise<{ success: boolean; error?: string }> {
+  ): Promise<{ success: boolean; error?: Error; message?: string }> {
     try {
       // Validate if project has schema-compatible structure
       if (this.isSchemaCompatible(project)) {
@@ -149,7 +152,12 @@ export class EnhancedStorageService {
       // Use quota-aware storage
       const result = await this.safeWrite(this.PROJECTS_KEY, JSON.stringify(projects));
       if (!result.success) {
-        return result;
+        // Propagate the underlying error as an Error instance if available
+        const out: { success: boolean; error?: Error; message?: string } = { success: false };
+        if (result.error instanceof Error) out.error = result.error;
+        else if (typeof result.error === 'string') out.message = result.error;
+        else out.message = 'Unknown storage error';
+        return out;
       }
 
       // Create snapshot if significant changes
@@ -160,7 +168,11 @@ export class EnhancedStorageService {
     } catch (error) {
       const errorMessage = `Failed to save project safely: ${error instanceof Error ? error.message : 'Unknown error'}`;
       console.error(errorMessage, error);
-      return { success: false, error: errorMessage };
+      return {
+        success: false,
+        error: error instanceof Error ? error : undefined,
+        message: errorMessage,
+      };
     }
   }
 
@@ -507,23 +519,51 @@ export class EnhancedStorageService {
   // STATIC INITIALIZATION
   // ==============================================
 
-  static {
+  /**
+   * Initializes the storage service with connectivity monitoring and automatic saves.
+   * Call this before using any storage service methods.
+   * @returns Cleanup function to unsubscribe from events
+   */
+  public static init(): () => void {
+    if (this._initialized) {
+      console.warn('EnhancedStorageService already initialized');
+      return () => {};
+    }
+
     // Initialize connectivity monitoring
-    if (typeof window !== 'undefined') {
-      // Auto-process queued writes when coming online
-      try {
-        connectivityService.onStatusChange((status) => {
-          try {
-            if (status?.isOnline && status?.queuedWrites > 0) {
+    try {
+      const unsubscribe = connectivityService.onStatusChange((status) => {
+        try {
+          if (status?.isOnline) {
+            if (status.queuedWrites > 0) {
               console.log('Processing queued storage operations...');
             }
-          } catch (error) {
-            console.error('Error in connectivity status handler:', error);
           }
-        });
-      } catch (error) {
-        console.error('Failed to initialize connectivity monitoring:', error);
-      }
+        } catch (error) {
+          console.error('Error in connectivity status handler:', error);
+        }
+      });
+
+      this._initialized = true;
+      this._cleanup = unsubscribe;
+      return unsubscribe;
+    } catch (error) {
+      const msg = 'Failed to initialize connectivity monitoring';
+      console.error(msg, error);
+      throw new Error(msg, { cause: error });
+    }
+  }
+
+  /**
+   * Clean up any active subscriptions and monitoring
+   */
+  public static cleanup(): void {
+    try {
+      this._cleanup?.();
+      this._initialized = false;
+      this._cleanup = undefined;
+    } catch (error) {
+      console.error('Error during storage service cleanup:', error);
     }
   }
 }
@@ -533,6 +573,10 @@ export default EnhancedStorageService;
 
 // New enhanced methods for gradual migration
 export const enhancedStorageService = {
+  // Core initialization
+  init: EnhancedStorageService.init.bind(EnhancedStorageService),
+  cleanup: EnhancedStorageService.cleanup.bind(EnhancedStorageService),
+
   // Legacy methods (unchanged)
   saveProject: EnhancedStorageService.saveProject.bind(EnhancedStorageService),
   loadProject: EnhancedStorageService.loadProject.bind(EnhancedStorageService),
