@@ -304,14 +304,14 @@ describe('AI Plot Analysis Service', () => {
     });
 
     it('should handle multiple concurrent analyses', async () => {
-      const promises = Array.from({ length: 5 }, (_, _i) =>
+      const promises = Array.from({ length: 5 }, (_, i) =>
         aiPlotAnalysisService.analyzeProject(`project-${i}`),
       );
 
       const results = await Promise.all(promises);
 
       expect(results.length).toBe(5);
-      results.forEach((result, _index) => {
+      results.forEach((result, index) => {
         expect(result.projectId).toBe(`project-${index}`);
       });
     });

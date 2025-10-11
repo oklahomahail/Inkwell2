@@ -22,8 +22,8 @@ vi.mock('./storageService', () => {
         {
           id: 's-2',
           title: 'Market',
-          content: 'A bustling market with vendors.',
-          wordCount: 6,
+          content: 'A bustling market with vendors. The market is very busy.',
+          wordCount: 9,
           updatedAt: 1700000000002,
         },
       ],
@@ -64,10 +64,17 @@ describe('enhancedSearchService (main-thread fallback)', () => {
   });
 
   it('indexes chapters & scenes and returns scored results', async () => {
-    const results = await enhancedSearchService.search('market', { projectId, maxResults: 5 });
+    const results = await enhancedSearchService.search('market', {
+      projectId,
+      maxResults: 5,
+      minScore: -1,
+    });
     expect(results.length).toBeGreaterThan(0);
     expect(results[0]).toHaveProperty('id');
     expect(results[0]).toHaveProperty('excerpt');
+    const ids = results.map((r) => r.id);
+    expect(ids).toContain('s-2');
+    expect(results.some((r) => r.excerpt.toLowerCase().includes('market'))).toBe(true);
   });
 
   it('updateDocument() reindexes content reflectively', async () => {
