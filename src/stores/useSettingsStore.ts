@@ -8,34 +8,34 @@ import { traceStoreAction } from '../utils/trace';
 // Public API for components/tests
 export interface SettingsStore extends SettingsStoreState {
   // Theme
-  setTheme: (_theme: 'light' | 'dark') => void;
+  setTheme: (theme: 'light' | 'dark') => void;
 
   // Auto-save
-  setAutoSaveEnabled: (_enabled: boolean) => void;
-  setAutoSaveInterval: (_interval: number) => void;
+  setAutoSaveEnabled: (enabled: boolean) => void;
+  setAutoSaveInterval: (interval: number) => void;
 
   // Backup
-  setBackupEnabled: (_enabled: boolean) => void;
-  setBackupFrequency: (_frequency: 'daily' | 'weekly' | 'monthly') => void;
+  setBackupEnabled: (enabled: boolean) => void;
+  setBackupFrequency: (frequency: 'daily' | 'weekly' | 'monthly') => void;
 
   // Editor
-  setEditorFontSize: (_size: number) => void;
-  setEditorFontFamily: (_family: string) => void;
-  setEditorLineHeight: (_height: number) => void;
-  setShowWordCount: (_show: boolean) => void;
-  setShowCharacterCount: (_show: boolean) => void;
+  setEditorFontSize: (size: number) => void;
+  setEditorFontFamily: (family: string) => void;
+  setEditorLineHeight: (height: number) => void;
+  setShowWordCount: (show: boolean) => void;
+  setShowCharacterCount: (show: boolean) => void;
 
   // Export
-  setDefaultExportFormat: (_format: ExportFormat) => void;
-  setIncludeMetadata: (_include: boolean) => void;
-  setCompressImages: (_compress: boolean) => void;
+  setDefaultExportFormat: (format: ExportFormat) => void;
+  setIncludeMetadata: (include: boolean) => void;
+  setCompressImages: (compress: boolean) => void;
 
   // Feature flags
-  setFeatureFlag: (_flag: string, _enabled: boolean) => void;
+  setFeatureFlag: (flag: string, enabled: boolean) => void;
 
   // Status and errors
-  setIsLoading: (_loading: boolean) => void;
-  setError: (_message: string | null) => void;
+  setIsLoading: (loading: boolean) => void;
+  setError: (message: string | null) => void;
   clearError: () => void;
 
   // Reset
@@ -92,63 +92,63 @@ export const useSettingsStore = create<SettingsStore>()(
         },
 
         // Auto-save
-        setAutoSaveEnabled: (_enabled) => {
+        setAutoSaveEnabled: (enabled) => {
           traceStoreAction?.('settings:setAutoSaveEnabled', { enabled });
           set((s) => ({ ...s, autoSave: { ...s.autoSave, enabled } }));
         },
-        setAutoSaveInterval: (_interval) => {
+        setAutoSaveInterval: (interval) => {
           traceStoreAction?.('settings:setAutoSaveInterval', { interval });
           set((s) => ({ ...s, autoSave: { ...s.autoSave, interval } }));
         },
 
         // Backup
-        setBackupEnabled: (_enabled) => {
+        setBackupEnabled: (enabled) => {
           traceStoreAction?.('settings:setBackupEnabled', { enabled });
           set((s) => ({ ...s, backup: { ...s.backup, enabled } }));
         },
-        setBackupFrequency: (_frequency) => {
+        setBackupFrequency: (frequency) => {
           traceStoreAction?.('settings:setBackupFrequency', { frequency });
           set((s) => ({ ...s, backup: { ...s.backup, frequency } }));
         },
 
         // Editor
-        setEditorFontSize: (_size) => {
+        setEditorFontSize: (size) => {
           traceStoreAction?.('settings:setEditorFontSize', { size });
           set((s) => ({ ...s, editor: { ...s.editor, fontSize: size } }));
         },
-        setEditorFontFamily: (_family) => {
+        setEditorFontFamily: (family) => {
           traceStoreAction?.('settings:setEditorFontFamily', { family });
           set((s) => ({ ...s, editor: { ...s.editor, fontFamily: family } }));
         },
-        setEditorLineHeight: (_height) => {
+        setEditorLineHeight: (height) => {
           traceStoreAction?.('settings:setEditorLineHeight', { height });
           set((s) => ({ ...s, editor: { ...s.editor, lineHeight: height } }));
         },
-        setShowWordCount: (_show) => {
+        setShowWordCount: (show) => {
           traceStoreAction?.('settings:setShowWordCount', { show });
           set((s) => ({ ...s, editor: { ...s.editor, showWordCount: show } }));
         },
-        setShowCharacterCount: (_show) => {
+        setShowCharacterCount: (show) => {
           traceStoreAction?.('settings:setShowCharacterCount', { show });
           set((s) => ({ ...s, editor: { ...s.editor, showCharacterCount: show } }));
         },
 
         // Export
-        setDefaultExportFormat: (_format) => {
+        setDefaultExportFormat: (format) => {
           traceStoreAction?.('settings:setDefaultExportFormat', { format });
           set((s) => ({ ...s, export: { ...s.export, defaultFormat: format } }));
         },
-        setIncludeMetadata: (_include) => {
+        setIncludeMetadata: (include) => {
           traceStoreAction?.('settings:setIncludeMetadata', { include });
           set((s) => ({ ...s, export: { ...s.export, includeMetadata: include } }));
         },
-        setCompressImages: (_compress) => {
+        setCompressImages: (compress) => {
           traceStoreAction?.('settings:setCompressImages', { compress });
           set((s) => ({ ...s, export: { ...s.export, compressImages: compress } }));
         },
 
         // Feature flags
-        setFeatureFlag: (_flag, _enabled) => {
+        setFeatureFlag: (flag, enabled) => {
           traceStoreAction?.('settings:setFeatureFlag', { flag, enabled });
           set((s) => ({
             ...s,
@@ -157,11 +157,11 @@ export const useSettingsStore = create<SettingsStore>()(
         },
 
         // Status and errors
-        setIsLoading: (_loading) => {
+        setIsLoading: (loading) => {
           traceStoreAction?.('settings:setIsLoading', { loading });
           set((s) => ({ ...s, isLoading: loading }));
         },
-        setError: (_message) => {
+        setError: (message) => {
           traceStoreAction?.('settings:setError', { message });
           set((s) => ({ ...s, error: message }));
         },
