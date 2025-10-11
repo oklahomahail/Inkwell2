@@ -15,8 +15,8 @@ import ExportDialog from '@/components/Writing/ExportDialog';
 import { SceneHeader } from '@/components/Writing/SceneHeader';
 import TipTapEditor from '@/components/Writing/TipTapEditor';
 import { useAppContext } from '@/context/AppContext';
+import { cn } from '@/lib/utils';
 import { Scene, SceneStatus, Chapter } from '@/types/writing';
-import { cn } from '@/utils/cn';
 import { generateId } from '@/utils/idUtils';
 
 interface WritingPanelProps {
