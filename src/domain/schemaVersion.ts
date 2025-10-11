@@ -26,7 +26,7 @@ export const MIGRATIONS: Record<number, MigrationFn> = {
  */
 export const runMigrations = _runMigrations;
 
-export function _runMigrations(data: any, fromVersion: number): Promise<any> {
+export async function _runMigrations(data: any, fromVersion: number): Promise<any> {
   let currentData = data;
   let currentVersion = fromVersion;
 
