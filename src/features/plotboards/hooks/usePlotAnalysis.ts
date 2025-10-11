@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react';
 
-import { isEnabled } from '../../../config/features';
-import { analyzeBoard } from '../../../services/aiPlotAnalysisService';
+import aiService from '../../../services/aiPlotAnalysisService';
 import { analyticsService } from '../../../services/analyticsService';
+import { isEnabled } from '../../../utils/flags';
 import { usePlotBoardStore } from '../store';
 
 export function usePlotAnalysis(profileId: string, projectId: string) {
@@ -41,7 +41,10 @@ export function usePlotAnalysis(profileId: string, projectId: string) {
       };
 
       console.log('Running plot analysis for', scenes.length, 'scenes');
-      const result = await analyzeBoard(input);
+      const service: any = (aiService as any) || {};
+      const result = service.analyzeBoard
+        ? await service.analyzeBoard(input)
+        : await service.analyzeProject(projectId, { mockMode: true });
       setAnalysis(projectId, result);
 
       // Track analytics

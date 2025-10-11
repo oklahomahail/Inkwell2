@@ -59,7 +59,7 @@ class PhraseAnalysisService {
     text: string,
     projectId: string,
     settings?: Partial<PhraseHygieneSettings>,
-  ): Promise<PhraseAnalysisResponse['results']> {
+  ): Promise<PhraseAnalysisResponse> {
     if (!this.worker) {
       throw new Error('Phrase analysis worker not available');
     }
@@ -68,16 +68,9 @@ class PhraseAnalysisService {
     const finalSettings = { ...hygieneSettings, ...settings };
 
     const request: PhraseAnalysisRequest = {
-      type: 'analyze',
       text,
       projectId,
-      options: {
-        ngramSizes: finalSettings.ngramSizes,
-        minOccurrences: finalSettings.minOccurrences,
-        stopWords: finalSettings.stopWords,
-        customStoplist: finalSettings.customStoplist,
-      },
-    };
+    } as any;
 
     return new Promise((resolve, reject) => {
       if (!this.worker) {
@@ -92,10 +85,10 @@ class PhraseAnalysisService {
       const handleMessage = (event: MessageEvent) => {
         const response = event.data;
 
-        if (response.type === 'analysis-complete' && response.projectId === projectId) {
+        if (response.type === 'ANALYSIS_COMPLETE') {
           clearTimeout(timeout);
           this.worker?.removeEventListener('message', handleMessage);
-          resolve(response.results);
+          resolve(response.result as PhraseAnalysisResponse);
         } else if (response.type === 'error') {
           clearTimeout(timeout);
           this.worker?.removeEventListener('message', handleMessage);

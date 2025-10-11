@@ -82,9 +82,7 @@ export interface FeatureFlag {
   requiresReload?: boolean;
 }
 
-export interface FeatureFlagConfig extends Record<string, FeatureFlag> {
-  aiWritingAssistant: FeatureFlag;
-}
+export type FeatureFlagConfig = Record<string, FeatureFlag>;
 
 // Worker types
 export interface WorkerMessage<T = unknown> {

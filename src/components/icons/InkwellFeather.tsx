@@ -131,7 +131,8 @@ export const INKWELL_ICONS = {
   minimize: Minimize2,
 } as const;
 
-export type InkwellIconName = keyof typeof INKWELL_ICONS;
+type InkwellIcons = typeof INKWELL_ICONS;
+export type InkwellIconName = keyof InkwellIcons | Lowercase<keyof InkwellIcons>;
 
 // Size variants for consistent sizing
 export const ICON_SIZES = {
@@ -160,15 +161,14 @@ export const ICON_COLORS = {
 
 export type IconColor = keyof typeof ICON_COLORS;
 
-export interface InkwellFeatherProps {
+import type { LucideProps } from 'lucide-react';
+
+export interface InkwellFeatherProps extends Omit<LucideProps, 'size' | 'color'> {
   name: InkwellIconName;
   size?: IconSize;
   color?: IconColor;
-  className?: string;
-  'aria-label'?: string;
   title?: string;
   'data-testid'?: string;
-  [key: string]: any; // Allow other DOM props
 }
 
 /**
@@ -208,7 +208,6 @@ export const InkwellFeather: React.FC<InkwellFeatherProps> = ({
     <IconComponent
       className={iconClasses}
       aria-label={ariaLabel || name.replace('-', ' ')}
-      title={title}
       data-testid={dataTestId}
       {...rest}
     />

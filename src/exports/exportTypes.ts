@@ -2,6 +2,8 @@
  * Export format types and interfaces
  */
 
+// exportTypes.ts - Core types for professional publishing exports
+
 export type ExportFormat = 'PDF' | 'DOCX' | 'EPUB';
 
 export interface ExportResult {
@@ -12,7 +14,7 @@ export interface ExportResult {
     format: ExportFormat;
     style: string;
     wordCount: number;
-    pageCount: number;
+    pageCount: number; // required to satisfy subsequent declarations
     fileSize: number;
     generatedAt: number;
   };
@@ -43,29 +45,17 @@ export interface ExportJob extends ExportJobConfig {
   };
 }
 
-export class ExportError extends Error {
-  constructor(
-    message: string,
-    public readonly code: string,
-    public readonly phase: ExportJob['progress']['phase'],
-    public readonly originalError?: Error,
-  ) {
-    super(message);
+// Export base error types
+import { ExportError, ExportValidationError } from './errors';
+
+export { ExportError, ExportValidationError };
+
+export class ExportRenderError extends ExportError {
+  constructor(message: string, _format: ExportFormat, details?: any) {
+    super(message, 'RENDER_ERROR', 'rendering', details);
+    this.name = 'ExportRenderError';
   }
 }
-
-export class ExportValidationError extends ExportError {
-  constructor(
-    message: string,
-    public readonly errors: string[],
-  ) {
-    super(message, 'VALIDATION_ERROR', 'assembling');
-  }
-}
-
-// exportTypes.ts - Core types for professional publishing exports
-
-export type ExportFormat = 'PDF' | 'DOCX' | 'EPUB';
 
 export interface StylePresetMeta {
   id: string; // 'classic-manuscript'
@@ -126,43 +116,6 @@ export interface ManuscriptDraft {
   metadata?: Record<string, string>;
   wordCount: number;
   estimatedPages: number;
-}
-
-export type ExportJobStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
-
-export interface ExportJob {
-  id: string;
-  projectId: string;
-  format: ExportFormat;
-  style: StylePresetMeta['id'];
-  includeProofread: boolean;
-  status: ExportJobStatus;
-  artifactPath?: string;
-  artifactSize?: number; // bytes
-  fileName?: string;
-  downloadUrl?: string;
-  startedAt?: number;
-  finishedAt?: number;
-  error?: string;
-  progress?: {
-    phase: 'assembling' | 'proofreading' | 'rendering' | 'finalizing';
-    percentage: number;
-    message?: string;
-  };
-}
-
-export interface ExportResult {
-  blob: Blob;
-  fileName: string;
-  downloadUrl: string;
-  metadata: {
-    format: ExportFormat;
-    style: string;
-    wordCount: number;
-    pageCount?: number;
-    fileSize: number;
-    generatedAt: number;
-  };
 }
 
 // Template variable replacement context
@@ -231,29 +184,3 @@ export interface ExportAnalyticsEvents {
 }
 
 // Error types for exports
-export class ExportError extends Error {
-  constructor(
-    message: string,
-    public code: string,
-    public phase: string,
-    public details?: any,
-  ) {
-    super(message);
-    this.name = 'ExportError';
-  }
-}
-
-export class ExportValidationError extends ExportError {
-  constructor(
-    message: string,
-    public validationErrors: string[],
-  ) {
-    super(message, 'VALIDATION_ERROR', 'validation');
-  }
-}
-
-export class ExportRenderError extends ExportError {
-  constructor(message: string, format: ExportFormat, details?: any) {
-    super(message, 'RENDER_ERROR', 'rendering', details);
-  }
-}

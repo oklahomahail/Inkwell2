@@ -380,10 +380,13 @@ class FeatureFlagManager {
   };
 }
 
-/* ========= Singleton Instance ========= */
+/* ========= Exports ========= */
 export const featureFlags = FeatureFlagManager.getInstance();
 
-/* ========= React Hook (optional) ========= */
+// Direct flag check function
+export const isEnabled = (flagKey: string): boolean => featureFlags.isEnabled(flagKey);
+
+/* ========= React Hook ========= */
 export function useFeatureFlag(flagKey: string): boolean {
   const [enabled, setEnabled] = React.useState(() => featureFlags.isEnabled(flagKey));
 

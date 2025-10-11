@@ -6,6 +6,8 @@ import {
   type WorkerResponse,
 } from '@/services/searchWorkerService';
 
+/// <reference lib="webworker" />
+
 declare var self: DedicatedWorkerGlobalScope;
 
 // Simple in-memory index for demo
@@ -21,7 +23,7 @@ function buildIndex(message: Extract<WorkerMessage, { type: 'BUILD_INDEX' }>): v
   });
 
   // Index chapters
-  chapters.forEach((chapter) => {
+  chapters.forEach((chapter: any) => {
     index.set(`chapter:${chapter.id}`, {
       projectId,
       content: JSON.stringify(chapter),

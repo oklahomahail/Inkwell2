@@ -19,6 +19,8 @@ interface ExportWizardProps {
 
 type WizardStep = 'format' | 'style' | 'proofread' | 'review' | 'processing' | 'download';
 
+const WIZARD_STEPS: WizardStep[] = ['format', 'style', 'proofread', 'review'];
+
 export default function ExportWizard({ projectId, onClose }: ExportWizardProps) {
   const [currentStep, setCurrentStep] = useState<WizardStep>('format');
   const [format, setFormat] = useState<ExportFormat>('PDF');
@@ -34,19 +36,18 @@ export default function ExportWizard({ projectId, onClose }: ExportWizardProps) 
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
 
-  const steps: WizardStep[] = ['format', 'style', 'proofread', 'review'];
+  const steps = WIZARD_STEPS;
   const currentStepIndex = steps.indexOf(currentStep);
 
   const canProceed = () => {
     switch (currentStep) {
       case 'format':
-        return format !== undefined;
+        return Boolean(format);
       case 'style':
-        return style !== undefined;
+        return Boolean(style);
       case 'proofread':
-        return true; // Always can proceed from proofread step
       case 'review':
-        return true;
+        return true; // Always can proceed from these steps
       default:
         return false;
     }
@@ -55,14 +56,14 @@ export default function ExportWizard({ projectId, onClose }: ExportWizardProps) 
   const nextStep = () => {
     const nextIndex = currentStepIndex + 1;
     if (nextIndex < steps.length) {
-      setCurrentStep(steps[nextIndex]);
+      setCurrentStep((prev) => steps[nextIndex] ?? prev);
     }
   };
 
   const prevStep = () => {
     const prevIndex = currentStepIndex - 1;
     if (prevIndex >= 0) {
-      setCurrentStep(steps[prevIndex]);
+      setCurrentStep((prev) => steps[prevIndex] ?? prev);
     }
   };
 

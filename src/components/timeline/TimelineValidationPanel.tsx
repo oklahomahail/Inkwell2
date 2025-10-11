@@ -33,14 +33,14 @@ const severityColors: Record<Severity, string> = {
   critical: 'text-red-800 bg-red-100 border-red-300',
 };
 
-const severityIcons: Record<Severity, JSX.Element> = {
+const severityIcons: Record<Severity, React.ReactNode> = {
   low: <AlertTriangle size={16} />,
   medium: <AlertTriangle size={16} />,
   high: <AlertTriangle size={16} />,
   critical: <AlertTriangle size={16} />,
 };
 
-const conflictTypeIcons: Record<RuleKey, JSX.Element> = {
+const conflictTypeIcons: Record<RuleKey, React.ReactNode> = {
   time_overlap: <Clock size={16} />,
   character_presence: <Users size={16} />,
   location_mismatch: <MapPin size={16} />,

@@ -1,8 +1,6 @@
 // File: src/context/AppContext.tsx - Updated with auto-save state
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
 
-import { Theme } from '@/types';
-
 import { useClaude } from './ClaudeProvider';
 
 // ===== ENUMS & TYPES =====
@@ -32,7 +30,6 @@ export interface Project {
 export type Theme = 'light' | 'dark';
 
 export interface AppState {
-  theme: Theme;
   claude: any;
   view: View;
   projects: Project[];
@@ -50,7 +47,6 @@ export interface AppState {
 
 // ===== ACTIONS =====
 type AppAction =
-  | { type: 'SET_THEME'; payload: Theme }
   | { type: 'SET_VIEW'; payload: View }
   | { type: 'ADD_PROJECT'; payload: Project }
   | { type: 'UPDATE_PROJECT'; payload: Project }
@@ -66,8 +62,7 @@ type AppAction =
   | { type: 'SET_AUTO_SAVE_ERROR'; payload: string | null };
 
 // ===== INITIAL STATE =====
-const initialState: AppState = {
-  theme: 'light',
+export const initialState: AppState = {
   view: View.Dashboard,
   projects: [],
   currentProjectId: null,
@@ -180,7 +175,7 @@ export interface AppContextValue {
 }
 
 // ===== CONTEXT CREATION =====
-const AppContext = createContext<AppContextValue | null>(null);
+export const AppContext = createContext<AppContextValue | null>(null);
 
 // ===== CUSTOM HOOK =====
 export function useAppContext(): AppContextValue {

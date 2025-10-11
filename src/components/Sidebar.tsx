@@ -15,7 +15,9 @@ const sidebarLinks = [
   {
     view: View.Planning,
     label: 'Planning',
-    icon: (props) => <InkwellFeather name="planning" size="sm" {...props} />,
+    icon: (props: React.ComponentProps<'svg'>) => (
+      <InkwellFeather name={'planning' as any} size="sm" {...props} />
+    ),
   },
   { view: View.Timeline, label: 'Timeline', icon: Clock },
   { view: View.Analysis, label: 'Analytics', icon: BarChart3 },

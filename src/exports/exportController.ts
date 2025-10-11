@@ -117,7 +117,7 @@ export function subscribeToJob(jobId: string, callback: (job: ExportJob) => void
  */
 function updateJobProgress(
   jobId: string,
-  phase: ExportJob['progress']['phase'],
+  phase: 'assembling' | 'proofreading' | 'rendering' | 'finalizing',
   percentage: number,
   message?: string,
 ) {
@@ -132,7 +132,7 @@ function updateJobProgress(
 export async function runExport(jobId: string): Promise<ExportResult> {
   const job = jobQueue.get(jobId);
   if (!job) {
-    throw new ExportError('Job not found', 'JOB_NOT_FOUND', 'validation');
+    throw new ExportError('Job not found', 'JOB_NOT_FOUND', 'assembling');
   }
 
   try {

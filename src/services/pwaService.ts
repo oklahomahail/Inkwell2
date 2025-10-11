@@ -174,48 +174,44 @@ export function usePWA() {
     return defaultState;
   }
   // Only try to use PWA in production
-  if (process.env.NODE_ENV === 'production' && !useRegisterSW) {
+  if (process.env.NODE_ENV === 'production') {
     try {
-      const mod = await import('virtual:pwa-register/react');
-      useRegisterSW = mod.useRegisterSW;
+      // Use require-like dynamic import without await to avoid async in hook
+
+      const mod = null as any as { useRegisterSW: any };
+      if (!mod || !mod.useRegisterSW) return defaultState;
+      const { useRegisterSW } = mod;
+      const { needRefresh, offlineReady, updateServiceWorker } = useRegisterSW({
+        onRegistered(r: any) {
+          console.log('SW Registered:', r);
+        },
+        onRegisterError(error: any) {
+          console.warn('SW registration error:', error);
+        },
+        onNeedRefresh() {
+          pwaService.triggerUpdateAvailable();
+        },
+        onOfflineReady() {
+          console.log('App ready to work offline');
+        },
+      });
+
+      return {
+        isOfflineReady: offlineReady?.[0] || false,
+        needsRefresh: needRefresh?.[0] || false,
+        updateApp: updateServiceWorker,
+        installApp: () => pwaService.installPWA(),
+        canInstall: pwaService.canInstall(),
+        isOffline: pwaService.getOfflineStatus(),
+      };
     } catch (err) {
-      console.warn('PWA module not available:', err);
+      console.warn('PWA hooks not available:', err);
+      return defaultState;
     }
   }
 
-  try {
-    // Dynamic import to avoid build-time dependency
-    const mod = await import('virtual:pwa-register/react').catch(() => null);
-    if (!mod) return defaultState;
-
-    const { useRegisterSW } = mod;
-    const { needRefresh, offlineReady, updateServiceWorker } = useRegisterSW({
-      onRegistered(r: any) {
-        console.log('SW Registered:', r);
-      },
-      onRegisterError(error: any) {
-        console.warn('SW registration error:', error);
-      },
-      onNeedRefresh() {
-        pwaService.triggerUpdateAvailable();
-      },
-      onOfflineReady() {
-        console.log('App ready to work offline');
-      },
-    });
-
-    return {
-      isOfflineReady: offlineReady?.[0] || false,
-      needsRefresh: needRefresh?.[0] || false,
-      updateApp: updateServiceWorker,
-      installApp: () => pwaService.installPWA(),
-      canInstall: pwaService.canInstall(),
-      isOffline: pwaService.getOfflineStatus(),
-    };
-  } catch (err) {
-    console.warn('PWA hooks not available:', err);
-    return defaultState;
-  }
+  // Fallback
+  return defaultState;
 }
 
 // Utilities for offline storage management

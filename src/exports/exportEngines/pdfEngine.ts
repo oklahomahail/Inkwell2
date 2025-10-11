@@ -16,9 +16,10 @@ export interface ExportEngine {
  */
 function compileManuscriptToHTML(draft: ManuscriptDraft, style: StylePresetMeta): string {
   const css = generateCSS(style);
-  
+
   // Generate watermark HTML if specified
-  const watermarkHTML = style.watermark ? `
+  const watermarkHTML = style.watermark
+    ? `
     <div class="watermark" style="
       position: fixed;
       top: 50%;
@@ -42,77 +43,113 @@ function compileManuscriptToHTML(draft: ManuscriptDraft, style: StylePresetMeta)
         `)}') center/contain no-repeat;
       "></div>
     </div>
-  ` : '';
+  `
+    : '';
 
   // Generate front matter HTML
-  const frontMatterHTML = draft.frontMatter ? `
+  const frontMatterHTML = draft.frontMatter
+    ? `
     <div class="front-matter">
-      ${draft.frontMatter.dedication ? `
+      ${
+        draft.frontMatter.dedication
+          ? `
         <div class="dedication">
           <h2>Dedication</h2>
           <div>${draft.frontMatter.dedication}</div>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
       
-      ${draft.frontMatter.acknowledgements ? `
+      ${
+        draft.frontMatter.acknowledgements
+          ? `
         <div class="acknowledgements">
           <h2>Acknowledgements</h2>
           <div>${draft.frontMatter.acknowledgements}</div>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
       
-      ${draft.frontMatter.epigraph ? `
+      ${
+        draft.frontMatter.epigraph
+          ? `
         <div class="epigraph">
           <div>${draft.frontMatter.epigraph}</div>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
-  ` : '';
+  `
+    : '';
 
   // Generate chapters HTML
-  const chaptersHTML = draft.chapters.map(chapter => {
-    const scenesHTML = chapter.scenes.map((scene, sceneIndex) => {
-      const isLastScene = sceneIndex === chapter.scenes.length - 1;
-      const sceneBreakHTML = !isLastScene && style.sceneBreak ? `
+  const chaptersHTML = draft.chapters
+    .map((chapter) => {
+      const scenesHTML = chapter.scenes
+        .map((scene, sceneIndex) => {
+          const isLastScene = sceneIndex === chapter.scenes.length - 1;
+          const sceneBreakHTML =
+            !isLastScene && style.sceneBreak
+              ? `
         <div class="scene-break">${style.sceneBreak}</div>
-      ` : '';
-      
-      return `
+      `
+              : '';
+
+          return `
         <div class="scene">
           ${scene}
         </div>
         ${sceneBreakHTML}
       `;
-    }).join('');
+        })
+        .join('');
 
-    return `
+      return `
       <div class="chapter" data-chapter="${chapter.number}">
-        ${chapter.title ? `
+        ${
+          chapter.title
+            ? `
           <h1 class="chapter-title">${chapter.title}</h1>
-        ` : ''}
+        `
+            : ''
+        }
         ${scenesHTML}
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   // Generate back matter HTML
-  const backMatterHTML = draft.backMatter ? `
+  const backMatterHTML = draft.backMatter
+    ? `
     <div class="back-matter">
-      ${draft.backMatter.aboutAuthor ? `
+      ${
+        draft.backMatter.aboutAuthor
+          ? `
         <div class="about-author">
           <h2>About the Author</h2>
           <div>${draft.backMatter.aboutAuthor}</div>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
       
-      ${draft.backMatter.notes ? `
+      ${
+        draft.backMatter.notes
+          ? `
         <div class="notes">
           <h2>Notes</h2>
           <div>${draft.backMatter.notes}</div>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
-  ` : '';
+  `
+    : '';
 
   // Generate headers and footers HTML (for print CSS)
   const headerHTML = generateRunningHeader(style, draft);
@@ -182,13 +219,13 @@ function generateRunningHeader(style: StylePresetMeta, draft: ManuscriptDraft) {
     page: 0, // Will be replaced by CSS counter
     totalPages: draft.estimatedPages,
     date: new Date().toLocaleDateString(),
-    projectName: draft.title
+    projectName: draft.title,
   };
 
   return {
     left: replaceTemplateVariables(style.header?.left || '', context),
     center: replaceTemplateVariables(style.header?.center || '', context),
-    right: replaceTemplateVariables(style.header?.right || '', context)
+    right: replaceTemplateVariables(style.header?.right || '', context),
   };
 }
 
@@ -204,13 +241,13 @@ function generateRunningFooter(style: StylePresetMeta, draft: ManuscriptDraft) {
     page: 0, // Will be replaced by CSS counter
     totalPages: draft.estimatedPages,
     date: new Date().toLocaleDateString(),
-    projectName: draft.title
+    projectName: draft.title,
   };
 
   return {
     left: replaceTemplateVariables(style.footer?.left || '', context),
     center: replaceTemplateVariables(style.footer?.center || '', context),
-    right: replaceTemplateVariables(style.footer?.right || '', context)
+    right: replaceTemplateVariables(style.footer?.right || '', context),
   };
 }
 
@@ -226,29 +263,28 @@ async function htmlToPDF(html: string): Promise<Blob> {
   iframe.style.left = '-9999px';
   iframe.style.width = '8.5in';
   iframe.style.height = '11in';
-  
+
   document.body.appendChild(iframe);
-  
+
   try {
     // Write HTML content to iframe
     const doc = iframe.contentDocument;
     if (!doc) {
       throw new Error('Could not access iframe document');
     }
-    
+
     doc.open();
     doc.write(html);
     doc.close();
-    
+
     // Wait for content to load
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // In a real implementation, you'd use puppeteer or similar for server-side PDF generation
     // For now, we'll create a mock PDF blob
     const mockPDFContent = createMockPDFBlob(html);
-    
+
     return mockPDFContent;
-    
   } finally {
     // Clean up
     document.body.removeChild(iframe);
@@ -278,11 +314,11 @@ The HTML content would be properly rendered to PDF with:
 - Watermarks
 - Professional typography
 `;
-  
-  const blob = new Blob([pdfHeader + mockContent], { 
-    type: getMimeType('PDF') 
+
+  const blob = new Blob([pdfHeader + mockContent], {
+    type: getMimeType('PDF'),
   });
-  
+
   return blob;
 }
 
@@ -294,23 +330,20 @@ class PDFEngine implements ExportEngine {
     try {
       // Compile manuscript to HTML
       const html = compileManuscriptToHTML(draft, style);
-      
+
       // Convert to PDF
       const pdfBlob = await htmlToPDF(html);
-      
+
       // Validate the result
       if (!pdfBlob || pdfBlob.size === 0) {
         throw new Error('PDF generation failed - empty result');
       }
-      
+
       return pdfBlob;
-      
     } catch (error) {
-      throw new ExportRenderError(
-        `PDF generation failed: ${error.message}`,
-        'PDF',
-        { originalError: error }
-      );
+      throw new ExportRenderError(`PDF generation failed: ${(error as any)?.message}`, 'PDF', {
+        originalError: error,
+      });
     }
   }
 }
