@@ -33,4 +33,5 @@ export function _ToastContainer({ className = '' }: ToastContainerProps) {
   );
 }
 
-export default ToastContainer;
+export const ToastContainer = _ToastContainer;
+export default _ToastContainer;
