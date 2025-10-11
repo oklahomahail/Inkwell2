@@ -1,11 +1,11 @@
 // exportController.ts - Orchestrates the full export pipeline
 
-import { 
-  ExportJob, 
-  ExportResult, 
+import {
+  ExportJob,
+  ExportResult,
   ExportFormat,
   ExportError,
-  ExportValidationError 
+  ExportValidationError,
 } from './exportTypes';
 import { generateFileName, createDownloadUrl } from './exportUtils';
 import { assembleManuscript, validateManuscriptForExport } from './manuscriptAssembler';
@@ -19,7 +19,7 @@ interface AnalyticsService {
 const analytics: AnalyticsService = {
   track: (event: string, data: any) => {
     console.log(`Analytics: ${event}`, data);
-  }
+  },
 };
 
 // Job queue for managing exports
@@ -62,7 +62,7 @@ class ExportJobQueue {
   }
 
   private notifyListeners(job: ExportJob) {
-    this.listeners.get(job.id)?.forEach(callback => callback(job));
+    this.listeners.get(job.id)?.forEach((callback) => callback(job));
   }
 }
 
@@ -75,7 +75,7 @@ export function createExportJob(
   projectId: string,
   format: ExportFormat,
   styleId: string,
-  includeProofread: boolean = false
+  includeProofread: boolean = false,
 ): ExportJob {
   const job: ExportJob = {
     id: `export_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -84,7 +84,7 @@ export function createExportJob(
     style: styleId,
     includeProofread,
     status: 'queued',
-    startedAt: Date.now()
+    startedAt: Date.now(),
   };
 
   jobQueue.add(job);
@@ -102,7 +102,7 @@ export function getExportJob(jobId: string): ExportJob | undefined {
  * Gets all export jobs for a project
  */
 export function getExportJobsForProject(projectId: string): ExportJob[] {
-  return jobQueue.getAll().filter(job => job.projectId === projectId);
+  return jobQueue.getAll().filter((job) => job.projectId === projectId);
 }
 
 /**
@@ -116,13 +116,13 @@ export function subscribeToJob(jobId: string, callback: (job: ExportJob) => void
  * Updates job progress
  */
 function updateJobProgress(
-  jobId: string, 
-  phase: ExportJob['progress']['phase'], 
-  percentage: number, 
-  message?: string
+  jobId: string,
+  phase: ExportJob['progress']['phase'],
+  percentage: number,
+  message?: string,
 ) {
   jobQueue.update(jobId, {
-    progress: { phase, percentage, message }
+    progress: { phase, percentage, message },
   });
 }
 
@@ -137,9 +137,9 @@ export async function runExport(jobId: string): Promise<ExportResult> {
 
   try {
     // Mark job as running
-    jobQueue.update(jobId, { 
+    jobQueue.update(jobId, {
       status: 'running',
-      startedAt: Date.now()
+      startedAt: Date.now(),
     });
 
     analytics.track('export.started', {
@@ -147,21 +147,18 @@ export async function runExport(jobId: string): Promise<ExportResult> {
       format: job.format,
       style: job.style,
       includeProofread: job.includeProofread,
-      wordCount: 0 // Will be updated after assembly
+      wordCount: 0, // Will be updated after assembly
     });
 
     // Phase 1: Assemble manuscript
     updateJobProgress(jobId, 'assembling', 10, 'Compiling manuscript from project data...');
-    
+
     const draft = await assembleManuscript(job.projectId);
-    
+
     // Validate manuscript
     const validation = validateManuscriptForExport(draft);
     if (!validation.isValid) {
-      throw new ExportValidationError(
-        'Manuscript validation failed',
-        validation.errors
-      );
+      throw new ExportValidationError('Manuscript validation failed', validation.errors);
     }
 
     updateJobProgress(jobId, 'assembling', 25, 'Manuscript compiled successfully');
@@ -172,7 +169,7 @@ export async function runExport(jobId: string): Promise<ExportResult> {
       format: job.format,
       style: job.style,
       includeProofread: job.includeProofread,
-      wordCount: draft.wordCount
+      wordCount: draft.wordCount,
     });
 
     let workingDraft = draft;
@@ -181,14 +178,14 @@ export async function runExport(jobId: string): Promise<ExportResult> {
     // Phase 2: Optional proofreading
     if (job.includeProofread) {
       updateJobProgress(jobId, 'proofreading', 30, 'Running AI proofread...');
-      
+
       try {
         // Import and run proofread service
         const { runProofread } = await import('./proofread/proofreadService');
         proofreadReport = await runProofread(draft);
-        
+
         updateJobProgress(jobId, 'proofreading', 50, 'Proofread completed');
-        
+
         // Apply suggestions to working draft if configured
         // This would be implemented based on user preferences
       } catch (proofreadError) {
@@ -199,15 +196,15 @@ export async function runExport(jobId: string): Promise<ExportResult> {
 
     // Phase 3: Load style preset
     updateJobProgress(jobId, 'rendering', 55, 'Loading style preset...');
-    
+
     const { getStylePreset } = await import('./exportTemplates/presets');
     const stylePreset = await getStylePreset(job.style);
-    
+
     if (!stylePreset) {
       throw new ExportError(
         `Style preset '${job.style}' not found`,
         'STYLE_NOT_FOUND',
-        'rendering'
+        'rendering',
       );
     }
 
@@ -233,15 +230,16 @@ export async function runExport(jobId: string): Promise<ExportResult> {
           throw new ExportError(
             `Unsupported format: ${job.format}`,
             'UNSUPPORTED_FORMAT',
-            'rendering'
+            'rendering',
           );
       }
     } catch (importError) {
+      const err = importError instanceof Error ? importError : new Error(String(importError));
       throw new ExportError(
-        `Failed to load ${job.format} engine: ${importError.message}`,
+        `Failed to load ${job.format} engine: ${err.message}`,
         'ENGINE_LOAD_ERROR',
         'rendering',
-        importError
+        err,
       );
     }
 
@@ -268,8 +266,8 @@ export async function runExport(jobId: string): Promise<ExportResult> {
         wordCount: workingDraft.wordCount,
         pageCount: workingDraft.estimatedPages,
         fileSize: blob.size,
-        generatedAt: Date.now()
-      }
+        generatedAt: Date.now(),
+      },
     };
 
     // Update job as completed
@@ -278,7 +276,7 @@ export async function runExport(jobId: string): Promise<ExportResult> {
       finishedAt: Date.now(),
       fileName,
       downloadUrl,
-      artifactSize: blob.size
+      artifactSize: blob.size,
     });
 
     // Track completion analytics
@@ -287,25 +285,25 @@ export async function runExport(jobId: string): Promise<ExportResult> {
       format: job.format,
       durationMs: Date.now() - (job.startedAt || Date.now()),
       artifactSize: blob.size,
-      pageCount: workingDraft.estimatedPages
+      pageCount: workingDraft.estimatedPages,
     });
 
     return result;
-
   } catch (error) {
     // Mark job as failed
+    const err = error instanceof Error ? error : new Error(String(error));
     jobQueue.update(jobId, {
       status: 'failed',
       finishedAt: Date.now(),
-      error: error.message
+      error: err.message,
     });
 
     // Track failure analytics
     analytics.track('export.failed', {
       projectId: job.projectId,
       format: job.format,
-      error: error.message,
-      phase: error instanceof ExportError ? error.phase : 'unknown'
+      error: error instanceof Error ? error.message : String(error),
+      phase: error instanceof ExportError ? error.phase : 'unknown',
     });
 
     throw error;
@@ -323,13 +321,13 @@ export function cancelExportJob(jobId: string): boolean {
 
   jobQueue.update(jobId, {
     status: 'cancelled',
-    finishedAt: Date.now()
+    finishedAt: Date.now(),
   });
 
   analytics.track('export.cancelled', {
     projectId: job.projectId,
     format: job.format,
-    phase: job.progress?.phase || 'unknown'
+    phase: (job.progress && job.progress.phase) || 'unknown',
   });
 
   return true;
@@ -340,33 +338,34 @@ export function cancelExportJob(jobId: string): boolean {
  */
 export function getExportStats(projectId: string) {
   const jobs = getExportJobsForProject(projectId);
-  
+
   const stats = {
     totalExports: jobs.length,
-    successfulExports: jobs.filter(j => j.status === 'succeeded').length,
-    failedExports: jobs.filter(j => j.status === 'failed').length,
+    successfulExports: jobs.filter((j) => j.status === 'succeeded').length,
+    failedExports: jobs.filter((j) => j.status === 'failed').length,
     averageDuration: 0,
     formatBreakdown: {} as Record<ExportFormat, number>,
     recentExports: jobs
-      .filter(j => j.status === 'succeeded')
+      .filter((j) => j.status === 'succeeded')
       .sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0))
-      .slice(0, 5)
+      .slice(0, 5),
   };
 
   // Calculate average duration for successful exports
-  const successfulJobs = jobs.filter(j => 
-    j.status === 'succeeded' && j.startedAt && j.finishedAt
+  const successfulJobs = jobs.filter(
+    (j) => j.status === 'succeeded' && j.startedAt && j.finishedAt,
   );
-  
+
   if (successfulJobs.length > 0) {
-    const totalDuration = successfulJobs.reduce((sum, job) => 
-      sum + ((job.finishedAt! - job.startedAt!)), 0
+    const totalDuration = successfulJobs.reduce(
+      (sum, job) => sum + (job.finishedAt! - job.startedAt!),
+      0,
     );
     stats.averageDuration = totalDuration / successfulJobs.length;
   }
 
   // Format breakdown
-  jobs.forEach(job => {
+  jobs.forEach((job) => {
     stats.formatBreakdown[job.format] = (stats.formatBreakdown[job.format] || 0) + 1;
   });
 

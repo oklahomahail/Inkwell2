@@ -3,6 +3,7 @@ import CryptoJS from 'crypto-js';
 
 import { aiRetryService } from './aiRetryService';
 import { analyticsService } from './analyticsService';
+import { featureFlagService } from './featureFlagService';
 import { mockAIService } from './mockAIService';
 
 interface AIProvider {

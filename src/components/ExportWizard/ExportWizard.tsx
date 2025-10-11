@@ -73,16 +73,13 @@ export default function ExportWizard({ projectId, onClose }: ExportWizardProps) 
     setProgress(0);
 
     try {
-      const result = await runExport({
-        id: crypto.randomUUID(),
-        projectId,
-        format,
-        style,
-        includeProofread,
-      });
+      // Create a job then run it
+      const { createExportJob } = await import('@/exports/exportController');
+      const job = createExportJob(projectId, format, style, includeProofread);
+      const result = await runExport(job.id);
 
       setDownload({
-        url: result.url,
+        url: result.downloadUrl,
         fileName: result.fileName,
         metadata: result.metadata,
       });

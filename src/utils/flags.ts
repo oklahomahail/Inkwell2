@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-import { FeatureFlagConfig, FeatureFlag, FeatureFlagStore } from '../types/feature-flags';
+import { FeatureFlag, FeatureFlagConfig } from '@/types';
 
 /* ========= Types ========= */
 
@@ -149,7 +149,7 @@ export const FEATURE_FLAGS: FeatureFlagConfig = {
 };
 
 /* ========= Feature Flag Manager ========= */
-class FeatureFlagManager implements FeatureFlagStore {
+class FeatureFlagManager {
   private static instance: FeatureFlagManager | null = null;
 
   static getInstance(): FeatureFlagManager {

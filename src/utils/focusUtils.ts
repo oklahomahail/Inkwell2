@@ -1,1 +1,27 @@
-// src/utils/focusUtils.ts - Helper utilities for focus management export const focusWritingEditor = () => { // Dispatch a custom event that the editor listens for window.dispatchEvent(new CustomEvent('focusWritingEditor')); }; // Optional: Create a hook for focus management export const useFocusWritingEditor = () => { return focusWritingEditor; }; 
+/**
+ * Focus utils for managing focus in the application
+ */
+
+/**
+ * Focus the first interactive element in a container
+ */
+export function focusFirstInteractive(root?: HTMLElement | null) {
+  const el = root?.querySelector<HTMLElement>(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+  );
+  el?.focus();
+}
+
+/**
+ * Focus the writing editor
+ */
+export function focusWritingEditor() {
+  window.dispatchEvent(new CustomEvent('focusWritingEditor'));
+}
+
+/**
+ * Restore focus to a previously focused element
+ */
+export function restoreFocus(previousElement?: HTMLElement | null) {
+  previousElement?.focus();
+}

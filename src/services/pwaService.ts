@@ -1,5 +1,23 @@
 // PWA Service for managing offline functionality and app updates
-import { useRegisterSW } from 'virtual:pwa-register/react';
+
+// Type for the PWA register hook from vite-plugin-pwa
+type RegisterSWOptions = {
+  onRegistered?: (r: ServiceWorkerRegistration | undefined) => void;
+  onRegisterError?: (error: any) => void;
+  onOfflineReady?: () => void;
+  onNeedRefresh?: () => void;
+};
+
+// Stub the PWA registration hook for development
+let useRegisterSW:
+  | ((options: RegisterSWOptions) => {
+      offlineReady: [boolean, (value: boolean) => void];
+      needRefresh: [boolean, (value: boolean) => void];
+      updateServiceWorker: () => Promise<void>;
+    })
+  | undefined;
+// We'll use an optional dynamic import of the PWA register hook
+let registerSW: undefined | ((opts?: any) => void);
 
 export interface PWAInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -136,30 +154,68 @@ export class PWAService {
 export const pwaService = new PWAService();
 
 // React hook for PWA functionality
+// Wrap the PWA functionality in a development-safe hook
 export function usePWA() {
-  const { offlineReady, needRefresh, updateServiceWorker } = useRegisterSW({
-    onRegistered(r: any) {
-      console.log('SW Registered: ' + r);
-    },
-    onRegisterError(error: any) {
-      console.log('SW registration error', error);
-    },
-    onNeedRefresh() {
-      pwaService.triggerUpdateAvailable();
-    },
-    onOfflineReady() {
-      console.log('App ready to work offline');
-    },
-  });
-
-  return {
-    isOfflineReady: offlineReady?.[0] || false,
-    needsRefresh: needRefresh?.[0] || false,
-    updateApp: updateServiceWorker,
-    installApp: () => pwaService.installPWA(),
-    canInstall: pwaService.canInstall(),
-    isOffline: pwaService.getOfflineStatus(),
+  const defaultState = {
+    isOfflineReady: false,
+    needsRefresh: false,
+    updateApp: () => {},
+    installApp: () => Promise.resolve(false),
+    canInstall: false,
+    isOffline: false,
   };
+
+  // Only use PWA functionality in production
+  if (process.env.NODE_ENV !== 'production') {
+    return defaultState;
+  }
+
+  if (!registerSW) {
+    return defaultState;
+  }
+  // Only try to use PWA in production
+  if (process.env.NODE_ENV === 'production' && !useRegisterSW) {
+    try {
+      const mod = await import('virtual:pwa-register/react');
+      useRegisterSW = mod.useRegisterSW;
+    } catch (err) {
+      console.warn('PWA module not available:', err);
+    }
+  }
+
+  try {
+    // Dynamic import to avoid build-time dependency
+    const mod = await import('virtual:pwa-register/react').catch(() => null);
+    if (!mod) return defaultState;
+
+    const { useRegisterSW } = mod;
+    const { needRefresh, offlineReady, updateServiceWorker } = useRegisterSW({
+      onRegistered(r: any) {
+        console.log('SW Registered:', r);
+      },
+      onRegisterError(error: any) {
+        console.warn('SW registration error:', error);
+      },
+      onNeedRefresh() {
+        pwaService.triggerUpdateAvailable();
+      },
+      onOfflineReady() {
+        console.log('App ready to work offline');
+      },
+    });
+
+    return {
+      isOfflineReady: offlineReady?.[0] || false,
+      needsRefresh: needRefresh?.[0] || false,
+      updateApp: updateServiceWorker,
+      installApp: () => pwaService.installPWA(),
+      canInstall: pwaService.canInstall(),
+      isOffline: pwaService.getOfflineStatus(),
+    };
+  } catch (err) {
+    console.warn('PWA hooks not available:', err);
+    return defaultState;
+  }
 }
 
 // Utilities for offline storage management

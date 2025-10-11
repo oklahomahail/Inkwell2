@@ -1,9 +1,12 @@
 // File: src/context/AppContext.tsx - Updated with auto-save state
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
 
+import { Theme } from '@/types';
+
 import { useClaude } from './ClaudeProvider';
 
 // ===== ENUMS & TYPES =====
+
 export enum View {
   Dashboard = 'dashboard',
   Writing = 'writing',
@@ -26,13 +29,17 @@ export interface Project {
   updatedAt: number;
 }
 
+export type Theme = 'light' | 'dark';
+
 export interface AppState {
+  theme: Theme;
   claude: any;
   view: View;
   projects: Project[];
   currentProjectId: string | null;
   isLoading: boolean;
   error: string | null;
+  theme: Theme;
   // 🆕 AUTO-SAVE STATE
   autoSave: {
     isSaving: boolean;
@@ -43,6 +50,7 @@ export interface AppState {
 
 // ===== ACTIONS =====
 type AppAction =
+  | { type: 'SET_THEME'; payload: Theme }
   | { type: 'SET_VIEW'; payload: View }
   | { type: 'ADD_PROJECT'; payload: Project }
   | { type: 'UPDATE_PROJECT'; payload: Project }
@@ -51,6 +59,7 @@ type AppAction =
   | { type: 'SET_PROJECTS'; payload: Project[] }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_THEME'; payload: Theme }
   // 🆕 AUTO-SAVE ACTIONS
   | { type: 'SET_AUTO_SAVE_SAVING'; payload: boolean }
   | { type: 'SET_AUTO_SAVE_SUCCESS'; payload: Date }
@@ -58,11 +67,13 @@ type AppAction =
 
 // ===== INITIAL STATE =====
 const initialState: AppState = {
+  theme: 'light',
   view: View.Dashboard,
   projects: [],
   currentProjectId: null,
   isLoading: false,
   error: null,
+  theme: 'light',
   // 🆕 AUTO-SAVE INITIAL STATE
   autoSave: {
     isSaving: false,
@@ -74,6 +85,9 @@ const initialState: AppState = {
 
 // ===== REDUCER =====
 function appReducer(state: AppState, action: AppAction): AppState {
+  if (action.type === 'SET_THEME') {
+    return { ...state, theme: action.payload };
+  }
   switch (action.type) {
     case 'SET_VIEW':
       return { ...state, view: action.payload };
@@ -100,6 +114,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, isLoading: action.payload };
     case 'SET_ERROR':
       return { ...state, error: action.payload };
+    case 'SET_THEME':
+      return { ...state, theme: action.payload };
     // 🆕 AUTO-SAVE REDUCER CASES
     case 'SET_AUTO_SAVE_SAVING':
       return {
@@ -139,6 +155,7 @@ export interface AppContextValue {
   currentProject: Project | null;
   projects: Project[];
   setView: (view: View) => void;
+  setTheme: (theme: Theme) => void;
   addProject: (project: Project) => void;
   updateProject: (project: Project) => void;
   deleteProject: (id: string) => void;
@@ -239,6 +256,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     currentProject,
     projects: state.projects,
     setView: (view) => dispatch({ type: 'SET_VIEW', payload: view }),
+    setTheme: (theme) => dispatch({ type: 'SET_THEME', payload: theme }),
     addProject: (project) => dispatch({ type: 'ADD_PROJECT', payload: project }),
     updateProject: (project) => dispatch({ type: 'UPDATE_PROJECT', payload: project }),
     deleteProject: (id) => dispatch({ type: 'DELETE_PROJECT', payload: id }),

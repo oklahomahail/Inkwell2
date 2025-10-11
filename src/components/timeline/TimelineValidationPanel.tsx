@@ -18,21 +18,29 @@ interface TimelineValidationPanelProps {
   onAutoFix?: (conflictId: string) => void;
 }
 
-const severityColors = {
+type Severity = 'low' | 'medium' | 'high' | 'critical';
+type RuleKey =
+  | 'time_overlap'
+  | 'character_presence'
+  | 'location_mismatch'
+  | 'pov_inconsistency'
+  | 'chronological_error';
+
+const severityColors: Record<Severity, string> = {
   low: 'text-yellow-600 bg-yellow-50 border-yellow-200',
   medium: 'text-orange-600 bg-orange-50 border-orange-200',
   high: 'text-red-600 bg-red-50 border-red-200',
   critical: 'text-red-800 bg-red-100 border-red-300',
 };
 
-const severityIcons = {
+const severityIcons: Record<Severity, JSX.Element> = {
   low: <AlertTriangle size={16} />,
   medium: <AlertTriangle size={16} />,
   high: <AlertTriangle size={16} />,
   critical: <AlertTriangle size={16} />,
 };
 
-const conflictTypeIcons = {
+const conflictTypeIcons: Record<RuleKey, JSX.Element> = {
   time_overlap: <Clock size={16} />,
   character_presence: <Users size={16} />,
   location_mismatch: <MapPin size={16} />,
@@ -121,7 +129,7 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
                     <div>
                       <p className="text-sm font-medium">Evidence:</p>
                       <ul className="text-sm text-gray-600 list-disc list-inside space-y-1">
-                        {conflict.evidence.map((evidence, index) => (
+                        {conflict.evidence.map((evidence: string, index: number) => (
                           <li key={index}>{evidence}</li>
                         ))}
                       </ul>
@@ -129,7 +137,7 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
                   )}
 
                   <div className="flex flex-wrap gap-2 mt-3">
-                    {conflict.affectedEvents.map((eventId) => (
+                    {conflict.affectedEvents.map((eventId: string) => (
                       <button
                         key={eventId}
                         className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
@@ -141,7 +149,7 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
                         Event: {eventId.slice(0, 8)}...
                       </button>
                     ))}
-                    {conflict.affectedScenes?.map((sceneId) => (
+                    {conflict.affectedScenes?.map((sceneId: string) => (
                       <button
                         key={sceneId}
                         className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-800 hover:bg-purple-200 transition-colors"
@@ -179,13 +187,13 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
   };
 
   const renderOptimizationCard = (optimization: TimelineOptimization) => {
-    const impactColors = {
+    const impactColors: Record<TimelineOptimization['impact'], string> = {
       low: 'bg-gray-100 text-gray-800',
       medium: 'bg-yellow-100 text-yellow-800',
       high: 'bg-green-100 text-green-800',
     };
 
-    const effortColors = {
+    const effortColors: Record<TimelineOptimization['effort'], string> = {
       easy: 'bg-green-100 text-green-800',
       moderate: 'bg-yellow-100 text-yellow-800',
       complex: 'bg-red-100 text-red-800',
@@ -215,7 +223,7 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
 
             {optimization.eventIds.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
-                {optimization.eventIds.map((eventId) => (
+                {optimization.eventIds.map((eventId: string) => (
                   <button
                     key={eventId}
                     className="px-2 py-1 text-xs rounded bg-blue-200 text-blue-900 hover:bg-blue-300 transition-colors"
@@ -261,8 +269,12 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
     );
   }
 
-  const criticalCount = validationResult.conflicts.filter((c) => c.severity === 'critical').length;
-  const highCount = validationResult.conflicts.filter((c) => c.severity === 'high').length;
+  const criticalCount = validationResult.conflicts.filter(
+    (c: TimelineConflict) => c.severity === 'critical',
+  ).length;
+  const highCount = validationResult.conflicts.filter(
+    (c: TimelineConflict) => c.severity === 'high',
+  ).length;
 
   return (
     <div className="space-y-6">
@@ -324,7 +336,9 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
             Conflicts ({validationResult.conflicts.length})
           </h4>
           <div className="space-y-3">
-            {validationResult.conflicts.map((conflict) => renderConflictCard(conflict))}
+            {validationResult.conflicts.map((conflict: TimelineConflict) =>
+              renderConflictCard(conflict),
+            )}
           </div>
         </div>
       )}
@@ -342,7 +356,9 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
             </button>
           </div>
           <div className="space-y-3">
-            {validationResult.warnings.map((warning) => renderConflictCard(warning, true))}
+            {validationResult.warnings.map((warning: TimelineConflict) =>
+              renderConflictCard(warning, true),
+            )}
           </div>
         </div>
       )}
@@ -362,7 +378,9 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
             </button>
           </div>
           <div className="space-y-3">
-            {validationResult.suggestions.map((suggestion) => renderOptimizationCard(suggestion))}
+            {validationResult.suggestions.map((suggestion: TimelineOptimization) =>
+              renderOptimizationCard(suggestion),
+            )}
           </div>
         </div>
       )}

@@ -1,36 +1,101 @@
+/**
+ * Export format types and interfaces
+ */
+
+export type ExportFormat = 'PDF' | 'DOCX' | 'EPUB';
+
+export interface ExportResult {
+  blob: Blob;
+  fileName: string;
+  downloadUrl: string;
+  metadata: {
+    format: ExportFormat;
+    style: string;
+    wordCount: number;
+    pageCount: number;
+    fileSize: number;
+    generatedAt: number;
+  };
+}
+
+export interface ExportJobConfig {
+  id: string;
+  projectId: string;
+  format: ExportFormat;
+  style: string;
+  includeProofread?: boolean;
+}
+
+export type ExportJobStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+
+export interface ExportJob extends ExportJobConfig {
+  status: ExportJobStatus;
+  startedAt?: number;
+  finishedAt?: number;
+  fileName?: string;
+  downloadUrl?: string;
+  artifactSize?: number;
+  error?: string;
+  progress?: {
+    phase: 'assembling' | 'proofreading' | 'rendering' | 'finalizing';
+    percentage: number;
+    message?: string;
+  };
+}
+
+export class ExportError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string,
+    public readonly phase: ExportJob['progress']['phase'],
+    public readonly originalError?: Error,
+  ) {
+    super(message);
+  }
+}
+
+export class ExportValidationError extends ExportError {
+  constructor(
+    message: string,
+    public readonly errors: string[],
+  ) {
+    super(message, 'VALIDATION_ERROR', 'assembling');
+  }
+}
+
 // exportTypes.ts - Core types for professional publishing exports
 
 export type ExportFormat = 'PDF' | 'DOCX' | 'EPUB';
 
 export interface StylePresetMeta {
-  id: string;               // 'classic-manuscript'
-  label: string;            // 'Classic Manuscript'
+  id: string; // 'classic-manuscript'
+  label: string; // 'Classic Manuscript'
   description: string;
   baseFont: 'Garamond' | 'Times New Roman' | 'Inter' | 'Georgia';
-  fontSizePt: number;       // 12
+  fontSizePt: number; // 12
   lineSpacing: 1 | 1.15 | 1.5 | 2;
-  marginsIn: { 
-    top: number; 
-    right: number; 
-    bottom: number; 
-    left: number; 
+  marginsIn: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
   };
-  header: { 
-    left?: string; 
-    center?: string; 
-    right?: string; 
+  header: {
+    left?: string;
+    center?: string;
+    right?: string;
   };
-  footer: { 
-    left?: string; 
-    center?: string; 
-    right?: string; 
+  footer: {
+    left?: string;
+    center?: string;
+    right?: string;
   };
-  watermark?: { 
-    svgPath: string; 
-    opacity: number; 
-    position: 'center' | 'top-right' | 'bottom-right'; 
+  watermark?: {
+    svgPath: string;
+    opacity: number;
+    position: 'center' | 'top-right' | 'bottom-right';
   };
-  sceneBreak: string;       // '***' or '⁂'
+  sceneBreak: string; // '***' or '⁂'
   chapterPageBreak: boolean;
 }
 
@@ -171,7 +236,7 @@ export class ExportError extends Error {
     message: string,
     public code: string,
     public phase: string,
-    public details?: any
+    public details?: any,
   ) {
     super(message);
     this.name = 'ExportError';
@@ -179,7 +244,10 @@ export class ExportError extends Error {
 }
 
 export class ExportValidationError extends ExportError {
-  constructor(message: string, public validationErrors: string[]) {
+  constructor(
+    message: string,
+    public validationErrors: string[],
+  ) {
     super(message, 'VALIDATION_ERROR', 'validation');
   }
 }

@@ -187,7 +187,8 @@ export class EPUBEngine extends BaseExportEngine {
         content += `<div class="scene">`;
 
         // Split scene into paragraphs
-        const paragraphs = scene.split('\n').filter((p) => p.trim().length > 0);
+        const text = typeof scene === 'string' ? scene : '';
+        const paragraphs = text.split('\n').filter((p) => p.trim().length > 0);
         for (const paragraph of paragraphs) {
           content += `<p>${this.escapeXHTML(paragraph.trim())}</p>`;
         }
@@ -206,10 +207,11 @@ export class EPUBEngine extends BaseExportEngine {
       </div>`;
     }
 
-    if (draft.backMatter?.acknowledgements) {
+    const acknowledgements = (draft as any)?.backMatter?.acknowledgements as string | undefined;
+    if (acknowledgements) {
       content += `<div class="back-matter">
         <h2>Acknowledgements</h2>
-        <p>${this.escapeXHTML(draft.backMatter.acknowledgements)}</p>
+<p>${this.escapeXHTML(acknowledgements)}</p>
       </div>`;
     }
 

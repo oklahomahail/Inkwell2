@@ -91,18 +91,20 @@ export class DOCXEngine extends BaseExportEngine {
     // Chapters
     for (let i = 0; i < draft.chapters.length; i++) {
       const chapter = draft.chapters[i];
+      if (!chapter) continue;
 
       if (style.chapterPageBreak && i > 0) {
         rtfBody += '\\page';
       }
 
       // Chapter title
-      const chapterTitle = chapter.title || `Chapter ${chapter.number}`;
+      const chapterTitle = chapter.title || `Chapter ${chapter.number ?? i + 1}`;
       rtfBody += `\\qc\\b\\fs${Math.round(style.fontSizePt * 2.5)} ${this.escapeRTF(chapterTitle)}\\b0\\par\\par`;
 
       // Chapter scenes
-      for (let j = 0; j < chapter.scenes.length; j++) {
-        const scene = chapter.scenes[j];
+      const scenes = Array.isArray(chapter.scenes) ? chapter.scenes : [];
+      for (let j = 0; j < scenes.length; j++) {
+        const scene = scenes[j];
 
         if (j > 0) {
           // Scene break
@@ -110,7 +112,8 @@ export class DOCXEngine extends BaseExportEngine {
         }
 
         // Scene content
-        rtfBody += `\\ql ${this.escapeRTF(scene)}\\par\\par`;
+        const content = typeof scene === 'string' ? scene : '';
+        rtfBody += `\\ql ${this.escapeRTF(content)}\\par\\par`;
       }
     }
 
