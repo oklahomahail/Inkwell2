@@ -24,7 +24,9 @@ export const MIGRATIONS: Record<number, MigrationFn> = {
 /**
  * Run migrations to upgrade data from oldVersion to CURRENT_SCHEMA_VERSION
  */
-export async function _runMigrations(data: any, fromVersion: number): Promise<any> {
+export const runMigrations = _runMigrations;
+
+export function _runMigrations(data: any, fromVersion: number): Promise<any> {
   let currentData = data;
   let currentVersion = fromVersion;
 
@@ -54,6 +56,8 @@ export async function _runMigrations(data: any, fromVersion: number): Promise<an
 /**
  * Check if data needs migration
  */
+export const needsMigration = _needsMigration;
+
 export function _needsMigration(data: any): boolean {
   const dataVersion = data?.schemaVersion || 0;
   return dataVersion < CURRENT_SCHEMA_VERSION;
@@ -62,6 +66,8 @@ export function _needsMigration(data: any): boolean {
 /**
  * Validate schema version compatibility
  */
+export const validateSchemaVersion = _validateSchemaVersion;
+
 export function _validateSchemaVersion(version: number): void {
   if (version > CURRENT_SCHEMA_VERSION) {
     throw new Error(
@@ -77,6 +83,8 @@ export function _validateSchemaVersion(version: number): void {
 /**
  * Get schema version from data, with fallback to 0 for legacy data
  */
+export const getSchemaVersion = _getSchemaVersion;
+
 export function _getSchemaVersion(data: any): number {
   return data?.schemaVersion || 0;
 }
