@@ -115,16 +115,16 @@ function _TutorialPage() {
               <div>
                 <h2 className="text-xl font-semibold mb-3">Steps in this tutorial:</h2>
                 <ol className="list-decimal list-inside space-y-2">
-                  {tourSteps.map((step, _index) => (
+                  {tourSteps.map((tStep, index) => (
                     <li
-                      key={step.id}
+                      key={tStep.id}
                       className={`text-sm ${
                         tourState.currentStep === index
                           ? 'text-blue-600 dark:text-blue-400 font-medium'
                           : 'text-gray-600 dark:text-gray-400'
                       }`}
                     >
-                      {step.title}
+                      {tStep.title}
                     </li>
                   ))}
                 </ol>
@@ -177,7 +177,7 @@ function _TutorialIndex() {
   const { active: activeProfile } = useProfile();
   const { startTour, setTourSteps, preferences } = useTour();
 
-  const handleStartTutorial = (_slug: string) => {
+  const handleStartTutorial = (slug: string) => {
     const tourSteps = TOUR_MAP[slug as keyof typeof TOUR_MAP];
     if (!tourSteps) return;
 
@@ -327,20 +327,27 @@ function _TutorialIndex() {
 /**
  * Main tutorial router component
  */
-export function _TutorialRouter() {
+function _TutorialRouter() {
   return (
     <Routes>
       {/* Tutorial index */}
       <Route path="/" element={<TutorialIndex />} />
 
       {/* Specific tutorial */}
-      <Route path="/:slug" element={<TutorialPage />} />
+      <Route path=":slug" element={<TutorialPage />} />
 
       {/* Specific tutorial step */}
-      <Route path="/:slug/:step" element={<TutorialPage />} />
+      <Route path=":slug/:step" element={<TutorialPage />} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="." replace />} />
     </Routes>
   );
 }
+
+// Local identifiers for internal components used in JSX
+const TutorialPage = _TutorialPage;
+const TutorialIndex = _TutorialIndex;
+
+// Named export
+export const TutorialRouter = _TutorialRouter;
