@@ -102,11 +102,11 @@ export class PWAService {
 
   // Listen for install prompt availability
   onInstallPromptReady(_callback: (event: PWAInstallPromptEvent) => void) {
-    this.listeners.installPrompt.push(callback);
+    this.listeners.installPrompt.push(_callback);
 
     // If prompt is already available, call immediately
     if (this.deferredPrompt) {
-      callback(this.deferredPrompt);
+      _callback(this.deferredPrompt);
     }
 
     return () => {
@@ -119,10 +119,10 @@ export class PWAService {
 
   // Listen for offline status changes
   onOfflineStatusChange(_callback: (isOffline: boolean) => void) {
-    this.listeners.offline.push(callback);
+    this.listeners.offline.push(_callback);
 
     // Call immediately with current status
-    callback(this.isOffline);
+    _callback(this.isOffline);
 
     return () => {
       const index = this.listeners.offline.indexOf(callback);
@@ -134,7 +134,7 @@ export class PWAService {
 
   // Listen for app updates
   onUpdateAvailable(_callback: () => void) {
-    this.listeners.update.push(callback);
+    this.listeners.update.push(_callback);
 
     return () => {
       const index = this.listeners.update.indexOf(callback);
