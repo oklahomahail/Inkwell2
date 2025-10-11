@@ -164,7 +164,7 @@ class ConnectivityService {
    * Get queued operations for display
    */
   getQueuedOperations(): QueuedWrite[] {
-    return [...this.queue].sort((a, _b) => a.timestamp - b.timestamp);
+    return [...this.queue].sort((a, b) => a.timestamp - b.timestamp);
   }
 
   /**
