@@ -8,8 +8,8 @@ interface IssuesListProps {
   issues: AnalysisIssue[];
 }
 
-export function _IssuesList({ issues }: IssuesListProps) {
-  const getSeverityColor = (_severity: AnalysisIssue['severity']) => {
+function _IssuesList({ issues }: IssuesListProps) {
+  const getSeverityColor = (severity: AnalysisIssue['severity']) => {
     switch (severity) {
       case 'high':
         return 'text-red-600 bg-red-50 border-red-200';
@@ -22,7 +22,7 @@ export function _IssuesList({ issues }: IssuesListProps) {
     }
   };
 
-  const getIssueIcon = (_type: AnalysisIssue['type']) => {
+  const getIssueIcon = (type: AnalysisIssue['type']) => {
     switch (type) {
       case 'plot_hole':
         return (
@@ -104,7 +104,7 @@ export function _IssuesList({ issues }: IssuesListProps) {
     }
   };
 
-  const handleResolveIssue = (_issue: AnalysisIssue) => {
+  const handleResolveIssue = (issue: AnalysisIssue) => {
     // Track that the user has acknowledged/resolved this issue
     analyticsService.trackPlotIssueResolved(issue.id, issue.type);
 
@@ -179,7 +179,7 @@ export function _IssuesList({ issues }: IssuesListProps) {
               <div className="mt-3 pl-8">
                 <div className="text-xs font-medium mb-2 opacity-75">Suggestions:</div>
                 <ul className="text-sm space-y-1 opacity-90">
-                  {issue.suggestions.map((suggestion, _idx) => (
+                  {issue.suggestions.map((suggestion, idx) => (
                     <li key={idx} className="flex items-start space-x-2">
                       <span className="text-xs opacity-50 mt-1">•</span>
                       <span>{suggestion}</span>
@@ -194,3 +194,5 @@ export function _IssuesList({ issues }: IssuesListProps) {
     </div>
   );
 }
+
+export const IssuesList = _IssuesList;

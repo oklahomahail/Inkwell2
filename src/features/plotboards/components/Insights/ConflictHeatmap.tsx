@@ -6,7 +6,7 @@ interface ConflictHeatmapProps {
   data: ConflictCell[];
 }
 
-export function _ConflictHeatmap({ data }: ConflictHeatmapProps) {
+function _ConflictHeatmap({ data }: ConflictHeatmapProps) {
   if (!data.length) {
     return (
       <div className="rounded-xl border p-3">
@@ -46,8 +46,8 @@ export function _ConflictHeatmap({ data }: ConflictHeatmapProps) {
 
       {/* Grid Display */}
       <div className="grid gap-1 mb-3" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
-        {grid.flatMap((row, _rIdx) =>
-          row.map((val, _cIdx) => (
+        {grid.flatMap((row, rIdx) =>
+          row.map((val, cIdx) => (
             <div
               key={`${rIdx}-${cIdx}`}
               className={`aspect-square border rounded-sm transition-colors ${getHeatColor(val)}`}
@@ -78,3 +78,5 @@ export function _ConflictHeatmap({ data }: ConflictHeatmapProps) {
     </div>
   );
 }
+
+export const ConflictHeatmap = _ConflictHeatmap;
