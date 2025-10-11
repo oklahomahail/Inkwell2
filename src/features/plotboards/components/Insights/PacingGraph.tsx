@@ -6,7 +6,7 @@ interface PacingGraphProps {
   data: PacingPoint[];
 }
 
-export function _PacingGraph({ data }: PacingGraphProps) {
+function _PacingGraph({ data }: PacingGraphProps) {
   const [R, setR] = useState<any>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -60,18 +60,18 @@ export function _PacingGraph({ data }: PacingGraphProps) {
           <LineChart data={chartData}>
             <XAxis
               dataKey="scene"
-              label={{ value: 'Scene', _position: 'insideBottom', _offset: -5 }}
+              label={{ value: 'Scene', position: 'insideBottom', offset: -5 }}
             />
             <YAxis
               domain={[0, 1]}
-              label={{ value: 'Intensity', _angle: -90, _position: 'insideLeft' }}
+              label={{ value: 'Intensity', angle: -90, position: 'insideLeft' }}
             />
             <Tooltip
-              formatter={(value: any, _name: any) => [
+              formatter={(value: any, name: string) => [
                 `${((value as number) * 100).toFixed(0)}%`,
                 name === 'tension' ? 'Tension' : 'Pace',
               ]}
-              labelFormatter={(_label: any) => `Scene ${label}`}
+              labelFormatter={(label: number) => `Scene ${label}`}
             />
             <Legend />
             <Line
@@ -100,3 +100,5 @@ export function _PacingGraph({ data }: PacingGraphProps) {
     </div>
   );
 }
+
+export const PacingGraph = _PacingGraph;
