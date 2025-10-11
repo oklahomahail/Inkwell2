@@ -4,32 +4,12 @@ import { describe, expect, it, vi } from 'vitest';
 
 import Sidebar from './Sidebar';
 
-vi.mock('@/utils/focusUtils', () => ({
-  focusWritingEditor: vi.fn(),
-}));
-
-vi.mock('@/hooks/useUI', () => ({
-  useUI: () => ({ sidebarCollapsed: false, toggleSidebar: vi.fn() }),
-}));
-
-vi.mock('@/context/AppContext', () => ({
-  useAppContext: () => ({
-    state: { view: 'Dashboard' },
-    dispatch: vi.fn(),
-  }),
-}));
-
+const mockFocusWritingEditor = vi.fn();
 const defaultMockUI = { sidebarCollapsed: false, toggleSidebar: vi.fn() };
 const defaultMockState = { view: 'Dashboard' };
 let mockUI = { ...defaultMockUI };
 let mockState = { ...defaultMockState };
 const mockDispatch = vi.fn();
-
-beforeEach(() => {
-  mockUI = { ...defaultMockUI };
-  mockState = { ...defaultMockState };
-  vi.clearAllMocks();
-});
 
 vi.mock('@/utils/focusUtils', () => ({
   focusWritingEditor: mockFocusWritingEditor,
@@ -71,6 +51,8 @@ describe('Sidebar Component', () => {
   };
 
   beforeEach(() => {
+    mockUI = { ...defaultMockUI };
+    mockState = { ...defaultMockState };
     vi.clearAllMocks();
     vi.resetModules();
   });
@@ -133,7 +115,7 @@ describe('Sidebar Component', () => {
 
     it('adds correct classes for collapsed state', () => {
       const { container } = renderSidebar({
-        uiState: { sidebarCollapsed: true, toggleSidebar: vi.fn() },
+        ui: { sidebarCollapsed: true, toggleSidebar: vi.fn() },
       });
 
       const aside = container.querySelector('aside');
