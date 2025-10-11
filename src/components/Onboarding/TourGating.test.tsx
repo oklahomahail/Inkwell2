@@ -4,12 +4,15 @@
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
+import { ProfileProvider } from '@/context/ProfileContext';
+
 import { OnboardingOrchestrator } from './OnboardingOrchestrator';
+import { ProfileTourProvider } from './ProfileTourProvider';
 import { TourProvider, useTour, CORE_TOUR_STEPS } from './TourProvider';
 
 // Mock component to access tour context
 function TestTourComponent({ onTourStart }: { onTourStart?: () => void }) {
-  const { startTour, shouldShowTourPrompt, tourState, logAnalytics } = useTour();
+  const { startTour, shouldShowTourPrompt, tourState } = useTour();
 
   return (
     <div>
@@ -63,6 +66,24 @@ const mockSessionStorage = {
   }),
 };
 
+// Mock database implementation
+const mockDb = {
+  get: vi.fn().mockImplementation(() => Promise.resolve(null)),
+  put: vi.fn().mockImplementation(() => Promise.resolve()),
+  delete: vi.fn().mockImplementation(() => Promise.resolve()),
+  list: vi.fn().mockImplementation(() => Promise.resolve([])),
+  clear: vi.fn().mockImplementation(() => Promise.resolve()),
+};
+
+vi.mock('../../data/dbFactory', () => ({
+  useMaybeDB: () => mockDb,
+  defineStores: () => ({
+    tutorials: 'tutorial_progress',
+    tutorialPreferences: 'tutorial_preferences',
+    tutorialChecklist: 'tutorial_checklist',
+  }),
+}));
+
 // Mock console.warn for testing
 const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -92,9 +113,13 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       const onTourStart = vi.fn();
 
       render(
-        <TourProvider>
-          <TestTourComponent onTourStart={onTourStart} />
-        </TourProvider>,
+        <ProfileProvider>
+          <ProfileTourProvider>
+            <TourProvider>
+              <TestTourComponent onTourStart={onTourStart} />
+            </TourProvider>
+          </ProfileTourProvider>
+        </ProfileProvider>,
       );
 
       const startButton = screen.getByTestId('start-tour');
@@ -120,9 +145,13 @@ describe('Tour Gating + First-run Flow (A1)', () => {
 
     it('should set session marker when tour starts', async () => {
       render(
-        <TourProvider>
-          <TestTourComponent />
-        </TourProvider>,
+        <ProfileProvider>
+          <ProfileTourProvider>
+            <TourProvider>
+              <TestTourComponent />
+            </TourProvider>
+          </ProfileTourProvider>
+        </ProfileProvider>,
       );
 
       fireEvent.click(screen.getByTestId('start-tour'));
@@ -138,9 +167,13 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       mockSessionStorage.store['inkwell-tour-prompted-this-session'] = 'true';
 
       render(
-        <TourProvider>
-          <TestTourComponent />
-        </TourProvider>,
+        <ProfileProvider>
+          <ProfileTourProvider>
+            <TourProvider>
+              <TestTourComponent />
+            </TourProvider>
+          </ProfileTourProvider>
+        </ProfileProvider>,
       );
 
       expect(screen.getByTestId('should-show-prompt')).toHaveTextContent('false');
@@ -151,9 +184,13 @@ describe('Tour Gating + First-run Flow (A1)', () => {
     it('should show prompt for first-time users', () => {
       // Fresh user - no stored preferences
       render(
-        <TourProvider>
-          <TestTourComponent />
-        </TourProvider>,
+        <ProfileProvider>
+          <ProfileTourProvider>
+            <TourProvider>
+              <TestTourComponent />
+            </TourProvider>
+          </ProfileTourProvider>
+        </ProfileProvider>,
       );
 
       expect(screen.getByTestId('should-show-prompt')).toHaveTextContent('true');
@@ -165,9 +202,13 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       });
 
       render(
-        <TourProvider>
-          <TestTourComponent />
-        </TourProvider>,
+        <ProfileProvider>
+          <ProfileTourProvider>
+            <TourProvider>
+              <TestTourComponent />
+            </TourProvider>
+          </ProfileTourProvider>
+        </ProfileProvider>,
       );
 
       expect(screen.getByTestId('should-show-prompt')).toHaveTextContent('false');
@@ -182,9 +223,13 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       });
 
       render(
-        <TourProvider>
-          <TestTourComponent />
-        </TourProvider>,
+        <ProfileProvider>
+          <ProfileTourProvider>
+            <TourProvider>
+              <TestTourComponent />
+            </TourProvider>
+          </ProfileTourProvider>
+        </ProfileProvider>,
       );
 
       expect(screen.getByTestId('should-show-prompt')).toHaveTextContent('false');
@@ -199,9 +244,13 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       });
 
       render(
-        <TourProvider>
-          <TestTourComponent />
-        </TourProvider>,
+        <ProfileProvider>
+          <ProfileTourProvider>
+            <TourProvider>
+              <TestTourComponent />
+            </TourProvider>
+          </ProfileTourProvider>
+        </ProfileProvider>,
       );
 
       expect(screen.getByTestId('should-show-prompt')).toHaveTextContent('true');
@@ -211,9 +260,13 @@ describe('Tour Gating + First-run Flow (A1)', () => {
   describe('OnboardingOrchestrator Session Guards', () => {
     it('should prevent welcome modal from showing multiple times in same session', async () => {
       const TestComponent = () => (
-        <TourProvider>
-          <OnboardingOrchestrator autoShowWelcome={true} delayWelcomeMs={0} />
-        </TourProvider>
+        <ProfileProvider>
+          <ProfileTourProvider>
+            <TourProvider>
+              <OnboardingOrchestrator autoShowWelcome={true} delayWelcomeMs={0} />
+            </TourProvider>
+          </ProfileTourProvider>
+        </ProfileProvider>
       );
 
       const { unmount } = render(<TestComponent />);
@@ -260,9 +313,13 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       };
 
       render(
-        <TourProvider>
-          <TestNeverShow />
-        </TourProvider>,
+        <ProfileProvider>
+          <ProfileTourProvider>
+            <TourProvider>
+              <TestNeverShow />
+            </TourProvider>
+          </ProfileTourProvider>
+        </ProfileProvider>,
       );
 
       fireEvent.click(screen.getByTestId('never-show'));

@@ -3,18 +3,12 @@
 
 import React from 'react';
 
+import { FeatureFlagConfig, FeatureFlag, FeatureFlagStore } from '../types/feature-flags';
+
 /* ========= Types ========= */
-export interface FeatureFlag {
-  key: string;
-  name: string;
-  description: string;
-  defaultValue: boolean;
-  category: 'core' | 'experimental' | 'debug';
-  requiresReload?: boolean;
-}
 
 /* ========= Feature Flag Definitions ========= */
-export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
+export const FEATURE_FLAGS: FeatureFlagConfig = {
   // Plot Boards - new feature being developed
   PLOT_BOARDS: {
     key: 'plotBoards',
@@ -155,13 +149,47 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
 };
 
 /* ========= Feature Flag Manager ========= */
-class FeatureFlagManager {
+class FeatureFlagManager implements FeatureFlagStore {
+  private static instance: FeatureFlagManager | null = null;
+
+  static getInstance(): FeatureFlagManager {
+    if (!FeatureFlagManager.instance) {
+      FeatureFlagManager.instance = new FeatureFlagManager();
+    }
+    return FeatureFlagManager.instance;
+  }
+
+  static resetInstance(): void {
+    FeatureFlagManager.instance = null;
+  }
   private cache = new Map<string, boolean>();
   private urlParams: URLSearchParams;
 
-  constructor() {
+  private readInitialState() {
+    // Clear existing state
+    this.cache.clear();
+
+    // Initialize with default values first
+    Object.values(FEATURE_FLAGS).forEach((flag) => {
+      const storageKey = `inkwell_flag_${flag.key}`;
+      const storageValue = localStorage.getItem(storageKey);
+
+      if (storageValue !== null) {
+        this.cache.set(flag.key, storageValue === 'true');
+      } else {
+        this.cache.set(flag.key, flag.defaultValue);
+      }
+    });
+
+    // Then apply URL overrides
     this.urlParams = new URLSearchParams(window.location.search);
     this.initializeFromURL();
+  }
+
+  constructor() {
+    this.urlParams = new URLSearchParams('');
+    this.cache = new Map<string, boolean>();
+    this.readInitialState();
   }
 
   /**
@@ -327,15 +355,51 @@ class FeatureFlagManager {
 
     console.log('🐛 Debug mode disabled');
   }
+
+  /**
+   * Reset all flags to their initial state
+   * Useful for testing and debugging
+   */
+  resetAll(): void {
+    // Clear localStorage for all known flags
+    Object.values(FEATURE_FLAGS).forEach((flag) => {
+      const storageKey = `inkwell_flag_${flag.key}`;
+      localStorage.removeItem(storageKey);
+    });
+
+    // Re-read initial state
+    this.readInitialState();
+  }
+
+  // Test utilities
+  static ['__testing__'] = {
+    resetAll: () => {
+      const instance = FeatureFlagManager.getInstance();
+      instance.resetAll();
+    },
+  };
 }
 
 /* ========= Singleton Instance ========= */
-export const featureFlags = new FeatureFlagManager();
+export const featureFlags = FeatureFlagManager.getInstance();
 
 /* ========= React Hook (optional) ========= */
 export function useFeatureFlag(flagKey: string): boolean {
-  // Simple implementation - could be enhanced with reactive updates
-  return featureFlags.isEnabled(flagKey);
+  const [enabled, setEnabled] = React.useState(() => featureFlags.isEnabled(flagKey));
+
+  React.useEffect(() => {
+    // Listen for storage events that might change the flag
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === `inkwell_flag_${flagKey}`) {
+        setEnabled(featureFlags.isEnabled(flagKey));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [flagKey]);
+
+  return enabled;
 }
 
 /* ========= Utility Functions ========= */

@@ -88,7 +88,7 @@ const EnhancedDashboard: React.FC = () => {
       id: 'plan-story',
       title: 'Plan Your Story',
       description: 'Organize characters, plots, and story structure',
-      icon: InkwellFeather,
+      icon: (props) => <InkwellFeather icon="quill" {...props} />,
       color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
       action: () => navigateToView(View.Planning),
     },
