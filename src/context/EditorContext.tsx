@@ -11,6 +11,8 @@ interface EditorContextValue {
 
 const EditorContext = createContext<EditorContextValue | null>(null);
 
+export const useEditorContext = _useEditorContext;
+
 export function _useEditorContext(): EditorContextValue {
   const context = useContext(EditorContext);
   if (!context) {
@@ -19,14 +21,16 @@ export function _useEditorContext(): EditorContextValue {
   return context;
 }
 
+export const EditorProvider = _EditorProvider;
+
 export function _EditorProvider({ children }: { children: ReactNode }) {
   const currentEditorRef = useRef<Editor | null>(null);
 
-  const setCurrentEditor = (_editor: Editor | null) => {
+  const setCurrentEditor = (editor: Editor | null) => {
     currentEditorRef.current = editor;
   };
 
-  const insertText = (_text: string) => {
+  const insertText = (text: string) => {
     const editor = currentEditorRef.current;
     if (!editor) {
       console.warn('No active editor available for text insertion');

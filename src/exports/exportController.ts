@@ -7,7 +7,10 @@ import {
   ExportError,
   ExportValidationError,
 } from './exportTypes';
-import { generateFileName, createDownloadUrl } from './exportUtils';
+import {
+  _generateFileName as generateFileName,
+  _createDownloadUrl as createDownloadUrl,
+} from './exportUtils';
 import { assembleManuscript, validateManuscriptForExport } from './manuscriptAssembler';
 
 // Analytics integration - would import from your analytics service
@@ -18,7 +21,7 @@ interface AnalyticsService {
 // Mock analytics - replace with actual service
 const analytics: AnalyticsService = {
   track: (_event: string, _data: any) => {
-    console.log(`Analytics: ${event}`, data);
+    console.log(`Analytics: ${_event}`, _data);
   },
 };
 
@@ -50,14 +53,14 @@ class ExportJobQueue {
   }
 
   subscribe(_jobId: string, _callback: (job: ExportJob) => void) {
-    if (!this.listeners.has(jobId)) {
-      this.listeners.set(jobId, new Set());
+    if (!this.listeners.has(_jobId)) {
+      this.listeners.set(_jobId, new Set());
     }
-    this.listeners.get(jobId)!.add(callback);
+    this.listeners.get(_jobId)!.add(_callback);
 
     // Return unsubscribe function
     return () => {
-      this.listeners.get(jobId)?.delete(callback);
+      this.listeners.get(_jobId)?.delete(_callback);
     };
   }
 
@@ -109,7 +112,7 @@ export function _getExportJobsForProject(projectId: string): ExportJob[] {
  * Subscribes to job updates
  */
 export function _subscribeToJob(_jobId: string, _callback: (job: ExportJob) => void) {
-  return jobQueue.subscribe(jobId, callback);
+  return jobQueue.subscribe(_jobId, _callback);
 }
 
 /**
@@ -337,7 +340,7 @@ export function _cancelExportJob(jobId: string): boolean {
  * Gets export statistics for a project
  */
 export function _getExportStats(projectId: string) {
-  const jobs = getExportJobsForProject(projectId);
+  const jobs = _getExportJobsForProject(projectId);
 
   const stats = {
     totalExports: jobs.length,
@@ -358,7 +361,7 @@ export function _getExportStats(projectId: string) {
 
   if (successfulJobs.length > 0) {
     const totalDuration = successfulJobs.reduce(
-      (sum, _job) => sum + (job.finishedAt! - job.startedAt!),
+      (sum, j) => sum + (j.finishedAt! - j.startedAt!),
       0,
     );
     stats.averageDuration = totalDuration / successfulJobs.length;

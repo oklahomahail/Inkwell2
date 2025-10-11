@@ -1,4 +1,6 @@
 // src/utils/id.ts - ID generation utilities
+export const generateId = _generateId;
+
 export function _generateId(prefix?: string): string {
   const timestamp = Date.now().toString(36);
   const random = Math.random().toString(36).substring(2, 8);
@@ -6,6 +8,8 @@ export function _generateId(prefix?: string): string {
 }
 
 // Alternative UUID-like generator for compatibility
+export const generateUUID = _generateUUID;
+
 export function _generateUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = (Math.random() * 16) | 0;
@@ -16,9 +20,9 @@ export function _generateUUID(): string {
 
 // Project-specific ID generators
 export const idUtils = {
-  project: () => generateId('proj'),
-  chapter: () => generateId('chap'),
-  scene: () => generateId('scene'),
-  session: () => generateId('session'),
-  backup: () => generateId('backup'),
+  project: () => _generateId('proj'),
+  chapter: () => _generateId('chap'),
+  scene: () => _generateId('scene'),
+  session: () => _generateId('session'),
+  backup: () => _generateId('backup'),
 };

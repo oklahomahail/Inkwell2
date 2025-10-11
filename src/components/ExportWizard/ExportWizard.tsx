@@ -1,16 +1,16 @@
 import { useState } from 'react';
 
-import { runExport } from '@/exports/exportController';
+import { _runExport as runExport } from '@/exports/exportController';
 import { ExportFormat } from '@/exports/exportTypes';
 
 import ExportReadyBadge from '../Badges/ExportReadyBadge';
 
-import { DownloadCard } from './DownloadCard';
-import { FormatStep } from './FormatStep';
-import { ProgressBar } from './ProgressBar';
-import { ProofreadStep } from './ProofreadStep';
-import { ReviewStep } from './ReviewStep';
-import { StyleStep } from './StyleStep';
+import { _DownloadCard as DownloadCard } from './DownloadCard';
+import { _FormatStep as FormatStep } from './FormatStep';
+import { _ProgressBar as ProgressBar } from './ProgressBar';
+import { _ProofreadStep as ProofreadStep } from './ProofreadStep';
+import { _ReviewStep as ReviewStep } from './ReviewStep';
+import { _StyleStep as StyleStep } from './StyleStep';
 
 interface ExportWizardProps {
   projectId: string;
@@ -75,7 +75,7 @@ export default function _ExportWizard({ projectId, onClose }: ExportWizardProps)
 
     try {
       // Create a job then run it
-      const { createExportJob } = await import('@/exports/exportController');
+      const { _createExportJob: createExportJob } = await import('@/exports/exportController');
       const job = createExportJob(projectId, format, style, includeProofread);
       const result = await runExport(job.id);
 

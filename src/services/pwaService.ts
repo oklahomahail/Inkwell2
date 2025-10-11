@@ -155,6 +155,8 @@ export const pwaService = new PWAService();
 
 // React hook for PWA functionality
 // Wrap the PWA functionality in a development-safe hook
+export const usePWA = _usePWA;
+
 export function _usePWA() {
   const defaultState = {
     isOfflineReady: false,

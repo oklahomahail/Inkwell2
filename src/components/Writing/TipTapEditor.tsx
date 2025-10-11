@@ -8,7 +8,7 @@ import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect, useRef } from 'react';
 
 import { useEditorContext } from '@/context/EditorContext';
-import { useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
+import { _useAdvancedFocusMode as useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -140,7 +140,7 @@ export default function _TipTapEditor({
       });
 
       // Highlight active paragraph
-      paragraphEls.forEach((p, _idx) => {
+      paragraphEls.forEach((p, idx) => {
         p.classList.toggle('is-editor-focused', idx === currentParagraphIndex);
       });
 

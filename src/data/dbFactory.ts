@@ -7,17 +7,21 @@ export interface DB {
   // add methods your code expects
 }
 
+export const useMaybeDB = _useMaybeDB;
+
 export function _useMaybeDB(): DB | null {
   // return a memoized DB instance or null in SSR/CI
   return useMemo<DB | null>(() => null, []);
 }
 
-export function _defineStores(_db: DB | null) {
+export const defineStores = _defineStores;
+
+export function _defineStores(db: DB | null) {
   // return the store API your services expect, or no-ops in SSR
   return {
     tutorials: {
-      get: async (_key: string) => null as any,
-      set: async (_key: string, _val: any) => {},
+      get: async (key: string) => null as any,
+      set: async (key: string, val: any) => {},
     },
   };
 }

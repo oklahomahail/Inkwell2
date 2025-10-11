@@ -8,7 +8,7 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import { _useClaude } from './ClaudeProvider';
+import { useClaude } from './ClaudeProvider';
 
 // ===== ENUMS & TYPES =====
 
@@ -160,7 +160,7 @@ export interface AppContextValue {
   setAutoSaveSaving: (_saving: boolean) => void;
   setAutoSaveSuccess: (_date: Date) => void;
   setAutoSaveError: (_error: string | null) => void;
-  claude: ReturnType<typeof _useClaude>['claude'];
+  claude: ReturnType<typeof useClaude>['claude'];
   claudeActions: {
     sendMessage: (_message: string) => Promise<string>;
     clearMessages: () => void;
@@ -196,7 +196,7 @@ export function _useCurrentProject() {
 // ===== PROVIDER (INNER) =====
 function AppProviderInner({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
-  const claudeContext = _useClaude();
+  const claudeContext = useClaude();
 
   // Load projects
   useEffect(() => {

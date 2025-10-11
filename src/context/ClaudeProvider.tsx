@@ -211,10 +211,12 @@ export const ClaudeProvider = ({ children }: { children: ReactNode }) => {
 
 ClaudeProvider.displayName = 'ClaudeProvider';
 
-export function useClaude() {
+export function _useClaude() {
   const context = useContext(ClaudeContext);
   if (!context) throw new Error('useClaude must be used within ClaudeProvider');
   return context;
 }
+
+export const useClaude = _useClaude;
 
 export { ClaudeContext };

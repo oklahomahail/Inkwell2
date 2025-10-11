@@ -306,6 +306,8 @@ export function traceFunction<T extends (...args: unknown[]) => unknown>(
  *  - traceStoreAction('settings:setIncludeMetadata', { include })
  *  - traceStoreAction('settings', 'setIncludeMetadata', { include })
  */
+export const traceStoreAction = _traceStoreAction;
+
 export function _traceStoreAction(action: string, payload?: unknown): string;
 export function _traceStoreAction(storeName: string, actionName: string, payload?: unknown): string;
 export function _traceStoreAction(a: string, b?: string | unknown, c?: unknown): string {

@@ -19,8 +19,8 @@ export function _sanitizeFileName(name: string): string {
  * Generates a professional filename for exports
  */
 export function _generateFileName(title: string, format: ExportFormat, author?: string): string {
-  const sanitizedTitle = sanitizeFileName(title) || 'Untitled';
-  const sanitizedAuthor = author ? sanitizeFileName(author) : '';
+  const sanitizedTitle = _sanitizeFileName(title) || 'Untitled';
+  const sanitizedAuthor = author ? _sanitizeFileName(author) : '';
 
   const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
@@ -209,8 +209,8 @@ export function _validateExportSettings(settings: {
  * Auto-cleanup setup for page unload
  */
 if (typeof window !== 'undefined') {
-  window.addEventListener('beforeunload', cleanupDownloadUrls);
+  window.addEventListener('beforeunload', _cleanupDownloadUrls);
 
   // Also clean up on page load to handle any leftover URLs
-  window.addEventListener('load', cleanupDownloadUrls);
+  window.addEventListener('load', _cleanupDownloadUrls);
 }

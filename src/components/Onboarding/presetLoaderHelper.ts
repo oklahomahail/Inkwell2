@@ -9,6 +9,8 @@ import type { TourType } from './steps/Step.types';
 
 export type StepComponent = React.ComponentType<any>;
 
+export const loadTourPreset = _loadTourPreset;
+
 export function _loadTourPreset(tour: TourType): StepComponent[] {
   switch (tour) {
     case 'full-onboarding':

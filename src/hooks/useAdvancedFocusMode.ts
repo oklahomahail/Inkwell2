@@ -53,6 +53,8 @@ const AMBIENT_SOUNDS = [
   { id: 'library', name: 'Library Ambience', url: '/sounds/library.mp3' },
 ];
 
+export const useAdvancedFocusMode = _useAdvancedFocusMode;
+
 export function _useAdvancedFocusMode() {
   // Basic focus mode state
   const [isFocusMode, setIsFocusMode] = useState(false);
@@ -317,7 +319,7 @@ export function _useAdvancedFocusMode() {
 
   // Keyboard shortcuts
   useEffect(() => {
-    const handleKeyDown = (_event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       // Toggle focus mode with F11 or Cmd/Ctrl + Shift + F
       if (
         event.key === 'F11' ||
@@ -444,7 +446,7 @@ export function _useAdvancedFocusMode() {
     ambientSounds: AMBIENT_SOUNDS,
 
     // Utilities
-    formatTime: (_seconds: number) => {
+    formatTime: (seconds: number) => {
       const mins = Math.floor(seconds / 60);
       const secs = seconds % 60;
       return `${mins}:${secs.toString().padStart(2, '0')}`;

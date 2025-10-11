@@ -62,7 +62,7 @@ export function _DownloadCard({
             <div className="text-sm font-medium text-gray-900">{fileName}</div>
             {metadata && (
               <div className="text-xs text-gray-500">
-                {formatFileSize(metadata.size)} • {metadata.format}
+                {_formatFileSize(metadata.size)} • {metadata.format}
               </div>
             )}
           </div>

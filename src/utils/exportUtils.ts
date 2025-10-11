@@ -55,6 +55,8 @@ function _formatSceneMetadata(scene: Scene, includeWordCounts: boolean): string 
 }
 
 // Export single scene
+export const exportScene = _exportScene;
+
 export function _exportScene(
   scene: Scene,
   options: ExportOptions,
@@ -65,7 +67,7 @@ export function _exportScene(
 
   // Add metadata header if requested
   if (includeMetadata) {
-    const metadata = formatSceneMetadata(scene, includeWordCounts);
+    const metadata = _formatSceneMetadata(scene, includeWordCounts);
 
     switch (format) {
       case 'markdown':
@@ -83,7 +85,7 @@ export function _exportScene(
   switch (format) {
     case 'markdown':
       content += `# ${scene.title}\n\n`;
-      content += htmlToMarkdown(scene.content);
+      content += _htmlToMarkdown(scene.content);
       filename += '.md';
       break;
 
@@ -109,14 +111,14 @@ export function _exportScene(
 
     case 'txt':
       content += `${scene.title}\n${'='.repeat(scene.title.length)}\n\n`;
-      content += stripHtml(scene.content);
+      content += _stripHtml(scene.content);
       filename += '.txt';
       break;
 
     case 'docx':
       // For now, export as rich text that can be opened in Word
       content += `${scene.title}\n${'='.repeat(scene.title.length)}\n\n`;
-      content += stripHtml(scene.content);
+      content += _stripHtml(scene.content);
       filename += '.rtf';
       break;
   }
@@ -125,6 +127,8 @@ export function _exportScene(
 }
 
 // Export full chapter
+export const exportChapter = _exportChapter;
+
 export function _exportChapter(
   chapter: Chapter,
   options: ExportOptions,
@@ -186,7 +190,7 @@ export function _exportChapter(
 
   // Add scenes
   chapter.scenes.forEach((scene, _index) => {
-    if (separateScenes && index > 0) {
+    if (separateScenes && _index > 0) {
       switch (format) {
         case 'markdown':
           content += '\n---\n\n';
@@ -201,7 +205,7 @@ export function _exportChapter(
 
     // Scene metadata
     if (includeMetadata) {
-      const metadata = formatSceneMetadata(scene, includeWordCounts);
+      const metadata = _formatSceneMetadata(scene, includeWordCounts);
       switch (format) {
         case 'markdown':
           content += `<!-- Scene: ${metadata} -->\n\n`;
@@ -218,7 +222,7 @@ export function _exportChapter(
     switch (format) {
       case 'markdown':
         content += `## ${scene.title}\n\n`;
-        content += htmlToMarkdown(scene.content) + '\n\n';
+        content += _htmlToMarkdown(scene.content) + '\n\n';
         break;
       case 'html':
         content += `<h2>${scene.title}</h2>\n`;
@@ -226,7 +230,7 @@ export function _exportChapter(
         break;
       default:
         content += `${scene.title}\n${'-'.repeat(scene.title.length)}\n\n`;
-        content += stripHtml(scene.content) + '\n\n';
+        content += _stripHtml(scene.content) + '\n\n';
     }
   });
 
@@ -255,6 +259,8 @@ export function _exportChapter(
 }
 
 // Download file
+export const downloadFile = _downloadFile;
+
 export function _downloadFile(
   content: string,
   filename: string,
@@ -273,6 +279,8 @@ export function _downloadFile(
 }
 
 // Main export function
+export const performExport = _performExport;
+
 export function _performExport(
   type: 'scene' | 'chapter',
   data: Scene | Chapter,
@@ -282,9 +290,9 @@ export function _performExport(
     let result: { content: string; filename: string };
 
     if (type === 'scene') {
-      result = exportScene(data as Scene, options);
+      result = _exportScene(data as Scene, options);
     } else {
-      result = exportChapter(data as Chapter, options);
+      result = _exportChapter(data as Chapter, options);
     }
 
     // Determine MIME type
@@ -301,7 +309,7 @@ export function _performExport(
         break;
     }
 
-    downloadFile(result.content, result.filename, mimeType);
+    _downloadFile(result.content, result.filename, mimeType);
   } catch (error) {
     console.error('Export failed:', error);
     throw new Error('Export failed. Please try again.');

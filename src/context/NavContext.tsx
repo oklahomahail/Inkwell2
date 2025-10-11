@@ -34,6 +34,8 @@ interface NavProviderProps {
  * Replaces global event listeners and provides a single source of truth for navigation.
  * Includes safe fallbacks for stale IDs and deep linking support.
  */
+export const NavProvider = _NavProvider;
+
 export function _NavProvider({ children, initialState = {} }: NavProviderProps) {
   const [state, setState] = useState<NavigationState>({
     currentView: 'dashboard',
@@ -134,7 +136,7 @@ export function _NavProvider({ children, initialState = {} }: NavProviderProps) 
   );
 
   const navigateToChapter = useCallback(
-    (projectId: string, _chapterId: string) => {
+    (projectId: string, chapterId: string) => {
       // Validate that the chapter exists (basic safety check)
       if (!chapterId || !projectId) {
         console.warn('NavContext: Invalid chapter navigation parameters');
@@ -154,7 +156,7 @@ export function _NavProvider({ children, initialState = {} }: NavProviderProps) 
   );
 
   const navigateToScene = useCallback(
-    (projectId: string, _chapterId: string, _sceneId: string) => {
+    (projectId: string, chapterId: string, sceneId: string) => {
       // Validate parameters
       if (!sceneId || !chapterId || !projectId) {
         console.warn('NavContext: Invalid scene navigation parameters');
@@ -209,6 +211,8 @@ export function _NavProvider({ children, initialState = {} }: NavProviderProps) 
 /**
  * Hook to access navigation context
  */
+export const useNavigation = _useNavigation;
+
 export function _useNavigation(): NavContextValue {
   const context = useContext(NavContext);
   if (!context) {
@@ -226,18 +230,18 @@ export function _useNavigation(): NavContextValue {
         currentChapterId: null,
         currentSceneId: null,
         focusMode: false,
-        navigateToView: (_view) => {
+        navigateToView: (view) => {
           console.warn(`[navigation] Navigation attempted without provider: ${view}`);
         },
-        navigateToProject: (_projectId) => {
+        navigateToProject: (projectId) => {
           console.warn(`[navigation] Project navigation attempted without provider: ${projectId}`);
         },
-        navigateToChapter: (_projectId, _chapterId) => {
+        navigateToChapter: (projectId, chapterId) => {
           console.warn(
             `[navigation] Chapter navigation attempted without provider: ${projectId}/${chapterId}`,
           );
         },
-        navigateToScene: (_projectId, _chapterId, _sceneId) => {
+        navigateToScene: (projectId, chapterId, sceneId) => {
           console.warn(
             `[navigation] Scene navigation attempted without provider: ${projectId}/${chapterId}/${sceneId}`,
           );
@@ -263,10 +267,10 @@ export const NavigationHelpers = {
    * Navigate to a scene with automatic fallback if the scene/chapter doesn't exist
    */
   navigateToSceneWithFallback: async (
-    _navigation: NavContextValue,
-    _projectId: string,
-    _chapterId: string,
-    _sceneId: string,
+    navigation: NavContextValue,
+    projectId: string,
+    chapterId: string,
+    sceneId: string,
   ) => {
     try {
       // Here you would validate that the scene exists in your storage service
@@ -289,9 +293,9 @@ export const NavigationHelpers = {
    * Navigate to a chapter with automatic fallback if the chapter doesn't exist
    */
   navigateToChapterWithFallback: async (
-    _navigation: NavContextValue,
-    _projectId: string,
-    _chapterId: string,
+    navigation: NavContextValue,
+    projectId: string,
+    chapterId: string,
   ) => {
     try {
       navigation.navigateToChapter(projectId, chapterId);
@@ -316,7 +320,7 @@ export const NavigationHelpers = {
   /**
    * Parse URL parameters and navigate accordingly
    */
-  handleDeepLink: (_navigation: NavContextValue, _url: string) => {
+  handleDeepLink: (navigation: NavContextValue, url: string) => {
     try {
       const urlObj = new URL(url);
       const params = new URLSearchParams(urlObj.search);
