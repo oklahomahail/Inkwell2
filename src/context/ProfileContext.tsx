@@ -214,6 +214,32 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     [state.profiles],
   );
 
+  const loadProfiles = useCallback(async (): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
+
+    try {
+      const profiles = loadProfilesFromStorage();
+      dispatch({ type: 'SET_PROFILES', payload: profiles });
+
+      // Load active profile
+      const activeProfileId = loadActiveProfileFromStorage();
+      if (activeProfileId && profiles.length > 0) {
+        const activeProfile = profiles.find((p) => p.id === activeProfileId);
+        if (activeProfile) {
+          dispatch({ type: 'SET_ACTIVE_PROFILE', payload: activeProfile });
+        }
+      }
+    } catch (error) {
+      dispatch({
+        type: 'SET_ERROR',
+        payload: error instanceof Error ? error.message : 'Failed to load profiles',
+      });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }, []);
+
   const setActiveProfile = useCallback(
     async (profileId: ProfileId): Promise<void> => {
       dispatch({ type: 'SET_ERROR', payload: null });
@@ -240,7 +266,10 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
       if (!profile) {
         console.warn('Profile not found, reloading and retrying:', profileId);
         await loadProfiles();
-        profile = state.profiles.find((p) => p.id === profileId);
+        // After reloading, select from latest state by id
+        // Note: using functional update via dispatch keeps state in sync
+        const refreshed = loadProfilesFromStorage();
+        profile = refreshed.find((p) => p.id === profileId);
       }
 
       if (profile) {
@@ -253,32 +282,6 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     },
     [state.profiles, loadProfiles],
   );
-
-  const loadProfiles = useCallback(async (): Promise<void> => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    dispatch({ type: 'SET_ERROR', payload: null });
-
-    try {
-      const profiles = loadProfilesFromStorage();
-      dispatch({ type: 'SET_PROFILES', payload: profiles });
-
-      // Load active profile
-      const activeProfileId = loadActiveProfileFromStorage();
-      if (activeProfileId && profiles.length > 0) {
-        const activeProfile = profiles.find((p) => p.id === activeProfileId);
-        if (activeProfile) {
-          dispatch({ type: 'SET_ACTIVE_PROFILE', payload: activeProfile });
-        }
-      }
-    } catch (error) {
-      dispatch({
-        type: 'SET_ERROR',
-        payload: error instanceof Error ? error.message : 'Failed to load profiles',
-      });
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, []);
 
   const clearActiveProfile = useCallback(() => {
     dispatch({ type: 'SET_ACTIVE_PROFILE', payload: null });
