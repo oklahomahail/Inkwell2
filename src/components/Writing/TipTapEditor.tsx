@@ -9,7 +9,7 @@ import React, { useEffect, useRef } from 'react';
 
 import { useEditorContext } from '@/context/EditorContext';
 import { useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 type Props = {
   value: string;
