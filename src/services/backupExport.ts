@@ -55,7 +55,7 @@ type BackupPayload = {
 // Turn any project-ish object into a strict InkwellProject
 function _normalizeProject(input: unknown): InkwellProject {
   const raw = RawProjectSchema.parse(input);
-  const chapters: NormalizedChapter[] = (raw.chapters || []).map((ch, _idx) => ({
+  const chapters: NormalizedChapter[] = (raw.chapters || []).map((ch, idx) => ({
     id: ch.id ?? `ch-${idx + 1}`,
     title: ch.title ?? `Chapter ${idx + 1}`,
     scenes: Array.isArray(ch.scenes) ? ch.scenes : [],
@@ -77,7 +77,7 @@ function _normalizeProject(input: unknown): InkwellProject {
  */
 export async function _performBackup(project: unknown): Promise<void> {
   const safe = normalizeProject(project);
-  const words = safe.chapters.reduce((acc, _ch) => acc + (ch.wordCount || 0), 0);
+  const words = safe.chapters.reduce((acc, ch) => acc + (ch.wordCount || 0), 0);
 
   const payload: BackupPayload = {
     version: 1,
@@ -131,3 +131,8 @@ export async function _performImport(projectId: string): Promise<void> {
     input.click();
   });
 }
+
+// Named exports for consumers
+export const performBackup = _performBackup;
+export const performImport = _performImport;
+export const normalizeProject = _normalizeProject;
