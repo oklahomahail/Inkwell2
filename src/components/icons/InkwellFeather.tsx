@@ -204,10 +204,15 @@ export const InkwellFeather: React.FC<InkwellFeatherProps> = ({
 
   const iconClasses = cn(ICON_SIZES[size], ICON_COLORS[color], className);
 
+  // Compose accessibility attributes
+  const computedAria = ariaLabel || name.replace('-', ' ');
+  const computedTitle = title ?? (ariaLabel ? undefined : undefined);
+
   return (
     <IconComponent
       className={iconClasses}
-      aria-label={ariaLabel || name.replace('-', ' ')}
+      aria-label={computedAria}
+      title={title}
       data-testid={dataTestId}
       {...rest}
     />
