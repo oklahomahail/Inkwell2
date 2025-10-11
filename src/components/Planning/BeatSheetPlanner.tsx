@@ -25,6 +25,15 @@ interface BeatSheet {
 }
 
 const BeatSheetPlanner: React.FC = () => {
+  const [isTemplateValid, setIsTemplateValid] = useState(false);
+  const invalidTemplate = {
+    id: '',
+    name: '',
+    template: 'custom' as const,
+    beats: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
   const { currentProject } = useAppContext();
   const { showToast } = useToast();
 

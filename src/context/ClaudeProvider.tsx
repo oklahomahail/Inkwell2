@@ -46,8 +46,15 @@ export const ClaudeProvider = ({ children }: { children: ReactNode }) => {
       }));
     };
 
-    claudeService.addStatusChangeListener?.(handleStatusChange);
-    return () => claudeService.removeStatusChangeListener?.(handleStatusChange);
+    if (claudeService.addStatusChangeListener) {
+      claudeService.addStatusChangeListener(handleStatusChange);
+      return () => {
+        if (claudeService.removeStatusChangeListener) {
+          claudeService.removeStatusChangeListener(handleStatusChange);
+        }
+      };
+    }
+    return undefined;
   }, []);
 
   const sendMessage = useCallback(
