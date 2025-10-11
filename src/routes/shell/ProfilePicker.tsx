@@ -18,7 +18,7 @@ const PRESET_COLORS = [
   '#84CC16', // lime
 ];
 
-export function _ProfilePicker() {
+function _ProfilePicker() {
   const navigate = useNavigate();
   const { profiles, createProfile, setActiveProfile, isLoading, error } = useProfileContext();
   const [isCreating, setIsCreating] = useState(false);
@@ -27,7 +27,7 @@ export function _ProfilePicker() {
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
-  const handleSelectProfile = async (_profile: Profile) => {
+  const handleSelectProfile = async (profile: Profile) => {
     try {
       await setActiveProfile(profile.id);
       navigate(`/p/${profile.id}/dashboard`);
@@ -37,7 +37,7 @@ export function _ProfilePicker() {
     }
   };
 
-  const handleCreateProfile = async (_e: React.FormEvent) => {
+  const handleCreateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pending) return; // Prevent double submission
 
@@ -262,3 +262,5 @@ export function _ProfilePicker() {
     </div>
   );
 }
+
+export const ProfilePicker = _ProfilePicker;
