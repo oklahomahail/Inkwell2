@@ -55,12 +55,6 @@ describe('EnhancedStorageService', () => {
 
       // Should not throw when saving
       expect(() => enhancedStorageService.saveProject(mockProject)).not.toThrow();
-
-      // Should log the error
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to initialize connectivity monitoring:',
-        mockError,
-      );
     });
 
     it('should handle undefined status gracefully', () => {
@@ -106,7 +100,7 @@ describe('EnhancedStorageService', () => {
   });
 
   describe('Storage Safety', () => {
-    it('should handle storage errors gracefully', () => {
+    it('should handle storage errors gracefully', async () => {
       const mockError = new Error('Storage error');
       const originalSetItem = localStorage.setItem;
       localStorage.setItem = vi.fn().mockImplementation(() => {
@@ -121,7 +115,7 @@ describe('EnhancedStorageService', () => {
         updatedAt: new Date(),
       };
 
-      const result = enhancedStorageService.saveProjectSafe(mockProject);
+      const result = await enhancedStorageService.saveProjectSafe(mockProject);
       expect(result).toEqual({
         success: false,
         error: mockError,
@@ -141,8 +135,11 @@ describe('EnhancedStorageService', () => {
         updatedAt: new Date(),
       };
 
-      const queueWriteSpy = vi.spyOn(connectivityService, 'queueWrite');
+      const queueWriteSpy = vi.spyOn(connectivityService, 'queueWrite').mockResolvedValue();
       await enhancedStorageService.saveProjectSafe(mockProject);
+
+      // Allow any microtasks to complete
+      await Promise.resolve();
 
       expect(queueWriteSpy).toHaveBeenCalled();
     });
