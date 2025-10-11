@@ -171,7 +171,7 @@ export class LegacyTutorialStorage {
     return profileId ? `inkwell:tutorial:${profileId}:${suffix}` : `inkwell:tutorial:${suffix}`;
   }
 
-  static getProgress(slug: string, profileId?: string): TutorialProgress | null {
+  static getProgress(slug: string = '__default__', profileId?: string): TutorialProgress | null {
     try {
       const key = this.getKey(`progress:${slug}`, profileId);
       const data = localStorage.getItem(key);
@@ -181,7 +181,11 @@ export class LegacyTutorialStorage {
     }
   }
 
-  static setProgress(slug: string, progress: TutorialProgress, profileId?: string): void {
+  static setProgress(
+    slug: string = '__default__',
+    progress: TutorialProgress,
+    profileId?: string,
+  ): void {
     try {
       const key = this.getKey(`progress:${slug}`, profileId);
       localStorage.setItem(key, JSON.stringify(progress));
