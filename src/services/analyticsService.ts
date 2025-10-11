@@ -835,8 +835,12 @@ export const trackEvent = _trackEvent;
 export const initializeAnalytics = _initializeAnalytics;
 export const getAnalyticsData = _getAnalyticsData;
 
+/** @deprecated Use trackEvent instead */
+export const track = trackEvent;
+
 export default {
   trackEvent,
+  track, // Backward compatibility for tests
   initializeAnalytics,
   getAnalyticsData,
   service: analyticsService,
