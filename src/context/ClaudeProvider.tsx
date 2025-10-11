@@ -37,6 +37,19 @@ export const ClaudeProvider = ({ children }: { children: ReactNode }) => {
     isConfigured: claudeService.isConfigured(),
   }));
 
+  useEffect(() => {
+    const handleStatusChange = () => {
+      setClaudeState((prev) => ({
+        ...prev,
+        isConfigured: claudeService.isConfigured(),
+        messages: claudeService.getMessages(),
+      }));
+    };
+
+    claudeService.addStatusChangeListener?.(handleStatusChange);
+    return () => claudeService.removeStatusChangeListener?.(handleStatusChange);
+  }, []);
+
   const sendMessage = useCallback(
     async (content: string, selectedText?: string): Promise<string> => {
       if (!claudeService.isConfigured()) {
