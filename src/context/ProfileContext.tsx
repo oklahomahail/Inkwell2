@@ -113,7 +113,7 @@ export function _useProfileContext(): ProfileContextType {
 
 // Alias for tutorial storage compatibility
 export function _useProfile() {
-  const context = useProfileContext();
+  const context = _useProfileContext();
   return {
     active: context.activeProfile,
     activeProfileId: context.activeProfile?.id || null,
@@ -127,7 +127,7 @@ interface ProfileProviderProps {
 }
 
 export function _ProfileProvider({ children }: ProfileProviderProps) {
-  const [state, dispatch] = useReducer(profileReducer, {
+  const [state, dispatch] = useReducer(_profileReducer, {
     profiles: [],
     activeProfile: null,
     isLoading: false,
@@ -165,7 +165,7 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
       dispatch({ type: 'ADD_PROFILE', payload: profile });
 
       const updatedProfiles = [...state.profiles, profile];
-      saveProfilesToStorage(updatedProfiles);
+      _saveProfilesToStorage(updatedProfiles);
 
       return profile;
     },
@@ -183,10 +183,10 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
       dispatch({ type: 'DELETE_PROFILE', payload: profileId });
 
       const updatedProfiles = state.profiles.filter((p) => p.id !== profileId);
-      saveProfilesToStorage(updatedProfiles);
+      _saveProfilesToStorage(updatedProfiles);
 
       if (state.activeProfile?.id === profileId) {
-        saveActiveProfileToStorage(null);
+        _saveActiveProfileToStorage(null);
       }
     },
     [state.profiles, state.activeProfile],
@@ -207,7 +207,7 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
       const updatedProfiles = state.profiles.map((p) =>
         p.id === profileId ? { ...p, ...updatedData } : p,
       );
-      saveProfilesToStorage(updatedProfiles);
+      _saveProfilesToStorage(updatedProfiles);
 
       return { ...profileToUpdate, ...updatedData };
     },
@@ -219,11 +219,11 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      const profiles = loadProfilesFromStorage();
+      const profiles = _loadProfilesFromStorage();
       dispatch({ type: 'SET_PROFILES', payload: profiles });
 
       // Load active profile
-      const activeProfileId = loadActiveProfileFromStorage();
+      const activeProfileId = _loadActiveProfileFromStorage();
       if (activeProfileId && profiles.length > 0) {
         const activeProfile = profiles.find((p) => p.id === activeProfileId);
         if (activeProfile) {
@@ -250,7 +250,7 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
       // If not in memory, try to load from storage directly
       if (!profile) {
         try {
-          const profiles = loadProfilesFromStorage();
+          const profiles = _loadProfilesFromStorage();
           profile = profiles.find((p) => p.id === profileId);
 
           // Keep memory in sync
@@ -268,13 +268,13 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
         await loadProfiles();
         // After reloading, select from latest state by id
         // Note: using functional update via dispatch keeps state in sync
-        const refreshed = loadProfilesFromStorage();
+        const refreshed = _loadProfilesFromStorage();
         profile = refreshed.find((p) => p.id === profileId);
       }
 
       if (profile) {
         dispatch({ type: 'SET_ACTIVE_PROFILE', payload: profile });
-        saveActiveProfileToStorage(profileId);
+        _saveActiveProfileToStorage(profileId);
       } else {
         // As a last resort, don't throw - just log error
         console.error('Profile not found after reload attempts:', profileId);
@@ -285,7 +285,7 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
 
   const clearActiveProfile = useCallback(() => {
     dispatch({ type: 'SET_ACTIVE_PROFILE', payload: null });
-    saveActiveProfileToStorage(null);
+    _saveActiveProfileToStorage(null);
   }, []);
 
   // Load profiles on mount
@@ -305,3 +305,8 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
 
   return <ProfileContext.Provider value={contextValue}>{children}</ProfileContext.Provider>;
 }
+
+// Public exports
+export const ProfileProvider = _ProfileProvider;
+export const useProfile = _useProfile;
+export const useProfileContext = _useProfileContext;

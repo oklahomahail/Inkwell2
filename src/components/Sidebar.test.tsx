@@ -2,30 +2,60 @@
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-import { View } from '@/context/AppContext';
+import { View, initialState } from '@/context/AppContext';
 import { TestWrapper } from '@/test-utils/component-mocks';
 
-import Sidebar from './Sidebar';
+import { Sidebar } from './Sidebar';
+
+vi.mock('@/context/ClaudeProvider', () => ({
+  _useClaude: vi.fn(() => ({
+    claude: null,
+    sendMessage: vi.fn(),
+    clearMessages: vi.fn(),
+    toggleVisibility: vi.fn(),
+    configureApiKey: vi.fn(),
+    suggestContinuation: vi.fn(),
+    improveText: vi.fn(),
+    analyzeWritingStyle: vi.fn(),
+    generatePlotIdeas: vi.fn(),
+    analyzeCharacter: vi.fn(),
+    brainstormIdeas: vi.fn(),
+  })),
+}));
+
+// Mock cn utility
+vi.mock('@/utils/cn', () => ({
+  cn: (...args: any[]) => args.filter(Boolean).join(' '),
+}));
 
 // Keep icon replacement lightweight
 vi.mock('@/components/icons', () => ({
-  InkwellFeather: vi.fn(({ name, _size, _color, ...props }) => (
+  InkwellFeather: vi.fn(({ name, size, color, ...props }) => (
     <span data-testid={`icon-${name}`} data-size={size} data-color={color} {...props} />
   )),
 }));
 
-// Optional: if Sidebar uses focus helpers, keep them inert
+// Keep focusHelper inert
 vi.mock('@/utils/focusUtils', () => ({
   focusWritingEditor: vi.fn(),
 }));
 
+// Mock UI context - passthrough actual so TestWrapper can provide UIContext
+vi.mock('@/hooks/useUI', async (importOriginal) => {
+  const actual = await importOriginal<any>();
+  return { ...actual };
+});
+
 describe('Sidebar Component', () => {
-  const renderWithProviders = (_opts?: {
+  const renderWithProviders = (opts?: {
     appView?: View;
     uiCollapsed?: boolean;
     toggle?: () => void;
   }) => {
-    const appState = { view: opts?.appView ?? View.Dashboard };
+    const appState = {
+      ...initialState,
+      view: opts?.appView ?? View.Dashboard,
+    };
     const ui = {
       sidebarCollapsed: Boolean(opts?.uiCollapsed),
       toggleSidebar: opts?.toggle ?? vi.fn(),

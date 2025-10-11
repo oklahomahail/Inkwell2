@@ -168,7 +168,7 @@ describe('InkwellFeather Icon System', () => {
         { name: 'analytics' as const, size: 'xl' as const, color: 'success' as const },
       ];
 
-      combinations.forEach((combo, _index) => {
+      combinations.forEach((combo, index) => {
         render(
           <InkwellFeather
             name={combo.name}

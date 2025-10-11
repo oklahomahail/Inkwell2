@@ -95,11 +95,11 @@ export interface InkwellFeatherProps extends Omit<SVGProps<SVGSVGElement>, 'colo
 
 export const InkwellFeather: React.FC<InkwellFeatherProps> = ({
   name,
-  _size = 'md',
-  _color = 'default',
-  _ariaLabel,
-  _className = '',
-  _title,
+  size = 'md',
+  color = 'default',
+  ariaLabel,
+  className = '',
+  title,
   ...rest
 }) => {
   const Icon = (INKWELL_ICONS as Record<string, React.ComponentType<SVGProps<SVGSVGElement>>>)[
