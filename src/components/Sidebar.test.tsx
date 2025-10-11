@@ -1,4 +1,14 @@
 // src/components/Sidebar.test.tsx
+
+vi.mock('@/utils/focusUtils', () => ({
+  focusWritingEditor: vi.fn(),
+}));
+
+vi.mock('@/hooks/useUI');
+vi.mock('@/context/AppContext');
+vi.mock('@/components/Brand/Brand');
+vi.mock('@/components/icons');
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
