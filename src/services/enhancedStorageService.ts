@@ -511,11 +511,19 @@ export class EnhancedStorageService {
     // Initialize connectivity monitoring
     if (typeof window !== 'undefined') {
       // Auto-process queued writes when coming online
-      connectivityService.onStatusChange((status) => {
-        if (status.isOnline && status.queuedWrites > 0) {
-          console.log('Processing queued storage operations...');
-        }
-      });
+      try {
+        connectivityService.onStatusChange((status) => {
+          try {
+            if (status?.isOnline && status?.queuedWrites > 0) {
+              console.log('Processing queued storage operations...');
+            }
+          } catch (error) {
+            console.error('Error in connectivity status handler:', error);
+          }
+        });
+      } catch (error) {
+        console.error('Failed to initialize connectivity monitoring:', error);
+      }
     }
   }
 }

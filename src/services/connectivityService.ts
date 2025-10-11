@@ -170,10 +170,25 @@ class ConnectivityService {
   /**
    * Subscribe to connectivity changes
    */
-  onStatusChange(_callback: (status: ConnectivityStatus) => void): () => void {
+  onStatusChange(callback: (status: ConnectivityStatus) => void): () => void {
+    if (typeof callback !== 'function') {
+      console.error('Invalid callback provided to onStatusChange');
+      return () => {};
+    }
+
     this.listeners.push(callback);
+
     // Immediately call with current status
-    callback(this.getStatus());
+    try {
+      callback(this.getStatus());
+    } catch (error) {
+      console.error('Error in status change callback:', error);
+      // Remove the callback if it errors on first call
+      const index = this.listeners.indexOf(callback);
+      if (index > -1) {
+        this.listeners.splice(index, 1);
+      }
+    }
 
     return () => {
       const index = this.listeners.indexOf(callback);
