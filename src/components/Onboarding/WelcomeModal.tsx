@@ -2,7 +2,8 @@
 import { Clock, X, ArrowRight, CheckCircle, Lightbulb } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { InkwellFeather } from '@/components/icons/InkwellFeather';
+// IMPORTANT: import from the barrel so tests that mock "@/components/icons" work
+import { InkwellFeather } from '@/components/icons';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 
 import { useTour, CORE_TOUR_STEPS } from './ProfileTourProvider';
@@ -33,7 +34,11 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
     logAnalytics('welcome_modal_start_tour');
 
     // 1. Store hide preference
-    localStorage.setItem('hideWelcome', 'true');
+    try {
+      localStorage.setItem('hideWelcome', 'true');
+    } catch {
+      // ignore storage errors in tests/SSR
+    }
 
     // 2. Prevent modal re-opening during tour
     setTourActive(true);
@@ -50,8 +55,9 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
         const safeTourSteps = getSafeTourSteps(CORE_TOUR_STEPS);
         await startTourSafely(safeTourSteps, startTour);
       } catch (error) {
-        console.error('Failed to start tour:', error);
         // Fallback to the original method if safe start fails
+
+        console.error('Failed to start tour:', error);
         onStartTour('core-onboarding');
       }
     });
@@ -77,7 +83,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
     onClose();
   };
 
-  const tourDuration = Math.ceil((CORE_TOUR_STEPS.length * 10) / 60); // Rough estimate: 10 seconds per step
+  const tourDuration = Math.ceil((CORE_TOUR_STEPS.length * 10) / 60); // ~10s per step
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
@@ -305,7 +311,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
           </div>
         </div>
 
-        {/* Show dismissal count if user has dismissed before */}
+        {/* Prior dismissals note */}
         {preferences && preferences.tourDismissals > 0 && (
           <div className="px-6 pb-2">
             <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg">
