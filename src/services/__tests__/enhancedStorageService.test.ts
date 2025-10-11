@@ -166,12 +166,14 @@ describe('EnhancedStorageService', () => {
       };
 
       const queueWriteSpy = vi.spyOn(connectivityService, 'queueWrite').mockResolvedValue();
-      await enhancedStorageService.saveProjectSafe(mockProject);
+      const result = await enhancedStorageService.saveProjectSafe(mockProject);
 
       // Allow any microtasks to complete
       await Promise.resolve();
 
-      expect(queueWriteSpy).toHaveBeenCalled();
+      expect(queueWriteSpy).toHaveBeenCalledWith('save', expect.any(String), expect.any(String));
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('queued');
     });
   });
 });

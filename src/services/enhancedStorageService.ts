@@ -149,6 +149,27 @@ export class EnhancedStorageService {
         projects.push(updatedProject);
       }
 
+      // If offline, enqueue the write and return queued status
+      const online = (() => {
+        try {
+          return connectivityService.getStatus().isOnline;
+        } catch {
+          return typeof navigator !== 'undefined' ? navigator.onLine : true;
+        }
+      })();
+
+      if (!online) {
+        try {
+          await connectivityService.queueWrite('save', this.PROJECTS_KEY, JSON.stringify(projects));
+          console.info('Save queued (offline):', updatedProject.id);
+          return { success: true, message: 'queued' };
+        } catch (e) {
+          const msg = 'Failed to queue save while offline';
+          console.error(msg, e);
+          return { success: false, error: e instanceof Error ? e : undefined, message: msg };
+        }
+      }
+
       // Use quota-aware storage
       const result = await this.safeWrite(this.PROJECTS_KEY, JSON.stringify(projects));
       if (!result.success) {
