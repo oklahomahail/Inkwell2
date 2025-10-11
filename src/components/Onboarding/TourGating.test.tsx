@@ -5,7 +5,26 @@ import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { ProfileProvider } from '@/context/ProfileContext';
+// Mock analytics service
+vi.mock('@/services/analyticsService', () => {
+  const mockService = {
+    track: vi.fn(),
+    trackEvent: vi.fn(),
+    initializeAnalytics: vi.fn(),
+    getAnalyticsData: vi.fn(),
+  };
+  return {
+    analyticsService: mockService,
+    default: mockService,
+  };
+});
+
 import { analyticsService } from '@/services/analyticsService';
+
+// Mock tour overlay to avoid loadTourPreset error
+vi.mock('./TourOverlay', () => ({
+  default: vi.fn(() => <div>Tour overlay mock</div>),
+}));
 import { makeMockStorage } from '@/test/utils/mockStorage';
 
 import OnboardingOrchestrator from './OnboardingOrchestrator';
@@ -66,8 +85,6 @@ const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 describe('Tour Gating + First-run Flow (A1)', () => {
   beforeEach(() => {
-    vi.spyOn(analyticsService, 'track').mockImplementation(() => {});
-
     // Reset mocks
     mockLocalStorage.clear();
     mockSessionStorage.clear();
@@ -96,7 +113,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <TestTourComponent onTourStart={onTourStart} />
+              <_TestTourComponent onTourStart={onTourStart} />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>,
@@ -128,7 +145,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <TestTourComponent />
+              <_TestTourComponent />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>,
@@ -155,7 +172,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <TestTourComponent />
+              <_TestTourComponent />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>,
@@ -172,7 +189,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <TestTourComponent />
+              <_TestTourComponent />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>,
@@ -190,7 +207,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <TestTourComponent />
+              <_TestTourComponent />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>,
@@ -211,7 +228,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <TestTourComponent />
+              <_TestTourComponent />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>,
@@ -232,7 +249,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <TestTourComponent />
+              <_TestTourComponent />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>,

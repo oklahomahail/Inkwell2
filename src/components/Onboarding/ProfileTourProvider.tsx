@@ -170,7 +170,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
 
   // Define logAnalytics first to avoid temporal dead zone errors
   const logAnalytics = useCallback(
-    (event: string, _data: any = {}) => {
+    (event: string, data: any = {}) => {
       try {
         // Enhanced analytics with profile context
         const analyticsEvent = {

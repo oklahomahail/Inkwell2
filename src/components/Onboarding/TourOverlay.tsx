@@ -1,5 +1,5 @@
 // src/components/Onboarding/TourOverlay.tsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { analyticsService } from '../../services/analyticsService';
 import { useTutorialStorage } from '../../services/tutorialStorage';
@@ -19,12 +19,57 @@ export default function _TourOverlay({ tourType = 'full-onboarding', onClose, pe
   const steps = useMemo(() => loadTourPreset(tourType), [tourType]);
   const total = steps.length;
   const [i, setI] = useState(0);
-  const startTime = useRef(Date.now());
+  const { setProgress, setPreferences } = useTutorialStorage?.() ?? {};
 
-  // --- persistence ------------
-  const { getProgress, setProgress, profileId } = useTutorialStorage();
-  const slug = useMemo(() => persistKey ?? `tour:${tourType}`, [persistKey, tourType]);
-  const mounted = useRef(false);
+  const stripTourQueryParam = useCallback(() => {
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('tour')) {
+        url.searchParams.delete('tour');
+        window.history.replaceState({}, '', url.toString());
+      }
+    } catch {}
+  }, []);
+
+  const onNext = useCallback(() => setI((x) => Math.min(total - 1, x + 1)), [total]);
+  const onPrevious = useCallback(() => setI((x) => Math.max(0, x - 1)), []);
+  const onComplete = useCallback(async () => {
+    const slug = tourType; // use tourType as the slug/key
+    const now = Date.now();
+    try {
+      // 1) persist "completed" progress
+      if (setProgress) {
+        await setProgress(slug, {
+          currentStep: total,
+          completedSteps: Array.from({ length: total }, (_, k) => String(k)),
+          tourType,
+          startedAt: now,
+          completedAt: now,
+          isCompleted: true,
+          totalSteps: total,
+          lastActiveAt: now,
+        });
+      }
+      // 2) mark preference completed to short-circuit future auto-starts
+      if (setPreferences) {
+        await setPreferences({
+          neverShowAgain: false,
+          remindMeLater: false,
+          completedTours: [slug],
+          tourDismissals: 0,
+        });
+      }
+      // 3) mark this session as "tour finished" to stop any session-based triggers
+      sessionStorage.setItem('inkwell:tour:finished', '1');
+      // 4) clear ?tour= param so history/refresh won't retrigger
+      stripTourQueryParam();
+      // 5) broadcast completion (orchestrator listens)
+      window.dispatchEvent(new CustomEvent('inkwell:tour:completed', { detail: { slug } }));
+    } catch {
+      // non-blocking; still close the overlay
+    }
+    onClose?.();
+  }, [onClose, setProgress, setPreferences, stripTourQueryParam, tourType, total]);
 
   // Log tour start on first mount
   useEffect(() => {
@@ -61,29 +106,6 @@ export default function _TourOverlay({ tourType = 'full-onboarding', onClose, pe
       cancelled = true;
     };
   }, [getProgress, slug, total]);
-
-  const onNext = useCallback(() => setI((x) => Math.min(total - 1, x + 1)), [total]);
-  const onPrevious = useCallback(() => setI((x) => Math.max(0, x - 1)), []);
-  const onComplete = useCallback(() => {
-    // log tour complete
-    try {
-      analyticsService.trackTourCompleted(tourType, total, Date.now() - startTime.current, 0);
-    } catch {}
-    // mark tour complete
-    try {
-      void setProgress(_slug, {
-        currentStep: total - 1,
-        _completedSteps: Array.from({ length: total }, (_, _k) => `step-${k}`),
-        tourType,
-        startedAt: Date.now(),
-        completedAt: Date.now(),
-        isCompleted: true,
-        totalSteps: total,
-        lastActiveAt: Date.now(),
-      });
-    } catch {}
-    onClose?.();
-  }, [onClose, setProgress, slug, total, tourType]);
 
   // Persist step changes (debounced per render tick)
   useEffect(() => {

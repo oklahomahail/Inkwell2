@@ -1,9 +1,14 @@
 // src/components/Onboarding/OnboardingOrchestrator.tsx
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+import analyticsService from '@/services/analyticsService';
 
 import { useTutorialStorage } from '../../services/tutorialStorage';
 
+import { shouldShowTourPrompt as gatingShouldShow, setPromptedThisSession } from './tourGating';
 import TourOverlay from './TourOverlay';
+
+const WELCOME_SHOWN_SESSION_KEY = 'inkwell-welcome-shown-this-session';
 
 import type { TourType } from './steps/Step.types';
 
@@ -13,78 +18,103 @@ import type { TourType } from './steps/Step.types';
  * - If no param: auto-start full-onboarding when not completed and not snoozed
  */
 
-export default function _OnboardingOrchestrator() {
-  const { getProgress, getPreferences, profileId } = useTutorialStorage();
+export function OnboardingOrchestrator() {
   const [open, setOpen] = useState(false);
   const [tourType, setTourType] = useState<TourType>('full-onboarding');
+  const launchedThisSession = useRef(false);
+  const finishedThisSession = useMemo(
+    () => sessionStorage.getItem('inkwell:tour:finished') === '1',
+    [],
+  );
+  const { getPreferences, getProgress } = useTutorialStorage?.() ?? {};
 
-  // read query param once
-  const queryTour = useMemo(() => {
-    if (typeof window === 'undefined') return null;
-    const q = new URLSearchParams(window.location.search).get('tour');
-    if (!q) return null;
-    if (q === 'full') return 'full-onboarding';
-    if (q === 'feature') return 'feature-tour';
-    if (q === 'context') return 'contextual-help';
-    return null;
-  }, []);
-
-  // listen for programmatic starts
+  // Mark welcome modal shown once per session when orchestrator first mounts
   useEffect(() => {
-    function _handler(e: Event) {
-      const detail = (e as CustomEvent<{ tourType?: TourType }>).detail;
-      const t = detail?.tourType ?? 'full-onboarding';
-      try {
-        setTourType(t);
-        setOpen(true);
-      } catch {}
+    const already = sessionStorage.getItem(WELCOME_SHOWN_SESSION_KEY) === 'true';
+    if (!already) {
+      sessionStorage.setItem(WELCOME_SHOWN_SESSION_KEY, 'true');
     }
-    window.addEventListener('inkwell:start-tour', handler as EventListener);
-    return () => window.removeEventListener('inkwell:start-tour', handler as EventListener);
   }, []);
 
+  // Listen for completion, prevent further auto-starts this session
   useEffect(() => {
-    let cancelled = false;
+    const done = () => {
+      launchedThisSession.current = true;
+      sessionStorage.setItem('inkwell:tour:launched', '1');
+    };
+    window.addEventListener('inkwell:tour:completed', done);
+    return () => window.removeEventListener('inkwell:tour:completed', done);
+  }, []);
+
+  // Auto-start logic (URL param, first-run, etc.)
+  useEffect(() => {
     (async () => {
+      if (launchedThisSession.current || finishedThisSession) return;
+
+      const url = new URL(window.location.href);
+      const q = (url.searchParams.get('tour') as TourType | null) ?? null;
+
+      // If we have prefs/progress that say "completed", do NOT autostart
+      const slug = q ?? 'full-onboarding';
       try {
-        // 1) explicit query param takes precedence
-        if (queryTour) {
-          if (!cancelled) {
-            setTourType(queryTour as TourType);
-            setOpen(true);
-            try {
-              sessionStorage.setItem('inkwell-welcome-shown-this-session', 'true');
-            } catch {}
+        const [prefs, progress] = await Promise.all([getPreferences?.(), getProgress?.(slug)]);
+        const isCompleted =
+          (prefs?.completedTours ?? []).includes(slug) || progress?.progress?.isCompleted === true;
+        if (isCompleted) {
+          // also strip ?tour= so refresh doesn't resurrect it
+          if (q) {
+            url.searchParams.delete('tour');
+            window.history.replaceState({}, '', url.toString());
           }
           return;
         }
-        // 2) otherwise, auto-start full-onboarding if not completed & not snoozed
-        const [prefs, progress] = await Promise.all([
-          getPreferences(),
-          getProgress('tour:full-onboarding'),
-        ]);
-
-        const snoozed =
-          !!prefs?.remindMeLaterUntil && Date.now() < (prefs?.remindMeLaterUntil ?? 0);
-        const never = !!prefs?.neverShowAgain;
-        const completed = !!progress?.progress?.isCompleted;
-
-        if (!cancelled && !never && !snoozed && !completed) {
-          setTourType('full-onboarding');
-          setOpen(true);
-          try {
-            sessionStorage.setItem('inkwell-welcome-shown-this-session', 'true');
-          } catch {}
-        }
       } catch {
-        // fail open quietly in dev if needed
+        // ignore; proceed on best-effort
+      }
+
+      if (q) {
+        setTourType(q);
+        setOpen(true);
+        launchedThisSession.current = true;
+        try {
+          analyticsService.track('tour_started', { tourType: 'first_time', entryPoint: 'overlay' });
+        } catch {}
+        // strip the param after opening once
+        url.searchParams.delete('tour');
+        window.history.replaceState({}, '', url.toString());
+        return;
+      }
+
+      // First-run gating without URL param
+      if (gatingShouldShow()) {
+        setTourType('full-onboarding');
+        setOpen(true);
+        launchedThisSession.current = true;
+        try {
+          setPromptedThisSession();
+        } catch {}
+        try {
+          analyticsService.track('tour_started', { tourType: 'first_time', entryPoint: 'overlay' });
+        } catch {}
       }
     })();
-    return () => {
-      cancelled = true;
+  }, [getPreferences, getProgress, finishedThisSession]);
+
+  // Programmatic starts (from settings, etc.)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const ev = e as CustomEvent<{ slug?: TourType }>;
+      if (launchedThisSession.current || finishedThisSession) return;
+      setTourType(ev.detail?.slug ?? 'full-onboarding');
+      setOpen(true);
+      launchedThisSession.current = true;
     };
-  }, [getPreferences, getProgress, profileId, queryTour]);
+    window.addEventListener('inkwell:tour:start', handler as EventListener);
+    return () => window.removeEventListener('inkwell:tour:start', handler as EventListener);
+  }, [finishedThisSession]);
 
   if (!open) return null;
   return <TourOverlay tourType={tourType} onClose={() => setOpen(false)} />;
 }
+
+export default OnboardingOrchestrator;

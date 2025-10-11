@@ -119,14 +119,14 @@ export function _useTutorialStorage() {
       if (!isProfileActive) return;
       const existing = await getProgress(slug);
       const now = Date.now();
-      const currentTotal = totalSteps ?? existing?.progress.totalSteps ?? 4;
+      const currentTotal = _totalSteps ?? existing?.progress.totalSteps ?? 4;
       const payload: TutorialProgress = {
         slug,
         updatedAt: now,
         progress: {
           currentStep: 0,
           completedSteps: [],
-          tourType,
+          tourType: _tourType,
           startedAt: now,
           completedAt: undefined,
           isCompleted: false,
@@ -233,3 +233,6 @@ export async function _migrateLegacyTutorialData(
   // TODO: implement migration logic from LegacyTutorialStorage to IndexedDB
   // Use `defineStores(db)` and upsert data into appropriate tables.
 }
+
+// Public alias for app code
+export const useTutorialStorage = _useTutorialStorage;

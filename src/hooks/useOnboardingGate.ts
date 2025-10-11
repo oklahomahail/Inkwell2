@@ -125,4 +125,5 @@ export function _useOnboardingGate() {
   };
 }
 
+export const useOnboardingGate = _useOnboardingGate;
 export type { Gate, Status };
