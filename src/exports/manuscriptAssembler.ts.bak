@@ -43,7 +43,7 @@ interface Scene {
  * - Cleaning up HTML structure
  * - Preserving intentional formatting
  */
-export function normalizeRichText(content: string): string {
+export function _normalizeRichText(content: string): string {
   if (!content) return '';
 
   let normalized = content
@@ -81,7 +81,7 @@ export function normalizeRichText(content: string): string {
  * - ~250 words per page for double-spaced manuscript
  * - ~350 words per page for book formatting
  */
-export function estimatePageCount(
+export function _estimatePageCount(
   wordCount: number,
   format: 'manuscript' | 'book' = 'manuscript',
 ): number {
@@ -92,7 +92,7 @@ export function estimatePageCount(
 /**
  * Counts words in text content, handling HTML
  */
-export function countWords(content: string): number {
+export function _countWords(content: string): number {
   if (!content) return 0;
 
   // Strip HTML tags and count words
@@ -110,7 +110,7 @@ export function countWords(content: string): number {
  * Retrieves project data - mock implementation
  * In real implementation, this would use your state selectors
  */
-async function getProjectData(projectId: string): Promise<Project> {
+async function _getProjectData(projectId: string): Promise<Project> {
   // Mock implementation - replace with actual data fetching
   // const project = selectProject(projectId);
   // if (!project) throw new Error(`Project ${projectId} not found`);
@@ -164,7 +164,7 @@ async function getProjectData(projectId: string): Promise<Project> {
 /**
  * Assembles a complete manuscript draft from project data
  */
-export async function assembleManuscript(projectId: string): Promise<ManuscriptDraft> {
+export async function _assembleManuscript(projectId: string): Promise<ManuscriptDraft> {
   const project = await getProjectData(projectId);
 
   if (!project) {
@@ -172,12 +172,12 @@ export async function assembleManuscript(projectId: string): Promise<ManuscriptD
   }
 
   // Sort chapters by order and compile scenes
-  const sortedChapters = (project.chapters || []).sort((a, b) => a.order - b.order);
+  const sortedChapters = (project.chapters || []).sort((a, _b) => a.order - b.order);
 
-  const chapters: ManuscriptChapter[] = sortedChapters.map((chapter, index) => {
+  const chapters: ManuscriptChapter[] = sortedChapters.map((chapter, _index) => {
     // Sort scenes by order and normalize content
     const sortedScenes = (chapter.scenes || [])
-      .sort((a, b) => a.order - b.order)
+      .sort((a, _b) => a.order - b.order)
       .map((scene) => normalizeRichText(scene.content));
 
     // If chapter has direct content (no scenes), use that
@@ -235,7 +235,7 @@ export async function assembleManuscript(projectId: string): Promise<ManuscriptD
 /**
  * Validates a manuscript draft for export readiness
  */
-export function validateManuscriptForExport(draft: ManuscriptDraft): {
+export function _validateManuscriptForExport(draft: ManuscriptDraft): {
   isValid: boolean;
   errors: string[];
   warnings: string[];
@@ -290,14 +290,14 @@ export function validateManuscriptForExport(draft: ManuscriptDraft): {
 /**
  * Gets a summary of the manuscript for display
  */
-export function getManuscriptSummary(draft: ManuscriptDraft) {
+export function _getManuscriptSummary(draft: ManuscriptDraft) {
   const validation = validateManuscriptForExport(draft);
 
   return {
     title: draft.title,
     author: draft.author || 'Unknown Author',
     chapterCount: draft.chapters.length,
-    sceneCount: draft.chapters.reduce((total, ch) => total + (ch.scenes?.length || 0), 0),
+    sceneCount: draft.chapters.reduce((total, _ch) => total + (ch.scenes?.length || 0), 0),
     wordCount: draft.wordCount,
     estimatedPages: draft.estimatedPages,
     estimatedReadingTime: Math.ceil(draft.wordCount / 200), // minutes at ~200 wpm
