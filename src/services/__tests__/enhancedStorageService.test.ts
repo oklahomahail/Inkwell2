@@ -15,6 +15,20 @@ describe('EnhancedStorageService', () => {
     localStorage.clear();
     sessionStorage.clear();
 
+    // Mock storage methods
+    vi.spyOn(localStorage, 'getItem').mockReturnValue(null);
+    vi.spyOn(localStorage, 'setItem').mockImplementation(() => {});
+
+    // Mock window.dispatchEvent to simulate connectivity changes
+    vi.spyOn(window, 'dispatchEvent').mockImplementation((event) => {
+      if (event.type === 'online' || event.type === 'offline') {
+        connectivityService.onStatusChange((status) => {
+          console.log('Status changed:', status);
+        });
+      }
+      return true;
+    });
+
     vi.clearAllMocks();
   });
 
@@ -102,8 +116,10 @@ describe('EnhancedStorageService', () => {
   describe('Storage Safety', () => {
     it('should handle storage errors gracefully', async () => {
       const mockError = new Error('Storage error');
-      const originalSetItem = localStorage.setItem;
-      localStorage.setItem = vi.fn().mockImplementation(() => {
+      vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+        throw mockError;
+      });
+      vi.spyOn(connectivityService, 'queueWrite').mockImplementation(() => {
         throw mockError;
       });
 
@@ -120,12 +136,13 @@ describe('EnhancedStorageService', () => {
         success: false,
         error: mockError,
       });
-
-      localStorage.setItem = originalSetItem;
     });
 
     it('should queue writes when offline', async () => {
+      // Force offline
       Object.defineProperty(window.navigator, 'onLine', { value: false });
+      // Trigger connectivity check
+      window.dispatchEvent(new Event('offline'));
 
       const mockProject = {
         id: 'test-6',
