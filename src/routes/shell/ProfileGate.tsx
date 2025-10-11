@@ -18,7 +18,7 @@ interface ProfileGateProps {
  *
  * If any condition fails, redirects to profile picker
  */
-export function _ProfileGate({ children }: ProfileGateProps) {
+function _ProfileGate({ children }: ProfileGateProps) {
   const { profileId } = useParams<{ profileId: string }>();
   const { profiles, activeProfile, setActiveProfile } = useProfile();
   const [ready, setReady] = useState(false);
@@ -87,3 +87,5 @@ export function _ProfileGate({ children }: ProfileGateProps) {
   // Key children so the app fully remounts when profile changes
   return <div key={activeProfile.id}>{children}</div>;
 }
+
+export const ProfileGate = _ProfileGate;
