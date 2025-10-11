@@ -4,29 +4,8 @@ vi.mock('@/utils/focusUtils', () => ({
   focusWritingEditor: vi.fn(),
 }));
 
-vi.mock('@/hooks/useUI');
-vi.mock('@/context/AppContext');
-vi.mock('@/components/Brand/Brand');
-vi.mock('@/components/icons');
-
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-
-import Sidebar from './Sidebar';
-
-const mockFocusWritingEditor = vi.fn();
-const defaultMockUI = { sidebarCollapsed: false, toggleSidebar: vi.fn() };
-const defaultMockState = { view: 'Dashboard' };
-let mockUI = { ...defaultMockUI };
-let mockState = { ...defaultMockState };
-const mockDispatch = vi.fn();
-
-vi.mock('@/utils/focusUtils', () => ({
-  focusWritingEditor: mockFocusWritingEditor,
-}));
-
 vi.mock('@/hooks/useUI', () => ({
-  useUI: () => mockUI,
+  useUI: () => ({ sidebarCollapsed: false, toggleSidebar: vi.fn() }),
 }));
 
 vi.mock('@/context/AppContext', () => ({
@@ -38,7 +17,7 @@ vi.mock('@/context/AppContext', () => ({
     Analysis: 'Analysis',
     Settings: 'Settings',
   },
-  useAppContext: () => ({ state: mockState, dispatch: mockDispatch }),
+  useAppContext: () => ({ state: { view: 'Dashboard' }, dispatch: vi.fn() }),
 }));
 
 vi.mock('@/components/Brand/Brand', () => ({
@@ -52,6 +31,16 @@ vi.mock('@/components/icons', () => ({
     <span data-testid={`icon-${name}`} data-size={size} data-color={color} {...props} />
   )),
 }));
+
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
+import Sidebar from './Sidebar';
+
+const defaultMockUI = { sidebarCollapsed: false, toggleSidebar: vi.fn() };
+const defaultMockState = { view: 'Dashboard' };
+let mockUI = { ...defaultMockUI };
+let mockState = { ...defaultMockState };
 
 describe('Sidebar Component', () => {
   const renderSidebar = (mocks = {}) => {
