@@ -1,7 +1,9 @@
 // src/components/Onboarding/TourProvider.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-import { analyticsService } from '../../services/analyticsService';
+import analyticsService from '../../services/analyticsService';
+
+import { hasPromptedThisSession, isNeverShow, isWithinRemindLaterWindow } from './tourGating';
 
 export interface TourStep {
   id: string;
@@ -182,7 +184,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
   }, [checklist]);
 
   // Define logAnalytics first to avoid temporal dead zone errors
-  const logAnalytics = (_event: string, _data: any = {}) => {
+  const logAnalytics = (event: string, data: any = {}) => {
     try {
       // Enhanced analytics with tour context
       const analyticsEvent = {
@@ -191,40 +193,8 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
         step: tourState.currentStep,
       };
 
-      // Track tour-specific events with the proper analytics service
-      switch (event) {
-        case 'tour_started':
-          analyticsService.trackTourStarted(data.tourType || 'feature_tour', 'tour_provider');
-          break;
-        case 'tour_completed':
-          analyticsService.trackTourCompleted(
-            tourState.tourType,
-            data.totalSteps || tourState.steps.length,
-            data.totalTime || 0,
-            data.stepsSkipped || 0,
-          );
-          break;
-        case 'tour_skipped':
-          analyticsService.trackTourAbandoned(
-            tourState.tourType,
-            tourState.currentStep,
-            tourState.steps.length,
-            data.timeBeforeAbandon || 0,
-          );
-          break;
-        case 'tour_step_completed':
-          analyticsService.trackTourStepCompleted(
-            tourState.tourType,
-            tourState.currentStep,
-            data.stepName || `step_${tourState.currentStep}`,
-            data.timeOnStep || 0,
-          );
-          break;
-        default:
-          // Generic event tracking
-          analyticsService.track(event as any, analyticsEvent);
-          break;
-      }
+      // Unify analytics via a single track API
+      analyticsService.track(event as any, analyticsEvent);
 
       // Log to console in dev mode
       if (import.meta.env.DEV) {
@@ -246,14 +216,17 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
     }
   };
 
-  const startTour = (_type: TourState['tourType'], _steps?: TourStep[]) => {
+  const startTour = (type: TourState['tourType'], steps?: TourStep[]) => {
     // Prevent duplicate tours
     if (tourState.isActive) {
       console.warn('Tour already active, ignoring duplicate start request');
       return;
     }
 
-    logAnalytics('tour_started', { tourType: type, stepCount: steps?.length || 0 });
+    analyticsService.track('tour_started', {
+      tourType: 'full-onboarding',
+      entryPoint: 'prompt',
+    });
 
     // Mark that we've prompted in this session
     sessionStorage.setItem('inkwell-tour-prompted-this-session', 'true');
@@ -321,30 +294,30 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
 
     setTourState((prev) => ({
       ...prev,
-      _isActive: false,
-      _isFirstTimeUser: false,
-      _completedSteps: [...new Set([...prev.completedSteps, ...prev.steps.map((s) => s.id)])],
+      isActive: false,
+      isFirstTimeUser: false,
+      completedSteps: [...new Set([...prev.completedSteps, ...prev.steps.map((s) => s.id)])],
     }));
   };
 
-  const completeStep = (_stepId: string) => {
+  const completeStep = (stepId: string) => {
     setTourState((prev) => ({
       ...prev,
       completedSteps: [...new Set([...prev.completedSteps, stepId])],
     }));
   };
 
-  const goToStep = (_stepIndex: number) => {
+  const goToStep = (stepIndex: number) => {
     setTourState((prev) => ({
       ...prev,
       currentStep: Math.max(0, Math.min(stepIndex, prev.steps.length - 1)),
     }));
   };
 
-  const setTourSteps = (_steps: TourStep[]) => {
+  const setTourSteps = (steps: TourStep[]) => {
     setTourState((prev) => ({
       ...prev,
-      _steps: [...steps].sort((a, _b) => a.order - b.order),
+      steps: [...steps].sort((a, b) => a.order - b.order),
     }));
   };
 
@@ -377,7 +350,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
     logAnalytics('tour_never_show_again');
   };
 
-  const setRemindMeLater = (_hours: number = 24) => {
+  const setRemindMeLater = (hours: number = 24) => {
     const remindMeLaterUntil = Date.now() + hours * 60 * 60 * 1000;
     setPreferences((prev) => ({
       ...prev,
@@ -389,31 +362,29 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
   };
 
   const shouldShowTourPrompt = (): boolean => {
-    // Never show if user said never
-    if (preferences.neverShowAgain) return false;
+    try {
+      // Storage checks take precedence over any state
+      if (hasPromptedThisSession(window.sessionStorage)) return false;
+      if (isNeverShow(window.localStorage)) return false;
+      if (isWithinRemindLaterWindow(Date.now(), window.localStorage)) return false;
 
-    // Don't show if remind me later is still active
-    if (
-      preferences.remindMeLater &&
-      preferences.remindMeLaterUntil &&
-      Date.now() < preferences.remindMeLaterUntil
-    ) {
-      return false;
+      // Then check local state
+      if (tourState.isActive) return false;
+      if (!tourState.isFirstTimeUser) return false;
+      if (preferences.completedTours.includes('full-onboarding')) return false;
+
+      return true;
+    } catch {
+      // If storage access fails, respect local state
+      return (
+        !tourState.isActive &&
+        tourState.isFirstTimeUser &&
+        !preferences.completedTours.includes('full-onboarding')
+      );
     }
-
-    // Don't show if a tour is already active (prevents duplicates)
-    if (tourState.isActive) return false;
-
-    // Don't show if user has already been prompted in this session
-    if (sessionStorage.getItem('inkwell-tour-prompted-this-session')) {
-      return false;
-    }
-
-    // Show if first time user and hasn't completed main tour
-    return tourState.isFirstTimeUser && !preferences.completedTours.includes('full-onboarding');
   };
 
-  const updateChecklist = (_item: keyof CompletionChecklist) => {
+  const updateChecklist = (item: keyof CompletionChecklist) => {
     setChecklist((prev) => ({ ...prev, [item]: true }));
     logAnalytics('checklist_item_completed', { item });
   };
