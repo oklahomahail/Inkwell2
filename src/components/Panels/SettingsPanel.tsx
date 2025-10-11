@@ -458,7 +458,7 @@ const SettingsPanel: React.FC = () => {
               <input
                 type="checkbox"
                 checked={appSettings.showWordCount}
-                onChange={(_e) =>
+                onChange={(e) =>
                   setAppSettings({ ...appSettings, showWordCount: e.target.checked })
                 }
                 className="w-4 h-4 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"
@@ -473,7 +473,7 @@ const SettingsPanel: React.FC = () => {
               <input
                 type="checkbox"
                 checked={appSettings.showReadingTime}
-                onChange={(_e) =>
+                onChange={(e) =>
                   setAppSettings({ ...appSettings, showReadingTime: e.target.checked })
                 }
                 className="w-4 h-4 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"

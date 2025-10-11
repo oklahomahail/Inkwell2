@@ -8,7 +8,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   required?: boolean;
 }
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, _error, _hint, _className = '', _required = false, _id, ...props }, _ref) => {
+  ({ label, error, hint, className = '', required = false, id, ...props }, ref) => {
     const inputId = id || props.name || `input-${Math.random().toString(36).slice(2, 8)}`;
     const hintId = hint && !error ? `${inputId}-hint` : undefined;
     const errorId = error ? `${inputId}-error` : undefined;

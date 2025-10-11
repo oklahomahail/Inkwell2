@@ -436,7 +436,7 @@ class AnalyticsService {
   private sessionId: string;
   private userId: string | null = null;
   private isEnabled = true;
-  private eventQueue: Array<{ name: string; data: any }> = [];
+  private eventQueue: Array<{ name: EventName; data: Record<string, unknown> }> = [];
   private sessionStartTime = Date.now();
   private lastActivityTime = Date.now();
   private activeView = 'dashboard';
@@ -513,7 +513,7 @@ class AnalyticsService {
   track<T extends EventName>(
     eventName: T,
     eventData: Omit<EventData<T>, keyof BaseEvent> & { profileId?: string },
-  ) {
+  ): void {
     if (!this.isEnabled) return;
 
     const { profileId, ...restData } = eventData;
@@ -676,7 +676,7 @@ class AnalyticsService {
     return projects ? JSON.parse(projects).length > 0 : false;
   }
 
-  private storeEventLocally(eventName: string, eventData: any) {
+  private storeEventLocally(eventName: string, eventData: Record<string, unknown>) {
     try {
       const storageKey = `${this.STORAGE_KEY}_${eventName}`;
       const existingData = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -816,23 +816,21 @@ export interface AnalyticsData {
   data: any;
 }
 
-export function _trackEvent(event: string, data?: any) {
+function _trackEvent(event: string, data?: Record<string, unknown>) {
   console.log('Legacy analytics event:', event, data);
   // Could map to new system if needed
 }
 
-export function _initializeAnalytics() {
+function _initializeAnalytics() {
   console.log('Analytics initialized');
 }
 
-export function _getAnalyticsData(): AnalyticsData[] {
+function _getAnalyticsData(): AnalyticsData[] {
   return [];
 }
 
-// Hook export
+// Export wrapper functions
 export const useAnalytics = _useAnalytics;
-
-// Legacy function exports
 export const trackEvent = _trackEvent;
 export const initializeAnalytics = _initializeAnalytics;
 export const getAnalyticsData = _getAnalyticsData;

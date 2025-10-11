@@ -13,9 +13,9 @@ interface PWAInstallButtonProps {
 
 export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
   className = '',
-  _variant = 'button',
-  _onInstall,
-  _onDismiss,
+  variant = 'button',
+  onInstall,
+  onDismiss,
 }) => {
   const { installApp, canInstall } = usePWA();
   const [showPrompt, setShowPrompt] = useState(false);

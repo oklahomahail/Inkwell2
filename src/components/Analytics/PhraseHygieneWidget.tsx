@@ -20,8 +20,8 @@ import { phraseAnalysisService } from '@/utils/textAnalysis';
 
 export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
   className = '',
-  _showTitle = true,
-  _maxItems = 10,
+  showTitle = true,
+  maxItems = 10,
 }) => {
   const { currentProject } = useAppContext();
   const { showToast } = useToast();
@@ -67,7 +67,7 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
           severity: phrase.severity as 'low' | 'medium' | 'high',
           frequency: (phrase.count / results.totalWords) * 1000,
         }))
-        .sort((a: PhraseOffender, _b: PhraseOffender) => {
+        .sort((a: PhraseOffender, b: PhraseOffender) => {
           // Sort by severity first, then by count
           const severityOrder = { high: 3, medium: 2, low: 1 };
           if (a.severity !== b.severity) {
@@ -89,15 +89,15 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
     }
   };
 
-  const addToStoplist = (_phrase: string) => {
+  const addToStoplist = (targetPhrase: string) => {
     if (!currentProject) return;
-    phraseAnalysisService.addToCustomStoplist(currentProject.id, phrase);
-    showToast(`Added "${phrase}" to stoplist`, 'success');
+    phraseAnalysisService.addToCustomStoplist(currentProject.id, targetPhrase);
+    showToast(`Added "${targetPhrase}" to stoplist`, 'success');
     // Remove from current offenders list
-    setOffenders((prev) => prev.filter((o) => o.phrase !== phrase));
+    setOffenders((prev) => prev.filter((o) => o.phrase !== targetPhrase));
   };
 
-  const getSeverityColor = (_severity: 'low' | 'medium' | 'high') => {
+  const getSeverityColor = (severity: 'low' | 'medium' | 'high') => {
     switch (severity) {
       case 'high':
         return 'text-red-500 bg-red-50';
@@ -108,7 +108,7 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
     }
   };
 
-  const getSeverityIcon = (_severity: 'low' | 'medium' | 'high') => {
+  const getSeverityIcon = (severity: 'low' | 'medium' | 'high') => {
     switch (severity) {
       case 'high':
         return <AlertTriangle className="w-3 h-3" />;
@@ -191,7 +191,7 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
             <div className="space-y-2 max-h-80 overflow-y-auto">
               {offenders.map((offender, _index) => (
                 <div
-                  key={index}
+                  key={`${offender.phrase}-${offender.severity}`}
                   className="flex items-center justify-between p-2 border rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">

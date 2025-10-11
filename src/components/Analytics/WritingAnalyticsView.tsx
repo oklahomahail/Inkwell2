@@ -39,14 +39,14 @@ export default function _WritingAnalyticsView() {
 
   // Totals and summary metrics
   const totalWords = trendRows.reduce(
-    (sum, _d) => sum + (typeof d.words === 'number' ? d.words : 0),
+    (sum, d) => sum + (typeof d.words === 'number' ? d.words : 0),
     0,
   );
   const averageWordsPerDay = trendRows.length ? Math.round(totalWords / trendRows.length) : 0;
 
-  const totalWritingTimeMin = sessions.reduce((sum, _s) => sum + (s.focusTime ?? 0), 0);
+  const totalWritingTimeMin = sessions.reduce((sum, s) => sum + (s.focusTime ?? 0), 0);
 
-  const writingStreak = computeStreak(sessions);
+  const writingStreak = _computeStreak(sessions);
 
   const todayWords = (() => {
     try {
@@ -135,32 +135,32 @@ export default function _WritingAnalyticsView() {
 
       {/* Key metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
-        <StatCard
+        <_StatCard
           icon={<Edit3 className="w-4 h-4" />}
           label="Total words"
           value={totalWords.toLocaleString()}
         />
-        <StatCard
+        <_StatCard
           icon={<Clock className="w-4 h-4" />}
           label="Total time"
           value={`${Math.floor(totalWritingTimeMin / 60)}h ${totalWritingTimeMin % 60}m`}
         />
-        <StatCard
+        <_StatCard
           icon={<Target className="w-4 h-4" />}
           label="Daily average"
           value={`${averageWordsPerDay} words`}
         />
-        <StatCard
+        <_StatCard
           icon={<TrendingUp className="w-4 h-4" />}
           label="Streak"
           value={`${writingStreak} days`}
         />
-        <StatCard
+        <_StatCard
           icon={<BookOpen className="w-4 h-4" />}
           label="Sessions"
           value={sessions.length}
         />
-        <StatCard
+        <_StatCard
           icon={<Award className="w-4 h-4" />}
           label="Daily goal"
           value={`${dailyGoalCompletion}%`}

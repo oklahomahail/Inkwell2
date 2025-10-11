@@ -166,7 +166,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
   // Keyboard shortcuts for header actions
   useEffect(() => {
-    const handleKeydown = (_e: KeyboardEvent) => {
+    const handleKeydown = (e: KeyboardEvent) => {
       // Command/Ctrl + K for command palette
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
@@ -198,7 +198,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     return () => document.removeEventListener('keydown', handleKeydown);
   }, []);
 
-  const handleViewChange = (_view: View) => {
+  const handleViewChange = (view: View) => {
     dispatch({ type: 'SET_VIEW', payload: view });
   };
 
@@ -305,7 +305,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             </div>
             <button
               onClick={toggleSidebar}
-              onKeyDown={(_e) => {
+              onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
                   toggleSidebar();

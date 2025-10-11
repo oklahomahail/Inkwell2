@@ -12,15 +12,17 @@ interface Tab {
 interface AccessibleTabsProps {
   tabs: Tab[];
   initialSelectedId?: string;
-  onChange?: (_selectedId: string) => void;
+  onChange?: (selectedId: string) => void;
   className?: string;
 }
 
+type KeyboardEvent = React.KeyboardEvent<HTMLButtonElement>;
+
 const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
   tabs,
-  _initialSelectedId,
-  _onChange,
-  _className = '',
+  initialSelectedId,
+  onChange,
+  className = '',
 }) => {
   const [selectedId, setSelectedId] = useState(initialSelectedId || tabs[0]?.id || '');
 
@@ -30,18 +32,18 @@ const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
     }
   }, [initialSelectedId, selectedId]);
 
-  const handleTabChange = (_id: string) => {
-    const tab = tabs.find((tab) => tab.id === id);
+  const handleTabChange = (newId: string) => {
+    const tab = tabs.find((tab) => tab.id === newId);
     if (tab && !tab.disabled) {
-      setSelectedId(id);
-      onChange?.(id);
+      setSelectedId(newId);
+      onChange?.(newId);
     }
   };
 
-  const handleKeyDown = (_e: React.KeyboardEvent, _id: string) => {
+  const handleKeyDown = (e: KeyboardEvent, tabId: string) => {
     if (tabs.length === 0) return;
 
-    const currentIndex = tabs.findIndex((tab) => tab.id === id);
+    const currentIndex = tabs.findIndex((tab) => tab.id === tabId);
     if (currentIndex === -1) return;
 
     let nextIndex = currentIndex;
@@ -66,7 +68,7 @@ const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
       case 'Enter':
       case ' ':
         e.preventDefault();
-        handleTabChange(id);
+        handleTabChange(tabId);
         return;
       default:
         return;
@@ -113,7 +115,7 @@ const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
             aria-disabled={tab.disabled}
             tabIndex={selectedId === tab.id ? 0 : -1}
             onClick={() => handleTabChange(tab.id)}
-            onKeyDown={(_e) => handleKeyDown(e, tab.id)}
+            onKeyDown={(e) => handleKeyDown(e, tab.id)}
             disabled={tab.disabled}
             className={`flex-1 px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#0073E6] focus:ring-inset ${
               selectedId === tab.id

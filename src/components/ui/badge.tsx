@@ -2,7 +2,7 @@ import React from 'react';
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: 'default' | 'secondary' | 'destructive' | 'outline';
 }
-const Badge: React.FC<BadgeProps> = ({ className = '', _variant = 'default', ...props }) => {
+const Badge: React.FC<BadgeProps> = ({ className = '', variant = 'default', ...props }) => {
   const variants = {
     default: 'bg-blue-100 text-blue-800',
     secondary: 'bg-gray-100 text-gray-800',

@@ -19,9 +19,9 @@ const sizeClasses: Record<NonNullable<ButtonProps['size']>, string> = {
 };
 export const Button: React.FC<ButtonProps> = ({
   className = '',
-  _children,
-  _variant = 'default',
-  _size = 'md',
+  children,
+  variant = 'default',
+  size = 'md',
   ...rest
 }) => {
   const base =

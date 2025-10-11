@@ -51,7 +51,7 @@ const Stepper: React.FC<StepperProps> = ({ currentStep, completedSteps }) => {
 
   return (
     <div className="flex items-center justify-center mb-8">
-      {steps.map((step, _index) => {
+      {steps.map((step, index) => {
         const StepIcon = step.icon;
         const isActive = currentStep === step.id;
         const isCompleted = completedSteps.has(step.id as FlowStep);
@@ -131,8 +131,8 @@ const Stepper: React.FC<StepperProps> = ({ currentStep, completedSteps }) => {
 
 export const StoryArchitectFlow: React.FC<StoryArchitectFlowProps> = ({
   onComplete,
-  _onClose,
-  _initialProject,
+  onClose,
+  initialProject,
 }) => {
   const { currentProject, updateProject } = useAppContext();
   const { showToast } = useToast();
@@ -473,7 +473,7 @@ interface PremiseStepProps {
   onNext: () => void;
 }
 
-const PremiseStep: React.FC<PremiseStepProps> = ({ premise, _onChange, _isValid, onNext }) => {
+const PremiseStep: React.FC<PremiseStepProps> = ({ premise, onChange, isValid, onNext }) => {
   return (
     <div className="space-y-6">
       <div>
@@ -495,7 +495,9 @@ const PremiseStep: React.FC<PremiseStepProps> = ({ premise, _onChange, _isValid,
             <input
               type="text"
               value={premise.title}
-              onChange={(e) => onChange({ ...premise, title: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                onChange({ ...premise, title: e.target.value })
+              }
               placeholder="Enter your story title"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
@@ -507,7 +509,7 @@ const PremiseStep: React.FC<PremiseStepProps> = ({ premise, _onChange, _isValid,
             </label>
             <select
               value={premise.genre}
-              onChange={(_e) => onChange({ ...premise, genre: e.target.value })}
+              onChange={(e) => onChange({ ...premise, genre: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
               <option value="">Select genre...</option>
@@ -531,7 +533,7 @@ const PremiseStep: React.FC<PremiseStepProps> = ({ premise, _onChange, _isValid,
             </label>
             <select
               value={premise.targetLength}
-              onChange={(_e) =>
+              onChange={(e) =>
                 onChange({
                   ...premise,
                   targetLength: e.target.value as StoryPremise['targetLength'],
@@ -553,7 +555,9 @@ const PremiseStep: React.FC<PremiseStepProps> = ({ premise, _onChange, _isValid,
             <input
               type="text"
               value={premise.tone}
-              onChange={(_e) => onChange({ ...premise, tone: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                onChange({ ...premise, tone: e.target.value })
+              }
               placeholder="e.g., Dark and mysterious, Light-hearted adventure, Romantic comedy"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
@@ -566,7 +570,9 @@ const PremiseStep: React.FC<PremiseStepProps> = ({ premise, _onChange, _isValid,
           </label>
           <textarea
             value={premise.premise}
-            onChange={(_e) => onChange({ ...premise, premise: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              onChange({ ...premise, premise: e.target.value })
+            }
             placeholder="Describe your story premise in 2-3 sentences. What is the main conflict? Who is the protagonist? What's at stake?"
             rows={8}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
@@ -598,9 +604,9 @@ interface GeneratingStepProps {
 
 const GeneratingStep: React.FC<GeneratingStepProps> = ({
   progress,
-  _status,
-  _estimatedTime,
-  _onCancel,
+  status,
+  estimatedTime,
+  onCancel,
 }) => {
   return (
     <div className="flex flex-col items-center justify-center space-y-8 py-12">

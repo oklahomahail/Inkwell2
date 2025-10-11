@@ -335,7 +335,7 @@ export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   errorBoundaryProps?: Omit<Props, 'children'>,
 ) {
-  const WrappedComponent: React.FC<P> = (_props) => (
+  const WrappedComponent: React.FC<P> = (props) => (
     <AppErrorBoundary {...errorBoundaryProps}>
       <Component {...props} />
     </AppErrorBoundary>
@@ -351,7 +351,7 @@ export const FeatureErrorBoundary: React.FC<{
   children: ReactNode;
   featureName: string;
   fallback?: ReactNode;
-}> = ({ children, _featureName, fallback }) => (
+}> = ({ children, featureName, fallback }) => (
   <AppErrorBoundary level="feature" featureName={featureName} fallback={fallback}>
     {children}
   </AppErrorBoundary>

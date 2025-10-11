@@ -15,7 +15,6 @@ const AnalysisPanel: React.FC = () => {
   const { state, currentProject } = useAppContext();
   const [sessions, setSessions] = useState<WritingSession[]>([]);
   const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('advanced');
-
   useEffect(() => {
     const savedSessions = localStorage.getItem(
       `sessions-${currentProject?.id ?? state.currentProjectId ?? 'default'}`,
@@ -161,7 +160,7 @@ const AnalysisPanel: React.FC = () => {
               {sortedSessions
                 .slice(-10)
                 .reverse()
-                .map((session, _index) => (
+                .map((session, index) => (
                   <div
                     key={`${session.date}-${index}`}
                     className="flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"

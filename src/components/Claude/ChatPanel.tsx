@@ -8,17 +8,8 @@ const ChatPanel: React.FC<{
   selectedText: string;
   messagesEndRef: React.RefObject<HTMLDivElement>;
   inputRef: React.RefObject<HTMLInputElement>;
-}> = ({
-  messages,
-  _input,
-  _setInput,
-  _onSend,
-  _isLoading,
-  _selectedText,
-  _messagesEndRef,
-  inputRef,
-}) => {
-  const handleKeyPress = (_e: React.KeyboardEvent) => {
+}> = ({ messages, input, setInput, onSend, isLoading, selectedText, messagesEndRef, inputRef }) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
       onSend();
@@ -69,7 +60,7 @@ const ChatPanel: React.FC<{
           <input
             ref={inputRef}
             value={input}
-            onChange={(_e) => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyPress}
             disabled={isLoading}
             placeholder={

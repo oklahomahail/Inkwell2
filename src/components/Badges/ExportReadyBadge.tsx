@@ -15,7 +15,7 @@ interface ExportReadyBadgeProps {
 }
 
 // Mock function to check export readiness - would integrate with actual project data
-function _checkExportReadiness(projectId: string): ExportReadinessCheck {
+const checkExportReadiness = (projectId: string): ExportReadinessCheck => {
   // This would integrate with your actual project state management
   // For now, returning mock data
   const mockProject = {
@@ -62,13 +62,13 @@ function _checkExportReadiness(projectId: string): ExportReadinessCheck {
     criteria,
     recommendations,
   };
-}
+};
 
 const ExportReadyBadge: React.FC<ExportReadyBadgeProps> = ({
   projectId,
-  _className = '',
-  _variant = 'badge',
-  _showDetails = false,
+  className = '',
+  variant = 'badge',
+  showDetails = false,
   onExportClick,
 }) => {
   const readiness = useMemo(() => checkExportReadiness(projectId), [projectId]);
@@ -226,7 +226,7 @@ const ExportReadyBadge: React.FC<ExportReadyBadgeProps> = ({
         <div className="px-4 pb-4">
           <h4 className="text-sm font-medium text-gray-900 mb-2">To improve export readiness:</h4>
           <ul className="space-y-1">
-            {readiness.recommendations.slice(0, 3).map((rec, _index) => (
+            {readiness.recommendations.slice(0, 3).map((rec, index) => (
               <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-amber-400 rounded-full flex-shrink-0" />
                 {rec}
@@ -256,7 +256,7 @@ const CriteriaItem: React.FC<{
   icon: React.ReactNode;
   label: string;
   completed: boolean;
-}> = ({ icon, _label, completed }) => (
+}> = ({ icon, label, completed }) => (
   <div className="flex items-center gap-3">
     <div
       className={cn(

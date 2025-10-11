@@ -8,10 +8,10 @@ interface CheckboxProps {
 }
 const Checkbox: React.FC<CheckboxProps> = ({
   id,
-  _checked = false,
-  _onCheckedChange,
-  _disabled = false,
-  _className = '',
+  checked = false,
+  onCheckedChange,
+  disabled = false,
+  className = '',
 }) => {
   return (
     <input

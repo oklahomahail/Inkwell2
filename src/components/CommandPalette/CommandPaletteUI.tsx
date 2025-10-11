@@ -36,14 +36,14 @@ const CommandPaletteUI: React.FC = () => {
   }, [isOpen]);
 
   // Handle backdrop click
-  const handleBackdropClick = (_e: React.MouseEvent) => {
+  const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       close();
     }
   };
 
   // Get category icon
-  const getCategoryIcon = (_category: string) => {
+  const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'navigation':
         return Navigation;
@@ -61,7 +61,7 @@ const CommandPaletteUI: React.FC = () => {
   };
 
   // Get category color
-  const getCategoryColor = (_category: string) => {
+  const getCategoryColor = (category: string) => {
     switch (category) {
       case 'navigation':
         return 'text-blue-500';
@@ -81,7 +81,7 @@ const CommandPaletteUI: React.FC = () => {
   if (!isOpen) return null;
 
   // Group commands by category (light typing to avoid `any`)
-  const grouped = filteredCommands.reduce<Record<string, typeof filteredCommands>>((acc, _cmd) => {
+  const grouped = filteredCommands.reduce<Record<string, typeof filteredCommands>>((acc, cmd) => {
     const category = (cmd as { category: string }).category;
     (acc[category] ||= []).push(cmd);
     return acc;
@@ -101,7 +101,7 @@ const CommandPaletteUI: React.FC = () => {
             type="text"
             placeholder="Search commands..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
             className="flex-1 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none text-lg"
           />
           <button

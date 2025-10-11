@@ -8,11 +8,11 @@ const AnalysisPanel: React.FC<{
   isLoading: boolean;
 }> = ({
   characterName,
-  _setCharacterName,
-  _brainstormTopic,
-  _setBrainstormTopic,
-  _onQuickAction,
-  _isLoading,
+  setCharacterName,
+  brainstormTopic,
+  setBrainstormTopic,
+  onQuickAction,
+  isLoading,
 }) => {
   return (
     <div className="p-4 space-y-4">
@@ -51,7 +51,7 @@ const AnalysisPanel: React.FC<{
           {' '}
           <input
             value={brainstormTopic}
-            onChange={(_e) => setBrainstormTopic(e.target.value)}
+            onChange={(e) => setBrainstormTopic(e.target.value)}
             placeholder="Topic to explore..."
             className="flex-1 px-2 py-1 text-xs text-gray-500 rounded bg-[#1A2233] border border-gray-700 text-gray-200 focus:outline-none focus:border-[#0073E6]"
           />{' '}

@@ -14,16 +14,16 @@ interface PanelProps {
 }
 const Panel: React.FC<PanelProps> = ({
   title,
-  _subtitle,
-  _children,
-  _className = '',
-  _titleSize = 'md',
-  _padding = 'md',
-  _shadow = 'soft',
-  _rounded = '2xl',
-  _headerActions,
-  _fullHeight = false,
-  _variant = 'default',
+  subtitle,
+  children,
+  className = '',
+  titleSize = 'md',
+  padding = 'md',
+  shadow = 'soft',
+  rounded = '2xl',
+  headerActions,
+  fullHeight = false,
+  variant = 'default',
 }) => {
   const variantClasses = {
     default: 'bg-white border-gray-200',

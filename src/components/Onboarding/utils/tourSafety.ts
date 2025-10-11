@@ -7,9 +7,9 @@ import { TourStep } from '../ProfileTourProvider';
  * @param timeout Maximum time to wait in milliseconds
  * @returns Promise that resolves when all elements exist or rejects on timeout
  */
-function _waitForAll(selectors: string[], timeout = 3000): Promise<void> {
+function waitForAll(selectors: string[], timeout = 3000): Promise<void> {
   const start = performance.now();
-  return new Promise<void>((resolve, _reject) => {
+  return new Promise<void>((resolve, reject) => {
     const checkElements = () => {
       const allExist = selectors.every((selector) => document.querySelector(selector));
 
@@ -32,11 +32,11 @@ function _waitForAll(selectors: string[], timeout = 3000): Promise<void> {
  * @param startTourCallback Function to call to start the tour
  * @param timeout Maximum time to wait for elements (default 4000ms)
  */
-export async function _startTourSafely(
-  _steps: TourStep[],
-  _startTourCallback: (
+export async function startTourSafely(
+  steps: TourStep[],
+  startTourCallback: (
     type: 'full-onboarding' | 'feature-tour' | 'contextual-help',
-    _steps?: TourStep[],
+    steps?: TourStep[],
   ) => void,
   timeout = 4000,
 ): Promise<void> {
@@ -45,7 +45,7 @@ export async function _startTourSafely(
     const mustExist = steps
       .map((step) => step.target)
       .filter((selector) => typeof selector === 'string' && selector.startsWith('#'))
-      .filter((selector, _index, _array) => array.indexOf(selector) === index); // Remove duplicates
+      .filter((selector, index, array) => array.indexOf(selector) === index); // Remove duplicates
 
     // Wait for all required elements to exist
     if (mustExist.length > 0) {
@@ -72,7 +72,10 @@ export async function _startTourSafely(
  * @param steps Original tour steps
  * @returns Modified steps with fallback targets for missing elements
  */
-export function _getSafeTourSteps(steps: TourStep[]): TourStep[] {
+export function getSafeTourSteps(steps: TourStep[]): TourStep[] {
+  interface StepWithOriginalTarget extends TourStep {
+    originalTarget?: string;
+  }
   return steps.map((step) => {
     // For steps that might have missing targets, provide fallbacks
     const fallbackMap: { [key: string]: string } = {
@@ -102,7 +105,7 @@ export function _getSafeTourSteps(steps: TourStep[]): TourStep[] {
 /**
  * Checks if welcome dialog should be suppressed based on localStorage
  */
-export function _shouldSuppressWelcomeDialog(): boolean {
+export function shouldSuppressWelcomeDialog(): boolean {
   try {
     return localStorage.getItem('hideWelcome') === 'true';
   } catch (error) {

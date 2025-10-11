@@ -53,27 +53,27 @@ export const BrandShowcase: React.FC = () => {
             {[
               {
                 name: 'Deep Navy',
-                _class: 'bg-inkwell-navy',
-                _hex: '#0A2F4E',
-                _textClass: 'text-white',
+                class: 'bg-inkwell-navy',
+                hex: '#0A2F4E',
+                textClass: 'text-white',
               },
               {
                 name: 'Warm Gold',
-                _class: 'bg-inkwell-gold',
-                _hex: '#D4A537',
-                _textClass: 'text-inkwell-navy',
+                class: 'bg-inkwell-gold',
+                hex: '#D4A537',
+                textClass: 'text-inkwell-navy',
               },
               {
                 name: 'Charcoal',
-                _class: 'bg-inkwell-charcoal',
-                _hex: '#2E2E2E',
-                _textClass: 'text-white',
+                class: 'bg-inkwell-charcoal',
+                hex: '#2E2E2E',
+                textClass: 'text-white',
               },
               {
                 name: 'Soft White',
-                _class: 'bg-inkwell-white border border-gray-200',
-                _hex: '#F9F9F9',
-                _textClass: 'text-inkwell-navy',
+                class: 'bg-inkwell-white border border-gray-200',
+                hex: '#F9F9F9',
+                textClass: 'text-inkwell-navy',
               },
             ].map((color) => (
               <div key={color.name} className="text-center">

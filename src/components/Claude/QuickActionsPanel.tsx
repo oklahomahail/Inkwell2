@@ -9,12 +9,12 @@ const QuickActionsPanel: React.FC<{
   insertButtonRef: React.RefObject<HTMLButtonElement>;
 }> = ({
   selectedText,
-  _onQuickAction,
-  _isLoading,
-  _lastResult,
-  _onInsert,
-  _onInsertText,
-  _insertButtonRef,
+  onQuickAction,
+  isLoading,
+  lastResult,
+  onInsert,
+  onInsertText,
+  insertButtonRef,
 }) => {
   useEffect(() => {
     if (lastResult && onInsertText) {

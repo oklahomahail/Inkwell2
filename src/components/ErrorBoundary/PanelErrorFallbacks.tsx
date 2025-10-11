@@ -20,8 +20,8 @@ export interface PanelErrorProps {
 
 export const PlotBoardErrorFallback: React.FC<PanelErrorProps> = ({
   onRetry,
-  _onReportIssue,
-  _errorId,
+  onReportIssue,
+  errorId,
 }) => (
   <div className="h-full min-h-[300px] flex items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
     <div className="text-center max-w-sm">
@@ -61,8 +61,8 @@ export const PlotBoardErrorFallback: React.FC<PanelErrorProps> = ({
 
 export const TimelineErrorFallback: React.FC<PanelErrorProps> = ({
   onRetry,
-  _onReportIssue,
-  _errorId,
+  onReportIssue,
+  errorId,
 }) => (
   <div className="h-full min-h-[300px] flex items-center justify-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-lg">
     <div className="text-center max-w-sm">
@@ -102,8 +102,8 @@ export const TimelineErrorFallback: React.FC<PanelErrorProps> = ({
 
 export const AnalyticsErrorFallback: React.FC<PanelErrorProps> = ({
   onRetry,
-  _onReportIssue,
-  _errorId,
+  onReportIssue,
+  errorId,
 }) => (
   <div className="h-full min-h-[300px] flex items-center justify-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg">
     <div className="text-center max-w-sm">
@@ -143,8 +143,8 @@ export const AnalyticsErrorFallback: React.FC<PanelErrorProps> = ({
 
 export const EditorErrorFallback: React.FC<PanelErrorProps> = ({
   onRetry,
-  _onReportIssue,
-  _errorId,
+  onReportIssue,
+  errorId,
 }) => (
   <div className="h-full min-h-[200px] flex items-center justify-center p-6 bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 rounded-lg">
     <div className="text-center max-w-sm">
@@ -184,8 +184,8 @@ export const EditorErrorFallback: React.FC<PanelErrorProps> = ({
 
 export const ImageErrorFallback: React.FC<PanelErrorProps> = ({
   onRetry,
-  _onReportIssue,
-  _errorId,
+  onReportIssue,
+  errorId,
 }) => (
   <div className="h-full min-h-[200px] flex items-center justify-center p-6 bg-gradient-to-br from-gray-50 to-slate-50 border border-gray-200 rounded-lg">
     <div className="text-center max-w-sm">
@@ -225,8 +225,8 @@ export const ImageErrorFallback: React.FC<PanelErrorProps> = ({
 
 export const SettingsErrorFallback: React.FC<PanelErrorProps> = ({
   onRetry,
-  _onReportIssue,
-  _errorId,
+  onReportIssue,
+  errorId,
 }) => (
   <div className="h-full min-h-[300px] flex items-center justify-center p-6 bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg">
     <div className="text-center max-w-sm">
@@ -269,7 +269,7 @@ export const GenericPanelErrorFallback: React.FC<
   PanelErrorProps & {
     panelName?: string;
   }
-> = ({ onRetry, _onReportIssue, _errorId, _panelName = 'Panel' }) => (
+> = ({ onRetry, onReportIssue, errorId, panelName = 'Panel' }) => (
   <div className="h-full min-h-[200px] flex items-center justify-center p-6 bg-gradient-to-br from-red-50 to-pink-50 border border-red-200 rounded-lg">
     <div className="text-center max-w-sm">
       <div className="mb-4">
@@ -307,7 +307,7 @@ export const GenericPanelErrorFallback: React.FC<
 );
 
 // Utility function to get the appropriate error fallback for a panel type
-export function _getPanelErrorFallback(
+export function getPanelErrorFallback(
   panelType: string,
   props: PanelErrorProps,
 ): React.ReactElement {

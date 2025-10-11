@@ -23,8 +23,8 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
-import { cn } from '@/utils/cn';
 
+import { cn } from '../../lib/utils';
 import {
   smartSearchService,
   SmartSearchResult,
@@ -45,10 +45,10 @@ type SearchView = 'search' | 'filters' | 'history' | 'saved';
 
 export const SmartSearchModal: React.FC<SmartSearchModalProps> = ({
   isOpen,
-  _onClose,
-  _onNavigate,
-  _initialQuery = '',
-  _focusMode,
+  onClose,
+  onNavigate,
+  initialQuery = '',
+  focusMode,
 }) => {
   const { currentProject } = useAppContext();
   const { showToast } = useToast();
@@ -122,7 +122,7 @@ export const SmartSearchModal: React.FC<SmartSearchModalProps> = ({
 
   // Perform search
   const performSearch = useCallback(
-    async (searchQuery: string, _searchOptions: SmartSearchOptions) => {
+    async (searchQuery: string, searchOptions: SmartSearchOptions) => {
       if (!currentProject?.id) return;
 
       setIsSearching(true);
@@ -194,7 +194,7 @@ export const SmartSearchModal: React.FC<SmartSearchModalProps> = ({
 
   // Keyboard navigation
   useEffect(() => {
-    const handleKeyDown = (_e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
 
       switch (e.key) {
@@ -394,7 +394,7 @@ export const SmartSearchModal: React.FC<SmartSearchModalProps> = ({
                       Suggestions
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                      {suggestions.map((suggestion, _index) => (
+                      {suggestions.map((suggestion, index) => (
                         <button
                           key={suggestion.id}
                           onClick={() => handleSuggestionClick(suggestion)}
@@ -423,7 +423,7 @@ export const SmartSearchModal: React.FC<SmartSearchModalProps> = ({
                 <div ref={resultsRef} className="flex-1 overflow-y-auto">
                   {results.length > 0 ? (
                     <div className="p-4 space-y-3">
-                      {results.map((result, _index) => (
+                      {results.map((result, index) => (
                         <SearchResultCard
                           key={result.id}
                           result={result}
@@ -548,16 +548,16 @@ interface SearchResultCardProps {
   result: SmartSearchResult;
   isSelected: boolean;
   onClick: () => void;
-  onQuickAction: (_action: () => void) => void;
+  onQuickAction: (action: () => void) => void;
 }
 
 const SearchResultCard: React.FC<SearchResultCardProps> = ({
   result,
-  _isSelected,
-  _onClick,
-  _onQuickAction,
+  isSelected,
+  onClick,
+  onQuickAction,
 }) => {
-  const getTypeIcon = (_type: string) => {
+  const getTypeIcon = (type: string) => {
     switch (type) {
       case 'scene':
         return <FileText className="w-4 h-4" />;
@@ -658,7 +658,7 @@ const SearchResultCard: React.FC<SearchResultCardProps> = ({
 // Search Filters Panel
 interface SearchFiltersPanelProps {
   filters: SmartSearchOptions;
-  onFiltersChange: (_filters: Partial<SmartSearchOptions>) => void;
+  onFiltersChange: (filters: Partial<SmartSearchOptions>) => void;
 }
 
 const SearchFiltersPanel: React.FC<SearchFiltersPanelProps> = ({ filters, onFiltersChange }) => {
@@ -674,16 +674,16 @@ const SearchFiltersPanel: React.FC<SearchFiltersPanelProps> = ({ filters, onFilt
         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Content Types</h3>
         <div className="space-y-2">
           {[
-            { value: 'scene', _label: 'Scenes', _icon: FileText },
-            { value: 'chapter', _label: 'Chapters', _icon: BookOpen },
-            { value: 'character', _label: 'Characters', _icon: User },
-            { value: 'plot', _label: 'Plot Notes', _icon: Map },
+            { value: 'scene', label: 'Scenes', icon: FileText },
+            { value: 'chapter', label: 'Chapters', icon: BookOpen },
+            { value: 'character', label: 'Characters', icon: User },
+            { value: 'plot', label: 'Plot Notes', icon: Map },
           ].map((type) => (
             <label key={type.value} className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={filters.types?.includes(type.value as any) || false}
-                onChange={(_e) => {
+                onChange={(e) => {
                   const newTypes = e.target.checked
                     ? [...(filters.types || []), type.value]
                     : (filters.types || []).filter((t) => t !== type.value);
@@ -708,7 +708,7 @@ const SearchFiltersPanel: React.FC<SearchFiltersPanelProps> = ({ filters, onFilt
             <input
               type="checkbox"
               checked={filters.enableSemanticSearch || false}
-              onChange={(_e) => onFiltersChange({ enableSemanticSearch: e.target.checked })}
+              onChange={(e) => onFiltersChange({ enableSemanticSearch: e.target.checked })}
               className="rounded"
             />
             <Sparkles className="w-4 h-4 text-gray-400" />
@@ -721,7 +721,7 @@ const SearchFiltersPanel: React.FC<SearchFiltersPanelProps> = ({ filters, onFilt
             <input
               type="checkbox"
               checked={filters.enableAdvancedQuery || false}
-              onChange={(_e) => onFiltersChange({ enableAdvancedQuery: e.target.checked })}
+              onChange={(e) => onFiltersChange({ enableAdvancedQuery: e.target.checked })}
               className="rounded"
             />
             <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -745,7 +745,7 @@ const SearchFiltersPanel: React.FC<SearchFiltersPanelProps> = ({ filters, onFilt
               max="100"
               step="5"
               value={filters.maxResults || 20}
-              onChange={(_e) => onFiltersChange({ maxResults: parseInt(e.target.value) })}
+              onChange={(e) => onFiltersChange({ maxResults: parseInt(e.target.value) })}
               className="w-full"
             />
           </div>
@@ -760,7 +760,7 @@ const SearchFiltersPanel: React.FC<SearchFiltersPanelProps> = ({ filters, onFilt
               max="1"
               step="0.1"
               value={filters.minScore || 0.1}
-              onChange={(_e) => onFiltersChange({ minScore: parseFloat(e.target.value) })}
+              onChange={(e) => onFiltersChange({ minScore: parseFloat(e.target.value) })}
               className="w-full"
             />
           </div>
@@ -800,12 +800,12 @@ const SearchFiltersPanel: React.FC<SearchFiltersPanelProps> = ({ filters, onFilt
 // Search History Panel
 interface SearchHistoryPanelProps {
   searchHistory: any;
-  onQuerySelect: (_query: string) => void;
+  onQuerySelect: (query: string) => void;
 }
 
 const SearchHistoryPanel: React.FC<SearchHistoryPanelProps> = ({
   searchHistory,
-  _onQuerySelect,
+  onQuerySelect,
 }) => {
   return (
     <div className="p-4 space-y-6 overflow-y-auto">
@@ -867,14 +867,14 @@ const SearchHistoryPanel: React.FC<SearchHistoryPanelProps> = ({
 // Saved Searches Panel
 interface SavedSearchesPanelProps {
   savedSearches: SavedSearch[];
-  onSearchSelect: (_saved: SavedSearch) => void;
+  onSearchSelect: (saved: SavedSearch) => void;
   onSaveCurrentSearch: () => void;
 }
 
 const SavedSearchesPanel: React.FC<SavedSearchesPanelProps> = ({
   savedSearches,
-  _onSearchSelect,
-  _onSaveCurrentSearch,
+  onSearchSelect,
+  onSaveCurrentSearch,
 }) => {
   return (
     <div className="p-4 space-y-6 overflow-y-auto">

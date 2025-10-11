@@ -12,8 +12,8 @@ interface PWAOfflineIndicatorProps {
 
 export const PWAOfflineIndicator: React.FC<PWAOfflineIndicatorProps> = ({
   className = '',
-  _variant = 'minimal',
-  _showSyncStatus = true,
+  variant = 'minimal',
+  showSyncStatus = true,
 }) => {
   const [isOffline, setIsOffline] = useState(false);
   const [syncQueue, setSyncQueue] = useState<any[]>([]);
@@ -56,7 +56,7 @@ export const PWAOfflineIndicator: React.FC<PWAOfflineIndicatorProps> = ({
     };
   }, [showSyncStatus]);
 
-  const formatBytes = (_bytes: number) => {
+  const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];

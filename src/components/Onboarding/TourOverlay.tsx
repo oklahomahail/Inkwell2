@@ -1,5 +1,5 @@
 // src/components/Onboarding/TourOverlay.tsx
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { analyticsService } from '../../services/analyticsService';
 import { useTutorialStorage } from '../../services/tutorialStorage';
@@ -15,7 +15,9 @@ type Props = {
   persistKey?: string;
 };
 
-export default function _TourOverlay({ tourType = 'full-onboarding', onClose, persistKey }: Props) {
+export default function TourOverlay({ tourType = 'full-onboarding', onClose, persistKey }: Props) {
+  const mounted = useRef(false);
+  const profileId = ''; // TODO: Get this from context/props if needed
   const steps = useMemo(() => loadTourPreset(tourType), [tourType]);
   const total = steps.length;
   const [i, setI] = useState(0);
@@ -34,7 +36,7 @@ export default function _TourOverlay({ tourType = 'full-onboarding', onClose, pe
   const onNext = useCallback(() => setI((x) => Math.min(total - 1, x + 1)), [total]);
   const onPrevious = useCallback(() => setI((x) => Math.max(0, x - 1)), []);
   const onComplete = useCallback(async () => {
-    const slug = tourType; // use tourType as the slug/key
+    const slug = persistKey || tourType; // use persistKey if provided, otherwise use tourType as the slug/key
     const now = Date.now();
     try {
       // 1) persist "completed" progress
@@ -80,7 +82,7 @@ export default function _TourOverlay({ tourType = 'full-onboarding', onClose, pe
         profileId: profileId || undefined,
       });
     } catch {}
-  }, []); // fire once when overlay appears
+  }, [tourType, profileId]); // Include dependencies
 
   // Log step changes
   useEffect(() => {
@@ -94,8 +96,8 @@ export default function _TourOverlay({ tourType = 'full-onboarding', onClose, pe
     let cancelled = false;
     (async () => {
       try {
-        const p = await getProgress(slug);
-        if (!cancelled && p && !p.progress.isCompleted) {
+        const p = await tutorialStorage.getProgress?.(persistKey || tourType);
+        if (!cancelled && p && !p.isCompleted) {
           setI(Math.min(total - 1, Math.max(0, p.progress.currentStep ?? 0)));
         }
       } catch {
@@ -105,7 +107,7 @@ export default function _TourOverlay({ tourType = 'full-onboarding', onClose, pe
     return () => {
       cancelled = true;
     };
-  }, [getProgress, slug, total]);
+  }, [persistKey, tourType, total]);
 
   // Persist step changes (debounced per render tick)
   useEffect(() => {
@@ -115,7 +117,7 @@ export default function _TourOverlay({ tourType = 'full-onboarding', onClose, pe
       return;
     }
     try {
-      void setProgress(slug, {
+      void setProgress?.(persistKey || tourType, {
         currentStep: i,
         completedSteps: [],
         tourType,
@@ -125,7 +127,7 @@ export default function _TourOverlay({ tourType = 'full-onboarding', onClose, pe
         lastActiveAt: Date.now(),
       });
     } catch {}
-  }, [i, slug, tourType, total, profileId]);
+  }, [i, persistKey, tourType, total, profileId, setProgress]);
 
   const Step = steps[i];
   if (!Step) return null;

@@ -28,9 +28,9 @@ interface WritingPanelProps {
 
 const WritingPanel: React.FC<WritingPanelProps> = ({
   draftText,
-  _onChangeText,
-  _onTextSelect,
-  _selectedText,
+  onChangeText,
+  onTextSelect,
+  selectedText,
 }) => {
   const { currentProject, updateProject } = useAppContext();
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
@@ -79,7 +79,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
   const currentSceneIndex = scenes.findIndex((s) => s.id === currentSceneId);
 
   const handleSceneUpdate = useCallback(
-    (sceneId: string, _updates: Partial<Scene>) => {
+    (sceneId: string, updates: Partial<Scene>) => {
       const updatedScenes = scenes.map((scene) =>
         scene.id === sceneId ? { ...scene, ...updates, updatedAt: new Date() } : scene,
       );
@@ -140,7 +140,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     setCurrentSceneId(newScene.id);
   };
 
-  const navigateToScene = (_direction: 'prev' | 'next') => {
+  const navigateToScene = (direction: 'prev' | 'next') => {
     const newIndex =
       direction === 'prev'
         ? Math.max(0, currentSceneIndex - 1)
@@ -167,7 +167,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     [currentScene, handleSceneUpdate],
   );
 
-  const handleInsertText = (_text: string) => {
+  const handleInsertText = (text: string) => {
     if (!currentScene) return;
     const newContent = currentScene.content + '\n\n' + text;
     handleSceneUpdate(currentScene.id, { content: newContent });

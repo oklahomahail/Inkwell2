@@ -25,10 +25,10 @@ interface LinkageSuggestion {
 
 const SceneLinkageSuggestions: React.FC<SceneLinkageSuggestionsProps> = ({
   projectId,
-  _project,
-  _onLinkAccepted,
-  _onNavigateToScene,
-  _onNavigateToEvent,
+  project,
+  onLinkAccepted,
+  onNavigateToScene,
+  onNavigateToEvent,
 }) => {
   const [suggestions, setSuggestions] = useState<LinkageSuggestion[]>([]);
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
@@ -67,7 +67,7 @@ const SceneLinkageSuggestions: React.FC<SceneLinkageSuggestionsProps> = ({
     }
   };
 
-  const handleAcceptLinkage = async (_suggestion: LinkageSuggestion) => {
+  const handleAcceptLinkage = async (suggestion: LinkageSuggestion) => {
     const linkageKey = `${suggestion.sceneId}_${suggestion.suggestedEvents.join('_')}`;
     setProcessingLinks((prev) => new Set([...prev, linkageKey]));
 
@@ -99,32 +99,32 @@ const SceneLinkageSuggestions: React.FC<SceneLinkageSuggestionsProps> = ({
     }
   };
 
-  const handleDismissSuggestion = (_suggestion: LinkageSuggestion) => {
+  const handleDismissSuggestion = (suggestion: LinkageSuggestion) => {
     const suggestionId = `${suggestion.sceneId}_${suggestion.suggestedEvents.join('_')}`;
     setDismissedSuggestions((prev) => new Set([...prev, suggestionId]));
   };
 
-  const getScene = (_sceneId: string, _chapterId: string) => {
+  const getScene = (sceneId: string, chapterId: string) => {
     const chapter = project.chapters.find((c) => c.id === chapterId);
     return chapter?.scenes?.find((s: any) => s.id === sceneId);
   };
 
-  const getChapter = (_chapterId: string) => {
+  const getChapter = (chapterId: string) => {
     return project.chapters.find((c) => c.id === chapterId);
   };
 
-  const getTimelineEvent = (_eventId: string) => {
+  const getTimelineEvent = (eventId: string) => {
     return timelineItems.find((item) => item.id === eventId);
   };
 
-  const getConfidenceColor = (_confidence: number) => {
+  const getConfidenceColor = (confidence: number) => {
     if (confidence >= 0.8) return 'text-green-600 bg-green-50 border-green-200';
     if (confidence >= 0.6) return 'text-blue-600 bg-blue-50 border-blue-200';
     if (confidence >= 0.4) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
     return 'text-gray-600 bg-gray-50 border-gray-200';
   };
 
-  const getConfidenceLabel = (_confidence: number) => {
+  const getConfidenceLabel = (confidence: number) => {
     if (confidence >= 0.8) return 'High Confidence';
     if (confidence >= 0.6) return 'Medium Confidence';
     if (confidence >= 0.4) return 'Low Confidence';

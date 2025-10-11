@@ -63,7 +63,7 @@ const CharacterManager: React.FC = () => {
   };
 
   // Delete character
-  const deleteCharacter = (_characterId: string) => {
+  const deleteCharacter = (characterId: string) => {
     if (confirm('Delete this character? This cannot be undone.')) {
       setCharacters(characters.filter((c) => c.id !== characterId));
       if (selectedCharacter?.id === characterId) {
@@ -74,7 +74,7 @@ const CharacterManager: React.FC = () => {
   };
 
   // Update selected character
-  const updateCharacter = (_updates: Partial<Character>) => {
+  const updateCharacter = (updates: Partial<Character>) => {
     if (!selectedCharacter) return;
 
     setSelectedCharacter({
@@ -85,7 +85,7 @@ const CharacterManager: React.FC = () => {
   };
 
   // Role colors and icons
-  const getRoleStyle = (_role: Character['role']) => {
+  const getRoleStyle = (role: Character['role']) => {
     switch (role) {
       case 'protagonist':
         return { color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/20' };

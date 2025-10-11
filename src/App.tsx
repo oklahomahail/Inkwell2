@@ -53,7 +53,7 @@ type QueuedOperation = {
 };
 
 // All app logic lives here, safely *inside* the providers.
-function _AppShell() {
+function _AppShell(_props: AppShellProps) {
   return (
     <BrowserRouter>
       <Routes>
@@ -79,7 +79,7 @@ function _AppShell() {
                 <Route path="brand" element={<BrandPage />} />
 
                 {/* Main app routes */}
-                <Route path="*" element={<ProfileAppShell />} />
+                <Route path="*" element={<_ProfileAppShell />} />
               </Routes>
             </ProfileGate>
           }
@@ -96,7 +96,7 @@ function _AppShell() {
 }
 
 // Profile-specific app shell (the original app logic)
-function _ProfileAppShell() {
+function _ProfileAppShell(_props: ProfileAppShellProps) {
   const { claude, currentProject } = useAppContext();
   const { insertText } = useEditorContext();
 
@@ -208,7 +208,10 @@ function _ProfileAppShell() {
 
         {/* Offline Queue Modal */}
         {showOfflineQueue && (
-          <OfflineQueueModal isOpen={showOfflineQueue} onClose={() => setShowOfflineQueue(false)} />
+          <_OfflineQueueModal
+            isOpen={showOfflineQueue}
+            onClose={() => setShowOfflineQueue(false)}
+          />
         )}
 
         {/* Command Palette UI */}
@@ -226,15 +229,15 @@ function _ProfileAppShell() {
 
         {/* Dev-only debug panels */}
         {import.meta.env.DEV && <DebugSearchPanel />}
-        {import.meta.env.DEV && <StorageDebugPanel />}
+        {import.meta.env.DEV && <_StorageDebugPanel />}
       </MainLayout>
     </>
   );
 }
 
 // Offline Queue Management Modal
-function _OfflineQueueModal(_props: { isOpen: boolean; onClose: () => void }) {
-  const { isOpen, onClose } = props;
+function _OfflineQueueModal(_props: OfflineQueueModalProps) {
+  const { isOpen, onClose } = _props;
   const [queuedOperations, setQueuedOperations] = useState<QueuedOperation[]>([]);
 
   useEffect(() => {
@@ -293,7 +296,7 @@ function _OfflineQueueModal(_props: { isOpen: boolean; onClose: () => void }) {
 }
 
 // Development Storage Debug Panel
-function _StorageDebugPanel() {
+function _StorageDebugPanel(_props: StorageDebugPanelProps) {
   const [stats, setStats] = useState<any>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -314,7 +317,7 @@ function _StorageDebugPanel() {
 
   if (!stats) return null;
 
-  const mb = (_n: number) => (n > 0 ? (n / 1024 / 1024).toFixed(1) : '0.0');
+  const mb = (n: number) => (n > 0 ? (n / 1024 / 1024).toFixed(1) : '0.0');
 
   return (
     <div className="fixed bottom-4 right-4 z-40">
@@ -365,7 +368,8 @@ function _StorageDebugPanel() {
                             return new Promise<void>((resolve, _reject) => {
                               const deleteReq = indexedDB.deleteDatabase(db.name!);
                               deleteReq.onsuccess = () => resolve();
-                              deleteReq.onerror = () => reject(deleteReq.error);
+                              deleteReq.onerror = () =>
+                                _reject(deleteReq.error || new Error('Failed to delete database'));
                             });
                           }
                         }),
@@ -392,11 +396,25 @@ function _StorageDebugPanel() {
 }
 
 // Root export: use centralized Providers component for clean composition
+// Interfaces
+interface OfflineQueueModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+interface ProfileAppShellProps {}
+
+interface StorageDebugPanelProps {}
+
+interface AppShellProps {}
+
+interface Props {}
+
 export default function _App() {
   return (
     <AppErrorBoundary level="app">
       <Providers>
-        <AppShell />
+        <_AppShell />
       </Providers>
     </AppErrorBoundary>
   );

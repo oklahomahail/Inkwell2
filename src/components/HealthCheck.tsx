@@ -27,10 +27,10 @@ export const HealthCheck: React.FC = () => {
   ]);
 
   const updateStatus = (
-    _component: string,
-    _status: 'success' | 'error',
-    _error?: string,
-    _renderTime?: number,
+    component: string,
+    status: 'success' | 'error',
+    error?: string,
+    renderTime?: number,
   ) => {
     setHealthStatuses((prev) =>
       prev.map((item) =>
@@ -41,7 +41,7 @@ export const HealthCheck: React.FC = () => {
 
   const TestComponent: React.FC<{ name: string; children: React.ReactNode }> = ({
     name,
-    _children,
+    children,
   }) => {
     useEffect(() => {
       const startTime = Date.now();

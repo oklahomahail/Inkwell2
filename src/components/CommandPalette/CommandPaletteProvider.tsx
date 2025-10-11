@@ -107,11 +107,11 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     try {
       const chapters = await storageService.loadWritingChapters(currentProject.id);
       const totalWords = chapters.reduce(
-        (t, _ch) => t + ch.scenes.reduce((ct, _s) => ct + (s.wordCount || 0), 0),
+        (t, ch) => t + (ch.scenes?.reduce((ct, s) => ct + (s.wordCount || 0), 0) || 0),
         0,
       );
       const chapterCount = chapters.length;
-      const sceneCount = chapters.reduce((t, _ch) => t + ch.scenes.length, 0);
+      const sceneCount = chapters.reduce((t, ch) => t + (ch.scenes?.length || 0), 0);
       showToast(
         `📊 Project Stats: ${totalWords.toLocaleString()} words, ${chapterCount} chapters, ${sceneCount} scenes`,
         'success',
@@ -328,7 +328,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         action: () => {
           if (projects.length === 0) return showToast('No other projects available', 'error');
           const others = projects.filter((p) => p.id !== currentProject?.id);
-          const projectList = others.map((p, _i) => `${i + 1}. ${p.name}`).join('\n');
+          const projectList = others.map((p, i) => `${i + 1}. ${p.name}`).join('\\n');
           if (!projectList) return;
           const choice = prompt(`Select project:\n${projectList}\n\nEnter number:`);
           const idx = parseInt(choice || '0', 10) - 1;
@@ -415,14 +415,14 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
   const toggle = () =>
     setState((p) => ({ ...p, isOpen: !p.isOpen, selectedIndex: p.isOpen ? 0 : p.selectedIndex }));
 
-  const setQuery = (_query: string) =>
+  const setQuery = (query: string) =>
     setState((p) => ({
       ...p,
       query,
       selectedIndex: 0,
     }));
 
-  const executeCommand = async (_cmd: Command) => {
+  const executeCommand = async (cmd: Command) => {
     try {
       await cmd.action();
       close();
@@ -432,15 +432,15 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     }
   };
 
-  const registerCommand = (_cmd: Command) =>
-    setState((p) => ({ ...p, _commands: [...p.commands.filter((c) => c.id !== cmd.id), cmd] }));
+  const registerCommand = (cmd: Command) =>
+    setState((p) => ({ ...p, commands: [...p.commands.filter((c) => c.id !== cmd.id), cmd] }));
 
-  const unregisterCommand = (_id: string) =>
-    setState((p) => ({ ...p, _commands: p.commands.filter((c) => c.id !== id) }));
+  const unregisterCommand = (id: string) =>
+    setState((p) => ({ ...p, commands: p.commands.filter((c) => c.id !== id) }));
 
   // keyboard navigation
   useEffect(() => {
-    const onKey = (_e: KeyboardEvent) => {
+    const onKey = (e: KeyboardEvent) => {
       if (!state.isOpen) {
         if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
           e.preventDefault();

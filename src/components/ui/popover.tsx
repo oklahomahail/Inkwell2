@@ -19,7 +19,7 @@ const PopoverContext = React.createContext<{
   setIsOpen: (_open: boolean) => void;
   triggerRef: React.RefObject<HTMLElement | null>;
 }>({ isOpen: false, _setIsOpen: () => {}, triggerRef: { current: null as HTMLElement | null } });
-export const Popover: React.FC<PopoverProps> = ({ open, _onOpenChange, children }) => {
+export const Popover: React.FC<PopoverProps> = ({ open, onOpenChange, children }) => {
   const [isOpen, setIsOpen] = useState(open ?? false);
   const triggerRef = useRef<HTMLElement | null>(null);
   const handleOpenChange = (_newOpen: boolean) => {
