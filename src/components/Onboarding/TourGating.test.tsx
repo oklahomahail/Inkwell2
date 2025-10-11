@@ -6,7 +6,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { ProfileProvider } from '@/context/ProfileContext';
 
-import { OnboardingOrchestrator } from './OnboardingOrchestrator';
+import OnboardingOrchestrator from './OnboardingOrchestrator';
 import { ProfileTourProvider } from './ProfileTourProvider';
 import { TourProvider, useTour, CORE_TOUR_STEPS } from './TourProvider';
 
