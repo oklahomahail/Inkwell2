@@ -263,7 +263,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <OnboardingOrchestrator autoShowWelcome={true} delayWelcomeMs={0} />
+              <OnboardingOrchestrator />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>

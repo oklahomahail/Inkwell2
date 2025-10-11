@@ -29,6 +29,20 @@ export default function OnboardingOrchestrator() {
     return null;
   }, []);
 
+  // listen for programmatic starts
+  useEffect(() => {
+    function handler(e: Event) {
+      const detail = (e as CustomEvent<{ tourType?: TourType }>).detail;
+      const t = detail?.tourType ?? 'full-onboarding';
+      try {
+        setTourType(t);
+        setOpen(true);
+      } catch {}
+    }
+    window.addEventListener('inkwell:start-tour', handler as EventListener);
+    return () => window.removeEventListener('inkwell:start-tour', handler as EventListener);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {

@@ -105,12 +105,49 @@ export function useTutorialStorage() {
     return [];
   }, [db, activeProfile?.id, stores, isProfileActive]);
 
+  /**
+   * Reset a tour's progress so it can be relaunched from step 0.
+   * totalSteps is optional; if omitted we'll keep whatever was there (or default to 4).
+   * tourType is optional; defaults to 'full-onboarding' to match first-run.
+   */
+  const resetProgress = useCallback(
+    async (
+      slug: string,
+      totalSteps?: number,
+      tourType: TutorialProgress['progress']['tourType'] = 'full-onboarding',
+    ) => {
+      if (!isProfileActive) return;
+      const existing = await getProgress(slug);
+      const now = Date.now();
+      const currentTotal = totalSteps ?? existing?.progress.totalSteps ?? 4;
+      const payload: TutorialProgress = {
+        slug,
+        updatedAt: now,
+        progress: {
+          currentStep: 0,
+          completedSteps: [],
+          tourType,
+          startedAt: now,
+          completedAt: undefined,
+          isCompleted: false,
+          totalSteps: currentTotal,
+          lastActiveAt: now,
+        },
+      };
+      await setProgress(slug, payload.progress);
+    },
+    [db, activeProfile?.id, getProgress, setProgress, isProfileActive],
+  );
+
   return {
     // Core progress methods
     getProgress,
     setProgress,
     clearProgress,
     getAllProgress,
+
+    // Reset utility
+    resetProgress,
 
     // Preferences methods
     getPreferences,
