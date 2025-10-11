@@ -38,6 +38,9 @@ export default function OnboardingOrchestrator() {
           if (!cancelled) {
             setTourType(queryTour as TourType);
             setOpen(true);
+            try {
+              sessionStorage.setItem('inkwell-welcome-shown-this-session', 'true');
+            } catch {}
           }
           return;
         }
@@ -55,6 +58,9 @@ export default function OnboardingOrchestrator() {
         if (!cancelled && !never && !snoozed && !completed) {
           setTourType('full-onboarding');
           setOpen(true);
+          try {
+            sessionStorage.setItem('inkwell-welcome-shown-this-session', 'true');
+          } catch {}
         }
       } catch {
         // fail open quietly in dev if needed
