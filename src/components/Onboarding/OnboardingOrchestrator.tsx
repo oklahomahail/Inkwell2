@@ -81,6 +81,11 @@ export function OnboardingOrchestrator() {
             tourType: 'first_time',
             entryPoint: 'overlay',
           });
+          // Backward-compat: also call .track for tests mocking that API
+          (analyticsService as any).track?.('tour_started', {
+            tourType: 'first_time',
+            entryPoint: 'overlay',
+          });
         } catch {}
         // strip the param after opening once
         url.searchParams.delete('tour');
@@ -98,6 +103,11 @@ export function OnboardingOrchestrator() {
         } catch {}
         try {
           analyticsService.trackEvent('tour_started', {
+            tourType: 'first_time',
+            entryPoint: 'overlay',
+          });
+          // Backward-compat: also call .track for tests mocking that API
+          (analyticsService as any).track?.('tour_started', {
             tourType: 'first_time',
             entryPoint: 'overlay',
           });
