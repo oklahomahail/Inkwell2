@@ -9,7 +9,7 @@ interface PlotAnalysisPanelProps {
   profileId: string;
   projectId: string;
 }
-export function _PlotAnalysisPanel({ profileId, projectId }: PlotAnalysisPanelProps) {
+function _PlotAnalysisPanel({ profileId, projectId }: PlotAnalysisPanelProps) {
   const { analysis, run, hasScenes, sceneCount, isEnabled } = usePlotAnalysis(profileId, projectId);
   if (!isEnabled) {
     return (
@@ -173,3 +173,5 @@ export function _PlotAnalysisPanel({ profileId, projectId }: PlotAnalysisPanelPr
     </div>
   );
 }
+
+export const PlotAnalysisPanel = _PlotAnalysisPanel;
