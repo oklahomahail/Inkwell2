@@ -211,7 +211,7 @@ export const ClaudeProvider = ({ children }: { children: ReactNode }) => {
 
 ClaudeProvider.displayName = 'ClaudeProvider';
 
-export function _useClaude() {
+export function useClaude() {
   const context = useContext(ClaudeContext);
   if (!context) throw new Error('useClaude must be used within ClaudeProvider');
   return context;
