@@ -39,7 +39,7 @@ export interface CompletionChecklist {
 export function useTutorialStorage() {
   const { active: activeProfile } = useProfile();
   const db = useMaybeDB();
-  const stores = defineStores();
+  const stores = defineStores(db);
 
   const isProfileActive = !!(activeProfile?.id && db);
 
@@ -126,12 +126,16 @@ export class LegacyTutorialStorage {
     return `inkwell:tutorial:${suffix}`;
   }
 
-  static getProgress(slug: string, profileId?: string): TutorialProgress | null {
+  static getProgress(slug: string = '__default__', profileId?: string): TutorialProgress | null {
     // Implementation
     return null;
   }
 
-  static setProgress(slug: string, progress: TutorialProgress, profileId?: string): void {
+  static setProgress(
+    slug: string = '__default__',
+    progress: TutorialProgress,
+    profileId?: string,
+  ): void {
     // Implementation
   }
 

@@ -55,6 +55,9 @@ export interface SearchStats {
   queryCount: number;
   averageLatency: number;
   usingWorker: boolean;
+  p50: number;
+  p95: number;
+  queries: number;
   workerStatus?: {
     ready: boolean;
     initialized: boolean;
@@ -145,6 +148,7 @@ class MainThreadSearchEngine {
       this.documents.set(projectId, docs);
 
       const indexTime = Math.round(this.nowMs() - startTime);
+      const metrics = this.getPerformanceMetrics();
       this.stats.set(projectId, {
         totalDocuments,
         indexSize: this.calculateIndexSize(index),
@@ -152,6 +156,9 @@ class MainThreadSearchEngine {
         queryCount: 0,
         averageLatency: 0,
         usingWorker: false,
+        p50: metrics.p50,
+        p95: metrics.p95,
+        queries: metrics.queries,
       });
 
       console.log(
@@ -488,18 +495,42 @@ class EnhancedSearchService {
         // for now, merge fallback stats with worker status.
         const fallbackStats = this.fallbackEngine.getStats(projectId);
         if (fallbackStats) {
-          return { ...fallbackStats, usingWorker: true, workerStatus };
+          const metrics = this.getPerformanceMetrics();
+          return {
+            ...fallbackStats,
+            usingWorker: true,
+            workerStatus,
+            p50: metrics.p50,
+            p95: metrics.p95,
+            queries: metrics.queries,
+          };
         }
       }
     }
     const stats = this.fallbackEngine.getStats(projectId);
-    return stats ? { ...stats, usingWorker: false } : null;
+    if (!stats) return null;
+    const metrics = this.getPerformanceMetrics();
+    return {
+      ...stats,
+      usingWorker: false,
+      p50: metrics.p50,
+      p95: metrics.p95,
+      queries: metrics.queries,
+    };
   }
 
   getPerformanceMetrics(): { p50: number; p95: number; queries: number } {
     if (this.useWorker && this.workerAvailable) {
       const workerStatus = searchWorkerService.getWorkerStatus();
-      if (workerStatus?.ready) return searchWorkerService.getPerformanceMetrics();
+      if (workerStatus?.ready) {
+        const workerMetrics = searchWorkerService.getPerformanceMetrics();
+        const metrics = this.getPerformanceMetrics();
+        return {
+          p50: metrics.p50,
+          p95: metrics.p95,
+          queries: metrics.queries,
+        };
+      }
     }
     return this.fallbackEngine.getPerformanceMetrics();
   }
