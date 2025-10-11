@@ -5,7 +5,7 @@ import { InkwellFeather } from '@/components/icons';
 import { View } from '@/context/AppContext';
 import { useAppContext } from '@/context/AppContext';
 import { useUI } from '@/hooks/useUI';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 import { focusWritingEditor } from '@/utils/focusUtils';
 
 export const Sidebar: React.FC = () => {

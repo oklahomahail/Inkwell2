@@ -19,7 +19,7 @@ import React, { useState, useEffect } from 'react';
 
 import Logo from '@/components/Logo';
 import { useAppContext, View } from '@/context/AppContext';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 import { useFeatureFlag } from '@/utils/flags';
 
 import { ProfileSwitcher } from '../ProfileSwitcher';
