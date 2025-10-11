@@ -1,5 +1,5 @@
 // src/services/enhancedSearchService.ts
-// Enhanced search service that uses a Web Worker when available, falls back to main thread
+// Enhanced search service that prefers a Web Worker and cleanly falls back to main thread
 
 import type { Chapter } from '@/types/writing';
 
@@ -69,11 +69,11 @@ type TermEntry = { term: string; documents: Map<string, TermDocEntry> };
 
 /** Fallback implementation for when worker is not available */
 class MainThreadSearchEngine {
-  private indexes = new Map<string, Map<string, TermEntry>>(); // projectId -> term -> entry
+  private indexes = new Map<string, Map<string, TermEntry>>(); // projectId -> term index
   private documents = new Map<string, Map<string, SearchResult>>(); // projectId -> docId -> doc
   private stats = new Map<string, SearchStats>();
   private queryHistory: string[] = [];
-  private performanceMetrics: number[] = [];
+  private performanceSamplesMs: number[] = [];
 
   private nowMs(): number {
     return typeof performance !== 'undefined' && typeof performance.now === 'function'
@@ -227,11 +227,11 @@ class MainThreadSearchEngine {
 
       // metrics
       const latency = this.nowMs() - startTime;
-      this.performanceMetrics.push(latency);
+      this.performanceSamplesMs.push(latency);
       this.queryHistory.push(query);
       if (this.queryHistory.length > 100) {
         this.queryHistory = this.queryHistory.slice(-100);
-        this.performanceMetrics = this.performanceMetrics.slice(-100);
+        this.performanceSamplesMs = this.performanceSamplesMs.slice(-100);
       }
 
       const s = this.stats.get(projectId);
@@ -243,6 +243,9 @@ class MainThreadSearchEngine {
           ...s,
           queryCount: newCount,
           averageLatency: newAvg,
+          lastUpdate: Date.now(),
+          indexSize: this.calculateIndexSize(index),
+          totalDocuments: docs.size,
         });
       }
 
@@ -260,7 +263,6 @@ class MainThreadSearchEngine {
     title: string,
     content: string,
   ): Promise<void> {
-    // Ensure initialized
     await this.initializeProject(projectId);
 
     const index = this.indexes.get(projectId);
@@ -269,9 +271,9 @@ class MainThreadSearchEngine {
 
     if (!index || !docs) return;
 
-    // Remove the doc from every term entry (cheap but safe)
+    // Remove the doc from every term entry
     index.forEach((entry) => {
-      if (entry.documents.has(documentId)) entry.documents.delete(documentId);
+      entry.documents.delete(documentId);
     });
 
     // Update or create the SearchResult
@@ -331,7 +333,7 @@ class MainThreadSearchEngine {
       let docEntry = entry.documents.get(docId);
       if (!docEntry) {
         docEntry = { frequency: 0, positions: [] };
-        entry!.documents.set(docId, docEntry);
+        entry.documents.set(docId, docEntry);
       }
       docEntry.frequency++;
       docEntry.positions.push(position);
@@ -342,7 +344,6 @@ class MainThreadSearchEngine {
     const c = content ?? '';
     if (c.length <= maxLength) return c;
     return c.substring(0, Math.max(0, maxLength - 3)) + '...';
-    // note: keep it simple; true snippetting can be layered in later
   }
 
   private highlightExcerpt(content: string, terms: string[]): string {
@@ -379,15 +380,16 @@ class MainThreadSearchEngine {
     return this.stats.get(projectId) || null;
   }
 
+  /** Percentiles + query count kept separate from SearchStats */
   getPerformanceMetrics(): { p50: number; p95: number; queries: number } {
-    if (this.performanceMetrics.length === 0) return { p50: 0, p95: 0, queries: 0 };
-    const sorted = [...this.performanceMetrics].sort((a, b) => a - b);
-    const p50Index = Math.floor(sorted.length * 0.5);
-    const p95Index = Math.floor(sorted.length * 0.95);
+    if (this.performanceSamplesMs.length === 0) return { p50: 0, p95: 0, queries: 0 };
+    const sorted = [...this.performanceSamplesMs].sort((a, b) => a - b);
+    const at = (p: number) =>
+      sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))] ?? 0;
     return {
-      p50: sorted[p50Index] || 0,
-      p95: sorted[p95Index] || 0,
-      queries: this.performanceMetrics.length,
+      p50: at(0.5),
+      p95: at(0.95),
+      queries: this.performanceSamplesMs.length,
     };
   }
 }
@@ -404,7 +406,7 @@ class EnhancedSearchService {
 
   private checkWorkerAvailability(): void {
     try {
-      // Web Workers do not require Service Workers; keep this simple and SSR-safe
+      // SSR-safe check
       this.workerAvailable =
         typeof window !== 'undefined' && typeof Worker !== 'undefined' && !!searchWorkerService;
 
@@ -484,12 +486,21 @@ class EnhancedSearchService {
     if (this.useWorker && this.workerAvailable) {
       const workerStatus = searchWorkerService.getWorkerStatus();
       if (workerStatus?.ready) {
-        // In a real impl this would call into the worker for its own stats;
-        // for now, merge fallback stats with worker status.
+        // If the worker maintained its own stats, we’d fetch them here and merge.
         const fallbackStats = this.fallbackEngine.getStats(projectId);
         if (fallbackStats) {
           return { ...fallbackStats, usingWorker: true, workerStatus };
         }
+        // If no fallback stats yet, still surface workerStatus.
+        return {
+          totalDocuments: 0,
+          indexSize: 0,
+          lastUpdate: Date.now(),
+          queryCount: 0,
+          averageLatency: 0,
+          usingWorker: true,
+          workerStatus,
+        };
       }
     }
     const stats = this.fallbackEngine.getStats(projectId);
@@ -499,7 +510,12 @@ class EnhancedSearchService {
   getPerformanceMetrics(): { p50: number; p95: number; queries: number } {
     if (this.useWorker && this.workerAvailable) {
       const workerStatus = searchWorkerService.getWorkerStatus();
-      if (workerStatus?.ready) return searchWorkerService.getPerformanceMetrics();
+      if (workerStatus?.ready)
+        return searchWorkerService.getPerformanceMetrics() as unknown as {
+          p50: number;
+          p95: number;
+          queries: number;
+        };
     }
     return this.fallbackEngine.getPerformanceMetrics();
   }
@@ -510,7 +526,7 @@ class EnhancedSearchService {
     console.log(`EnhancedSearchService: Worker preference set to ${useWorker}`);
   }
 
-  getWorkerStatus(): { available: boolean; enabled: boolean; status?: any } {
+  getWorkerStatus(): { available: boolean; enabled: boolean; status?: unknown } {
     return {
       available: this.workerAvailable,
       enabled: this.useWorker,
@@ -552,10 +568,10 @@ if (typeof window !== 'undefined') {
     testSearch: async (query: string, projectId: string) => {
       console.log('Testing search:', query);
       const start =
-        typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now();
+        typeof performance !== 'undefined' && 'now' in performance ? performance.now() : Date.now();
       const results = await enhancedSearchService.search(query, { projectId });
       const end =
-        typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now();
+        typeof performance !== 'undefined' && 'now' in performance ? performance.now() : Date.now();
 
       console.log(`Results: ${results.length} in ${(end - start).toFixed(1)}ms`);
       return results;

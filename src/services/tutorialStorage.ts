@@ -36,63 +36,74 @@ export interface CompletionChecklist {
   useAI: boolean;
 }
 
+/**
+ * Hook for managing tutorial progress, preferences, and checklist data.
+ */
 export function useTutorialStorage() {
   const { active: activeProfile } = useProfile();
   const db = useMaybeDB();
-  const stores = defineStores();
+  const stores = defineStores(db);
 
-  const isProfileActive = !!(activeProfile?.id && db);
+  const isProfileActive = Boolean(activeProfile?.id && db);
 
   const getProgress = useCallback(
     async (slug: string): Promise<TutorialProgress | null> => {
-      // Implementation
+      if (!isProfileActive) return null;
+      // TODO: implement IndexedDB get logic
       return null;
     },
-    [db, activeProfile?.id, stores],
+    [db, activeProfile?.id, stores, isProfileActive],
   );
 
   const setProgress = useCallback(
     async (slug: string, progress: TutorialProgress['progress']) => {
-      // Implementation
+      if (!isProfileActive) return;
+      // TODO: implement IndexedDB put logic
     },
-    [db, activeProfile?.id, stores],
+    [db, activeProfile?.id, stores, isProfileActive],
   );
 
   const clearProgress = useCallback(
     async (slug?: string) => {
-      // Implementation
+      if (!isProfileActive) return;
+      // TODO: implement clear logic for one or all progress entries
     },
-    [db, activeProfile?.id, stores],
+    [db, activeProfile?.id, stores, isProfileActive],
   );
 
   const getPreferences = useCallback(async (): Promise<TutorialPreferences | null> => {
-    // Implementation
+    if (!isProfileActive) return null;
+    // TODO: implement get preferences logic
     return null;
-  }, [db, activeProfile?.id, stores]);
+  }, [db, activeProfile?.id, stores, isProfileActive]);
 
   const setPreferences = useCallback(
     async (preferences: TutorialPreferences) => {
-      // Implementation
+      if (!isProfileActive) return;
+      // TODO: implement save preferences logic
     },
-    [db, activeProfile?.id, stores],
+    [db, activeProfile?.id, stores, isProfileActive],
   );
 
   const getChecklist = useCallback(async (): Promise<CompletionChecklist | null> => {
-    // Implementation
+    if (!isProfileActive) return null;
+    // TODO: implement get checklist logic
     return null;
-  }, [db, activeProfile?.id, stores]);
+  }, [db, activeProfile?.id, stores, isProfileActive]);
 
   const setChecklist = useCallback(
     async (checklist: CompletionChecklist) => {
-      // Implementation
+      if (!isProfileActive) return;
+      // TODO: implement save checklist logic
     },
-    [db, activeProfile?.id, stores],
+    [db, activeProfile?.id, stores, isProfileActive],
   );
 
   const getAllProgress = useCallback(async (): Promise<TutorialProgress[]> => {
-    // Implementation
+    if (!isProfileActive) return [];
+    // TODO: implement get all progress logic
     return [];
-  }, [db, activeProfile?.id, stores]);
+  }, [db, activeProfile?.id, stores, isProfileActive]);
 
   return {
     // Core progress methods
@@ -120,45 +131,68 @@ export function useTutorialStorage() {
  */
 export class LegacyTutorialStorage {
   private static getKey(suffix: string, profileId?: string): string {
-    if (profileId) {
-      return `inkwell:tutorial:${profileId}:${suffix}`;
-    }
-    return `inkwell:tutorial:${suffix}`;
+    return profileId ? `inkwell:tutorial:${profileId}:${suffix}` : `inkwell:tutorial:${suffix}`;
   }
 
   static getProgress(slug: string, profileId?: string): TutorialProgress | null {
-    // Implementation
-    return null;
+    try {
+      const key = this.getKey(`progress:${slug}`, profileId);
+      const data = localStorage.getItem(key);
+      return data ? (JSON.parse(data) as TutorialProgress) : null;
+    } catch {
+      return null;
+    }
   }
 
   static setProgress(slug: string, progress: TutorialProgress, profileId?: string): void {
-    // Implementation
+    try {
+      const key = this.getKey(`progress:${slug}`, profileId);
+      localStorage.setItem(key, JSON.stringify(progress));
+    } catch {
+      /* ignore */
+    }
   }
 
   static getPreferences(profileId?: string): TutorialPreferences | null {
-    // Implementation
-    return null;
+    try {
+      const key = this.getKey('preferences', profileId);
+      const data = localStorage.getItem(key);
+      return data ? (JSON.parse(data) as TutorialPreferences) : null;
+    } catch {
+      return null;
+    }
   }
 
   static getChecklist(profileId?: string): CompletionChecklist | null {
-    // Implementation
-    return null;
+    try {
+      const key = this.getKey('checklist', profileId);
+      const data = localStorage.getItem(key);
+      return data ? (JSON.parse(data) as CompletionChecklist) : null;
+    } catch {
+      return null;
+    }
   }
 
   static getAllLegacyKeys(): string[] {
-    // Implementation
-    return [];
+    return Object.keys(localStorage).filter((k) => k.startsWith('inkwell:tutorial:'));
   }
 
   static clearLegacyData(profileId?: string): void {
-    // Implementation
+    const prefix = profileId ? `inkwell:tutorial:${profileId}:` : 'inkwell:tutorial:';
+    Object.keys(localStorage).forEach((k) => {
+      if (k.startsWith(prefix)) localStorage.removeItem(k);
+    });
   }
 }
 
+/**
+ * Migration helper – migrates old localStorage tutorial data into the new IndexedDB
+ */
 export async function migrateLegacyTutorialData(
   profileId: string,
-  db: any, // ProfileStorageManager type
-  isFirstProfile: boolean = false,
+  db: any, // Replace with the correct ProfileStorageManager type
+  isFirstProfile = false,
 ): Promise<void> {
-  // Implementation
+  // TODO: implement migration logic from LegacyTutorialStorage to IndexedDB
+  // Use `defineStores(db)` and upsert data into appropriate tables.
 }
