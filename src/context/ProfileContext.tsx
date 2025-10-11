@@ -218,15 +218,40 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     async (profileId: ProfileId): Promise<void> => {
       dispatch({ type: 'SET_ERROR', payload: null });
 
-      const profile = state.profiles.find((p) => p.id === profileId);
+      // First try to find profile in memory
+      let profile = state.profiles.find((p) => p.id === profileId);
+
+      // If not in memory, try to load from storage directly
       if (!profile) {
-        throw new Error('Profile not found');
+        try {
+          const profiles = loadProfilesFromStorage();
+          profile = profiles.find((p) => p.id === profileId);
+
+          // Keep memory in sync
+          if (profiles.length > 0) {
+            dispatch({ type: 'SET_PROFILES', payload: profiles });
+          }
+        } catch (error) {
+          console.warn('Failed to load profile from storage:', error);
+        }
       }
 
-      dispatch({ type: 'SET_ACTIVE_PROFILE', payload: profile });
-      saveActiveProfileToStorage(profileId);
+      // If still not found after storage check, try one more reload
+      if (!profile) {
+        console.warn('Profile not found, reloading and retrying:', profileId);
+        await loadProfiles();
+        profile = state.profiles.find((p) => p.id === profileId);
+      }
+
+      if (profile) {
+        dispatch({ type: 'SET_ACTIVE_PROFILE', payload: profile });
+        saveActiveProfileToStorage(profileId);
+      } else {
+        // As a last resort, don't throw - just log error
+        console.error('Profile not found after reload attempts:', profileId);
+      }
     },
-    [state.profiles],
+    [state.profiles, loadProfiles],
   );
 
   const loadProfiles = useCallback(async (): Promise<void> => {

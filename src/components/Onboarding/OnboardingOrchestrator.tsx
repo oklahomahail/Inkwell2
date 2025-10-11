@@ -17,14 +17,14 @@ export const OnboardingOrchestrator: React.FC<OnboardingOrchestratorProps> = ({
   autoShowWelcome = true,
   delayWelcomeMs = 2000,
 }) => {
-  const {
-    startTour,
-    setTourSteps,
-    shouldShowTourPrompt,
-    tourState,
-    logAnalytics,
-    updateChecklist,
-  } = useTour();
+  let startTour, setTourSteps, shouldShowTourPrompt, tourState, logAnalytics, updateChecklist;
+  try {
+    ({ startTour, setTourSteps, shouldShowTourPrompt, tourState, logAnalytics, updateChecklist } =
+      useTour());
+  } catch {
+    // No provider found; do not render onboarding in this environment
+    return null;
+  }
 
   const [showWelcome, setShowWelcome] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
