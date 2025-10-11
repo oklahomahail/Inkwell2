@@ -13,14 +13,14 @@ import MainLayout from './MainLayout';
 vi.mock('@/context/AppContext', () => ({
   View: {
     Dashboard: 'dashboard',
-    _Writing: 'writing',
-    _Planning: 'planning',
-    _Timeline: 'timeline',
-    _Analysis: 'analysis',
-    _Settings: 'settings',
-    _PlotBoards: 'plotboards',
+    Writing: 'writing',
+    Planning: 'planning',
+    Timeline: 'timeline',
+    Analysis: 'analysis',
+    Settings: 'settings',
+    PlotBoards: 'plotboards',
   },
-  _useAppContext: () => ({
+  useAppContext: () => ({
     state: {
       view: 'dashboard',
       projects: [],
@@ -54,6 +54,11 @@ vi.mock('@/utils/flags', () => ({
   useFeatureFlag: () => false,
 }));
 
+// Mock cn utility
+vi.mock('@/utils/cn', () => ({
+  cn: (...args: any[]) => args.filter(Boolean).join(' '),
+}));
+
 // Mock localStorage and sessionStorage
 const mockLocalStorage = {
   getItem: vi.fn(() => null),
@@ -71,7 +76,7 @@ Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
 Object.defineProperty(window, 'sessionStorage', { value: mockSessionStorage });
 
 // Mock window.matchMedia for dark mode detection
-Object.defineProperty(_window, 'matchMedia', {
+Object.defineProperty(window, 'matchMedia', {
   value: vi.fn(() => ({
     matches: false,
     addListener: vi.fn(),

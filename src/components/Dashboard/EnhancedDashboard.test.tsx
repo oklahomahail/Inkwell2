@@ -6,7 +6,7 @@ import EnhancedDashboard from './EnhancedDashboard';
 
 // Mock the InkwellFeather component
 vi.mock('@/components/icons', () => ({
-  InkwellFeather: vi.fn(({ name, _size, _color, ...props }) => (
+  InkwellFeather: vi.fn(({ name, size, color, ...props }) => (
     <span data-testid={`icon-${name}`} data-size={size} data-color={color} {...props} />
   )),
 }));
@@ -23,12 +23,12 @@ let mockContext: any = {
 vi.mock('@/context/AppContext', () => ({
   View: {
     Dashboard: 'Dashboard',
-    _Writing: 'Writing',
-    _Analysis: 'Analysis',
-    _Planning: 'Planning',
-    _Timeline: 'Timeline',
+    Writing: 'Writing',
+    Analysis: 'Analysis',
+    Planning: 'Planning',
+    Timeline: 'Timeline',
   },
-  _useAppContext: () => mockContext,
+  useAppContext: () => mockContext,
 }));
 
 describe('EnhancedDashboard Component', () => {
