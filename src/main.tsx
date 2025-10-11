@@ -7,6 +7,19 @@ import App from './App';
 import { AppProviders } from './AppProviders';
 import './index.css';
 
+// Clean up legacy dark mode
+if (typeof window !== 'undefined') {
+  // Clear theme storage
+  localStorage.removeItem('theme');
+  localStorage.removeItem('preferred_theme');
+  localStorage.removeItem('inkwell_theme');
+  localStorage.removeItem('ui_theme');
+
+  // Remove theme classes
+  document.documentElement.classList.remove('dark');
+  document.body.classList.remove('dark');
+}
+
 // Initialize Sentry for error tracking and performance monitoring
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({

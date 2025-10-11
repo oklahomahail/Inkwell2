@@ -33,7 +33,6 @@ const SettingsPanel: React.FC = () => {
   const [appSettings, setAppSettings] = useState({
     autoSave: true,
     autoSaveInterval: 30,
-    darkMode: state.theme === 'dark',
     showWordCount: true,
     showReadingTime: true,
   });
