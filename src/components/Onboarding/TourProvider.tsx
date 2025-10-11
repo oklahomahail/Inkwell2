@@ -193,8 +193,11 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
         step: tourState.currentStep,
       };
 
-      // Unify analytics via a single track API
+      // Support both trackEvent and legacy track API
       analyticsService.trackEvent(event as any, analyticsEvent);
+      if ((analyticsService as any).track) {
+        (analyticsService as any).track(event as any, analyticsEvent);
+      }
 
       // Log to console in dev mode
       if (import.meta.env.DEV) {
@@ -209,6 +212,13 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
           event,
           context: 'TourProvider.logAnalytics',
         });
+        if ((analyticsService as any).track) {
+          (analyticsService as any).track('analytics_error' as any, {
+            error: error instanceof Error ? error.message : String(error),
+            event,
+            context: 'TourProvider.logAnalytics',
+          });
+        }
       } catch (telemetryError) {
         // Silent fail for telemetry errors to avoid infinite loops
         console.warn('Telemetry error:', telemetryError);
@@ -227,6 +237,12 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
       tourType: 'full-onboarding',
       entryPoint: 'prompt',
     });
+    if ((analyticsService as any).track) {
+      (analyticsService as any).track('tour_started', {
+        tourType: 'full-onboarding',
+        entryPoint: 'prompt',
+      });
+    }
 
     // Mark that we've prompted in this session
     sessionStorage.setItem('inkwell-tour-prompted-this-session', 'true');
