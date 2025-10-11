@@ -17,7 +17,7 @@ export interface CommandPaletteContextValue {
 
 export const CommandPaletteContext = createContext<CommandPaletteContextValue | null>(null);
 
-export function _useCommandPaletteContext() {
+export function useCommandPaletteContext() {
   const ctx = useContext(CommandPaletteContext);
   if (!ctx) throw new Error('useCommandPaletteContext must be used within CommandPaletteProvider');
   return ctx;
