@@ -2,7 +2,7 @@
 import React from 'react';
 
 import Logo from '@/components/Logo';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 interface BrandMarkProps {
   collapsed?: boolean;
@@ -11,7 +11,7 @@ interface BrandMarkProps {
   className?: string;
 }
 
-export function _BrandMark({
+export function BrandMark({
   collapsed = false,
   variant = 'light',
   size = 'md',
