@@ -7,6 +7,15 @@ import classicManuscript from './classicManuscript.json';
 import modernBook from './modernBook.json';
 import screenplay from './screenplay.json';
 
+// Re-export functions without underscore prefixes
+export const getAllStylePresets = _getAllStylePresets;
+export const getStylePreset = _getStylePreset;
+export const getPresetsForFormat = _getPresetsForFormat;
+export const replaceTemplateVariables = _replaceTemplateVariables;
+export const generateCSS = _generateCSS;
+export const generateHTMLTemplate = _generateHTMLTemplate;
+export const getDefaultPresetForFormat = _getDefaultPresetForFormat;
+
 // Available presets
 const presets: Record<string, StylePresetMeta> = {
   'classic-manuscript': classicManuscript as StylePresetMeta,
