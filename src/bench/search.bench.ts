@@ -1,1 +1,0 @@
-import { bench, describe } from 'vitest'; // Replace with your actual instance / factory: import { searchService } from '@/services/searchService'; describe('Search micro-bench', () => { bench('common term', () => { searchService.search('the', { maxResults: 20 }); }); }); 

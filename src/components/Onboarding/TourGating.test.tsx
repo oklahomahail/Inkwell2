@@ -5,6 +5,8 @@ import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { ProfileProvider } from '@/context/ProfileContext';
+import { analyticsService } from '@/services/analyticsService';
+import { makeMockStorage } from '@/test/utils/mockStorage';
 
 import OnboardingOrchestrator from './OnboardingOrchestrator';
 import { ProfileTourProvider } from './ProfileTourProvider';
@@ -38,33 +40,8 @@ function TestTourComponent({ onTourStart }: { onTourStart?: () => void }) {
 }
 
 // Mock localStorage and sessionStorage
-const mockLocalStorage = {
-  store: {} as Record<string, string>,
-  getItem: vi.fn((key: string) => mockLocalStorage.store[key] || null),
-  setItem: vi.fn((key: string, value: string) => {
-    mockLocalStorage.store[key] = value;
-  }),
-  removeItem: vi.fn((key: string) => {
-    delete mockLocalStorage.store[key];
-  }),
-  clear: vi.fn(() => {
-    mockLocalStorage.store = {};
-  }),
-};
-
-const mockSessionStorage = {
-  store: {} as Record<string, string>,
-  getItem: vi.fn((key: string) => mockSessionStorage.store[key] || null),
-  setItem: vi.fn((key: string, value: string) => {
-    mockSessionStorage.store[key] = value;
-  }),
-  removeItem: vi.fn((key: string) => {
-    delete mockSessionStorage.store[key];
-  }),
-  clear: vi.fn(() => {
-    mockSessionStorage.store = {};
-  }),
-};
+const mockLocalStorage = makeMockStorage();
+const mockSessionStorage = makeMockStorage();
 
 // Mock database implementation
 const mockDb = {
@@ -89,6 +66,8 @@ const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 describe('Tour Gating + First-run Flow (A1)', () => {
   beforeEach(() => {
+    vi.spyOn(analyticsService, 'track').mockImplementation(() => {});
+
     // Reset mocks
     mockLocalStorage.clear();
     mockSessionStorage.clear();
@@ -106,6 +85,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
   afterEach(() => {
     // Cleanup
     mockConsoleWarn.mockRestore();
+    vi.restoreAllMocks();
   });
 
   describe('Duplicate Tour Prevention', () => {
@@ -160,6 +140,11 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         'inkwell-tour-prompted-this-session',
         'true',
       );
+
+      expect(analyticsService.track).toHaveBeenCalledWith('tour_started', {
+        tourType: 'full-onboarding',
+        entryPoint: 'prompt',
+      });
     });
 
     it('should not show tour prompt if already prompted this session', async () => {
@@ -297,6 +282,11 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         'inkwell-welcome-shown-this-session',
         'true',
       );
+
+      expect(analyticsService.track).toHaveBeenCalledWith('tour_started', {
+        tourType: 'first_time',
+        entryPoint: 'overlay',
+      });
       expect(mockSessionStorage.setItem).toHaveBeenCalled();
     });
   });
@@ -328,6 +318,11 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         'inkwell-tour-progress-preferences',
         expect.stringContaining('"neverShowAgain":true'),
       );
+
+      expect(analyticsService.track).toHaveBeenCalledWith('tour_never_show_again', {
+        tourType: 'full-onboarding',
+        step: 0,
+      });
     });
   });
 
@@ -340,5 +335,3 @@ describe('Tour Gating + First-run Flow (A1)', () => {
     });
   });
 });
-
-export { mockLocalStorage, mockSessionStorage };
