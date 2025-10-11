@@ -77,7 +77,10 @@ export function OnboardingOrchestrator() {
         setOpen(true);
         launchedThisSession.current = true;
         try {
-          analyticsService.track('tour_started', { tourType: 'first_time', entryPoint: 'overlay' });
+          analyticsService.trackEvent('tour_started', {
+            tourType: 'first_time',
+            entryPoint: 'overlay',
+          });
         } catch {}
         // strip the param after opening once
         url.searchParams.delete('tour');
@@ -94,7 +97,10 @@ export function OnboardingOrchestrator() {
           setPromptedThisSession();
         } catch {}
         try {
-          analyticsService.track('tour_started', { tourType: 'first_time', entryPoint: 'overlay' });
+          analyticsService.trackEvent('tour_started', {
+            tourType: 'first_time',
+            entryPoint: 'overlay',
+          });
         } catch {}
       }
     })();

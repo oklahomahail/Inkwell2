@@ -12,15 +12,15 @@ import { startTourSafely, getSafeTourSteps } from './utils/tourSafety';
 interface WelcomeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onStartTour: (_tourType: string) => void;
+  onStartTour: (tourType: string) => void;
   onOpenChecklist: () => void;
 }
 
 export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   isOpen,
-  _onClose,
-  _onStartTour,
-  _onOpenChecklist,
+  onClose,
+  onStartTour,
+  onOpenChecklist,
 }) => {
   const { setNeverShowAgain, setRemindMeLater, logAnalytics, preferences, startTour } = useTour();
   const { setTourActive, snoozeModal, dismissModal } = useOnboardingGate();

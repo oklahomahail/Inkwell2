@@ -161,33 +161,33 @@ export const FeatureDiscoveryProvider: React.FC<FeatureDiscoveryProviderProps> =
     }
   }, [dismissedHints]);
 
-  const showHint = (_hintId: string) => {
+  const showHint = (hintId: string) => {
     const hint = availableHints.find((h) => h.id === hintId);
     if (hint && !dismissedHints.includes(hintId)) {
       setActiveHint(hint);
     }
   };
 
-  const hideHint = (_hintId: string) => {
+  const hideHint = (hintId: string) => {
     if (activeHint?.id === hintId) {
       setActiveHint(null);
     }
   };
 
-  const dismissHint = (_hintId: string) => {
+  const dismissHint = (hintId: string) => {
     setDismissedHints((prev) => [...prev, hintId]);
     hideHint(hintId);
   };
 
-  const isHintVisible = (_hintId: string) => {
+  const isHintVisible = (hintId: string) => {
     return activeHint?.id === hintId;
   };
 
-  const isHintDismissed = (_hintId: string) => {
+  const isHintDismissed = (hintId: string) => {
     return dismissedHints.includes(hintId);
   };
 
-  const registerHints = (_hints: FeatureHint[]) => {
+  const registerHints = (hints: FeatureHint[]) => {
     setAvailableHints((prev) => [...prev, ...hints]);
   };
 

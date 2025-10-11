@@ -194,7 +194,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
       };
 
       // Unify analytics via a single track API
-      analyticsService.track(event as any, analyticsEvent);
+      analyticsService.trackEvent(event as any, analyticsEvent);
 
       // Log to console in dev mode
       if (import.meta.env.DEV) {
@@ -204,7 +204,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
       console.warn('Failed to log analytics:', error);
       // Track telemetry errors
       try {
-        analyticsService.track('analytics_error' as any, {
+        analyticsService.trackEvent('analytics_error' as any, {
           error: error instanceof Error ? error.message : String(error),
           event,
           context: 'TourProvider.logAnalytics',
@@ -223,7 +223,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
       return;
     }
 
-    analyticsService.track('tour_started', {
+    analyticsService.trackEvent('tour_started', {
       tourType: 'full-onboarding',
       entryPoint: 'prompt',
     });

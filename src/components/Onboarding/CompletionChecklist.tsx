@@ -74,6 +74,10 @@ const CHECKLIST_ITEMS: ChecklistItemConfig[] = [
 ];
 
 interface CompletionChecklistProps {
+  onStartTour?: (tourType: string) => void;
+  onClose?: () => void;
+  checklist?: Record<string, boolean>;
+  isOpen?: boolean;
   isOpen: boolean;
   onClose: () => void;
   onStartTour?: (_tourType: string) => void;
@@ -81,8 +85,8 @@ interface CompletionChecklistProps {
 
 export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = ({
   isOpen,
-  _onClose,
-  _onStartTour,
+  onClose,
+  onStartTour,
 }) => {
   const { checklist, getChecklistProgress, canShowContextualTour, logAnalytics } = useTour();
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -93,22 +97,28 @@ export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = 
   if (!isOpen) return null;
 
   const handleItemClick = (_item: ChecklistItemConfig) => {
-    if (item.tourTrigger && canShowContextualTour(item.tourTrigger)) {
-      logAnalytics('checklist_tour_requested', { tourType: item.tourTrigger, item: item.key });
-      onStartTour?.(item.tourTrigger);
+    if (checklistItem.tourTrigger && canShowContextualTour(checklistItem.tourTrigger)) {
+      logAnalytics('checklist_tour_requested', {
+        tourType: checklistItem.tourTrigger,
+        item: checklistItem.key,
+      });
+      onStartTour?.(checklistItem.tourTrigger);
       onClose();
     }
   };
 
   const getItemStyle = (_item: ChecklistItemConfig) => {
-    const isCompleted = checklist?.[item.key as keyof typeof checklist] || false;
-    const canStartTour = item.tourTrigger && canShowContextualTour(item.tourTrigger);
+    const isCompleted = checklist?.[checklistItem.key as keyof typeof checklist] || false;
+    const canStartTour =
+      checklistItem.tourTrigger && canShowContextualTour(checklistItem.tourTrigger);
 
     return {
       opacity: isCompleted ? 0.7 : 1,
       cursor: canStartTour ? 'pointer' : 'default',
       background:
-        hoveredItem === item.key && canStartTour ? 'rgba(59, 130, 246, 0.05)' : 'transparent',
+        hoveredItem === checklistItem.key && canStartTour
+          ? 'rgba(59, 130, 246, 0.05)'
+          : 'transparent',
     };
   };
 
