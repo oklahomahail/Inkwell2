@@ -5,7 +5,7 @@ import { withFeatureFlag } from '../../utils/flags';
 import { PlotBoards as PlotBoardsComponent } from './components/PlotBoards';
 
 // Export the feature-flagged component
-export const PlotBoards = withFeatureFlag('plotBoards')(PlotBoardsComponent);
+export const PlotBoards = withFeatureFlag('plotBoards', PlotBoardsComponent);
 
 // Export other components for direct use (when feature is enabled)
 export { PlotBoard, PlotCard, PlotColumn } from './components';

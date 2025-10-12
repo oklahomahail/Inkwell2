@@ -45,13 +45,20 @@ export function FeatureGate({
  */
 export function withFeatureFlag<P extends Record<string, any>>(
   flagKey: string,
-  WrappedComponent: React.ComponentType<P>,
+  WrappedComponent?: React.ComponentType<P>,
   FallbackComponent?: React.ComponentType<P>,
 ): React.ComponentType<P> {
+  if (!WrappedComponent) {
+    console.warn(
+      `withFeatureFlag(${flagKey}): WrappedComponent is undefined. This may happen if the component failed to load or was not provided.`,
+    );
+    return FallbackComponent || (() => null);
+  }
+
   function FeatureFlaggedComponent(props: P) {
     const enabled = useFeatureFlag(flagKey);
 
-    if (enabled) {
+    if (enabled && WrappedComponent) {
       return <WrappedComponent {...props} />;
     }
 
