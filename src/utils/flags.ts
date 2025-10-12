@@ -3,15 +3,20 @@
  * Re-exports all feature flag functionality
  */
 
+// Import dependencies first
+import { FeatureFlagManager } from './FeatureFlagManager';
+
+// Create singleton instance
+export const featureFlags = FeatureFlagManager.getInstance();
+
+// Re-export manager class
+export { FeatureFlagManager };
+
 // Export types from our types file
 export * from '../types/featureFlags';
 
 // Export the configuration
 export { FEATURE_FLAGS } from './featureFlags.config';
-
-// Export the manager instance and utilities
-export { FeatureFlagManager } from './FeatureFlagManager';
-export const featureFlags = FeatureFlagManager.getInstance();
 
 // Export React integration
 export {
