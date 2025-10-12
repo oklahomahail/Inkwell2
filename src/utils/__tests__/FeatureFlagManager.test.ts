@@ -21,12 +21,32 @@ const mockLocalStorage = {
 
 import { TEST_FLAGS } from './testFlags';
 
-// Mock the config module
-vi.mock('../featureFlags.config', async (importOriginal) => {
-  const actual = await importOriginal();
+// Mock the config module implementation
+vi.mock('../FeatureFlagManager', () => {
   return {
-    ...actual,
-    FEATURE_FLAGS: TEST_FLAGS,
+    default: class MockFeatureFlagManager {
+      private static instance: MockFeatureFlagManager | null = null;
+      private cache = new Map<string, boolean>();
+
+      static getInstance(): MockFeatureFlagManager {
+        if (!MockFeatureFlagManager.instance) {
+          MockFeatureFlagManager.instance = new MockFeatureFlagManager();
+        }
+        return MockFeatureFlagManager.instance;
+      }
+
+      static resetInstance(): void {
+        MockFeatureFlagManager.instance = null;
+      }
+
+      isEnabled(flagKey: string): boolean {
+        return TEST_FLAGS[flagKey]?.defaultValue ?? false;
+      }
+
+      setEnabled(flagKey: string, enabled: boolean): void {
+        this.cache.set(flagKey, enabled);
+      }
+    },
   };
 });
 
