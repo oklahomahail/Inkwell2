@@ -25,8 +25,8 @@ interface BeatSheet {
 }
 
 const BeatSheetPlanner: React.FC = () => {
-  const [isTemplateValid, setIsTemplateValid] = useState(false);
-  const invalidTemplate = {
+  const [_isTemplateValid, _setIsTemplateValid] = useState(false);
+  const _invalidTemplate = {
     id: '',
     name: '',
     template: 'custom' as const,

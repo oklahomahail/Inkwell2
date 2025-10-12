@@ -1,4 +1,4 @@
-type PerformanceData = {
+type _PerformanceData = {
   date: string;
   wordCount: number;
   goalProgress: number;
