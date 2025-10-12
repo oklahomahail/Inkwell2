@@ -1,47 +1,19 @@
 import { render, screen, act } from '@testing-library/react';
 import React from 'react';
+
+import { MockFeatureFlagManager } from './mockFeatureFlagManager';
+
 import { vi, beforeEach } from 'vitest';
+
+// Ensure the FeatureFlagManager module is mocked before importing it
+vi.mock('../FeatureFlagManager', () => ({
+  FeatureFlagManager: MockFeatureFlagManager,
+}));
 
 import { FeatureFlagManager } from '../FeatureFlagManager';
 import { FeatureGate, useFeatureFlag, withFeatureFlag } from '../featureFlags.react';
 
-// Mock feature flags module
-import { TEST_FLAGS } from './testFlags';
-
-// Mock feature flags manager
-vi.mock('../FeatureFlagManager', () => {
-  class MockFeatureFlagManager {
-    private static instance: MockFeatureFlagManager | null = null;
-    private cache = new Map<string, boolean>();
-
-    static getInstance(): MockFeatureFlagManager {
-      if (!MockFeatureFlagManager.instance) {
-        MockFeatureFlagManager.instance = new MockFeatureFlagManager();
-      }
-      return MockFeatureFlagManager.instance;
-    }
-
-    isEnabled(flagKey: string): boolean {
-      if (this.cache.has(flagKey)) {
-        return this.cache.get(flagKey)!;
-      }
-      return (TEST_FLAGS as any)[flagKey]?.defaultValue ?? false;
-    }
-
-    setEnabled(flagKey: string, enabled: boolean): void {
-      this.cache.set(flagKey, enabled);
-      const storageKey = `inkwell_flag_${flagKey}`;
-      localStorage.setItem(storageKey, enabled.toString());
-      window.dispatchEvent(
-        new StorageEvent('storage', {
-          key: storageKey,
-          newValue: enabled.toString(),
-        }),
-      );
-    }
-  }
-  return { FeatureFlagManager: MockFeatureFlagManager };
-});
+// Import shared feature flag config
 
 // Mock localStorage
 const mockLocalStorage = {
@@ -76,7 +48,7 @@ describe('Feature Flag React Integration', () => {
     });
 
     // Reset singleton
-    FeatureFlagManager['instance'] = null;
+    (FeatureFlagManager as any).instance = null;
   });
 
   describe('useFeatureFlag hook', () => {
