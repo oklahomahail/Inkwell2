@@ -84,7 +84,7 @@ const baseNavigationItems = [
 const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const { state, dispatch } = useAppContext();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(state.theme === 'dark');
   const [isMobile, setIsMobile] = useState(false);
 
   // Modal states for header actions
@@ -152,10 +152,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       // Default to system preference
       const systemDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
       setIsDarkMode(systemDarkMode);
+      // Sync with app state
+      dispatch({ type: 'SET_THEME', payload: systemDarkMode ? 'dark' : 'light' });
     }
+
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleThemeChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem('inkwell-dark-mode')) {
+        setIsDarkMode(e.matches);
+        dispatch({ type: 'SET_THEME', payload: e.matches ? 'dark' : 'light' });
+      }
+    };
+    mediaQuery.addEventListener('change', handleThemeChange);
 
     return () => {
       window.removeEventListener('resize', checkMobile);
+      mediaQuery.removeEventListener('change', handleThemeChange);
     };
   }, []);
 
@@ -213,6 +226,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     setIsDarkMode(newDarkMode);
     localStorage.setItem('inkwell-dark-mode', JSON.stringify(newDarkMode));
     dispatch({ type: 'SET_THEME', payload: newDarkMode ? 'dark' : 'light' });
+    // Apply theme class
+    document.documentElement.classList.toggle('dark', newDarkMode);
   };
 
   // Header action handlers
