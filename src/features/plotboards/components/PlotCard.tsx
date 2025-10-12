@@ -1,9 +1,10 @@
+// File: PlotBoard/components/PlotCard.tsx
 // Individual Plot Card component with drag-and-drop support
 // Displays story elements as draggable cards on the Kanban board
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import React, { useState } from 'react';
+import React, { useState, KeyboardEvent } from 'react';
 
 import { useChaptersStore } from '../../../stores/useChaptersStore';
 import { usePlotBoardStore } from '../store';
@@ -20,6 +21,11 @@ interface PlotCardProps {
   isDraggedCard?: boolean;
   onFocus?: (cardId: string) => void;
   onKeyboardDragStart?: (cardId: string) => void;
+}
+
+// tiny, dependency-free class combiner
+function classNames(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ');
 }
 
 export const PlotCard: React.FC<PlotCardProps> = ({
@@ -43,18 +49,18 @@ export const PlotCard: React.FC<PlotCardProps> = ({
     id: card.id,
   });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: transition ?? undefined,
     opacity: isDragging ? 0.5 : 1,
   };
 
-  // Find linked scene/chapter info
+  // Linked scene/chapter
+  const linkedChapter = card.chapterId ? ((chapters as any)?.[card.chapterId] ?? null) : null;
   const linkedScene =
-    card.sceneId && card.chapterId
-      ? (chapters as any)[card.chapterId]?.scenes?.find((s: any) => s.id === card.sceneId)
+    card.sceneId && linkedChapter?.scenes
+      ? ((linkedChapter.scenes as any[]).find((s: any) => s?.id === card.sceneId) ?? null)
       : null;
-  const linkedChapter = card.chapterId ? (chapters as any)[card.chapterId] : null;
 
   // Status and priority styling
   const getStatusColor = (status: PlotCardStatus): string => {
@@ -71,19 +77,23 @@ export const PlotCard: React.FC<PlotCardProps> = ({
         return 'bg-green-100 text-green-700';
       case PlotCardStatus.CUT:
         return 'bg-red-100 text-red-700 line-through';
+      default:
+        return 'bg-gray-100 text-gray-700';
     }
   };
 
-  const getPriorityColor = (priority: PlotCardPriority): string => {
+  const getPriorityClass = (priority: PlotCardPriority): string => {
     switch (priority) {
-      case PlotCardPriority.LOW:
+      case 'low':
         return 'border-l-2 border-gray-300';
-      case PlotCardPriority.MEDIUM:
+      case 'medium':
         return 'border-l-2 border-blue-400';
-      case PlotCardPriority.HIGH:
+      case 'high':
         return 'border-l-2 border-orange-400';
-      case PlotCardPriority.CRITICAL:
+      case 'critical':
         return 'border-l-2 border-red-500';
+      default:
+        return '';
     }
   };
 
@@ -96,9 +106,7 @@ export const PlotCard: React.FC<PlotCardProps> = ({
   };
 
   const handleEdit = () => {
-    if (onEdit) {
-      onEdit(card);
-    }
+    onEdit?.(card);
   };
 
   const handleDelete = () => {
@@ -107,16 +115,25 @@ export const PlotCard: React.FC<PlotCardProps> = ({
     }
   };
 
-  const cardClasses = `
-    bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 p-3
-    ${getPriorityColor(card.priority)}
-    ${card.color ? `border-l-4` : ''}
-    ${isDragOverlay ? 'shadow-lg rotate-3' : ''}
-    ${isDragging ? 'opacity-50' : ''}
-    ${isFocused ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
-    ${isDraggedCard ? 'bg-blue-50 border-blue-300' : ''}
-    cursor-grab active:cursor-grabbing focus:outline-none
-  `.trim();
+  const cardClasses = classNames(
+    'bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 p-3 cursor-grab active:cursor-grabbing focus:outline-none',
+    getPriorityClass(card.priority),
+    isDragOverlay && 'shadow-lg rotate-3',
+    isDragging && 'opacity-50',
+    isFocused && 'ring-2 ring-blue-500 ring-offset-2',
+    isDraggedCard && 'bg-blue-50 border-blue-300',
+    card.color && 'border-l-4',
+  );
+
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      onKeyboardDragStart?.(card.id);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      handleEdit();
+    }
+  };
 
   return (
     <div
@@ -127,36 +144,39 @@ export const PlotCard: React.FC<PlotCardProps> = ({
       {...listeners}
       tabIndex={isFocused ? 0 : -1}
       role="button"
-      aria-label={`Plot card: ${card.title}. Status: ${card.status}. Priority: ${card.priority}. ${card.description ? `Description: ${card.description}` : ''}`}
+      aria-label={`Plot card: ${card.title}. Status: ${card.status}. Priority: ${card.priority}.${
+        card.description ? ` Description: ${card.description}` : ''
+      }`}
       aria-describedby={`card-${card.id}-details`}
-      aria-grabbed={isDraggedCard}
+      aria-grabbed={isDraggedCard || isDragging}
       onFocus={() => onFocus?.(card.id)}
-      onKeyDown={(e) => {
-        if (e.key === ' ' || e.key === 'Spacebar') {
-          e.preventDefault();
-          onKeyboardDragStart?.(card.id);
-        } else if (e.key === 'Enter') {
-          e.preventDefault();
-          handleEdit();
-        }
-      }}
+      onKeyDown={onKeyDown}
     >
       {/* Header */}
-      <div className="flex items-start justify-between mb-2">
-        <h4 className="font-medium text-gray-900 text-sm leading-tight flex-1">{card.title}</h4>
-        <div className="flex items-center space-x-1 ml-2">
+      <div className="mb-2 flex items-start justify-between">
+        <h4 className="flex-1 text-sm font-medium leading-tight text-gray-900">{card.title}</h4>
+        <div className="ml-2 flex items-center space-x-1">
           {/* Status Badge */}
-          <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(card.status)}`}>
-            {card.status.replace('_', ' ')}
+          <span
+            className={classNames('rounded-full px-2 py-1 text-xs', getStatusColor(card.status))}
+          >
+            {String(card.status).replace('_', ' ')}
           </span>
 
           {/* Actions */}
           <button
             onClick={handleEdit}
-            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-1 text-gray-400 transition-colors hover:text-gray-600"
             title="Edit card"
+            aria-label="Edit card"
           >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="h-3 w-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -168,10 +188,17 @@ export const PlotCard: React.FC<PlotCardProps> = ({
 
           <button
             onClick={handleDelete}
-            className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+            className="p-1 text-gray-400 transition-colors hover:text-red-600"
             title="Delete card"
+            aria-label="Delete card"
           >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="h-3 w-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -184,15 +211,21 @@ export const PlotCard: React.FC<PlotCardProps> = ({
       </div>
 
       {/* Description */}
-      {card.description && (
-        <p className="text-xs text-gray-600 mb-2 line-clamp-2">{card.description}</p>
-      )}
+      {card.description ? (
+        <p className="mb-2 line-clamp-2 text-xs text-gray-600">{card.description}</p>
+      ) : null}
 
       {/* Scene/Chapter Link */}
-      {showSceneLink && linkedScene && linkedChapter && (
-        <div className="mb-2 p-2 bg-blue-50 rounded text-xs">
+      {showSceneLink && linkedScene && linkedChapter ? (
+        <div className="mb-2 rounded bg-blue-50 p-2 text-xs">
           <div className="flex items-center text-blue-700">
-            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="mr-1 h-3 w-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -202,15 +235,21 @@ export const PlotCard: React.FC<PlotCardProps> = ({
             </svg>
             <span className="font-medium">{linkedChapter.title}</span>
           </div>
-          <div className="text-blue-600 ml-4">{linkedScene.title}</div>
+          <div className="ml-4 text-blue-600">{linkedScene.title}</div>
         </div>
-      )}
+      ) : null}
 
       {/* Timeline Events */}
-      {showTimeline && card.timelineEventIds && card.timelineEventIds.length > 0 && (
-        <div className="mb-2 p-2 bg-purple-50 rounded text-xs">
+      {showTimeline && Array.isArray(card.timelineEventIds) && card.timelineEventIds.length > 0 ? (
+        <div className="mb-2 rounded bg-purple-50 p-2 text-xs">
           <div className="flex items-center text-purple-700">
-            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="mr-1 h-3 w-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -221,26 +260,32 @@ export const PlotCard: React.FC<PlotCardProps> = ({
             <span>{card.timelineEventIds.length} timeline event(s)</span>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Tags */}
-      {card.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2">
+      {Array.isArray(card.tags) && card.tags.length > 0 ? (
+        <div className="mb-2 flex flex-wrap gap-1">
           {card.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+            <span key={tag} className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-600">
               {tag}
             </span>
           ))}
-          {card.tags.length > 3 && (
+          {card.tags.length > 3 ? (
             <span className="text-xs text-gray-500">+{card.tags.length - 3} more</span>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
 
       {/* Word Count */}
-      {card.wordCount && (
+      {typeof card.wordCount === 'number' ? (
         <div className="flex items-center text-xs text-gray-500">
-          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="mr-1 h-3 w-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -250,43 +295,52 @@ export const PlotCard: React.FC<PlotCardProps> = ({
           </svg>
           <span>{card.wordCount.toLocaleString()} words</span>
         </div>
-      )}
+      ) : null}
 
-      {/* Expand/Collapse for notes */}
-      {card.notes && (
+      {/* Notes */}
+      {card.notes ? (
         <div className="mt-2">
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
+            onClick={() => setIsExpanded((v) => !v)}
+            className="flex items-center text-xs text-blue-600 hover:text-blue-800"
+            aria-expanded={isExpanded}
+            aria-controls={`card-${card.id}-notes`}
           >
             <svg
-              className={`w-3 h-3 mr-1 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+              className={classNames('mr-1 h-3 w-3 transition-transform', isExpanded && 'rotate-90')}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
             Notes
           </button>
 
-          {isExpanded && (
-            <div className="mt-1 p-2 bg-gray-50 rounded text-xs text-gray-700">{card.notes}</div>
-          )}
+          {isExpanded ? (
+            <div
+              id={`card-${card.id}-notes`}
+              className="mt-1 rounded bg-gray-50 p-2 text-xs text-gray-700"
+            >
+              {card.notes}
+            </div>
+          ) : null}
         </div>
-      )}
+      ) : null}
 
-      {/* Priority Selector (quick actions) */}
-      <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+      {/* Quick actions */}
+      <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
         <select
           value={card.status}
           onChange={(e) => handleStatusChange(e.target.value as PlotCardStatus)}
-          className="text-xs border-none bg-transparent text-gray-600 focus:outline-none cursor-pointer"
           onClick={(e) => e.stopPropagation()}
+          className="cursor-pointer bg-transparent text-xs text-gray-600 focus:outline-none"
+          aria-label="Change status"
         >
           {Object.values(PlotCardStatus).map((status) => (
             <option key={status} value={status}>
-              {status.replace('_', ' ')}
+              {String(status).replace('_', ' ')}
             </option>
           ))}
         </select>
@@ -294,8 +348,9 @@ export const PlotCard: React.FC<PlotCardProps> = ({
         <select
           value={card.priority}
           onChange={(e) => handlePriorityChange(e.target.value as PlotCardPriority)}
-          className="text-xs border-none bg-transparent text-gray-600 focus:outline-none cursor-pointer"
           onClick={(e) => e.stopPropagation()}
+          className="cursor-pointer bg-transparent text-xs text-gray-600 focus:outline-none"
+          aria-label="Change priority"
         >
           {Object.values(PlotCardPriority).map((priority) => (
             <option key={priority} value={priority}>
@@ -306,23 +361,27 @@ export const PlotCard: React.FC<PlotCardProps> = ({
       </div>
 
       {/* Last updated */}
-      <div className="text-xs text-gray-400 mt-1">
-        Updated {new Date(card.updatedAt).toLocaleDateString()}
-      </div>
+      {card.updatedAt ? (
+        <div className="mt-1 text-xs text-gray-400">
+          Updated {new Date(card.updatedAt).toLocaleDateString()}
+        </div>
+      ) : null}
 
       {/* Screen reader details */}
       <div id={`card-${card.id}-details`} className="sr-only">
-        {linkedScene && linkedChapter && (
+        {linkedScene && linkedChapter ? (
           <span>
             Linked to scene: {linkedScene.title} in chapter: {linkedChapter.title}.{' '}
           </span>
-        )}
-        {card.timelineEventIds && card.timelineEventIds.length > 0 && (
+        ) : null}
+        {Array.isArray(card.timelineEventIds) && card.timelineEventIds.length > 0 ? (
           <span>{card.timelineEventIds.length} timeline events linked. </span>
-        )}
-        {card.tags.length > 0 && <span>Tags: {card.tags.join(', ')}. </span>}
-        {card.wordCount && <span>Word count: {card.wordCount}. </span>}
-        {card.notes && <span>Has notes. </span>}
+        ) : null}
+        {Array.isArray(card.tags) && card.tags.length > 0 ? (
+          <span>Tags: {card.tags.join(', ')}. </span>
+        ) : null}
+        {typeof card.wordCount === 'number' ? <span>Word count: {card.wordCount}. </span> : null}
+        {card.notes ? <span>Has notes. </span> : null}
         <span>Use arrow keys to navigate, Space to pick up, Enter to edit.</span>
       </div>
     </div>
