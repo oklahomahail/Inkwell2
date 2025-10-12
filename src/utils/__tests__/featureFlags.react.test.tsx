@@ -7,15 +7,13 @@ import { FeatureGate, useFeatureFlag, withFeatureFlag } from '../featureFlags.re
 
 // Mock feature flags module
 vi.mock('../featureFlags.config', () => ({
-  default: {
-    FEATURE_FLAGS: {
-      EXPORT_WIZARD: {
-        key: 'exportWizard',
-        name: 'Export Wizard',
-        description: 'Test feature',
-        defaultValue: true,
-        category: 'core',
-      },
+  FEATURE_FLAGS: {
+    EXPORT_WIZARD: {
+      key: 'exportWizard',
+      name: 'Export Wizard',
+      description: 'Test feature',
+      defaultValue: true,
+      category: 'core',
     },
   },
 }));
