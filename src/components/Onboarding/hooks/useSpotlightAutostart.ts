@@ -22,6 +22,11 @@ export function useSpotlightAutostart(opts: StartOpts = {}) {
   const profileId = storage.profileId;
 
   useEffect(() => {
+    const DEBUG = true; // Set to false in production
+    if (DEBUG) {
+      console.debug('[SpotlightTour] Location:', location);
+      console.debug('[SpotlightTour] Route blocked?', isProfilesRoute(location));
+    }
     if (startedRef.current) return;
     if (!uiReady) return;
     if (isProfilesRoute(location)) return;
