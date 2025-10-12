@@ -28,13 +28,22 @@ export function useSimpleTourAutostart() {
     if (storage.get('simpleTour.dismissed')) return;
     if (hasStartedOnce(profileId, 'simple')) return;
 
-    const id = window.setTimeout(() => {
+    const token = Symbol('tour-start:simple');
+    (window as any).__tourStartTokenSimple = token;
+
+    queueMicrotask(() => {
+      if ((window as any).__tourStartTokenSimple !== token) return;
       TourController.start('simple');
       startedRef.current = true;
       markStarted(profileId, 'simple');
       storage.set('simpleTour.lastAutostartAt', Date.now());
-    }, 0);
+    });
 
-    return () => clearTimeout(id);
+    return () => {
+      // invalidate this token on cleanup
+      if ((window as any).__tourStartTokenSimple === token) {
+        (window as any).__tourStartTokenSimple = null;
+      }
+    };
   }, [location, uiReady, storage, profileId]);
 }

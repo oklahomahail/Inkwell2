@@ -66,9 +66,15 @@ export function useSpotlightAutostart(opts: StartOpts = {}) {
           return;
         }
 
-        TourController.start('spotlight');
-        startedRef.current = true;
-        markStarted(profileId, 'spotlight');
+        const token = Symbol('tour-start:spotlight');
+        (window as any).__tourStartTokenSpotlight = token;
+
+        queueMicrotask(() => {
+          if ((window as any).__tourStartTokenSpotlight !== token) return;
+          TourController.start('spotlight');
+          startedRef.current = true;
+          markStarted(profileId, 'spotlight');
+        });
       } catch (e) {
         console.warn('[SpotlightTour] waitForElement failed', e);
       }

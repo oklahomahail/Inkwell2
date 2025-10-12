@@ -3,12 +3,9 @@ export const isProfilesRoute = (loc: Location | { pathname: string; search?: str
   // Normalize and clean pathname
   const pathname = (loc.pathname || '').toLowerCase().replace(/\/+$/, '');
   const baseMatch = pathname === '/profiles' || pathname.startsWith('/profiles/');
-  if (!baseMatch) return false;
 
-  // Add extra check for view=dashboard
-  const search = new URLSearchParams(loc.search || '');
-  const view = search.get('view');
-  return view === 'dashboard' || !view;
+  // Always return true for profiles route - block all profile views
+  return baseMatch;
 };
 
 // Matches /profiles*?view=dashboard
