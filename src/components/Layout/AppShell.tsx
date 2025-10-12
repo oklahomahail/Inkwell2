@@ -3,10 +3,8 @@ import React from 'react';
 
 import { OnboardingOrchestrator } from '../../components/Onboarding/OnboardingOrchestrator';
 import { TourProvider } from '../../components/Onboarding/TourProvider';
-import {
-  useAutostartSimpleTour,
-  useSpotlightAutostart,
-} from '../Onboarding/hooks/useTourAutostart';
+import { useSimpleTourAutostart } from '../Onboarding/hooks/useSimpleTourAutostart';
+import { useSpotlightAutostart } from '../Onboarding/hooks/useSpotlightAutostart';
 import '../Onboarding/styles/overlay.css';
 
 interface AppShellProps {
@@ -15,7 +13,7 @@ interface AppShellProps {
 
 function _AppShell({ children }: AppShellProps) {
   // Initialize tour autostart hooks after providers/portals are mounted
-  useAutostartSimpleTour();
+  useSimpleTourAutostart();
   useSpotlightAutostart();
 
   return (

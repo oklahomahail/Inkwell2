@@ -5,32 +5,9 @@ import { useUIReady } from '@/context/AppContext';
 import { TourStorage } from '@/services/TourStorage';
 
 import { TourController } from '../tour-core/TourController';
+import { isProfilesRoute } from '../utils/routeGuards';
+import { hasStartedOnce, markStarted } from '../utils/tourOnce';
 import { waitForElement } from '../utils/waitForElement';
-
-const AUTOSTART_BLOCKLIST = new Set<string>(['/profile', '/profile/edit']);
-
-export function useAutostartSimpleTour() {
-  const { pathname } = useLocation();
-  const uiReady = useUIReady();
-  const startedRef = useRef(false);
-  const storage = TourStorage.forCurrentProfile();
-
-  useEffect(() => {
-    if (!uiReady) return;
-    if (startedRef.current) return;
-    if (AUTOSTART_BLOCKLIST.has(pathname)) return;
-    if (storage.get('simpleTour.completed')) return;
-    if (storage.get('simpleTour.dismissed')) return;
-
-    const id = window.setTimeout(() => {
-      TourController.start('simple');
-      startedRef.current = true;
-      storage.set('simpleTour.lastAutostartAt', Date.now());
-    }, 0);
-
-    return () => clearTimeout(id);
-  }, [pathname, uiReady]);
-}
 
 interface StartOpts {
   timeoutMs?: number;
@@ -38,13 +15,19 @@ interface StartOpts {
 
 export function useSpotlightAutostart(opts: StartOpts = {}) {
   const { timeoutMs = 8000 } = opts;
+  const location = useLocation();
   const uiReady = useUIReady();
+  const startedRef = useRef(false);
   const storage = TourStorage.forCurrentProfile();
+  const profileId = storage.profileId;
 
   useEffect(() => {
+    if (startedRef.current) return;
     if (!uiReady) return;
+    if (isProfilesRoute(location)) return;
     if (storage.get('spotlightTour.completed')) return;
     if (storage.get('spotlightTour.dismissed')) return;
+    if (hasStartedOnce(profileId, 'spotlight')) return;
 
     let cancelled = false;
 
@@ -75,9 +58,12 @@ export function useSpotlightAutostart(opts: StartOpts = {}) {
           .map((s) => s.target);
         if (unresolved.length) {
           console.debug('[SpotlightTour] Unresolved selectors:', unresolved);
+          return;
         }
 
         TourController.start('spotlight');
+        startedRef.current = true;
+        markStarted(profileId, 'spotlight');
       } catch (e) {
         console.warn('[SpotlightTour] waitForElement failed', e);
       }
@@ -86,5 +72,5 @@ export function useSpotlightAutostart(opts: StartOpts = {}) {
     return () => {
       cancelled = true;
     };
-  }, [uiReady]);
+  }, [location, uiReady, timeoutMs, storage, profileId]);
 }
