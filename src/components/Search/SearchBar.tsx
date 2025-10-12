@@ -12,9 +12,9 @@ interface SearchBarProps {
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
-  _isSearching = false,
-  _placeholder = 'Search scenes, _characters,  plot notes...',
-  _className = '',
+  isSearching = false,
+  placeholder = 'Search scenes, characters, plot notes...',
+  className = '',
 }) => {
   const [query, setQuery] = useState('');
   const _navigation = useNavigation();

@@ -3,6 +3,20 @@
 
 import { useEffect, useCallback, useRef } from 'react';
 
+interface _Scene {
+  id: string;
+  title?: string;
+  storyDate?: string;
+  tags?: string[];
+}
+
+interface _Chapter {
+  id: string;
+  title: string;
+  projectId: string;
+  scenes?: _Scene[];
+}
+
 import { useChaptersStore } from '../../../stores/useChaptersStore';
 import { trace } from '../../../utils/trace';
 import { usePlotBoardStore } from '../store';
@@ -18,10 +32,10 @@ interface PlotBoardIntegration {
   // Sync operations
   syncWithChapters: () => Promise<void>;
   syncWithTimeline: () => Promise<void>;
-  createCardsFromChapters: (_chapterIds: string[]) => Promise<void>;
+  createCardsFromChapters: (chapterIds: string[]) => Promise<void>;
 
   // Progress tracking
-  getProgressMetrics: () => any | null;
+  getProgressMetrics: () => Record<string, unknown> | null;
 
   // Auto-sync status
   isAutoSyncEnabled: boolean;
@@ -72,7 +86,7 @@ export const usePlotBoardIntegration = (
 
       // Convert chapters array to record for integration utils
       const chaptersRecord = projectChapters.reduce(
-        (acc: Record<string, any>, _chapter: any) => {
+        (acc: Record<string, unknown>, chapter: any) => {
           acc[chapter.id] = chapter;
           return acc;
         },
@@ -96,8 +110,17 @@ export const usePlotBoardIntegration = (
     try {
       syncInProgressRef.current = true;
 
+      interface TimelineEvent {
+        id: string;
+        title: string;
+        storyDate: string;
+        tags: string[];
+        sceneId: string;
+        chapterId: string;
+      }
+
       // Get timeline events from chapters (if they have timeline data)
-      const timelineEvents: any[] = [];
+      const timelineEvents: TimelineEvent[] = [];
       projectChapters.forEach((chapter) => {
         if (chapter.scenes) {
           chapter.scenes.forEach((scene) => {
@@ -116,7 +139,7 @@ export const usePlotBoardIntegration = (
       });
 
       const chaptersRecord = projectChapters.reduce(
-        (acc: Record<string, any>, _chapter: any) => {
+        (acc: Record<string, unknown>, chapter: any) => {
           acc[chapter.id] = chapter;
           return acc;
         },
@@ -140,7 +163,7 @@ export const usePlotBoardIntegration = (
 
       try {
         const chaptersRecord = projectChapters.reduce(
-          (acc: Record<string, any>, _chapter: any) => {
+          (acc: Record<string, unknown>, chapter: any) => {
             acc[chapter.id] = chapter;
             return acc;
           },
@@ -159,7 +182,7 @@ export const usePlotBoardIntegration = (
     if (!boardId) return null;
 
     const chaptersRecord = projectChapters.reduce(
-      (acc: Record<string, any>, _chapter: any) => {
+      (acc: Record<string, unknown>, chapter: any) => {
         acc[chapter.id] = chapter;
         return acc;
       },

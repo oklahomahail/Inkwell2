@@ -27,11 +27,11 @@ import { useToast } from '@/context/toast';
 
 interface ClaudeToolbarProps {
   selectedText?: string;
-  onInsertText?: (_text: string, _replaceSelection?: boolean) => void;
+  onInsertText?: (text: string, replaceSelection?: boolean) => void;
   sceneTitle?: string;
   currentContent?: string;
-  position?: 'panel' | 'popup';
-  popupPosition?: { x: number; y: number };
+  position: 'panel' | 'popup';
+  popupPosition: { x: number; y: number };
   onClose?: () => void;
   className?: string;
 }
@@ -50,13 +50,13 @@ interface QuickPrompt {
 
 const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
   selectedText = '',
-  _onInsertText,
-  _sceneTitle = '',
-  _currentContent = '',
-  _position = 'panel',
-  _popupPosition = { x: 0, _y: 0 },
-  _onClose,
-  _className = '',
+  onInsertText,
+  sceneTitle = '',
+  currentContent = '',
+  position,
+  popupPosition,
+  onClose,
+  className = '',
 }) => {
   const { claudeActions } = useAppContext();
   const { showToast } = useToast();
@@ -70,7 +70,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
   const [showAllActions, setShowAllActions] = useState<boolean>(false); // NEW: Toggle for showing all actions
 
   // Enhanced icon mapping
-  const getIcon = (_iconName: string) => {
+  const getIcon = (iconName: string) => {
     const icons = {
       Sparkles,
       Zap,
@@ -94,7 +94,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: 'Continue Scene',
       shortLabel: 'Continue',
       icon: 'Pen',
-      prompt: (_text) =>
+      prompt: (text) =>
         `Continue this scene naturally, maintaining the current tone, pacing, and character voice. Build on the existing tension and move the story forward organically:\n\n"${text}"`,
       color: 'bg-blue-600 hover:bg-blue-700',
       category: 'generate',
@@ -105,7 +105,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: 'Add Emotion',
       shortLabel: 'Emotion',
       icon: 'Heart',
-      prompt: (_text) =>
+      prompt: (text) =>
         `Enhance this text with more emotional depth and character feelings. Show internal thoughts, physical reactions, and deepen the emotional impact without changing the core meaning:\n\n"${text}"`,
       color: 'bg-rose-600 hover:bg-rose-700',
       category: 'enhance',
@@ -117,7 +117,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: 'Improve Flow',
       shortLabel: 'Flow',
       icon: 'Zap',
-      prompt: (_text) =>
+      prompt: (text) =>
         `Improve the pacing and flow of this passage. Enhance transitions between sentences, vary sentence structure, and make the prose more engaging while preserving the author's voice:\n\n"${text}"`,
       color: 'bg-emerald-600 hover:bg-emerald-700',
       category: 'enhance',
@@ -131,7 +131,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: 'Improve Writing',
       shortLabel: 'Improve',
       icon: 'Sparkles',
-      prompt: (_text) =>
+      prompt: (text) =>
         `Improve this text for clarity, flow, and engagement while maintaining the original meaning and voice:\n\n"${text}"`,
       color: 'bg-purple-600 hover:bg-purple-700',
       category: 'enhance',
@@ -142,7 +142,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: 'Continue Writing',
       shortLabel: 'Continue',
       icon: 'Zap',
-      prompt: (_text) =>
+      prompt: (text) =>
         `Continue this story naturally from where it leaves off. Write the next 1-2 paragraphs, maintaining the same tone, style, and perspective:\n\n"${text}"`,
       color: 'bg-blue-600 hover:bg-blue-700',
       category: 'generate',
@@ -152,7 +152,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: 'Add Dialogue',
       shortLabel: 'Dialogue',
       icon: 'MessageSquare',
-      prompt: (_text) =>
+      prompt: (text) =>
         `Transform this narrative into engaging dialogue between characters. Maintain the story information but make it more dynamic through character conversation and interaction:\n\n"${text}"`,
       color: 'bg-indigo-600 hover:bg-indigo-700',
       category: 'enhance',
@@ -162,7 +162,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: "Show Don't Tell",
       shortLabel: 'Show',
       icon: 'Eye',
-      prompt: (_text) =>
+      prompt: (text) =>
         `Rewrite this text to 'show don't tell' - replace exposition with vivid scenes, actions, and sensory details that demonstrate what's happening rather than simply stating it:\n\n"${text}"`,
       color: 'bg-amber-600 hover:bg-amber-700',
       category: 'enhance',
@@ -173,7 +173,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: 'Add Details',
       shortLabel: 'Details',
       icon: 'Sparkles',
-      prompt: (_text) =>
+      prompt: (text) =>
         `Enhance this text with rich sensory details, vivid descriptions, and atmospheric elements. Add sight, sound, smell, touch, and taste details to make the scene more immersive:\n\n"${text}"`,
       color: 'bg-yellow-600 hover:bg-yellow-700',
       category: 'enhance',
@@ -183,7 +183,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: 'Rewrite Style',
       shortLabel: 'Rewrite',
       icon: 'RotateCcw',
-      prompt: (_text) =>
+      prompt: (text) =>
         `Rewrite this text with a different tone or style. Make it more engaging and vivid:\n\n"${text}"`,
       color: 'bg-green-600 hover:bg-green-700',
       category: 'enhance',
@@ -194,7 +194,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: 'Analyze Writing',
       shortLabel: 'Analyze',
       icon: 'Eye',
-      prompt: (_text) =>
+      prompt: (text) =>
         `Analyze this writing for pacing, character development, dialogue quality, and plot advancement. Provide specific feedback:\n\n"${text}"`,
       color: 'bg-orange-600 hover:bg-orange-700',
       category: 'analyze',
@@ -204,7 +204,7 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: 'Character Development',
       shortLabel: 'Character',
       icon: 'Users',
-      prompt: (_text) =>
+      prompt: (text) =>
         `Analyze the character development in this text. Suggest ways to deepen character voice, motivation, and growth:\n\n"${text}"`,
       color: 'bg-pink-600 hover:bg-pink-700',
       category: 'analyze',
@@ -214,8 +214,8 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       label: 'Brainstorm Ideas',
       shortLabel: 'Ideas',
       icon: 'Brain',
-      prompt: (_text, _context) =>
-        `Based on this scene "${sceneTitle}" and content: "${text}", brainstorm 5 creative directions this story could take next. Consider plot twists, character conflicts, and dramatic possibilities.`,
+      prompt: (text, context) =>
+        `Based on this scene "${context}" and content: "${text}", brainstorm 5 creative directions this story could take next. Consider plot twists, character conflicts, and dramatic possibilities.`,
       color: 'bg-emerald-600 hover:bg-emerald-700',
       category: 'generate',
     },

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, useId } from 'react';
 
 import { Command, CommandGroup } from '@/types/commands';
+import { cn } from '@/utils';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -217,13 +218,11 @@ export function _CommandPalette({
                       data-cmd-index={globalIndex}
                       onClick={() => void executeCommand(command)}
                       onMouseEnter={() => setSelectedIndex(globalIndex)}
-                      className={[
+                      className={cn(
                         'w-full px-4 py-3 text-left transition-colors',
                         'hover:bg-gray-100 dark:hover:bg-gray-700',
-                        isSelected
-                          ? 'bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-500'
-                          : '',
-                      ].join(' ')}
+                        isSelected && 'bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-500',
+                      )}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">

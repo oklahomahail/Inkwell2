@@ -30,7 +30,7 @@ export const Spinner: React.FC<SpinnerProps> = ({ size = 'md', className = '' })
 
 export const LoadingSpinner: React.FC<{ text?: string; size?: 'sm' | 'md' | 'lg' }> = ({
   text = 'Loading...',
-  _size = 'md',
+  size = 'md',
 }) => (
   <div className="flex items-center justify-center gap-3 p-4">
     <Spinner size={size} />
@@ -52,12 +52,12 @@ interface LoadingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 export const LoadingButton: React.FC<LoadingButtonProps> = ({
   loading = false,
-  _loadingText,
-  _variant = 'primary',
-  _size = 'md',
-  _children,
-  _className = '',
-  _disabled = false,
+  loadingText,
+  variant = 'primary',
+  size = 'md',
+  children,
+  className = '',
+  disabled = false,
   ...props
 }) => {
   const baseClasses =
@@ -105,8 +105,8 @@ interface SkeletonProps {
 
 export const Skeleton: React.FC<SkeletonProps> = ({
   className = '',
-  _width = 'w-full',
-  _height = 'h-4',
+  width = 'w-full',
+  height = 'h-4',
 }) => (
   <div
     className={`${width} ${height} bg-slate-200 dark:bg-slate-700 rounded animate-pulse ${className}`}
@@ -197,9 +197,9 @@ interface OperationFeedbackProps {
 
 export const OperationFeedback: React.FC<OperationFeedbackProps> = ({
   type,
-  _message,
-  _details,
-  _className = '',
+  message,
+  details,
+  className = '',
 }) => {
   const config = {
     loading: {
@@ -263,8 +263,8 @@ interface AutoSaveIndicatorProps {
 
 export const AutoSaveIndicator: React.FC<AutoSaveIndicatorProps> = ({
   status,
-  _lastSaved,
-  _className = '',
+  lastSaved,
+  className = '',
 }) => {
   const getStatusConfig = () => {
     switch (status) {
@@ -321,10 +321,10 @@ interface ProgressIndicatorProps {
 
 export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
   progress,
-  _text,
-  _showPercentage = true,
-  _size = 'md',
-  _className = '',
+  text,
+  showPercentage = true,
+  size = 'md',
+  className = '',
 }) => {
   const sizeClasses = {
     sm: 'h-1',

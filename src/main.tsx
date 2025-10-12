@@ -7,6 +7,9 @@ import App from './App';
 import { AppProviders } from './AppProviders';
 import './index.css';
 
+// Temporary safety shim – remove after migrating to utils/compact
+(window as any).compact = (arr: any[]) => (Array.isArray(arr) ? arr.filter(Boolean) : []);
+
 // Clean up legacy dark mode
 if (typeof window !== 'undefined') {
   // Clear theme storage

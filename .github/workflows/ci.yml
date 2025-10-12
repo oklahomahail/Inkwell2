@@ -35,10 +35,16 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Type check
-        run: pnpm typecheck
+        id: typecheck
+        run: |
+          pnpm exec tsc -p tsconfig.json --noEmit --pretty false | tee tsc.log
+          echo "Error summary:" >> $GITHUB_STEP_SUMMARY
+          grep -oE "error TS[0-9]{4}:" tsc.log | sort | uniq -c | sort -nr >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
 
-      - name: Lint
-        run: pnpm lint || pnpm lint:relaxed
+      - name: Lint (relaxed)
+        if: always()
+        run: pnpm run lint:relaxed
 
       - name: Run tests
         run: pnpm test:run

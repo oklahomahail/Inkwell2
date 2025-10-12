@@ -4,6 +4,8 @@ import { Plus, User, Palette } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { cn } from '@/utils';
+
 import { useProfileContext } from '../../context/ProfileContext';
 import { Profile } from '../../types/profile';
 
@@ -122,12 +124,42 @@ function _ProfilePicker() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to Inkwell</h1>
-          <p className="text-gray-600">Choose a profile to continue or create a new one</p>
-        </div>
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="max-w-2xl w-full">
+        {/* Brand header */}
+        <section
+          className={cn(
+            'relative overflow-hidden rounded-2xl border mb-8',
+            'border-zinc-200 bg-white',
+          )}
+        >
+          <div
+            className="absolute inset-0 pointer-events-none opacity-70"
+            aria-hidden="true"
+            style={{
+              background:
+                'radial-gradient(1200px 350px at 10% -10%, rgba(234, 179, 8, 0.08), transparent 60%),' + // gold glow
+                'radial-gradient(800px 250px at 90% 0%, rgba(37, 99, 235, 0.08), transparent 60%)', // blue glow
+            }}
+          />
+          <div className="relative z-10 flex flex-col gap-4 p-8 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-4">
+              {/* Feather mark */}
+              <FeatherMark className="h-12 w-12 shrink-0" />
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+                  Inkwell by Nexus Partners
+                </h1>
+                <p className="text-zinc-600">Find your Direction. Lead with Purpose.</p>
+              </div>
+            </div>
+            <div className="mt-4 md:mt-0">
+              <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                Professional AI-powered writing platform
+              </span>
+            </div>
+          </div>
+        </section>
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
@@ -260,6 +292,30 @@ function _ProfilePicker() {
         )}
       </div>
     </div>
+  );
+}
+
+function FeatherMark(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 64 64" {...props}>
+      <defs>
+        <linearGradient id="g" x1="0" x2="1">
+          <stop offset="0" stopColor="#facc15" />
+          <stop offset="1" stopColor="#eab308" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M50 6c-9 2-18 9-26 18C16 33 9 43 8 50c7-1 17-8 26-16C43 25 50 16 52 8l2-8-4 6z"
+        fill="url(#g)"
+      />
+      <path
+        d="M12 52c10-2 22-10 32-20"
+        stroke="#a16207"
+        strokeWidth="2"
+        fill="none"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 

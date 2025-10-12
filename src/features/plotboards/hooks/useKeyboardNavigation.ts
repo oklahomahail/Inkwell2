@@ -5,7 +5,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { PlotBoard, PlotColumn, PlotCard } from '../types';
 
-interface KeyboardNavigationState {
+interface _FocusState {
+  cardId: string | null;
+  columnId: string | null;
+}
+
+interface _KeyboardNavigationOptions {
   focusedCardId: string | null;
   focusedColumnId: string | null;
   draggedCardId: string | null;

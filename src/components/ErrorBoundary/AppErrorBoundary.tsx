@@ -6,16 +6,16 @@ import { InkwellLogo } from '@/components/Brand';
 
 interface Props {
   children: ReactNode;
-  fallback?: ReactNode;
-  level?: 'app' | 'feature' | 'component';
-  featureName?: string;
+  fallback?: ReactNode | undefined;
+  level?: 'app' | 'feature' | 'component' | undefined;
+  featureName?: string | undefined;
 }
 
 interface State {
   hasError: boolean;
-  error: Error | null;
-  errorInfo: ErrorInfo | null;
-  errorId: string | null;
+  error: Error | null | undefined;
+  errorInfo: ErrorInfo | null | undefined;
+  errorId: string | null | undefined;
   showDetails: boolean;
 }
 
@@ -24,15 +24,15 @@ interface ErrorReport {
   timestamp: string;
   userAgent: string;
   url: string;
-  userId?: string;
-  featureName?: string;
+  userId?: string | undefined;
+  featureName?: string | undefined;
   level: string;
   error: {
     message: string;
-    stack?: string;
+    stack?: string | undefined;
     name: string;
   };
-  componentStack?: string;
+  componentStack?: string | undefined;
   buildInfo: {
     version: string;
     environment: string;

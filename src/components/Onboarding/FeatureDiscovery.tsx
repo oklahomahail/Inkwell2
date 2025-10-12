@@ -287,7 +287,7 @@ const FeatureHintOverlay: React.FC = () => {
     hideHint(activeHint.id);
   };
 
-  const getPriorityColor = (_priority: FeatureHint['priority']) => {
+  const getPriorityColor = (priority: FeatureHint['priority']): string => {
     switch (priority) {
       case 'high':
         return 'border-blue-400 bg-blue-50 dark:bg-blue-900/20';
@@ -295,16 +295,20 @@ const FeatureHintOverlay: React.FC = () => {
         return 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20';
       case 'low':
         return 'border-gray-400 bg-gray-50 dark:bg-gray-800/50';
+      default:
+        return 'border-gray-400 bg-gray-50 dark:bg-gray-800/50';
     }
   };
 
-  const getPriorityIcon = (_priority: FeatureHint['priority']) => {
+  const getPriorityIcon = (priority: FeatureHint['priority']): React.ReactElement => {
     switch (priority) {
       case 'high':
         return <Sparkles className="w-4 h-4 text-blue-500" />;
       case 'medium':
         return <Lightbulb className="w-4 h-4 text-yellow-500" />;
       case 'low':
+        return <Lightbulb className="w-4 h-4 text-gray-500" />;
+      default:
         return <Lightbulb className="w-4 h-4 text-gray-500" />;
     }
   };
@@ -379,13 +383,13 @@ const FeatureHintOverlay: React.FC = () => {
 
 // Hook for triggering contextual hints based on conditions
 export const useContextualHints = (
-  _currentView: string,
-  _appState: {
+  currentView: string,
+  appState: {
     hasProjects: boolean;
     hasContent: boolean;
     userLevel: 'beginner' | 'intermediate' | 'advanced';
   },
-) => {
+): void => {
   const { showHint, hideHint, isHintDismissed } = useFeatureDiscovery();
   const { tourState } = useTour();
 
@@ -451,7 +455,7 @@ interface HintTriggerProps {
   className?: string;
 }
 
-export const HintTrigger: React.FC<HintTriggerProps> = ({ hintId, _children, _className = '' }) => {
+export const HintTrigger: React.FC<HintTriggerProps> = ({ hintId, children, className = '' }) => {
   const { showHint, hideHint, isHintDismissed } = useFeatureDiscovery();
 
   if (isHintDismissed(hintId)) {
