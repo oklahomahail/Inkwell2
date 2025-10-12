@@ -6,16 +6,9 @@ import { FeatureFlagManager } from '../FeatureFlagManager';
 import { FeatureGate, useFeatureFlag, withFeatureFlag } from '../featureFlags.react';
 
 // Mock feature flags module
+import { TEST_FLAGS } from './testFlags';
 vi.mock('../featureFlags.config', () => ({
-  FEATURE_FLAGS: {
-    EXPORT_WIZARD: {
-      key: 'exportWizard',
-      name: 'Export Wizard',
-      description: 'Test feature',
-      defaultValue: true,
-      category: 'core',
-    },
-  },
+  FEATURE_FLAGS: TEST_FLAGS,
 }));
 
 // Mock localStorage

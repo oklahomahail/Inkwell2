@@ -19,40 +19,8 @@ const mockLocalStorage = {
   },
 };
 
-// Mock feature flags module
-const TEST_FLAGS = {
-  PLOT_BOARDS: {
-    key: 'plotBoards',
-    name: 'Plot Boards',
-    description: 'Test feature',
-    defaultValue: false,
-    category: 'experimental',
-  },
-  EXPORT_WIZARD: {
-    key: 'exportWizard',
-    name: 'Export Wizard',
-    description: 'Test feature',
-    defaultValue: true,
-    category: 'core',
-  },
-  ADVANCED_EXPORT: {
-    key: 'advancedExport',
-    name: 'Advanced Export',
-    description: 'Test feature',
-    defaultValue: false,
-    category: 'experimental',
-    dependencies: ['exportWizard'],
-  },
-  DEBUG_STATE: {
-    key: 'debugState',
-    name: 'Debug State',
-    description: 'Test feature',
-    defaultValue: false,
-    category: 'debug',
-  },
-};
-
 // Mock the config module
+import { TEST_FLAGS } from './testFlags';
 vi.mock('../featureFlags.config', () => ({
   FEATURE_FLAGS: TEST_FLAGS,
 }));
