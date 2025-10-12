@@ -7,9 +7,11 @@ import { FeatureGate, useFeatureFlag, withFeatureFlag } from '../featureFlags.re
 
 // Mock feature flags module
 import { TEST_FLAGS } from './testFlags';
-vi.mock('../featureFlags.config', () => ({
-  FEATURE_FLAGS: TEST_FLAGS,
-}));
+vi.mock('../featureFlags.config', () => {
+  return {
+    FEATURE_FLAGS: TEST_FLAGS,
+  };
+});
 
 // Mock localStorage
 const mockLocalStorage = {

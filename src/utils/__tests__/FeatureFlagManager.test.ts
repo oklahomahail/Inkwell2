@@ -19,29 +19,30 @@ const mockLocalStorage = {
   },
 };
 
-// Mock the config module
 import { TEST_FLAGS } from './testFlags';
-vi.mock('../featureFlags.config', () => ({
-  FEATURE_FLAGS: TEST_FLAGS,
-}));
+
+// Mock the config module
+vi.mock('../featureFlags.config', () => {
+  return {
+    FEATURE_FLAGS: TEST_FLAGS,
+  };
+});
+
+// Place beforeEach at top level
+beforeEach(() => {
+  // Reset localStorage
+  mockLocalStorage.clear();
+
+  // Reset singleton
+  FeatureFlagManager['instance'] = null;
+
+  // Mock storage
+  Object.defineProperty(window, 'localStorage', {
+    value: mockLocalStorage,
+  });
+});
 
 describe('FeatureFlagManager', () => {
-  beforeEach(() => {
-    // Reset localStorage
-    mockLocalStorage.clear();
-
-    // Reset singleton
-    FeatureFlagManager['instance'] = null;
-
-    // Mock storage
-    Object.defineProperty(window, 'localStorage', {
-      value: mockLocalStorage,
-    });
-  });
-
-  afterEach(() => {
-    mockLocalStorage.clear();
-  });
   let manager: FeatureFlagManager;
 
   beforeEach(() => {
