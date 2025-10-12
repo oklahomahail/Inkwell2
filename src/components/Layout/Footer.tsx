@@ -1,6 +1,7 @@
 // src/components/Layout/Footer.tsx
 import React from 'react';
 
+import { TAGLINE_SECONDARY } from '@/constants';
 import { cn } from '@/utils';
 
 export function _Footer() {
@@ -17,7 +18,7 @@ export function _Footer() {
           <FeatherMark className="h-6 w-6 shrink-0" />
           <div className="text-left">
             <p className="font-medium text-zinc-900">Inkwell by Nexus Partners</p>
-            <p className="text-zinc-500">Because great stories deserve great tools.</p>
+            <p className="text-zinc-500">{TAGLINE_SECONDARY}</p>
           </div>
         </div>
 
