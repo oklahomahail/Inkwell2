@@ -5,45 +5,53 @@ import { useUIReady } from '@/context/AppContext';
 import { TourStorage } from '@/services/TourStorage';
 
 import { TourController } from '../tour-core/TourController';
-import { isProfilesRoute } from '../utils/routeGuards';
+import { debugTour } from '../utils/debug';
+import { shouldBlockTourHere } from '../utils/routeGuards';
 import { hasStartedOnce, markStarted } from '../utils/tourOnce';
 
-export function useSimpleTourAutostart() {
+export function useSimpleTourAutostart(profileId?: string) {
   const location = useLocation();
   const uiReady = useUIReady();
-  const startedRef = useRef(false);
   const storage = TourStorage.forCurrentProfile();
-  const profileId = storage.profileId;
+  const effectiveProfileId = profileId ?? storage.profileId ?? 'default';
+  const gateRef = useRef({ started: false, token: 0 });
 
   useEffect(() => {
-    const DEBUG = true; // Set to false in production
-    if (DEBUG) {
-      console.debug('[SimpleTour] Location:', location);
-      console.debug('[SimpleTour] Route blocked?', isProfilesRoute(location));
+    if (shouldBlockTourHere(location)) {
+      debugTour('autostart:blocked', { route: location.pathname, tour: 'simple' });
+      return;
     }
-    if (startedRef.current) return;
     if (!uiReady) return;
-    if (isProfilesRoute(location)) return;
-    if (storage.get('simpleTour.completed')) return;
-    if (storage.get('simpleTour.dismissed')) return;
-    if (hasStartedOnce(profileId, 'simple')) return;
+    if (gateRef.current.started) {
+      debugTour('autostart:ref-guard-hit', { tour: 'simple' });
+      return;
+    }
+    if (storage.get('simpleTour.completed') || storage.get('simpleTour.dismissed')) return;
+    if (hasStartedOnce(effectiveProfileId, 'simple')) {
+      debugTour('autostart:once-guard-hit', { tour: 'simple' });
+      return;
+    }
 
-    const token = Symbol('tour-start:simple');
-    (window as any).__tourStartTokenSimple = token;
+    const myToken = ++gateRef.current.token;
 
-    queueMicrotask(() => {
-      if ((window as any).__tourStartTokenSimple !== token) return;
-      TourController.start('simple');
-      startedRef.current = true;
-      markStarted(profileId, 'simple');
-      storage.set('simpleTour.lastAutostartAt', Date.now());
-    });
-
-    return () => {
-      // invalidate this token on cleanup
-      if ((window as any).__tourStartTokenSimple === token) {
-        (window as any).__tourStartTokenSimple = null;
+    queueMicrotask(async () => {
+      if (gateRef.current.started || gateRef.current.token !== myToken) {
+        debugTour('autostart:token-mismatch', {
+          tour: 'simple',
+          myToken,
+          token: gateRef.current.token,
+        });
+        return;
       }
-    };
-  }, [location, uiReady, storage, profileId]);
+
+      // Start tour via controller singleton
+      const ok = await TourController.startTour('simple', effectiveProfileId);
+      if (!ok) return;
+
+      gateRef.current.started = true;
+      markStarted(effectiveProfileId, 'simple');
+      storage.set('simpleTour.lastAutostartAt', Date.now());
+      debugTour('autostart:started', { tour: 'simple', route: location.pathname });
+    });
+  }, [location, uiReady, storage, effectiveProfileId]);
 }

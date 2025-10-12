@@ -5,7 +5,8 @@ import { useUIReady } from '@/context/AppContext';
 import { TourStorage } from '@/services/TourStorage';
 
 import { TourController } from '../tour-core/TourController';
-import { isProfilesRoute } from '../utils/routeGuards';
+import { debugTour } from '../utils/debug';
+import { shouldBlockTourHere } from '../utils/routeGuards';
 import { hasStartedOnce, markStarted } from '../utils/tourOnce';
 import { waitForElement } from '../utils/waitForElement';
 
@@ -13,34 +14,38 @@ interface StartOpts {
   timeoutMs?: number;
 }
 
-export function useSpotlightAutostart(opts: StartOpts = {}) {
+export function useSpotlightAutostart(profileId?: string, opts: StartOpts = {}) {
   const { timeoutMs = 8000 } = opts;
   const location = useLocation();
   const uiReady = useUIReady();
-  const startedRef = useRef(false);
   const storage = TourStorage.forCurrentProfile();
-  const profileId = storage.profileId;
+  const effectiveProfileId = profileId ?? storage.profileId ?? 'default';
+  const gateRef = useRef({ started: false, token: 0 });
 
   useEffect(() => {
-    const DEBUG = true; // Set to false in production
-    if (DEBUG) {
-      console.debug('[SpotlightTour] Location:', location);
-      console.debug('[SpotlightTour] Route blocked?', isProfilesRoute(location));
+    if (shouldBlockTourHere(location)) {
+      debugTour('autostart:blocked', { route: location.pathname, tour: 'spotlight' });
+      return;
     }
-    if (startedRef.current) return;
     if (!uiReady) return;
-    if (isProfilesRoute(location)) return;
-    if (storage.get('spotlightTour.completed')) return;
-    if (storage.get('spotlightTour.dismissed')) return;
-    if (hasStartedOnce(profileId, 'spotlight')) return;
+    if (gateRef.current.started) {
+      debugTour('autostart:ref-guard-hit', { tour: 'spotlight' });
+      return;
+    }
+    if (storage.get('spotlightTour.completed') || storage.get('spotlightTour.dismissed')) return;
+    if (hasStartedOnce(effectiveProfileId, 'spotlight')) {
+      debugTour('autostart:once-guard-hit', { tour: 'spotlight' });
+      return;
+    }
 
     let cancelled = false;
+    const myToken = ++gateRef.current.token;
 
     (async () => {
       const steps = TourController.getSteps('spotlight');
       const firstWithSelector = steps.find((s) => s.target);
       if (!firstWithSelector) {
-        console.warn('[SpotlightTour] No steps with a target selector.');
+        debugTour('autostart:no-steps', { tour: 'spotlight' });
         return;
       }
 
@@ -53,7 +58,7 @@ export function useSpotlightAutostart(opts: StartOpts = {}) {
 
         if (cancelled) return;
         if (!el) {
-          console.warn('[SpotlightTour] Target never appeared:', firstWithSelector.target);
+          debugTour('autostart:no-target', { tour: 'spotlight', target: firstWithSelector.target });
           return;
         }
 
@@ -62,26 +67,34 @@ export function useSpotlightAutostart(opts: StartOpts = {}) {
           .filter((s) => !document.querySelector(s.target!))
           .map((s) => s.target);
         if (unresolved.length) {
-          console.debug('[SpotlightTour] Unresolved selectors:', unresolved);
+          debugTour('autostart:unresolved-targets', { tour: 'spotlight', unresolved });
           return;
         }
 
-        const token = Symbol('tour-start:spotlight');
-        (window as any).__tourStartTokenSpotlight = token;
+        queueMicrotask(async () => {
+          if (gateRef.current.started || gateRef.current.token !== myToken) {
+            debugTour('autostart:token-mismatch', {
+              tour: 'spotlight',
+              myToken,
+              token: gateRef.current.token,
+            });
+            return;
+          }
 
-        queueMicrotask(() => {
-          if ((window as any).__tourStartTokenSpotlight !== token) return;
-          TourController.start('spotlight');
-          startedRef.current = true;
-          markStarted(profileId, 'spotlight');
+          const ok = await TourController.startTour('spotlight', effectiveProfileId);
+          if (!ok) return;
+
+          gateRef.current.started = true;
+          markStarted(effectiveProfileId, 'spotlight');
+          debugTour('autostart:started', { tour: 'spotlight', route: location.pathname });
         });
       } catch (e) {
-        console.warn('[SpotlightTour] waitForElement failed', e);
+        debugTour('autostart:error', { tour: 'spotlight', error: e });
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [location, uiReady, timeoutMs, storage, profileId]);
+  }, [location, uiReady, timeoutMs, storage, effectiveProfileId]);
 }
