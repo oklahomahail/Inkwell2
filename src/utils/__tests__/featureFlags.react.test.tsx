@@ -1,54 +1,58 @@
 import { render, screen, act } from '@testing-library/react';
 import React from 'react';
+import { vi, beforeEach } from 'vitest';
 
-import { FeatureFlagConfig } from '../../types/featureFlags';
 import { FeatureFlagManager } from '../FeatureFlagManager';
 import { FeatureGate, useFeatureFlag, withFeatureFlag } from '../featureFlags.react';
 
-// Test flags configuration
-const TEST_FLAGS: FeatureFlagConfig = {
-  EXPORT_WIZARD: {
-    key: 'exportWizard',
-    name: 'Export Wizard',
-    description: 'Test feature',
-    defaultValue: true,
-    category: 'core',
-  },
-};
-
+// Mock feature flags module
 vi.mock('../featureFlags.config', () => ({
-  FEATURE_FLAGS: TEST_FLAGS,
+  default: {
+    FEATURE_FLAGS: {
+      EXPORT_WIZARD: {
+        key: 'exportWizard',
+        name: 'Export Wizard',
+        description: 'Test feature',
+        defaultValue: true,
+        category: 'core',
+      },
+    },
+  },
 }));
-
-// Ensure window.location is defined
-Object.defineProperty(window, 'location', {
-  value: new URL('http://localhost:3000'),
-});
 
 // Mock localStorage
 const mockLocalStorage = {
-  store: {} as { [key: string]: string },
+  store: {} as Record<string, string>,
   getItem(key: string) {
-    return this.store[key];
+    return this.store[key] ?? null;
   },
   setItem(key: string, value: string) {
     this.store[key] = value;
+  },
+  removeItem(key: string) {
+    delete this.store[key];
   },
   clear() {
     this.store = {};
   },
 };
 
-Object.defineProperty(window, 'localStorage', {
-  value: mockLocalStorage,
-});
-
 describe('Feature Flag React Integration', () => {
   beforeEach(() => {
     // Reset localStorage
-    localStorage.clear();
+    mockLocalStorage.clear();
 
-    // Reset FeatureFlagManager instance
+    // Mock storage
+    Object.defineProperty(window, 'localStorage', {
+      value: mockLocalStorage,
+    });
+
+    // Mock location
+    Object.defineProperty(window, 'location', {
+      value: new URL('http://localhost:3000'),
+    });
+
+    // Reset singleton
     FeatureFlagManager['instance'] = null;
   });
 
