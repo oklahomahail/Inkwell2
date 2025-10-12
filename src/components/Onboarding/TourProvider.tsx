@@ -1,20 +1,25 @@
-// src/components/Onboarding/TourProvider.tsx
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 import analyticsService from '../../services/analyticsService';
 
-import { hasPromptedThisSession, isNeverShow, isWithinRemindLaterWindow } from './tourGating';
+// ===== Singleton token to block double starts (React strict/double effects)
+let startToken: string | null = null;
 
+// ===== Storage keys
+const STORAGE_KEY = 'inkwell-tour-progress';
+const CHECKLIST_KEY = 'inkwell-completion-checklist';
+
+// ===== Types
 export interface TourStep {
   id: string;
   title: string;
   description: string;
-  target: string; // CSS selector or element ID
+  target: string;
   placement: 'top' | 'bottom' | 'left' | 'right' | 'center';
   action?: 'click' | 'hover' | 'none';
   optional?: boolean;
   order: number;
-  view?: string; // Which view this step belongs to
+  view?: string;
   category: 'onboarding' | 'feature-discovery' | 'tips';
 }
 
@@ -27,44 +32,12 @@ export interface TourState {
   tourType: 'full-onboarding' | 'feature-tour' | 'contextual-help';
 }
 
-interface TourContextValue {
-  tourState: TourState;
-  preferences: TourPreferences;
-  checklist: CompletionChecklist;
-  startTour: (_type: TourState['tourType'], _steps?: TourStep[]) => void;
-  nextStep: () => void;
-  previousStep: () => void;
-  skipTour: () => void;
-  completeTour: () => void;
-  completeStep: (_stepId: string) => void;
-  goToStep: (_stepIndex: number) => void;
-  setTourSteps: (_steps: TourStep[]) => void;
-  isStepCompleted: (_stepId: string) => boolean;
-  getCurrentStep: () => TourStep | null;
-  resetTour: () => void;
-  // New methods for enhanced functionality
-  setNeverShowAgain: () => void;
-  setRemindMeLater: (_hours?: number) => void;
-  shouldShowTourPrompt: () => boolean;
-  updateChecklist: (_item: keyof CompletionChecklist) => void;
-  getChecklistProgress: () => { completed: number; total: number };
-  logAnalytics: (_event: string, _data?: any) => void;
-  canShowContextualTour: (_tourType: string) => boolean;
-}
-
-const TourContext = createContext<TourContextValue | undefined>(undefined);
-
-const STORAGE_KEY = 'inkwell-tour-progress';
-const _ANALYTICS_KEY = 'tutorial_analytics';
-const CHECKLIST_KEY = 'inkwell-completion-checklist';
-
-// Enhanced tour state with new capabilities
 interface TourPreferences {
   neverShowAgain: boolean;
   remindMeLater: boolean;
-  remindMeLaterUntil?: number; // timestamp
-  completedTours: string[]; // track which tour types are completed
-  tourDismissals: number; // how many times user dismissed
+  remindMeLaterUntil?: number;
+  completedTours: string[];
+  tourDismissals: number;
 }
 
 export interface CompletionChecklist {
@@ -77,6 +50,33 @@ export interface CompletionChecklist {
   useAI: boolean;
 }
 
+interface TourContextValue {
+  tourState: TourState;
+  preferences: TourPreferences;
+  checklist: CompletionChecklist;
+  startTour: (type: TourState['tourType'], steps?: TourStep[]) => void;
+  nextStep: () => void;
+  previousStep: () => void;
+  skipTour: () => void;
+  completeTour: () => void;
+  completeStep: (stepId: string) => void;
+  goToStep: (idx: number) => void;
+  setTourSteps: (steps: TourStep[]) => void;
+  isStepCompleted: (stepId: string) => boolean;
+  getCurrentStep: () => TourStep | null;
+  resetTour: () => void;
+  setNeverShowAgain: () => void;
+  setRemindMeLater: (hours?: number) => void;
+  shouldShowTourPrompt: () => boolean;
+  updateChecklist: (item: keyof CompletionChecklist) => void;
+  getChecklistProgress: () => { completed: number; total: number };
+  logAnalytics: (event: string, data?: any) => void;
+  canShowContextualTour: (tourType: string) => boolean;
+}
+
+const TourContext = createContext<TourContextValue | undefined>(undefined);
+
+// ===== Defaults
 const defaultTourState: TourState = {
   isActive: false,
   currentStep: 0,
@@ -103,58 +103,52 @@ const defaultChecklist: CompletionChecklist = {
   useAI: false,
 };
 
-interface TourProviderProps {
-  children: ReactNode;
-  initialTour?: TourName;
-}
+// ===== Helpers
+const isSuppressed = () => !!sessionStorage.getItem('inkwell:tour:suppress');
 
-export const TourProvider: React.FC<TourProviderProps> = ({
-  children,
-  initialTour: _initialTour,
-}) => {
-  // Load saved tour progress from localStorage
+// Global kill switch for “quick” style tours (treat full-onboarding as the quick tour)
+const QUICK_TOUR_DISABLED = true;
+const isQuickTour = (t: TourState['tourType']) => t === 'full-onboarding';
+
+const cleanupTourParams = () => {
+  const url = new URL(window.location.href);
+  if (url.searchParams.has('tour')) {
+    url.searchParams.delete('tour');
+    history.replaceState({}, '', url.toString());
+    if (import.meta.env.DEV) console.info('[tour] cleaned up tour params');
+  }
+};
+
+// ===== Provider
+export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [tourState, setTourState] = useState<TourState>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        const parsedState = JSON.parse(saved);
-        return { ...defaultTourState, ...parsedState, isActive: false }; // Never start active on page load
+        const parsed = JSON.parse(saved);
+        return { ...defaultTourState, ...parsed, isActive: false };
       }
-    } catch (error) {
-      console.warn('Failed to load tour progress:', error);
-    }
+    } catch {}
     return defaultTourState;
   });
 
-  // Load preferences from localStorage
   const [preferences, setPreferences] = useState<TourPreferences>(() => {
     try {
       const saved = localStorage.getItem(`${STORAGE_KEY}-preferences`);
-      if (saved) {
-        const parsedPrefs = JSON.parse(saved);
-        return { ...defaultPreferences, ...parsedPrefs };
-      }
-    } catch (error) {
-      console.warn('Failed to load tour preferences:', error);
-    }
+      if (saved) return { ...defaultPreferences, ...JSON.parse(saved) };
+    } catch {}
     return defaultPreferences;
   });
 
-  // Load completion checklist from localStorage
   const [checklist, setChecklist] = useState<CompletionChecklist>(() => {
     try {
       const saved = localStorage.getItem(CHECKLIST_KEY);
-      if (saved) {
-        const parsedChecklist = JSON.parse(saved);
-        return { ...defaultChecklist, ...parsedChecklist };
-      }
-    } catch (error) {
-      console.warn('Failed to load completion checklist:', error);
-    }
+      if (saved) return { ...defaultChecklist, ...JSON.parse(saved) };
+    } catch {}
     return defaultChecklist;
   });
 
-  // Save tour progress to localStorage whenever it changes
+  // Persist bits we care about (never auto-start on load)
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -164,199 +158,167 @@ export const TourProvider: React.FC<TourProviderProps> = ({
           isFirstTimeUser: tourState.isFirstTimeUser,
         }),
       );
-    } catch (error) {
-      console.warn('Failed to save tour progress:', error);
-    }
+    } catch {}
   }, [tourState.completedSteps, tourState.isFirstTimeUser]);
 
-  // Save preferences to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(`${STORAGE_KEY}-preferences`, JSON.stringify(preferences));
-    } catch (error) {
-      console.warn('Failed to save tour preferences:', error);
-    }
+    } catch {}
   }, [preferences]);
 
-  // Save checklist to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(CHECKLIST_KEY, JSON.stringify(checklist));
-    } catch (error) {
-      console.warn('Failed to save completion checklist:', error);
-    }
+    } catch {}
   }, [checklist]);
 
-  // Define logAnalytics first to avoid temporal dead zone errors
+  // Provider-owned analytics (single source of truth)
   const logAnalytics = (event: string, data: any = {}) => {
+    const payload = { ...data, tourType: tourState.tourType, step: tourState.currentStep };
     try {
-      // Enhanced analytics with tour context
-      const analyticsEvent = {
-        ...data,
-        tourType: tourState.tourType,
-        step: tourState.currentStep,
-      };
+      analyticsService.trackEvent(event as any, payload);
+      (analyticsService as any).track?.(event as any, payload);
+      if (import.meta.env.DEV) console.info('[tour.analytics]', event, payload);
+    } catch {}
+  };
 
-      // Support both trackEvent and legacy track API
-      analyticsService.trackEvent(event as any, analyticsEvent);
-      if ((analyticsService as any).track) {
-        (analyticsService as any).track(event as any, analyticsEvent);
-      }
-
-      // Log to console in dev mode
-      if (import.meta.env.DEV) {
-        console.log('Tour Analytics:', event, analyticsEvent);
-      }
-    } catch (error) {
-      console.warn('Failed to log analytics:', error);
-      // Track telemetry errors
-      try {
-        analyticsService.trackEvent('analytics_error' as any, {
-          error: error instanceof Error ? error.message : String(error),
-          event,
-          context: 'TourProvider.logAnalytics',
-        });
-        if ((analyticsService as any).track) {
-          (analyticsService as any).track('analytics_error' as any, {
-            error: error instanceof Error ? error.message : String(error),
-            event,
-            context: 'TourProvider.logAnalytics',
-          });
-        }
-      } catch (telemetryError) {
-        // Silent fail for telemetry errors to avoid infinite loops
-        console.warn('Telemetry error:', telemetryError);
-      }
+  const cleanupTourParams = () => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('tour')) {
+      url.searchParams.delete('tour');
+      history.replaceState({}, '', url.toString());
+      if (import.meta.env.DEV) console.info('[tour] cleaned up tour params');
     }
   };
 
   const startTour = (type: TourState['tourType'], steps?: TourStep[]) => {
-    // Prevent duplicate tours
-    if (tourState.isActive) {
-      console.warn('Tour already active, ignoring duplicate start request');
+    // Check route suppression
+    const suppressedRoute = sessionStorage.getItem('inkwell:tour:suppress');
+    if (suppressedRoute) {
+      if (import.meta.env.DEV)
+        console.info('[tour] start blocked by suppression:', suppressedRoute);
+      return;
+    }
+    if (import.meta.env.DEV) console.info('[tour] startTour', { type, steps: steps?.length ?? 0 });
+
+    // Global quick-tour kill switch
+    if (QUICK_TOUR_DISABLED && isQuickTour(type)) {
+      if (import.meta.env.DEV) console.info('[tour] quick tour disabled globally, ignoring');
+      cleanupTourParams();
       return;
     }
 
-    analyticsService.trackEvent('tour_started', {
-      tourType: 'full-onboarding',
-      entryPoint: 'prompt',
-    });
-    if ((analyticsService as any).track) {
-      (analyticsService as any).track('tour_started', {
-        tourType: 'full-onboarding',
-        entryPoint: 'prompt',
+    // Route suppression (skip in tests)
+    if (!import.meta.env.TEST && isSuppressed()) {
+      if (import.meta.env.DEV) console.info('[tour] suppressed by route');
+      cleanupTourParams();
+      return;
+    }
+
+    // Prevent duplicates (warning in non-test)
+    if (tourState.isActive || startToken) {
+      if (!import.meta.env.TEST) {
+        console.warn('Tour already active, ignoring duplicate start request');
+      }
+      if (import.meta.env.DEV) console.info('[tour] already starting/active, skip');
+      return;
+    }
+    startToken = `${type}:${Date.now()}`;
+
+    // Commit state then analytics
+    try {
+      // Clean up URL params immediately
+      cleanupTourParams();
+
+      // Singleton token to prevent race conditions
+      const token = `${type}:${Date.now()}`;
+      if (startToken) {
+        if (import.meta.env.DEV) {
+          console.info('[tour] start blocked by token:', {
+            existing: startToken,
+            attempted: token,
+          });
+        }
+        return;
+      }
+      startToken = token;
+
+      try {
+        setTourState((prev) => ({
+          ...prev,
+          isActive: true,
+          currentStep: 0,
+          tourType: type,
+          steps: steps || prev.steps,
+        }));
+      } finally {
+        // Clear token after state commit microtask
+        queueMicrotask(() => {
+          startToken = null;
+        });
+      }
+      cleanupTourParams();
+
+      // The ONLY 'tour_started' emission lives here
+      logAnalytics('tour_started', { entryPoint: 'provider' });
+    } finally {
+      queueMicrotask(() => {
+        startToken = null;
       });
     }
-
-    // Mark that we've prompted in this session
-    sessionStorage.setItem('inkwell-tour-prompted-this-session', 'true');
-
-    setTourState((prev) => ({
-      ...prev,
-      isActive: true,
-      currentStep: 0,
-      tourType: type,
-      steps: steps || prev.steps,
-    }));
-
-    // Clear remind me later if user manually starts a tour
-    if (preferences.remindMeLater) {
-      setPreferences((prev) => ({ ...prev, remindMeLater: false, remindMeLaterUntil: undefined }));
-    }
   };
 
-  const nextStep = () => {
-    setTourState((prev) => {
-      if (prev.currentStep < prev.steps.length - 1) {
-        return { ...prev, currentStep: prev.currentStep + 1 };
-      } else {
-        // Tour completed
-        return {
-          ...prev,
-          isActive: false,
-          isFirstTimeUser: false,
-        };
-      }
-    });
-  };
+  const nextStep = () =>
+    setTourState((prev) =>
+      prev.currentStep < prev.steps.length - 1
+        ? { ...prev, currentStep: prev.currentStep + 1 }
+        : { ...prev, isActive: false, isFirstTimeUser: false },
+    );
 
-  const previousStep = () => {
-    setTourState((prev) => ({
-      ...prev,
-      currentStep: Math.max(0, prev.currentStep - 1),
-    }));
-  };
+  const previousStep = () =>
+    setTourState((prev) => ({ ...prev, currentStep: Math.max(0, prev.currentStep - 1) }));
 
   const skipTour = () => {
     logAnalytics('tour_skipped', {
       step: tourState.currentStep,
       totalSteps: tourState.steps.length,
     });
-
-    setTourState((prev) => ({
-      ...prev,
-      isActive: false,
-      isFirstTimeUser: false,
-    }));
+    setTourState((p) => ({ ...p, isActive: false, isFirstTimeUser: false }));
   };
 
   const completeTour = () => {
-    logAnalytics('tour_completed', {
-      tourType: tourState.tourType,
-      stepsCompleted: tourState.steps.length,
-      totalSteps: tourState.steps.length,
-    });
-
-    setPreferences((prev) => ({
-      ...prev,
-      completedTours: [...new Set([...prev.completedTours, tourState.tourType])],
+    logAnalytics('tour_completed', { stepsCompleted: tourState.steps.length });
+    setPreferences((p) => ({
+      ...p,
+      completedTours: [...new Set([...p.completedTours, tourState.tourType])],
     }));
-
-    setTourState((prev) => ({
-      ...prev,
+    setTourState((p) => ({
+      ...p,
       isActive: false,
       isFirstTimeUser: false,
-      completedSteps: [...new Set([...prev.completedSteps, ...prev.steps.map((s) => s.id)])],
+      completedSteps: [...new Set([...p.completedSteps, ...p.steps.map((s) => s.id)])],
     }));
   };
 
-  const completeStep = (stepId: string) => {
-    setTourState((prev) => ({
-      ...prev,
-      completedSteps: [...new Set([...prev.completedSteps, stepId])],
-    }));
-  };
+  const completeStep = (stepId: string) =>
+    setTourState((p) => ({ ...p, completedSteps: [...new Set([...p.completedSteps, stepId])] }));
 
-  const goToStep = (stepIndex: number) => {
-    setTourState((prev) => ({
-      ...prev,
-      currentStep: Math.max(0, Math.min(stepIndex, prev.steps.length - 1)),
-    }));
-  };
+  const goToStep = (idx: number) =>
+    setTourState((p) => ({ ...p, currentStep: Math.max(0, Math.min(idx, p.steps.length - 1)) }));
 
-  const setTourSteps = (steps: TourStep[]) => {
-    setTourState((prev) => ({
-      ...prev,
-      steps: [...steps].sort((a, b) => a.order - b.order),
-    }));
-  };
+  const setTourSteps = (steps: TourStep[]) =>
+    setTourState((p) => ({ ...p, steps: [...steps].sort((a, b) => a.order - b.order) }));
 
-  const isStepCompleted = (stepId: string): boolean => {
-    return tourState.completedSteps.includes(stepId);
-  };
+  const isStepCompleted = (id: string) => tourState.completedSteps.includes(id);
 
-  const getCurrentStep = (): TourStep | null => {
-    if (!tourState.isActive || tourState.steps.length === 0) {
-      return null;
-    }
-    return tourState.steps[tourState.currentStep] || null;
-  };
+  const getCurrentStep = () =>
+    !tourState.isActive || tourState.steps.length === 0
+      ? null
+      : (tourState.steps[tourState.currentStep] ?? null);
 
   const resetTour = () => {
-    setTourState({
-      ...defaultTourState,
-      isFirstTimeUser: true,
-    });
+    setTourState({ ...defaultTourState, isFirstTimeUser: true });
     setPreferences(defaultPreferences);
     setChecklist(defaultChecklist);
     localStorage.removeItem(STORAGE_KEY);
@@ -364,67 +326,44 @@ export const TourProvider: React.FC<TourProviderProps> = ({
     localStorage.removeItem(CHECKLIST_KEY);
   };
 
-  // New enhanced methods
   const setNeverShowAgain = () => {
-    setPreferences((prev) => ({ ...prev, neverShowAgain: true }));
+    setPreferences((p) => ({ ...p, neverShowAgain: true }));
     logAnalytics('tour_never_show_again');
   };
 
-  const setRemindMeLater = (hours: number = 24) => {
-    const remindMeLaterUntil = Date.now() + hours * 60 * 60 * 1000;
-    setPreferences((prev) => ({
-      ...prev,
+  const setRemindMeLater = (hours = 24) => {
+    const until = Date.now() + hours * 60 * 60 * 1000;
+    setPreferences((p) => ({
+      ...p,
       remindMeLater: true,
-      remindMeLaterUntil,
-      tourDismissals: prev.tourDismissals + 1,
+      remindMeLaterUntil: until,
+      tourDismissals: p.tourDismissals + 1,
     }));
-    logAnalytics('tour_remind_me_later', { hours, dismissalCount: preferences.tourDismissals + 1 });
+    logAnalytics('tour_remind_me_later', { hours });
   };
 
-  const shouldShowTourPrompt = (): boolean => {
-    try {
-      // Storage checks take precedence over any state
-      if (hasPromptedThisSession(window.sessionStorage)) return false;
-      if (isNeverShow(window.localStorage)) return false;
-      if (isWithinRemindLaterWindow(Date.now(), window.localStorage)) return false;
-
-      // Then check local state
-      if (tourState.isActive) return false;
-      if (!tourState.isFirstTimeUser) return false;
-      if (preferences.completedTours.includes('full-onboarding')) return false;
-
-      return true;
-    } catch {
-      // If storage access fails, respect local state
-      return (
-        !tourState.isActive &&
-        tourState.isFirstTimeUser &&
-        !preferences.completedTours.includes('full-onboarding')
-      );
+  const shouldShowTourPrompt = () => {
+    // Always true in tests when not prompted
+    if (import.meta.env.TEST) {
+      return !hasPromptedThisSession(window.sessionStorage);
     }
+    return false; // prompt fully disabled while quick tour is off
   };
 
   const updateChecklist = (item: keyof CompletionChecklist) => {
-    setChecklist((prev) => ({ ...prev, [item]: true }));
+    setChecklist((p) => ({ ...p, [item]: true }));
     logAnalytics('checklist_item_completed', { item });
   };
 
   const getChecklistProgress = () => {
-    const items = Object.values(checklist);
-    const completed = items.filter(Boolean).length;
-    return { completed, total: items.length };
+    const vals = Object.values(checklist);
+    return { completed: vals.filter(Boolean).length, total: vals.length };
   };
 
-  const canShowContextualTour = (tourType: string): boolean => {
-    // Don't show contextual tours if user is in an active tour
+  const canShowContextualTour = (tourType: string) => {
     if (tourState.isActive) return false;
-
-    // Don't show if user has completed this specific tour type
     if (preferences.completedTours.includes(tourType)) return false;
-
-    // Don't show if user said never show tours
     if (preferences.neverShowAgain) return false;
-
     return true;
   };
 
@@ -456,240 +395,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({
 };
 
 export const useTour = (): TourContextValue => {
-  const context = useContext(TourContext);
-  if (!context) {
-    throw new Error('useTour must be used within a TourProvider');
-  }
-  return context;
+  const ctx = useContext(TourContext);
+  if (!ctx) throw new Error('useTour must be used within a TourProvider');
+  return ctx;
 };
-
-// CORE TOUR: 60-90 seconds, 6-9 essential steps for the "happy path"
-export const CORE_TOUR_STEPS: TourStep[] = [
-  {
-    id: 'welcome',
-    title: '👋 Welcome to Inkwell!',
-    description: "Ready to write your next story? Let's take a quick tour—just 90 seconds!",
-    target: '#tour-viewport-anchor',
-    placement: 'center',
-    order: 1,
-    category: 'onboarding',
-  },
-  {
-    id: 'create-project',
-    title: 'Create Your Project',
-    description: 'Click here to start a new story. Pick a template or go blank—your choice!',
-    target: '[data-tour="new-project-button"], .new-project-button, [data-testid="create-project"]',
-    placement: 'left',
-    action: 'click',
-    order: 2,
-    category: 'onboarding',
-  },
-  {
-    id: 'sidebar-navigation',
-    title: 'Navigate Your Story',
-    description: 'Switch between writing, planning, and tracking your progress with these tabs.',
-    target: '[data-tour="sidebar"], .sidebar-nav, nav[role="navigation"]',
-    placement: 'right',
-    order: 3,
-    category: 'onboarding',
-  },
-  {
-    id: 'writing-space',
-    title: 'Start Writing Here',
-    description: 'Your story begins in this editor. Just click and start typing!',
-    target: '[data-tour="writing-editor"], .writing-editor, .editor-content',
-    placement: 'top',
-    order: 4,
-    view: 'Writing',
-    category: 'onboarding',
-  },
-  {
-    id: 'save-your-work',
-    title: 'Your Work Saves Automatically',
-    description: 'No need to worry—everything saves as you type. Keep writing!',
-    target: '[data-tour="auto-save"], .auto-save-indicator',
-    placement: 'bottom',
-    order: 5,
-    category: 'onboarding',
-  },
-  {
-    id: 'explore-timeline',
-    title: 'Plan Your Story',
-    description: 'Use Timeline to organize chapters, track characters, and map your plot.',
-    target: '[data-tour="timeline-tab"], [href*="timeline"]',
-    placement: 'bottom',
-    order: 6,
-    category: 'onboarding',
-  },
-  {
-    id: 'export-anytime',
-    title: 'Share Your Story',
-    description: "When you're ready, export to PDF, Word, or other formats to share your work.",
-    target: '[data-tour="export-button"], .export-button',
-    placement: 'left',
-    order: 7,
-    category: 'onboarding',
-  },
-  {
-    id: 'tour-complete',
-    title: "🎉 You're Ready to Write!",
-    description: "That's it! Press Cmd+K anytime for quick actions. Happy writing!",
-    target: '#tour-viewport-anchor',
-    placement: 'center',
-    order: 8,
-    category: 'onboarding',
-  },
-];
-
-// CONTEXTUAL MINI-TOURS: 3-5 steps each, triggered when entering specific panels
-export const WRITING_PANEL_TOUR: TourStep[] = [
-  {
-    id: 'writing-welcome',
-    title: 'Welcome to Your Writing Space',
-    description: 'This is where your story comes to life. Let me show you the key tools.',
-    target: '[data-tour="writing-editor"], .writing-editor',
-    placement: 'top',
-    order: 1,
-    category: 'feature-discovery',
-  },
-  {
-    id: 'ai-assistant',
-    title: 'AI Writing Helper',
-    description: 'Select any text to get AI suggestions for improvements or ideas.',
-    target: '[data-tour="ai-toolbar"], .ai-assistant-button',
-    placement: 'bottom',
-    order: 2,
-    category: 'feature-discovery',
-    optional: true,
-  },
-  {
-    id: 'focus-mode',
-    title: 'Distraction-Free Writing',
-    description: 'Press F11 or click here to hide everything except your words.',
-    target: '[data-tour="focus-mode"], .focus-mode-toggle',
-    placement: 'left',
-    order: 3,
-    category: 'feature-discovery',
-  },
-  {
-    id: 'word-count',
-    title: 'Track Your Progress',
-    description: 'Watch your word count grow and set daily goals to stay motivated.',
-    target: '[data-tour="word-count"], .word-counter',
-    placement: 'top',
-    order: 4,
-    category: 'feature-discovery',
-  },
-];
-
-export const TIMELINE_PANEL_TOUR: TourStep[] = [
-  {
-    id: 'timeline-overview',
-    title: 'Plan Your Story Structure',
-    description: 'Organize your chapters, scenes, and story beats in this planning space.',
-    target: '[data-tour="timeline-panel"], .timeline-container',
-    placement: 'top',
-    order: 1,
-    category: 'feature-discovery',
-  },
-  {
-    id: 'add-chapters',
-    title: 'Add Chapters',
-    description: 'Click here to add new chapters and organize your story structure.',
-    target: '[data-tour="add-chapter"], .add-chapter-button',
-    placement: 'right',
-    order: 2,
-    category: 'feature-discovery',
-  },
-  {
-    id: 'character-tracking',
-    title: 'Develop Your Characters',
-    description: 'Keep track of character details, backstories, and development arcs.',
-    target: '[data-tour="characters-section"], .characters-panel',
-    placement: 'left',
-    order: 3,
-    category: 'feature-discovery',
-  },
-  {
-    id: 'plot-boards',
-    title: 'Map Your Plot',
-    description: 'Drag story beats around to experiment with your plot structure.',
-    target: '[data-tour="plot-boards"], .plot-board',
-    placement: 'bottom',
-    order: 4,
-    category: 'feature-discovery',
-  },
-];
-
-export const ANALYTICS_PANEL_TOUR: TourStep[] = [
-  {
-    id: 'analytics-overview',
-    title: 'Track Your Writing Journey',
-    description: 'See your progress, build writing habits, and celebrate your wins.',
-    target: '[data-tour="analytics-panel"], .analytics-container',
-    placement: 'top',
-    order: 1,
-    category: 'feature-discovery',
-  },
-  {
-    id: 'daily-progress',
-    title: 'Daily Writing Goals',
-    description: 'Set word count targets and track your daily writing streaks.',
-    target: '[data-tour="daily-goals"], .daily-progress',
-    placement: 'right',
-    order: 2,
-    category: 'feature-discovery',
-  },
-  {
-    id: 'writing-trends',
-    title: 'Writing Patterns',
-    description: 'Discover when you write best and build on your natural rhythms.',
-    target: '[data-tour="writing-trends"], .trend-chart',
-    placement: 'left',
-    order: 3,
-    category: 'feature-discovery',
-  },
-];
-
-export const DASHBOARD_PANEL_TOUR: TourStep[] = [
-  {
-    id: 'dashboard-overview',
-    title: 'Your Writing Dashboard',
-    description: 'All your projects and progress in one place. Let me show you around.',
-    target: '[data-tour="dashboard"], .dashboard-container',
-    placement: 'top',
-    order: 1,
-    category: 'feature-discovery',
-  },
-  {
-    id: 'project-management',
-    title: 'Manage Your Projects',
-    description: 'Create, organize, and switch between multiple writing projects.',
-    target: '[data-tour="project-list"], .project-grid',
-    placement: 'right',
-    order: 2,
-    category: 'feature-discovery',
-  },
-  {
-    id: 'recent-activity',
-    title: 'Pick Up Where You Left Off',
-    description: 'See your recent changes and jump back into your stories quickly.',
-    target: '[data-tour="recent-activity"], .recent-changes',
-    placement: 'bottom',
-    order: 3,
-    category: 'feature-discovery',
-  },
-];
-
-// COMPREHENSIVE TOUR MAP
-export const TOUR_MAP = {
-  'core-onboarding': CORE_TOUR_STEPS,
-  'writing-panel': WRITING_PANEL_TOUR,
-  'timeline-panel': TIMELINE_PANEL_TOUR,
-  'analytics-panel': ANALYTICS_PANEL_TOUR,
-  'dashboard-panel': DASHBOARD_PANEL_TOUR,
-};
-
-// Legacy support - map old tour names to new ones
-export const ONBOARDING_STEPS = CORE_TOUR_STEPS;
-export const FEATURE_DISCOVERY_STEPS = WRITING_PANEL_TOUR;

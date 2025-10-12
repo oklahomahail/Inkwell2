@@ -6,7 +6,8 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { ProfileProvider } from '@/context/ProfileContext';
 import { analyticsService } from '@/services/analyticsService';
-import { makeMockStorage } from '@/test/utils/mockStorage';
+
+import { makeMockStorage, TestTourWrapper } from './testUtils';
 
 // Mock analytics service
 vi.mock('@/services/analyticsService', () => {
@@ -28,8 +29,8 @@ vi.mock('./TourOverlay', () => ({
 }));
 
 import OnboardingOrchestrator from './OnboardingOrchestrator';
-import { ProfileTourProvider } from './ProfileTourProvider';
-import { TourProvider, useTour, CORE_TOUR_STEPS } from './TourProvider';
+import { TestTourWrapper } from './testUtils';
+import { TestTourComponent } from './TourGating.components';
 
 // Mock database implementation
 const mockDb = {
@@ -49,32 +50,7 @@ vi.mock('../../data/dbFactory', () => ({
   }),
 }));
 
-// Mock component to access tour context
-function _TestTourComponent({ onTourStart }: { onTourStart?: () => void }) {
-  const { startTour, shouldShowTourPrompt, tourState } = useTour();
-
-  return (
-    <div>
-      <button
-        onClick={() => {
-          startTour('full-onboarding', CORE_TOUR_STEPS);
-          onTourStart?.();
-        }}
-        data-testid="start-tour"
-      >
-        Start Tour
-      </button>
-      <button
-        onClick={() => startTour('full-onboarding', CORE_TOUR_STEPS)}
-        data-testid="start-tour-duplicate"
-      >
-        Start Duplicate Tour
-      </button>
-      <div data-testid="tour-active">{tourState.isActive ? 'active' : 'inactive'}</div>
-      <div data-testid="should-show-prompt">{shouldShowTourPrompt() ? 'true' : 'false'}</div>
-    </div>
-  );
-}
+// Test components are now imported from separate file
 
 // Mock localStorage and sessionStorage
 const mockLocalStorage = makeMockStorage();
@@ -110,13 +86,9 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       const onTourStart = vi.fn();
 
       render(
-        <ProfileProvider>
-          <ProfileTourProvider>
-            <TourProvider>
-              <_TestTourComponent onTourStart={onTourStart} />
-            </TourProvider>
-          </ProfileTourProvider>
-        </ProfileProvider>,
+        <TestTourWrapper>
+          <TestTourComponent onTourStart={onTourStart} />
+        </TestTourWrapper>,
       );
 
       const startButton = screen.getByTestId('start-tour');
@@ -142,13 +114,9 @@ describe('Tour Gating + First-run Flow (A1)', () => {
 
     it('should set session marker when tour starts', async () => {
       render(
-        <ProfileProvider>
-          <ProfileTourProvider>
-            <TourProvider>
-              <_TestTourComponent />
-            </TourProvider>
-          </ProfileTourProvider>
-        </ProfileProvider>,
+        <TestTourWrapper>
+          <TestTourComponent onTourStart={onTourStart} />
+        </TestTourWrapper>,
       );
 
       fireEvent.click(screen.getByTestId('start-tour'));

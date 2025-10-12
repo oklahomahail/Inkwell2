@@ -10,6 +10,8 @@ import { shouldBlockTourHere } from '../utils/routeGuards';
 import { hasStartedOnce, markStarted } from '../utils/tourOnce';
 import { waitForElement } from '../utils/waitForElement';
 
+import { isSuppressed } from './tourHookUtils';
+
 interface StartOpts {
   timeoutMs?: number;
 }
@@ -23,6 +25,10 @@ export function useSpotlightAutostart(profileId?: string, opts: StartOpts = {}) 
   const gateRef = useRef({ started: false, token: 0 });
 
   useEffect(() => {
+    if (isSuppressed()) {
+      debugTour('autostart:suppressed', { route: location.pathname });
+      return;
+    }
     if (shouldBlockTourHere(location)) {
       debugTour('autostart:blocked', { route: location.pathname, tour: 'spotlight' });
       return;

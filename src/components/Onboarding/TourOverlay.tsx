@@ -1,7 +1,7 @@
 // src/components/Onboarding/TourOverlay.tsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { analyticsService } from '../../services/analyticsService';
+import analyticsService from '../../services/analyticsService';
 import { useTutorialStorage } from '../../services/tutorialStorage';
 
 import { loadTourPreset } from './presetLoaderHelper';
@@ -21,7 +21,7 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
   const steps = useMemo(() => loadTourPreset(tourType), [tourType]);
   const total = steps.length;
   const [i, setI] = useState(0);
-  const { setProgress, setPreferences } = useTutorialStorage?.() ?? {};
+  const storage = useTutorialStorage?.() ?? {};
 
   const stripTourQueryParam = useCallback(() => {
     try {
@@ -75,7 +75,21 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
 
   // Log tour start on first mount
   useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.info('[tour-overlay] tour starting', {
+        tourType,
+        profileId,
+        storage: !!storage,
+      });
+    }
     try {
+      if (import.meta.env.DEV) {
+        console.info('[tour-overlay] starting tour:', {
+          tourType,
+          profileId,
+          storage: !!storage,
+        });
+      }
       analyticsService.track('tour_started', {
         tourType: tourType === 'full-onboarding' ? 'first_time' : 'feature_tour',
         entryPoint: 'overlay',
@@ -96,9 +110,9 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
     let cancelled = false;
     (async () => {
       try {
-        const p = await tutorialStorage.getProgress?.(persistKey || tourType);
+        const p = await storage.getProgress?.(persistKey || tourType);
         if (!cancelled && p && !p.isCompleted) {
-          setI(Math.min(total - 1, Math.max(0, p.progress.currentStep ?? 0)));
+          setI(Math.min(total - 1, Math.max(0, p.progress?.currentStep ?? 0)));
         }
       } catch {
         /* no-op: fall back to step 0 */
@@ -117,7 +131,7 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
       return;
     }
     try {
-      void setProgress?.(persistKey || tourType, {
+      void storage.setProgress?.(persistKey || tourType, {
         currentStep: i,
         completedSteps: [],
         tourType,
