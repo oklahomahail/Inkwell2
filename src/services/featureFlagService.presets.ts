@@ -1,6 +1,10 @@
 // src/services/featureFlagService.presets.ts
 
 export interface FeatureFlagPreset {
+  tours: {
+    spotlightTour: boolean;
+    simpleTour: boolean;
+  };
   ui: {
     showPowerMenu: boolean;
     showFocusMode: boolean;
@@ -48,6 +52,10 @@ export interface FeatureFlagPreset {
 }
 
 export const BeginnerPreset: FeatureFlagPreset = {
+  tours: {
+    spotlightTour: true,
+    simpleTour: false,
+  },
   ui: {
     showPowerMenu: false,
     showFocusMode: true,
@@ -96,6 +104,10 @@ export const BeginnerPreset: FeatureFlagPreset = {
 };
 
 export const ProPreset: FeatureFlagPreset = {
+  tours: {
+    spotlightTour: true,
+    simpleTour: false,
+  },
   ui: {
     showPowerMenu: true,
     showFocusMode: true,
@@ -154,6 +166,11 @@ export function _getPresetForMode(mode: UIMode): FeatureFlagPreset {
  */
 export function _presetToFlags(preset: FeatureFlagPreset): Record<string, boolean> {
   const flags: Record<string, boolean> = {};
+
+  // Map tour flags
+  Object.entries(preset.tours).forEach(([key, value]) => {
+    flags[`tour_${key}`] = value;
+  });
 
   // Map UI flags
   Object.entries(preset.ui).forEach(([key, value]) => {
