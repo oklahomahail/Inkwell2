@@ -11,7 +11,7 @@ interface WritingSession {
   duration?: number;
 }
 
-const AnalysisPanel: React.FC = () => {
+const AnalyticsPanel: React.FC = () => {
   const { state, currentProject } = useAppContext();
   const [sessions, setSessions] = useState<WritingSession[]>([]);
   const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('advanced');
@@ -37,12 +37,12 @@ const AnalysisPanel: React.FC = () => {
 
   // Simple Analytics View (your existing component, enhanced)
   const SimpleAnalyticsView = () => {
-    const totalWords = sessions.reduce((acc, _session) => acc + (session.wordCount || 0), 0);
+    const totalWords = sessions.reduce((acc, session) => acc + (session.wordCount || 0), 0);
     const totalDays = sessions.length;
     const averageWordsPerDay = totalDays > 0 ? Math.round(totalWords / totalDays) : 0;
 
     const sortedSessions = [...sessions].sort(
-      (a, _b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
 
     return (
@@ -222,4 +222,4 @@ const AnalysisPanel: React.FC = () => {
   return <SimpleAnalyticsView />;
 };
 
-export default AnalysisPanel;
+export default AnalyticsPanel;

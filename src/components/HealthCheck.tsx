@@ -1,7 +1,7 @@
 // src/components/HealthCheck.tsx
 import React, { useState, useEffect } from 'react';
 
-import { AnalysisPanel, DashboardPanel, SettingsPanel, TimelinePanel } from './Panels';
+import { AnalyticsPanel, DashboardPanel, SettingsPanel, TimelinePanel } from './Panels';
 import StoryPlanningView from './Views/StoryPlanningView';
 import EnhancedWritingPanel from './Writing/EnhancedWritingPanel';
 
@@ -21,7 +21,7 @@ export const HealthCheck: React.FC = () => {
     { component: 'DashboardPanel', status: 'loading' },
     { component: 'EnhancedWritingPanel', status: 'loading' },
     { component: 'TimelinePanel', status: 'loading' },
-    { component: 'AnalysisPanel', status: 'loading' },
+    { component: 'AnalyticsPanel', status: 'loading' },
     { component: 'StoryPlanningView', status: 'loading' },
     { component: 'SettingsPanel', status: 'loading' },
   ]);
@@ -167,8 +167,8 @@ export const HealthCheck: React.FC = () => {
         <TimelinePanel />
       </TestComponent>
 
-      <TestComponent name="AnalysisPanel">
-        <AnalysisPanel />
+      <TestComponent name="AnalyticsPanel">
+        <AnalyticsPanel />
       </TestComponent>
 
       <TestComponent name="StoryPlanningView">

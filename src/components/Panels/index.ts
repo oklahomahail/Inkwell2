@@ -30,7 +30,7 @@ const SettingsPanel: React.FC = () => {
 SettingsPanel.displayName = 'SettingsPanel';
 
 // Fallback component for AnalysisPanel
-const AnalysisPanel: React.FC = () => {
+const AnalyticsPanel: React.FC = () => {
   return React.createElement(
     'div',
     {
@@ -44,12 +44,12 @@ const AnalysisPanel: React.FC = () => {
       React.createElement(
         'h2',
         { className: 'text-2xl font-bold font-bold mb-4' },
-        'Analysis Panel',
+        'Analytics Panel',
       ),
       React.createElement('p', { className: 'text-gray-400' }, 'Analytics coming soon!'),
     ),
   );
 };
-AnalysisPanel.displayName = 'AnalysisPanel';
+AnalyticsPanel.displayName = 'AnalyticsPanel';
 
-export { SettingsPanel, AnalysisPanel };
+export { SettingsPanel, AnalyticsPanel };

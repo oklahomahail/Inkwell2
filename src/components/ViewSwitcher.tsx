@@ -12,9 +12,8 @@ import { useFeatureDiscovery } from '../hooks/useAnalyticsTracking';
 
 import EnhancedDashboard from './Dashboard/EnhancedDashboard';
 import { FeatureErrorBoundary } from './ErrorBoundary';
-import AnalysisPanel from './Panels/AnalysisPanel';
-import SettingsPanel from './Panels/SettingsPanel';
-import TimelinePanel from './Panels/TimelinePanel';
+import { AnalyticsPanel } from './Panels';
+import { TimelinePanel, SettingsPanel } from './Panels';
 import StoryPlanningView from './Views/StoryPlanningView';
 import EnhancedWritingPanel from './Writing/EnhancedWritingPanel';
 // Feature-flagged imports
@@ -93,7 +92,7 @@ const ViewSwitcher: React.FC = () => {
     case View.Analysis:
       return (
         <FeatureErrorBoundary featureName="Analytics">
-          <AnalysisPanel />
+          <AnalyticsPanel />
         </FeatureErrorBoundary>
       );
     case View.Planning:
