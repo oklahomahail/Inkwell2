@@ -23,31 +23,33 @@ import { TEST_FLAGS } from './testFlags';
 
 // Mock the config module implementation
 vi.mock('../FeatureFlagManager', () => {
-  return {
-    default: class MockFeatureFlagManager {
-      private static instance: MockFeatureFlagManager | null = null;
-      private cache = new Map<string, boolean>();
+  class MockFeatureFlagManager {
+    private static instance: MockFeatureFlagManager | null = null;
+    private cache = new Map<string, boolean>();
 
-      static getInstance(): MockFeatureFlagManager {
-        if (!MockFeatureFlagManager.instance) {
-          MockFeatureFlagManager.instance = new MockFeatureFlagManager();
-        }
-        return MockFeatureFlagManager.instance;
+    static getInstance(): MockFeatureFlagManager {
+      if (!MockFeatureFlagManager.instance) {
+        MockFeatureFlagManager.instance = new MockFeatureFlagManager();
       }
+      return MockFeatureFlagManager.instance;
+    }
 
-      static resetInstance(): void {
-        MockFeatureFlagManager.instance = null;
-      }
+    static resetInstance(): void {
+      MockFeatureFlagManager.instance = null;
+    }
 
-      isEnabled(flagKey: string): boolean {
-        return TEST_FLAGS[flagKey]?.defaultValue ?? false;
+    isEnabled(flagKey: string): boolean {
+      if (this.cache.has(flagKey)) {
+        return this.cache.get(flagKey)!;
       }
+      return (TEST_FLAGS as any)[flagKey]?.defaultValue ?? false;
+    }
 
-      setEnabled(flagKey: string, enabled: boolean): void {
-        this.cache.set(flagKey, enabled);
-      }
-    },
-  };
+    setEnabled(flagKey: string, enabled: boolean): void {
+      this.cache.set(flagKey, enabled);
+    }
+  }
+  return { FeatureFlagManager: MockFeatureFlagManager };
 });
 
 // Place beforeEach at top level
