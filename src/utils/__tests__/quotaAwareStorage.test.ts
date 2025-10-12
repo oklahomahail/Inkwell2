@@ -32,6 +32,11 @@ describe('QuotaAwareStorage', () => {
     estimate: vi.fn().mockResolvedValue({
       quota: 100 * 1024 * 1024, // 100MB
       usage: 10 * 1024 * 1024, // 10MB
+      usageDetails: {
+        indexedDB: 0,
+        caches: 0,
+        serviceWorkerRegistrations: 0,
+      },
     }),
   };
 
@@ -110,20 +115,20 @@ describe('QuotaAwareStorage', () => {
     });
 
     describe('safeGetItem', () => {
-      it('should read from storage successfully', () => {
+      it('should read from storage successfully', async () => {
         localStorage.setItem('test-key', 'test-value');
         const result = quotaAwareStorage.safeGetItem('test-key');
         expect(result.success).toBe(true);
         expect(result.data).toBe('test-value');
       });
 
-      it('should handle missing keys gracefully', () => {
+      it('should handle missing keys gracefully', async () => {
         const result = quotaAwareStorage.safeGetItem('nonexistent-key');
         expect(result.success).toBe(true);
         expect(result.data).toBeUndefined();
       });
 
-      it('should handle storage errors', () => {
+      it('should handle storage errors', async () => {
         vi.spyOn(localStorage, 'getItem').mockImplementation(() => {
           throw new Error('Read error');
         });
@@ -135,14 +140,14 @@ describe('QuotaAwareStorage', () => {
     });
 
     describe('safeRemoveItem', () => {
-      it('should remove items from storage', () => {
+      it('should remove items from storage', async () => {
         localStorage.setItem('test-key', 'test-value');
         const result = quotaAwareStorage.safeRemoveItem('test-key');
         expect(result.success).toBe(true);
         expect(localStorage.getItem('test-key')).toBeNull();
       });
 
-      it('should handle removal errors gracefully', () => {
+      it('should handle removal errors gracefully', async () => {
         vi.spyOn(localStorage, 'removeItem').mockImplementation(() => {
           throw new Error('Remove error');
         });
@@ -189,14 +194,17 @@ describe('QuotaAwareStorage', () => {
 
   describe('Emergency Cleanup', () => {
     it('should free space by cleaning temporary data', async () => {
-      // Add some temp data
+      // Add some temp data with initial values to signal a valid cleanup
+      localStorage.clear();
       localStorage.setItem('temp_data1', 'x'.repeat(1000));
       localStorage.setItem('cache_data1', 'y'.repeat(2000));
+      localStorage.setItem('draft_data1', 'z'.repeat(1500));
+      localStorage.setItem('backup_data', 'w'.repeat(1000));
       localStorage.setItem('normal_data', 'z'.repeat(500));
 
       const result = await quotaAwareStorage.emergencyCleanup();
       expect(result.freedBytes).toBeGreaterThan(0);
-      expect(result.actions).toContain(expect.stringContaining('Cleared temporary data'));
+      expect(result.actions.some((action) => action.includes('Cleared temporary data'))).toBe(true);
       expect(localStorage.getItem('temp_data1')).toBeNull();
       expect(localStorage.getItem('cache_data1')).toBeNull();
       expect(localStorage.getItem('normal_data')).toBe('z'.repeat(500));
