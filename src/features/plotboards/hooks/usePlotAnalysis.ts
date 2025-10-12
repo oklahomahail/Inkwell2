@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 
 import aiService from '../../../services/aiPlotAnalysisService';
 import { analyticsService } from '../../../services/analyticsService';
-import { isEnabled } from '../../../utils/flags';
+import { featureFlags } from '../../../utils/flags';
 import { usePlotBoardStore } from '../store';
 
 export const usePlotAnalysis = _usePlotAnalysis;
@@ -29,7 +29,7 @@ export function _usePlotAnalysis(profileId: string, projectId: string) {
   }, [activeBoard, boards]);
 
   const run = useCallback(async () => {
-    if (!isEnabled('aiPlotAnalysis') || scenes.length === 0) {
+    if (!featureFlags.isEnabled('aiPlotAnalysis') || scenes.length === 0) {
       console.warn('Plot analysis disabled or no scenes available');
       return;
     }
@@ -76,6 +76,6 @@ export function _usePlotAnalysis(profileId: string, projectId: string) {
     run,
     hasScenes: scenes.length > 0,
     sceneCount: scenes.length,
-    isEnabled: isEnabled('aiPlotAnalysis'),
+    isEnabled: featureFlags.isEnabled('aiPlotAnalysis'),
   };
 }

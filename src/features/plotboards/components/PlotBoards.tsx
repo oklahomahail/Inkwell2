@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useChaptersStore } from '../../../stores/useChaptersStore';
 import { useSettingsStore } from '../../../stores/useSettingsStore';
-import { useFeatureFlag, isEnabled } from '../../../utils/flags';
+import { useFeatureFlag, featureFlags } from '../../../utils/flags';
 import { usePlotBoardIntegration } from '../hooks/usePlotBoardIntegration';
 import { usePlotBoardStore, initializePlotBoardStore } from '../store';
 import {
@@ -641,7 +641,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
   ];
 
   // Add Insights tab if feature is enabled
-  if (isEnabled('aiPlotAnalysis')) {
+  if (featureFlags.isEnabled('aiPlotAnalysis')) {
     tabs.push({
       id: 'insights',
       label: 'Insights',
