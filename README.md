@@ -1,6 +1,6 @@
-# Inkwell — Professional AI-Powered Writing Platform
+# Inkwell — Find your story. Write it well.
 
-**Inkwell** is a local-first fiction writing platform built for novelists, screenwriters, and storytellers who need professional-grade tools. Combining distraction-free writing with intelligent AI assistance and visual story management, Inkwell helps authors plan, write, and refine their stories from concept to publication.
+**Inkwell** is a professional-grade writing platform built for novelists, screenwriters, and serious storytellers. Combining distraction-free writing with intelligent AI assistance and visual story management, Inkwell helps authors bring their stories to life. Because great stories deserve great tools.
 
 **Built with React + TypeScript + TailwindCSS** • **Powered by Claude AI** • **Local-first & Private**  
 **🎨 Professional Blue & Gold Brand Identity** • **Accessible Design** • **PWA Ready**

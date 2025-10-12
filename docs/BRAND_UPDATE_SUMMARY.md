@@ -1,10 +1,29 @@
-# Inkwell Brand Color System Update
+# Inkwell Brand Update — October 2025
 
-## ✅ What Was Updated
+## ✅ Major Updates
 
-Your Inkwell application has been successfully updated with the new blue and gold color system. Here's what changed:
+The Inkwell brand and platform have been updated with new taglines and visual refinements:
 
-### 1. **Color Palette Expansion**
+### 1. **New Tagline System**
+
+- ✅ Primary (User-facing): "Find your story. Write it well."
+  - Used in core product UI, onboarding, and dashboard
+  - Emphasizes the creative journey and writer-centric focus
+
+- ✅ Secondary (Marketing): "Because great stories deserve great tools."
+  - Used in marketing materials, footers, and documentation
+  - Reinforces professional capability and craftsmanship
+
+- ❌ Retired: "Where Writing Flows"
+
+### 2. **Theme Simplification**
+
+- ✅ App now locked to light mode for brand consistency
+- ✅ Dark mode classes remain in codebase but are inert
+- ✅ Maintains low code churn while simplifying UI
+- ✅ Cleaner, more focused user experience
+
+### 3. **Color Palette System**
 
 - ✅ Extended the navy blue scale (50-900) for better design flexibility
 - ✅ Added gold color variations (50-700) for accent usage
@@ -132,4 +151,9 @@ The new colors are now active in:
 - 🔗 **All primary buttons and CTAs**
 - 📱 **PWA theme and manifest**
 
-Your application now has a cohesive, accessible blue and gold brand experience while maintaining the professional writing studio aesthetic!
+The Inkwell platform now offers a cohesive brand experience with clear messaging hierarchy:
+
+- Primary tagline speaks directly to writers about their creative journey
+- Secondary tagline reinforces our commitment to professional tools
+- Simplified light-mode UI maintains focus on writing
+- Consistent navy & gold aesthetic across all touchpoints

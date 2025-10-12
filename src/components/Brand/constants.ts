@@ -10,7 +10,10 @@ export const INKWELL_BRAND = {
     serif: 'Source Serif Pro, ui-serif, Georgia, serif',
     sans: 'Inter, ui-sans-serif, system-ui, sans-serif',
   },
-  tagline: 'Where Writing Flows',
+  taglines: {
+    primary: 'Find your story. Write it well.',
+    secondary: 'Because great stories deserve great tools.',
+  },
 } as const;
 
 // Brand Utility Classes

@@ -161,7 +161,7 @@ export const BrandShowcase: React.FC = () => {
         <footer className="text-center py-8 border-t border-gray-200">
           <InkwellLogo variant="mark" size="sm" className="mx-auto mb-4 text-inkwell-gold" />
           <p className={`text-sm ${BRAND_CLASSES.text.body}`}>
-            Inkwell Brand System &copy; 2024 — Where Writing Flows
+            Inkwell Brand System &copy; 2024 — Because great stories deserve great tools
           </p>
         </footer>
       </div>

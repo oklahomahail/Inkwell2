@@ -1,4 +1,6 @@
-# Inkwell: Next-Generation AI-Powered Writing Platform
+# Inkwell: Find your story. Write it well.
+
+_Because great stories deserve great tools._
 
 ## Executive Summary
 

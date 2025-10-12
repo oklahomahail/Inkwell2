@@ -1,6 +1,6 @@
 # Inkwell User Guide
 
-**Welcome to Inkwell** — Your AI-powered writing companion for crafting compelling fiction, screenplays, and stories.
+**Welcome to Inkwell** — where you'll find your story and write it well. Our professional-grade platform combines focused writing tools with intelligent AI assistance to help bring your stories to life.
 
 ---
 
@@ -97,7 +97,7 @@ Inkwell now features a **collapsible sidebar** and enhanced navigation:
 - **Project Selector**: Switch between projects with dropdown menu
 - **View Navigation**: Dashboard, Writing, Timeline, Analysis tabs
 - **Settings Access**: Quick access to preferences and configuration
-- **Dark Mode Toggle**: Switch between light and dark themes
+- **Theme**: Light mode (Dark mode currently disabled)
 
 **Header Features**:
 
@@ -109,14 +109,14 @@ Inkwell now features a **collapsible sidebar** and enhanced navigation:
 ### Navigation & Keyboard Shortcuts
 
 | Shortcut                       | Action                  |
-| ------------------------------ | ----------------------- |
+| ------------------------------ | ----------------------- | --- |
 | **⌘K** (Mac) / **Ctrl+K** (PC) | Open Command Palette    |
 | **⌘1**                         | Switch to Dashboard     |
 | **⌘2**                         | Switch to Writing       |
 | **⌘3**                         | Switch to Timeline      |
 | **⌘4**                         | Switch to Analysis      |
 | **⌘\\**                        | Toggle Sidebar          |
-| **⌘D**                         | Toggle Dark Mode        |
+|                                |                         |     |
 | **F11**                        | Enter Focus Mode        |
 | **?**                          | Show keyboard shortcuts |
 

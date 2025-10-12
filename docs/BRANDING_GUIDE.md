@@ -13,7 +13,21 @@ Last Updated: October 2025
 **Inkwell** represents _clarity, creativity, and composure_.  
 The brand should feel **modern, focused, and intelligent**, never busy or performative. Every visual and word choice should reinforce trust and a sense of creative calm.
 
-> **Tagline:** "Where stories take shape."
+### Brand Taglines
+
+Inkwell uses a dual-tagline system that speaks to both creative inspiration and professional capability:
+
+- **Primary Tagline (User-facing):**  
+  "Find your story. Write it well."
+  - Used in core product UI: onboarding, create profile, app dashboard
+  - Emphasizes the creative journey and quality
+  - Centers the writer rather than the tool
+
+- **Secondary Tagline (Marketing):**  
+  "Because great stories deserve great tools."
+  - Used in marketing materials, footers, feature pages
+  - Emphasizes capability and craftsmanship
+  - Positions Inkwell as a professional instrument
 
 ---
 
