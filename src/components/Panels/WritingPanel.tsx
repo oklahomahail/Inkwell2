@@ -22,7 +22,7 @@ import { generateId } from '@/utils/idUtils';
 interface WritingPanelProps {
   draftText: string;
   onChangeText: (_text: string) => void;
-  _onTextSelect: () => void;
+  onTextSelect: () => void;
   selectedText: string;
 }
 
@@ -87,7 +87,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
       const updatedChapter = {
         ...chapter,
         scenes: updatedScenes,
-        totalWordCount: updatedScenes.reduce((sum, _scene) => sum + scene.wordCount, 0),
+        totalWordCount: updatedScenes.reduce((sum, scene) => sum + scene.wordCount, 0),
         updatedAt: new Date(),
       };
 
@@ -281,7 +281,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
             </div>
 
             <div className="p-2 space-y-1 max-h-full overflow-y-auto">
-              {scenes.map((scene, _index) => (
+              {scenes.map((scene, index) => (
                 <button
                   key={scene.id}
                   onClick={() => handleSceneSelect(scene.id)}
@@ -366,7 +366,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
                   status={currentScene.status}
                   wordGoal={currentScene.wordCountGoal}
                   words={currentScene.wordCount}
-                  onChange={(_updates) => handleSceneUpdate(currentScene.id, updates)}
+                  onChange={(updates) => handleSceneUpdate(currentScene.id, updates)}
                 />
               </div>
 

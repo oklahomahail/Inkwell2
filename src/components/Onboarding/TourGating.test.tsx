@@ -5,6 +5,9 @@ import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { ProfileProvider } from '@/context/ProfileContext';
+import { analyticsService } from '@/services/analyticsService';
+import { makeMockStorage } from '@/test/utils/mockStorage';
+
 // Mock analytics service
 vi.mock('@/services/analyticsService', () => {
   const mockService = {
@@ -19,13 +22,10 @@ vi.mock('@/services/analyticsService', () => {
   };
 });
 
-import { analyticsService } from '@/services/analyticsService';
-
 // Mock tour overlay to avoid loadTourPreset error
 vi.mock('./TourOverlay', () => ({
   default: vi.fn(() => <div>Tour overlay mock</div>),
 }));
-import { makeMockStorage } from '@/test/utils/mockStorage';
 
 import OnboardingOrchestrator from './OnboardingOrchestrator';
 import { ProfileTourProvider } from './ProfileTourProvider';

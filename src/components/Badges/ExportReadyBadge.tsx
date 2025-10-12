@@ -7,7 +7,7 @@ import { ExportReadinessCheck } from '@/exports/exportTypes';
 import { cn } from '@/lib/utils';
 
 interface ExportReadyBadgeProps {
-  projectId: string;
+  projectId: string; // Required for readiness check
   className?: string;
   variant?: 'badge' | 'card' | 'banner';
   showDetails?: boolean;

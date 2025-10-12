@@ -62,8 +62,6 @@ const TimelinePanel: React.FC = () => {
   });
   const [selectedSceneId, setSelectedSceneId] = useState<string | undefined>();
 
-  const [_showFilters, _setShowFilters] = useState(false);
-
   // Load timeline events for current project
   useEffect(() => {
     const loadTimeline = async () => {
@@ -210,15 +208,16 @@ const TimelinePanel: React.FC = () => {
   );
 
   const handleAutoFix = useCallback(
-    async (_conflictId: string) => {
+    async (conflictId: string) => {
       showToast('Auto-fix functionality will be implemented soon', 'info');
       // Implementation would go here
+      console.log('Auto-fixing conflict:', conflictId);
     },
     [showToast],
   );
 
   const handleLinkAccepted = useCallback(
-    (sceneId: string, _chapterId: string, _eventIds: string[]) => {
+    (sceneId: string, chapterId: string, eventIds: string[]) => {
       showToast(`Successfully linked scene to ${eventIds.length} timeline event(s)`, 'success');
       // Reload timeline to reflect changes
       if (currentProject) {

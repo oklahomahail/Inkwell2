@@ -53,7 +53,7 @@ type QueuedOperation = {
 };
 
 // All app logic lives here, safely *inside* the providers.
-function _AppShell(_props: AppShellProps) {
+function _AppShell() {
   return (
     <BrowserRouter>
       <Routes>
@@ -96,7 +96,7 @@ function _AppShell(_props: AppShellProps) {
 }
 
 // Profile-specific app shell (the original app logic)
-function _ProfileAppShell(_props: ProfileAppShellProps) {
+function _ProfileAppShell() {
   const { claude, currentProject } = useAppContext();
   const { insertText } = useEditorContext();
 
@@ -296,7 +296,7 @@ function _OfflineQueueModal(_props: OfflineQueueModalProps) {
 }
 
 // Development Storage Debug Panel
-function _StorageDebugPanel(_props: StorageDebugPanelProps) {
+function _StorageDebugPanel() {
   const [stats, setStats] = useState<any>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -407,8 +407,6 @@ interface ProfileAppShellProps {}
 interface StorageDebugPanelProps {}
 
 interface AppShellProps {}
-
-interface Props {}
 
 export default function _App() {
   return (

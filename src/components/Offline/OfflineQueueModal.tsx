@@ -6,7 +6,7 @@ interface OfflineQueueModalProps {
   onSave: (json: Record<string, unknown>, type: string, scope: string) => void;
 }
 
-function _OfflineQueueModal({ onDisable, onSave }: OfflineQueueModalProps) {
+function _OfflineQueueModal({ onDisable: _onDisable, onSave: _onSave }: OfflineQueueModalProps) {
   return (
     <div className="offline-queue-modal">
       <h2>Offline Queue</h2>
