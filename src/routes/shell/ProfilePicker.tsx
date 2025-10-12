@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { cn } from '@/utils';
 
-import { BRAND } from '../../constants/brand';
+import { BRAND_NAME, TAGLINE_PRIMARY } from '../../constants/brand';
 import { useProfileContext } from '../../context/ProfileContext';
 import { Profile } from '../../types/profile';
 
@@ -149,14 +149,14 @@ function _ProfilePicker() {
               <FeatherMark className="h-12 w-12 shrink-0" />
               <div>
                 <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-                  {BRAND.NAME}
+                  {BRAND_NAME}
                 </h1>
-                <p className="text-zinc-600">{BRAND.TAGLINE}</p>
+                <p className="text-zinc-600">{TAGLINE_PRIMARY}</p>
               </div>
             </div>
             <div className="mt-4 md:mt-0">
               <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                {BRAND.TAGLINE}
+                {TAGLINE_PRIMARY}
               </span>
             </div>
           </div>

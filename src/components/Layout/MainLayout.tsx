@@ -18,6 +18,7 @@ import {
 import React, { useState, useEffect } from 'react';
 
 import Logo from '@/components/Logo';
+import { BRAND_NAME } from '@/constants/brand';
 import { useAppContext, View } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
 import { useFeatureFlag } from '@/utils/flags';
@@ -329,7 +330,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
               {!sidebarCollapsed && (
                 <div className="flex flex-col min-w-0 flex-1">
                   <h1 className="text-heading-sm text-slate-900 dark:text-white font-semibold truncate">
-                    Inkwell
+                    {BRAND_NAME}
                   </h1>
                   <p className="text-caption text-slate-500 dark:text-slate-400 truncate">
                     {currentProject?.name || 'No project'}
