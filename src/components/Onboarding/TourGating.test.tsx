@@ -5,6 +5,7 @@ import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { ProfileProvider } from '@/context/ProfileContext';
+import { ProfileProvider } from '@/context/ProfileContext';
 import { analyticsService } from '@/services/analyticsService';
 import { makeMockStorage } from '@/test/utils/mockStorage';
 
@@ -29,7 +30,26 @@ vi.mock('./TourOverlay', () => ({
 
 import OnboardingOrchestrator from './OnboardingOrchestrator';
 import { ProfileTourProvider } from './ProfileTourProvider';
+import { ProfileTourProvider } from './ProfileTourProvider';
 import { TourProvider, useTour, CORE_TOUR_STEPS } from './TourProvider';
+
+// Mock database implementation
+const mockDb = {
+  get: vi.fn().mockImplementation(() => Promise.resolve(null)),
+  put: vi.fn().mockImplementation(() => Promise.resolve()),
+  delete: vi.fn().mockImplementation(() => Promise.resolve()),
+  list: vi.fn().mockImplementation(() => Promise.resolve([])),
+  clear: vi.fn().mockImplementation(() => Promise.resolve()),
+};
+
+vi.mock('../../data/dbFactory', () => ({
+  useMaybeDB: () => mockDb,
+  defineStores: () => ({
+    tutorials: 'tutorial_progress',
+    tutorialPreferences: 'tutorial_preferences',
+    tutorialChecklist: 'tutorial_checklist',
+  }),
+}));
 
 // Mock component to access tour context
 function _TestTourComponent({ onTourStart }: { onTourStart?: () => void }) {
@@ -263,11 +283,11 @@ describe('Tour Gating + First-run Flow (A1)', () => {
     it('should prevent welcome modal from showing multiple times in same session', async () => {
       const TestComponent = () => (
         <ProfileProvider>
-          <ProfileTourProvider>
-            <TourProvider>
-              <OnboardingOrchestrator />
-            </TourProvider>
-          </ProfileTourProvider>
+          <TourProvider>
+            <ProfileTourProvider>
+              <OnboardingOrchestrator autoShowWelcome={true} delayWelcomeMs={0} />
+            </ProfileTourProvider>
+          </TourProvider>
         </ProfileProvider>
       );
 
