@@ -107,7 +107,7 @@ interface TourProviderProps {
   children: ReactNode;
 }
 
-export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
+export const TourProvider: React.FC<TourProviderProps> = ({ children, initialTour }) => {
   // Load saved tour progress from localStorage
   const [tourState, setTourState] = useState<TourState>(() => {
     try {

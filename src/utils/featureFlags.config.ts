@@ -144,4 +144,13 @@ export const FEATURE_FLAGS: FeatureFlagConfig = {
     defaultValue: false,
     category: 'debug',
   },
+
+  // Spotlight Tour
+  SPOTLIGHT_TOUR: {
+    key: 'spotlightTour',
+    name: 'Spotlight Tour',
+    description: 'Enhanced onboarding tour with spotlight focus',
+    defaultValue: true,
+    category: 'core',
+  },
 };

@@ -1,0 +1,69 @@
+.tour-portal {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000; /* Highest possible z-index */
+  pointer-events: none;
+}
+
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 50%);
+}
+
+.tour-spotlight {
+  position: fixed;
+  outline: 9999px solid rgb(0 0 0 / 55%);
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.tour-controls {
+  position: absolute;
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+  min-width: 280px;
+  max-width: 400px;
+  pointer-events: auto;
+}
+
+.tour-content {
+  margin-bottom: 16px;
+  color: #22222d;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.tour-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.tour-button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  transition: all 0.2s;
+}
+
+.tour-button:hover {
+  background: #f3f4f6;
+}
+
+.tour-button:last-child {
+  background: #0c5c3d;
+  border-color: #0c5c3d;
+  color: white;
+}
+
+.tour-button:last-child:hover {
+  background: #094832;
+}

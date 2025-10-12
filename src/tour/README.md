@@ -196,15 +196,29 @@ Tour interaction events are tracked:
 
 ## Storage
 
-Tour state is persisted in localStorage with the following structure:
+Tour state is now managed through the centralized TourStorage service with the following structure:
 
 ```typescript
-{
-  `inkwell_tour_${tourId}_step`: string;     // Current step index
-  `inkwell_tour_${tourId}_completed`: string; // Completion status
-  `inkwell_tour_${tourId}_dismissed`: string; // Dismissal status
+interface TourProgress {
+  seen: boolean; // Whether the tour has been completed
+  step: number; // Current step in the tour (0-based)
 }
+
+// Storage keys are profile-aware:
+const STORAGE_KEYS = {
+  TUTORIAL_SEEN: (profileId: string, tourName: TourName) =>
+    `inkwell.tutorial.${profileId}.${tourName}.seen`,
+  TUTORIAL_STEP: (profileId: string, tourName: TourName) =>
+    `inkwell.tutorial.${profileId}.${tourName}.step`,
+};
 ```
+
+This new structure provides:
+
+- Profile-specific tour state
+- Better type safety
+- Centralized state management
+- React 19 double-effect protection
 
 ## Styling
 
