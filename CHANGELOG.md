@@ -2,6 +2,35 @@
 
 All notable changes to this project are documented here.
 
+## [v1.2.5] - 2025-10-12
+
+### 🔍 **Type-Safety & Test Infrastructure**
+
+#### **TypeScript & Path Resolution**
+
+- **Fixed Import Path Resolution** - Unified alias configuration across Vite, TypeScript, and Vitest
+- **Enhanced Type Safety** - Fixed unused parameter and argument warnings across multiple components
+- **Keyboard Event Handling** - Improved event typing in modal components
+- **Documentation Updates** - Better type documentation in component props
+
+#### **Timeline Conflict Detection**
+
+- **New Timeline Conflict Service** - Added comprehensive service for detecting story timeline inconsistencies
+- **Conflict Types**:
+  - Chronology conflicts
+  - Knowledge conflicts
+  - Presence conflicts
+  - Age inconsistencies
+- **Mock Infrastructure** - Complete test mocking for timeline service dependencies
+
+#### **Test Infrastructure**
+
+- **Enhanced Mocking** - Improved test mocks for storage, timeline, and character services
+- **Path Resolution** - Fixed test imports with proper alias support
+- **Clean Test Runs** - All tests passing with proper type checking
+
+---
+
 ## [v1.2.4] - 2025-10-10
 
 ### 🎯 **Critical Issues Resolution & Platform Stability**

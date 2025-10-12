@@ -67,6 +67,33 @@ We have successfully implemented the foundational architecture refactoring for I
 
 ## 🏗️ Architecture Highlights
 
+### Timeline & Consistency Management
+
+```typescript
+// Timeline conflict detection service
+export interface TimelineConflict {
+  id: string;
+  type: 'chronology' | 'knowledge' | 'presence' | 'age_inconsistency';
+  severity: 'error' | 'warning' | 'suggestion';
+  sceneId: string;
+  eventIds: string[];
+  description: string;
+  confidence: number;
+}
+
+class TimelineConflictService {
+  async analyzeProjectConflicts(projectId: string): Promise<TimelineConflict[]> {
+    const ctx = await this.buildConflictContext(projectId);
+    return [
+      ...this.detectChronologyConflicts(ctx),
+      ...this.detectKnowledgeConflicts(ctx),
+      ...this.detectPresenceConflicts(ctx),
+      ...this.detectAgeInconsistencies(ctx),
+    ];
+  }
+}
+```
+
 ### Modern State Management
 
 ```typescript
