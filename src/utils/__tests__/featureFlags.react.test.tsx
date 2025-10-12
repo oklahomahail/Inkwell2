@@ -1,8 +1,29 @@
 import { render, screen, act } from '@testing-library/react';
 import React from 'react';
 
+import { FeatureFlagConfig } from '../../types/featureFlags';
 import { FeatureFlagManager } from '../FeatureFlagManager';
 import { FeatureGate, useFeatureFlag, withFeatureFlag } from '../featureFlags.react';
+
+// Test flags configuration
+const TEST_FLAGS: FeatureFlagConfig = {
+  EXPORT_WIZARD: {
+    key: 'exportWizard',
+    name: 'Export Wizard',
+    description: 'Test feature',
+    defaultValue: true,
+    category: 'core',
+  },
+};
+
+vi.mock('../featureFlags.config', () => ({
+  FEATURE_FLAGS: TEST_FLAGS,
+}));
+
+// Ensure window.location is defined
+Object.defineProperty(window, 'location', {
+  value: new URL('http://localhost:3000'),
+});
 
 // Mock localStorage
 const mockLocalStorage = {

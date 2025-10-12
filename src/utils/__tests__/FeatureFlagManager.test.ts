@@ -1,5 +1,70 @@
+import { FeatureFlagConfig } from '../../types/featureFlags';
 import { FeatureFlagManager } from '../FeatureFlagManager';
-import { FEATURE_FLAGS } from '../featureFlags.config';
+
+// Test flags configuration
+const TEST_FLAGS: FeatureFlagConfig = {
+  PLOT_BOARDS: {
+    key: 'plotBoards',
+    name: 'Plot Boards',
+    description: 'Test feature',
+    defaultValue: false,
+    category: 'experimental',
+  },
+  EXPORT_WIZARD: {
+    key: 'exportWizard',
+    name: 'Export Wizard',
+    description: 'Test feature',
+    defaultValue: true,
+    category: 'core',
+  },
+  ADVANCED_EXPORT: {
+    key: 'advancedExport',
+    name: 'Advanced Export',
+    description: 'Test feature',
+    defaultValue: false,
+    category: 'experimental',
+    dependencies: ['exportWizard'],
+  },
+  DEBUG_STATE: {
+    key: 'debugState',
+    name: 'Debug State',
+    description: 'Test feature',
+    defaultValue: false,
+    category: 'debug',
+  },
+};
+
+// Mock the feature flags module
+vi.mock('../featureFlags.config', () => ({
+  FEATURE_FLAGS: TEST_FLAGS,
+}));
+
+// Mock localStorage
+const mockLocalStorage = {
+  store: {} as Record<string, string>,
+  getItem(key: string) {
+    return this.store[key] ?? null;
+  },
+  setItem(key: string, value: string) {
+    this.store[key] = value;
+  },
+  removeItem(key: string) {
+    delete this.store[key];
+  },
+  clear() {
+    this.store = {};
+  },
+};
+
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
+});
+
+// Mock window.location for URL tests
+const mockLocation = new URL('http://localhost:3000');
+Object.defineProperty(window, 'location', {
+  value: mockLocation,
+});
 
 describe('FeatureFlagManager', () => {
   let manager: FeatureFlagManager;
