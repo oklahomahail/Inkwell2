@@ -217,6 +217,7 @@ const EnhancedDashboard: React.FC = () => {
             onClick={createNewProject}
             disabled={isCreatingProject}
             className="btn btn-primary"
+            data-tour="new-project-button"
           >
             {isCreatingProject ? (
               <>

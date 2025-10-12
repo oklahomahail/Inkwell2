@@ -10,9 +10,9 @@ import { ToastProvider } from '../context/ToastContext';
 
 import { CommandPaletteProvider } from './CommandPalette/CommandPaletteProvider';
 import { FeatureDiscoveryProvider } from './Onboarding/FeatureDiscovery';
+import { OnboardingOrchestrator } from './Onboarding/OnboardingOrchestrator';
 import { ProfileTourProvider } from './Onboarding/ProfileTourProvider';
 import { TourProvider } from './Onboarding/TourProvider';
-
 interface ProvidersProps {
   children: React.ReactNode;
 }
@@ -44,7 +44,10 @@ export const Providers: React.FC<ProvidersProps> = ({ children }) => {
                 <ProfileTourProvider>
                   <FeatureDiscoveryProvider>
                     <AppProvider>
-                      <CommandPaletteProvider>{children}</CommandPaletteProvider>
+                      <CommandPaletteProvider>
+                        <OnboardingOrchestrator />
+                        {children}
+                      </CommandPaletteProvider>
                     </AppProvider>
                   </FeatureDiscoveryProvider>
                 </ProfileTourProvider>
