@@ -63,7 +63,7 @@ export function withFeatureFlag<P extends Record<string, any>>(
   }
 
   FeatureFlaggedComponent.displayName = `WithFeatureFlag(${
-    WrappedComponent.displayName || WrappedComponent.name || 'Component'
+    (WrappedComponent && (WrappedComponent.displayName || WrappedComponent.name)) || 'Component'
   })`;
 
   return FeatureFlaggedComponent;
