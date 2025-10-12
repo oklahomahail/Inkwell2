@@ -212,7 +212,7 @@ export default function _ExportWizard({ projectId, onClose }: ExportWizardProps)
             fileName={download.fileName}
             metadata={download.metadata}
             onStartOver={resetWizard}
-            onClose={onClose}
+            onClose={() => onClose?.()}
           />
         )}
       </div>

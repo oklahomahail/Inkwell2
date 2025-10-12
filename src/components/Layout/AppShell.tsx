@@ -1,8 +1,8 @@
 // AppShell.tsx - Main application shell component
 import React from 'react';
 
-import { OnboardingOrchestrator } from '@/onboarding/OnboardingOrchestrator';
-import { TourProvider } from '@/onboarding/TourProvider';
+import { OnboardingOrchestrator } from '../../components/Onboarding/OnboardingOrchestrator';
+import { TourProvider } from '../../components/Onboarding/TourProvider';
 
 interface AppShellProps {
   children: React.ReactNode;

@@ -39,7 +39,8 @@ class ClaudeErrorBoundary extends Component<Props, State> {
   }
 
   private handleRestart = () => {
-    this.setState({ hasError: false, error: undefined, info: undefined, showDetails: false });
+    // Reset only the required keys to satisfy exactOptionalPropertyTypes
+    this.setState({ hasError: false, showDetails: false });
     this.props.onReset?.();
   };
 

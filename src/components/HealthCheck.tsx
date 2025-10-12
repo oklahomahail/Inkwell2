@@ -33,8 +33,16 @@ export const HealthCheck: React.FC = () => {
     renderTime?: number,
   ) => {
     setHealthStatuses((prev) =>
-      prev.map((item) =>
-        item.component === component ? { ...item, status, error, renderTime } : item,
+      prev.map(
+        (item): HealthStatus =>
+          item.component === component
+            ? {
+                component: item.component,
+                status,
+                error: error ?? '',
+                renderTime,
+              }
+            : item,
       ),
     );
   };

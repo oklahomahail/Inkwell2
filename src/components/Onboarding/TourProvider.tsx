@@ -105,9 +105,13 @@ const defaultChecklist: CompletionChecklist = {
 
 interface TourProviderProps {
   children: ReactNode;
+  initialTour?: TourName;
 }
 
-export const TourProvider: React.FC<TourProviderProps> = ({ children, initialTour }) => {
+export const TourProvider: React.FC<TourProviderProps> = ({
+  children,
+  initialTour: _initialTour,
+}) => {
   // Load saved tour progress from localStorage
   const [tourState, setTourState] = useState<TourState>(() => {
     try {

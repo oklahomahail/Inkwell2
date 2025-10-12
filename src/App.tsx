@@ -363,16 +363,16 @@ function _StorageDebugPanel() {
                     if ('indexedDB' in window) {
                       const databases = await indexedDB.databases();
                       await Promise.all(
-                        databases.map((db) => {
-                          if (db.name) {
-                            return new Promise<void>((resolve, _reject) => {
-                              const deleteReq = indexedDB.deleteDatabase(db.name!);
-                              deleteReq.onsuccess = () => resolve();
-                              deleteReq.onerror = () =>
-                                _reject(deleteReq.error || new Error('Failed to delete database'));
-                            });
-                          }
-                        }),
+                        databases.map((db) =>
+                          db.name
+                            ? new Promise<void>((resolve, reject) => {
+                                const deleteReq = indexedDB.deleteDatabase(db.name!);
+                                deleteReq.onsuccess = () => resolve();
+                                deleteReq.onerror = () =>
+                                  reject(deleteReq.error || new Error('Failed to delete database'));
+                              })
+                            : Promise.resolve(),
+                        ),
                       );
                     }
 

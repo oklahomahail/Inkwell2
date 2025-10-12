@@ -74,13 +74,10 @@ const CHECKLIST_ITEMS: ChecklistItemConfig[] = [
 ];
 
 interface CompletionChecklistProps {
-  onStartTour?: (tourType: string) => void;
-  onClose?: () => void;
-  checklist?: Record<string, boolean>;
-  isOpen?: boolean;
   isOpen: boolean;
   onClose: () => void;
-  onStartTour?: (_tourType: string) => void;
+  onStartTour?: (tourType: string) => void;
+  checklist?: Record<string, boolean>;
 }
 
 export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = ({
@@ -96,21 +93,20 @@ export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = 
 
   if (!isOpen) return null;
 
-  const handleItemClick = (_item: ChecklistItemConfig) => {
-    if (checklistItem.tourTrigger && canShowContextualTour(checklistItem.tourTrigger)) {
+  const handleItemClick = (item: ChecklistItemConfig) => {
+    if (item.tourTrigger && canShowContextualTour(item.tourTrigger)) {
       logAnalytics('checklist_tour_requested', {
-        tourType: checklistItem.tourTrigger,
-        item: checklistItem.key,
+        tourType: item.tourTrigger,
+        item: item.key,
       });
-      onStartTour?.(checklistItem.tourTrigger);
+      onStartTour?.(item.tourTrigger);
       onClose();
     }
   };
 
-  const getItemStyle = (_item: ChecklistItemConfig) => {
-    const isCompleted = checklist?.[checklistItem.key as keyof typeof checklist] || false;
-    const canStartTour =
-      checklistItem.tourTrigger && canShowContextualTour(checklistItem.tourTrigger);
+  const getItemStyle = (item: ChecklistItemConfig) => {
+    const isCompleted = checklist?.[item.key as keyof typeof checklist] || false;
+    const canStartTour = item.tourTrigger && canShowContextualTour(item.tourTrigger);
 
     return {
       opacity: isCompleted ? 0.7 : 1,
@@ -198,7 +194,7 @@ export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = 
                   onMouseLeave={() => setHoveredItem(null)}
                   role={canStartTour ? 'button' : 'listitem'}
                   tabIndex={canStartTour ? 0 : undefined}
-                  onKeyDown={(_e) => {
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
                       handleItemClick(item);
