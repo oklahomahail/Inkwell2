@@ -69,9 +69,13 @@ export function withFeatureFlag<P extends Record<string, any>>(
     return null;
   }
 
-  FeatureFlaggedComponent.displayName = `WithFeatureFlag(${
-    (WrappedComponent && (WrappedComponent.displayName || WrappedComponent.name)) || 'Component'
-  })`;
+  if (WrappedComponent) {
+    FeatureFlaggedComponent.displayName = `WithFeatureFlag(${
+      WrappedComponent.displayName || WrappedComponent.name || 'Component'
+    })`;
+  } else {
+    FeatureFlaggedComponent.displayName = 'WithFeatureFlag(Undefined)';
+  }
 
   return FeatureFlaggedComponent;
 }
