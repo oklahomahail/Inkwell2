@@ -164,11 +164,30 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         dispatch({ type: 'SET_THEME', payload: e.matches ? 'dark' : 'light' });
       }
     };
-    mediaQuery.addEventListener('change', handleThemeChange);
+    const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (!localStorage.getItem('inkwell-dark-mode')) {
+        setIsDarkMode(e.matches);
+        dispatch({ type: 'SET_THEME', payload: e.matches ? 'dark' : 'light' });
+      }
+    };
+
+    // Handle both modern and legacy browsers
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleMediaChange);
+    } else if (mediaQuery.addListener) {
+      // Legacy support
+      mediaQuery.addListener(handleMediaChange);
+      // Initial check
+      handleMediaChange(mediaQuery);
+    }
 
     return () => {
       window.removeEventListener('resize', checkMobile);
-      mediaQuery.removeEventListener('change', handleThemeChange);
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleMediaChange);
+      } else if (mediaQuery.removeListener) {
+        mediaQuery.removeListener(handleMediaChange);
+      }
     };
   }, []);
 
