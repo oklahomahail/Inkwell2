@@ -22,8 +22,10 @@ const mockLocalStorage = {
 import { TEST_FLAGS } from './testFlags';
 
 // Mock the config module
-vi.mock('../featureFlags.config', () => {
+vi.mock('../featureFlags.config', async (importOriginal) => {
+  const actual = await importOriginal();
   return {
+    ...actual,
     FEATURE_FLAGS: TEST_FLAGS,
   };
 });

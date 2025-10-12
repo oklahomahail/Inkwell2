@@ -7,8 +7,10 @@ import { FeatureGate, useFeatureFlag, withFeatureFlag } from '../featureFlags.re
 
 // Mock feature flags module
 import { TEST_FLAGS } from './testFlags';
-vi.mock('../featureFlags.config', () => {
+vi.mock('../featureFlags.config', async (importOriginal) => {
+  const actual = await importOriginal();
   return {
+    ...actual,
     FEATURE_FLAGS: TEST_FLAGS,
   };
 });
