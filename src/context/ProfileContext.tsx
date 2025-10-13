@@ -180,12 +180,18 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
         throw new Error('Cannot delete the last profile');
       }
 
-      dispatch({ type: 'DELETE_PROFILE', payload: profileId });
-
       const updatedProfiles = state.profiles.filter((p) => p.id !== profileId);
+      dispatch({ type: 'DELETE_PROFILE', payload: profileId });
       _saveProfilesToStorage(updatedProfiles);
 
-      if (state.activeProfile?.id === profileId) {
+      // If we deleted the active profile, automatically switch to the first remaining profile
+      if (state.activeProfile?.id === profileId && updatedProfiles.length > 0) {
+        const fallbackProfile = updatedProfiles[0];
+        dispatch({ type: 'SET_ACTIVE_PROFILE', payload: fallbackProfile });
+        _saveActiveProfileToStorage(fallbackProfile.id);
+      } else if (state.activeProfile?.id === profileId) {
+        // No remaining profiles (shouldn't happen due to guard above, but just in case)
+        dispatch({ type: 'SET_ACTIVE_PROFILE', payload: null });
         _saveActiveProfileToStorage(null);
       }
     },
