@@ -45,6 +45,18 @@ class TourControllerImpl {
     profileId: string,
     options: StartTourOptions = {},
   ): Promise<boolean> {
+    // Global killswitch for profiles page
+    if ((window as any).__blockToursOnProfiles) {
+      console.debug(`[TourController] Tours blocked on profiles page`);
+      return false;
+    }
+
+    // Dedupe guard - prevent multiple simultaneous starts
+    if ((window as any).__tourActiveId) {
+      console.debug(`[TourController] Tour already active: ${(window as any).__tourActiveId}`);
+      return false;
+    }
+
     const tourType = tourId as 'spotlight' | 'simple';
     if (!this.steps[tourType]) {
       console.warn(`[TourController] Unknown tour type: ${tourType}`);
@@ -55,6 +67,9 @@ class TourControllerImpl {
     const effectiveProfileId = profileId || 'default';
 
     try {
+      // Set active tour ID for deduplication
+      (window as any).__tourActiveId = tourType;
+
       // For spotlight tours, trigger the actual tour system
       if (tourType === 'spotlight') {
         // Get the steps and trigger TourProvider to show the spotlight tour
@@ -76,9 +91,13 @@ class TourControllerImpl {
       }
     } catch (error) {
       console.error(`[TourController] Error starting ${tourType} tour:`, error);
+      // Clear active tour ID on error
+      (window as any).__tourActiveId = null;
       return false;
     }
 
+    // Clear active tour ID if we get here without starting
+    (window as any).__tourActiveId = null;
     return false;
   }
 
@@ -95,6 +114,8 @@ class TourControllerImpl {
       this.options.onDismiss();
     }
     this.currentTour = null;
+    // Clear active tour ID
+    (window as any).__tourActiveId = null;
   }
 
   complete() {
@@ -102,6 +123,8 @@ class TourControllerImpl {
       this.options.onComplete();
     }
     this.currentTour = null;
+    // Clear active tour ID
+    (window as any).__tourActiveId = null;
   }
 }
 

@@ -1,3 +1,4 @@
+import { match } from 'path-to-regexp';
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -10,6 +11,13 @@ import { hasStartedOnce, markStarted } from '../utils/tourOnce';
 
 import { isSuppressed } from './tourHookUtils';
 
+// Allowlist of routes where autostart is permitted
+const AUTOSTART_ALLOW = ['/p/:id/writing', '/p/:id/timeline', '/p/:id/analysis', '/p/:id/planning'];
+
+function isAutostartAllowed(pathname: string) {
+  return AUTOSTART_ALLOW.some((p) => match(p, { decode: decodeURIComponent })(pathname));
+}
+
 export function useSimpleTourAutostart(profileId?: string) {
   const location = useLocation();
   const { isReady } = useUIReady();
@@ -21,6 +29,10 @@ export function useSimpleTourAutostart(profileId?: string) {
   const gateRef = useRef({ started: false, token: 0 });
 
   useEffect(() => {
+    if (!isAutostartAllowed(location.pathname)) {
+      debugTour('autostart:not-allowed', { route: location.pathname, tour: 'simple' });
+      return;
+    }
     if (isSuppressed()) {
       debugTour('autostart:suppressed', { route: location.pathname });
       return;

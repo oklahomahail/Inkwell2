@@ -2,6 +2,7 @@
 // Tests for duplicate prevention, session tracking, and first-target checks
 
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { ProfileProvider } from '@/context/ProfileContext';
@@ -251,13 +252,15 @@ describe('Tour Gating + First-run Flow (A1)', () => {
   describe('OnboardingOrchestrator Session Guards', () => {
     it('should prevent welcome modal from showing multiple times in same session', async () => {
       const TestComponent = () => (
-        <ProfileProvider>
-          <TourProvider>
-            <ProfileTourProvider>
-              <OnboardingOrchestrator autoShowWelcome={true} delayWelcomeMs={0} />
-            </ProfileTourProvider>
-          </TourProvider>
-        </ProfileProvider>
+        <MemoryRouter initialEntries={['/p/123/writing']}>
+          <ProfileProvider>
+            <TourProvider>
+              <ProfileTourProvider>
+                <OnboardingOrchestrator autoShowWelcome={true} delayWelcomeMs={0} />
+              </ProfileTourProvider>
+            </TourProvider>
+          </ProfileProvider>
+        </MemoryRouter>
       );
 
       const { unmount } = render(<TestComponent />);

@@ -1,5 +1,7 @@
 // src/components/Onboarding/OnboardingOrchestrator.tsx
+import { match } from 'path-to-regexp';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import analyticsService from '@/services/analyticsService';
 
@@ -7,6 +9,13 @@ import { useTutorialStorage } from '../../services/tutorialStorage';
 
 import { shouldShowTourPrompt as gatingShouldShow, setPromptedThisSession } from './tourGating';
 import TourOverlay from './TourOverlay';
+
+// Allowlist for first-time onboarding - keep this very restrictive
+const FIRST_TIME_ALLOWED = ['/p/:id/writing'];
+
+function isFirstTimeAllowed(pathname: string) {
+  return FIRST_TIME_ALLOWED.some((p) => match(p, { decode: decodeURIComponent })(pathname));
+}
 
 const WELCOME_SHOWN_SESSION_KEY = 'inkwell-welcome-shown-this-session';
 
@@ -19,6 +28,7 @@ import type { TourType } from './steps/Step.types';
  */
 
 export function OnboardingOrchestrator() {
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [tourType, setTourType] = useState<TourType>('full-onboarding');
   const launchedThisSession = useRef(false);
@@ -34,6 +44,12 @@ export function OnboardingOrchestrator() {
     if (!already) {
       sessionStorage.setItem(WELCOME_SHOWN_SESSION_KEY, 'true');
     }
+    // One-time cleanup of legacy first-run keys
+    try {
+      ['inkwell.tour.firstTime', 'tour.firstRun', 'onboarding.seen'].forEach((k) =>
+        localStorage.removeItem(k),
+      );
+    } catch {}
   }, []);
 
   // Listen for completion, prevent further auto-starts this session
@@ -93,8 +109,9 @@ export function OnboardingOrchestrator() {
         return;
       }
 
-      // First-run gating without URL param
-      if (gatingShouldShow()) {
+      // First-run gating without URL param - only on allowed routes
+      const isFirstRun = localStorage.getItem('inkwell.onboarding.firstRunCompleted') !== 'true';
+      if (isFirstRun && isFirstTimeAllowed(location.pathname) && gatingShouldShow()) {
         setTourType('full-onboarding');
         setOpen(true);
         launchedThisSession.current = true;
@@ -130,7 +147,20 @@ export function OnboardingOrchestrator() {
   }, [finishedThisSession]);
 
   if (!open) return null;
-  return <TourOverlay tourType={tourType} onClose={() => setOpen(false)} />;
+  return (
+    <TourOverlay
+      tourType={tourType}
+      onClose={() => {
+        try {
+          // Mark first-run tour completed on successful completion
+          if (tourType === 'full-onboarding') {
+            localStorage.setItem('inkwell.onboarding.firstRunCompleted', 'true');
+          }
+        } catch {}
+        setOpen(false);
+      }}
+    />
+  );
 }
 
 export default OnboardingOrchestrator;

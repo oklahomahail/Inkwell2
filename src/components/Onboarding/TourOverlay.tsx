@@ -1,5 +1,6 @@
 // src/components/Onboarding/TourOverlay.tsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { analyticsService } from '../../services/analyticsService';
 import { useTutorialStorage } from '../../services/tutorialStorage';
@@ -147,7 +148,7 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
   const Step = steps[i];
   if (!Step) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] bg-black/30">
       <div className="absolute inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
         <div className="bg-white rounded-2xl shadow-xl mx-auto md:min-w-[560px]">
@@ -160,6 +161,7 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
           />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

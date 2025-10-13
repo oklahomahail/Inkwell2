@@ -15,7 +15,14 @@ export function ProfilePage() {
   useEffect(() => {
     // Ensure suppression is maintained during component lifecycle
     sessionStorage.setItem('inkwell:tour:suppress', 'profiles');
-    return () => sessionStorage.removeItem('inkwell:tour:suppress');
+
+    // Temporary killswitch for tour blocking
+    (window as any).__blockToursOnProfiles = true;
+
+    return () => {
+      sessionStorage.removeItem('inkwell:tour:suppress');
+      (window as any).__blockToursOnProfiles = false;
+    };
   }, []);
 
   const { activeProfile } = useProfile();

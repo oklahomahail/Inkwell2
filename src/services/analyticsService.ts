@@ -440,6 +440,7 @@ class AnalyticsService {
   private sessionStartTime = Date.now();
   private lastActivityTime = Date.now();
   private activeView = 'dashboard';
+  private lastTourStartHash: string | null = null;
 
   // Privacy settings
   private readonly RETENTION_DAYS = 30;
@@ -541,6 +542,19 @@ class AnalyticsService {
 
   // Convenience methods for common events
   trackTourStarted(tourType: 'first_time' | 'feature_tour' | 'help_requested', entryPoint: string) {
+    // Create hash for deduplication
+    const hash = `${tourType}|${entryPoint}|${this.sessionId}`;
+    if (hash === this.lastTourStartHash) {
+      console.debug('[Analytics] Deduping duplicate tour_started event:', { tourType, entryPoint });
+      return; // Skip duplicate events
+    }
+    this.lastTourStartHash = hash;
+
+    // Log legacy analytics for debugging
+    if (import.meta.env.DEV) {
+      console.log('Legacy analytics event: tour_started', { tourType, entryPoint });
+    }
+
     this.track('tour_started', { tourType, entryPoint });
   }
 
