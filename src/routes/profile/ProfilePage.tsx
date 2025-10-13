@@ -4,7 +4,13 @@ import React, { useEffect } from 'react';
 import { useProfile } from '@/context/ProfileContext';
 
 export function ProfilePage() {
+  // Set suppression immediately when component loads (before useEffect)
+  React.useMemo(() => {
+    sessionStorage.setItem('inkwell:tour:suppress', 'profiles');
+  }, []);
+
   useEffect(() => {
+    // Ensure suppression is maintained during component lifecycle
     sessionStorage.setItem('inkwell:tour:suppress', 'profiles');
     return () => sessionStorage.removeItem('inkwell:tour:suppress');
   }, []);

@@ -54,8 +54,32 @@ class TourControllerImpl {
     // Apply default profile if none provided
     const effectiveProfileId = profileId || 'default';
 
-    this.start(tourType, options);
-    return true;
+    try {
+      // For spotlight tours, trigger the actual tour system
+      if (tourType === 'spotlight') {
+        // Get the steps and trigger TourProvider to show the spotlight tour
+        const steps = this.steps[tourType];
+        if (steps && steps.length > 0) {
+          // Dispatch event for TourProvider to handle
+          window.dispatchEvent(
+            new CustomEvent('inkwell:tour:start-spotlight', {
+              detail: { steps, profileId: effectiveProfileId, options },
+            }),
+          );
+          this.start(tourType, options);
+          return true;
+        }
+      } else {
+        // For other tour types, use existing logic
+        this.start(tourType, options);
+        return true;
+      }
+    } catch (error) {
+      console.error(`[TourController] Error starting ${tourType} tour:`, error);
+      return false;
+    }
+
+    return false;
   }
 
   getSteps(tourId: string): SpotlightStep[] {

@@ -11,11 +11,20 @@ export function useSpotlightTour(): SpotlightTour {
 
   return {
     start: () => {
-      // Assuming the tour library is mounted on window
-      if (window.__INKWELL_TOUR__) {
-        window.__INKWELL_TOUR__.start({ steps });
-      } else {
-        console.error('Tour library not initialized');
+      try {
+        // Use the TourController system instead of looking for window.__INKWELL_TOUR__
+        import('../components/Onboarding/tour-core/TourController').then(({ TourController }) => {
+          TourController.startTour('spotlight', 'default', {
+            onComplete: () => {
+              console.log('Spotlight tour completed');
+            },
+            onDismiss: () => {
+              console.log('Spotlight tour dismissed');
+            },
+          });
+        });
+      } catch (error) {
+        console.error('Failed to start spotlight tour:', error);
       }
     },
   };

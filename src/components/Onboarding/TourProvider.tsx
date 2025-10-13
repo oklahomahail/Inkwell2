@@ -225,6 +225,13 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.info('[tour] start blocked by suppression:', suppressedRoute);
       return;
     }
+
+    // Extra check for profile routes
+    const currentPath = window.location.pathname.toLowerCase();
+    if (currentPath === '/profile' || currentPath.startsWith('/profiles')) {
+      if (import.meta.env.DEV) console.info('[tour] start blocked by profile route:', currentPath);
+      return;
+    }
     if (import.meta.env.DEV) console.info('[tour] startTour', { type, steps: steps?.length ?? 0 });
 
     // Global quick-tour kill switch
@@ -405,6 +412,38 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (preferences.neverShowAgain) return false;
     return true;
   };
+
+  // Handle spotlight tour events from TourController
+  useEffect(() => {
+    const handleSpotlightTour = (event: CustomEvent) => {
+      const { steps, profileId, options } = event.detail;
+      if (steps && steps.length > 0) {
+        // Convert spotlight steps to tour steps format
+        const tourSteps: TourStep[] = steps.map((step: any, index: number) => ({
+          id: step.id,
+          title: `Step ${index + 1}`,
+          description: step.content,
+          target: step.target,
+          placement: 'center' as const,
+          action: 'none' as const,
+          optional: false,
+          order: index,
+          category: 'feature-discovery' as const,
+        }));
+
+        // Start the tour with the converted steps
+        startTour('feature-tour', tourSteps);
+      }
+    };
+
+    window.addEventListener('inkwell:tour:start-spotlight', handleSpotlightTour as EventListener);
+    return () => {
+      window.removeEventListener(
+        'inkwell:tour:start-spotlight',
+        handleSpotlightTour as EventListener,
+      );
+    };
+  }, [startTour]); // Include startTour in dependencies
 
   const value: TourContextValue = {
     tourState,

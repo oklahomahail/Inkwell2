@@ -27,7 +27,8 @@ export function useSpotlightAutostart(profileId?: string, opts: StartOpts = {}) 
       debugTour('autostart:suppressed', { route: location.pathname });
       return;
     }
-    if (shouldBlockTourHere(window.location)) {
+    // Check both window.location and React Router location for route blocking
+    if (shouldBlockTourHere(window.location) || shouldBlockTourHere(location)) {
       debugTour('autostart:blocked', { route: location.pathname, tour: 'spotlight' });
       return;
     }
