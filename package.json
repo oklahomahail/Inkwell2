@@ -23,7 +23,7 @@
     "tailwind:replace": "node scripts/tailwind-text-replacer.mjs",
     "clean": "rm -rf node_modules pnpm-lock.yaml node_modules/.cache .turbo .vite dist",
     "vercel:test": "npm run build && npm run preview",
-    "test": "vitest",
+    "test": "vitest run --coverage",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:baseline": "tsx src/test/runBaseline.ts",
@@ -42,7 +42,9 @@
     "lint:relaxed": "eslint \"src/**/*.{ts,tsx}\" --fix --cache --cache-location node_modules/.cache/eslint --rule '@typescript-eslint/no-explicit-any: off' --rule '@typescript-eslint/no-unused-vars: [warn, {\"argsIgnorePattern\":\"^_\",\"varsIgnorePattern\":\"^_\"}]' --rule 'react-hooks/exhaustive-deps: off' --rule 'react-refresh/only-export-components: off' --rule 'import/order: warn'",
     "pretypecheck": "npm run lint:relaxed",
     "check": "npm run lint:relaxed && npm run typecheck",
-    "check:corruption": "./scripts/check-corruption.sh"
+    "check:corruption": "./scripts/check-corruption.sh",
+    "test:watch": "vitest --watch",
+    "test:ci": "vitest run --coverage --reporter=dot"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
