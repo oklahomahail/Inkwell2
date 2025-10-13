@@ -1,131 +1,102 @@
-import { spotlightSteps, SpotlightStep } from './spotlightSteps';
+// src/components/Onboarding/TourController.ts
+type TourId = 'feature-tour' | (string & {});
 
-// Module-level state for tour control
-let __starting = false;
+type TourEventName = 'tour:start' | 'tour:stop' | 'tour:step' | 'tour:complete' | 'tour:error';
 
-interface StartTourOptions extends TourOptions {
-  force?: boolean;
+interface TourStartDetail {
+  id: TourId;
+}
+interface TourStopDetail {
+  id: TourId;
+  reason?: 'user' | 'program' | 'error';
+}
+interface TourStepDetail {
+  id: TourId;
+  stepId: string;
+  index: number;
+}
+interface TourCompleteDetail {
+  id: TourId;
+}
+interface TourErrorDetail {
+  id: TourId;
+  message: string;
 }
 
-interface TourOptions {
-  onComplete?: () => void;
-  onDismiss?: () => void;
-}
-
-class TourControllerImpl {
-  private currentTour: string | null = null;
-  private options: TourOptions = {};
-  private steps: Record<string, SpotlightStep[]> = {
-    spotlight: spotlightSteps,
-    simple: [],
-  };
-
-  start(tourId: string, options: TourOptions = {}) {
-    if (__starting) {
-      console.debug(`[TourController] Ignoring duplicate start request for ${tourId}`);
-      return;
-    }
-
-    __starting = true;
-    try {
-      console.debug(`[TourController] Starting tour: ${tourId}`);
-      this.currentTour = tourId;
-      this.options = options;
-      // Your existing tour start logic here
-    } finally {
-      // Release after a tick to swallow immediate duplicate calls
-      setTimeout(() => {
-        __starting = false;
-      }, 0);
-    }
-  }
-
-  async startTour(
-    tourId: string,
-    profileId: string,
-    options: StartTourOptions = {},
-  ): Promise<boolean> {
-    // Global killswitch for profiles page
-    if ((window as any).__blockToursOnProfiles) {
-      console.debug(`[TourController] Tours blocked on profiles page`);
-      return false;
-    }
-
-    // Dedupe guard - prevent multiple simultaneous starts
-    if ((window as any).__tourActiveId) {
-      console.debug(`[TourController] Tour already active: ${(window as any).__tourActiveId}`);
-      return false;
-    }
-
-    const tourType = tourId as 'spotlight' | 'simple';
-    if (!this.steps[tourType]) {
-      console.warn(`[TourController] Unknown tour type: ${tourType}`);
-      return false;
-    }
-
-    // Apply default profile if none provided
-    const effectiveProfileId = profileId || 'default';
-
-    try {
-      // Set active tour ID for deduplication
-      (window as any).__tourActiveId = tourType;
-
-      // For spotlight tours, trigger the actual tour system
-      if (tourType === 'spotlight') {
-        // Get the steps and trigger TourProvider to show the spotlight tour
-        const steps = this.steps[tourType];
-        if (steps && steps.length > 0) {
-          // Dispatch event for TourProvider to handle
-          window.dispatchEvent(
-            new CustomEvent('inkwell:tour:start-spotlight', {
-              detail: { steps, profileId: effectiveProfileId, options },
-            }),
-          );
-          this.start(tourType, options);
-          return true;
-        }
-      } else {
-        // For other tour types, use existing logic
-        this.start(tourType, options);
-        return true;
-      }
-    } catch (error) {
-      console.error(`[TourController] Error starting ${tourType} tour:`, error);
-      // Clear active tour ID on error
-      (window as any).__tourActiveId = null;
-      return false;
-    }
-
-    // Clear active tour ID if we get here without starting
-    (window as any).__tourActiveId = null;
-    return false;
-  }
-
-  getSteps(tourId: string): SpotlightStep[] {
-    return this.steps[tourId] || [];
-  }
-
-  getCurrentTour(): string | null {
-    return this.currentTour;
-  }
-
-  dismiss() {
-    if (this.options.onDismiss) {
-      this.options.onDismiss();
-    }
-    this.currentTour = null;
-    // Clear active tour ID
-    (window as any).__tourActiveId = null;
-  }
-
-  complete() {
-    if (this.options.onComplete) {
-      this.options.onComplete();
-    }
-    this.currentTour = null;
-    // Clear active tour ID
-    (window as any).__tourActiveId = null;
+declare global {
+  interface Window {
+    __inkwell?: {
+      tour?: {
+        running: boolean;
+        id?: TourId | undefined;
+      };
+    };
   }
 }
 
-export const TourController = new TourControllerImpl();
+const bus = (typeof window !== 'undefined' ? window : undefined) as
+  | (Window & typeof globalThis)
+  | undefined;
+
+const state = {
+  running: false,
+  id: undefined as TourId | undefined,
+};
+
+function dispatch<T>(name: TourEventName, detail: T) {
+  if (!bus) return;
+  bus.dispatchEvent(new CustomEvent(name, { detail }));
+}
+
+export function isTourRunning() {
+  return state.running;
+}
+
+export function currentTourId(): TourId | undefined {
+  return state.id;
+}
+
+/**
+ * Idempotent start. If a tour is already running, does nothing.
+ * Your overlay should listen for `tour:start`:
+ *   window.addEventListener('tour:start', (e) => { ... })
+ */
+export function startTour(id: TourId) {
+  if (!bus) return;
+  if (state.running && state.id === id) return;
+
+  state.running = true;
+  state.id = id;
+  // expose for quick console checks
+  bus.__inkwell = bus.__inkwell || {};
+  bus.__inkwell.tour = { running: true, id };
+
+  dispatch<TourStartDetail>('tour:start', { id });
+}
+
+/** Programmatic stop; overlay can also dispatch this on Done. */
+export function stopTour(reason: TourStopDetail['reason'] = 'program') {
+  if (!bus || !state.running) return;
+  const id = state.id as TourId;
+  state.running = false;
+  state.id = undefined;
+  bus.__inkwell = bus.__inkwell || {};
+  bus.__inkwell.tour = { running: false, id: undefined };
+  dispatch<TourStopDetail>('tour:stop', { id, reason });
+}
+
+/** Optional helpers your overlay can call to broadcast progress */
+export function emitTourStep(stepId: string, index: number) {
+  if (!bus || !state.running || !state.id) return;
+  dispatch<TourStepDetail>('tour:step', { id: state.id, stepId, index });
+}
+export function emitTourComplete() {
+  if (!bus || !state.running || !state.id) return;
+  const id = state.id;
+  stopTour('program');
+  dispatch<TourCompleteDetail>('tour:complete', { id });
+}
+export function emitTourError(message: string) {
+  if (!bus || !state.id) return;
+  dispatch<TourErrorDetail>('tour:error', { id: state.id, message });
+}

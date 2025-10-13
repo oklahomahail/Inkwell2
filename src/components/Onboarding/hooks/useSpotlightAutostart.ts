@@ -1,121 +1,64 @@
-import { match } from 'path-to-regexp';
+// src/components/Onboarding/useSpotlightAutostart.ts
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { useUIReady } from '@/context/AppContext';
+import { startTour, isTourRunning } from './TourController';
+import { getTourProgress, resetProgress, markTourLaunched } from './useTutorialStorage';
 
-import { TourController } from '../tour-core/TourController';
-import { debugTour } from '../utils/debug';
-import { shouldBlockTourHere } from '../utils/routeGuards';
-import { hasStartedOnce, markStarted } from '../utils/tourOnce';
-import { waitForElement } from '../utils/waitForElement';
+const FEATURE_TOUR_ID = 'feature-tour';
+const DASHBOARD_PATH = '/profiles';
 
-import { isSuppressed } from './tourHookUtils';
-
-// Allowlist of routes where autostart is permitted
-const AUTOSTART_ALLOW = ['/p/:id/writing', '/p/:id/timeline', '/p/:id/analysis', '/p/:id/planning'];
-
-function isAutostartAllowed(pathname: string) {
-  return AUTOSTART_ALLOW.some((p) => match(p, { decode: decodeURIComponent })(pathname));
+function targetsExist(selectors: string[]) {
+  return selectors.every((sel) => !!document.querySelector(sel));
 }
 
-interface StartOpts {
-  timeoutMs?: number;
+function whenTargetsReady(selectors: string[], timeoutMs = 8000): Promise<boolean> {
+  // quick path
+  if (targetsExist(selectors)) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const deadline = Date.now() + timeoutMs;
+    const observer = new MutationObserver(() => {
+      if (targetsExist(selectors)) finalize(true);
+      else if (Date.now() > deadline) finalize(false);
+    });
+    const finalize = (ok: boolean) => {
+      observer.disconnect();
+      resolve(ok);
+    };
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    // last-chance check on macrotask
+    setTimeout(() => finalize(targetsExist(selectors)), timeoutMs);
+  });
 }
 
-export function useSpotlightAutostart(profileId?: string, opts: StartOpts = {}) {
-  const { timeoutMs = 8000 } = opts;
-  const location = useLocation();
-  const { isReady } = useUIReady();
-  const effectiveProfileId = profileId ?? 'default';
-  const gateRef = useRef({ started: false, token: 0 });
+export function useSpotlightAutostart(stepSelectors: string[]) {
+  const once = useRef(false);
+  const loc = useLocation();
 
   useEffect(() => {
-    if (!isAutostartAllowed(location.pathname)) {
-      debugTour('autostart:not-allowed', { route: location.pathname, tour: 'spotlight' });
-      return;
-    }
-    if (isSuppressed()) {
-      debugTour('autostart:suppressed', { route: location.pathname });
-      return;
-    }
-    // Check both window.location and React Router location for route blocking
-    if (shouldBlockTourHere(window.location) || shouldBlockTourHere(location)) {
-      debugTour('autostart:blocked', { route: location.pathname, tour: 'spotlight' });
-      return;
-    }
-    if (!isReady) return;
-    if (gateRef.current.started) {
-      debugTour('autostart:ref-guard-hit', { tour: 'spotlight' });
-      return;
-    }
-    if (
-      localStorage.getItem('tourProgress.spotlight.completed') === 'true' ||
-      localStorage.getItem('tourProgress.spotlight.dismissed') === 'true'
-    )
-      return;
-    if (hasStartedOnce(effectiveProfileId, 'spotlight')) {
-      debugTour('autostart:once-guard-hit', { tour: 'spotlight' });
-      return;
-    }
+    if (once.current) return;
+    if (!loc.pathname.startsWith(DASHBOARD_PATH)) return;
+    if (isTourRunning()) return;
 
-    let cancelled = false;
-    const myToken = ++gateRef.current.token;
+    const progress = getTourProgress(FEATURE_TOUR_ID);
+    // Only auto-start if user has never completed it
+    const shouldAutostart = !progress?.completed && !sessionStorage.getItem('tour:feature:blocked');
 
-    (async () => {
-      const steps = TourController.getSteps('spotlight');
-      const firstWithSelector = steps.find((s) => s.target);
-      if (!firstWithSelector) {
-        debugTour('autostart:no-steps', { tour: 'spotlight' });
-        return;
-      }
+    if (!shouldAutostart) return;
+    once.current = true;
+
+    // Give the page a tick to mount panels, then wait for targets
+    queueMicrotask(async () => {
+      const ok = await whenTargetsReady(stepSelectors);
+      if (!ok) return; // silently bail if targets never appear
 
       try {
-        const el = await waitForElement(firstWithSelector.target!, {
-          timeout: timeoutMs,
-          pollEveryMs: 100,
-          root: document,
-        });
-
-        if (cancelled) return;
-        if (!el) {
-          debugTour('autostart:no-target', { tour: 'spotlight', target: firstWithSelector.target });
-          return;
-        }
-
-        const unresolved = steps
-          .filter((s) => s.target)
-          .filter((s) => !document.querySelector(s.target!))
-          .map((s) => s.target);
-        if (unresolved.length) {
-          debugTour('autostart:unresolved-targets', { tour: 'spotlight', unresolved });
-          return;
-        }
-
-        queueMicrotask(async () => {
-          if (gateRef.current.started || gateRef.current.token !== myToken) {
-            debugTour('autostart:token-mismatch', {
-              tour: 'spotlight',
-              myToken,
-              token: gateRef.current.token,
-            });
-            return;
-          }
-
-          const ok = await TourController.startTour('spotlight', effectiveProfileId);
-          if (!ok) return;
-
-          gateRef.current.started = true;
-          markStarted(effectiveProfileId, 'spotlight');
-          debugTour('autostart:started', { tour: 'spotlight', route: location.pathname });
-        });
-      } catch (e) {
-        debugTour('autostart:error', { tour: 'spotlight', error: e });
+        startTour(FEATURE_TOUR_ID); // TourController has its own global double-start guard
+        markTourLaunched(FEATURE_TOUR_ID);
+      } catch {
+        // If a stale progress record is blocking, allow a one-time reset
+        resetProgress(FEATURE_TOUR_ID);
       }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [location, isReady, timeoutMs, effectiveProfileId]);
+    });
+  }, [loc.pathname, stepSelectors]);
 }
