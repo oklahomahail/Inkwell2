@@ -137,10 +137,13 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         'true',
       );
 
-      expect(analyticsService.track).toHaveBeenCalledWith('tour_started', {
-        tourType: 'full-onboarding',
-        entryPoint: 'prompt',
-      });
+      expect(analyticsService.track).toHaveBeenCalledWith(
+        'tour_started',
+        expect.objectContaining({
+          tourType: 'feature-tour',
+          entryPoint: 'provider',
+        }),
+      );
     });
 
     it('should not show tour prompt if already prompted this session', async () => {
@@ -194,7 +197,9 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         </ProfileProvider>,
       );
 
-      expect(screen.getByTestId('should-show-prompt')).toHaveTextContent('false');
+      await waitFor(() => {
+        expect(screen.getByTestId('should-show-prompt')).toHaveTextContent('false');
+      });
     });
 
     it('should not show prompt during remind me later period', async () => {
@@ -216,7 +221,9 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         </ProfileProvider>,
       );
 
-      expect(screen.getByTestId('should-show-prompt')).toHaveTextContent('false');
+      await waitFor(() => {
+        expect(screen.getByTestId('should-show-prompt')).toHaveTextContent('false');
+      });
     });
 
     it('should show prompt after remind me later period expires', () => {

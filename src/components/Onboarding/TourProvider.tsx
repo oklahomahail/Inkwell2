@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, type ReactNode }
 
 import analyticsService from '../../services/analyticsService';
 
+import * as tourGatingMod from './tourGating';
 import { hasPromptedThisSession } from './tourGating';
 
 // ===== Singleton token to block double starts (React strict/double effects)
@@ -177,7 +178,11 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Provider-owned analytics (single source of truth)
   const logAnalytics = (event: string, data: any = {}) => {
-    const payload = { ...data, tourType: tourState.tourType, step: tourState.currentStep };
+    const payload = {
+      tourType: data.tourType ?? tourState.tourType,
+      step: data.step ?? tourState.currentStep,
+      ...data,
+    };
     try {
       analyticsService.trackEvent(event as any, payload);
       (analyticsService as any).track?.(event as any, payload);
@@ -226,7 +231,6 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (import.meta.env.DEV) console.info('[tour] already starting/active, skip');
       return;
     }
-    startToken = `${type}:${Date.now()}`;
 
     // Commit state then analytics
     try {
@@ -253,6 +257,9 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       startToken = token;
 
+      // Log analytics before state update to preserve the tour type
+      logAnalytics('tour_started', { entryPoint: 'provider', tourType: type });
+
       try {
         setTourState((prev) => ({
           ...prev,
@@ -268,9 +275,6 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
       }
       cleanupTourParams();
-
-      // The ONLY 'tour_started' emission lives here
-      logAnalytics('tour_started', { entryPoint: 'provider' });
     } finally {
       queueMicrotask(() => {
         startToken = null;
@@ -352,16 +356,19 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const shouldShowTourPrompt = () => {
-    try {
-      const { shouldShowTourPrompt: computeShould } = require('./tourGating');
-      return Boolean(computeShould());
-    } catch {
-      // Fallback to session-only guard in tests
-      if (import.meta.env.TEST) {
-        return !hasPromptedThisSession(window.sessionStorage);
-      }
-      return false; // default disabled
+    // Prefer statically imported module when available (works in tests reliably)
+    if (tourGatingMod && typeof tourGatingMod.shouldShowTourPrompt === 'function') {
+      return Boolean(tourGatingMod.shouldShowTourPrompt());
     }
+    try {
+      const gating = require('./tourGating');
+      const compute = gating.shouldShowTourPrompt ?? gating.default?.shouldShowTourPrompt;
+      if (typeof compute === 'function') return Boolean(compute());
+    } catch {}
+    if (import.meta.env.TEST) {
+      return !hasPromptedThisSession(window.sessionStorage);
+    }
+    return false; // default disabled
   };
 
   const updateChecklist = (item: keyof CompletionChecklist) => {
