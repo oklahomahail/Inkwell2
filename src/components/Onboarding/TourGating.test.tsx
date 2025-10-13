@@ -7,6 +7,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { ProfileProvider } from '@/context/ProfileContext';
 import { analyticsService } from '@/services/analyticsService';
 
+import { ProfileTourProvider } from './ProfileTourProvider';
 import { makeMockStorage, TestTourWrapper } from './testUtils';
 
 // Mock analytics service
@@ -31,6 +32,8 @@ vi.mock('./TourOverlay', () => ({
 import OnboardingOrchestrator from './OnboardingOrchestrator';
 import { TestTourWrapper } from './testUtils';
 import { TestTourComponent } from './TourGating.components';
+import { _TestTourComponent } from './TourGating.components';
+import { TourProvider, useTour } from './TourProvider';
 
 // Mock database implementation
 const mockDb = {
@@ -84,6 +87,9 @@ describe('Tour Gating + First-run Flow (A1)', () => {
   describe('Duplicate Tour Prevention', () => {
     it('should prevent duplicate tour launches', async () => {
       const onTourStart = vi.fn();
+      vi.mock('./tour-core', () => ({
+        hasPromptedThisSession: vi.fn(),
+      }));
 
       render(
         <TestTourWrapper>
