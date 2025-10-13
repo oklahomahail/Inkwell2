@@ -32,7 +32,7 @@ vi.mock('./TourOverlay', () => ({
 import OnboardingOrchestrator from './OnboardingOrchestrator';
 import { TestTourWrapper } from './testUtils';
 import { TestTourComponent } from './TourGating.components';
-import { _TestTourComponent } from './TourGating.components';
+import { useTour } from './TourProvider';
 import { TourProvider, useTour } from './TourProvider';
 
 // Mock database implementation
@@ -119,6 +119,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
     });
 
     it('should set session marker when tour starts', async () => {
+      const onTourStart = vi.fn();
       render(
         <TestTourWrapper>
           <TestTourComponent onTourStart={onTourStart} />
@@ -146,7 +147,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <_TestTourComponent />
+              <TestTourComponent />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>,
@@ -163,7 +164,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <_TestTourComponent />
+              <TestTourComponent />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>,
@@ -181,7 +182,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <_TestTourComponent />
+              <TestTourComponent />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>,
@@ -202,7 +203,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <_TestTourComponent />
+              <TestTourComponent />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>,
@@ -223,7 +224,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         <ProfileProvider>
           <ProfileTourProvider>
             <TourProvider>
-              <_TestTourComponent />
+              <TestTourComponent />
             </TourProvider>
           </ProfileTourProvider>
         </ProfileProvider>,

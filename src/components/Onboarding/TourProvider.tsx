@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState, type ReactNode }
 
 import analyticsService from '../../services/analyticsService';
 
+import { hasPromptedThisSession } from './tourGating';
+
 // ===== Singleton token to block double starts (React strict/double effects)
 let startToken: string | null = null;
 
