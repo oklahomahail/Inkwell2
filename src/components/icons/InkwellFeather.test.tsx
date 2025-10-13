@@ -11,10 +11,20 @@ import InkwellFeather, {
   type InkwellIconName,
 } from './InkwellFeather';
 
-// Mock console.warn to test error handling
-const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
 describe('InkwellFeather Icon System', () => {
+  let mockConsoleWarn: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    mockConsoleWarn = vi.spyOn(console, 'warn');
+  });
+
+  afterEach(() => {
+    mockConsoleWarn.mockClear();
+  });
+
+  afterAll(() => {
+    mockConsoleWarn.mockRestore();
+  });
   describe('Icon Registry', () => {
     it('should have consistent icon registry with expected icons', () => {
       expect(INKWELL_ICONS).toBeDefined();
@@ -212,13 +222,4 @@ describe('InkwellFeather Icon System', () => {
       expect(ICON_COLORS).toBeDefined();
     });
   });
-});
-
-// Clean up mocks
-afterEach(() => {
-  mockConsoleWarn.mockClear();
-});
-
-afterAll(() => {
-  mockConsoleWarn.mockRestore();
 });

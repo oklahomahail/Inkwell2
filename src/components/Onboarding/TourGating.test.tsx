@@ -58,10 +58,13 @@ vi.mock('../../data/dbFactory', () => ({
 const mockLocalStorage = makeMockStorage();
 const mockSessionStorage = makeMockStorage();
 
-// Mock console.warn for testing
-const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
 describe('Tour Gating + First-run Flow (A1)', () => {
+  let mockConsoleWarn: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    // Fresh spy for each test, after setup.ts sets up initial mock
+    mockConsoleWarn = vi.spyOn(console, 'warn');
+  });
   beforeEach(() => {
     // Backup window.location
     (window as any)._oldLocation = window.location;
@@ -81,10 +84,8 @@ describe('Tour Gating + First-run Flow (A1)', () => {
   });
 
   afterEach(() => {
-    // Cleanup
-    mockConsoleWarn.mockRestore();
-    vi.restoreAllMocks();
-
+    // Just clear our warn spy
+    mockConsoleWarn.mockClear();
     // Reset window.location
     delete (window as any).location;
     window.location = (window as any)._oldLocation;

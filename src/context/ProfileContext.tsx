@@ -1,6 +1,13 @@
 // src/context/ProfileContext.tsx - Profile state management
 
-import React, { createContext, useContext, useEffect, useReducer, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useCallback,
+  useRef,
+} from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Profile, ProfileId, ProfileState, ProfileContextType } from '../types/profile';
@@ -56,9 +63,12 @@ function _profileReducer(state: ProfileState, action: ProfileAction): ProfileSta
 // Storage utilities
 function _saveProfilesToStorage(profiles: Profile[]) {
   try {
-    localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+    const serializedProfiles = JSON.stringify(profiles);
+    localStorage.setItem(PROFILES_KEY, serializedProfiles);
+    return true;
   } catch (error) {
     console.error('Failed to save profiles to storage:', error);
+    return false;
   }
 }
 
@@ -134,23 +144,30 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
     error: null,
   });
 
+  // Keep a ref to the latest state to avoid stale closures in async callbacks
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
   // Actions
   const createProfile = useCallback(
     async (name: string, options: Partial<Profile> = {}): Promise<Profile> => {
       dispatch({ type: 'SET_ERROR', payload: null });
 
       const trimmedName = name.trim();
+      const currentProfiles = stateRef.current.profiles;
 
       // Check if profile already exists (idempotent)
-      const existingProfile = state.profiles.find(
+      const existingProfile = currentProfiles.find(
         (p) => p.name.toLowerCase() === trimmedName.toLowerCase(),
       );
 
       if (existingProfile) {
-        console.log('Profile already exists, returning existing:', existingProfile.name);
         return existingProfile;
       }
 
+      // Create new profile
       const now = new Date();
       const profile: Profile = {
         id: uuidv4(),
@@ -162,11 +179,15 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
         ...options,
       };
 
-      dispatch({ type: 'ADD_PROFILE', payload: profile });
-
-      const updatedProfiles = [...state.profiles, profile];
+      // Update state and storage atomically
+      const updatedProfiles = [...currentProfiles, profile];
+      dispatch({ type: 'SET_PROFILES', payload: updatedProfiles });
+      // Keep ref in sync immediately to avoid stale reads in same tick
+      stateRef.current = { ...stateRef.current, profiles: updatedProfiles };
       _saveProfilesToStorage(updatedProfiles);
 
+      // Ensure state is flushed before returning
+      await Promise.resolve();
       return profile;
     },
     [state.profiles],
@@ -176,20 +197,32 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
     async (profileId: ProfileId): Promise<void> => {
       dispatch({ type: 'SET_ERROR', payload: null });
 
-      if (state.profiles.length <= 1) {
+      const current = stateRef.current;
+      if (current.profiles.length <= 1) {
         throw new Error('Cannot delete the last profile');
       }
 
-      const updatedProfiles = state.profiles.filter((p) => p.id !== profileId);
+      const updatedProfiles = current.profiles.filter((p) => p.id !== profileId);
       dispatch({ type: 'DELETE_PROFILE', payload: profileId });
+      // Update ref synchronously
+      stateRef.current = {
+        ...stateRef.current,
+        profiles: updatedProfiles,
+        activeProfile:
+          stateRef.current.activeProfile?.id === profileId ? null : stateRef.current.activeProfile,
+      };
       _saveProfilesToStorage(updatedProfiles);
 
+      // Ensure state is flushed
+      await Promise.resolve();
+
       // If we deleted the active profile, automatically switch to the first remaining profile
-      if (state.activeProfile?.id === profileId && updatedProfiles.length > 0) {
+      const currentActive = stateRef.current.activeProfile;
+      if (currentActive?.id === profileId && updatedProfiles.length > 0) {
         const fallbackProfile = updatedProfiles[0];
         dispatch({ type: 'SET_ACTIVE_PROFILE', payload: fallbackProfile });
         _saveActiveProfileToStorage(fallbackProfile.id);
-      } else if (state.activeProfile?.id === profileId) {
+      } else if (currentActive?.id === profileId) {
         // No remaining profiles (shouldn't happen due to guard above, but just in case)
         dispatch({ type: 'SET_ACTIVE_PROFILE', payload: null });
         _saveActiveProfileToStorage(null);
@@ -202,19 +235,31 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
     async (profileId: ProfileId, updates: Partial<Profile>): Promise<Profile> => {
       dispatch({ type: 'SET_ERROR', payload: null });
 
-      const profileToUpdate = state.profiles.find((p) => p.id === profileId);
+      const current = stateRef.current;
+      const profileToUpdate = current.profiles.find((p) => p.id === profileId);
       if (!profileToUpdate) {
         throw new Error('Profile not found');
       }
 
       const updatedData = { ...updates, updatedAt: new Date() };
-      dispatch({ type: 'UPDATE_PROFILE', payload: { id: profileId, updates: updatedData } });
-
-      const updatedProfiles = state.profiles.map((p) =>
+      const updatedProfiles = current.profiles.map((p) =>
         p.id === profileId ? { ...p, ...updatedData } : p,
       );
+
+      dispatch({ type: 'UPDATE_PROFILE', payload: { id: profileId, updates: updatedData } });
+      // Update ref synchronously
+      stateRef.current = {
+        ...stateRef.current,
+        profiles: updatedProfiles,
+        activeProfile:
+          stateRef.current.activeProfile?.id === profileId
+            ? { ...stateRef.current.activeProfile, ...updatedData }
+            : stateRef.current.activeProfile,
+      };
       _saveProfilesToStorage(updatedProfiles);
 
+      // Ensure state is flushed before returning
+      await Promise.resolve();
       return { ...profileToUpdate, ...updatedData };
     },
     [state.profiles],
@@ -226,14 +271,24 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
 
     try {
       const profiles = _loadProfilesFromStorage();
-      dispatch({ type: 'SET_PROFILES', payload: profiles });
+
+      // Only initialize profiles from storage if we don't already have profiles in memory
+      if (stateRef.current.profiles.length === 0) {
+        dispatch({ type: 'SET_PROFILES', payload: profiles });
+      }
 
       // Load active profile
       const activeProfileId = _loadActiveProfileFromStorage();
       if (activeProfileId && profiles.length > 0) {
         const activeProfile = profiles.find((p) => p.id === activeProfileId);
         if (activeProfile) {
-          dispatch({ type: 'SET_ACTIVE_PROFILE', payload: activeProfile });
+          // Only set if not already set
+          if (
+            !stateRef.current.activeProfile ||
+            stateRef.current.activeProfile.id !== activeProfile.id
+          ) {
+            dispatch({ type: 'SET_ACTIVE_PROFILE', payload: activeProfile });
+          }
         }
       }
     } catch (error) {
@@ -251,7 +306,7 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
       dispatch({ type: 'SET_ERROR', payload: null });
 
       // First try to find profile in memory
-      let profile = state.profiles.find((p) => p.id === profileId);
+      let profile = stateRef.current.profiles.find((p) => p.id === profileId);
 
       // If not in memory, try to load from storage directly
       if (!profile) {

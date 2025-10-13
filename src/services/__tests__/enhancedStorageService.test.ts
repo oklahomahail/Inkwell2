@@ -1,42 +1,194 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import connectivityService from '../connectivityService';
+import { quotaAwareStorage } from '../../utils/quotaAwareStorage';
+import { connectivityService } from '../connectivityService';
 import { enhancedStorageService } from '../enhancedStorageService';
+import { snapshotService } from '../snapshotService';
+
+// Mock dependencies
+vi.mock('../connectivityService', () => ({
+  connectivityService: {
+    getStatus: vi.fn(() => ({ isOnline: true })),
+    onStatusChange: vi.fn(() => () => {}),
+    queueWrite: vi.fn(async () => {}),
+  },
+}));
+
+vi.mock('../../utils/quotaAwareStorage', () => ({
+  quotaAwareStorage: {
+    safeGetItem: vi.fn(),
+    safeSetItem: vi.fn(),
+    getQuotaInfo: vi.fn(),
+    needsMaintenance: vi.fn(),
+    emergencyCleanup: vi.fn(),
+  },
+}));
+
+vi.mock('../snapshotService', () => ({
+  snapshotService: {
+    createSnapshot: vi.fn(),
+    getSnapshotStorageUsage: vi.fn(),
+    emergencyCleanup: vi.fn(),
+  },
+}));
 
 describe('EnhancedStorageService', () => {
   beforeEach(() => {
-    // initialize service explicitly for tests
-    try {
-      enhancedStorageService.cleanup();
-    } catch {}
-    try {
-      enhancedStorageService.init();
-    } catch {}
-    // Mock navigator.onLine
-    Object.defineProperty(window.navigator, 'onLine', {
-      value: true,
-      writable: true,
-    });
-
-    // Reset storage
-    localStorage.clear();
-    sessionStorage.clear();
-
-    // Mock storage methods
-    vi.spyOn(localStorage, 'getItem').mockReturnValue(null);
-    vi.spyOn(localStorage, 'setItem').mockImplementation(() => {});
-
-    // Mock window.dispatchEvent to simulate connectivity changes
-    vi.spyOn(window, 'dispatchEvent').mockImplementation((event) => {
-      if (event.type === 'online' || event.type === 'offline') {
-        connectivityService.onStatusChange((status) => {
-          console.log('Status changed:', status);
-        });
-      }
-      return true;
-    });
-
     vi.clearAllMocks();
+    localStorage.clear();
+
+    // Default mock implementations
+    (quotaAwareStorage.safeGetItem as any).mockImplementation((key: string) => {
+      const v = localStorage.getItem(key);
+      return { success: true, data: v ?? '[]' };
+    });
+    (quotaAwareStorage.safeSetItem as any).mockImplementation(
+      async (key: string, value: string) => {
+        // Persist to localStorage so subsequent reads work in tests
+        localStorage.setItem(key, value);
+        return { success: true };
+      },
+    );
+    (quotaAwareStorage.getQuotaInfo as any).mockResolvedValue({ usage: 1000, quota: 5000 });
+    (snapshotService.getSnapshotStorageUsage as any).mockReturnValue({
+      snapshotCount: 0,
+      totalSize: 0,
+    });
+    (connectivityService.getStatus as any).mockReturnValue({ isOnline: true });
+
+    // Initialize service
+    enhancedStorageService.init();
+  });
+
+  afterEach(() => {
+    enhancedStorageService.cleanup();
+    vi.useRealTimers();
+  });
+
+  describe('Project Management', () => {
+    it('should save and load projects', () => {
+      const mockProject = {
+        id: 'test-1',
+        name: 'Test Project',
+        chapters: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      enhancedStorageService.saveProject(mockProject);
+      const loaded = enhancedStorageService.loadProject(mockProject.id);
+      expect(loaded).toEqual(
+        expect.objectContaining({
+          id: mockProject.id,
+          name: mockProject.name,
+        }),
+      );
+    });
+
+    it('should update project content', () => {
+      const mockProject = {
+        id: 'test-1',
+        name: 'Test Project',
+        chapters: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      enhancedStorageService.saveProject(mockProject);
+      enhancedStorageService.updateProjectContent(mockProject.id, 'Hello world');
+      const updated = enhancedStorageService.loadProject(mockProject.id);
+      expect(updated?.currentWordCount).toBe(2);
+      expect(updated?.recentContent).toBe('Hello world');
+    });
+
+    it('should handle safe project save with validation', async () => {
+      const mockProject = {
+        id: 'test-1',
+        name: 'Test Project',
+        chapters: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const result = await enhancedStorageService.saveProjectSafe(mockProject);
+      expect(result.success).toBe(true);
+      expect(quotaAwareStorage.safeSetItem).toHaveBeenCalled();
+    });
+
+    it('should handle project backup before deletion', async () => {
+      const mockProject = {
+        id: 'test-1',
+        name: 'Test Project',
+        chapters: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      enhancedStorageService.saveProject(mockProject);
+      const result = await enhancedStorageService.deleteProjectSafe(mockProject.id);
+      expect(result.success).toBe(true);
+      expect(snapshotService.createSnapshot).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          description: 'Backup before deletion',
+          tags: ['deletion-backup'],
+        }),
+      );
+    });
+  });
+
+  describe('Storage Statistics', () => {
+    it('should calculate storage statistics', async () => {
+      const mockProject = {
+        id: 'test-1',
+        name: 'Test Project',
+        chapters: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        currentWordCount: 1000,
+      };
+
+      enhancedStorageService.saveProject(mockProject);
+      const stats = await enhancedStorageService.getStorageStats();
+      expect(stats).toMatchObject({
+        totalProjects: 1,
+        totalWordCount: 1000,
+        storageUsed: 1000,
+        snapshotCount: 0,
+      });
+    });
+
+    it('should handle maintenance requests', async () => {
+      (quotaAwareStorage.needsMaintenance as any).mockResolvedValue(true);
+      (snapshotService.emergencyCleanup as any).mockResolvedValue(5);
+
+      const result = await enhancedStorageService.performMaintenance();
+      expect(result.success).toBe(true);
+      expect(result.actions).toContain(expect.stringContaining('No maintenance needed'));
+    });
+
+    it('should handle auto-snapshots', async () => {
+      vi.useFakeTimers();
+      enhancedStorageService.setAutoSnapshotEnabled(true);
+
+      const mockProject = {
+        id: 'test-1',
+        name: 'Test Project',
+        chapters: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      enhancedStorageService.saveProject(mockProject);
+      await vi.advanceTimersByTimeAsync(10 * 60 * 1000); // 10 minutes
+
+      expect(snapshotService.createSnapshot).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          isAutomatic: true,
+        }),
+      );
+    });
   });
 
   describe('Connectivity Integration', () => {
@@ -127,7 +279,7 @@ describe('EnhancedStorageService', () => {
     });
   });
 
-  describe('Storage Safety', () => {
+  describe('Storage Safety and Error Handling', () => {
     it('should handle storage errors gracefully', async () => {
       const mockError = new Error('Storage error');
       // Simulate storage layer throwing but service remains resilient
@@ -155,6 +307,27 @@ describe('EnhancedStorageService', () => {
 
       consoleWarnSpy.mockRestore();
       consoleErrorSpy.mockRestore();
+    });
+
+    it('should handle quota exceeded errors', async () => {
+      (quotaAwareStorage.safeSetItem as any).mockResolvedValueOnce({
+        success: false,
+        error: { type: 'quota', message: 'Storage quota exceeded' },
+      });
+      (quotaAwareStorage.emergencyCleanup as any).mockResolvedValueOnce({ freedBytes: 1000 });
+
+      const mockProject = {
+        id: 'test-5',
+        name: 'Test Project',
+        chapters: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const result = await enhancedStorageService.saveProjectSafe(mockProject);
+      expect(quotaAwareStorage.emergencyCleanup).toHaveBeenCalled();
+      expect(quotaAwareStorage.safeSetItem).toHaveBeenCalledTimes(2);
+      expect(result.success).toBe(true);
     });
 
     it('should queue writes when offline', async () => {

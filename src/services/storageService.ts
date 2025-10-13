@@ -4,7 +4,7 @@ import { Scene, Chapter as WritingChapter, ChapterStatus } from '@/types/writing
 
 export class EnhancedStorageService {
   private static PROJECTS_KEY = 'inkwell_enhanced_projects';
-  private static writingChaptersKey = (_projectId: string) =>
+  private static writingChaptersKey = (projectId: string) =>
     `inkwell_writing_chapters_${projectId}`;
 
   // ---------- EnhancedProject (unchanged shape) ----------
@@ -102,7 +102,7 @@ export class EnhancedStorageService {
       return {
         ...ch,
         scenes: nextScenes,
-        totalWordCount: nextScenes.reduce((sum, _s) => sum + (s.wordCount || 0), 0),
+        totalWordCount: nextScenes.reduce((sum, s) => sum + (s.wordCount || 0), 0),
         updatedAt: new Date(),
       };
     });
@@ -176,7 +176,7 @@ export const storageService = {
   loadWritingChapters: (projectId: string): WritingChapter[] =>
     EnhancedStorageService.loadWritingChapters(projectId),
 
-  saveWritingChapters: (_projectId: string, _chapters: WritingChapter[]) => {
+  saveWritingChapters: (projectId: string, chapters: WritingChapter[]) => {
     EnhancedStorageService.saveWritingChapters(projectId, chapters);
     return Promise.resolve();
   },

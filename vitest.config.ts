@@ -11,9 +11,27 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
-    globals: true, // enables test/expect/vi globals
-    setupFiles: ['./src/setupTests.ts'],
+    globals: true,
+    setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    mockReset: true,
+    restoreMocks: true,
+    clearMocks: true,
+    testTimeout: 10000,
+    retry: 2,
+    pool: 'forks',
+    deps: {
+      inline: [
+        '@testing-library/react',
+        '@testing-library/react-hooks',
+        '@testing-library/user-event',
+      ],
+    },
+    watch: {
+      onRerun: () => {
+        console.log('\nTests re-running...');
+      },
+    },
 
     coverage: {
       enabled: true,
@@ -52,11 +70,16 @@ export default defineConfig({
 
       // Set reasonable thresholds
       thresholds: {
-        lines: 30,
-        functions: 30,
-        branches: 25,
-        statements: 30,
+        // Gradually increase these thresholds as coverage improves
+        lines: 60,
+        functions: 60,
+        branches: 50,
+        statements: 60,
       },
+      // Additional coverage settings
+      reportOnFailure: true,
+      cleanOnRerun: true,
+      skipFull: false,
     },
   },
 });

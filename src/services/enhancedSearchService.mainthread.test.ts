@@ -1,8 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-import { enhancedSearchService } from './enhancedSearchService';
-
-// We'll stub storageService that enhancedSearchService uses internally
+// We'll stub storageService that enhancedSearchService uses internally (must be mocked before importing service)
 vi.mock('./storageService', () => {
   const chapters = [
     {
@@ -31,7 +29,29 @@ vi.mock('./storageService', () => {
   ];
   return {
     storageService: {
-      loadProject: vi.fn().mockReturnValue({ id: 'p-1', title: 'Demo' }),
+      loadProject: vi.fn().mockReturnValue({
+        id: 'p-1',
+        name: 'Demo Project',
+        title: 'Demo Project',
+        description: 'A test project',
+        characters: [],
+        chapters: [],
+        plotNotes: [],
+        worldBuilding: [],
+        currentWordCount: 0,
+        recentContent: '',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        sessions: [],
+        claudeContext: {
+          includeCharacters: false,
+          includePlotNotes: false,
+          includeWorldBuilding: false,
+          maxCharacters: 0,
+          maxPlotNotes: 0,
+          contextLength: 'short',
+        },
+      }),
       loadWritingChapters: vi.fn().mockResolvedValue(chapters),
     },
   };
@@ -54,6 +74,9 @@ vi.mock('./searchWorkerService', () => {
     },
   };
 });
+
+// Import after mocks so service sees mocked dependencies
+const { enhancedSearchService } = await import('./enhancedSearchService');
 
 describe('enhancedSearchService (main-thread fallback)', () => {
   const projectId = 'p-1';
