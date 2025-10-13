@@ -1,4 +1,5 @@
-// src/components/Providers.tsx
+// DEPRECATED: Use AppProviders.tsx at the root instead
+// This file is kept for reference but should not be used.
 import React from 'react';
 
 import { AppProvider } from '../context/AppContext';

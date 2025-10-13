@@ -13,7 +13,6 @@ import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
 import OnboardingOrchestrator from './components/Onboarding/OnboardingOrchestrator';
 import { TutorialRouter } from './components/Onboarding/TutorialRouter';
-import Providers from './components/Providers';
 import { PWAInstallButton, PWAUpdateNotification } from './components/PWA';
 import {
   StorageRecoveryBanner,
@@ -409,9 +408,7 @@ interface _AppShellProps {}
 export default function _App() {
   return (
     <AppErrorBoundary level="app">
-      <Providers>
-        <_AppShell />
-      </Providers>
+      <_AppShell />
     </AppErrorBoundary>
   );
 }
