@@ -94,6 +94,41 @@ class TimelineConflictService {
 }
 ```
 
+### Router and Provider Architecture
+
+```typescript
+// src/main.tsx - Root application mount with proper provider order
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <AppProviders>
+        <App />
+      </AppProviders>
+    </BrowserRouter>
+  </React.StrictMode>,
+);
+
+// src/utils/routerGuards.ts - Safe Router hook usage
+export function useIsInRouter() {
+  return !!useContext(NavigationContext);
+}
+
+// Example provider with router guard
+function OnboardingProvider({ children }) {
+  const inRouter = useIsInRouter();
+  const location = inRouter ? useLocation() : { pathname: window.location.pathname };
+  // ... safe to use location here
+  return children;
+}
+```
+
+Key architectural principles:
+
+- BrowserRouter is the outermost wrapper (after StrictMode)
+- Providers/components using routing hooks must be inside Router
+- Error fallbacks use window.location instead of useLocation
+- Optional routing features use useIsInRouter guard
+
 ### Modern State Management
 
 ```typescript

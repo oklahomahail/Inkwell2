@@ -80,6 +80,15 @@ VITE_APP_NAME=Inkwell
 VITE_VERSION=1.0.1
 ```
 
+### Router Configuration
+
+Inkwell uses React Router for client-side routing. Important deployment considerations:
+
+- Configure server to route all requests to index.html (SPA fallback)
+- Root path (/) redirects to /profiles via client-side routing
+- Error boundaries are location-safe (no Router dependency)
+- Ensure monitoring tools (e.g., Sentry) handle SPA routing correctly
+
 ### Server Requirements
 
 **Minimum Requirements:**

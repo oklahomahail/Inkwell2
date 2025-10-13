@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.0.3] - 2025-10-13
+
+### Fixed
+
+- Router issues in production:
+  - Moved BrowserRouter to root (main.tsx)
+  - Made error boundaries location-safe
+  - Added router guards for providers
+  - Fixed useLocation calls outside Router context
+  - Added useIsInRouter utility for safe routing
+
+### Changed
+
+- Refactored provider architecture for proper Router context
+- Updated test suite for Router-aware components
+- Improved error boundary implementation
+
+### Added
+
+- New routerGuards utility for safe Router hook usage
+- Enhanced window.location mocking in tests
+
+# Changelog
+
 All notable changes to this project are documented here.
 
 ## [v1.2.5] - 2025-10-12
