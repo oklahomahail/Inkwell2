@@ -261,11 +261,11 @@ describe('Tour Gating + First-run Flow (A1)', () => {
           'inkwell-welcome-shown-this-session',
           'true',
         );
+      });
 
-        // Allow for state updates to complete
-        await act(async () => {
-          await new Promise((resolve) => setTimeout(resolve, 10));
-        });
+      // Allow for state updates to complete
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
       });
 
       // Unmount and remount (simulating navigation)
