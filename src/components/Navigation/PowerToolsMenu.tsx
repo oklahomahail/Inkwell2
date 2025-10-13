@@ -35,12 +35,12 @@ const powerTools: PowerTool[] = [
     category: 'analysis',
     keywords: ['plot', 'story', 'analysis', 'structure'],
     isPro: true,
-    onClick: () => analyticsService.trackEvent('powerTool_open', { tool: 'plot-analyzer' }),
+    onClick: () => analyticsService.track('power_tool_used', { tool: 'plot-analyzer' }),
   },
   // ... other tools ...
 ];
 
-export function PowerToolsMenu({ projectId, onToolSelect }: PowerToolsMenuProps) {
+export function PowerToolsMenu({ projectId: _projectId, onToolSelect }: PowerToolsMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,7 +82,7 @@ export function PowerToolsMenu({ projectId, onToolSelect }: PowerToolsMenuProps)
   const helpPopover = (
     <Popover open={helpOpen} onOpenChange={setHelpOpen}>
       <PopoverTrigger asChild>{HelpButton}</PopoverTrigger>
-      <PopoverContent align="end" className="w-64" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <PopoverContent align="end" className="w-64">
         <HelpMenu />
       </PopoverContent>
     </Popover>
@@ -108,7 +108,7 @@ export function PowerToolsMenu({ projectId, onToolSelect }: PowerToolsMenuProps)
               Tools
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-80" onOpenAutoFocus={(e) => e.preventDefault()}>
+          <PopoverContent align="end" className="w-80">
             <div className="space-y-4">
               <Input
                 ref={searchInputRef}
@@ -134,12 +134,12 @@ export function PowerToolsMenu({ projectId, onToolSelect }: PowerToolsMenuProps)
                     <tool.icon className="w-4 h-4 mr-2" />
                     <span>{tool.name}</span>
                     {tool.isNew && (
-                      <Badge variant="info" className="ml-2">
+                      <Badge variant="secondary" className="ml-2">
                         New
                       </Badge>
                     )}
                     {tool.isPro && (
-                      <Badge variant="pro" className="ml-2">
+                      <Badge variant="outline" className="ml-2">
                         Pro
                       </Badge>
                     )}

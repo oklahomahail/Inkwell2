@@ -125,7 +125,11 @@ function _updateJobProgress(
   message?: string,
 ) {
   jobQueue.update(jobId, {
-    progress: { phase, percentage, message },
+    progress: {
+      phase,
+      percentage,
+      ...(message ? { message } : {}),
+    },
   });
 }
 
@@ -154,7 +158,7 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
     });
 
     // Phase 1: Assemble manuscript
-    updateJobProgress(jobId, 'assembling', 10, 'Compiling manuscript from project data...');
+    _updateJobProgress(jobId, 'assembling', 10, 'Compiling manuscript from project data...');
 
     const draft = await assembleManuscript(job.projectId);
 
@@ -164,7 +168,7 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
       throw new ExportValidationError('Manuscript validation failed', validation.errors);
     }
 
-    updateJobProgress(jobId, 'assembling', 25, 'Manuscript compiled successfully');
+    _updateJobProgress(jobId, 'assembling', 25, 'Manuscript compiled successfully');
 
     // Update analytics with actual word count
     analytics.track('export.started', {
@@ -180,25 +184,25 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
 
     // Phase 2: Optional proofreading
     if (job.includeProofread) {
-      updateJobProgress(jobId, 'proofreading', 30, 'Running AI proofread...');
+      _updateJobProgress(jobId, 'proofreading', 30, 'Running AI proofread...');
 
       try {
         // Import and run proofread service
         const { runProofread } = await import('./proofread/proofreadService');
         proofreadReport = await runProofread(draft);
 
-        updateJobProgress(jobId, 'proofreading', 50, 'Proofread completed');
+        _updateJobProgress(jobId, 'proofreading', 50, 'Proofread completed');
 
         // Apply suggestions to working draft if configured
         // This would be implemented based on user preferences
       } catch (proofreadError) {
         console.warn('Proofread failed:', proofreadError);
-        updateJobProgress(jobId, 'proofreading', 50, 'Proofread skipped due to error');
+        _updateJobProgress(jobId, 'proofreading', 50, 'Proofread skipped due to error');
       }
     }
 
     // Phase 3: Load style preset
-    updateJobProgress(jobId, 'rendering', 55, 'Loading style preset...');
+    _updateJobProgress(jobId, 'rendering', 55, 'Loading style preset...');
 
     const { getStylePreset } = await import('./exportTemplates/presets');
     const stylePreset = await getStylePreset(job.style);
@@ -212,7 +216,7 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
     }
 
     // Phase 4: Render to target format
-    updateJobProgress(jobId, 'rendering', 60, `Rendering ${job.format} document...`);
+    _updateJobProgress(jobId, 'rendering', 60, `Rendering ${job.format} document...`);
 
     let engine;
     try {
@@ -246,17 +250,17 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
       );
     }
 
-    updateJobProgress(jobId, 'rendering', 80, 'Generating document...');
+    _updateJobProgress(jobId, 'rendering', 80, 'Generating document...');
 
     const blob = await engine.render(workingDraft, stylePreset);
 
     // Phase 5: Finalize
-    updateJobProgress(jobId, 'finalizing', 90, 'Creating download link...');
+    _updateJobProgress(jobId, 'finalizing', 90, 'Creating download link...');
 
     const fileName = generateFileName(workingDraft.title, job.format, workingDraft.author);
     const downloadUrl = await createDownloadUrl(blob, fileName);
 
-    updateJobProgress(jobId, 'finalizing', 100, 'Export completed successfully');
+    _updateJobProgress(jobId, 'finalizing', 100, 'Export completed successfully');
 
     // Create result
     const result: ExportResult = {
@@ -350,7 +354,7 @@ export function _getExportStats(projectId: string) {
     formatBreakdown: {} as Record<ExportFormat, number>,
     recentExports: jobs
       .filter((j) => j.status === 'succeeded')
-      .sort((a, _b) => (b.finishedAt || 0) - (a.finishedAt || 0))
+      .sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0))
       .slice(0, 5),
   };
 

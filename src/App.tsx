@@ -402,11 +402,11 @@ interface OfflineQueueModalProps {
   onClose: () => void;
 }
 
-interface ProfileAppShellProps {}
+interface _ProfileAppShellProps {}
 
-interface StorageDebugPanelProps {}
+interface _StorageDebugPanelProps {}
 
-interface AppShellProps {}
+interface _AppShellProps {}
 
 export default function _App() {
   return (

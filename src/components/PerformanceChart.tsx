@@ -52,6 +52,12 @@ export default function _PerformanceChart({
     };
   }, []);
 
+  const toNumber = (value: any): number | null => {
+    if (value == null) return null;
+    const num = Number(value);
+    return isNaN(num) ? null : num;
+  };
+
   const data = useMemo(() => {
     const raw = Array.isArray(rows) ? rows : [];
     return raw.map((d) => (toNumber((d as any)[yKey]) == null ? null : d)).filter(Boolean) as Row[];

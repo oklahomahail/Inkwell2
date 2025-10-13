@@ -1,7 +1,7 @@
 // src/components/Onboarding/TourOverlay.tsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import analyticsService from '../../services/analyticsService';
+import { analyticsService } from '../../services/analyticsService';
 import { useTutorialStorage } from '../../services/tutorialStorage';
 
 import { loadTourPreset } from './presetLoaderHelper';
@@ -40,8 +40,8 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
     const now = Date.now();
     try {
       // 1) persist "completed" progress
-      if (setProgress) {
-        await setProgress(slug, {
+      if (storage.setProgress) {
+        await storage.setProgress(slug, {
           currentStep: total,
           completedSteps: Array.from({ length: total }, (_, k) => String(k)),
           tourType,
@@ -53,8 +53,8 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
         });
       }
       // 2) mark preference completed to short-circuit future auto-starts
-      if (setPreferences) {
-        await setPreferences({
+      if (storage.setPreferences) {
+        await storage.setPreferences({
           neverShowAgain: false,
           remindMeLater: false,
           completedTours: [slug],
@@ -71,7 +71,7 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
       // non-blocking; still close the overlay
     }
     onClose?.();
-  }, [onClose, setProgress, setPreferences, stripTourQueryParam, tourType, total]);
+  }, [onClose, storage, stripTourQueryParam, tourType, total]);
 
   // Log tour start on first mount
   useEffect(() => {
@@ -90,11 +90,12 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
           storage: !!storage,
         });
       }
-      analyticsService.track('tour_started', {
+      const base = {
         tourType: tourType === 'full-onboarding' ? 'first_time' : 'feature_tour',
         entryPoint: 'overlay',
-        profileId: profileId || undefined,
-      });
+      } as const;
+      const payload = profileId ? { ...base, profileId } : base;
+      analyticsService.track('tour_started', payload as any);
     } catch {}
   }, [tourType, profileId]); // Include dependencies
 
@@ -111,8 +112,8 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
     (async () => {
       try {
         const p = await storage.getProgress?.(persistKey || tourType);
-        if (!cancelled && p && !p.isCompleted) {
-          setI(Math.min(total - 1, Math.max(0, p.progress?.currentStep ?? 0)));
+        if (!cancelled && p && !(p as any).isCompleted) {
+          setI(Math.min(total - 1, Math.max(0, (p as any).progress?.currentStep ?? 0)));
         }
       } catch {
         /* no-op: fall back to step 0 */
@@ -141,7 +142,7 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
         lastActiveAt: Date.now(),
       });
     } catch {}
-  }, [i, persistKey, tourType, total, profileId, setProgress]);
+  }, [i, persistKey, tourType, total, profileId, storage]);
 
   const Step = steps[i];
   if (!Step) return null;

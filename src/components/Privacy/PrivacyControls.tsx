@@ -2,6 +2,8 @@
 import { Shield, Eye, EyeOff, Database, Trash2, Download, Info } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
+import type { AnalyticsStore } from '@/types/analytics';
+
 import { analyticsService, useAnalytics } from '../../services/analyticsService';
 
 interface PrivacyControlsProps {
@@ -11,13 +13,13 @@ interface PrivacyControlsProps {
 
 export const PrivacyControls: React.FC<PrivacyControlsProps> = ({
   className = '',
-  _detailed = false,
+  detailed = false,
 }) => {
   const { isEnabled } = useAnalytics();
   const [analyticsEnabled, setAnalyticsEnabled] = useState(isEnabled);
   const [dataSize, setDataSize] = useState(0);
   const [showDataPreview, setShowDataPreview] = useState(false);
-  const [localAnalytics, setLocalAnalytics] = useState<Record<string, any[]>>({});
+  const [localAnalytics, setLocalAnalytics] = useState<AnalyticsStore>({});
 
   useEffect(() => {
     setAnalyticsEnabled(analyticsService.isAnalyticsEnabled());
@@ -66,7 +68,7 @@ export const PrivacyControls: React.FC<PrivacyControlsProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  const formatBytes = (_bytes: number) => {
+  const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -75,7 +77,7 @@ export const PrivacyControls: React.FC<PrivacyControlsProps> = ({
   };
 
   const getEventCount = () => {
-    return Object.values(localAnalytics).reduce((total, _events) => total + events.length, 0);
+    return Object.values(localAnalytics).reduce((total, events) => total + events.length, 0);
   };
 
   if (!detailed) {
@@ -254,7 +256,10 @@ export const PrivacyControls: React.FC<PrivacyControlsProps> = ({
                     </div>
                     {events.length > 0 && (
                       <div className="text-xs text-gray-600 dark:text-gray-400">
-                        Latest: {new Date(events[events.length - 1]?.timestamp).toLocaleString()}
+                        Latest:{' '}
+                        {new Date(
+                          events[events.length - 1]?.timestamp ?? Date.now(),
+                        ).toLocaleString()}
                       </div>
                     )}
                   </div>

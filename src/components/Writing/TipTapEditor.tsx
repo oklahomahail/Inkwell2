@@ -127,7 +127,7 @@ export default function _TipTapEditor({
       let currentParagraphIndex = 0;
       let found = false;
 
-      editor.state.doc.descendants((node, _pos) => {
+      editor.state.doc.descendants((node, pos) => {
         if (found) return false;
         if (node.type.name === 'paragraph') {
           if (pos <= currentPos && currentPos <= pos + node.nodeSize) {

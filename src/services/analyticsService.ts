@@ -676,7 +676,7 @@ class AnalyticsService {
     return projects ? JSON.parse(projects).length > 0 : false;
   }
 
-  private storeEventLocally(eventName: string, eventData: Record<string, unknown>) {
+  private storeEventLocally(eventName: string, eventData: Partial<AnalyticsEvent>) {
     try {
       const storageKey = `${this.STORAGE_KEY}_${eventName}`;
       const existingData = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -736,7 +736,7 @@ class AnalyticsService {
   }
 
   // Get aggregated analytics for admin/debug purposes
-  getLocalAnalytics(): Record<string, any[]> {
+  getLocalAnalytics(): AnalyticsStore {
     const analytics: Record<string, any[]> = {};
 
     Object.keys(localStorage).forEach((key) => {
@@ -791,6 +791,9 @@ class AnalyticsService {
 
 // Export singleton instance
 export const analyticsService = new AnalyticsService();
+
+// Export types for external use
+export type { AnalyticsEvent, AnalyticsStore } from '@/types/analytics';
 
 // React hook for analytics
 function _useAnalytics() {

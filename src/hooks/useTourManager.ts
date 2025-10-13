@@ -1,9 +1,17 @@
 // src/hooks/useTourManager.ts
 import { useCallback, useRef } from 'react';
 
-import { useProfile } from '../context/ProfileContext';
-import { createTourStorage, TourName, TourProgress } from '../services/TourStorage';
+import { _useProfile as useProfile } from '../context/ProfileContext';
+import { createTourStorage, TourName, TourProgress } from '../services/simpleTourStorage';
 import { waitForElement } from '../utils/domUtils';
+
+// Stub function for spotlight tour UI - should be implemented by tour overlay component
+function showSpotlight(element: HTMLElement, content: React.ReactNode): Promise<void> {
+  console.log('Spotlight tour step:', element, content);
+  // In a real implementation, this would show a spotlight overlay
+  // and resolve when the user clicks next or dismisses
+  return Promise.resolve();
+}
 
 interface TourStep {
   id: string;
@@ -11,8 +19,8 @@ interface TourStep {
 }
 
 export function useTourManager() {
-  const { profileId } = useProfile();
-  const storage = createTourStorage(profileId);
+  const { activeProfileId } = useProfile();
+  const storage = createTourStorage(activeProfileId);
   const startedRef = useRef<Record<TourName, boolean>>({
     simple: false,
     spotlight: false,

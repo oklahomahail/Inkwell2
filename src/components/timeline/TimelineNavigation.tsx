@@ -19,9 +19,9 @@ interface NavigationInfo {
 
 const TimelineNavigation: React.FC<TimelineNavigationProps> = ({
   projectId,
-  _currentSceneId,
-  _onNavigateToScene,
-  _className = '',
+  currentSceneId,
+  onNavigateToScene,
+  className = '',
 }) => {
   const [navigationInfo, setNavigationInfo] = useState<NavigationInfo | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +49,7 @@ const TimelineNavigation: React.FC<TimelineNavigationProps> = ({
     }
   };
 
-  const formatTimePosition = (_position: number) => {
+  const formatTimePosition = (position: number) => {
     // You might want to format this based on your timeline's time format
     // For now, just return the number
     return position.toString();
@@ -214,7 +214,7 @@ const TimelineNavigation: React.FC<TimelineNavigationProps> = ({
             These scenes are linked to timeline events happening around the same time:
           </div>
           <div className="space-y-2">
-            {navigationInfo.siblings.map((sibling, _index) => (
+            {navigationInfo.siblings.map((sibling, index) => (
               <button
                 key={`${sibling.sceneId}_${index}`}
                 onClick={() => onNavigateToScene?.(sibling.sceneId, sibling.chapterId)}

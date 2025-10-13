@@ -14,8 +14,10 @@ import ClaudeToolbar from '@/components/Writing/ClaudeToolbar';
 import ExportDialog from '@/components/Writing/ExportDialog';
 import { SceneHeader } from '@/components/Writing/SceneHeader';
 import TipTapEditor from '@/components/Writing/TipTapEditor';
-import { useAppContext } from '@/context/AppContext';
+import { useAppContext, Project } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
+import { EnhancedProject } from '@/types/project';
+import { ensureValidProjectUpdate } from '@/types/projectUpdates';
 import { Scene, SceneStatus, Chapter } from '@/types/writing';
 import { generateId } from '@/utils/idUtils';
 
@@ -100,13 +102,45 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
       }
 
       // Save to current project
-      if (currentProject) {
-        const updatedProject = {
+      if (currentProject && updatedScene) {
+        // Convert Project to EnhancedProject format for compatibility
+        const enhancedProject: EnhancedProject = {
           ...currentProject,
-          content: updatedScene?.content || currentProject.content,
-          updatedAt: Date.now(),
+          currentWordCount: 0,
+          recentContent: '',
+          characters: [],
+          plotNotes: [],
+          worldBuilding: [],
+          sessions: [],
+          claudeContext: {
+            includeCharacters: true,
+            includePlotNotes: true,
+            includeWorldBuilding: true,
+            maxCharacters: 5,
+            maxPlotNotes: 10,
+            contextLength: 'medium' as const,
+          },
         };
-        updateProject(updatedProject);
+
+        const projectUpdate = ensureValidProjectUpdate(enhancedProject, {
+          id: currentProject.id,
+          content: updatedScene.content,
+          updatedAt: Date.now(),
+        });
+
+        // Convert back to basic Project for updateProject
+        const basicProjectUpdate: Project = {
+          id: projectUpdate.id,
+          name: currentProject.name,
+          description: currentProject.description,
+          content: projectUpdate.content,
+          createdAt: currentProject.createdAt,
+          updatedAt: projectUpdate.updatedAt,
+          chapters: currentProject.chapters,
+          characters: [],
+          beatSheet: [],
+        };
+        updateProject(basicProjectUpdate);
       }
     },
     [scenes, chapter, currentProject, updateProject, onChangeText],
@@ -258,8 +292,10 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
         <ClaudeToolbar
           selectedText={selectedText}
           onInsertText={handleInsertText}
-          sceneTitle={currentScene?.title}
-          currentContent={currentScene?.content}
+          sceneTitle={currentScene?.title || ''}
+          {...(currentScene?.content && { currentContent: currentScene.content })}
+          position="relative"
+          popupPosition="bottom"
         />
       </div>
 
@@ -364,9 +400,14 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
                 <SceneHeader
                   title={currentScene.title}
                   status={currentScene.status}
-                  wordGoal={currentScene.wordCountGoal}
+                  wordGoal={currentScene.wordCountGoal ?? null}
                   words={currentScene.wordCount}
-                  onChange={(updates) => handleSceneUpdate(currentScene.id, updates)}
+                  onChange={(updates) =>
+                    handleSceneUpdate(currentScene.id, {
+                      ...updates,
+                      wordCountGoal: updates.wordGoal ?? (undefined as unknown as number),
+                    })
+                  }
                 />
               </div>
 

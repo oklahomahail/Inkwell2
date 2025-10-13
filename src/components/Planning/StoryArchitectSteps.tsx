@@ -14,11 +14,11 @@ interface OptionsStepProps {
 
 export const OptionsStep: React.FC<OptionsStepProps> = ({
   premise,
-  _onChange,
-  _onNext,
-  _onPrevious,
-  _onGenerate,
-  _isGenerating,
+  onChange,
+  onNext,
+  onPrevious,
+  onGenerate,
+  isGenerating,
 }) => {
   return <div>{/* Options step implementation */}</div>;
 };
@@ -33,9 +33,9 @@ interface ReviewStepProps {
 
 export const ReviewStep: React.FC<ReviewStepProps> = ({
   outline,
-  _onNext,
-  _onPrevious,
-  _onRegenerate,
+  onNext,
+  onPrevious,
+  onRegenerate,
 }) => {
   return <div>{/* Review step implementation */}</div>;
 };
@@ -58,11 +58,11 @@ interface IntegrationStepProps {
 
 export const IntegrationStep: React.FC<IntegrationStepProps> = ({
   outline,
-  _options,
-  _onOptionsChange,
-  _onIntegrate,
-  _onPrevious,
-  _currentProject,
+  options,
+  onOptionsChange,
+  onIntegrate,
+  onPrevious,
+  currentProject,
 }) => {
   return <div>{/* Integration step implementation */}</div>;
 };

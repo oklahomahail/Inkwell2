@@ -6,7 +6,7 @@ import { View } from '@/context/AppContext';
 import { useAppContext } from '@/context/AppContext';
 import { useUI } from '@/hooks/useUI';
 import { cn } from '@/lib/utils';
-import { focusWritingEditor } from '@/utils/focusUtils';
+import { _focusWritingEditor } from '@/utils/focusUtils';
 
 export const Sidebar: React.FC = () => {
   const { state, setView } = useAppContext();
@@ -26,7 +26,7 @@ export const Sidebar: React.FC = () => {
 
   const handleChangeView = (view: View) => {
     setView(view);
-    if (view === View.Writing) focusWritingEditor();
+    if (view === View.Writing) _focusWritingEditor();
   };
 
   return (

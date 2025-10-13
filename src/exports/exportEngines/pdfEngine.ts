@@ -89,7 +89,7 @@ function _compileManuscriptToHTML(draft: ManuscriptDraft, style: StylePresetMeta
   const chaptersHTML = draft.chapters
     .map((chapter) => {
       const scenesHTML = chapter.scenes
-        .map((scene, _sceneIndex) => {
+        .map((scene, sceneIndex) => {
           const isLastScene = sceneIndex === chapter.scenes.length - 1;
           const sceneBreakHTML =
             !isLastScene && style.sceneBreak
@@ -152,8 +152,8 @@ function _compileManuscriptToHTML(draft: ManuscriptDraft, style: StylePresetMeta
     : '';
 
   // Generate headers and footers HTML (for print CSS)
-  const headerHTML = generateRunningHeader(style, draft);
-  const footerHTML = generateRunningFooter(style, draft);
+  const headerHTML = _generateRunningHeader(style, draft);
+  const footerHTML = _generateRunningFooter(style, draft);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -282,7 +282,7 @@ async function _htmlToPDF(html: string): Promise<Blob> {
 
     // In a real implementation, you'd use puppeteer or similar for server-side PDF generation
     // For now, we'll create a mock PDF blob
-    const mockPDFContent = createMockPDFBlob(html);
+    const mockPDFContent = _createMockPDFBlob(html);
 
     return mockPDFContent;
   } finally {
@@ -329,10 +329,10 @@ class PDFEngine implements ExportEngine {
   async render(draft: ManuscriptDraft, style: StylePresetMeta): Promise<Blob> {
     try {
       // Compile manuscript to HTML
-      const html = compileManuscriptToHTML(draft, style);
+      const html = _compileManuscriptToHTML(draft, style);
 
       // Convert to PDF
-      const pdfBlob = await htmlToPDF(html);
+      const pdfBlob = await _htmlToPDF(html);
 
       // Validate the result
       if (!pdfBlob || pdfBlob.size === 0) {
@@ -351,5 +351,10 @@ class PDFEngine implements ExportEngine {
 // Export the engine instance
 export const pdfEngine = new PDFEngine();
 
+// Functions already defined above
+
 // For testing and development
-export { compileManuscriptToHTML, createMockPDFBlob };
+export {
+  _compileManuscriptToHTML as compileManuscriptToHTML,
+  _createMockPDFBlob as createMockPDFBlob,
+};

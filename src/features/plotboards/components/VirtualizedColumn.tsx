@@ -37,21 +37,21 @@ interface VirtualizedColumnProps {
 
 export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
   column,
-  _cards,
-  _onEditCard,
-  _onAddCard,
-  _onEditColumn,
-  _onDeleteColumn,
-  _showSceneLinks = true,
-  _showTimeline = true,
-  _isCompact = false,
-  _focusedCardId = null,
-  _draggedCardId = null,
-  _onCardFocus,
-  _onKeyboardDragStart,
-  _onBeforeCardDelete,
-  _onBeforeCardCreate,
-  _itemHeight = 140, // Estimated card height
+  cards,
+  onEditCard,
+  onAddCard,
+  onEditColumn,
+  onDeleteColumn,
+  showSceneLinks = true,
+  showTimeline = true,
+  isCompact = false,
+  focusedCardId = null,
+  draggedCardId = null,
+  onCardFocus,
+  onKeyboardDragStart,
+  onBeforeCardDelete,
+  onBeforeCardCreate,
+  itemHeight = 140, // Estimated card height
   maxHeight = 600, // Max column height before virtualizing
   overscanCount = 5, // Cards to render outside visible area
 }) => {
@@ -92,7 +92,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
     setIsAddingCard(false);
   };
 
-  const handleDeleteCard = async (_cardId: string) => {
+  const handleDeleteCard = async (cardId: string) => {
     const card = cards.find((c) => c.id === cardId);
     if (card && onBeforeCardDelete) {
       await onBeforeCardDelete(cardId, card.title);
@@ -116,7 +116,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
   };
 
   // Sort cards and get IDs for DnD context
-  const sortedCards = useMemo(() => [...cards].sort((a, _b) => a.order - b.order), [cards]);
+  const sortedCards = useMemo(() => [...cards].sort((a, b) => a.order - b.order), [cards]);
   const cardIds = useMemo(() => sortedCards.map((card) => card.id), [sortedCards]);
 
   // Determine if virtualization is needed
@@ -126,7 +126,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
   // Set up virtualizer for large lists
   const virtualizer = useVirtualizer({
     count: shouldVirtualize ? sortedCards.length : 0,
-    _getScrollElement: () => parentRef.current,
+    getScrollElement: () => parentRef.current,
     estimateSize: () => itemHeight,
     overscan: overscanCount,
   });
@@ -283,7 +283,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
             placeholder="Card title..."
             className="w-full text-sm border-none outline-none resize-none"
             autoFocus
-            onKeyDown={(_e) => {
+            onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleQuickAdd();
@@ -354,14 +354,14 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
                         <div className="px-1 py-1 h-full">
                           <PlotCard
                             card={card}
-                            onEdit={onEditCard}
+                            {...(onEditCard ? { onEdit: onEditCard } : {})}
                             onDelete={handleDeleteCard}
                             showSceneLink={showSceneLinks}
                             showTimeline={showTimeline}
                             isFocused={focusedCardId === card.id}
                             isDraggedCard={draggedCardId === card.id}
-                            onFocus={onCardFocus}
-                            onKeyboardDragStart={onKeyboardDragStart}
+                            {...(onCardFocus ? { onFocus: onCardFocus } : {})}
+                            {...(onKeyboardDragStart ? { onKeyboardDragStart } : {})}
                           />
                         </div>
                       </div>
@@ -376,14 +376,14 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
                   <PlotCard
                     key={card.id}
                     card={card}
-                    onEdit={onEditCard}
+                    {...(onEditCard ? { onEdit: onEditCard } : {})}
                     onDelete={handleDeleteCard}
                     showSceneLink={showSceneLinks}
                     showTimeline={showTimeline}
                     isFocused={focusedCardId === card.id}
                     isDraggedCard={draggedCardId === card.id}
-                    onFocus={onCardFocus}
-                    onKeyboardDragStart={onKeyboardDragStart}
+                    {...(onCardFocus ? { onFocus: onCardFocus } : {})}
+                    {...(onKeyboardDragStart ? { onKeyboardDragStart } : {})}
                   />
                 ))}
               </div>
@@ -427,7 +427,7 @@ export const VirtualizedColumn: React.FC<VirtualizedColumnProps> = ({
               <span>
                 {cards
                   .filter((c) => c.wordCount)
-                  .reduce((sum, _c) => sum + (c.wordCount || 0), 0)
+                  .reduce((sum, c) => sum + (c.wordCount || 0), 0)
                   .toLocaleString()}{' '}
                 words
               </span>

@@ -30,4 +30,4 @@ export function _Icon({ name, ...props }: IconProps) {
 // Re-export lucide-react for direct usage where the adapter isn't needed
 export * from 'lucide-react';
 
-export default Icon;
+export default _Icon;

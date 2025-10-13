@@ -25,7 +25,7 @@ const StoryPlanningView: React.FC = () => {
     { id: 'world' as const, label: 'World Building', icon: Map },
   ];
 
-  const handleStoryArchitectComplete = (_outline: GeneratedOutline) => {
+  const handleStoryArchitectComplete = (outline: GeneratedOutline) => {
     // Story has been successfully integrated by the StoryArchitectFlow
     setShowArchitectFlow(false);
     setActiveTab('beats'); // Navigate to beat sheet to see results

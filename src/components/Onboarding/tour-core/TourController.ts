@@ -3,6 +3,10 @@ import { spotlightSteps, SpotlightStep } from './spotlightSteps';
 // Module-level state for tour control
 let __starting = false;
 
+interface StartTourOptions extends TourOptions {
+  force?: boolean;
+}
+
 interface TourOptions {
   onComplete?: () => void;
   onDismiss?: () => void;
@@ -34,6 +38,24 @@ class TourControllerImpl {
         __starting = false;
       }, 0);
     }
+  }
+
+  async startTour(
+    tourId: string,
+    profileId: string,
+    options: StartTourOptions = {},
+  ): Promise<boolean> {
+    const tourType = tourId as 'spotlight' | 'simple';
+    if (!this.steps[tourType]) {
+      console.warn(`[TourController] Unknown tour type: ${tourType}`);
+      return false;
+    }
+
+    // Apply default profile if none provided
+    const effectiveProfileId = profileId || 'default';
+
+    this.start(tourType, options);
+    return true;
   }
 
   getSteps(tourId: string): SpotlightStep[] {

@@ -1,8 +1,6 @@
 import { BookOpen, Video, MessageSquare, Sparkles } from 'lucide-react';
 import React from 'react';
 
-import { TourStorage } from '@/services/TourStorage';
-
 import { TourController } from '../Onboarding/tour-core/TourController';
 import { Button } from '../ui/Button';
 
@@ -11,8 +9,7 @@ interface HelpMenuProps {
 }
 
 export function HelpMenu({ className }: HelpMenuProps) {
-  const storage = TourStorage.forCurrentProfile();
-  const profileId = storage.profileId ?? 'default';
+  const profileId = 'default'; // Use simple default profile ID
 
   const startSpotlightTour = () => {
     TourController.startTour('spotlight', profileId, { force: true });

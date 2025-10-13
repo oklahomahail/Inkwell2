@@ -272,6 +272,7 @@ export const usePlotBoardIntegration = (
 
       return () => clearTimeout(timeoutId);
     }
+    return () => {}; // Always return cleanup function
   }, [autoSyncConfig.enabled, boardId, projectChapters, handleSyncWithChapters]);
 
   return {

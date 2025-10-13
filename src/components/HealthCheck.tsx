@@ -8,8 +8,8 @@ import EnhancedWritingPanel from './Writing/EnhancedWritingPanel';
 interface HealthStatus {
   component: string;
   status: 'loading' | 'success' | 'error';
-  error?: string;
-  renderTime?: number;
+  error: string | undefined;
+  renderTime: number | undefined;
 }
 
 /**
@@ -18,12 +18,17 @@ interface HealthStatus {
  */
 export const HealthCheck: React.FC = () => {
   const [healthStatuses, setHealthStatuses] = useState<HealthStatus[]>([
-    { component: 'DashboardPanel', status: 'loading' },
-    { component: 'EnhancedWritingPanel', status: 'loading' },
-    { component: 'TimelinePanel', status: 'loading' },
-    { component: 'AnalyticsPanel', status: 'loading' },
-    { component: 'StoryPlanningView', status: 'loading' },
-    { component: 'SettingsPanel', status: 'loading' },
+    { component: 'DashboardPanel', status: 'loading', error: undefined, renderTime: undefined },
+    {
+      component: 'EnhancedWritingPanel',
+      status: 'loading',
+      error: undefined,
+      renderTime: undefined,
+    },
+    { component: 'TimelinePanel', status: 'loading', error: undefined, renderTime: undefined },
+    { component: 'AnalyticsPanel', status: 'loading', error: undefined, renderTime: undefined },
+    { component: 'StoryPlanningView', status: 'loading', error: undefined, renderTime: undefined },
+    { component: 'SettingsPanel', status: 'loading', error: undefined, renderTime: undefined },
   ]);
 
   const updateStatus = (

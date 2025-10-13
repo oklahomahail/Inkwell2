@@ -1,6 +1,6 @@
 // File: src/components/Panels/SettingsPanel.tsx - Enhanced Claude Setup
 import { Eye, EyeOff, ExternalLink, CheckCircle, AlertCircle, Info } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type ChangeEvent } from 'react';
 
 import { PrivacyControls } from '@/components/Privacy/PrivacyControls';
 import BackupControls from '@/components/Settings/BackupControls';
@@ -278,7 +278,7 @@ const SettingsPanel: React.FC = () => {
                   <input
                     type={showApiKey ? 'text' : 'password'}
                     value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setApiKey(e.target.value)}
                     placeholder={
                       claude.isConfigured ? 'Enter new API key to update...' : 'sk-ant-api03-...'
                     }
@@ -423,7 +423,9 @@ const SettingsPanel: React.FC = () => {
               <input
                 type="checkbox"
                 checked={appSettings.autoSave}
-                onChange={(_e) => setAppSettings({ ...appSettings, autoSave: e.target.checked })}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setAppSettings({ ...appSettings, autoSave: e.target.checked })
+                }
                 className="w-4 h-4 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"
               />
             </div>
@@ -436,7 +438,7 @@ const SettingsPanel: React.FC = () => {
                 <input
                   type="number"
                   value={appSettings.autoSaveInterval}
-                  onChange={(_e) =>
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setAppSettings({
                       ...appSettings,
                       autoSaveInterval: parseInt(e.target.value) || 30,

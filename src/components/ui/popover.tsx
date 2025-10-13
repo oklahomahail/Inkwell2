@@ -18,11 +18,11 @@ const PopoverContext = React.createContext<{
   isOpen: boolean;
   setIsOpen: (_open: boolean) => void;
   triggerRef: React.RefObject<HTMLElement | null>;
-}>({ isOpen: false, _setIsOpen: () => {}, triggerRef: { current: null as HTMLElement | null } });
+}>({ isOpen: false, setIsOpen: () => {}, triggerRef: { current: null as HTMLElement | null } });
 export const Popover: React.FC<PopoverProps> = ({ open, onOpenChange, children }) => {
   const [isOpen, setIsOpen] = useState(open ?? false);
   const triggerRef = useRef<HTMLElement | null>(null);
-  const handleOpenChange = (_newOpen: boolean) => {
+  const handleOpenChange = (newOpen: boolean) => {
     setIsOpen(newOpen);
     onOpenChange?.(newOpen);
   };
@@ -57,14 +57,14 @@ export const PopoverTrigger: React.FC<PopoverTriggerProps> = ({ children, asChil
 };
 export const PopoverContent: React.FC<PopoverContentProps> = ({
   children,
-  _className = '',
-  _align = 'center',
-  _side = 'bottom',
+  className = '',
+  align = 'center',
+  side = 'bottom',
 }) => {
   const { isOpen, setIsOpen } = React.useContext(PopoverContext);
   const contentRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const handleClickOutside = (_event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
@@ -73,6 +73,7 @@ export const PopoverContent: React.FC<PopoverContentProps> = ({
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
+    return () => {}; // Always return cleanup function
   }, [isOpen, setIsOpen]);
   if (!isOpen) return null;
   const alignmentClasses = { start: 'left-0', center: 'left-1/2 -translate-x-1/2', end: 'right-0' };

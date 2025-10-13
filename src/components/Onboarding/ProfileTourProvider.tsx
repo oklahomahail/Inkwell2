@@ -273,7 +273,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
     for (const step of tourState.steps) {
       await tutorialStorage.setProgress(step.id, {
         currentStep: tourState.steps.length - 1,
-        _completedSteps: tourState.steps.map((s) => s.id),
+        completedSteps: tourState.steps.map((s) => s.id),
         tourType: tourState.tourType,
         startedAt: Date.now(),
         completedAt: Date.now(),
@@ -294,23 +294,24 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
     async (type: TourState['tourType'], _steps?: TourStep[]) => {
       if (!tutorialStorage.isProfileActive) return;
 
-      logAnalytics('tour_started', { tourType: type, stepCount: steps?.length || 0 });
+      logAnalytics('tour_started', { tourType: type, stepCount: _steps?.length || 0 });
 
       setTourState((prev) => ({
         ...prev,
         isActive: true,
         currentStep: 0,
         tourType: type,
-        steps: steps || prev.steps,
+        steps: _steps || prev.steps,
       }));
 
       // Clear remind me later if user manually starts a tour
       if (preferences?.remindMeLater) {
-        const updatedPrefs = {
+        const updatedPrefs: TutorialPreferences = {
           ...preferences,
           remindMeLater: false,
-          remindMeLaterUntil: undefined,
         };
+        // Remove remindMeLaterUntil if it exists
+        delete updatedPrefs.remindMeLaterUntil;
         setPreferences(updatedPrefs);
         await tutorialStorage.setPreferences(updatedPrefs);
       }
@@ -391,7 +392,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
   const setTourSteps = useCallback((steps: TourStep[]) => {
     setTourState((prev) => ({
       ...prev,
-      _steps: [...steps].sort((a, _b) => a.order - b.order),
+      steps: [...steps].sort((a, b) => a.order - b.order),
     }));
   }, []);
 

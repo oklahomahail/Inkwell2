@@ -25,7 +25,7 @@ const claudeService: ClaudeService = {
   sendMessage: async (_message: string) => {
     await new Promise((r) => setTimeout(r, 1000));
 
-    if (message.includes('proofread') || message.includes('suggestions')) {
+    if (_message.includes('proofread') || _message.includes('suggestions')) {
       return JSON.stringify({
         suggestions: [
           {
@@ -52,7 +52,7 @@ const claudeService: ClaudeService = {
       });
     }
 
-    if (message.includes('readability')) {
+    if (_message.includes('readability')) {
       return JSON.stringify({
         gradeLevel: 8.2,
         avgWordsPerSentence: 15.4,
@@ -332,18 +332,18 @@ export async function _runProofread(
 
         if (countWords(sceneText) < 50) continue;
 
-        const chunks = chunkText(sceneText);
+        const chunks = _chunkText(sceneText);
         let sceneOffset = 0;
 
         for (const chunk of chunks) {
           try {
-            const prompt = generateProofreadPrompt(chunk, options, {
+            const prompt = _generateProofreadPrompt(chunk, options, {
               chapterTitle,
               chapterNumber,
             });
 
             const response = await claudeService.sendMessage(prompt);
-            const suggestions = processClaudeResponse(
+            const suggestions = _processClaudeResponse(
               response,
               chapterNumber,
               sceneIndex + 1,
@@ -380,9 +380,9 @@ export async function _runProofread(
     let readability: ReadabilityMetrics;
     try {
       const readabilitySample = combinedText.slice(0, 5000);
-      const readabilityPrompt = generateReadabilityPrompt(readabilitySample);
+      const readabilityPrompt = _generateReadabilityPrompt(readabilitySample);
       const readabilityResponse = await claudeService.sendMessage(readabilityPrompt);
-      readability = processReadabilityResponse(readabilityResponse);
+      readability = _processReadabilityResponse(readabilityResponse);
     } catch {
       readability = {
         gradeLevel: 8,
@@ -398,10 +398,10 @@ export async function _runProofread(
     const wordCount =
       typeof draft.wordCount === 'number' && Number.isFinite(draft.wordCount)
         ? draft.wordCount
-        : calculateTextStats(combinedText).totalWords;
+        : _calculateTextStats(combinedText).totalWords;
     readability.readingTimeMinutes = Math.ceil(wordCount / 200);
 
-    const textStats = calculateTextStats(combinedText);
+    const textStats = _calculateTextStats(combinedText);
 
     const issuesByCategory: Record<ProofreadSuggestion['category'], number> = {
       clarity: 0,
@@ -425,8 +425,8 @@ export async function _runProofread(
       issuesBySeverity[s.severity] += 1;
     }
 
-    const summary = generateReportSummary(allSuggestions, readability, textStats);
-    const highlights = generateReportHighlights(allSuggestions, readability);
+    const summary = _generateReportSummary(allSuggestions, readability, textStats);
+    const highlights = _generateReportHighlights(allSuggestions, readability);
 
     onProgress?.({
       phase: 'complete',
@@ -542,8 +542,8 @@ export function _getProofreadStats(reports: ProofreadReport[]) {
     };
   }
 
-  const totalSuggestions = reports.reduce((sum, _r) => sum + r.totalSuggestions, 0);
-  const totalGradeLevel = reports.reduce((sum, _r) => sum + r.readability.gradeLevel, 0);
+  const totalSuggestions = reports.reduce((sum, r) => sum + r.totalSuggestions, 0);
+  const totalGradeLevel = reports.reduce((sum, r) => sum + r.readability.gradeLevel, 0);
 
   // Safely compute first-vs-last improvement
   const first = reports.at(0);
@@ -571,3 +571,8 @@ export function _getProofreadStats(reports: ProofreadReport[]) {
     improvement,
   };
 }
+
+// Functions already defined above in the file
+
+// Export the main function
+export const runProofread = _runProofread;

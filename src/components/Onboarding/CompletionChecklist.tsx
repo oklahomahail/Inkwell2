@@ -112,7 +112,7 @@ export const CompletionChecklistComponent: React.FC<CompletionChecklistProps> = 
       opacity: isCompleted ? 0.7 : 1,
       cursor: canStartTour ? 'pointer' : 'default',
       background:
-        hoveredItem === checklistItem.key && canStartTour
+        hoveredItem === String(item.key) && canStartTour
           ? 'rgba(59, 130, 246, 0.05)'
           : 'transparent',
     };

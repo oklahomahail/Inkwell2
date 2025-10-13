@@ -75,7 +75,7 @@ export const SmartSearchModal: React.FC<SmartSearchModalProps> = ({
     minScore: 0.1,
     enableSemanticSearch: true,
     enableAdvancedQuery: true,
-    userIntent: focusMode,
+    ...(focusMode ? { userIntent: focusMode } : {}),
     projectId: currentProject?.id,
   });
 

@@ -401,6 +401,7 @@ export function _useAdvancedFocusMode() {
       document.body.classList.remove('focus-mode', 'zen-mode', 'typewriter-mode');
       document.body.style.overflow = '';
     }
+    return () => {}; // Always return cleanup function
   }, [isFocusMode, settings.zenMode, settings.typewriterMode]);
 
   // Calculate sprint progress

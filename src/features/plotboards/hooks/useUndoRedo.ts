@@ -75,9 +75,9 @@ export const useUndoRedo = (
 
     loadingRef.current = (async () => {
       try {
-        trace.log('loadHistory', 'store_action', 'debug', { boardId });
+        trace.log('loadHistory', 'store_action', 'debug', { boardId: _boardId });
 
-        const historyData = await storage.getItem(`${STORAGE_KEY_PREFIX}${boardId}`);
+        const historyData = await storage.getItem(`${STORAGE_KEY_PREFIX}${_boardId}`);
         if (historyData && Array.isArray(historyData)) {
           const undoStack = historyData.map((entry) => ({
             ...entry,
@@ -99,18 +99,18 @@ export const useUndoRedo = (
 
     await loadingRef.current;
     loadingRef.current = null;
-  }, [boardId]);
+  }, [_boardId]);
 
   // Save history to storage
   const saveHistory = useCallback(
     async (undoStack: HistoryEntry[]): Promise<void> => {
       try {
-        await storage.setItem(`${STORAGE_KEY_PREFIX}${boardId}`, undoStack);
+        await storage.setItem(`${STORAGE_KEY_PREFIX}${_boardId}`, undoStack);
       } catch (error) {
         console.warn('Failed to save undo history:', error);
       }
     },
-    [boardId],
+    [_boardId],
   );
 
   // Push new entry to undo stack
@@ -123,16 +123,20 @@ export const useUndoRedo = (
     ): Promise<void> => {
       await loadHistory();
 
-      trace.log('pushUndoEntry', 'store_action', 'debug', { operation, boardId, description });
+      trace.log('pushUndoEntry', 'store_action', 'debug', {
+        operation,
+        boardId: _boardId,
+        description,
+      });
 
       const entry: HistoryEntry = {
         id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         timestamp: new Date(),
         operation,
-        boardId,
+        boardId: _boardId,
         boardState: JSON.parse(JSON.stringify(board)), // Deep clone
         description,
-        metadata,
+        metadata: metadata || {},
       };
 
       setState((prev) => {
@@ -160,7 +164,7 @@ export const useUndoRedo = (
       }
       saveHistory(newUndoStack);
     },
-    [loadHistory, saveHistory, boardId, state.undoStack],
+    [loadHistory, saveHistory, _boardId, state.undoStack],
   );
 
   // Undo last operation
@@ -190,7 +194,7 @@ export const useUndoRedo = (
 
       // Restore board state (reconstruct Date objects)
       const restoredBoard = reconstructDates(entryToUndo.boardState);
-      await onRestoreBoard(restoredBoard);
+      await _onRestoreBoard(restoredBoard);
 
       setState((prev) => ({
         ...prev,
@@ -217,7 +221,7 @@ export const useUndoRedo = (
     state.redoStack,
     state.isUndoing,
     state.isRedoing,
-    onRestoreBoard,
+    _onRestoreBoard,
     saveHistory,
   ]);
 
@@ -279,7 +283,7 @@ export const useUndoRedo = (
 
   // Clear all history
   const clear = useCallback(async (): Promise<void> => {
-    trace.log('clearUndoHistory', 'store_action', 'debug', { boardId });
+    trace.log('clearUndoHistory', 'store_action', 'debug', { boardId: _boardId });
 
     setState({
       undoStack: [],
@@ -291,9 +295,9 @@ export const useUndoRedo = (
       canRedo: false,
     });
 
-    await storage.removeItem(`${STORAGE_KEY_PREFIX}${boardId}`);
+    await storage.removeItem(`${STORAGE_KEY_PREFIX}${_boardId}`);
     loadedRef.current = false;
-  }, [boardId]);
+  }, [_boardId]);
 
   // Get full history
   const getHistory = useCallback((): HistoryEntry[] => {

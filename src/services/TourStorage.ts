@@ -1,52 +1,100 @@
-// src/services/TourStorage.ts
-import { enhancedStorageService } from './storageService';
-
-export type TourName = 'simple' | 'spotlight';
+// src/services/tourStorage.ts
+import type { TourStep } from '@/types/tour';
 
 export interface TourProgress {
-  seen: boolean;
-  step: number;
+  currentStep: number;
+  completedSteps: string[];
+  steps: TourStep[];
+  isActive: boolean;
+  lastUpdate: Date;
 }
 
-const STORAGE_KEYS = {
-  TUTORIAL_SEEN: (profileId: string, tourName: TourName) =>
-    `inkwell.tutorial.${profileId}.${tourName}.seen`,
-  TUTORIAL_STEP: (profileId: string, tourName: TourName) =>
-    `inkwell.tutorial.${profileId}.${tourName}.step`,
-};
+export interface TourStorage {
+  getProgress(): Promise<TourProgress | null>;
+  setProgress(progress: TourProgress): Promise<void>;
+  getCompletedTours(): Promise<string[]>;
+  markTourCompleted(tourId: string): Promise<void>;
+  clearProgress(tourId?: string): Promise<void>;
+}
 
-export class TourStorage {
-  constructor(private profileId: string) {}
+// LocalStorage-based implementation of TourStorage
+export class LocalTourStorage implements TourStorage {
+  private readonly PROGRESS_KEY = 'tour_progress';
+  private readonly COMPLETED_TOURS_KEY = 'completed_tours';
 
-  getTourProgress(tour: TourName): TourProgress {
-    const seen =
-      enhancedStorageService.getItem(STORAGE_KEYS.TUTORIAL_SEEN(this.profileId, tour)) === 'true';
-    const step =
-      Number(enhancedStorageService.getItem(STORAGE_KEYS.TUTORIAL_STEP(this.profileId, tour))) || 0;
-    return { seen, step };
+  async getProgress(): Promise<TourProgress | null> {
+    try {
+      const stored = localStorage.getItem(this.PROGRESS_KEY);
+      if (!stored) return null;
+
+      const parsed = JSON.parse(stored);
+      if (!parsed) return null;
+
+      return {
+        ...parsed,
+        lastUpdate: new Date(parsed.lastUpdate),
+      };
+    } catch (error) {
+      console.warn('Failed to load tour progress:', error);
+      return null;
+    }
   }
 
-  startTour(tour: TourName): void {
-    const { seen } = this.getTourProgress(tour);
-    if (seen) return; // No-op if already completed
-
-    enhancedStorageService.setItem(STORAGE_KEYS.TUTORIAL_SEEN(this.profileId, tour), 'false');
-    enhancedStorageService.setItem(STORAGE_KEYS.TUTORIAL_STEP(this.profileId, tour), '0');
+  async setProgress(progress: TourProgress): Promise<void> {
+    try {
+      localStorage.setItem(
+        this.PROGRESS_KEY,
+        JSON.stringify({
+          ...progress,
+          lastUpdate: new Date(),
+        }),
+      );
+    } catch (error) {
+      console.warn('Failed to save tour progress:', error);
+      throw error;
+    }
   }
 
-  endTour(tour: TourName): void {
-    enhancedStorageService.setItem(STORAGE_KEYS.TUTORIAL_SEEN(this.profileId, tour), 'true');
-    enhancedStorageService.removeItem(STORAGE_KEYS.TUTORIAL_STEP(this.profileId, tour));
+  async getCompletedTours(): Promise<string[]> {
+    try {
+      const stored = localStorage.getItem(this.COMPLETED_TOURS_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.warn('Failed to load completed tours:', error);
+      return [];
+    }
   }
 
-  setTourStep(tour: TourName, step: number): void {
-    enhancedStorageService.setItem(STORAGE_KEYS.TUTORIAL_STEP(this.profileId, tour), String(step));
+  async markTourCompleted(tourId: string): Promise<void> {
+    try {
+      const completed = await this.getCompletedTours();
+      if (!completed.includes(tourId)) {
+        completed.push(tourId);
+        localStorage.setItem(this.COMPLETED_TOURS_KEY, JSON.stringify(completed));
+      }
+    } catch (error) {
+      console.warn('Failed to mark tour as completed:', error);
+      throw error;
+    }
   }
 
-  resetTour(tour: TourName): void {
-    enhancedStorageService.removeItem(STORAGE_KEYS.TUTORIAL_SEEN(this.profileId, tour));
-    enhancedStorageService.removeItem(STORAGE_KEYS.TUTORIAL_STEP(this.profileId, tour));
+  async clearProgress(tourId?: string): Promise<void> {
+    try {
+      if (tourId) {
+        const progress = await this.getProgress();
+        if (progress && progress.steps[0]?.tourId === tourId) {
+          localStorage.removeItem(this.PROGRESS_KEY);
+        }
+      } else {
+        localStorage.removeItem(this.PROGRESS_KEY);
+        localStorage.removeItem(this.COMPLETED_TOURS_KEY);
+      }
+    } catch (error) {
+      console.warn('Failed to clear tour progress:', error);
+      throw error;
+    }
   }
 }
 
-export const createTourStorage = (profileId: string) => new TourStorage(profileId);
+// Export singleton instance
+export const tourStorage = new LocalTourStorage();

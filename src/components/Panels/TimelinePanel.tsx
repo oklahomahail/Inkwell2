@@ -197,7 +197,7 @@ const TimelinePanel: React.FC = () => {
   );
 
   const handleNavigateToScene = useCallback(
-    (sceneId: string, _chapterId: string) => {
+    (sceneId: string, chapterId: string) => {
       if (currentProject) {
         navigateToScene(currentProject.id, chapterId, sceneId);
         setSelectedSceneId(sceneId);
@@ -475,7 +475,7 @@ const TimelinePanel: React.FC = () => {
           <div className="p-6">
             <TimelineNavigation
               projectId={currentProject.id}
-              currentSceneId={selectedSceneId}
+              {...(selectedSceneId && { currentSceneId: selectedSceneId })}
               onNavigateToScene={handleNavigateToScene}
             />
           </div>

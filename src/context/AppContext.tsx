@@ -331,6 +331,14 @@ export function _AppProvider({ children }: { children: ReactNode }) {
   return <AppProviderInner>{children}</AppProviderInner>;
 }
 
+// UI ready hook for onboarding
+export function useUIReady() {
+  const { state } = _useAppContext();
+  return {
+    isReady: !state.isLoading && state.error === null,
+  };
+}
+
 // ✅ Public aliases expected by consumers/tests
 export const useAppContext = _useAppContext;
 export const useCurrentProject = _useCurrentProject;

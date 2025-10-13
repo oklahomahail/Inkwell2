@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { useUIReady } from '@/context/AppContext';
-import { TourStorage } from '@/services/TourStorage';
 
 import { TourController } from '../tour-core/TourController';
 import { debugTour } from '../utils/debug';
@@ -19,9 +18,8 @@ interface StartOpts {
 export function useSpotlightAutostart(profileId?: string, opts: StartOpts = {}) {
   const { timeoutMs = 8000 } = opts;
   const location = useLocation();
-  const uiReady = useUIReady();
-  const storage = TourStorage.forCurrentProfile();
-  const effectiveProfileId = profileId ?? storage.profileId ?? 'default';
+  const { isReady } = useUIReady();
+  const effectiveProfileId = profileId ?? 'default';
   const gateRef = useRef({ started: false, token: 0 });
 
   useEffect(() => {
@@ -29,16 +27,20 @@ export function useSpotlightAutostart(profileId?: string, opts: StartOpts = {}) 
       debugTour('autostart:suppressed', { route: location.pathname });
       return;
     }
-    if (shouldBlockTourHere(location)) {
+    if (shouldBlockTourHere(window.location)) {
       debugTour('autostart:blocked', { route: location.pathname, tour: 'spotlight' });
       return;
     }
-    if (!uiReady) return;
+    if (!isReady) return;
     if (gateRef.current.started) {
       debugTour('autostart:ref-guard-hit', { tour: 'spotlight' });
       return;
     }
-    if (storage.get('spotlightTour.completed') || storage.get('spotlightTour.dismissed')) return;
+    if (
+      localStorage.getItem('tourProgress.spotlight.completed') === 'true' ||
+      localStorage.getItem('tourProgress.spotlight.dismissed') === 'true'
+    )
+      return;
     if (hasStartedOnce(effectiveProfileId, 'spotlight')) {
       debugTour('autostart:once-guard-hit', { tour: 'spotlight' });
       return;
@@ -102,5 +104,5 @@ export function useSpotlightAutostart(profileId?: string, opts: StartOpts = {}) 
     return () => {
       cancelled = true;
     };
-  }, [location, uiReady, timeoutMs, storage, effectiveProfileId]);
+  }, [location, isReady, timeoutMs, effectiveProfileId]);
 }

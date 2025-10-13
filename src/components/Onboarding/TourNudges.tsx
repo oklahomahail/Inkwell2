@@ -24,7 +24,7 @@ const TOUR_NUDGES: TourNudge[] = [
     id: 'first-chapter-added',
     title: '🎉 Great start!',
     description: 'Want a 30-second tour of the Timeline to organize your story structure?',
-    tourType: 'timeline-panel',
+    tourType: 'feature-tour',
     icon: BarChart3,
     trigger: {
       action: 'chapter_added',
@@ -38,7 +38,7 @@ const TOUR_NUDGES: TourNudge[] = [
     id: 'first-character-created',
     title: 'Character created!',
     description: 'Explore how to develop rich character profiles and track their arcs.',
-    tourType: 'timeline-panel',
+    tourType: 'feature-tour',
     icon: Users,
     trigger: {
       action: 'character_created',
@@ -52,7 +52,7 @@ const TOUR_NUDGES: TourNudge[] = [
     id: 'writing-session-started',
     title: 'Ready to write?',
     description: 'Quick tour of writing tools to help you focus and be productive.',
-    tourType: 'writing-panel',
+    tourType: 'feature-tour',
     icon: BookOpen,
     trigger: {
       action: 'writing_started',
@@ -66,7 +66,7 @@ const TOUR_NUDGES: TourNudge[] = [
     id: 'progress-milestone',
     title: "You're making progress!",
     description: 'See how the Analytics panel can help track your writing habits.',
-    tourType: 'analytics-panel',
+    tourType: 'feature-tour',
     icon: BarChart3,
     trigger: {
       action: 'word_count_milestone',
@@ -80,7 +80,7 @@ const TOUR_NUDGES: TourNudge[] = [
     id: 'multiple-projects',
     title: 'Growing your library!',
     description: 'Learn how to manage multiple projects efficiently.',
-    tourType: 'dashboard-panel',
+    tourType: 'feature-tour',
     icon: BookOpen,
     trigger: {
       action: 'project_created',

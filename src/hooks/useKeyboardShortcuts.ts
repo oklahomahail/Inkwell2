@@ -34,5 +34,6 @@ export function _useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled = t
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
+    return () => {}; // Always return cleanup function
   }, [handleKeyDown, enabled]);
 }

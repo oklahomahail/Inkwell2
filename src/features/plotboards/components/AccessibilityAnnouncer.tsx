@@ -5,16 +5,16 @@ import React from 'react';
 
 interface AccessibilityAnnouncerProps {
   message: string;
-  assertiveness?: 'polite' | 'assertive';
+  assertiveness?: 'assertive' | 'polite';
   clearAfter?: number; // milliseconds
   className?: string;
 }
 
 export const AccessibilityAnnouncer: React.FC<AccessibilityAnnouncerProps> = ({
   message,
-  _assertiveness = 'assertive',
-  _clearAfter = 5000,
-  _className = '',
+  assertiveness = 'assertive',
+  clearAfter = 5000,
+  className = '',
 }) => {
   const [announcement, setAnnouncement] = React.useState(message);
 
@@ -30,6 +30,7 @@ export const AccessibilityAnnouncer: React.FC<AccessibilityAnnouncerProps> = ({
 
       return () => clearTimeout(timeout);
     }
+    return () => {}; // Always return cleanup function
   }, [message, clearAfter]);
 
   if (!message) {

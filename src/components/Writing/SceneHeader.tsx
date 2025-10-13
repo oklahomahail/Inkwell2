@@ -3,6 +3,8 @@ import React from 'react';
 
 import { SceneStatus } from '@/types/writing';
 
+import { type SceneHeaderProps, type SceneUpdatePayload } from './SceneHeaderTypes';
+
 export const SceneHeader = _SceneHeader;
 
 export function _SceneHeader({
@@ -11,19 +13,7 @@ export function _SceneHeader({
   wordGoal,
   words = 0,
   onChange,
-}: {
-  title: string;
-  status?: SceneStatus;
-  wordGoal?: number;
-  words?: number;
-  onChange: (
-    patch: Partial<{
-      title: string;
-      status: SceneStatus;
-      wordGoal: number;
-    }>,
-  ) => void;
-}) {
+}: SceneHeaderProps) {
   const pct =
     wordGoal && wordGoal > 0 ? Math.min(100, Math.round((words / wordGoal) * 100)) : undefined;
 
@@ -33,7 +23,7 @@ export function _SceneHeader({
       <input
         className="border rounded px-2 py-1 text-sm flex-1"
         value={title}
-        onChange={(e) => onChange({ title: e.target.value })}
+        onChange={(e) => onChange({ title: e.target.value } as SceneUpdatePayload)}
         placeholder="Scene title"
       />
 
@@ -41,7 +31,7 @@ export function _SceneHeader({
       <select
         className="border rounded px-2 py-1 text-sm"
         value={status}
-        onChange={(e) => onChange({ status: e.target.value as SceneStatus })}
+        onChange={(e) => onChange({ status: e.target.value as SceneStatus } as SceneUpdatePayload)}
       >
         <option value={SceneStatus.DRAFT}>Draft</option>
         <option value={SceneStatus.REVISION}>Revision</option>
@@ -57,8 +47,8 @@ export function _SceneHeader({
         value={wordGoal ?? ''}
         onChange={(e) =>
           onChange({
-            wordGoal: e.target.value ? Number(e.target.value) : undefined,
-          })
+            wordGoal: e.target.value ? Number(e.target.value) : null,
+          } as SceneUpdatePayload)
         }
       />
 

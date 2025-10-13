@@ -25,13 +25,10 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
 
-interface ClaudeToolbarProps {
-  selectedText?: string;
+import { type ClaudeToolbarProps } from './ClaudeToolbarTypes';
+
+interface ClaudeToolbarInternalProps extends Omit<ClaudeToolbarProps, 'onInsertText'> {
   onInsertText?: (text: string, replaceSelection?: boolean) => void;
-  sceneTitle?: string;
-  currentContent?: string;
-  position: 'panel' | 'popup';
-  popupPosition: { x: number; y: number };
   onClose?: () => void;
   className?: string;
 }
@@ -342,8 +339,8 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
   const hiddenActionsCount = quickPrompts.length - filteredPrompts.length;
 
   useEffect(() => {
-    if (position === 'popup' && popupPosition.x && popupPosition.y) {
-      // Position handled by parent
+    if (position === 'popup' && popupPosition) {
+      // Position handled by CSS classes based on popupPosition value
     }
   }, [position, popupPosition]);
 
@@ -363,8 +360,6 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
       style={
         position === 'popup'
           ? {
-              left: popupPosition.x,
-              top: popupPosition.y,
               maxWidth: '320px',
             }
           : undefined
@@ -488,24 +483,22 @@ const ClaudeToolbar: React.FC<ClaudeToolbarProps> = ({
                   {copied ? <Check size={12} /> : <Copy size={12} />}
                   {copied ? 'Copied!' : 'Copy'}
                 </button>
-                {onInsertText && (
-                  <>
-                    {selectedText && (
-                      <button
-                        onClick={() => handleInsert(true)}
-                        className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                      >
-                        Replace
-                      </button>
-                    )}
+                <>
+                  {selectedText && (
                     <button
-                      onClick={() => handleInsert(false)}
-                      className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                      onClick={() => handleInsert(true)}
+                      className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
                     >
-                      Insert
+                      Replace
                     </button>
-                  </>
-                )}
+                  )}
+                  <button
+                    onClick={() => handleInsert(false)}
+                    className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  >
+                    Insert
+                  </button>
+                </>
               </div>
             </div>
             <div

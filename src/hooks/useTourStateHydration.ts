@@ -1,20 +1,20 @@
 // src/hooks/useTourStateHydration.ts
 import { useEffect } from 'react';
 
-import { useProfile } from '../context/ProfileContext';
-import { createTourStorage } from '../services/TourStorage';
+import { _useProfile as useProfile } from '../context/ProfileContext';
+import { createTourStorage } from '../services/simpleTourStorage';
 
 /**
  * Hook to handle tour state hydration when profiles change
  */
 export function useTourStateHydration() {
-  const { profileId } = useProfile();
+  const { activeProfileId } = useProfile();
 
   useEffect(() => {
     if (!profileId) return;
 
     // When profile changes, initialize storage for new profile
-    const storage = createTourStorage(profileId);
+    const storage = createTourStorage(activeProfileId);
 
     // Hydrate any existing progress
     const simpleProgress = storage.getTourProgress('simple');
@@ -27,5 +27,5 @@ export function useTourStateHydration() {
     if (!spotlightProgress.seen && spotlightProgress.step > 0) {
       storage.resetTour('spotlight');
     }
-  }, [profileId]);
+  }, [activeProfileId]);
 }

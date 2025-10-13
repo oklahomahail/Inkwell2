@@ -17,22 +17,20 @@ const sizeClasses: Record<NonNullable<ButtonProps['size']>, string> = {
   lg: 'h-10 px-4 text-base',
   icon: 'h-9 w-9 p-0',
 };
-export const Button: React.FC<ButtonProps> = ({
-  className = '',
-  children,
-  variant = 'default',
-  size = 'md',
-  ...rest
-}) => {
-  const base =
-    'inline-flex items-center justify-center rounded-md font-medium transition-colors ' +
-    'focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ';
-  const classes = [base, variantClasses[variant], sizeClasses[size], className].join(' ');
-  return (
-    <button className={classes} {...rest}>
-      {' '}
-      {children}{' '}
-    </button>
-  );
-};
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className = '', children, variant = 'default', size = 'md', ...rest }, ref) => {
+    const base =
+      'inline-flex items-center justify-center rounded-md font-medium transition-colors ' +
+      'focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ';
+    const classes = [base, variantClasses[variant], sizeClasses[size], className].join(' ');
+    return (
+      <button className={classes} ref={ref} {...rest}>
+        {' '}
+        {children}{' '}
+      </button>
+    );
+  },
+);
+
+Button.displayName = 'Button';
 export default Button;

@@ -3,28 +3,17 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { PlotBoard, PlotColumn, PlotCard } from '../types';
+import { PlotBoard } from '../types';
+
+import type {
+  CardPosition,
+  KeyboardNavigationState,
+  KeyboardNavigationActions as KeyboardNavigationActionsType,
+} from '../types/keyboard';
 
 interface _FocusState {
   cardId: string | null;
   columnId: string | null;
-}
-
-interface _KeyboardNavigationOptions {
-  focusedCardId: string | null;
-  focusedColumnId: string | null;
-  draggedCardId: string | null;
-  isDragging: boolean;
-  announcements: string[];
-}
-
-interface KeyboardNavigationActions {
-  setFocus: (_cardId: string | null, _columnId: string | null) => void;
-  startDrag: (_cardId: string) => void;
-  completeDrop: (_targetColumnId: string, _newOrder: number) => void;
-  cancelDrag: () => void;
-  announce: (_message: string) => void;
-  clearAnnouncements: () => void;
 }
 
 interface UseKeyboardNavigationProps {
@@ -37,7 +26,7 @@ export const useKeyboardNavigation = ({
   board,
   onMoveCard,
   onReorderColumns: _onReorderColumns,
-}: UseKeyboardNavigationProps): KeyboardNavigationState & KeyboardNavigationActions => {
+}: UseKeyboardNavigationProps): KeyboardNavigationState & KeyboardNavigationActionsType => {
   const [state, setState] = useState<KeyboardNavigationState>({
     focusedCardId: null,
     focusedColumnId: null,
@@ -52,16 +41,11 @@ export const useKeyboardNavigation = ({
   });
 
   // Get all cards in a flat array with their positions
-  const getAllCards = useCallback(() => {
-    const cards: Array<{
-      card: PlotCard;
-      column: PlotColumn;
-      cardIndex: number;
-      columnIndex: number;
-    }> = [];
+  const getAllCards = useCallback((): CardPosition[] => {
+    const cards: CardPosition[] = [];
 
-    board.columns.forEach((column, _columnIndex) => {
-      column.cards.forEach((card, _cardIndex) => {
+    board.columns.forEach((column, columnIndex) => {
+      column.cards.forEach((card, cardIndex) => {
         cards.push({ card, column, cardIndex, columnIndex });
       });
     });
@@ -221,6 +205,12 @@ export const useKeyboardNavigation = ({
     ],
   );
 
+  // Declare announce function stub to be defined later
+  let announce: (message: string) => void;
+  let startDrag: (cardId: string) => void;
+  let completeDrop: (targetColumnId: string, newOrder: number) => void;
+  let cancelDrag: () => void;
+
   // Set up keyboard event listeners
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
@@ -228,12 +218,12 @@ export const useKeyboardNavigation = ({
   }, [handleKeyDown]);
 
   // Actions
-  const setFocus = useCallback((cardId: string | null, _columnId: string | null) => {
+  const setFocus = useCallback((cardId: string | null, columnId: string | null) => {
     setState((prev) => ({ ...prev, focusedCardId: cardId, focusedColumnId: columnId }));
     lastFocusRef.current = { cardId, columnId };
   }, []);
 
-  const startDrag = useCallback(
+  startDrag = useCallback(
     (cardId: string) => {
       const position = findCardPosition(cardId);
       if (!position) return;
@@ -251,8 +241,8 @@ export const useKeyboardNavigation = ({
     [findCardPosition],
   );
 
-  const completeDrop = useCallback(
-    (targetColumnId: string, _newOrder: number) => {
+  completeDrop = useCallback(
+    (targetColumnId: string, newOrder: number) => {
       if (!state.draggedCardId) return;
 
       const draggedCard = findCardPosition(state.draggedCardId);
@@ -276,7 +266,7 @@ export const useKeyboardNavigation = ({
     [state.draggedCardId, findCardPosition, board, onMoveCard],
   );
 
-  const cancelDrag = useCallback(() => {
+  cancelDrag = useCallback(() => {
     if (!state.draggedCardId) return;
 
     const draggedCard = findCardPosition(state.draggedCardId);
@@ -290,7 +280,7 @@ export const useKeyboardNavigation = ({
     }));
   }, [state.draggedCardId, findCardPosition]);
 
-  const announce = useCallback((message: string) => {
+  announce = useCallback((message: string) => {
     setState((prev) => ({
       ...prev,
       announcements: [...prev.announcements, message],
@@ -313,7 +303,7 @@ export const useKeyboardNavigation = ({
 };
 
 // Hook for managing ARIA live region announcements
-export const useAriaLiveRegion = (_announcements: string[]) => {
+export const useAriaLiveRegion = (announcements: string[]) => {
   const [currentAnnouncement, setCurrentAnnouncement] = useState<string>('');
 
   useEffect(() => {
@@ -330,6 +320,7 @@ export const useAriaLiveRegion = (_announcements: string[]) => {
         return () => clearTimeout(timer);
       }
     }
+    return () => {}; // Always return cleanup function
   }, [announcements]);
 
   return currentAnnouncement;

@@ -5,6 +5,18 @@ import analyticsService from '../../services/analyticsService';
 import * as tourGatingMod from './tourGating';
 import { hasPromptedThisSession } from './tourGating';
 
+// Re-export the tour map for backwards compatibility
+export {
+  TOUR_MAP,
+  CORE_TOUR_STEPS,
+  WRITING_PANEL_TOUR,
+  TIMELINE_PANEL_TOUR,
+  ANALYTICS_PANEL_TOUR,
+  DASHBOARD_PANEL_TOUR,
+  ONBOARDING_STEPS,
+  FEATURE_DISCOVERY_STEPS,
+} from './tourRegistry';
+
 // ===== Singleton token to block double starts (React strict/double effects)
 let startToken: string | null = null;
 
@@ -13,17 +25,17 @@ const STORAGE_KEY = 'inkwell-tour-progress';
 const CHECKLIST_KEY = 'inkwell-completion-checklist';
 
 // ===== Types
-export interface TourStep {
-  id: string;
-  title: string;
+import { type TourStep as BaseTourStep } from './tourRegistry';
+
+export interface TourStep extends BaseTourStep {
   description: string;
   target: string;
   placement: 'top' | 'bottom' | 'left' | 'right' | 'center';
   action?: 'click' | 'hover' | 'none';
   optional?: boolean;
   order: number;
-  view?: string;
   category: 'onboarding' | 'feature-discovery' | 'tips';
+  view?: string;
 }
 
 export interface TourState {
@@ -177,15 +189,21 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [checklist]);
 
   // Provider-owned analytics (single source of truth)
-  const logAnalytics = (event: string, data: any = {}) => {
+  type TourAnalyticsData = {
+    tourType?: TourState['tourType'];
+    step?: number;
+    [key: string]: unknown;
+  };
+
+  const logAnalytics = (event: string, data: TourAnalyticsData = {}) => {
     const payload = {
       tourType: data.tourType ?? tourState.tourType,
       step: data.step ?? tourState.currentStep,
       ...data,
     };
     try {
-      analyticsService.trackEvent(event as any, payload);
-      (analyticsService as any).track?.(event as any, payload);
+      analyticsService.trackEvent(event, payload);
+      analyticsService.track?.(event, payload);
       if (import.meta.env.DEV) console.info('[tour.analytics]', event, payload);
     } catch {}
   };

@@ -35,7 +35,10 @@ export interface ClaudeError extends Error {
   retryable: boolean;
 }
 
+type StatusChangeListener = () => void;
+
 class ClaudeService {
+  private listeners: Set<StatusChangeListener> = new Set();
   private config: ClaudeServiceConfig;
   private baseUrl = 'https://api.anthropic.com/v1/messages';
   private readonly STORAGE_KEY = 'claude_messages';
@@ -71,6 +74,7 @@ Context: You have access to the user's current project and any selected text. Al
     this.config.apiKey = apiKey;
     this.saveApiKey(apiKey);
     this.saveConfig();
+    this.notifyListeners();
   }
 
   isConfigured(): boolean {
@@ -78,6 +82,20 @@ Context: You have access to the user's current project and any selected text. Al
       this.config.apiKey = this.loadApiKey();
     }
     return !!this.config.apiKey;
+  }
+
+  addStatusChangeListener(listener: StatusChangeListener): void {
+    this.listeners.add(listener);
+  }
+
+  removeStatusChangeListener(listener: StatusChangeListener): void {
+    this.listeners.delete(listener);
+  }
+
+  private notifyListeners(): void {
+    for (const listener of this.listeners) {
+      listener();
+    }
   }
 
   async sendMessage(
@@ -246,6 +264,7 @@ Context: You have access to the user's current project and any selected text. Al
     } catch (e) {
       console.warn('Failed to save Claude messages:', e);
     }
+    this.notifyListeners();
   }
 
   getMessages(): ClaudeMessage[] {
@@ -268,6 +287,7 @@ Context: You have access to the user's current project and any selected text. Al
     } catch (e) {
       console.warn('Failed to clear messages:', e);
     }
+    this.notifyListeners();
   }
 
   updateConfig(updates: Partial<ClaudeServiceConfig>): void {

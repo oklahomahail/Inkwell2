@@ -88,7 +88,7 @@ export const ClaudeProvider = ({ children }: { children: ReactNode }) => {
         const freshMessages = claudeService.getMessages();
 
         const response = await claudeService.sendMessage(content, {
-          selectedText,
+          ...(selectedText ? { selectedText } : {}),
           conversationHistory: freshMessages,
         });
 

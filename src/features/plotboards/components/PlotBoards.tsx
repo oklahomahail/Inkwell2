@@ -121,18 +121,19 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
   const projectChapters = chapters; // Use chapters directly from store
 
   // Create a new board
-  const handleCreateBoard = async (_title: string, _templateId?: string) => {
+  const handleCreateBoard = async (title: string, templateId?: string) => {
     try {
       const newBoard = await createBoard(projectId, title, templateId);
       setShowTemplateModal(false);
       return newBoard;
     } catch (error) {
       console.error('Failed to create board:', error);
+      return null;
     }
   };
 
   // Board management
-  const handleDeleteBoard = async (_boardId: string) => {
+  const handleDeleteBoard = async (boardId: string) => {
     if (
       window.confirm('Are you sure you want to delete this board? This action cannot be undone.')
     ) {
@@ -144,7 +145,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
     }
   };
 
-  const handleDuplicateBoard = async (_boardId: string) => {
+  const handleDuplicateBoard = async (boardId: string) => {
     try {
       const board = boards[boardId];
       if (board) {
@@ -368,7 +369,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
                       <input
                         type="checkbox"
                         checked={selectedChapters.includes(chapter.id)}
-                        onChange={(_e) => {
+                        onChange={(e) => {
                           if (e.target.checked) {
                             setSelectedChapters([...selectedChapters, chapter.id]);
                           } else {
@@ -454,13 +455,13 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
               <div className="font-medium text-sm">{board.title}</div>
               <div className="text-xs text-gray-500">
                 {board.columns.length} columns •{' '}
-                {board.columns.reduce((sum, _col) => sum + col.cards.length, 0)} cards
+                {board.columns.reduce((sum, col) => sum + col.cards.length, 0)} cards
               </div>
             </div>
 
             <div className="flex items-center space-x-1">
               <button
-                onClick={(_e) => {
+                onClick={(e) => {
                   e.stopPropagation();
                   handleDuplicateBoard(board.id);
                 }}
@@ -478,7 +479,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
               </button>
 
               <button
-                onClick={(_e) => {
+                onClick={(e) => {
                   e.stopPropagation();
                   handleDeleteBoard(board.id);
                 }}

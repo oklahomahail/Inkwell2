@@ -35,8 +35,8 @@ export abstract class BaseExportEngine implements ExportEngine {
     percentage: number,
     message?: string,
   ): void {
-    if (progress) {
-      progress(phase, percentage, message);
+    if (_progress) {
+      _progress(phase, percentage, message);
     }
   }
 

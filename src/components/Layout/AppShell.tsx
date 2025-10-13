@@ -1,8 +1,6 @@
 // AppShell.tsx - Main application shell component
 import React from 'react';
 
-import { TourStorage } from '@/services/TourStorage';
-
 import { OnboardingOrchestrator } from '../../components/Onboarding/OnboardingOrchestrator';
 import { TourProvider } from '../../components/Onboarding/TourProvider';
 import { useSimpleTourAutostart } from '../Onboarding/hooks/useSimpleTourAutostart';
@@ -15,8 +13,8 @@ interface AppShellProps {
 
 function _AppShell({ children }: AppShellProps) {
   // Initialize tour autostart hooks after providers/portals are mounted
-  const storage = TourStorage.forCurrentProfile();
-  const profileId = storage.profileId ?? 'default';
+  // Use a simple default profile identifier; no storage coupling needed
+  const profileId = 'default';
   useSimpleTourAutostart(profileId);
   useSpotlightAutostart(profileId);
 

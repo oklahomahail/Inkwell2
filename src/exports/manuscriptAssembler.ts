@@ -187,7 +187,7 @@ export async function assembleManuscript(projectId: string): Promise<ManuscriptD
 
     return {
       number: index + 1,
-      title: chapter.title,
+      title: chapter.title || `Chapter ${index + 1}`,
       scenes: sortedScenes,
     };
   });
@@ -221,11 +221,11 @@ export async function assembleManuscript(projectId: string): Promise<ManuscriptD
 
   return {
     title: project.name || 'Untitled',
-    author: project.author,
+    author: project.author || 'Unknown Author',
     projectId,
     chapters,
-    frontMatter: project.frontMatter,
-    backMatter: project.backMatter,
+    ...(project.frontMatter ? { frontMatter: project.frontMatter } : {}),
+    ...(project.backMatter ? { backMatter: project.backMatter } : {}),
     metadata: project.metadata || {},
     wordCount: totalWordCount,
     estimatedPages,

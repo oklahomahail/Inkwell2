@@ -226,7 +226,7 @@ export const StorageRecoveryBanner: React.FC<StorageRecoveryBannerProps> = ({ on
                 <div className="opacity-90">
                   {storageError?.suggestedActions ? (
                     <ul className="text-xs space-y-1">
-                      {storageError.suggestedActions.slice(0, 2).map((action, _index) => (
+                      {storageError.suggestedActions.slice(0, 2).map((action, index) => (
                         <li key={index}>• {action}</li>
                       ))}
                     </ul>
@@ -265,8 +265,8 @@ interface OfflineBannerProps {
 
 export const OfflineBanner: React.FC<OfflineBannerProps> = ({
   queuedOperations,
-  _onViewQueue,
-  _onDismiss,
+  onViewQueue,
+  onDismiss,
 }) => {
   if (queuedOperations === 0) return null;
 

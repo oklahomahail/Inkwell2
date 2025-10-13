@@ -25,7 +25,7 @@ export function _useCommands(
         keywords: ['dashboard', 'home', 'projects'],
         action: () => {
           setView(View.Dashboard);
-          onCommandExecute?.('nav-dashboard');
+          _onCommandExecute?.('nav-dashboard');
           showToast('Switched to Dashboard', 'success');
         },
       },
@@ -38,7 +38,7 @@ export function _useCommands(
         keywords: ['writing', 'write', 'editor'],
         action: () => {
           setView(View.Writing);
-          onCommandExecute?.('nav-writing');
+          _onCommandExecute?.('nav-writing');
           showToast('Switched to Writing', 'success');
         },
       },
@@ -51,7 +51,7 @@ export function _useCommands(
         keywords: ['timeline', 'schedule', 'calendar'],
         action: () => {
           setView(View.Timeline);
-          onCommandExecute?.('nav-timeline');
+          _onCommandExecute?.('nav-timeline');
           showToast('Switched to Timeline', 'success');
         },
       },
@@ -64,7 +64,7 @@ export function _useCommands(
         keywords: ['analysis', 'analytics', 'stats'],
         action: () => {
           setView(View.Analysis);
-          onCommandExecute?.('nav-analysis');
+          _onCommandExecute?.('nav-analysis');
           showToast('Switched to Analysis', 'success');
         },
       },
@@ -77,7 +77,7 @@ export function _useCommands(
         keywords: ['settings', 'preferences', 'config'],
         action: () => {
           setView(View.Settings);
-          onCommandExecute?.('nav-settings');
+          _onCommandExecute?.('nav-settings');
           showToast('Switched to Settings', 'success');
         },
       },
@@ -105,7 +105,7 @@ export function _useCommands(
               characters: [],
               beatSheet: [],
             });
-            onCommandExecute?.('project-new');
+            _onCommandExecute?.('project-new');
             showToast(`Created project: ${projectName}`, 'success');
           }
         },
@@ -119,18 +119,18 @@ export function _useCommands(
       commands.push(
         {
           id: 'claude-improve',
-          _label: 'Improve Writing',
-          _description: selectedText
+          label: 'Improve Writing',
+          description: _selectedText
             ? 'Improve selected text with Claude AI'
             : 'Improve current writing with Claude AI',
-          _icon: '✨',
-          _category: 'claude',
-          _keywords: ['improve', 'enhance', 'claude', 'ai'],
-          _enabled: !!currentProject?.content || !!selectedText,
-          _action: async () => {
+          icon: '✨',
+          category: 'claude',
+          keywords: ['improve', 'enhance', 'claude', 'ai'],
+          enabled: !!currentProject?.content || !!_selectedText,
+          action: async () => {
             try {
-              onCommandExecute?.('claude-improve');
-              const textToImprove = selectedText || currentProject?.content || '';
+              _onCommandExecute?.('claude-improve');
+              const textToImprove = _selectedText || currentProject?.content || '';
               if (textToImprove) {
                 await claudeActions.improveText(textToImprove);
                 showToast('Text improvement requested', 'success');
@@ -152,7 +152,7 @@ export function _useCommands(
           enabled: !!currentProject?.content,
           action: async () => {
             try {
-              onCommandExecute?.('claude-continue');
+              _onCommandExecute?.('claude-continue');
               const content = currentProject?.content || '';
               if (content) {
                 await claudeActions.suggestContinuation(content);
@@ -175,7 +175,7 @@ export function _useCommands(
           enabled: !!currentProject.content,
           action: async () => {
             try {
-              onCommandExecute?.('claude-analyze');
+              _onCommandExecute?.('claude-analyze');
               const content = currentProject?.content || '';
               if (content) {
                 await claudeActions.analyzeWritingStyle(content);
@@ -197,7 +197,7 @@ export function _useCommands(
           keywords: ['brainstorm', 'ideas', 'creative', 'claude'],
           action: async () => {
             try {
-              onCommandExecute?.('claude-brainstorm');
+              _onCommandExecute?.('claude-brainstorm');
               const context = currentProject?.content || 'New creative writing project';
               await claudeActions.brainstormIdeas(context);
               showToast('Brainstorming session started', 'success');
@@ -215,7 +215,7 @@ export function _useCommands(
           keywords: ['plot', 'story', 'narrative', 'claude'],
           action: async () => {
             try {
-              onCommandExecute?.('claude-plot-ideas');
+              _onCommandExecute?.('claude-plot-ideas');
               const context = currentProject?.content || 'Story development';
               await claudeActions.generatePlotIdeas(context);
               showToast('Plot ideas generated', 'success');
@@ -229,12 +229,12 @@ export function _useCommands(
 
     return commands.filter((cmd) => cmd.enabled !== false);
   }, [
-    selectedText,
+    _selectedText,
     currentProject,
     setView,
     addProject,
     claudeActions,
     showToast,
-    onCommandExecute,
+    _onCommandExecute,
   ]);
 }
