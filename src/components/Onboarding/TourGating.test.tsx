@@ -30,9 +30,7 @@ vi.mock('./TourOverlay', () => ({
 }));
 
 import OnboardingOrchestrator from './OnboardingOrchestrator';
-import { TestTourWrapper } from './testUtils';
 import { TestTourComponent } from './TourGating.components';
-import { useTour } from './TourProvider';
 import { TourProvider, useTour } from './TourProvider';
 
 // Mock database implementation
@@ -101,12 +99,16 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       const duplicateButton = screen.getByTestId('start-tour-duplicate');
 
       // Start first tour
-      fireEvent.click(startButton);
+      await act(async () => {
+        fireEvent.click(startButton);
+      });
       expect(screen.getByTestId('tour-active')).toHaveTextContent('active');
       expect(onTourStart).toHaveBeenCalledOnce();
 
       // Try to start duplicate tour
-      fireEvent.click(duplicateButton);
+      await act(async () => {
+        fireEvent.click(duplicateButton);
+      });
 
       // Should warn about duplicate
       expect(mockConsoleWarn).toHaveBeenCalledWith(
@@ -126,7 +128,9 @@ describe('Tour Gating + First-run Flow (A1)', () => {
         </TestTourWrapper>,
       );
 
-      fireEvent.click(screen.getByTestId('start-tour'));
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('start-tour'));
+      });
 
       expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
         'inkwell-tour-prompted-this-session',
@@ -173,7 +177,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       expect(screen.getByTestId('should-show-prompt')).toHaveTextContent('true');
     });
 
-    it('should not show prompt if user said never show again', () => {
+    it('should not show prompt if user said never show again', async () => {
       // Set preferences exactly as tourGating.ts reads them
       window.localStorage.setItem(
         'inkwell-tour-progress-preferences',
@@ -193,7 +197,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       expect(screen.getByTestId('should-show-prompt')).toHaveTextContent('false');
     });
 
-    it('should not show prompt during remind me later period', () => {
+    it('should not show prompt during remind me later period', async () => {
       const futureTime = Date.now() + 24 * 60 * 60 * 1000; // 24 hours from now
 
       // Set preferences exactly as tourGating.ts reads them
@@ -257,6 +261,11 @@ describe('Tour Gating + First-run Flow (A1)', () => {
           'inkwell-welcome-shown-this-session',
           'true',
         );
+
+        // Allow for state updates to complete
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        });
       });
 
       // Unmount and remount (simulating navigation)

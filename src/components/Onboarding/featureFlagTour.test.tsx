@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
@@ -61,7 +61,7 @@ describe('Tour Feature Flag Integration', () => {
   });
 
   describe('Quick Tour', () => {
-    it('can run when onboarding is enabled', () => {
+    it('can run when onboarding is enabled', async () => {
       // Enable onboarding flag
       (featureManager.isEnabled as any).mockImplementation(
         (flag: FeatureName) => flag === 'onboarding',
@@ -69,6 +69,7 @@ describe('Tour Feature Flag Integration', () => {
 
       // Create test component
       const TestComponent = () => {
+        const { startTour } = useTour();
         useSimpleTourAutostart();
         return <div data-testid="quick-tour">Test</div>;
       };
@@ -80,10 +81,12 @@ describe('Tour Feature Flag Integration', () => {
       );
 
       // Hook should be called since onboarding is enabled
-      expect(useSimpleTourAutostart).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(useSimpleTourAutostart).toHaveBeenCalled();
+      });
     });
 
-    it('never runs when onboarding is disabled', () => {
+    it('never runs when onboarding is disabled', async () => {
       // Disable onboarding flag
       (featureManager.isEnabled as any).mockImplementation(() => false);
 
@@ -99,14 +102,15 @@ describe('Tour Feature Flag Integration', () => {
         </TestTourWrapper>,
       );
 
-      // Hook should be called but returns early
-      expect(useSimpleTourAutostart).toHaveBeenCalled();
-      expect(useTour().startTour).not.toHaveBeenCalled();
+      await act(async () => {
+        expect(useSimpleTourAutostart).toHaveBeenCalled();
+        expect(useTour().startTour).not.toHaveBeenCalled();
+      });
     });
   });
 
   describe('Feature Discovery', () => {
-    it('can run when feature-discovery and onboarding are enabled', () => {
+    it('can run when feature-discovery and onboarding are enabled', async () => {
       // Enable both flags
       (featureManager.isEnabled as any).mockImplementation(
         (flag: FeatureName) => flag === 'onboarding' || flag === 'feature-discovery',
@@ -125,10 +129,12 @@ describe('Tour Feature Flag Integration', () => {
       );
 
       // Hook should be called since both flags are enabled
-      expect(useSpotlightAutostart).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(useSpotlightAutostart).toHaveBeenCalled();
+      });
     });
 
-    it('never runs when feature-discovery is disabled', () => {
+    it('never runs when feature-discovery is disabled', async () => {
       // Enable onboarding but disable feature-discovery
       (featureManager.isEnabled as any).mockImplementation(
         (flag: FeatureName) => flag === 'onboarding',
@@ -146,12 +152,13 @@ describe('Tour Feature Flag Integration', () => {
         </TestTourWrapper>,
       );
 
-      // Hook should be called but returns early
-      expect(useSpotlightAutostart).toHaveBeenCalled();
-      expect(useTour().startTour).not.toHaveBeenCalled();
+      await act(async () => {
+        expect(useSpotlightAutostart).toHaveBeenCalled();
+        expect(useTour().startTour).not.toHaveBeenCalled();
+      });
     });
 
-    it('never runs when onboarding is disabled', () => {
+    it('never runs when onboarding is disabled', async () => {
       // Disable onboarding but enable feature-discovery
       (featureManager.isEnabled as any).mockImplementation(
         (flag: FeatureName) => flag === 'feature-discovery',
@@ -169,9 +176,10 @@ describe('Tour Feature Flag Integration', () => {
         </TestTourWrapper>,
       );
 
-      // Hook should be called but returns early
-      expect(useSpotlightAutostart).toHaveBeenCalled();
-      expect(useTour().startTour).not.toHaveBeenCalled();
+      await act(async () => {
+        expect(useSpotlightAutostart).toHaveBeenCalled();
+        expect(useTour().startTour).not.toHaveBeenCalled();
+      });
     });
   });
 });

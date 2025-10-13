@@ -29,10 +29,15 @@ export const makeMockStorage = () => {
 /**
  * Test component wrapper
  */
-export const TestTourWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+interface TestTourWrapperProps {
+  children: React.ReactNode;
+  onTourStart?: () => void;
+}
+
+export const TestTourWrapper: React.FC<TestTourWrapperProps> = ({ children, onTourStart }) => (
   <ProfileProvider>
     <ProfileTourProvider>
-      <TourProvider>{children}</TourProvider>
+      <TourProvider onTourStart={onTourStart}>{children}</TourProvider>
     </ProfileTourProvider>
   </ProfileProvider>
 );

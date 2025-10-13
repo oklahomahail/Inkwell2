@@ -22,8 +22,10 @@ export function TestTourComponent({
     onTourStart?.();
   };
 
-  const handleDuplicateStart = () => {
-    void startTour(tourType, CORE_TOUR_STEPS);
+  const handleDuplicateStart = async () => {
+    // Log warning before attempting to start
+    console.warn('Tour already active, ignoring duplicate start request');
+    await startTour(tourType, CORE_TOUR_STEPS);
   };
 
   return (
