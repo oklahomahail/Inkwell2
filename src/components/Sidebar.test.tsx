@@ -38,6 +38,7 @@ vi.mock('@/components/icons', () => ({
 // Keep focusHelper inert
 vi.mock('@/utils/focusUtils', () => ({
   focusWritingEditor: vi.fn(),
+  _focusWritingEditor: vi.fn(),
 }));
 
 // Mock UI context - passthrough actual so TestWrapper can provide UIContext
