@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+import { mockConnectivityService } from '../../test/mocks/mockConnectivityService';
 import { quotaAwareStorage } from '../../utils/quotaAwareStorage';
 import { connectivityService } from '../connectivityService';
 import { enhancedStorageService } from '../enhancedStorageService';
@@ -7,11 +8,7 @@ import { snapshotService } from '../snapshotService';
 
 // Mock dependencies
 vi.mock('../connectivityService', () => ({
-  connectivityService: {
-    getStatus: vi.fn(() => ({ isOnline: true })),
-    onStatusChange: vi.fn(() => () => {}),
-    queueWrite: vi.fn(async () => {}),
-  },
+  connectivityService: mockConnectivityService,
 }));
 
 vi.mock('../../utils/quotaAwareStorage', () => ({

@@ -1,6 +1,10 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { mockConnectivityService } from '../../test/mocks/mockConnectivityService';
 import { snapshotService } from '../snapshotService';
+
+// Mock services and storage
+vi.mock('../connectivityService', () => ({ connectivityService: mockConnectivityService }));
 
 // Mock localStorage
 const mockStorage: { [key: string]: string } = {};
