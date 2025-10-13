@@ -1,7 +1,7 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // We'll stub storageService that enhancedSearchService uses internally (must be mocked before importing service)
-vi.mock('./storageService', () => {
+vi.mock('./storageService', async () => {
   const chapters = [
     {
       id: 'ch-1',
@@ -52,7 +52,7 @@ vi.mock('./storageService', () => {
           contextLength: 'short',
         },
       }),
-      loadWritingChapters: vi.fn().mockResolvedValue(chapters),
+      loadWritingChapters: vi.fn(async () => chapters),
     },
   };
 });
@@ -84,6 +84,11 @@ describe('enhancedSearchService (main-thread fallback)', () => {
   beforeEach(async () => {
     // Re-init per test
     await enhancedSearchService.initializeProject(projectId);
+
+    // Debug log index contents
+    const index = (enhancedSearchService.engine as any).index;
+    const docs = index.get(projectId) || [];
+    console.log('Index contents for', projectId, ':', docs);
   });
 
   it('indexes chapters & scenes and returns scored results', async () => {
@@ -115,6 +120,65 @@ describe('enhancedSearchService (main-thread fallback)', () => {
     expect(stats).not.toBeNull();
     expect(stats!.totalDocuments).toBeGreaterThan(0);
     expect(typeof stats!.averageLatency).toBe('number');
+  });
+
+  it('handles empty/invalid search queries', async () => {
+    // Test undefined query
+    const resultsUndefined = await enhancedSearchService.search(undefined as any, { projectId });
+    expect(resultsUndefined).toHaveLength(0);
+
+    // Test empty string
+    const resultsEmpty = await enhancedSearchService.search('', { projectId });
+    expect(resultsEmpty).toHaveLength(0);
+
+    // Test whitespace only
+    const resultsWhitespace = await enhancedSearchService.search('   ', { projectId });
+    expect(resultsWhitespace).toHaveLength(0);
+  });
+
+  it('is resilient to repeated initialization', async () => {
+    // Calling initializeProject multiple times should not throw and should yield a stable count
+    const first = await enhancedSearchService.initializeProject(projectId);
+    const second = await enhancedSearchService.initializeProject(projectId);
+    expect(first.totalDocuments).toBeGreaterThanOrEqual(0);
+    expect(second.totalDocuments).toBe(first.totalDocuments);
+  });
+
+  it('handles partial document content', async () => {
+    // Initialize with a partial chapter (missing fields)
+    const partialChapter = {
+      id: 'partial-1',
+      scenes: [
+        {
+          id: 'scene-partial',
+          // Only has ID, missing title/content
+        },
+      ],
+    };
+
+    const storageWithPartial = {
+      loadProject: vi.fn().mockResolvedValue({
+        id: 'p-partial',
+        chapters: [partialChapter],
+      }),
+      loadWritingChapters: vi.fn().mockResolvedValue([partialChapter]),
+    };
+
+    // Temporarily replace storage
+    const original = (await import('./storageService')).storageService;
+    vi.doMock('./storageService', () => ({
+      storageService: storageWithPartial,
+    }));
+
+    // Test with partial content
+    const { enhancedSearchService: partialService } = await import('./enhancedSearchService');
+    const initResult = await partialService.initializeProject('p-partial');
+    expect(initResult.totalDocuments).toBeGreaterThan(0); // Should index IDs at minimum
+
+    // Reset mock
+    vi.doMock('./storageService', () => ({
+      storageService: original,
+    }));
   });
 
   it('getPerformanceMetrics() returns p50/p95/queries', () => {

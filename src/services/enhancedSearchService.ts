@@ -1,11 +1,34 @@
 // src/services/enhancedSearchService.ts
 
-import { enhancedStorageService as storageService, Project } from './enhancedStorageService';
+import { storageService as namedStorageService } from './storageService';
+import * as storageModule from './storageService';
 
 type IndexDoc = { id: string; text: string };
 type Metrics = { queries: number; durations: number[] };
 
 class MainThreadSearchEngine {
+  private resolveStorage() {
+    const mod: any = storageModule as any;
+    // Prefer direct named import if present (plays best with vi.mock)
+    if (namedStorageService && (namedStorageService as any).loadProject) {
+      return namedStorageService as any;
+    }
+    // Try common shapes created by mocks and module systems
+    // 1) Named export on module namespace: { storageService }
+    if (
+      mod.storageService &&
+      (mod.storageService.loadProject || mod.storageService.loadWritingChapters)
+    ) {
+      return mod.storageService;
+    }
+    // 2) Default export that contains storageService
+    if (mod.default && (mod.default.storageService || mod.default.loadProject)) {
+      return mod.default.storageService ?? mod.default;
+    }
+    // 3) Fallback to module itself if it has the methods
+    if (mod.loadProject || mod.loadWritingChapters) return mod;
+    throw new Error('storageService not available');
+  }
   private index: Map<string, IndexDoc[]> = new Map();
 
   constructor() {
@@ -20,42 +43,121 @@ class MainThreadSearchEngine {
   }
 
   async initializeProject(projectId: string): Promise<{ totalDocuments: number }> {
-    let project = await storageService.loadProject(projectId);
-    if (!project) {
+    const storage = this.resolveStorage();
+    if (process.env.NODE_ENV === 'test') {
+      try {
+        console.log('Resolved storage keys:', Object.keys(storage || {}));
+        // Also inspect module namespace for debugging
+        console.log('storageModule keys:', Object.keys(storageModule as any));
+        console.log(
+          'namedStorageService has loadWritingChapters:',
+          typeof (namedStorageService as any)?.loadWritingChapters,
+        );
+      } catch {}
+    }
+    // Load project metadata first
+    if (process.env.NODE_ENV === 'test') {
+      console.log('Loading project', projectId);
+    }
+    const project = await storage.loadProject(projectId as any);
+
+    // Determine which chapters to index
+    let chapList: any[] = project?.chapters ?? [];
+    if (process.env.NODE_ENV === 'test') {
+      console.log('Project chapters:', chapList);
+    }
+    if (typeof storage.loadWritingChapters === 'function') {
       if (process.env.NODE_ENV === 'test') {
-        // Provide a minimal shell so tests don’t fail hard
-        project = {
-          id: projectId,
-          title: 'Untitled',
-          name: 'Untitled',
-          chapters: [],
-          characters: [],
-          currentWordCount: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          version: '1.0.0',
-        } as Project;
-      } else {
-        throw new Error(`Project ${projectId} not found`);
+        console.log('Loading writing chapters (primary)...');
+      }
+      if (process.env.NODE_ENV === 'test') {
+        console.log('loadWritingChapters mock value:', storage.loadWritingChapters);
+      }
+      const maybeChapters: any = storage.loadWritingChapters(projectId);
+      if (process.env.NODE_ENV === 'test') {
+        console.log('maybeChapters value:', maybeChapters);
+      }
+      let loadedChapters: any =
+        maybeChapters && typeof maybeChapters.then === 'function'
+          ? await maybeChapters
+          : maybeChapters;
+      if (
+        (!Array.isArray(loadedChapters) || loadedChapters.length === 0) &&
+        (storageModule as any).storageService?.loadWritingChapters
+      ) {
+        if (process.env.NODE_ENV === 'test') {
+          console.log('Primary load returned empty, trying named export fallback...');
+        }
+        try {
+          loadedChapters = await (storageModule as any).storageService.loadWritingChapters(
+            projectId,
+          );
+        } catch (_err) {
+          // ignore
+        }
+      }
+      if (process.env.NODE_ENV === 'test') {
+        console.log('Loaded chapters (final):', loadedChapters);
+      }
+      if (Array.isArray(loadedChapters) && loadedChapters.length > 0) {
+        chapList = loadedChapters as any[];
       }
     }
 
     const docs: IndexDoc[] = [];
-    const push = (id: string, text: string) => docs.push({ id, text });
+    const push = (id: string, text: string) => docs.push({ id, text: text.toLowerCase() });
 
-    // Collect minimal text sources; tests don’t assert exact content, just that it runs.
-    push(
-      `${project.id}:meta`,
-      `${project.title ?? project.name ?? ''} ${project.description ?? ''}`,
-    );
-    (project.chapters ?? []).forEach((c: any, i: number) =>
-      push(`${project.id}:chapter:${i}`, JSON.stringify(c)),
-    );
-    (project.characters ?? []).forEach((c: any, i: number) =>
-      push(`${project.id}:character:${i}`, JSON.stringify(c)),
-    );
+    // Add project metadata if available
+    if (project) {
+      push(
+        `${project.id}:meta`,
+        `${project.title ?? project.name ?? ''} ${project.description ?? ''}`,
+      );
 
-    this.index.set(project.id, docs);
+      // Add character content for searching
+      const characters = project.characters || [];
+      for (const char of characters) {
+        if (!char || !char.id) continue;
+        const charText = [char.name || '', char.description || '', char.notes || '']
+          .join(' ')
+          .trim();
+        if (charText) push(char.id, charText);
+      }
+    }
+
+    // Process chapters and scenes
+    if (Array.isArray(chapList)) {
+      for (const chapter of chapList) {
+        // Skip invalid chapters
+        if (!chapter || !chapter.id) continue;
+
+        // Add chapter content if available
+        const chapterText = [
+          chapter.title || '',
+          chapter.content || chapter.text || '', // Handle both content and text fields
+        ]
+          .join(' ')
+          .trim();
+        if (chapterText) push(chapter.id, chapterText);
+
+        // Add scene content if available
+        if (Array.isArray(chapter.scenes)) {
+          for (const scene of chapter.scenes) {
+            if (!scene || !scene.id) continue;
+            const sceneText = [scene.title || '', scene.content || scene.text || '']
+              .join(' ')
+              .trim();
+            if (sceneText) push(scene.id, sceneText);
+          }
+        }
+      }
+    }
+
+    // Debug what we're indexing
+    if (process.env.NODE_ENV === 'test') {
+      console.log('Indexing for', projectId, ':', docs);
+    }
+    this.index.set(projectId, docs);
     return { totalDocuments: docs.length };
   }
 
@@ -75,14 +177,51 @@ class MainThreadSearchEngine {
   async search(
     projectId: string,
     query: string | undefined,
-  ): Promise<{ id: string; score: number }[]> {
+  ): Promise<{ id: string; score: number; excerpt?: string }[]> {
     const bucket = this.index.get(projectId) ?? [];
-    // Handle undefined query gracefully
     if (!query) return [];
-    const q = String(query).toLowerCase();
+
+    if (process.env.NODE_ENV === 'test') {
+      console.log('Search query:', query);
+      console.log('Searching bucket:', bucket);
+    }
+
+    // Normalize query
+    const q = String(query).toLowerCase().trim();
+    if (!q) return [];
+
+    // Split into terms for better matching
+    const terms = q.split(/\s+/);
+
     return bucket
-      .map((d) => ({ id: d.id, score: d.text.toLowerCase().includes(q) ? 1 : 0 }))
-      .filter((r) => r.score > 0);
+      .map((d) => {
+        let score = 0;
+        let matches = 0;
+        const text = d.text.toLowerCase();
+
+        // Score each term match
+        for (const term of terms) {
+          if (text.includes(term)) {
+            score += 1;
+            matches++;
+          }
+        }
+
+        if (score > 0) {
+          // Normalize score by number of terms
+          score = score / terms.length;
+          // Weight by match density
+          score *= Math.min(1, matches / Math.sqrt(text.length));
+
+          // Add excerpt for UI/testing
+          const excerpt = text.slice(0, 100);
+
+          return { id: d.id, score, excerpt };
+        }
+        return { id: d.id, score: 0 };
+      })
+      .filter((r) => r.score > 0)
+      .sort((a, b) => b.score - a.score);
   }
 }
 
@@ -149,10 +288,11 @@ const service = new EnhancedSearchService();
 // Export singleton instance with proper method bindings
 export const enhancedSearchService = {
   // Core functionality
-  search: async (text: string, opts: { projectId: string }) => {
-    const raw = await service.query(opts.projectId, text);
-    // Add excerpt field expected by tests
-    return raw.map((r: any) => ({ id: r.id, score: r.score, excerpt: '' }));
+  search: async (
+    text: string,
+    opts: { projectId: string; maxResults?: number; minScore?: number },
+  ) => {
+    return service.query(opts.projectId, text);
   },
   initializeProject: service.initializeProject.bind(service),
   // Support both 3-arg and 4-arg signatures: (projectId, docId, content) or (projectId, docId, title, content)
