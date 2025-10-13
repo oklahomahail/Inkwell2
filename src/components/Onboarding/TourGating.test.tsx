@@ -93,7 +93,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
 
       render(
         <TestTourWrapper>
-          <TestTourComponent onTourStart={onTourStart} />
+          <TestTourComponent onTourStart={onTourStart} tourType="feature-tour" />
         </TestTourWrapper>,
       );
 
@@ -122,7 +122,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       const onTourStart = vi.fn();
       render(
         <TestTourWrapper>
-          <TestTourComponent onTourStart={onTourStart} />
+          <TestTourComponent onTourStart={onTourStart} tourType="feature-tour" />
         </TestTourWrapper>,
       );
 
@@ -174,9 +174,11 @@ describe('Tour Gating + First-run Flow (A1)', () => {
     });
 
     it('should not show prompt if user said never show again', () => {
-      mockLocalStorage.store['inkwell-tour-progress-preferences'] = JSON.stringify({
-        neverShowAgain: true,
-      });
+      // Set preferences exactly as tourGating.ts reads them
+      window.localStorage.setItem(
+        'inkwell-tour-progress-preferences',
+        JSON.stringify({ neverShowAgain: true }),
+      );
 
       render(
         <ProfileProvider>
@@ -194,10 +196,11 @@ describe('Tour Gating + First-run Flow (A1)', () => {
     it('should not show prompt during remind me later period', () => {
       const futureTime = Date.now() + 24 * 60 * 60 * 1000; // 24 hours from now
 
-      mockLocalStorage.store['inkwell-tour-progress-preferences'] = JSON.stringify({
-        remindMeLater: true,
-        remindMeLaterUntil: futureTime,
-      });
+      // Set preferences exactly as tourGating.ts reads them
+      window.localStorage.setItem(
+        'inkwell-tour-progress-preferences',
+        JSON.stringify({ remindMeLater: true, remindMeLaterUntil: futureTime }),
+      );
 
       render(
         <ProfileProvider>

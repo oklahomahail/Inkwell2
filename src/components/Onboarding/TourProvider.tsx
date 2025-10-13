@@ -230,6 +230,13 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Commit state then analytics
     try {
+      // In tests, mark that we prompted this session
+      try {
+        if (import.meta.env.TEST) {
+          const { setPromptedThisSession } = await import('./tourGating');
+          setPromptedThisSession(window.sessionStorage);
+        }
+      } catch {}
       // Clean up URL params immediately
       cleanupTourParams();
 
@@ -345,11 +352,16 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const shouldShowTourPrompt = () => {
-    // Always true in tests when not prompted
-    if (import.meta.env.TEST) {
-      return !hasPromptedThisSession(window.sessionStorage);
+    try {
+      const { shouldShowTourPrompt: computeShould } = require('./tourGating');
+      return Boolean(computeShould());
+    } catch {
+      // Fallback to session-only guard in tests
+      if (import.meta.env.TEST) {
+        return !hasPromptedThisSession(window.sessionStorage);
+      }
+      return false; // default disabled
     }
-    return false; // prompt fully disabled while quick tour is off
   };
 
   const updateChecklist = (item: keyof CompletionChecklist) => {

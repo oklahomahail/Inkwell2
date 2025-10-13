@@ -10,14 +10,17 @@ interface TestTourComponentProps {
 /**
  * Component for testing tour functionality
  */
-export function TestTourComponent({ onTourStart }: TestTourComponentProps) {
+export function TestTourComponent({
+  onTourStart,
+  tourType = 'full-onboarding' as const,
+}: TestTourComponentProps & { tourType?: 'full-onboarding' | 'feature-tour' | 'contextual-help' }) {
   const { startTour, shouldShowTourPrompt, tourState } = useTour();
 
   return (
     <div>
       <button
         onClick={() => {
-          startTour('full-onboarding', CORE_TOUR_STEPS);
+          startTour(tourType, CORE_TOUR_STEPS);
           onTourStart?.();
         }}
         data-testid="start-tour"
@@ -25,7 +28,7 @@ export function TestTourComponent({ onTourStart }: TestTourComponentProps) {
         Start Tour
       </button>
       <button
-        onClick={() => startTour('full-onboarding', CORE_TOUR_STEPS)}
+        onClick={() => startTour(tourType, CORE_TOUR_STEPS)}
         data-testid="start-tour-duplicate"
       >
         Start Duplicate Tour
