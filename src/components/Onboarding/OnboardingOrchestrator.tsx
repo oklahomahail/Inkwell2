@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import analyticsService from '@/services/analyticsService';
 
 import { useTutorialStorage } from '../../services/tutorialStorage';
+import { useIsInRouter } from '../../utils/routerGuards';
 
 import { shouldShowTourPrompt as gatingShouldShow, setPromptedThisSession } from './tourGating';
 import TourOverlay from './TourOverlay';
@@ -28,7 +29,8 @@ import type { TourType } from './steps/Step.types';
  */
 
 export function OnboardingOrchestrator() {
-  const location = useLocation();
+  const inRouter = useIsInRouter();
+  const location = inRouter ? useLocation() : { pathname: window.location.pathname };
   const [open, setOpen] = useState(false);
   const [tourType, setTourType] = useState<TourType>('full-onboarding');
   const launchedThisSession = useRef(false);

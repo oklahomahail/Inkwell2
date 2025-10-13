@@ -63,6 +63,9 @@ const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 describe('Tour Gating + First-run Flow (A1)', () => {
   beforeEach(() => {
+    // Backup window.location
+    (window as any)._oldLocation = window.location;
+
     // Reset mocks
     mockLocalStorage.clear();
     mockSessionStorage.clear();
@@ -81,6 +84,10 @@ describe('Tour Gating + First-run Flow (A1)', () => {
     // Cleanup
     mockConsoleWarn.mockRestore();
     vi.restoreAllMocks();
+
+    // Reset window.location
+    delete (window as any).location;
+    window.location = (window as any)._oldLocation;
   });
 
   describe('Duplicate Tour Prevention', () => {
@@ -249,8 +256,25 @@ describe('Tour Gating + First-run Flow (A1)', () => {
     });
   });
 
+  // Mock useIsInRouter to return true
+  vi.mock('../../utils/routerGuards', () => ({
+    useIsInRouter: () => true,
+  }));
+
   describe('OnboardingOrchestrator Session Guards', () => {
     it('should prevent welcome modal from showing multiple times in same session', async () => {
+      // Mock window.location
+      Object.defineProperty(window, 'location', {
+        value: {
+          href: 'http://localhost/p/123/writing',
+          origin: 'http://localhost',
+          pathname: '/p/123/writing',
+          search: '',
+          hash: '',
+        },
+        writable: true,
+      });
+
       const TestComponent = () => (
         <MemoryRouter initialEntries={['/p/123/writing']}>
           <ProfileProvider>
