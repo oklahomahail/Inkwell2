@@ -16,21 +16,22 @@ export function TestTourComponent({
 }: TestTourComponentProps & { tourType?: 'full-onboarding' | 'feature-tour' | 'contextual-help' }) {
   const { startTour, shouldShowTourPrompt, tourState } = useTour();
 
+  // Create handlers to handle the async calls
+  const handleTourStart = async () => {
+    await startTour(tourType, CORE_TOUR_STEPS);
+    onTourStart?.();
+  };
+
+  const handleDuplicateStart = () => {
+    void startTour(tourType, CORE_TOUR_STEPS);
+  };
+
   return (
     <div>
-      <button
-        onClick={() => {
-          startTour(tourType, CORE_TOUR_STEPS);
-          onTourStart?.();
-        }}
-        data-testid="start-tour"
-      >
+      <button onClick={handleTourStart} data-testid="start-tour">
         Start Tour
       </button>
-      <button
-        onClick={() => startTour(tourType, CORE_TOUR_STEPS)}
-        data-testid="start-tour-duplicate"
-      >
+      <button onClick={handleDuplicateStart} data-testid="start-tour-duplicate">
         Start Duplicate Tour
       </button>
       <div data-testid="tour-active">{tourState.isActive ? 'active' : 'inactive'}</div>

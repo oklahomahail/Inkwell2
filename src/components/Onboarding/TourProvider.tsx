@@ -56,7 +56,7 @@ interface TourContextValue {
   tourState: TourState;
   preferences: TourPreferences;
   checklist: CompletionChecklist;
-  startTour: (type: TourState['tourType'], steps?: TourStep[]) => void;
+  startTour: (type: TourState['tourType'], steps?: TourStep[]) => Promise<void>;
   nextStep: () => void;
   previousStep: () => void;
   skipTour: () => void;
@@ -194,7 +194,7 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const startTour = (type: TourState['tourType'], steps?: TourStep[]) => {
+  const startTour = async (type: TourState['tourType'], steps?: TourStep[]) => {
     // Check route suppression
     const suppressedRoute = sessionStorage.getItem('inkwell:tour:suppress');
     if (suppressedRoute) {

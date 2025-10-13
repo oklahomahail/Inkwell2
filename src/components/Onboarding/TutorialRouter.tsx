@@ -46,7 +46,7 @@ function _TutorialPage() {
 
     // Start the tutorial if not already active
     if (!tourState.isActive) {
-      startTour(tourType, tourSteps);
+      void startTour(tourType, tourSteps);
     }
 
     // Navigate to specific step if provided
@@ -177,7 +177,7 @@ function _TutorialIndex() {
   const { active: activeProfile } = useProfile();
   const { startTour, setTourSteps, preferences } = useTour();
 
-  const handleStartTutorial = (slug: string) => {
+  const handleStartTutorial = async (slug: string) => {
     const tourSteps = TOUR_MAP[slug as keyof typeof TOUR_MAP];
     if (!tourSteps) return;
 
@@ -198,7 +198,7 @@ function _TutorialIndex() {
         tourType = 'contextual-help';
     }
 
-    startTour(tourType, tourSteps);
+    await startTour(tourType, tourSteps);
 
     // Navigate to the tutorial page
     window.location.href = `/p/${activeProfile?.id}/tutorials/${slug}`;
