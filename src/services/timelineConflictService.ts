@@ -1,11 +1,17 @@
-import type { TimelineItem } from '@/types/timeline';
-import type { Scene, Character } from '@/types/writing';
+import type { Character } from '../types/project';
+import type { TimelineItem } from '../types/timeline';
+import type { Scene } from '../types/writing';
 
-import { getCharacterBible } from './projectContextService';
+// TODO: Add implementation for getCharacterBible
+const getCharacterBible = (characterId: string) =>
+  Promise.resolve({ name: '', traits: [], data: {} });
 import { storageService } from './storageService';
 import { timelineService } from './timelineService';
 
-import type { CharacterTrait } from './projectContextService';
+interface CharacterTrait {
+  name: string;
+  value: number;
+}
 
 export interface TimelineConflict {
   id: string;

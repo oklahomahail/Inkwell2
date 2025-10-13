@@ -69,3 +69,7 @@ export function _approxWordCount(s: string | null | undefined): number {
   if (!s) return 0;
   return s.trim().split(/\s+/).filter(Boolean).length;
 }
+
+// Public API
+export const makeCorpus = _makeCorpus;
+export const approxWordCount = _approxWordCount;

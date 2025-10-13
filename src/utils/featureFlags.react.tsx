@@ -1,6 +1,8 @@
-import React from 'react';
+import * as React from 'react';
 
 import { FeatureFlagManager } from './FeatureFlagManager';
+
+import type { JSX } from 'react';
 
 const manager = FeatureFlagManager.getInstance();
 

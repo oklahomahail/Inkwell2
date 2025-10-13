@@ -2,6 +2,9 @@ import { BookOpen, Video, MessageSquare, Sparkles } from 'lucide-react';
 import React from 'react';
 
 import { TourController } from '../Onboarding/tour-core/TourController';
+
+// Re-export types if needed
+type TourId = 'feature-tour' | string;
 import { Button } from '../ui/Button';
 
 interface HelpMenuProps {

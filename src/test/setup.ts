@@ -80,6 +80,12 @@ vi.stubGlobal('BUILD_TIME', '2025-01-01T00:00:00Z');
 vi.stubGlobal('COMMIT_HASH', 'test-commit-hash');
 
 // Set up common test utilities
+declare global {
+  var sleep: (ms: number) => Promise<void>;
+  var mockDate: (isoDate: string) => Date;
+  var mockNow: () => number;
+}
+
 global.sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 global.mockDate = (isoDate: string) => {
   const date = new Date(isoDate);

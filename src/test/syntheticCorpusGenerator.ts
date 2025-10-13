@@ -1,6 +1,6 @@
 // src/test/syntheticCorpusGenerator.ts
-import type { Scene, Chapter } from '@/types/writing';
-import type { EnhancedProject, Character } from '@/types/project';
+import type { Scene, Chapter } from '../types/writing';
+import type { EnhancedProject, Character, ChapterStatus } from '../types/project';
 
 export interface CorpusSettings {
   targetWordCount: number; // 150,000 words
@@ -245,7 +245,7 @@ class SyntheticCorpusGenerator {
       );
 
       const scenes = this.generateScenes(scenesInChapter, chapterIndex, characters);
-      const chapterWordCount = scenes.reduce((sum, _scene) => sum + scene.wordCount, 0);
+      const chapterWordCount = scenes.reduce((sum, scene) => sum + scene.wordCount, 0);
 
       chapters.push({
         id: `chapter_${chapterIndex}`,
@@ -491,7 +491,7 @@ class SyntheticCorpusGenerator {
   }
 
   private pickWeighted<T>(options: Array<{ value: T; weight: number }>): T {
-    const totalWeight = options.reduce((sum, _opt) => sum + opt.weight, 0);
+    const totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
     let random = this.rng() * totalWeight;
 
     for (const option of options) {
@@ -524,33 +524,30 @@ class SyntheticCorpusGenerator {
     return result;
   }
 
-  private createProject(characters: Character[], chapters: Chapter[]): EnhancedProject {
-    const totalWords = chapters.reduce((sum, _ch) => sum + ch.totalWordCount, 0);
-
+  private createProject(characters: Character[], writingChapters: Chapter[]): EnhancedProject {
     // Convert writing.ts Chapter[] to project.ts Chapter[] format
-    const projectChapters = chapters.map((ch, _index) => ({
-      scenes: 'mixed_content_placeholder' as any, // This is the problematic any type you mentioned
+    const chapters = writingChapters.map((ch, _index) => ({
+      scenes: ch.scenes,
       id: ch.id,
-      _title: ch.title,
-      _summary: `Chapter ${index + 1} summary`,
-      _content: ch.scenes.map((s) => s.content).join('\n\n'),
+      title: ch.title,
+      summary: `Chapter ${_index + 1} summary`,
+      content: ch.scenes.map((s) => s.content).join('\n\n'),
       wordCount: ch.totalWordCount,
       targetWordCount: Math.round(ch.totalWordCount * 1.1),
-      status:
-        ch.status === 'complete'
-          ? ('completed' as const)
-          : ch.status === 'draft'
-            ? ('planned' as const)
-            : ch.status === 'in_progress'
-              ? ('in-progress' as const)
-              : ('planned' as const),
+      status: (ch.status === 'complete'
+        ? 'completed'
+        : ch.status === 'draft'
+          ? 'planned'
+          : 'in-progress') as ChapterStatus,
       order: ch.order,
-      charactersInChapter: characters.slice(0, 3).map((c) => c.id), // Sample characters
-      plotPointsResolved: [], // Empty for synthetic data
+      charactersInChapter: characters.slice(0, 3).map((c) => c.id),
+      plotPointsResolved: [] as string[],
       notes: '',
       createdAt: ch.createdAt.getTime(),
       updatedAt: ch.updatedAt.getTime(),
     }));
+
+    const totalWords = chapters.reduce((sum, ch) => sum + ch.wordCount, 0);
 
     // Safe access to first chapter/scene with fallback
     const firstChapter = chapters.length > 0 ? chapters[0] : null;
@@ -569,7 +566,7 @@ class SyntheticCorpusGenerator {
       characters,
       plotNotes: [],
       worldBuilding: [],
-      chapters: projectChapters,
+      chapters,
       recentContent,
       createdAt: Date.now() - 90 * 24 * 60 * 60 * 1000,
       updatedAt: Date.now(),
@@ -587,8 +584,8 @@ class SyntheticCorpusGenerator {
   }
 
   private calculateStats(chapters: Chapter[]) {
-    const totalScenes = chapters.reduce((sum, _ch) => sum + ch.scenes.length, 0);
-    const totalWords = chapters.reduce((sum, _ch) => sum + ch.totalWordCount, 0);
+    const totalScenes = chapters.reduce((sum, ch) => sum + ch.scenes.length, 0);
+    const totalWords = chapters.reduce((sum, ch) => sum + ch.totalWordCount, 0);
 
     return {
       totalWords,
@@ -718,9 +715,10 @@ class SyntheticCorpusGenerator {
   }
 }
 
-// Export the generator class and a convenience function
+// Export the generator class and convenience functions
 export { SyntheticCorpusGenerator };
 
+// Internal implementation
 export function _generateSyntheticCorpus(settings: Partial<CorpusSettings> = {}): GeneratedCorpus {
   const defaultSettings: CorpusSettings = {
     targetWordCount: 150000,
@@ -733,3 +731,6 @@ export function _generateSyntheticCorpus(settings: Partial<CorpusSettings> = {})
   const generator = new SyntheticCorpusGenerator({ ...defaultSettings, ...settings });
   return generator.generate();
 }
+
+// Public API
+export const generateSyntheticCorpus = _generateSyntheticCorpus;

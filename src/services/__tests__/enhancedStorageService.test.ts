@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { mockConnectivityService } from '../../test/mocks/mockConnectivityService';
+import { mockConnectivityService, resetMocks } from '../../test/mocks/mockConnectivityService';
 import { quotaAwareStorage } from '../../utils/quotaAwareStorage';
 import { connectivityService } from '../connectivityService';
 import { enhancedStorageService } from '../enhancedStorageService';
 import { snapshotService } from '../snapshotService';
 
-// Mock dependencies
-vi.mock('../connectivityService', () => ({
+// Mock dependencies - keeping consistent mock setup
+vi.mock('../connectivityService', async () => ({
   connectivityService: mockConnectivityService,
 }));
 
@@ -33,6 +33,7 @@ describe('EnhancedStorageService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    resetMocks(); // Reset the mock connectivity service first
 
     // Default mock implementations
     (quotaAwareStorage.safeGetItem as any).mockImplementation((key: string) => {
@@ -51,7 +52,7 @@ describe('EnhancedStorageService', () => {
       snapshotCount: 0,
       totalSize: 0,
     });
-    (connectivityService.getStatus as any).mockReturnValue({ isOnline: true });
+    mockConnectivityService.getStatus.mockReturnValue({ isOnline: true });
 
     // Initialize service
     enhancedStorageService.init();

@@ -3,7 +3,30 @@ import type { EnhancedProject } from '@/types/project';
 import type { Chapter } from '@/types/writing';
 
 import claudeService from './claudeService';
-import { enhancedSearchService, SearchResult, SearchOptions } from './enhancedSearchService';
+import { enhancedSearchService } from './enhancedSearchService';
+
+import type { BaseSearchResult, BaseSearchOptions } from '../types/search';
+
+// Base search types
+export interface SearchResult extends BaseSearchResult {
+  id: string;
+  type: 'scene' | 'chapter' | 'character' | 'plot';
+  title: string;
+  content: string;
+  excerpt: string;
+  score: number;
+  metadata?: {
+    lastModified?: string;
+    wordCount?: number;
+  };
+}
+
+export interface SearchOptions extends BaseSearchOptions {
+  projectId?: string;
+  maxResults?: number;
+  minScore?: number;
+  types?: string[];
+}
 
 // Enhanced search types
 export interface SmartSearchOptions extends SearchOptions {

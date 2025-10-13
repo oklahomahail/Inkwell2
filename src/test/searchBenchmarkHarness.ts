@@ -97,8 +97,11 @@ class SearchBenchmarkHarness {
       type: 'character-name',
       weight: 0.25,
       generator: (_corpus) => {
+        if (!this.corpus) {
+          return [];
+        }
         const names: string[] = [];
-        corpus.characters.forEach((c) => {
+        this.corpus.characters.forEach((c) => {
           if (c.name && c.name.trim()) {
             names.push(c.name.trim());
             const firstName = c.name.split(' ')[0];
@@ -316,7 +319,7 @@ class SearchBenchmarkHarness {
   ): BenchmarkResult {
     const successfulResults = results.filter((r) => r.success);
     const latencies = successfulResults.map((r) => r.latency);
-    latencies.sort((a, _b) => a - b);
+    latencies.sort((a, b) => a - b);
 
     // Calculate percentiles
     const p50 = this.percentile(latencies, 0.5);
@@ -335,14 +338,14 @@ class SearchBenchmarkHarness {
       const typeResults = successfulResults.filter((r) => r.type === type);
       if (typeResults.length > 0) {
         const typeLatencies = typeResults.map((r) => r.latency);
-        typeLatencies.sort((a, _b) => a - b);
+        typeLatencies.sort((a, b) => a - b);
 
         detailsByQueryType[type] = {
           count: typeResults.length,
           p50: this.percentile(typeLatencies, 0.5),
           p95: this.percentile(typeLatencies, 0.95),
           averageResults:
-            typeResults.reduce((sum, _r) => sum + r.resultCount, 0) / typeResults.length,
+            typeResults.reduce((sum, r) => sum + r.resultCount, 0) / typeResults.length,
         };
       }
     }

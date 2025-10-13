@@ -15,7 +15,7 @@ interface ExportReadyBadgeProps {
 }
 
 // Mock function to check export readiness - would integrate with actual project data
-const checkExportReadiness = (projectId: string): ExportReadinessCheck => {
+const checkExportReadiness = (_projectId: string): ExportReadinessCheck => {
   // This would integrate with your actual project state management
   // For now, returning mock data
   const mockProject = {

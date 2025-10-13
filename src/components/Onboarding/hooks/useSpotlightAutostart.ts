@@ -2,8 +2,12 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { startTour, isTourRunning } from './TourController';
-import { getTourProgress, resetProgress, markTourLaunched } from './useTutorialStorage';
+import {
+  getTourProgress,
+  resetProgress,
+  markTourLaunched,
+} from '../../../services/tutorialStorage';
+import { startTour, isTourRunning } from '../tour-core/TourController';
 
 const FEATURE_TOUR_ID = 'feature-tour';
 const DASHBOARD_PATH = '/profiles';

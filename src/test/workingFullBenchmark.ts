@@ -3,7 +3,7 @@ import { generateSyntheticCorpus } from './syntheticCorpusGenerator';
 import { searchService } from '@/services/searchService';
 import { storageService } from '@/services/storageService';
 
-async function _workingFullBenchmark() {
+async function workingFullBenchmark() {
   try {
     console.log('Generating larger corpus...');
 
@@ -48,7 +48,7 @@ async function _workingFullBenchmark() {
         console.log(`"${query}": ${latency.toFixed(1)}ms, ${results.length} results`);
       }
 
-      latencies.sort((a, _b) => a - b);
+      latencies.sort((a, b) => a - b);
       const p50 = latencies[Math.floor(latencies.length * 0.5)] || 0;
       const p95 = latencies[Math.floor(latencies.length * 0.95)] || 0;
 

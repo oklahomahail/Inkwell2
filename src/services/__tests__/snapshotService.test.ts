@@ -1,10 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { mockConnectivityService } from '../../test/mocks/mockConnectivityService';
+import { mockConnectivityService, resetMocks } from '../../test/mocks/mockConnectivityService';
 import { snapshotService } from '../snapshotService';
 
 // Mock services and storage
-vi.mock('../connectivityService', () => ({ connectivityService: mockConnectivityService }));
+vi.mock('../connectivityService', async () => ({
+  connectivityService: mockConnectivityService,
+}));
+
+beforeEach(() => {
+  resetMocks(); // Reset mock connectivity service
+  vi.clearAllMocks();
+  localStorageMock.clear();
+
+  console.log = vi.fn();
+  console.error = vi.fn();
+  console.warn = vi.fn();
+
+  // Reset Date.now to return a fixed timestamp
+  vi.setSystemTime(new Date('2025-01-01'));
+});
 
 // Mock localStorage
 const mockStorage: { [key: string]: string } = {};
@@ -24,17 +39,8 @@ const localStorageMock = {
 };
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
-// Mock console methods
-const originalConsole = { ...console };
-beforeEach(() => {
-  console.log = vi.fn();
-  console.error = vi.fn();
-  console.warn = vi.fn();
-});
 afterEach(() => {
-  console.log = originalConsole.log;
-  console.error = originalConsole.error;
-  console.warn = originalConsole.warn;
+  vi.useRealTimers();
 });
 
 describe('SnapshotService', () => {

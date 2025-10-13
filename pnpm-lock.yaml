@@ -150,10 +150,10 @@ importers:
         specifier: ^24.3.0
         version: 24.7.2
       '@types/react':
-        specifier: ^19.0.0
+        specifier: ^19.2.2
         version: 19.2.2
       '@types/react-dom':
-        specifier: ^19.0.0
+        specifier: ^19.2.1
         version: 19.2.1(@types/react@19.2.2)
       '@types/react-router-dom':
         specifier: ^5.3.3

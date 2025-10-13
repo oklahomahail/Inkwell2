@@ -1,6 +1,6 @@
 import { SearchBenchmarkHarness } from './searchBenchmarkHarness';
 
-async function _simpleBenchmark() {
+async function simpleBenchmark() {
   try {
     console.log('Creating benchmark harness...');
     const harness = new SearchBenchmarkHarness();

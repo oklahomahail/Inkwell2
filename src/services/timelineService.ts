@@ -17,10 +17,7 @@ export interface TimelineExportData {
 export interface TimelineImportResult {
   importedItems: number;
   skippedItems: number;
-  conflicts: Array<{
-    itemId: string;
-    reason: string;
-  }>;
+  conflicts: Array<{ itemId: string; reason: string }>;
 }
 
 export interface TimelineAnalytics {
@@ -33,70 +30,87 @@ export interface TimelineAnalytics {
   consistencyScore: number;
 }
 
+/** conditional spread helper */
+const cond = <T extends object>(flag: any, obj: T) =>
+  flag !== undefined && flag !== null ? obj : {};
+
+/** Filter items that overlap a given range */
 export function _within(items: TimelineItem[], range: TimelineRange): TimelineItem[] {
   return items.filter((item) => {
-    const itemEnd = item.end ?? item.start;
+    const itemEnd = typeof item.end === 'number' ? item.end : item.start;
     return item.start <= range.end && itemEnd >= range.start;
   });
+}
+
+type StorageLike = {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+};
+
+const mem = new Map<string, string>();
+const memoryStorage: StorageLike = {
+  getItem: (k) => (mem.has(k) ? mem.get(k)! : null),
+  setItem: (k, v) => void mem.set(k, v),
+  removeItem: (k) => void mem.delete(k),
+};
+
+function safeStorage(): StorageLike {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) return window.localStorage;
+  } catch {}
+  return memoryStorage;
 }
 
 class TimelineService {
   private readonly STORAGE_VERSION = '1.0';
   private readonly STORAGE_PREFIX = 'timeline_';
 
-  /** Get timeline items for a specific project using localStorage */
+  private get storage(): StorageLike {
+    return safeStorage();
+  }
+
   async getProjectTimeline(projectId: string): Promise<TimelineItem[]> {
     try {
-      const storageKey = this.getStorageKey(projectId);
-      const stored = localStorage.getItem(storageKey);
+      const stored = this.storage.getItem(this.getStorageKey(projectId));
       const data = stored ? JSON.parse(stored) : null;
-
-      if (!data) return [];
-
-      // Deserialize dates
+      if (!Array.isArray(data)) return [];
       return data.map((item: any) => ({
         ...item,
-        createdAt: new Date(item.createdAt),
-        updatedAt: new Date(item.updatedAt),
-      }));
-    } catch (error) {
-      console.error('Failed to load timeline:', error);
+        createdAt: item?.createdAt ? new Date(item.createdAt) : new Date(),
+        updatedAt: item?.updatedAt ? new Date(item.updatedAt) : new Date(),
+      })) as TimelineItem[];
+    } catch (e) {
+      console.error('Failed to load timeline:', e);
       return [];
     }
   }
 
-  /** Save timeline items for a project using localStorage */
   async saveProjectTimeline(projectId: string, items: TimelineItem[]): Promise<void> {
     try {
-      const storageKey = this.getStorageKey(projectId);
-      localStorage.setItem(storageKey, JSON.stringify(items));
-
+      this.storage.setItem(this.getStorageKey(projectId), JSON.stringify(items));
       this.trackEvent('timeline_saved', {
         projectId,
         itemCount: items.length,
         timestamp: Date.now(),
       });
-    } catch (error) {
-      console.error('Failed to save timeline:', error);
-      throw error;
+    } catch (e) {
+      console.error('Failed to save timeline:', e);
+      throw e;
     }
   }
 
-  /** Generate timeline items from Story Architect outline */
   generateTimelineFromOutline(outline: GeneratedOutline, _projectId: string): TimelineItem[] {
     const items: TimelineItem[] = [];
     let orderIndex = 1;
 
-    // Story start
+    // Story start (omit optional keys instead of writing undefined)
     items.push({
       id: `item_story_start_${Date.now()}`,
       title: `${outline.title} - Story Begins`,
-      description: outline.summary,
+      description: outline.summary ?? '',
       start: orderIndex++,
-      end: undefined,
       characterIds: [],
-      pov: undefined,
-      location: undefined,
       tags: ['story-start', 'generated'],
       importance: 'major',
       eventType: 'plot',
@@ -104,41 +118,43 @@ class TimelineService {
       updatedAt: new Date(),
     });
 
-    // Chapters & scenes
-    outline.chapters.forEach((chapter, _chapterIndex) => {
+    (outline.chapters ?? []).forEach((chapter, chapterIndex) => {
+      const sceneCount = chapter.scenes?.length ?? 0;
       const chapterStart = orderIndex++;
-      const chapterEnd = chapterStart + (chapter.scenes?.length || 0);
+      const chapterEnd = chapterStart + sceneCount;
 
       items.push({
         id: `item_chapter_${chapterIndex}_${Date.now()}`,
-        title: chapter.title,
-        description: `${chapter.plotFunction}: ${chapter.summary}`,
+        title: chapter.title ?? `Chapter ${chapterIndex + 1}`,
+        description: `${chapter.plotFunction ?? 'Chapter'}: ${chapter.summary ?? ''}`,
         start: chapterStart,
-        end: chapterEnd,
+        ...cond(sceneCount, { end: chapterEnd }),
         characterIds: [],
-        pov: undefined,
-        location: undefined,
-        tags: ['chapter', 'generated', chapter.plotFunction.toLowerCase().replace(/\s+/g, '-')],
-        importance: this.getChapterImportance(chapter.plotFunction),
+        tags: [
+          'chapter',
+          'generated',
+          ...(chapter.plotFunction
+            ? [chapter.plotFunction.toLowerCase().replace(/\s+/g, '-')]
+            : []),
+        ],
+        importance: this.getChapterImportance(chapter.plotFunction ?? ''),
         eventType: 'plot',
         chapterId: `chapter_${chapterIndex}`,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
 
-      chapter.scenes?.forEach((scene, _sceneIndex) => {
-        const sceneCharacters = scene.characters || [];
-        const povCharacter = sceneCharacters[0];
+      (chapter.scenes ?? []).forEach((scene, sceneIndex) => {
+        const sceneChars = (scene as any)?.characters ?? [];
+        const pov = sceneChars[0] as string | undefined;
 
         items.push({
           id: `item_scene_${chapterIndex}_${sceneIndex}_${Date.now()}`,
-          title: scene.title,
-          description: `${scene.purpose}\n\nConflict: ${scene.conflict}`,
+          title: scene.title ?? `Scene ${sceneIndex + 1}`,
+          description: `${scene.purpose ?? ''}\n\nConflict: ${scene.conflict ?? ''}`,
           start: orderIndex++,
-          end: undefined,
-          characterIds: sceneCharacters,
-          pov: povCharacter,
-          location: undefined,
+          characterIds: sceneChars,
+          ...cond(pov, { pov }),
           tags: ['scene', 'generated'],
           importance: 'minor',
           eventType: 'plot',
@@ -150,99 +166,89 @@ class TimelineService {
       });
     });
 
-    // Character arcs
-    outline.characters?.forEach((character, _charIndex) => {
-      if (character.arc) {
-        const arcStart = Math.floor(outline.chapters.length / 3) + 1;
-        const arcEnd = Math.floor((outline.chapters.length * 2) / 3) + 1;
+    (outline.characters ?? []).forEach((character, charIndex) => {
+      if (!character.arc) return;
+      const totalChapters = outline.chapters?.length ?? 0;
+      const arcStart = Math.floor(totalChapters / 3) + 1;
+      const arcEnd = Math.floor((totalChapters * 2) / 3) + 1;
 
-        items.push({
-          id: `item_character_arc_${charIndex}_${Date.now()}`,
-          title: `${character.name}'s Transformation`,
-          description: character.arc,
-          start: arcStart,
-          end: arcEnd,
-          characterIds: [character.name],
-          pov: character.name,
-          location: undefined,
-          tags: ['character-arc', 'generated'],
-          importance: character.role === 'protagonist' ? 'major' : 'minor',
-          eventType: 'character',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-      }
+      items.push({
+        id: `item_character_arc_${charIndex}_${Date.now()}`,
+        title: `${character.name}'s Transformation`,
+        description: character.arc,
+        start: arcStart,
+        end: arcEnd,
+        characterIds: [character.name],
+        pov: character.name,
+        tags: ['character-arc', 'generated'],
+        importance: character.role === 'protagonist' ? 'major' : 'minor',
+        eventType: 'character',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
     });
 
-    return items.sort((a, _b) => a.start - b.start);
+    return items.sort((a, b) => a.start - b.start);
   }
 
-  /** Merge items from existing project chapters */
   async syncWithProjectChapters(projectId: string, project: EnhancedProject): Promise<void> {
-    const existingItems = await this.getProjectTimeline(projectId);
+    const existing = await this.getProjectTimeline(projectId);
     const newItems: TimelineItem[] = [];
-    let orderIndex = existingItems.length + 1;
+    let orderIndex = existing.length + 1;
 
-    project.chapters.forEach((chapter, _chapterIndex) => {
-      const chapterExists = existingItems.some(
-        (item) => item.chapterId === chapter.id || item.title.includes(chapter.title),
+    (project.chapters ?? []).forEach((chapter, chapterIndex) => {
+      const chapterExists = existing.some(
+        (i) => i.chapterId === chapter.id || i.title.includes(chapter.title ?? ''),
       );
+      if (chapterExists) return;
 
-      if (!chapterExists) {
-        const chapterStart = chapter.order || orderIndex++;
-        const chapterEnd = chapterStart + (chapter.scenes?.length || 0);
+      const chapterStart = (chapter as any).order ?? orderIndex++;
+      const sceneCount = chapter.scenes?.length ?? 0;
+      const chapterEnd = chapterStart + sceneCount;
 
+      newItems.push({
+        id: `item_sync_chapter_${chapterIndex}_${Date.now()}`,
+        title: chapter.title ?? `Chapter ${chapterIndex + 1}`,
+        description: chapter.summary || 'Chapter content',
+        start: chapterStart,
+        ...cond(sceneCount, { end: chapterEnd }),
+        characterIds: (chapter as any).charactersInChapter ?? [],
+        tags: ['chapter', 'synced'],
+        importance: 'major',
+        eventType: 'plot',
+        chapterId: chapter.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      (chapter.scenes ?? []).forEach((scene: any, sceneIndex: number) => {
+        const preview =
+          typeof scene?.content === 'string' ? `${scene.content.substring(0, 200)}...` : '';
         newItems.push({
-          id: `item_sync_chapter_${chapterIndex}_${Date.now()}`,
-          title: chapter.title,
-          description: chapter.summary || 'Chapter content',
-          start: chapterStart,
-          end: chapterEnd,
-          characterIds: chapter.charactersInChapter || [],
-          pov: undefined,
-          location: undefined,
-          tags: ['chapter', 'synced'],
-          importance: 'major',
+          id: `item_sync_scene_${chapterIndex}_${sceneIndex}_${Date.now()}`,
+          title: scene?.title ?? `Scene ${sceneIndex + 1}`,
+          description: scene?.summary || preview,
+          start: orderIndex++,
+          characterIds: [],
+          tags: ['scene', 'synced'],
+          importance: 'minor',
           eventType: 'plot',
           chapterId: chapter.id,
+          ...cond(scene?.id, { sceneId: scene.id }),
           createdAt: new Date(),
           updatedAt: new Date(),
         });
-
-        if (chapter.scenes && Array.isArray(chapter.scenes)) {
-          chapter.scenes.forEach((scene: any, _sceneIndex) => {
-            newItems.push({
-              id: `item_sync_scene_${chapterIndex}_${sceneIndex}_${Date.now()}`,
-              title: scene.title || `Scene ${sceneIndex + 1}`,
-              description: scene.summary || scene.content?.substring(0, 200) + '...' || '',
-              start: orderIndex++,
-              end: undefined,
-              characterIds: [],
-              pov: undefined,
-              location: undefined,
-              tags: ['scene', 'synced'],
-              importance: 'minor',
-              eventType: 'plot',
-              chapterId: chapter.id,
-              sceneId: scene.id,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            });
-          });
-        }
-      }
+      });
     });
 
-    if (newItems.length > 0) {
-      const allItems = [...existingItems, ...newItems].sort((a, _b) => a.start - b.start);
-      await this.saveProjectTimeline(projectId, allItems);
+    if (newItems.length) {
+      const all = [...existing, ...newItems].sort((a, b) => a.start - b.start);
+      await this.saveProjectTimeline(projectId, all);
     }
   }
 
-  /** Export timeline to various formats */
   async exportTimeline(projectId: string, projectName: string): Promise<TimelineExportData> {
     const items = await this.getProjectTimeline(projectId);
-
     return {
       items,
       metadata: {
@@ -254,52 +260,41 @@ class TimelineService {
     };
   }
 
-  /** Import timeline from export data */
   async importTimeline(projectId: string, data: TimelineExportData): Promise<TimelineImportResult> {
-    const existingItems = await this.getProjectTimeline(projectId);
-    const result: TimelineImportResult = {
-      importedItems: 0,
-      skippedItems: 0,
-      conflicts: [],
-    };
+    const existing = await this.getProjectTimeline(projectId);
+    const result: TimelineImportResult = { importedItems: 0, skippedItems: 0, conflicts: [] };
+    const toImport: TimelineItem[] = [];
 
-    const itemsToImport: TimelineItem[] = [];
-
-    data.items.forEach((item) => {
-      const existingItem = existingItems.find(
-        (i) => i.title === item.title && i.start === item.start,
-      );
-
-      if (existingItem) {
+    (data.items ?? []).forEach((item) => {
+      const dup = existing.find((i) => i.title === item.title && i.start === item.start);
+      if (dup) {
         result.skippedItems++;
         result.conflicts.push({
           itemId: item.id,
           reason: 'Item with same title and start time already exists',
         });
-      } else {
-        itemsToImport.push({
-          ...item,
-          id: `imported_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-        result.importedItems++;
+        return;
       }
+      toImport.push({
+        ...item,
+        id: `imported_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      result.importedItems++;
     });
 
-    if (itemsToImport.length > 0) {
-      const allItems = [...existingItems, ...itemsToImport].sort((a, _b) => a.start - b.start);
-      await this.saveProjectTimeline(projectId, allItems);
+    if (toImport.length) {
+      const all = [...existing, ...toImport].sort((a, b) => a.start - b.start);
+      await this.saveProjectTimeline(projectId, all);
     }
 
     return result;
   }
 
-  /** Analyze timeline for insights and consistency */
   async analyzeTimeline(projectId: string): Promise<TimelineAnalytics> {
     const items = await this.getProjectTimeline(projectId);
-
-    if (items.length === 0) {
+    if (!items.length) {
       return {
         itemCount: 0,
         povCharacters: [],
@@ -311,53 +306,43 @@ class TimelineService {
       };
     }
 
-    // Distinct POV characters
-    const povCharacters = items
-      .map((i) => i.pov)
-      .filter((pov): pov is string => pov !== undefined && pov !== null)
-      .filter((pov, _index, _arr) => arr.indexOf(pov) === index);
+    const povCharacters = Array.from(
+      new Set(items.map((i) => i.pov).filter((p): p is string => typeof p === 'string' && p)),
+    );
 
-    // Aggregations
     const itemsByImportance = items.reduce(
-      (acc, _item) => {
-        acc[item.importance] = (acc[item.importance] || 0) + 1;
+      (acc, item) => {
+        const k = item.importance ?? 'unknown';
+        acc[k] = (acc[k] ?? 0) + 1;
         return acc;
       },
       {} as Record<string, number>,
     );
 
     const itemsByType = items.reduce(
-      (acc, _item) => {
-        acc[item.eventType] = (acc[item.eventType] || 0) + 1;
+      (acc, item) => {
+        const k = item.eventType ?? 'unknown';
+        acc[k] = (acc[k] ?? 0) + 1;
         return acc;
       },
       {} as Record<string, number>,
     );
 
-    // Time span calculation (robust: filter to numbers)
-    const startTimes = items
+    const starts = items
       .map((i) => i.start)
       .filter((n): n is number => typeof n === 'number')
-      .sort((a, _b) => a - b);
-
-    const endTimes = items
-      .map((i) => i.end ?? i.start)
+      .sort((a, b) => a - b);
+    const ends = items
+      .map((i) => (typeof i.end === 'number' ? i.end : i.start))
       .filter((n): n is number => typeof n === 'number')
-      .sort((a, _b) => a - b);
+      .sort((a, b) => a - b);
 
-    let timeSpan: TimelineRange | null = null;
-    if (startTimes.length > 0 && endTimes.length > 0) {
-      timeSpan = {
-        start: startTimes[0] ?? 0,
-        end: endTimes[endTimes.length - 1] ?? 0,
-      };
-    }
+    const timeSpan =
+      starts.length && ends.length ? { start: starts[0], end: ends[ends.length - 1] } : null;
 
-    // Chapter analysis
-    const chapterItems = items.filter((i) => Array.isArray(i.tags) && i.tags.includes('chapter'));
-    const averageItemsPerChapter = chapterItems.length > 0 ? items.length / chapterItems.length : 0;
+    const chapterItems = items.filter((i) => (i.tags ?? []).includes('chapter'));
+    const averageItemsPerChapter = chapterItems.length ? items.length / chapterItems.length : 0;
 
-    // Consistency score (simplified)
     const issues = this.checkConsistencyIssues(items);
     const consistencyScore = Math.max(0, 100 - issues.length * 5);
 
@@ -372,107 +357,89 @@ class TimelineService {
     };
   }
 
-  /** Delete all timeline data for a project */
   async deleteProjectTimeline(projectId: string): Promise<void> {
     try {
-      const storageKey = this.getStorageKey(projectId);
-      localStorage.removeItem(storageKey);
-
-      this.trackEvent('timeline_deleted', {
-        projectId,
-        timestamp: Date.now(),
-      });
-    } catch (error) {
-      console.error('Failed to delete timeline:', error);
-      throw error;
+      this.storage.removeItem(this.getStorageKey(projectId));
+      this.trackEvent('timeline_deleted', { projectId, timestamp: Date.now() });
+    } catch (e) {
+      console.error('Failed to delete timeline:', e);
+      throw e;
     }
   }
 
-  /** Backup timeline data */
   async backupTimeline(projectId: string): Promise<void> {
     try {
       const items = await this.getProjectTimeline(projectId);
-      const backup = {
-        items,
-        timestamp: Date.now(),
-        version: this.STORAGE_VERSION,
-      };
-
-      const backupKey = `${this.getStorageKey(projectId)}_backup`;
-      localStorage.setItem(backupKey, JSON.stringify(backup));
-    } catch (error) {
-      console.error('Timeline backup failed:', error);
+      const backup = { items, timestamp: Date.now(), version: this.STORAGE_VERSION };
+      this.storage.setItem(`${this.getStorageKey(projectId)}_backup`, JSON.stringify(backup));
+    } catch (e) {
+      console.error('Timeline backup failed:', e);
     }
   }
 
-  /** Restore timeline from backup */
   async restoreFromBackup(projectId: string): Promise<boolean> {
     try {
-      const backupKey = `${this.getStorageKey(projectId)}_backup`;
-      const stored = localStorage.getItem(backupKey);
-      const backup = stored ? JSON.parse(stored) : null;
+      const raw = this.storage.getItem(`${this.getStorageKey(projectId)}_backup`);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (!parsed?.items) return false;
 
-      if (!backup || !backup.items) return false;
-
-      const items = backup.items.map((item: any) => ({
+      const items = (parsed.items as any[]).map((item) => ({
         ...item,
-        createdAt: new Date(item.createdAt),
-        updatedAt: new Date(item.updatedAt),
-      }));
+        createdAt: item?.createdAt ? new Date(item.createdAt) : new Date(),
+        updatedAt: item?.updatedAt ? new Date(item.updatedAt) : new Date(),
+      })) as TimelineItem[];
 
       await this.saveProjectTimeline(projectId, items);
       return true;
-    } catch (error) {
-      console.error('Timeline restore failed:', error);
+    } catch (e) {
+      console.error('Timeline restore failed:', e);
       return false;
     }
   }
 
-  /** Track analytics events (with fallback if analytics service unavailable) */
-  private trackEvent(eventName: string, data: any): void {
+  private trackEvent(event: string, data: any) {
     try {
       if (typeof window !== 'undefined' && (window as any).analyticsService) {
-        (window as any).analyticsService.track(eventName, data);
+        (window as any).analyticsService.track(event, data);
       } else {
-        console.log(`Analytics: ${eventName}`, data);
+        console.log(`Analytics: ${event}`, data);
       }
-    } catch (error) {
-      console.debug('Analytics tracking failed:', error);
+    } catch (e) {
+      console.debug('Analytics tracking failed:', e);
     }
   }
 
-  /** Get timeline items that conflict with each other */
   private checkConsistencyIssues(items: TimelineItem[]): Array<{ itemId: string; issue: string }> {
     const issues: Array<{ itemId: string; issue: string }> = [];
 
     items.forEach((item) => {
-      // Missing titles
       if (!item.title || !item.title.trim()) {
         issues.push({ itemId: item.id, issue: 'Missing item title' });
       }
 
-      // POV consistency
-      if (item.pov && !item.characterIds.includes(item.pov)) {
+      const chars = item.characterIds ?? [];
+      if (item.pov && !chars.includes(item.pov)) {
         issues.push({ itemId: item.id, issue: 'POV character not in character list' });
       }
 
-      // Overlaps for same POV
-      const conflicts = items.filter(
-        (i) =>
-          i.id !== item.id &&
-          i.pov === item.pov &&
-          item.pov &&
-          this.rangesOverlap(
-            { start: item.start, end: item.end ?? item.start },
-            { start: i.start, end: i.end ?? i.start },
-          ),
-      );
-      if (conflicts.length > 0) {
+      const conflicts = items.filter((i) => {
+        if (i.id === item.id) return false;
+        if (!item.pov || i.pov !== item.pov) return false;
+        const a: TimelineRange = {
+          start: item.start,
+          end: typeof item.end === 'number' ? item.end : item.start,
+        };
+        const b: TimelineRange = {
+          start: i.start,
+          end: typeof i.end === 'number' ? i.end : i.start,
+        };
+        return this.rangesOverlap(a, b);
+      });
+      if (conflicts.length) {
         issues.push({ itemId: item.id, issue: 'Timeline conflict with another item' });
       }
 
-      // Invalid ranges
-      if (item.end && item.end < item.start) {
+      if (typeof item.end === 'number' && item.end < item.start) {
         issues.push({ itemId: item.id, issue: 'End time is before start time' });
       }
     });
@@ -480,79 +447,62 @@ class TimelineService {
     return issues;
   }
 
-  /** Check if two time ranges overlap */
-  private rangesOverlap(range1: TimelineRange, range2: TimelineRange): boolean {
-    return range1.start <= range2.end && range2.start <= range1.end;
+  private rangesOverlap(a: TimelineRange, b: TimelineRange): boolean {
+    return a.start <= b.end && b.start <= a.end;
   }
 
-  /** Determine chapter importance based on plot function */
   private getChapterImportance(plotFunction: string): TimelineItem['importance'] {
-    const majorEvents = ['inciting incident', 'midpoint', 'climax', 'resolution'];
+    const majors = ['inciting incident', 'midpoint', 'climax', 'resolution'];
     const lower = plotFunction.toLowerCase();
-    return majorEvents.some((e) => lower.includes(e)) ? 'major' : 'minor';
+    return majors.some((m) => lower.includes(m)) ? 'major' : 'minor';
   }
 
-  /** Link a scene to timeline events */
   async linkScene(projectId: string, sceneId: string, eventId: string): Promise<void> {
     const items = await this.getProjectTimeline(projectId);
-    const event = items.find((item) => item.id === eventId);
-
-    if (event) {
-      event.sceneId = sceneId;
-      event.updatedAt = new Date();
-      await this.saveProjectTimeline(projectId, items);
-
-      this.trackEvent('scene_linked_to_timeline', {
-        projectId,
-        sceneId,
-        eventId,
-        timestamp: Date.now(),
-      });
-    }
+    const ev = items.find((i) => i.id === eventId);
+    if (!ev) return;
+    ev.sceneId = sceneId;
+    ev.updatedAt = new Date();
+    await this.saveProjectTimeline(projectId, items);
+    this.trackEvent('scene_linked_to_timeline', {
+      projectId,
+      sceneId,
+      eventId,
+      timestamp: Date.now(),
+    });
   }
 
-  /** Unlink a scene from timeline events */
   async unlinkScene(projectId: string, sceneId: string, eventId: string): Promise<void> {
     const items = await this.getProjectTimeline(projectId);
-    const event = items.find((item) => item.id === eventId);
-
-    if (event && event.sceneId === sceneId) {
-      delete event.sceneId;
-      event.updatedAt = new Date();
-      await this.saveProjectTimeline(projectId, items);
-
-      this.trackEvent('scene_unlinked_from_timeline', {
-        projectId,
-        sceneId,
-        eventId,
-        timestamp: Date.now(),
-      });
-    }
+    const ev = items.find((i) => i.id === eventId);
+    if (!ev || ev.sceneId !== sceneId) return;
+    delete (ev as any).sceneId;
+    ev.updatedAt = new Date();
+    await this.saveProjectTimeline(projectId, items);
+    this.trackEvent('scene_unlinked_from_timeline', {
+      projectId,
+      sceneId,
+      eventId,
+      timestamp: Date.now(),
+    });
   }
 
-  /** Get timeline events linked to a specific scene */
   async getEventsForScene(projectId: string, sceneId: string): Promise<TimelineItem[]> {
     const items = await this.getProjectTimeline(projectId);
-    return items.filter((item) => item.sceneId === sceneId);
+    return items.filter((i) => i.sceneId === sceneId);
   }
 
-  /** Get scenes referenced by timeline events (requires project data) */
   async getScenesForEvents(
     projectId: string,
     eventIds: string[],
   ): Promise<Array<{ eventId: string; sceneId?: string; title?: string }>> {
     const items = await this.getProjectTimeline(projectId);
-    return eventIds.map((eventId) => {
-      const event = items.find((item) => item.id === eventId);
-      return {
-        eventId,
-        sceneId: event?.sceneId,
-        title: event?.title,
-      };
+    return eventIds.map((id) => {
+      const ev = items.find((i) => i.id === id);
+      return { eventId: id, sceneId: ev?.sceneId, title: ev?.title };
     });
   }
 
-  /** Check for timeline consistency issues specific to scene linkage */
   async checkSceneLinkageConsistency(projectId: string): Promise<
     Array<{
       type: 'orphan-event' | 'missing-scene' | 'chronological-mismatch';
@@ -571,44 +521,38 @@ class TimelineService {
       suggestion: string;
     }> = [];
 
-    // Find events that should be linked to scenes but aren't
-    const plotEvents = items.filter(
-      (item) =>
-        (item.eventType === 'plot' || item.eventType === 'character') &&
-        item.importance === 'major' &&
-        !item.sceneId,
+    const majors = items.filter(
+      (i) =>
+        (i.eventType === 'plot' || i.eventType === 'character') &&
+        i.importance === 'major' &&
+        !i.sceneId,
     );
-
-    plotEvents.forEach((event) => {
+    majors.forEach((ev) =>
       issues.push({
         type: 'orphan-event',
-        eventId: event.id,
-        issue: `Major ${event.eventType} event "${event.title}" is not linked to any scene`,
-        suggestion: `Link this event to the scene where it occurs for better navigation and consistency tracking`,
-      });
-    });
+        eventId: ev.id,
+        issue: `Major ${ev.eventType} event "${ev.title}" is not linked to any scene`,
+        suggestion:
+          'Link this event to the scene where it occurs for better navigation and consistency tracking',
+      }),
+    );
 
-    // Check chronological order of linked scenes (simplified)
-    const linkedEvents = items.filter((item) => item.sceneId).sort((a, _b) => a.start - b.start);
-    for (let i = 1; i < linkedEvents.length; i++) {
-      const prev = linkedEvents[i - 1];
-      const current = linkedEvents[i];
-
+    const linked = items.filter((i) => i.sceneId).sort((a, b) => a.start - b.start);
+    for (let i = 1; i < linked.length; i++) {
+      const prev = linked[i - 1]!;
+      const cur = linked[i]!;
       if (
-        prev &&
-        current &&
         prev.sceneId &&
-        current.sceneId &&
-        prev.sceneId === current.sceneId &&
-        Math.abs(current.start - prev.start) > 10
+        cur.sceneId &&
+        prev.sceneId === cur.sceneId &&
+        Math.abs(cur.start - prev.start) > 10
       ) {
         issues.push({
           type: 'chronological-mismatch',
-          eventId: current.id,
-          sceneId: current.sceneId,
-          issue: `Events in scene "${current.sceneId}" are spread far apart in timeline (positions ${prev.start} and ${current.start})`,
-          suggestion:
-            'Consider if these events should be in separate scenes or if the timeline positions need adjustment',
+          eventId: cur.id,
+          sceneId: cur.sceneId,
+          issue: `Events in scene "${cur.sceneId}" are far apart in timeline (positions ${prev.start} and ${cur.start})`,
+          suggestion: 'Consider splitting into separate scenes or adjusting timeline positions',
         });
       }
     }
@@ -616,7 +560,6 @@ class TimelineService {
     return issues;
   }
 
-  /** Navigation helper: Get next/previous linked scenes */
   async getSceneNavigation(
     projectId: string,
     currentSceneId: string,
@@ -625,40 +568,22 @@ class TimelineService {
     next?: { sceneId: string; eventTitle: string };
   }> {
     const items = await this.getProjectTimeline(projectId);
-    const linkedEvents = items.filter((item) => item.sceneId).sort((a, _b) => a.start - b.start);
-
-    const currentIndex = linkedEvents.findIndex((item) => item.sceneId === currentSceneId);
-    if (currentIndex === -1) return {};
-
-    const result: {
+    const linked = items.filter((i) => i.sceneId).sort((a, b) => a.start - b.start);
+    const idx = linked.findIndex((i) => i.sceneId === currentSceneId);
+    if (idx === -1) return {};
+    const out: {
       previous?: { sceneId: string; eventTitle: string };
       next?: { sceneId: string; eventTitle: string };
     } = {};
-
-    if (currentIndex > 0 && linkedEvents[currentIndex - 1]) {
-      const prev = linkedEvents[currentIndex - 1];
-      if (prev && prev.sceneId) {
-        result.previous = {
-          sceneId: prev.sceneId,
-          eventTitle: prev.title,
-        };
-      }
+    if (idx > 0 && linked[idx - 1]!.sceneId) {
+      out.previous = { sceneId: linked[idx - 1]!.sceneId!, eventTitle: linked[idx - 1]!.title };
     }
-
-    if (currentIndex < linkedEvents.length - 1 && linkedEvents[currentIndex + 1]) {
-      const next = linkedEvents[currentIndex + 1];
-      if (next && next.sceneId) {
-        result.next = {
-          sceneId: next.sceneId,
-          eventTitle: next.title,
-        };
-      }
+    if (idx < linked.length - 1 && linked[idx + 1]!.sceneId) {
+      out.next = { sceneId: linked[idx + 1]!.sceneId!, eventTitle: linked[idx + 1]!.title };
     }
-
-    return result;
+    return out;
   }
 
-  /** Generate storage key for project timeline */
   private getStorageKey(projectId: string): string {
     return `${this.STORAGE_PREFIX}${projectId}`;
   }

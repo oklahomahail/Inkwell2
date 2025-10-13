@@ -161,6 +161,8 @@ export function _getPresetForMode(mode: UIMode): FeatureFlagPreset {
   return mode === 'beginner' ? BeginnerPreset : ProPreset;
 }
 
+export const getPresetForMode = _getPresetForMode;
+
 /**
  * Convert preset to feature flag configuration
  */
@@ -272,7 +274,7 @@ export function _formatSceneFilename(
  * Default editor settings based on mode
  */
 export function _getEditorDefaults(mode: UIMode) {
-  const preset = getPresetForMode(mode);
+  const preset = _getPresetForMode(mode);
   return {
     focusMode: preset.editor.focusModeDefault,
     autosave: preset.editor.autosaveIntervalSeconds * 1000, // Convert to milliseconds

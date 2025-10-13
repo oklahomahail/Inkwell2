@@ -238,5 +238,39 @@ export async function _migrateLegacyTutorialData(
   // Use `defineStores(db)` and upsert data into appropriate tables.
 }
 
-// Public alias for app code
+// Public exports for tutorial system
 export const useTutorialStorage = _useTutorialStorage;
+
+// Public APIs for tour system
+export function getTourProgress(
+  slug: string = '__default__',
+  profileId?: string,
+): TutorialProgress | null {
+  return LegacyTutorialStorage.getProgress(slug, profileId);
+}
+
+export function resetProgress(
+  slug: string,
+  totalSteps?: number,
+  tourType: TutorialProgress['progress']['tourType'] = 'full-onboarding',
+): void {
+  const now = Date.now();
+  const progress: TutorialProgress = {
+    slug,
+    updatedAt: now,
+    progress: {
+      currentStep: 0,
+      completedSteps: [],
+      tourType,
+      startedAt: now,
+      isCompleted: false,
+      totalSteps: totalSteps ?? 4,
+      lastActiveAt: now,
+    },
+  };
+  LegacyTutorialStorage.setProgress(slug, progress);
+}
+
+export function markTourLaunched(tourId: string): void {
+  localStorage.setItem(`inkwell:tour:${tourId}:launched`, 'true');
+}
