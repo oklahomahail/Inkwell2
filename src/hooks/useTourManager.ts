@@ -72,12 +72,12 @@ export function useTourManager() {
 
       try {
         for (let i = storage.getTourProgress(tour).step; i < steps.length; i++) {
-          const sel = `[data-tour-id="${steps[i].id}"]`;
+          const sel = `[data-tour-id="${steps[i]?.id}"]`;
           const el = await waitForElement(sel).catch(() => null);
           if (!el) continue; // Skip missing targets
 
           // These functions will be implemented in TourOverlay component
-          await showSpotlight(el, steps[i].content);
+          await showSpotlight(el, steps[i]?.content);
           storage.setTourStep(tour, i + 1);
         }
         endTour(tour);

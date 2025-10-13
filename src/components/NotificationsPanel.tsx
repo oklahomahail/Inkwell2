@@ -2,18 +2,11 @@ import { clsx } from 'clsx';
 import { Bell, Check, ChevronDown, X } from 'lucide-react';
 import { FC, MouseEvent } from 'react';
 
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  createdAt: Date;
-  read: boolean;
-}
+import type { Notification } from '@/types/notifications';
 
 export interface NotificationsPanelProps {
   notifications?: Notification[];
-  onClose?: () => void;
+  onClose: () => void; // Made required to fix _onClose issue
   onMarkAsRead?: (id: string) => void;
   onMarkAllAsRead?: () => void;
   onNotificationClick?: (notification: Notification) => void;

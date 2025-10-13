@@ -76,7 +76,7 @@ export const SmartSearchModal: React.FC<SmartSearchModalProps> = ({
     enableSemanticSearch: true,
     enableAdvancedQuery: true,
     ...(focusMode ? { userIntent: focusMode } : {}),
-    projectId: currentProject?.id,
+    projectId: currentProject?.id || '',
   });
 
   // Refs
