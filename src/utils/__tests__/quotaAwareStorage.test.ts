@@ -85,7 +85,7 @@ describe('QuotaAwareStorage', () => {
         testHelper.setQuotaExceeded(false);
         const result = await quotaAwareStorage.safeSetItem('test-key', 'test-value');
         expect(result.success).toBe(true);
-        expect(localStorage.getItem('test-key')).toBe('test-value');
+        expect(localStorage.getItem('inkwell_test-key')).toBe('test-value');
       });
 
       it('should handle quota exceeded errors', async () => {
@@ -138,7 +138,7 @@ describe('QuotaAwareStorage', () => {
 
     describe('safeGetItem', () => {
       it('should read from storage successfully', async () => {
-        localStorage.setItem('test-key', 'test-value');
+        localStorage.setItem('inkwell_test-key', 'test-value');
         const result = quotaAwareStorage.safeGetItem('test-key');
         expect(result.success).toBe(true);
         expect(result.data).toBe('test-value');
@@ -163,10 +163,10 @@ describe('QuotaAwareStorage', () => {
 
     describe('safeRemoveItem', () => {
       it('should remove items from storage', async () => {
-        localStorage.setItem('test-key', 'test-value');
+        localStorage.setItem('inkwell_test-key', 'test-value');
         const result = quotaAwareStorage.safeRemoveItem('test-key');
         expect(result.success).toBe(true);
-        expect(localStorage.getItem('test-key')).toBeNull();
+        expect(localStorage.getItem('inkwell_test-key')).toBeNull();
       });
 
       it('should handle removal errors gracefully', async () => {

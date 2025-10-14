@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { mockConnectivityService, resetMocks } from '../../test/mocks/mockConnectivityService';
-import snapshotService from '../snapshotService';
+import { SnapshotService } from '../snapshotService';
 
 // Mock services and storage
 vi.mock('../connectivityService', async () => ({
@@ -70,6 +70,15 @@ describe('SnapshotService', () => {
     vi.clearAllMocks();
     // Reset Date.now to return a fixed timestamp
     vi.setSystemTime(new Date('2025-01-01'));
+
+    // Force a clean state for each test
+    Object.keys(mockStorage).forEach((key) => delete mockStorage[key]);
+
+    // Create fresh instance for each test
+    const snapshotService = new SnapshotService<any>();
+
+    // Force service to be available in describe block scope
+    Object.assign(this, { snapshotService });
   });
 
   describe('Snapshot Creation', () => {
@@ -167,10 +176,11 @@ describe('SnapshotService', () => {
   describe('Snapshot Restoration', () => {
     it('should restore a project from snapshot', async () => {
       const metadata = await snapshotService.createSnapshot(mockProject);
+      vi.clearAllMocks(); // Clear create logs
       const restored = await snapshotService.restoreSnapshot(metadata.id);
 
       expect(restored).toEqual(mockProject);
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Snapshot restored:'));
+      expect(console.log).toHaveBeenCalledWith(`Snapshot restored: ${metadata.id}`);
     });
 
     it('should handle non-existent snapshots', async () => {
@@ -209,11 +219,12 @@ describe('SnapshotService', () => {
   describe('Snapshot Deletion', () => {
     it('should delete a snapshot', async () => {
       const metadata = await snapshotService.createSnapshot(mockProject);
+      vi.clearAllMocks(); // Clear create logs
       await snapshotService.deleteSnapshot(metadata.id);
 
       const snapshots = await snapshotService.getSnapshots(mockProject.id);
       expect(snapshots).toHaveLength(0);
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Snapshot deleted:'));
+      expect(console.log).toHaveBeenCalledWith(`Snapshot deleted: ${metadata.id}`);
     });
 
     it('should update snapshot index after deletion', async () => {
@@ -226,11 +237,13 @@ describe('SnapshotService', () => {
     });
 
     it('should handle deletion errors', async () => {
+      const snapshot = await snapshotService.createSnapshot(mockProject);
+
       localStorageMock.removeItem.mockImplementationOnce(() => {
         throw new Error('Storage error');
       });
 
-      await expect(snapshotService.deleteSnapshot('test-id')).rejects.toThrow(
+      await expect(snapshotService.deleteSnapshot('non-existent')).rejects.toThrow(
         'Snapshot deletion failed',
       );
     });
