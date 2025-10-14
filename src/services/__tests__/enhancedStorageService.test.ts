@@ -6,26 +6,97 @@ import { connectivityService } from '../connectivityService';
 import { enhancedStorageService } from '../enhancedStorageService';
 import { snapshotService } from '../snapshotService';
 
-// Mock dependencies - keeping consistent mock setup
-vi.mock('../connectivityService', async () => ({
-  connectivityService: mockConnectivityService,
+// Mock localStorage
+const mockStorage: { [key: string]: string } = {};
+const localStorageMock = {
+  getItem: vi.fn((key: string) => mockStorage[key] ?? null),
+  setItem: vi.fn((key: string, value: string) => {
+    mockStorage[key] = value;
+  }),
+  removeItem: vi.fn((key: string) => {
+    delete mockStorage[key];
+  }),
+  clear: vi.fn(() => {
+    Object.keys(mockStorage).forEach((key) => delete mockStorage[key]);
+  }),
+  length: 0,
+  key: vi.fn((index: number) => Object.keys(mockStorage)[index] || null),
+};
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+
+// Mock dependencies
+vi.mock('../connectivityService', () => ({
+  connectivityService: {
+    ...mockConnectivityService,
+    isOnline: true,
+    getQueue: vi.fn().mockResolvedValue([]),
+    getStatus: vi.fn().mockReturnValue({
+      isOnline: true,
+      lastOnline: new Date(),
+      lastOffline: null,
+      queuedWrites: 0,
+      connectionType: 'wifi',
+    }),
+    onStatusChange: vi.fn((cb) => {
+      setTimeout(
+        () =>
+          cb({
+            isOnline: true,
+            lastOnline: new Date(),
+            lastOffline: null,
+            queuedWrites: 0,
+            connectionType: 'wifi',
+          }),
+        0,
+      );
+      return () => {};
+    }),
+    queueWrite: vi.fn().mockImplementation(async (_type: string, key: string, data: string) => {
+      console.log('Queueing write for:', key);
+      return { success: true };
+    }),
+    clearQueue: vi.fn().mockResolvedValue(undefined),
+  },
 }));
 
 vi.mock('../../utils/quotaAwareStorage', () => ({
   quotaAwareStorage: {
-    safeGetItem: vi.fn(),
-    safeSetItem: vi.fn(),
-    getQuotaInfo: vi.fn(),
-    needsMaintenance: vi.fn(),
-    emergencyCleanup: vi.fn(),
+    safeGetItem: vi.fn().mockImplementation((key: string) => {
+      const value = localStorage.getItem(key);
+      return { success: true, data: value };
+    }),
+    safeSetItem: vi.fn().mockImplementation((key: string, value: string) => {
+      localStorage.setItem(key, value);
+      return { success: true };
+    }),
+    safeRemoveItem: vi.fn().mockImplementation((key: string) => {
+      localStorage.removeItem(key);
+      return { success: true };
+    }),
+    getQuotaInfo: vi.fn().mockResolvedValue({ usage: 1000, quota: 5000, percentUsed: 0.2 }),
+    needsMaintenance: vi.fn().mockResolvedValue(false),
+    emergencyCleanup: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
 vi.mock('../snapshotService', () => ({
   snapshotService: {
-    createSnapshot: vi.fn(),
-    getSnapshotStorageUsage: vi.fn(),
-    emergencyCleanup: vi.fn(),
+    createSnapshot: vi.fn().mockResolvedValue({
+      id: 'snapshot-1',
+      projectId: 'test-1',
+      timestamp: Date.now(),
+      isAutomatic: false,
+      tags: [],
+      description: 'Test snapshot',
+    }),
+    getSnapshotStorageUsage: vi.fn().mockReturnValue({
+      snapshotCount: 0,
+      totalSize: 0,
+      details: [],
+    }),
+    startAutoSnapshots: vi.fn(),
+    stopAutoSnapshots: vi.fn(),
+    emergencyCleanup: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -162,7 +233,9 @@ describe('EnhancedStorageService', () => {
 
       const result = await enhancedStorageService.performMaintenance();
       expect(result.success).toBe(true);
-      expect(result.actions).toContain(expect.stringContaining('No maintenance needed'));
+      expect(result.actions).toEqual(
+        expect.arrayContaining([expect.stringContaining('No maintenance needed')]),
+      );
     });
 
     it('should handle auto-snapshots', async () => {
