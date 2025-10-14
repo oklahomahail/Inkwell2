@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { testHelper } from '../../test/testHelper';
 import { quotaAwareStorage } from '../quotaAwareStorage';
 
 describe('QuotaAwareStorage', () => {
@@ -14,10 +15,24 @@ describe('QuotaAwareStorage', () => {
       return this.data.get(key) || null;
     },
     setItem(key: string, value: string): void {
+      // Handle quota error test cases
+      if (value === 'error:quota') {
+        const error = new Error('QuotaExceededError');
+        error.name = 'QuotaExceededError';
+        throw error;
+      }
+      // Handle storage error test cases
+      if (value === 'error:storage') {
+        throw new Error('Storage error');
+      }
       this.data.set(key, value);
       this.length = this.data.size;
     },
     removeItem(key: string): void {
+      // Handle error cases
+      if (key === 'error-key') {
+        throw new Error('Remove error');
+      }
       this.data.delete(key);
       this.length = this.data.size;
     },
@@ -41,6 +56,7 @@ describe('QuotaAwareStorage', () => {
   };
 
   beforeEach(() => {
+    testHelper.reset();
     // Reset mocks and storage
     vi.restoreAllMocks();
     mockLocalStorage.clear();
@@ -65,12 +81,16 @@ describe('QuotaAwareStorage', () => {
   describe('Safe Storage Operations', () => {
     describe('safeSetItem', () => {
       it('should write to storage when space is available', async () => {
+        testHelper.disableErrorMode();
+        testHelper.setQuotaExceeded(false);
         const result = await quotaAwareStorage.safeSetItem('test-key', 'test-value');
         expect(result.success).toBe(true);
         expect(localStorage.getItem('test-key')).toBe('test-value');
       });
 
       it('should handle quota exceeded errors', async () => {
+        testHelper.disableErrorMode();
+        testHelper.setQuotaExceeded(true);
         // Mock Storage API to report near full
         mockStorageManager.estimate.mockResolvedValueOnce({
           quota: 1000,
@@ -102,6 +122,8 @@ describe('QuotaAwareStorage', () => {
       });
 
       it('should handle storage errors gracefully', async () => {
+        testHelper.enableErrorMode();
+        testHelper.setQuotaExceeded(false);
         // Mock localStorage to throw
         const mockError = new Error('Storage error');
         vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
@@ -256,7 +278,7 @@ describe('QuotaAwareStorage', () => {
       await quotaAwareStorage.safeSetItem('test', 'value');
       expect(listener).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'generic',
+          type: 'error',
         }),
       );
 

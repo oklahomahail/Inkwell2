@@ -2,6 +2,7 @@ import { vi, beforeEach, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import 'cross-fetch/polyfill';
+import React from 'react';
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -84,6 +85,7 @@ declare global {
   var sleep: (ms: number) => Promise<void>;
   var mockDate: (isoDate: string) => Date;
   var mockNow: () => number;
+  var React: typeof React;
 }
 
 global.sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -93,3 +95,6 @@ global.mockDate = (isoDate: string) => {
   return date;
 };
 global.mockNow = () => new Date('2025-01-01T00:00:00Z').getTime();
+
+// Make React available globally for tests
+global.React = React;

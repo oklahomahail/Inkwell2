@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { mockConnectivityService, resetMocks } from '../../test/mocks/mockConnectivityService';
-import { snapshotService } from '../snapshotService';
+import snapshotService from '../snapshotService';
 
 // Mock services and storage
 vi.mock('../connectivityService', async () => ({
@@ -13,6 +13,11 @@ beforeEach(() => {
   vi.clearAllMocks();
   localStorageMock.clear();
 
+  // Enable test error handler and reset quota status
+  TestErrorHandler.enable();
+  TestErrorHandler.setQuotaExceeded(false);
+
+  // Mock console methods
   console.log = vi.fn();
   console.error = vi.fn();
   console.warn = vi.fn();
@@ -42,6 +47,8 @@ Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 afterEach(() => {
   vi.useRealTimers();
 });
+
+import { TestErrorHandler } from '@/utils/testErrorHandler';
 
 describe('SnapshotService', () => {
   const mockProject = {
