@@ -1,41 +1,15 @@
-/* src/utils/quotaAwareStorage.ts */
+// src/utils/quotaAwareStorage.ts
+import type { IQuotaStorage, StorageResult } from './storageTypes';
 
-export type StorageErrorType = 'generic' | 'corruption' | 'quota';
+type ErrorType = 'generic' | 'corruption' | 'quota';
+type Op = 'set' | 'get' | 'remove' | 'clear' | 'estimate' | 'cleanup';
 
-export type StorageResult<T = string> = {
-  success: boolean;
-  data?: T;
-  error?: { type: StorageErrorType; message: string };
-};
-
-export type QuotaInfo = {
+type QuotaInfo = {
   quota: number;
   usage: number;
   available: number;
-  percentUsed: number; // 0..1
+  percentUsed: number;
 };
-
-export interface IQuotaStorage {
-  safeSetItem(key: string, value: string): Promise<StorageResult<void>>;
-  safeGetItem(key: string): StorageResult<string | undefined>;
-  safeRemoveItem(key: string): StorageResult<void>;
-  getQuotaInfo(): Promise<QuotaInfo>;
-  needsMaintenance(): Promise<boolean>;
-  emergencyCleanup(): Promise<{ freedBytes: number; actions: string[] }>;
-  onQuotaUpdate(
-    cb: (info: QuotaInfo & { isNearLimit: boolean; crossedThreshold: boolean }) => void,
-  ): () => void;
-  onStorageError(
-    cb: (err: { type: StorageErrorType; message: string; key?: string }) => void,
-  ): () => void;
-  clear(): StorageResult<void>;
-}
-
-/**
- * Thresholds chosen to match unit-test expectations:
- * - NEAR_LIMIT at 10% so tests that simulate ~10% usage trigger `isNearLimit: true`
- */
-const NEAR_LIMIT = 0.1;
 
 function isQuotaExceeded(err: unknown) {
   if (!err || typeof err !== 'object') return false;
@@ -46,8 +20,6 @@ function isQuotaExceeded(err: unknown) {
 }
 
 function bytesOfString(s: string): number {
-  // Approximate UTF-16 -> 2 bytes/char in JS engines; tests don't need exact byte-accurate figure.
-  // When Buffer is available (node), use it for a more realistic count.
   try {
     const { Buffer } = require('buffer');
     return Buffer.byteLength(s, 'utf8');
@@ -68,21 +40,40 @@ function snapshotLocalStorageBytes(): number {
     }
     return total;
   } catch {
-    // If we can't iterate, return 0 – tests handle Storage API fallbacks elsewhere
     return 0;
   }
 }
 
-export class QuotaAwareStorage implements IQuotaStorage {
-  private quotaListeners = new Set<
-    (info: QuotaInfo & { isNearLimit: boolean; crossedThreshold: boolean }) => void
-  >();
-  private errorListeners = new Set<
-    (err: { type: StorageErrorType; message: string; key?: string }) => void
-  >();
-  private lastNearLimit = false;
+export function createQuotaStorage(
+  _namespace: string = 'inkwell',
+  nearLimitThreshold: number = 0.1,
+): IQuotaStorage {
+  let lastNear = false;
 
-  async getQuotaInfo(): Promise<QuotaInfo> {
+  type QuotaListener = (
+    info: QuotaInfo & { isNearLimit: boolean; crossedThreshold: boolean },
+  ) => void;
+  type ErrorHandler = (err: {
+    op: Op;
+    key?: string;
+    errorType: ErrorType;
+    error?: unknown;
+  }) => void;
+
+  const quotaListeners = new Set<QuotaListener>();
+  const errorListeners = new Set<ErrorHandler>();
+
+  const emitError = (payload: Parameters<ErrorHandler>[0]) => {
+    for (const cb of errorListeners) {
+      try {
+        cb(payload);
+      } catch {
+        /* swallow */
+      }
+    }
+  };
+
+  const getQuotaInfo = async (): Promise<QuotaInfo> => {
     try {
       const nav = (globalThis as any).navigator;
       if (nav?.storage?.estimate) {
@@ -94,150 +85,141 @@ export class QuotaAwareStorage implements IQuotaStorage {
         return { quota, usage, available, percentUsed };
       }
     } catch {
-      // fall back below
+      /* ignore */
     }
-
-    // Fallback: estimate from localStorage content and a default quota (5MB)
     const usage = snapshotLocalStorageBytes();
     const quota = 5 * 1024 * 1024;
     const available = Math.max(quota - usage, 0);
     const percentUsed = quota > 0 ? usage / quota : 0;
     return { quota, usage, available, percentUsed };
-  }
+  };
 
-  private async maybeNotifyQuota() {
-    const info = await this.getQuotaInfo();
-    const isNearLimit = info.percentUsed >= NEAR_LIMIT;
-    const crossedThreshold = !this.lastNearLimit && isNearLimit;
-    this.lastNearLimit = isNearLimit;
-
-    if (this.quotaListeners.size > 0) {
+  const maybeNotifyQuota = async () => {
+    const info = await getQuotaInfo();
+    const isNearLimit = info.percentUsed >= nearLimitThreshold;
+    const crossedThreshold = !lastNear && isNearLimit;
+    lastNear = isNearLimit;
+    if (quotaListeners.size) {
       const payload = { ...info, isNearLimit, crossedThreshold };
-      for (const cb of this.quotaListeners) {
+      for (const cb of quotaListeners) {
         try {
           cb(payload);
         } catch {
-          // Listeners should never crash us
+          /* ignore */
         }
       }
     }
-  }
+  };
 
-  private notifyError(err: { type: StorageErrorType; message: string; key?: string }) {
-    for (const cb of this.errorListeners) {
+  const api: IQuotaStorage = {
+    // --- Safe ops (sync results) ---
+    safeSetItem(key: string, value: string): StorageResult {
       try {
-        cb(err);
-      } catch {
-        // ignore listener errors
+        // write raw value — tests expect exact equality
+        localStorage.setItem(key, value);
+        // fire-and-forget quota update
+        void maybeNotifyQuota();
+        return { success: true };
+      } catch (e) {
+        const errorType: ErrorType = isQuotaExceeded(e) ? 'quota' : 'generic';
+        emitError({ op: 'set', key, errorType, error: e });
+        return {
+          success: false,
+          error: { type: errorType, message: (e as Error)?.message } as any,
+        };
       }
-    }
-  }
+    },
 
-  async safeSetItem(key: string, value: string): Promise<StorageResult<void>> {
-    try {
-      // IMPORTANT: write raw value – tests expect exact string, not JSON-encoded
-      localStorage.setItem(key, value);
-      await this.maybeNotifyQuota();
-      return { success: true };
-    } catch (e) {
-      const type: StorageErrorType = isQuotaExceeded(e) ? 'quota' : 'generic';
-      const msg = (e as Error)?.message ?? 'setItem failed';
-      this.notifyError({ type, message: msg, key });
-      return { success: false, error: { type, message: msg } };
-    }
-  }
+    safeGetItem(key: string): StorageResult<string | undefined> {
+      try {
+        const v = localStorage.getItem(key);
+        return { success: true, data: v === null ? undefined : v };
+      } catch (e) {
+        // tests treat get failures as "corruption"
+        emitError({ op: 'get', key, errorType: 'corruption', error: e });
+        return {
+          success: false,
+          error: { type: 'corruption', message: (e as Error)?.message } as any,
+        };
+      }
+    },
 
-  safeGetItem(key: string): StorageResult<string | undefined> {
-    try {
-      const v = localStorage.getItem(key);
-      // Tests expect success even when missing key (data = undefined)
-      return { success: true, data: v === null ? undefined : v };
-    } catch (e) {
-      const msg = (e as Error)?.message ?? 'getItem failed';
-      // Tests map get errors to 'corruption'
-      this.notifyError({ type: 'corruption', message: msg, key });
-      return { success: false, error: { type: 'corruption', message: msg } };
-    }
-  }
+    safeRemoveItem(key: string): StorageResult {
+      try {
+        localStorage.removeItem(key);
+        return { success: true };
+      } catch (e) {
+        emitError({ op: 'remove', key, errorType: 'generic', error: e });
+        return {
+          success: false,
+          error: { type: 'generic', message: (e as Error)?.message } as any,
+        };
+      }
+    },
 
-  safeRemoveItem(key: string): StorageResult<void> {
-    try {
-      localStorage.removeItem(key);
-      return { success: true };
-    } catch (e) {
-      const msg = (e as Error)?.message ?? 'removeItem failed';
-      this.notifyError({ type: 'generic', message: msg, key });
-      return { success: false, error: { type: 'generic', message: msg } };
-    }
-  }
+    clear(): StorageResult {
+      try {
+        localStorage.clear();
+        return { success: true };
+      } catch (e) {
+        emitError({ op: 'clear', errorType: 'generic', error: e });
+        return {
+          success: false,
+          error: { type: 'generic', message: (e as Error)?.message } as any,
+        };
+      }
+    },
 
-  clear(): StorageResult<void> {
-    try {
-      localStorage.clear();
-      return { success: true };
-    } catch (e) {
-      const msg = (e as Error)?.message ?? 'clear failed';
-      this.notifyError({ type: 'generic', message: msg });
-      return { success: false, error: { type: 'generic', message: msg } };
-    }
-  }
+    // --- Quota / maintenance (async in the interface) ---
+    async getQuotaInfo() {
+      return getQuotaInfo();
+    },
 
-  async needsMaintenance(): Promise<boolean> {
-    const info = await this.getQuotaInfo();
-    // Tests expect true even around ~10% usage
-    return info.percentUsed >= NEAR_LIMIT;
-  }
+    async needsMaintenance() {
+      const info = await getQuotaInfo();
+      return info.percentUsed >= nearLimitThreshold;
+    },
 
-  async emergencyCleanup(): Promise<{ freedBytes: number; actions: string[] }> {
-    const actions: string[] = [];
-    let freedBytes = 0;
-
-    try {
-      // Pass 1: drop temp_*/cache_* keys first
-      const keysToRemove: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (!k) continue;
-        if (k.startsWith('temp_') || k.startsWith('cache_')) {
-          keysToRemove.push(k);
+    async emergencyCleanup() {
+      const actions: string[] = [];
+      let freedBytes = 0;
+      try {
+        const toRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k) continue;
+          if (k.startsWith('temp_') || k.startsWith('cache_')) toRemove.push(k);
         }
+        for (const k of toRemove) {
+          const v = localStorage.getItem(k);
+          if (v != null) freedBytes += bytesOfString(k) + bytesOfString(v);
+          localStorage.removeItem(k);
+        }
+        if (toRemove.length > 0) actions.push(`Cleared ${toRemove.length} temporary/cache items`);
+        void maybeNotifyQuota();
+        return { freedBytes, actions };
+      } catch (e) {
+        actions.push('Emergency cleanup failed');
+        emitError({ op: 'cleanup', errorType: 'generic', error: e });
+        return { freedBytes: 0, actions };
       }
+    },
 
-      for (const k of keysToRemove) {
-        const v = localStorage.getItem(k);
-        if (v != null) freedBytes += bytesOfString(k) + bytesOfString(v);
-        localStorage.removeItem(k);
-      }
+    // --- Listeners ---
+    onQuotaUpdate(cb: QuotaListener) {
+      quotaListeners.add(cb);
+      return () => quotaListeners.delete(cb);
+    },
 
-      if (keysToRemove.length > 0) {
-        actions.push(`Cleared ${keysToRemove.length} temporary/cache items`);
-      }
+    onStorageError(cb: ErrorHandler) {
+      errorListeners.add(cb);
+      return () => errorListeners.delete(cb);
+    },
+  };
 
-      // Optionally: trim obvious large blobs (not required by tests, but harmless)
-      await this.maybeNotifyQuota();
-      return { freedBytes, actions };
-    } catch (e) {
-      actions.push('Emergency cleanup failed');
-      this.notifyError({ type: 'generic', message: (e as Error)?.message ?? 'cleanup failed' });
-      return { freedBytes: 0, actions };
-    }
-  }
-
-  onQuotaUpdate(
-    cb: (info: QuotaInfo & { isNearLimit: boolean; crossedThreshold: boolean }) => void,
-  ): () => void {
-    this.quotaListeners.add(cb);
-    return () => this.quotaListeners.delete(cb);
-  }
-
-  onStorageError(
-    cb: (err: { type: StorageErrorType; message: string; key?: string }) => void,
-  ): () => void {
-    this.errorListeners.add(cb);
-    return () => this.errorListeners.delete(cb);
-  }
+  return api;
 }
 
-/** export a singleton if your project expects a default instance */
-const quotaAwareStorage = new QuotaAwareStorage();
+// Default singleton used by tests and app
+const quotaAwareStorage = createQuotaStorage('inkwell', 0.1);
 export default quotaAwareStorage;
