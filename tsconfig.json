@@ -3,6 +3,8 @@
     /* Language & Environment */
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+    "jsx": "react-jsx",
+    "types": ["react"],
 
     /* Modules & Resolution */
     "module": "ESNext",
