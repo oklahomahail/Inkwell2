@@ -8,9 +8,20 @@ describe('TourController', () => {
   const id = 'test-tour';
 
   beforeEach(() => {
+    // Create localStorage mock
+    const store: Record<string, string> = {};
+    vi.stubGlobal('localStorage', {
+      setItem: vi.fn((key: string, value: string) => {
+        store[key] = value;
+      }),
+      getItem: vi.fn((key: string) => store[key]),
+      clear: vi.fn(() => {
+        Object.keys(store).forEach((key) => delete store[key]);
+      }),
+    });
+
     controller = new TourController();
     vi.spyOn(window, 'dispatchEvent');
-    vi.spyOn(localStorage, 'setItem');
   });
 
   test('startTour sets running flag and fires event', () => {
