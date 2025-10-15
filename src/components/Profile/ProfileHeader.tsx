@@ -1,6 +1,8 @@
 // src/components/Profile/ProfileHeader.tsx
 import React from 'react';
 
+import { MAIN_TAGLINE, ALT_TAGLINE } from '@/constants/branding';
+
 interface ProfileHeaderProps {
   /** Whether to make the alternate tagline clickable */
   onTaglineClick?: () => void;
@@ -22,7 +24,7 @@ export default function ProfileHeader({ onTaglineClick, taglineHref }: ProfileHe
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Inkwell by Nexus Partners</h1>
-          <p className="mt-1 text-sm text-neutral-600">Find your story. Write it well.</p>
+          <p className="mt-1 text-sm text-neutral-600">{MAIN_TAGLINE}</p>
         </div>
 
         {/* Alt tagline on the right */}
@@ -34,7 +36,7 @@ export default function ProfileHeader({ onTaglineClick, taglineHref }: ProfileHe
             aria-label="Alternate tagline"
             {...taglineProps}
           >
-            Because great stories deserve great tools.
+            {ALT_TAGLINE}
           </TaglineComponent>
         </div>
       </div>
