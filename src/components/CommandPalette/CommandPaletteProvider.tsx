@@ -1,6 +1,7 @@
 // src/components/CommandPalette/CommandPaletteProvider.tsx
 import React, { useEffect, useState, type ReactNode } from 'react';
 
+import { SCENE_STATUS, CHAPTER_STATUS, EXPORT_FORMAT } from '@/consts/writing';
 import { useAppContext, View } from '@/context/AppContext';
 import {
   CommandPaletteContext,
@@ -9,7 +10,7 @@ import {
 import { useToast } from '@/context/toast';
 import { exportService } from '@/services/exportService';
 import { storageService } from '@/services/storageService';
-import { ChapterStatus, SceneStatus, ExportFormat, type Chapter } from '@/types/writing';
+import type { Chapter as WritingChapter } from '@/types/writing';
 import { generateId } from '@/utils/id';
 
 export type CommandCategory = 'navigation' | 'writing' | 'project' | 'ai' | 'settings' | 'export';
@@ -53,7 +54,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         order: existing.length,
         scenes: [],
         totalWordCount: 0,
-        status: ChapterStatus.DRAFT,
+        status: CHAPTER_STATUS.DRAFT,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -77,7 +78,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         await createNewChapter();
         return;
       }
-      const target: Chapter | undefined = chapters[0];
+      const target: WritingChapter | undefined = chapters[0];
       if (!target) {
         showToast('No chapter available', 'error');
         return;
@@ -88,7 +89,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         title: `Scene ${nextSceneNumber}`,
         content: '',
         wordCount: 0,
-        status: SceneStatus.DRAFT,
+        status: SCENE_STATUS.DRAFT,
         order: nextSceneNumber - 1,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -107,7 +108,8 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     try {
       const chapters = await storageService.loadWritingChapters(currentProject.id);
       const totalWords = chapters.reduce(
-        (t, ch) => t + (ch.scenes?.reduce((ct, s) => ct + (s.wordCount || 0), 0) || 0),
+        (t: number, ch: WritingChapter) =>
+          t + (ch.scenes?.reduce((ct: number, s: any) => ct + (s.wordCount || 0), 0) || 0),
         0,
       );
       const chapterCount = chapters.length;
@@ -134,7 +136,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     if (!currentProject) return showToast('No project selected', 'error');
     try {
       showToast('Exporting to Markdown...', 'info');
-      const res = await exportService.exportProject(currentProject.id, ExportFormat.MARKDOWN);
+      const res = await exportService.exportProject(currentProject.id, EXPORT_FORMAT.MARKDOWN);
       res.success
         ? showToast(`Successfully exported ${res.filename}`, 'success')
         : showToast(`Export failed: ${res.error}`, 'error');
@@ -148,7 +150,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     if (!currentProject) return showToast('No project selected', 'error');
     try {
       showToast('Opening PDF export...', 'info');
-      const res = await exportService.exportProject(currentProject.id, ExportFormat.PDF);
+      const res = await exportService.exportProject(currentProject.id, EXPORT_FORMAT.PDF);
       res.success
         ? showToast('PDF export window opened', 'success')
         : showToast(`Export failed: ${res.error}`, 'error');

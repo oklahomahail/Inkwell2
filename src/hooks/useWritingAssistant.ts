@@ -39,7 +39,7 @@ export default function _useWritingAssistant(): AssistantActions {
 
   const improveText = useCallback(
     async (text: string, _goal?: string) => {
-      await claudeActions.improveText(text, goal);
+      await claudeActions.improveText(text, undefined);
     },
     [claudeActions],
   );

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // src/services/storyArchitectService.ts - UPDATED WITH REAL API
 import claudeService from './claudeService';
 

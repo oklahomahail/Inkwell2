@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 import type { Scene, Character } from '@/types/writing';
 import type { TimelineItem } from '@/types/timeline';

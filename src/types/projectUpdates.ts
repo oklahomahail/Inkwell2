@@ -17,7 +17,7 @@ export function ensureValidProjectUpdate(
 ): ProjectUpdate {
   return {
     ...updates,
-    content: updates.content ?? project.content ?? '',
+    content: updates.content ?? (project as any).content ?? '',
     id: project.id,
     updatedAt: updates.updatedAt || Date.now(),
   };

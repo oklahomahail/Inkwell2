@@ -6,7 +6,9 @@
 export type Theme = 'light' | 'dark';
 
 // Export types
-export type ExportFormat = 'PDF' | 'DOCX' | 'EPUB';
+// Import ExportFormat enum from writing types
+export type { ExportFormat } from './writing';
+export type LegacyExportFormat = 'PDF' | 'DOCX' | 'EPUB';
 
 export type ExportJobStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
 
@@ -19,7 +21,7 @@ export interface ExportJobProgress {
 export interface ExportJobConfig {
   id: string;
   projectId: string;
-  format: ExportFormat;
+  format: LegacyExportFormat;
   style: string;
   includeProofread?: boolean;
 }
@@ -40,7 +42,7 @@ export interface ExportResult {
   fileName: string;
   downloadUrl: string;
   metadata: {
-    format: ExportFormat;
+    format: LegacyExportFormat;
     style: string;
     wordCount: number;
     pageCount: number;

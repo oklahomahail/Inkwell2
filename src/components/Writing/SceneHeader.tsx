@@ -1,7 +1,7 @@
 // src/components/Writing/SceneHeader.tsx
 import React from 'react';
 
-import { SceneStatus } from '@/types/writing';
+import { SCENE_STATUS } from '@/consts/writing';
 
 import { type SceneHeaderProps, type SceneUpdatePayload } from './SceneHeaderTypes';
 
@@ -9,7 +9,7 @@ export const SceneHeader = _SceneHeader;
 
 export function _SceneHeader({
   title,
-  status = SceneStatus.DRAFT,
+  status = SCENE_STATUS.DRAFT,
   wordGoal,
   words = 0,
   onChange,
@@ -31,11 +31,11 @@ export function _SceneHeader({
       <select
         className="border rounded px-2 py-1 text-sm"
         value={status}
-        onChange={(e) => onChange({ status: e.target.value as SceneStatus } as SceneUpdatePayload)}
+        onChange={(e) => onChange({ status: e.target.value } as SceneUpdatePayload)}
       >
-        <option value={SceneStatus.DRAFT}>Draft</option>
-        <option value={SceneStatus.REVISION}>Revision</option>
-        <option value={SceneStatus.COMPLETE}>Complete</option>
+        <option value={SCENE_STATUS.DRAFT}>Draft</option>
+        <option value={SCENE_STATUS.REVISION}>Revision</option>
+        <option value={SCENE_STATUS.COMPLETE}>Complete</option>
       </select>
 
       {/* Word goal input */}

@@ -1,0 +1,71 @@
+name: Technical Debt Tracking
+description: Track technical debt that needs to be addressed
+title: "tech-debt: "
+labels: ["tech-debt", "tracking"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Track technical debt items that need to be resolved
+
+  - type: input
+    id: area
+    attributes:
+      label: Area
+      description: Which area of the codebase is affected?
+      placeholder: "e.g. Tour System, Analytics, Types"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_state
+    attributes:
+      label: Current State
+      description: What temporary solutions are currently in place?
+      placeholder: "e.g. @ts-nocheck is used, type assertions, etc."
+    validations:
+      required: true
+
+  - type: textarea
+    id: desired_state
+    attributes:
+      label: Desired State
+      description: What should the proper implementation look like?
+      placeholder: "e.g. Proper type definitions, no type assertions"
+    validations:
+      required: true
+
+  - type: textarea
+    id: files
+    attributes:
+      label: Files Affected
+      description: List the files that need to be modified
+      placeholder: |
+        - src/onboarding/useSpotlightTour.ts
+        - src/components/Onboarding/hooks/useSpotlightAutostart.ts
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: What needs to be done to consider this resolved?
+      placeholder: |
+        - [ ] Remove @ts-nocheck from useSpotlightTour.ts
+        - [ ] Add proper types for tour controller
+        - [ ] Update related test files
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this technical debt?
+      options:
+        - High (Blocking Features)
+        - Medium (Affects Development)
+        - Low (Nice to Have)
+    validations:
+      required: true

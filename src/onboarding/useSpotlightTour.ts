@@ -10,19 +10,12 @@ export function useSpotlightTour(): SpotlightTour {
   const steps = useMemo(() => [StepWelcome, StepQuickActions, StepProjectCard, StepFinish], []);
 
   return {
-    start: () => {
+    start: async () => {
       try {
         // Use the TourController system instead of looking for window.__INKWELL_TOUR__
-        import('../components/Onboarding/tour-core/TourController').then(({ TourController }) => {
-          TourController.startTour('spotlight', 'default', {
-            onComplete: () => {
-              console.log('Spotlight tour completed');
-            },
-            onDismiss: () => {
-              console.log('Spotlight tour dismissed');
-            },
-          });
-        });
+        const { tourController } = await import('../components/Onboarding/hooks/TourController');
+        tourController.startTour('spotlight', 'default', { steps: steps.length });
+        // Overlay listens to tour:start event and renders steps internally
       } catch (error) {
         console.error('Failed to start spotlight tour:', error);
       }

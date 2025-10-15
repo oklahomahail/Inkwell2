@@ -21,6 +21,4 @@ export function _useUI(): UIContextValue {
 /** ✅ Public alias expected by tests and components */
 export const useUI = _useUI;
 
-export type { UIContextValue };
-
 export default useUI;

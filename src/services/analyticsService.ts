@@ -2,12 +2,12 @@
 // Collects minimal, anonymized data to improve user experience
 
 interface BaseEvent {
-  timestamp: number;
   sessionId: string;
   userId?: string; // Optional, hashed if provided
   profileId?: string; // Profile identifier for profile-specific analytics
   version: string;
   platform: string;
+  createdAt: number; // Consistent timestamp field
 }
 
 // Critical events for tour adaptation and drop-off analysis
@@ -494,7 +494,7 @@ class AnalyticsService {
 
   private getBaseEvent(profileId?: string): BaseEvent {
     return {
-      timestamp: Date.now(),
+      createdAt: Date.now(),
       sessionId: this.sessionId,
       userId: this.userId ?? undefined,
       profileId: profileId ?? undefined,
@@ -760,7 +760,7 @@ class AnalyticsService {
       }
     });
 
-    return analytics;
+    return { events: (analytics.traces || []).map((t) => ({ timestamp: t.timestamp, ...t })) };
   }
 
   // Privacy controls
@@ -828,14 +828,17 @@ function _useAnalytics() {
 
 // Legacy compatibility exports
 export interface AnalyticsData {
-  timestamp: number;
+  createdAt: number;
   eventType: string;
-  data: any;
+  data: Record<string, unknown>;
 }
 
 function _trackEvent(event: string, data?: Record<string, unknown>) {
-  console.log('Legacy analytics event:', event, data);
-  // Could map to new system if needed
+  const normalizedData = {
+    ...data,
+    createdAt: Date.now(),
+  };
+  analyticsService.track(event as EventName, normalizedData);
 }
 
 function _initializeAnalytics() {

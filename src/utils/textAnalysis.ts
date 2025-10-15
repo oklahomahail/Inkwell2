@@ -72,7 +72,7 @@ class PhraseAnalysisService {
       projectId,
     } as any;
 
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve, reject) => {
       if (!this.worker) {
         reject(new Error('Worker not available'));
         return;
@@ -82,7 +82,7 @@ class PhraseAnalysisService {
         reject(new Error('Analysis timeout'));
       }, 30000); // 30 second timeout
 
-      const handleMessage = (_event: MessageEvent) => {
+      const handleMessage = (event: MessageEvent) => {
         const response = event.data;
 
         if (response.type === 'ANALYSIS_COMPLETE') {

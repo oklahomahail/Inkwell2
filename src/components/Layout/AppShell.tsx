@@ -16,7 +16,7 @@ function _AppShell({ children }: AppShellProps) {
   // Use a simple default profile identifier; no storage coupling needed
   const profileId = 'default';
   useSimpleTourAutostart(profileId);
-  useSpotlightAutostart(profileId);
+  useSpotlightAutostart([profileId]);
 
   return (
     <TourProvider>

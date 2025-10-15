@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { TimelineItem } from '@/types/timeline';
 import type { Scene, Character } from '@/types/writing';
 

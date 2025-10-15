@@ -4,7 +4,7 @@ import { TourStep } from '@/types/tour';
 
 export const StepQuickActions: TourStep = {
   id: 'quick-actions',
-  element: '.quick-actions-bar',
+  selectors: ['.quick-actions-bar'],
   title: 'Quick Actions',
   content: (
     <div className="space-y-2">

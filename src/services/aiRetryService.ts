@@ -68,7 +68,7 @@ class AIRetryService {
    * Execute a request with retry logic and circuit breaker protection
    */
   async executeWithRetry<T>(
-    _operation: () => Promise<T>,
+    operation: () => Promise<T>,
     context: string = 'ai_request',
   ): Promise<T> {
     // Check circuit breaker first
@@ -234,7 +234,7 @@ class AIRetryService {
 
     // Group errors by message
     const errorCounts = failures.reduce(
-      (acc, _attempt) => {
+      (acc, attempt) => {
         if (attempt.error) {
           acc[attempt.error] = (acc[attempt.error] || 0) + 1;
         }
@@ -245,13 +245,13 @@ class AIRetryService {
 
     const commonErrors = Object.entries(errorCounts)
       .map(([error, count]) => ({ error, count }))
-      .sort((a, _b) => b.count - a.count)
+      .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
     // Calculate average response time (mock calculation for now)
     const averageResponseTime =
       recentAttempts.length > 0
-        ? recentAttempts.reduce((sum, _a) => sum + (1000 + a.retryCount * 500), 0) /
+        ? recentAttempts.reduce((sum, a) => sum + (1000 + a.retryCount * 500), 0) /
           recentAttempts.length
         : 0;
 
@@ -276,7 +276,7 @@ class AIRetryService {
     };
   }
 
-  private recordSuccess(_duration: number): void {
+  private recordSuccess(duration: number): void {
     this.stats.successCount++;
     this.stats.lastSuccessTime = Date.now();
     this.stats.totalRequests++;
@@ -287,7 +287,7 @@ class AIRetryService {
     }
   }
 
-  private recordFailure(_error: string): void {
+  private recordFailure(error: string): void {
     this.stats.failureCount++;
     this.stats.lastFailureTime = Date.now();
     this.stats.totalRequests++;

@@ -11,7 +11,7 @@ export interface UseExportWizardReturn {
  * Hook for managing Export Wizard state
  * Provides a consistent way to open/close the export wizard across the app
  */
-export function _useExportWizard(): UseExportWizardReturn {
+export function useExportWizard(): UseExportWizardReturn {
   const [isOpen, setIsOpen] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
 

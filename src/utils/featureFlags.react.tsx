@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ReactElement } from 'react';
 
 import { FeatureFlagManager } from './FeatureFlagManager';
 
@@ -35,7 +35,7 @@ export function FeatureGate({
   flagKey: string;
   children: React.ReactNode;
   fallback?: React.ReactNode;
-}): JSX.Element | null {
+}): ReactElement | null {
   const enabled = useFeatureFlag(flagKey);
   return enabled ? <>{children}</> : <>{fallback}</>;
 }

@@ -13,8 +13,12 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true, // enables test/expect/vi globals
     setupFiles: ['./src/setupTests.ts'],
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
-
+    // Phase C: add headless component tests progressively
+    include: [
+      'src/utils/**/*.{test,spec}.ts',
+      'src/services/**/*.{test,spec}.ts',
+      'src/components/**/*.{test,spec}.tsx'
+    ],
     coverage: {
       enabled: true,
       provider: 'v8',
@@ -36,6 +40,8 @@ export default defineConfig({
         'scripts/**',
         'api/**',
         'src/bench/**',
+        'tools/bench/**',
+        '**/*.bench.*',
         'src/test-utils/**',
         'src/pages/**',
         'src/workers/**',

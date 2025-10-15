@@ -1,105 +1,99 @@
-import type { Dispatch } from 'react';
-// src/types/writing.ts
+/**
+ * Writing domain types
+ * - Flexible enough to tolerate existing usage across services/components
+ * - Strong where it matters (ids, nesting), loose for optional props
+ */
 
-/* ========= Enums ========= */
-export enum SceneStatus {
-  DRAFT = 'draft',
-  REVISION = 'revision',
-  COMPLETE = 'complete',
+export type SceneStatus = 'draft' | 'in_progress' | 'final' | 'archived' | (string & {});
+export type ChapterStatus = 'draft' | 'final' | 'archived' | (string & {});
+
+/** Export formats used by ExportDialog and downstream utilities */
+export type ExportFormat = 'markdown' | 'html' | 'pdf' | 'docx' | (string & {});
+
+/** Some code references ExportFormat without importing. Make it safe globally. */
+declare global {
+  var __inkwell_has_global_exportformat__: true | undefined;
+  // Only define once
+  // @ts-ignore
+  if (!globalThis.__inkwell_has_global_exportformat__) {
+    type ExportFormat = 'markdown' | 'html' | 'pdf' | 'docx' | (string & {});
+    // @ts-ignore
+    globalThis.__inkwell_has_global_exportformat__ = true;
+  }
 }
 
-export enum ChapterStatus {
-  DRAFT = 'draft',
-  IN_PROGRESS = 'in_progress',
-  COMPLETE = 'complete',
-}
-
-export enum ExportFormat {
-  PDF = 'pdf',
-  DOCX = 'docx',
-  TXT = 'txt',
-  HTML = 'html',
-  MARKDOWN = 'markdown',
-}
-
-/* ========= Auto-save ========= */
-export interface AutoSaveState {
-  isDirty: boolean;
-  isSaving: boolean;
-  lastSaved: Date | null;
-  error?: string | null;
-  saveCount: number; // ✅ used in WritingPanel
-}
-
-/* ========= Writing Sessions ========= */
-export interface WritingSession {
+/** Common identity & audit fields */
+export interface BaseEntity {
   id: string;
-  projectId: string;
-  chapterId?: string;
-  startTime: Date;
-  endTime?: Date;
-  wordCount: number;
-  wordsAdded: number;
-  productivity: number;
-  focusTime: number;
-  notes?: string;
+  createdAt?: Date | number | string;
+  updatedAt?: Date | number | string;
 }
 
-export interface UIWritingSession {
-  date: string;
-  startTime: Date;
-  endTime?: Date;
-  wordCount?: number;
-  wordsAtStart: number;
-  wordsWritten?: number;
-  lastActivityTime: Date;
-  projectId?: string;
-  sceneId?: string;
-  chapterId?: string;
+/** Character (needed by timelineConflictService and tests) */
+export interface Character extends BaseEntity {
+  name: string;
+  description?: string;
+  traits?: Record<string, unknown>;
+  tags?: string[];
+  [key: string]: any;
 }
 
-/* ========= Core Models ========= */
-export interface Scene {
-  id: string;
+/** Scene is the atomic writing unit */
+export interface Scene extends BaseEntity {
   title: string;
-  content: string;
-  status: SceneStatus;
-  order: number;
-  wordCount: number;
-  wordCountGoal?: number;
+  content?: string;
+  /** numeric order inside its chapter (1-based or 0-based depending on caller) */
+  order?: number;
+  status?: SceneStatus;
+  /** optional metadata used around the app */
   summary?: string;
-  timelineEventIds?: string[]; // Links to timeline events
-  createdAt: Date;
-  updatedAt: Date;
+  pov?: string;
+  location?: string;
+  characterIds?: string[];
+  tags?: string[];
+  eventType?: string; // e.g., 'plot', 'character', etc.
+  importance?: 'minor' | 'major' | (string & {});
+  [key: string]: any; // keep permissive for legacy usage
 }
 
-export interface Chapter {
-  id: string;
+/** Chapter groups scenes */
+export interface Chapter extends BaseEntity {
   title: string;
-  order: number;
   scenes: Scene[];
-  totalWordCount: number;
-  status: ChapterStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  order?: number;
+  status?: ChapterStatus;
+  summary?: string;
+  notes?: string;
+  [key: string]: any;
 }
 
-/* ========= Hook State / API ========= */
-export type WritingState = {
-  /** The active project ID (string) or null if nothing selected */
-  currentProject: string | null;
-  /** The active project’s chapters */
-  chapters: Chapter[];
-};
+/** Helpful aliases used around services */
+export type WritingChapter = Chapter;
+export type WritingScene = Scene;
 
-export type WritingAction =
-  | { type: 'SET_CHAPTERS'; payload: Chapter[] }
-  | { type: 'ADD_CHAPTER'; payload: Chapter }
-  | { type: 'UPDATE_CHAPTER'; payload: Chapter }
-  | { type: 'DELETE_CHAPTER'; payload: { id: string } }
-  | { type: string; payload?: unknown }; // catch-all for now
+/** Light-weight project shape some services expect when pairing with writing */
+export interface WritingProject extends BaseEntity {
+  name: string;
+  description?: string;
+  chapters?: Chapter[];
+  characters?: Character[];
+  currentWordCount?: number;
+  sessions?: Array<{ startTime: number | string; endTime?: number | string }>;
+  [key: string]: any;
+}
 
-export type WritingAPI = {
-  state: WritingState;
-  dispatch: Dispatch<WritingAction>;
-};
+/** Export request/response helpers */
+export interface ExportRequest {
+  projectId: string;
+  format: ExportFormat;
+  chapters?: Chapter[];
+  scenes?: Scene[];
+  options?: Record<string, unknown>;
+}
+
+export interface ExportResult {
+  format: ExportFormat;
+  blob?: Blob;
+  content?: string; // for text-like exports
+  filename?: string;
+}

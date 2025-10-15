@@ -110,7 +110,7 @@ export const updateSceneFromPlotCard = (scene: Scene, card: PlotCard): Partial<S
 export const createCardsFromChapter = (chapter: Chapter, columnId: string): PlotCard[] => {
   if (!chapter.scenes) return [];
 
-  return chapter.scenes.map((scene, _index) => sceneToPlotCard(scene, chapter, columnId, index));
+  return chapter.scenes.map((scene, index) => sceneToPlotCard(scene, chapter, columnId, index));
 };
 
 /**
@@ -226,7 +226,7 @@ export const linkCardsToTimelineEvents = (
     if (relatedEvents.length > 0) {
       links.push({
         cardId: card.id,
-        _eventIds: relatedEvents.map((e) => e.id),
+        eventIds: relatedEvents.map((e) => e.id),
       });
     }
   }
@@ -261,7 +261,7 @@ export const calculatePlotProgress = (
 
   // Count by status
   const cardsByStatus = cards.reduce(
-    (acc, _card) => {
+    (acc, card) => {
       acc[card.status] = (acc[card.status] || 0) + 1;
       return acc;
     },
@@ -270,7 +270,7 @@ export const calculatePlotProgress = (
 
   // Count by priority
   const cardsByPriority = cards.reduce(
-    (acc, _card) => {
+    (acc, card) => {
       acc[card.priority] = (acc[card.priority] || 0) + 1;
       return acc;
     },
@@ -287,15 +287,15 @@ export const calculatePlotProgress = (
     [PlotCardStatus.CUT]: 0, // Cut cards don't count toward progress
   };
 
-  const totalProgress = cards.reduce((sum, _card) => {
+  const totalProgress = cards.reduce((sum, card) => {
     return sum + (statusWeights[card.status] || 0);
   }, 0);
 
   const averageProgress = totalCards > 0 ? (totalProgress / totalCards) * 100 : 0;
 
   // Word count progress
-  const currentWords = cards.reduce((sum, _card) => sum + (card.wordCount || 0), 0);
-  const estimatedWords = cards.reduce((sum, _card) => sum + (card.estimatedLength || 1000), 0);
+  const currentWords = cards.reduce((sum, c) => sum + (c.wordCount || 0), 0);
+  const estimatedWords = cards.reduce((sum, c) => sum + (c.estimatedLength || 1000), 0);
   const wordCountPercentage = estimatedWords > 0 ? (currentWords / estimatedWords) * 100 : 0;
 
   // Chapter-level progress
@@ -311,13 +311,13 @@ export const calculatePlotProgress = (
     }
   });
 
-  chapterCards.forEach((chapterCardList, _chapterId) => {
+  chapterCards.forEach((chapterCardList, chapterId) => {
     const completedCards = chapterCardList.filter(
       (c) => c.status === PlotCardStatus.COMPLETE,
     ).length;
-    const totalWords = chapterCardList.reduce((sum, _c) => sum + (c.wordCount || 0), 0);
+    const totalWords = chapterCardList.reduce((sum, c) => sum + (c.wordCount || 0), 0);
     const chapterProgress_avg =
-      (chapterCardList.reduce((sum, _c) => {
+      (chapterCardList.reduce((sum, c) => {
         return sum + (statusWeights[c.status] || 0);
       }, 0) /
         chapterCardList.length) *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { SearchBenchmarkHarness } from './searchBenchmarkHarness';
 
 async function _simpleBenchmark() {

@@ -12,6 +12,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "build:strict": "VITE_ENABLE_PWA=false tsc --noEmit && vite build",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "lint:css": "stylelint \"**/*.css\"",

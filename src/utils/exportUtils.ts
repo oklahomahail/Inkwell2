@@ -1,5 +1,5 @@
 // src/utils/exportUtils.ts - NEW FILE
-import { Scene, Chapter } from '@/types/writing';
+import { type Scene, type Chapter } from '@/types/writing';
 
 export type ExportFormat = 'markdown' | 'txt' | 'docx' | 'html';
 
@@ -45,7 +45,9 @@ function _formatSceneMetadata(scene: Scene, includeWordCounts: boolean): string 
   }
 
   metadata.push(`Status: ${scene.status}`);
-  metadata.push(`Updated: ${scene.updatedAt.toLocaleDateString()}`);
+  const updatedAt =
+    scene.updatedAt instanceof Date ? scene.updatedAt : new Date(scene.updatedAt as any);
+  metadata.push(`Updated: ${updatedAt.toLocaleDateString()}`);
 
   if (scene.summary) {
     metadata.push(`Summary: ${scene.summary}`);
@@ -85,7 +87,7 @@ export function _exportScene(
   switch (format) {
     case 'markdown':
       content += `# ${scene.title}\n\n`;
-      content += _htmlToMarkdown(scene.content);
+      content += _htmlToMarkdown(scene.content ?? '');
       filename += '.md';
       break;
 
@@ -111,14 +113,14 @@ export function _exportScene(
 
     case 'txt':
       content += `${scene.title}\n${'='.repeat(scene.title.length)}\n\n`;
-      content += _stripHtml(scene.content);
+      content += _stripHtml(scene.content ?? '');
       filename += '.txt';
       break;
 
     case 'docx':
       // For now, export as rich text that can be opened in Word
       content += `${scene.title}\n${'='.repeat(scene.title.length)}\n\n`;
-      content += _stripHtml(scene.content);
+      content += _stripHtml(scene.content ?? '');
       filename += '.rtf';
       break;
   }
@@ -142,7 +144,7 @@ export function _exportChapter(
     const chapterMeta = [
       `Total Words: ${chapter.totalWordCount}`,
       `Scenes: ${chapter.scenes.length}`,
-      `Updated: ${chapter.updatedAt.toLocaleDateString()}`,
+      `Updated: ${(chapter.updatedAt instanceof Date ? chapter.updatedAt : new Date(chapter.updatedAt as any)).toLocaleDateString()}`,
     ].join(' • ');
 
     switch (format) {
@@ -222,7 +224,7 @@ export function _exportChapter(
     switch (format) {
       case 'markdown':
         content += `## ${scene.title}\n\n`;
-        content += _htmlToMarkdown(scene.content) + '\n\n';
+        content += _htmlToMarkdown(scene.content ?? '') + '\n\n';
         break;
       case 'html':
         content += `<h2>${scene.title}</h2>\n`;
@@ -230,7 +232,7 @@ export function _exportChapter(
         break;
       default:
         content += `${scene.title}\n${'-'.repeat(scene.title.length)}\n\n`;
-        content += _stripHtml(scene.content) + '\n\n';
+        content += _stripHtml(scene.content ?? '') + '\n\n';
     }
   });
 

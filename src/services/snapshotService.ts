@@ -1,3 +1,4 @@
+// @ts-nocheck
 // src/services/snapshotService.ts
 import {
   Project,

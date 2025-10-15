@@ -53,7 +53,7 @@ export default function _Login() {
             <Logo variant="wordmark-light" size={48} className="mx-auto mb-4" />
           </div>
 
-          <form onSubmit={onSubmit} className="space-y-6">
+          <form onSubmit={_onSubmit} className="space-y-6">
             <div className="text-center">
               <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
                 Welcome back

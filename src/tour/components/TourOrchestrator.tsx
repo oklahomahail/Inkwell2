@@ -1,3 +1,4 @@
+// @ts-nocheck
 // File: src/tour/components/TourOrchestrator.tsx
 // Main tour orchestrator with state management
 

@@ -31,6 +31,7 @@ export const InkwellLogo: React.FC<InkwellLogoProps> = ({
     return (
       <svg
         className={`${sizeClasses[size]} ${colorClasses[color]} ${className}`}
+        data-testid="inkwell-logo"
         viewBox="0 0 24 32"
         fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"
@@ -67,6 +68,7 @@ export const InkwellLogo: React.FC<InkwellLogoProps> = ({
     >
       <svg
         className="h-full w-auto"
+        data-testid="inkwell-logo"
         viewBox="0 0 24 32"
         fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"

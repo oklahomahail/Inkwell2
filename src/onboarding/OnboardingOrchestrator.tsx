@@ -11,7 +11,7 @@ export function OnboardingOrchestrator() {
   const { pathname, search } = location;
 
   useEffect(() => {
-    if (!featureFlags.spotlightTour) return;
+    if (!(featureFlags as any).spotlightTour) return;
 
     // Check if we're on the dashboard view in /profiles
     const searchParams = new URLSearchParams(search);

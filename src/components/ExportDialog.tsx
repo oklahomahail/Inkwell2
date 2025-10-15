@@ -2,9 +2,24 @@
 import { X, Download, FileText, File, FileImage, Settings } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { EXPORT_FORMAT } from '@/consts/writing';
 import { useToast } from '@/context/toast';
 import { exportService, ExportOptions } from '@/services/exportService';
-import { ExportFormat } from '@/types/writing';
+
+interface ExportDialogFormat extends ExportOptions {
+  isOpen: boolean;
+  onClose: () => void;
+  projectId: string;
+  projectName: string;
+}
+
+interface FormatOption {
+  format: string;
+  label: string;
+  description: string;
+  icon: string; // Change to string identifier instead of component
+  recommended?: boolean;
+}
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -13,17 +28,9 @@ interface ExportDialogProps {
   projectName: string;
 }
 
-interface FormatOption {
-  format: ExportFormat;
-  label: string;
-  description: string;
-  icon: string; // Change to string identifier instead of component
-  recommended?: boolean;
-}
-
 const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, projectId, projectName }) => {
   const { showToast } = useToast();
-  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(ExportFormat.MARKDOWN);
+  const [selectedFormat, setSelectedFormat] = useState<keyof typeof EXPORT_FORMAT>('MARKDOWN');
   const [isExporting, setIsExporting] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [customTitle, setCustomTitle] = useState(projectName);
@@ -33,26 +40,26 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, projectId,
 
   const formatOptions: FormatOption[] = [
     {
-      format: ExportFormat.MARKDOWN,
+      format: EXPORT_FORMAT.MARKDOWN,
       label: 'Markdown',
       description: 'Universal format, great for further editing',
       icon: 'FileText',
       recommended: true,
     },
     {
-      format: ExportFormat.TXT,
+      format: EXPORT_FORMAT.TXT,
       label: 'Plain Text',
       description: 'Simple text file, compatible everywhere',
       icon: 'File',
     },
     {
-      format: ExportFormat.PDF,
+      format: EXPORT_FORMAT.PDF,
       label: 'PDF',
       description: 'Print-ready format for sharing',
       icon: 'FileImage',
     },
     {
-      format: ExportFormat.DOCX,
+      format: EXPORT_FORMAT.DOCX,
       label: 'Word Document',
       description: 'RTF format compatible with Microsoft Word',
       icon: 'FileText',
@@ -135,7 +142,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, projectId,
                 return (
                   <button
                     key={option.format}
-                    onClick={() => setSelectedFormat(option.format)}
+                    onClick={() => setSelectedFormat(option.format as keyof typeof EXPORT_FORMAT)}
                     className={`
                       relative flex items-start p-4 rounded-lg border transition-all
                       ${

@@ -4,7 +4,7 @@ import { TourStep } from '@/types/tour';
 
 export const StepProjectCard: TourStep = {
   id: 'project-card',
-  element: '.project-card-demo',
+  selectors: ['.project-card-demo'],
   title: 'Project Management',
   content: (
     <div className="space-y-2">

@@ -326,8 +326,8 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
           <UndoRedoControls
             canUndo={undoRedo.canUndo}
             canRedo={undoRedo.canRedo}
-            undoDescription={undoRedo.getUndoDescription() ?? undefined}
-            redoDescription={undoRedo.getRedoDescription() ?? undefined}
+            undoDescription={undoRedo.getUndoDescription() ?? ''}
+            redoDescription={undoRedo.getRedoDescription() ?? ''}
             onUndo={undoRedo.undo}
             onRedo={undoRedo.redo}
             isUndoing={undoRedo.isUndoing}

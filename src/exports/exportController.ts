@@ -13,35 +13,35 @@ import {
 } from './exportUtils';
 import { assembleManuscript, validateManuscriptForExport } from './manuscriptAssembler';
 
-// Analytics integration - would import from your analytics service
+// ---- Analytics integration (mock) ----
 interface AnalyticsService {
-  track: (_event: string, _data: any) => void;
+  track: (event: string, data: unknown) => void;
 }
 
-// Mock analytics - replace with actual service
 const analytics: AnalyticsService = {
-  track: (_event: string, _data: any) => {
-    console.log(`Analytics: ${_event}`, _data);
+  track: (event: string, data: unknown) => {
+    // Replace with your real analytics service
+
+    console.log(`Analytics: ${event}`, data);
   },
 };
 
-// Job queue for managing exports
+// ---- Job queue & subscriptions ----
 class ExportJobQueue {
   private jobs = new Map<string, ExportJob>();
-  private listeners = new Map<string, Set<(_job: ExportJob) => void>>();
+  private listeners = new Map<string, Set<(job: ExportJob) => void>>();
 
   add(job: ExportJob) {
     this.jobs.set(job.id, job);
-    this.notifyListeners(job);
+    this.notify(job);
   }
 
   update(jobId: string, updates: Partial<ExportJob>) {
     const job = this.jobs.get(jobId);
-    if (job) {
-      const updatedJob = { ...job, ...updates };
-      this.jobs.set(jobId, updatedJob);
-      this.notifyListeners(updatedJob);
-    }
+    if (!job) return;
+    const next: ExportJob = { ...job, ...updates };
+    this.jobs.set(jobId, next);
+    this.notify(next);
   }
 
   get(jobId: string): ExportJob | undefined {
@@ -52,36 +52,42 @@ class ExportJobQueue {
     return Array.from(this.jobs.values());
   }
 
-  subscribe(_jobId: string, _callback: (job: ExportJob) => void) {
-    if (!this.listeners.has(_jobId)) {
-      this.listeners.set(_jobId, new Set());
+  /** Subscribe to updates for a specific job id; returns an unsubscribe fn. */
+  subscribe(jobId: string, listener: (job: ExportJob) => void): () => void {
+    let set = this.listeners.get(jobId);
+    if (!set) {
+      set = new Set();
+      this.listeners.set(jobId, set);
     }
-    this.listeners.get(_jobId)!.add(_callback);
-
-    // Return unsubscribe function
+    set.add(listener);
     return () => {
-      this.listeners.get(_jobId)?.delete(_callback);
+      const s = this.listeners.get(jobId);
+      if (!s) return;
+      s.delete(listener);
+      if (s.size === 0) this.listeners.delete(jobId);
     };
   }
 
-  private notifyListeners(job: ExportJob) {
-    this.listeners.get(job.id)?.forEach((callback) => callback(job));
+  private notify(job: ExportJob) {
+    const set = this.listeners.get(job.id);
+    if (!set) return;
+    for (const cb of set) cb(job);
   }
 }
 
 const jobQueue = new ExportJobQueue();
 
-/**
- * Creates and queues a new export job
- */
+// ---- Public API ----
+
+/** Creates and queues a new export job */
 export function _createExportJob(
   projectId: string,
   format: ExportFormat,
   styleId: string,
-  includeProofread: boolean = false,
+  includeProofread = false,
 ): ExportJob {
   const job: ExportJob = {
-    id: `export_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    id: `export_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
     projectId,
     format,
     style: styleId,
@@ -89,35 +95,26 @@ export function _createExportJob(
     status: 'queued',
     startedAt: Date.now(),
   };
-
   jobQueue.add(job);
   return job;
 }
 
-/**
- * Gets the current status of an export job
- */
+/** Gets the current status of an export job */
 export function _getExportJob(jobId: string): ExportJob | undefined {
   return jobQueue.get(jobId);
 }
 
-/**
- * Gets all export jobs for a project
- */
+/** Gets all export jobs for a project */
 export function _getExportJobsForProject(projectId: string): ExportJob[] {
   return jobQueue.getAll().filter((job) => job.projectId === projectId);
 }
 
-/**
- * Subscribes to job updates
- */
-export function _subscribeToJob(_jobId: string, _callback: (job: ExportJob) => void) {
-  return jobQueue.subscribe(_jobId, _callback);
+/** Subscribes to job updates */
+export function _subscribeToJob(jobId: string, callback: (job: ExportJob) => void) {
+  return jobQueue.subscribe(jobId, callback);
 }
 
-/**
- * Updates job progress
- */
+/** Updates job progress (internal) */
 function _updateJobProgress(
   jobId: string,
   phase: 'assembling' | 'proofreading' | 'rendering' | 'finalizing',
@@ -133,33 +130,25 @@ function _updateJobProgress(
   });
 }
 
-/**
- * Main export function that orchestrates the entire pipeline
- */
+/** Main export function that orchestrates the entire pipeline */
 export async function _runExport(jobId: string): Promise<ExportResult> {
   const job = jobQueue.get(jobId);
-  if (!job) {
-    throw new ExportError('Job not found', 'JOB_NOT_FOUND', 'assembling');
-  }
+  if (!job) throw new ExportError('Job not found', 'JOB_NOT_FOUND', 'assembling');
 
   try {
     // Mark job as running
-    jobQueue.update(jobId, {
-      status: 'running',
-      startedAt: Date.now(),
-    });
+    jobQueue.update(jobId, { status: 'running', startedAt: Date.now() });
 
     analytics.track('export.started', {
       projectId: job.projectId,
       format: job.format,
       style: job.style,
       includeProofread: job.includeProofread,
-      wordCount: 0, // Will be updated after assembly
+      wordCount: 0, // updated after assembly
     });
 
     // Phase 1: Assemble manuscript
     _updateJobProgress(jobId, 'assembling', 10, 'Compiling manuscript from project data...');
-
     const draft = await assembleManuscript(job.projectId);
 
     // Validate manuscript
@@ -167,7 +156,6 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
     if (!validation.isValid) {
       throw new ExportValidationError('Manuscript validation failed', validation.errors);
     }
-
     _updateJobProgress(jobId, 'assembling', 25, 'Manuscript compiled successfully');
 
     // Update analytics with actual word count
@@ -180,21 +168,16 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
     });
 
     let workingDraft = draft;
-    let proofreadReport = undefined;
+    let proofreadReport: unknown | undefined;
 
     // Phase 2: Optional proofreading
     if (job.includeProofread) {
       _updateJobProgress(jobId, 'proofreading', 30, 'Running AI proofread...');
-
       try {
-        // Import and run proofread service
         const { runProofread } = await import('./proofread/proofreadService');
         proofreadReport = await runProofread(draft);
-
+        // In the future, merge suggestions into workingDraft as desired
         _updateJobProgress(jobId, 'proofreading', 50, 'Proofread completed');
-
-        // Apply suggestions to working draft if configured
-        // This would be implemented based on user preferences
       } catch (proofreadError) {
         console.warn('Proofread failed:', proofreadError);
         _updateJobProgress(jobId, 'proofreading', 50, 'Proofread skipped due to error');
@@ -203,10 +186,8 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
 
     // Phase 3: Load style preset
     _updateJobProgress(jobId, 'rendering', 55, 'Loading style preset...');
-
     const { getStylePreset } = await import('./exportTemplates/presets');
     const stylePreset = await getStylePreset(job.style);
-
     if (!stylePreset) {
       throw new ExportError(
         `Style preset '${job.style}' not found`,
@@ -218,21 +199,24 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
     // Phase 4: Render to target format
     _updateJobProgress(jobId, 'rendering', 60, `Rendering ${job.format} document...`);
 
-    let engine;
+    let engine: { render: (draft: any, style: any) => Promise<Blob> };
     try {
       switch (job.format) {
-        case 'PDF':
+        case 'PDF': {
           const { pdfEngine } = await import('./exportEngines/pdfEngine');
           engine = pdfEngine;
           break;
-        case 'DOCX':
+        }
+        case 'DOCX': {
           const { docxEngine } = await import('./exportEngines/docxEngine');
           engine = docxEngine;
           break;
-        case 'EPUB':
+        }
+        case 'EPUB': {
           const { epubEngine } = await import('./exportEngines/epubEngine');
           engine = epubEngine;
           break;
+        }
         default:
           throw new ExportError(
             `Unsupported format: ${job.format}`,
@@ -251,18 +235,14 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
     }
 
     _updateJobProgress(jobId, 'rendering', 80, 'Generating document...');
-
     const blob = await engine.render(workingDraft, stylePreset);
 
     // Phase 5: Finalize
     _updateJobProgress(jobId, 'finalizing', 90, 'Creating download link...');
-
     const fileName = generateFileName(workingDraft.title, job.format, workingDraft.author);
     const downloadUrl = await createDownloadUrl(blob, fileName);
-
     _updateJobProgress(jobId, 'finalizing', 100, 'Export completed successfully');
 
-    // Create result
     const result: ExportResult = {
       blob,
       fileName,
@@ -274,10 +254,11 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
         pageCount: workingDraft.estimatedPages,
         fileSize: blob.size,
         generatedAt: Date.now(),
+        // optionally include proofreadReport flag
+        ...(proofreadReport ? { proofread: true } : {}),
       },
     };
 
-    // Update job as completed
     jobQueue.update(jobId, {
       status: 'succeeded',
       finishedAt: Date.now(),
@@ -286,7 +267,6 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
       artifactSize: blob.size,
     });
 
-    // Track completion analytics
     analytics.track('export.completed', {
       projectId: job.projectId,
       format: job.format,
@@ -297,7 +277,6 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
 
     return result;
   } catch (error) {
-    // Mark job as failed
     const err = error instanceof Error ? error : new Error(String(error));
     jobQueue.update(jobId, {
       status: 'failed',
@@ -305,44 +284,34 @@ export async function _runExport(jobId: string): Promise<ExportResult> {
       error: err.message,
     });
 
-    // Track failure analytics
     analytics.track('export.failed', {
-      projectId: job.projectId,
-      format: job.format,
-      error: error instanceof Error ? error.message : String(error),
+      projectId: job?.projectId,
+      format: job?.format,
+      error: err.message,
       phase: error instanceof ExportError ? error.phase : 'unknown',
     });
 
-    throw error;
+    throw err;
   }
 }
 
-/**
- * Cancels a running export job
- */
+/** Cancels a running export job */
 export function _cancelExportJob(jobId: string): boolean {
   const job = jobQueue.get(jobId);
-  if (!job || job.status !== 'running') {
-    return false;
-  }
+  if (!job || job.status !== 'running') return false;
 
-  jobQueue.update(jobId, {
-    status: 'cancelled',
-    finishedAt: Date.now(),
-  });
+  jobQueue.update(jobId, { status: 'cancelled', finishedAt: Date.now() });
 
   analytics.track('export.cancelled', {
     projectId: job.projectId,
     format: job.format,
-    phase: (job.progress && job.progress.phase) || 'unknown',
+    phase: job.progress?.phase ?? 'unknown',
   });
 
   return true;
 }
 
-/**
- * Gets export statistics for a project
- */
+/** Gets export statistics for a project */
 export function _getExportStats(projectId: string) {
   const jobs = _getExportJobsForProject(projectId);
 
@@ -354,27 +323,25 @@ export function _getExportStats(projectId: string) {
     formatBreakdown: {} as Record<ExportFormat, number>,
     recentExports: jobs
       .filter((j) => j.status === 'succeeded')
-      .sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0))
+      .sort((a, b) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0))
       .slice(0, 5),
   };
 
-  // Calculate average duration for successful exports
   const successfulJobs = jobs.filter(
-    (j) => j.status === 'succeeded' && j.startedAt && j.finishedAt,
+    (j) => j.status === 'succeeded' && j.startedAt != null && j.finishedAt != null,
   );
 
   if (successfulJobs.length > 0) {
     const totalDuration = successfulJobs.reduce(
-      (sum, j) => sum + (j.finishedAt! - j.startedAt!),
+      (sum, j) => sum + ((j.finishedAt as number) - (j.startedAt as number)),
       0,
     );
     stats.averageDuration = totalDuration / successfulJobs.length;
   }
 
-  // Format breakdown
-  jobs.forEach((job) => {
-    stats.formatBreakdown[job.format] = (stats.formatBreakdown[job.format] || 0) + 1;
-  });
+  for (const j of jobs) {
+    stats.formatBreakdown[j.format] = (stats.formatBreakdown[j.format] || 0) + 1;
+  }
 
   return stats;
 }

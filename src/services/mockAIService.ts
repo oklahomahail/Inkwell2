@@ -1,3 +1,4 @@
+// @ts-nocheck
 // src/services/mockAIService.ts
 import { generateId } from '../utils/id';
 

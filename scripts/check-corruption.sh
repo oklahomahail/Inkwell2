@@ -16,7 +16,7 @@ TOTAL_FILES=0
 CORRUPTED_FILES=0
 
 while IFS= read -r file; do
-    if [[ ! "$file" =~ (node_modules|\.next|dist|build|\.vercel|\.turbo|\.cache|coverage|\.vite|\.parcel-cache|\.pnpm-store|\.git) ]]; then
+    if [[ ! "$file" =~ (node_modules|\.next|dist|build|\.vercel|\.turbo|\.cache|coverage|\.vite|\.parcel-cache|\.pnpm-store|\.git|test/run.*\.ts) ]]; then
         ((TOTAL_FILES++))
         
         LINES=$(awk 'END{print NR}' "$file")

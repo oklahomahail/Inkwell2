@@ -1,10 +1,8 @@
-// Inkwell brand constants
+import { MAIN_TAGLINE, ALT_TAGLINE } from './branding';
 
-export const BRAND_NAME = 'Inkwell by Nexus Partners';
-
-// Taglines (single source of truth)
-export const TAGLINE_PRIMARY = 'Find your story. Write it well.';
-export const TAGLINE_SECONDARY = 'Because great stories deserve great tools.';
+// Re-export taglines from branding.ts
+export const TAGLINE_PRIMARY = MAIN_TAGLINE;
+export const TAGLINE_SECONDARY = ALT_TAGLINE;
 
 // Brand colors
 export const BRAND_COLORS = {
@@ -14,8 +12,13 @@ export const BRAND_COLORS = {
 } as const;
 
 // Legacy exports (for backward compatibility)
+export const BRAND_NAME = 'Inkwell by Nexus Partners';
+
 export const BRAND = {
   NAME: BRAND_NAME,
   TAGLINE: TAGLINE_PRIMARY,
   COLORS: BRAND_COLORS,
 } as const;
+
+// Re-export everything from branding.ts
+export * from './branding';

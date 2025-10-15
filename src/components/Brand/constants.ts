@@ -1,3 +1,5 @@
+import { MAIN_TAGLINE, ALT_TAGLINE } from '@/constants/branding';
+
 // Inkwell Brand System Constants (Blue & Gold Theme)
 export const INKWELL_BRAND = {
   colors: {
@@ -11,8 +13,8 @@ export const INKWELL_BRAND = {
     sans: 'Inter, ui-sans-serif, system-ui, sans-serif',
   },
   taglines: {
-    primary: 'Find your story. Write it well.',
-    secondary: 'Because great stories deserve great tools.',
+    primary: MAIN_TAGLINE,
+    secondary: ALT_TAGLINE,
   },
 } as const;
 

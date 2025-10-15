@@ -14,11 +14,12 @@ import ClaudeToolbar from '@/components/Writing/ClaudeToolbar';
 import ExportDialog from '@/components/Writing/ExportDialog';
 import { SceneHeader } from '@/components/Writing/SceneHeader';
 import TipTapEditor from '@/components/Writing/TipTapEditor';
+import { SCENE_STATUS } from '@/consts/writing';
 import { useAppContext, Project } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
 import { EnhancedProject } from '@/types/project';
 import { ensureValidProjectUpdate } from '@/types/projectUpdates';
-import { Scene, SceneStatus, Chapter } from '@/types/writing';
+import type { Scene, Chapter } from '@/types/writing';
 import { generateId } from '@/utils/idUtils';
 
 interface WritingPanelProps {
@@ -60,7 +61,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
         id: 'scene-1',
         title: 'Opening Scene',
         content: draftText || '<p>Start writing your story here...</p>',
-        status: SceneStatus.DRAFT,
+        status: SCENE_STATUS.DRAFT,
         order: 0,
         wordCount: 0,
         wordCountGoal: 500,
@@ -124,7 +125,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
 
         const projectUpdate = ensureValidProjectUpdate(enhancedProject, {
           id: currentProject.id,
-          content: updatedScene.content,
+          content: updatedScene.content || '',
           updatedAt: Date.now(),
         });
 
@@ -155,7 +156,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
       id: generateId('scene'),
       title: `Scene ${scenes.length + 1}`,
       content: '<p>New scene content...</p>',
-      status: SceneStatus.DRAFT,
+      status: SCENE_STATUS.DRAFT,
       order: scenes.length,
       wordCount: 0,
       wordCountGoal: 500,
@@ -414,7 +415,7 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
               {/* TipTap Editor */}
               <div className="flex-1 p-6 overflow-auto bg-white dark:bg-gray-900">
                 <TipTapEditor
-                  value={currentScene.content}
+                  value={currentScene.content || ''}
                   onChange={handleContentChange}
                   onWordCountChange={handleWordCountChange}
                   placeholder={`Start writing "${currentScene.title}"...`}
