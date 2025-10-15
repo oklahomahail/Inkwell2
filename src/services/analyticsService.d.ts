@@ -1,9 +1,9 @@
 import { BaseEvent, EventName, EventData } from './analyticsTypes';
 
 export interface AnalyticsData {
-  timestamp: number;
+  createdAt: number;
   eventType: string;
-  data: any;
+  data: Record<string, unknown>;
 }
 
 export interface AnalyticsService {
