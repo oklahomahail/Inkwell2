@@ -19,6 +19,7 @@ export default defineConfig({
       'src/services/**/*.{test,spec}.ts',
       'src/components/**/*.{test,spec}.tsx'
     ],
+    coverage: {
       enabled: true,
       provider: 'v8',
       reportsDirectory: './coverage',
