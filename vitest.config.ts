@@ -36,6 +36,8 @@ export default defineConfig({
         'scripts/**',
         'api/**',
         'src/bench/**',
+        'tools/bench/**',
+        '**/*.bench.*',
         'src/test-utils/**',
         'src/pages/**',
         'src/workers/**',
