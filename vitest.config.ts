@@ -13,11 +13,11 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true, // enables test/expect/vi globals
     setupFiles: ['./src/setupTests.ts'],
-    // Phase B: utils + non-DOM services
+    // Phase C: add headless component tests progressively
     include: [
       'src/utils/**/*.{test,spec}.ts',
       'src/services/**/*.{test,spec}.ts',
-      'src/components/Onboarding/hooks/**/*.{test,spec}.ts'
+      'src/components/**/*.{test,spec}.tsx'
     ],
       enabled: true,
       provider: 'v8',
