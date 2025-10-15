@@ -99,6 +99,8 @@ export function TourOrchestrator({
     if (currentStep === steps.length - 1) {
       storage.markComplete();
       analytics?.trackEvent('tour_completed', { tourId });
+      const { tourController } = require('../../components/Onboarding/hooks/TourController');
+      tourController.endTour(tourId);
       onComplete?.();
     } else {
       setCurrentStep((prev) => prev + 1);
