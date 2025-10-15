@@ -12,19 +12,35 @@ interface ExportReadyBadgeProps {
   variant?: 'badge' | 'card' | 'banner';
   showDetails?: boolean;
   onExportClick?: () => void;
+  checkExportReadiness?: (projectId: string) => ExportReadinessCheck;
 }
 
-interface CheckExportReadinessProps {
-  (projectId: string): ExportReadinessCheck;
-}
+// Default function to check export readiness - can be overridden via props
+const defaultCheckExportReadiness = (_projectId: string): ExportReadinessCheck => {
+  // This would integrate with your actual project state management
+  // For now, returning mock data
+  const mockProject = {
+    title: 'Sample Project',
+    wordCount: 25000,
+    chapterCount: 12,
+    hasContent: true,
+    chaptersWithTitles: 10,
+    totalChapters: 12,
+  };
 
-type ExportReadyBadgeProps = {
-  projectId: string; // Required for readiness check
-  className?: string;
-  variant?: 'badge' | 'card' | 'banner';
-  showDetails?: boolean;
-  onExportClick?: () => void;
-  checkExportReadiness: CheckExportReadinessProps;
+  return {
+    isReady: mockProject.hasContent && mockProject.chaptersWithTitles === mockProject.totalChapters,
+    score: Math.floor((mockProject.chaptersWithTitles / mockProject.totalChapters) * 100),
+    criteria: {
+      hasTitle: !!mockProject.title,
+      hasContent: mockProject.hasContent,
+      hasChapters: mockProject.chapterCount > 0,
+      minWordCount: mockProject.wordCount >= 1000,
+      chaptersHaveTitles: mockProject.chaptersWithTitles === mockProject.totalChapters,
+      noBlockingIssues: true,
+    },
+    recommendations: [],
+  };
 };
 
 const ExportReadyBadge = ({
@@ -36,7 +52,10 @@ const ExportReadyBadge = ({
   checkExportReadiness,
 }: ExportReadyBadgeProps) => {
   const readiness = useMemo(
-    () => checkExportReadiness(projectId),
+    () =>
+      checkExportReadiness
+        ? checkExportReadiness(projectId)
+        : defaultCheckExportReadiness(projectId),
     [projectId, checkExportReadiness],
   );
 
@@ -152,9 +171,9 @@ const ExportReadyBadge = ({
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             role="progressbar"
-            aria-valuemin="0"
-            aria-valuemax="100"
             aria-valuenow={readiness.score}
+            aria-valuemin={0}
+            aria-valuemax={100}
             className={cn(
               'h-2 rounded-full transition-all duration-500',
               readiness.score >= 80 ? 'bg-green-500' : 'bg-amber-500',

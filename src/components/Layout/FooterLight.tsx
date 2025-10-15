@@ -2,7 +2,7 @@
 import React from 'react';
 
 import InkwellFeatherNavy from '@/assets/brand/inkwell-feather-navy.svg';
-import { TAGLINE_SECONDARY } from '@/constants';
+import { TAGLINE_SECONDARY } from '@/constants/brand';
 
 export function FooterLight() {
   return (
