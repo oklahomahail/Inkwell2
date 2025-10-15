@@ -12,8 +12,10 @@ export const BRAND_COLORS = {
 } as const;
 
 // Legacy exports (for backward compatibility)
+export const BRAND_NAME = 'Inkwell by Nexus Partners';
+
 export const BRAND = {
-  NAME: 'Inkwell by Nexus Partners',
+  NAME: BRAND_NAME,
   TAGLINE: TAGLINE_PRIMARY,
   COLORS: BRAND_COLORS,
 } as const;

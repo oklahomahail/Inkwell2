@@ -1,7 +1,7 @@
 // src/components/Layout/Footer.tsx
 import React from 'react';
 
-import { TAGLINE_SECONDARY } from '@/constants';
+import { TAGLINE_SECONDARY } from '@/constants/brand';
 import { cn } from '@/utils';
 
 export function _Footer() {
