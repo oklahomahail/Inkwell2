@@ -1,7 +1,7 @@
 import { BookOpen, Video, MessageSquare, Sparkles } from 'lucide-react';
 import React from 'react';
 
-import { TourController } from '../Onboarding/tour-core/TourController';
+import { startTour } from '../Onboarding/tour-core/TourController';
 import { Button } from '../ui/Button';
 
 interface HelpMenuProps {
@@ -12,7 +12,7 @@ export function HelpMenu({ className }: HelpMenuProps) {
   const profileId = 'default'; // Use simple default profile ID
 
   const startSpotlightTour = () => {
-    TourController.startTour('spotlight', profileId, { force: true });
+    startTour('spotlight', profileId, { force: true });
   };
 
   return (

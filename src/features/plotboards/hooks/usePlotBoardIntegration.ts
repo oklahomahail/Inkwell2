@@ -128,7 +128,7 @@ export const usePlotBoardIntegration = (
               timelineEvents.push({
                 id: `scene_event_${scene.id}`,
                 title: scene.title || `Scene in ${chapter.title}`,
-                storyDate: scene.storyDate,
+                storyDate: String(scene.storyDate),
                 tags: scene.tags || [],
                 sceneId: scene.id,
                 chapterId: chapter.id,
@@ -282,7 +282,7 @@ export const usePlotBoardIntegration = (
     createCardsFromChapters: handleCreateCardsFromChapters,
 
     // Progress tracking
-    getProgressMetrics: handleGetProgressMetrics,
+    getProgressMetrics: () => handleGetProgressMetrics() as Record<string, unknown> | null,
 
     // Auto-sync status
     isAutoSyncEnabled: autoSyncConfig.enabled,

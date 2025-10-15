@@ -14,14 +14,8 @@ export function useSpotlightTour(): SpotlightTour {
       try {
         // Use the TourController system instead of looking for window.__INKWELL_TOUR__
         import('../components/Onboarding/tour-core/TourController').then(({ TourController }) => {
-          TourController.startTour('spotlight', 'default', {
-            onComplete: () => {
-              console.log('Spotlight tour completed');
-            },
-            onDismiss: () => {
-              console.log('Spotlight tour dismissed');
-            },
-          });
+          TourController.startTour('spotlight', 'default');
+          // Overlay listens to events and renders steps internally
         });
       } catch (error) {
         console.error('Failed to start spotlight tour:', error);

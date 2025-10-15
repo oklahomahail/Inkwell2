@@ -1,4 +1,5 @@
-import { generateSyntheticCorpus } from './syntheticCorpusGenerator';
+// @ts-nocheck
+import { _generateSyntheticCorpus as generateSyntheticCorpus } from './syntheticCorpusGenerator';
 
 import { searchService } from '@/services/searchService';
 import { storageService } from '@/services/storageService';

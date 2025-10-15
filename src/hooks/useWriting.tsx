@@ -1,7 +1,7 @@
 import { useMemo, useReducer } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
-import { Chapter, Scene } from '@/types/writing';
+import type { Scene, Chapter } from '@/types/writing';
 
 import type { Dispatch } from 'react';
 
@@ -52,7 +52,7 @@ export default function _useWriting(): WritingAPI {
     currentProject: currentProject?.id ?? null, // Assuming currentProject has an id property
   };
 
-  const [state, dispatch] = useReducer(writingReducer, initialState);
+  const [state, dispatch] = useReducer(_writingReducer, initialState);
 
   // Update state when currentProject changes
   const updatedState = useMemo<WritingState>(

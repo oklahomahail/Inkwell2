@@ -29,7 +29,7 @@ export interface UseNotificationsApi {
 
 export function _useNotifications(): UseNotificationsApi {
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<NotificationItem[]>(() => seed());
+  const [items, setItems] = useState<NotificationItem[]>([]);
   const idSeq = useRef(1000);
 
   const toggle = useCallback(() => setOpen((v) => !v), []);

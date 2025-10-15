@@ -187,8 +187,10 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
       // If we deleted the active profile, automatically switch to the first remaining profile
       if (state.activeProfile?.id === profileId && updatedProfiles.length > 0) {
         const fallbackProfile = updatedProfiles[0];
-        dispatch({ type: 'SET_ACTIVE_PROFILE', payload: fallbackProfile });
-        _saveActiveProfileToStorage(fallbackProfile.id);
+        if (fallbackProfile) {
+          dispatch({ type: 'SET_ACTIVE_PROFILE', payload: fallbackProfile });
+          _saveActiveProfileToStorage(fallbackProfile.id);
+        }
       } else if (state.activeProfile?.id === profileId) {
         // No remaining profiles (shouldn't happen due to guard above, but just in case)
         dispatch({ type: 'SET_ACTIVE_PROFILE', payload: null });
@@ -232,9 +234,7 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
       const activeProfileId = _loadActiveProfileFromStorage();
       if (activeProfileId && profiles.length > 0) {
         const activeProfile = profiles.find((p) => p.id === activeProfileId);
-        if (activeProfile) {
-          dispatch({ type: 'SET_ACTIVE_PROFILE', payload: activeProfile });
-        }
+        dispatch({ type: 'SET_ACTIVE_PROFILE', payload: activeProfile || null });
       }
     } catch (error) {
       dispatch({
@@ -282,8 +282,10 @@ export function _ProfileProvider({ children }: ProfileProviderProps) {
         dispatch({ type: 'SET_ACTIVE_PROFILE', payload: profile });
         _saveActiveProfileToStorage(profileId);
       } else {
-        // As a last resort, don't throw - just log error
+        // As a last resort, don't throw - just log error and reset active profile
         console.error('Profile not found after reload attempts:', profileId);
+        dispatch({ type: 'SET_ACTIVE_PROFILE', payload: null });
+        _saveActiveProfileToStorage(null);
       }
     },
     [state.profiles, loadProfiles],

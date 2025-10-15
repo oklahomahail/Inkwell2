@@ -1,5 +1,6 @@
-// src/components/Onboarding/TourController.ts
-type TourId = 'feature-tour' | (string & {});
+export type StartOptions = { force?: boolean };
+
+type TourId = 'feature-tour' | 'spotlight' | 'simple' | (string & {});
 
 type TourEventName = 'tour:start' | 'tour:stop' | 'tour:step' | 'tour:complete' | 'tour:error';
 
@@ -28,7 +29,7 @@ declare global {
     __inkwell?: {
       tour?: {
         running: boolean;
-        id?: TourId | undefined;
+        id?: string;
       };
     };
   }
@@ -61,9 +62,13 @@ export function currentTourId(): TourId | undefined {
  * Your overlay should listen for `tour:start`:
  *   window.addEventListener('tour:start', (e) => { ... })
  */
-export function startTour(id: TourId) {
-  if (!bus) return;
-  if (state.running && state.id === id) return;
+export async function startTour(
+  id: TourId,
+  profileId?: string,
+  opts?: StartOptions,
+): Promise<boolean> {
+  if (!bus) return false;
+  if (state.running && state.id === id && !opts?.force) return false;
 
   state.running = true;
   state.id = id;
@@ -72,6 +77,7 @@ export function startTour(id: TourId) {
   bus.__inkwell.tour = { running: true, id };
 
   dispatch<TourStartDetail>('tour:start', { id });
+  return true;
 }
 
 /** Programmatic stop; overlay can also dispatch this on Done. */
@@ -81,7 +87,7 @@ export function stopTour(reason: TourStopDetail['reason'] = 'program') {
   state.running = false;
   state.id = undefined;
   bus.__inkwell = bus.__inkwell || {};
-  bus.__inkwell.tour = { running: false, id: undefined };
+  bus.__inkwell.tour = { running: false };
   dispatch<TourStopDetail>('tour:stop', { id, reason });
 }
 
@@ -100,3 +106,6 @@ export function emitTourError(message: string) {
   if (!bus || !state.id) return;
   dispatch<TourErrorDetail>('tour:error', { id: state.id, message });
 }
+
+// Back-compat for places that still call TourController.startTour(...)
+export const TourController = { startTour, isTourRunning };

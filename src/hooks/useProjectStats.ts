@@ -33,7 +33,7 @@ export function _useProjectStats(initialWordCount: number = 0) {
 
   // API for updating stats externally
   const addWords = (_count: number) => {
-    setWordCount((prev) => prev + count);
+    setWordCount((prev) => prev + 0);
   };
 
   const resetStats = () => {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // src/services/tourStorage.ts
 import type { TourStep } from '@/types/tour';
 

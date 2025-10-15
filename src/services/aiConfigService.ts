@@ -364,14 +364,14 @@ Context: You have access to the user's current project and any selected text. Al
   /**
    * Subscribe to configuration changes
    */
-  subscribe(_callback: (config: AIConfiguration | null) => void): () => void {
-    this.listeners.push(callback);
+  subscribe(cb: (config: AIConfiguration | null) => void): () => void {
+    this.listeners.push(cb);
 
     // Immediately notify with current config
-    callback(this.config);
+    cb(this.config);
 
     return () => {
-      const index = this.listeners.indexOf(callback);
+      const index = this.listeners.indexOf(cb);
       if (index > -1) {
         this.listeners.splice(index, 1);
       }
@@ -575,9 +575,9 @@ Context: You have access to the user's current project and any selected text. Al
   }
 
   private notifyListeners(): void {
-    this.listeners.forEach((callback) => {
+    this.listeners.forEach((cb) => {
       try {
-        callback(this.config);
+        cb(this.config);
       } catch (error) {
         console.error('AI configuration listener error:', error);
       }

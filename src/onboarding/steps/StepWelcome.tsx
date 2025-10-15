@@ -4,7 +4,7 @@ import { TourStep } from '@/types/tour';
 
 export const StepWelcome: TourStep = {
   id: 'welcome',
-  element: '.dashboard-welcome',
+  selectors: ['.dashboard-welcome'],
   title: 'Welcome to Inkwell!',
   content: (
     <div className="space-y-2">

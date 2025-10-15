@@ -1,4 +1,4 @@
-import type { SceneStatus } from '@/types/writing';
+import { type SceneStatus } from '@/types/writing';
 
 export type SceneUpdatePayload = Partial<{
   title: string;

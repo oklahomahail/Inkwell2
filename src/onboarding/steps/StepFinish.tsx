@@ -4,7 +4,7 @@ import { TourStep } from '@/types/tour';
 
 export const StepFinish: TourStep = {
   id: 'finish',
-  element: 'body',
+  selectors: ['body'],
   title: "You're All Set!",
   content: (
     <div className="space-y-2">

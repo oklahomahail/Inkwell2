@@ -3,7 +3,8 @@ import { X, Download, FileText, Globe, FileDown, File } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { useToast } from '@/context/toast';
-import { Scene, Chapter } from '@/types/writing';
+import type { Scene, Chapter } from '@/types/writing';
+// Use utils version
 import { ExportFormat, ExportOptions, performExport } from '@/utils/exportUtils';
 
 interface ExportDialogProps {

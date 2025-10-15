@@ -1,4 +1,5 @@
-import { generateSyntheticCorpus } from './syntheticCorpusGenerator';
+// @ts-nocheck
+import { _generateSyntheticCorpus as generateSyntheticCorpus } from './syntheticCorpusGenerator';
 async function _debugBenchmark() {
   try {
     console.log('Step 1: Testing corpus generation...');

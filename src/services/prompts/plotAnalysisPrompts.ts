@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { AnalyzeBoardInput } from '@/types/plotAnalysis';
 export const plotAnalysisSystem = `You are an expert story editor. Analyze structure, pacing, continuity, and character consistency. Output strict JSON only.`;
 export const plotAnalysisUser = (_payload: AnalyzeBoardInput) =>

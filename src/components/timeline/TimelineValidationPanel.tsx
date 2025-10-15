@@ -270,10 +270,10 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
   }
 
   const criticalCount = validationResult.conflicts.filter(
-    (c: TimelineConflict) => c.severity === 'critical',
+    (conflict: TimelineConflict) => conflict.severity === 'critical',
   ).length;
   const highCount = validationResult.conflicts.filter(
-    (c: TimelineConflict) => c.severity === 'high',
+    (conflict: TimelineConflict) => conflict.severity === 'high',
   ).length;
 
   return (

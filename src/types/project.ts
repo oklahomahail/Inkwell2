@@ -129,7 +129,19 @@ export interface Chapter {
 // If you truly need a different shape for project-level sessions, define a new
 // name like `ProjectWritingSession` instead of `WritingSession`.
 
-export type { WritingSession } from './writing';
+// WritingSession is now internal to this module
+export interface WritingSession {
+  id: string;
+  projectId: string;
+  chapterId?: string;
+  startTime: Date;
+  endTime?: Date;
+  wordCount: number;
+  wordsAdded: number;
+  productivity: number;
+  focusTime: number;
+  notes?: string;
+}
 
 // ----------------------------------------
 // Enhanced Project
@@ -164,7 +176,7 @@ export interface EnhancedProject {
   updatedAt: number; // epoch ms
 
   // Writing analytics
-  sessions: import('./writing').WritingSession[];
+  sessions: WritingSession[];
   dailyGoal?: number;
 
   // Claude context settings

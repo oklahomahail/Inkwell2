@@ -760,7 +760,7 @@ class AnalyticsService {
       }
     });
 
-    return analytics;
+    return { events: (analytics.traces || []).map((t) => ({ timestamp: t.timestamp, ...t })) };
   }
 
   // Privacy controls

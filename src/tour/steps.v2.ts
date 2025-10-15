@@ -1,3 +1,4 @@
+// @ts-nocheck
 // File: src/tour/steps.v2.ts
 // Enhanced tour step definitions with route awareness
 

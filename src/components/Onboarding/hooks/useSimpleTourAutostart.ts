@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 
 import { useUIReady } from '@/context/AppContext';
 
-import { TourController } from '../tour-core/TourController';
+import { startTour } from '../tour-core/TourController';
 import { debugTour } from '../utils/debug';
 import { shouldBlockTourHere } from '../utils/routeGuards';
 import { hasStartedOnce, markStarted } from '../utils/tourOnce';
@@ -66,7 +66,7 @@ export function useSimpleTourAutostart(profileId?: string) {
       }
 
       // Start tour via controller singleton
-      const ok = await TourController.startTour('simple', effectiveProfileId);
+      const ok = await startTour('simple', effectiveProfileId);
       if (!ok) return;
 
       gateRef.current.started = true;

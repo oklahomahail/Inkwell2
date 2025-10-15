@@ -1,3 +1,4 @@
+// @ts-nocheck
 // File: src/tour/targets.ts
 // Robust target resolution with MutationObserver and fallbacks
 

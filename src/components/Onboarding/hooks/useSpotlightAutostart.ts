@@ -40,9 +40,9 @@ export function useSpotlightAutostart(stepSelectors: string[]) {
     if (!loc.pathname.startsWith(DASHBOARD_PATH)) return;
     if (isTourRunning()) return;
 
-    const progress = getTourProgress(FEATURE_TOUR_ID);
+    const progress = (getTourProgress(FEATURE_TOUR_ID) || {}) as { completed?: boolean };
     // Only auto-start if user has never completed it
-    const shouldAutostart = !progress?.completed && !sessionStorage.getItem('tour:feature:blocked');
+    const shouldAutostart = !progress.completed && !sessionStorage.getItem('tour:feature:blocked');
 
     if (!shouldAutostart) return;
     once.current = true;
