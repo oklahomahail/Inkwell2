@@ -48,9 +48,6 @@ describe('ExportReadyBadge', () => {
     beforeEach(() => {
       mockCheckExportReadiness = vi.fn(() => mockReadiness.ready);
     });
-    beforeEach(() => {
-      mockCheckExportReadiness = vi.fn(() => mockReadiness.ready);
-    });
 
     it('renders export ready badge', () => {
       mockCheckExportReadiness = vi.fn(() => mockReadiness.ready);
@@ -81,9 +78,6 @@ describe('ExportReadyBadge', () => {
       mockReadiness.notReady.recommendations = ['Fix missing data'];
       mockCheckExportReadiness = vi.fn(() => mockReadiness.notReady);
     });
-    beforeEach(() => {
-      mockCheckExportReadiness = vi.fn(() => mockReadiness.notReady);
-    });
 
     it('does not render badge variant', () => {
       mockCheckExportReadiness = vi.fn(() => mockReadiness.notReady);
@@ -94,6 +88,11 @@ describe('ExportReadyBadge', () => {
     });
 
     it('shows not ready banner with correct status', () => {
+      mockCheckExportReadiness = vi.fn(() => ({
+        ...mockReadiness.notReady,
+        score: 60,
+        recommendations: ['Add a title to your project'],
+      }));
       render(
         <ExportReadyBadge
           projectId="test-2"
@@ -287,6 +286,7 @@ describe('ExportReadyBadge', () => {
 
   describe('Banner Variant', () => {
     it('renders ready banner with export button', () => {
+      mockCheckExportReadiness = vi.fn(() => mockReadiness.ready);
       const onExportClick = vi.fn();
       render(
         <ExportReadyBadge
@@ -319,6 +319,7 @@ describe('ExportReadyBadge', () => {
 
   describe('Card Variant', () => {
     it('renders full card with ready state', () => {
+      mockCheckExportReadiness = vi.fn(() => mockReadiness.ready);
       render(
         <ExportReadyBadge
           projectId="any-id"
@@ -339,6 +340,7 @@ describe('ExportReadyBadge', () => {
     });
 
     it('shows criteria checklist when showDetails is true', () => {
+      mockCheckExportReadiness = vi.fn(() => mockReadiness.ready);
       render(
         <ExportReadyBadge
           projectId="any-id"
@@ -354,6 +356,7 @@ describe('ExportReadyBadge', () => {
     });
 
     it('shows export button when ready and callback provided', () => {
+      mockCheckExportReadiness = vi.fn(() => mockReadiness.ready);
       const onExportClick = vi.fn();
       render(
         <ExportReadyBadge
