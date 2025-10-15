@@ -12,10 +12,11 @@ interface ExportReadyBadgeProps {
   variant?: 'badge' | 'card' | 'banner';
   showDetails?: boolean;
   onExportClick?: () => void;
+  checkExportReadiness?: (projectId: string) => ExportReadinessCheck;
 }
 
-// Mock function to check export readiness - would integrate with actual project data
-const checkExportReadiness = (projectId: string): ExportReadinessCheck => {
+// Default function to check export readiness - can be overridden via props
+const defaultCheckExportReadiness = (projectId: string): ExportReadinessCheck => {
   // This would integrate with your actual project state management
   // For now, returning mock data
   const mockProject = {
@@ -70,8 +71,15 @@ const ExportReadyBadge: React.FC<ExportReadyBadgeProps> = ({
   variant = 'badge',
   showDetails = false,
   onExportClick,
+  checkExportReadiness,
 }) => {
-  const readiness = useMemo(() => checkExportReadiness(projectId), [projectId]);
+  const readiness = useMemo(
+    () =>
+      checkExportReadiness
+        ? checkExportReadiness(projectId)
+        : defaultCheckExportReadiness(projectId),
+    [projectId, checkExportReadiness],
+  );
 
   if (variant === 'badge') {
     // Simple badge variant
@@ -184,6 +192,10 @@ const ExportReadyBadge: React.FC<ExportReadyBadgeProps> = ({
       <div className="px-4 py-3">
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
+            role="progressbar"
+            aria-valuenow={readiness.score}
+            aria-valuemin={0}
+            aria-valuemax={100}
             className={cn(
               'h-2 rounded-full transition-all duration-500',
               readiness.score >= 80 ? 'bg-green-500' : 'bg-amber-500',
