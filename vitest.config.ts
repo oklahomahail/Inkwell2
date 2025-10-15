@@ -13,7 +13,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true, // enables test/expect/vi globals
     setupFiles: ['./src/setupTests.ts'],
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    // Phase A: utils only; Phases B/C expand these globs progressively
+    include: ['src/utils/**/*.{test,spec}.ts'],
 
     coverage: {
       enabled: true,
