@@ -11,7 +11,7 @@ export interface TourState {
   stepsCount: number;
 }
 
-class TourController {
+export class TourController {
   private activeTour: TourState | null = null;
 
   startTour(id: string, variant?: string, opts: StartOptions = {}): boolean {

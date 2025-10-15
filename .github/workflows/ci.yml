@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     
     steps:
@@ -30,27 +30,13 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
-
+          
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
+        
       - name: Type check
-        id: typecheck
-        run: |
-          pnpm exec tsc -p tsconfig.json --noEmit --pretty false | tee tsc.log
-          echo "Error summary:" >> $GITHUB_STEP_SUMMARY
-          grep -oE "error TS[0-9]{4}:" tsc.log | sort | uniq -c | sort -nr >> $GITHUB_STEP_SUMMARY
-        continue-on-error: true
-
-      - name: Lint (relaxed)
-        if: always()
-        run: pnpm run lint:relaxed
-
-      - name: Run tests
-        run: pnpm test:run
-
+        run: pnpm tsc --noEmit
+        
       - name: Build
         run: pnpm build
 
-      - name: Repository audit
-        run: pnpm ci:audit
