@@ -2,7 +2,8 @@
 import { ArrowRight, Clock, X, BookOpen, Users, BarChart3 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-import { useTour, TOUR_MAP } from './ProfileTourProvider';
+import { useTour } from './ProfileTourProvider';
+import { TOUR_MAP } from './tourRegistry';
 
 interface TourNudge {
   id: string;

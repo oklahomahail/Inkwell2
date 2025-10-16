@@ -131,6 +131,27 @@ pnpm dev
 # Open http://localhost:5173
 ```
 
+### Authentication Setup (Clerk)
+
+1. Install Clerk dependencies (if not present):
+
+```bash
+pnpm add @clerk/clerk-react
+```
+
+2. Create `.env` from `.env.example` and fill in:
+
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+```
+
+3. Run tests deterministically:
+
+```bash
+pnpm vitest run --pool=forks --sequence.concurrent=false
+```
+
 ### Development Commands
 
 ```bash

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 
-import { useProfileActions } from '../../hooks/useProfileActions';
-import { profileService } from '../../services/ProfileService';
-import { Profile } from '../../types/profile';
+import { useProfileActions } from '@/hooks/useProfileActions';
+import { profileService } from '@/services/ProfileService';
+import { Profile } from '@/types/profile';
 
 interface ProfileActionsProps {
   profile: Profile;
@@ -10,7 +10,7 @@ interface ProfileActionsProps {
 }
 
 export function ProfileActions({ profile, onComplete }: ProfileActionsProps) {
-  const { busy, archiveProfile, deleteProfile } = useProfileActions();
+  const { busy, archiveProfile, deleteProfile } = useProfileActions() as any;
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [confirmName, setConfirmName] = useState('');
   const [counts, setCounts] = useState<Record<string, number> | null>(null);
@@ -28,7 +28,9 @@ export function ProfileActions({ profile, onComplete }: ProfileActionsProps) {
   };
 
   const openDeleteModal = async () => {
-    const dependencyCounts = await profileService.getDependencyCounts(profile.id);
+    const dependencyCounts = await (profileService as any).constructor.getDependencyCounts(
+      profile.id,
+    );
     setCounts(dependencyCounts);
     setIsDeleteOpen(true);
   };

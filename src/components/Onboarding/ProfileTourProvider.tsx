@@ -14,6 +14,18 @@ import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 import { useProfile } from '../../context/ProfileContext';
 import { useTutorialStorage, type TutorialPreferences } from '../../services/tutorialStorage';
 
+export type TourId = 'core' | 'feature-tour' | 'spotlight' | 'simple' | 'full-onboarding';
+
+export interface TourStep {
+  id: string;
+  title?: string;
+  content?: React.ReactNode;
+  anchor?: string;
+}
+
+// Re-export from tutorialStorage
+export type { TutorialPreferences } from '../../services/tutorialStorage';
+
 interface TourContextValue {
   prefs: TutorialPreferences | null;
   hydrated: boolean;
@@ -21,14 +33,42 @@ interface TourContextValue {
   isActive: boolean;
   startTour: (id: string) => void;
   completeTour: (id: string) => void;
+  // Additional properties
+  tourState: { active: boolean; currentStep: number; steps: TourStep[]; tourId?: TourId } | null;
+  setTourSteps: (steps: TourStep[], opts?: { goTo?: number }) => void;
+  goToStep: (idx: number) => void;
+  preferences: TutorialPreferences | null;
+  setNeverShowAgain: (v: boolean) => void;
+  setRemindMeLater: (v: boolean) => void;
+  logAnalytics: (event: string, payload?: Record<string, any>) => void;
+  checklist: string[];
+  getChecklistProgress: () => { completed: number; total: number };
+  canShowContextualTour: (key: string) => boolean;
+  // Extra required properties
+  completedTours: string[];
+  neverShowAgain: boolean;
+  remindMeLater: boolean;
 }
 
 const TourContext = createContext<TourContextValue | undefined>(undefined);
 
-const defaultPreferences: TutorialPreferences = {
+export const CORE_TOUR_STEPS: TourStep[] = [{ id: 'welcome' }, { id: 'profile' }, { id: 'writer' }];
+
+export const TOUR_MAP: Record<TourId, TourStep[]> = {
+  core: CORE_TOUR_STEPS,
+  'feature-tour': [{ id: 'feat-1' }, { id: 'feat-2' }],
+  spotlight: [{ id: 'spot-1' }],
+  simple: [{ id: 's1' }, { id: 's2' }],
+  'full-onboarding': [...CORE_TOUR_STEPS, { id: 'done' }],
+};
+
+export const CompletionChecklist = ['set-profile', 'create-project', 'write-500-words'];
+
+const defaultPreferences: import('../../services/tutorialStorage').TutorialPreferences = {
   neverShowAgain: false,
   remindMeLater: false,
   completedTours: [],
+  remindMeLaterUntil: undefined,
   tourDismissals: 0,
 };
 
@@ -44,6 +84,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
   const [prefs, setPrefs] = useState<TutorialPreferences | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [isActive, setIsActive] = useState(false);
+  const [tourState, setTourState] = useState<TourContextValue['tourState']>(null);
 
   const SAVE_DEBOUNCE_MS = process.env.NODE_ENV === 'test' ? 0 : 300;
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -106,7 +147,7 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
   useEffect(() => {
     if (isActive && !sentActiveOnceRef.current) {
       sentActiveOnceRef.current = true;
-      setTourActive('full-onboarding');
+      setTourActive(true);
     }
     if (!isActive) {
       sentActiveOnceRef.current = false;
@@ -117,6 +158,34 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
     if (!hydrated) return true;
     return !(prefs?.hasLaunched === true || (prefs?.completedTours?.length ?? 0) > 0);
   }, [hydrated, prefs]);
+
+  const setTourSteps = useCallback((steps: TourStep[], opts?: { goTo?: number }) => {
+    setTourState({ active: true, currentStep: opts?.goTo ?? 0, steps, tourId: 'core' });
+  }, []);
+
+  const goToStep = useCallback((idx: number) => {
+    setTourState((s) => (s ? { ...s, currentStep: idx } : s));
+  }, []);
+
+  const setNeverShowAgain = (v: boolean) =>
+    setPrefs((p) => ({ ...(p ?? defaultPreferences), neverShowAgain: v }));
+
+  const setRemindMeLater = (v: boolean) =>
+    setPrefs((p) => ({ ...(p ?? defaultPreferences), remindMeLater: v }));
+
+  const logAnalytics = (event: string, payload?: Record<string, any>) => {
+    if (process.env.NODE_ENV === 'test') {
+      console.log('[tour.analytics]', event, payload ?? {});
+    }
+  };
+
+  const getChecklistProgress = () => {
+    const completed = (prefs?.hasLaunched ? 1 : 0) + (prefs?.completedTours?.length ?? 0);
+    return {
+      completed: Math.min(completed, CompletionChecklist.length),
+      total: CompletionChecklist.length,
+    };
+  };
 
   const value = useMemo(
     () => ({
@@ -138,8 +207,22 @@ export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ childr
         });
         setIsActive(false);
       },
+      // New API surface
+      tourState,
+      setTourSteps,
+      goToStep,
+      preferences: prefs,
+      setNeverShowAgain,
+      setRemindMeLater,
+      logAnalytics,
+      checklist: CompletionChecklist,
+      getChecklistProgress,
+      canShowContextualTour: () => true,
+      completedTours: prefs?.completedTours ?? [],
+      neverShowAgain: prefs?.neverShowAgain ?? false,
+      remindMeLater: prefs?.remindMeLater ?? false,
     }),
-    [prefs, hydrated, isFirstTimeUser, isActive, savePrefs],
+    [prefs, hydrated, isFirstTimeUser, isActive, savePrefs, tourState, setTourSteps, goToStep],
   );
 
   return (

@@ -1,5 +1,5 @@
 // src/components/Onboarding/utils/tourSafety.ts
-import { TourStep } from '../ProfileTourProvider';
+import { TourStep } from '../tourRegistry';
 
 /**
  * Waits for all specified selectors to exist in the DOM

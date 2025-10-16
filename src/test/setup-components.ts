@@ -30,17 +30,16 @@ afterEach(() => {
 });
 
 // Helper for basic smoke test of a React component
-export function smokeTest(
-  Component: React.ComponentType<any>,
-  props: Record<string, any> = {}
-) {
+import React from 'react';
+
+export function smokeTest(Component: React.ComponentType<any>, props: Record<string, any> = {}) {
   it('renders without crashing', () => {
-    const { container } = rtl.render(<Component {...props} />);
+    const { container } = rtl.render(React.createElement(Component, props));
     expect(container).toBeInTheDocument();
   });
 }
 
 // Helper to wait for async updates
 export async function waitForChanges() {
-  await rtl.waitFor(() => new Promise(resolve => setTimeout(resolve, 0)));
+  await rtl.waitFor(() => new Promise((resolve) => setTimeout(resolve, 0)));
 }

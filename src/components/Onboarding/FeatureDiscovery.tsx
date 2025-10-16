@@ -395,7 +395,7 @@ export const useContextualHints = (
 
   useEffect(() => {
     // Don't show hints during active tour
-    if (tourState.isActive) return;
+    if (tourState?.active) return;
 
     const eligibleHints = FEATURE_HINTS.filter((hint) => {
       if (isHintDismissed(hint.id)) return false;
@@ -445,7 +445,7 @@ export const useContextualHints = (
         }
       }
     }, 15000); // Show after 15 seconds
-  }, [currentView, appState, showHint, hideHint, isHintDismissed, tourState.isActive]);
+  }, [currentView, appState, showHint, hideHint, isHintDismissed, tourState?.active]);
 };
 
 // Component wrapper that adds hint triggers to elements

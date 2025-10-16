@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["vite/client", "node"],
     /* Language & Environment */
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
@@ -43,8 +45,9 @@
     },
 
     /* Type Declarations */
-    "types": ["vite/client", "vitest/globals", "node"]
+    "types": ["vite/client", "node"]
   },
-  "include": ["src"],
-  "exclude": ["src/test/**", "**/__tests__/**", "**/*.test.*", "src/bench/**"]
+  "include": ["src/types/shims.d.ts", "src/**/*"],
+  "exclude": ["src/test/**", "**/__tests__/**", "**/*.test.*", "src/bench/**"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

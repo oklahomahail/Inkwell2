@@ -1,7 +1,9 @@
 import { useUser } from '@clerk/clerk-react';
 import { useEffect } from 'react';
 
-import { backfillProfilesForCurrentUser } from '../../utils/devBackfill';
+import { devBackfill } from '@/utils/devBackfill';
+
+const { backfillProfilesForCurrentUser } = devBackfill();
 
 const BACKFILL_KEY = 'inkwell.backfill.v1.completed';
 
@@ -15,7 +17,7 @@ export function FirstLoginBackfill() {
 
     (async () => {
       try {
-        await backfillProfilesForCurrentUser(user.id);
+        await backfillProfilesForCurrentUser();
         localStorage.setItem(BACKFILL_KEY, 'true');
       } catch (e) {
         console.error('Backfill failed:', e);

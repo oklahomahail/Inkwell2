@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
 export const LazyLineChart = React.lazy(() => import('./LineChartImpl'));
 

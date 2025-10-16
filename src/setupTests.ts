@@ -3,6 +3,23 @@ import * as matchers from '@testing-library/jest-dom/matchers';
 import { cleanup } from '@testing-library/react';
 import { expect, afterEach, afterAll, vi } from 'vitest';
 
+// Add matchMedia polyfill for components that need it
+if (!window.matchMedia) {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(), // legacy
+      removeListener: vi.fn(), // legacy
+      dispatchEvent: vi.fn(),
+    }),
+  });
+}
+
 expect.extend(matchers);
 
 // --- Make JSDOM behave for idle callbacks so timers get cleared ---
@@ -26,8 +43,9 @@ if (!('requestIdleCallback' in globalThis)) {
 const activeIntervals = new Set<number>();
 const _setInterval = globalThis.setInterval;
 const _clearInterval = globalThis.clearInterval;
-globalThis.setInterval = ((...args: any[]) => {
-  const id = _setInterval(...(args as any));
+globalThis.setInterval = ((handler: TimerHandler, timeout?: number, ...rest: any[]) => {
+  // @ts-ignore
+  const id = _setInterval(handler as any, timeout as any, ...rest);
   // @ts-ignore
   activeIntervals.add(id);
   // @ts-ignore
