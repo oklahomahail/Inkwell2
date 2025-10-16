@@ -1,7 +1,8 @@
 // src/main.tsx - Clean entry point using centralized Providers
 import * as Sentry from '@sentry/react';
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
 import App from './App';
@@ -10,22 +11,6 @@ import './index.css';
 
 // Initialize feature flags system
 import './utils/flags';
-
-// Temporary safety shim – remove after migrating to utils/compact
-(window as any).compact = (arr: any[]) => (Array.isArray(arr) ? arr.filter(Boolean) : []);
-
-// Clean up legacy dark mode
-if (typeof window !== 'undefined') {
-  // Clear theme storage
-  localStorage.removeItem('theme');
-  localStorage.removeItem('preferred_theme');
-  localStorage.removeItem('inkwell_theme');
-  localStorage.removeItem('ui_theme');
-
-  // Remove theme classes
-  document.documentElement.classList.remove('dark');
-  document.body.classList.remove('dark');
-}
 
 // Initialize Sentry for error tracking and performance monitoring
 if (import.meta.env.VITE_SENTRY_DSN) {
@@ -58,12 +43,12 @@ if (import.meta.env.VITE_SENTRY_DSN) {
   console.log('ℹ️ Sentry monitoring disabled (no VITE_SENTRY_DSN)');
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
     <BrowserRouter>
       <AppProviders>
         <App />
       </AppProviders>
     </BrowserRouter>
-  </React.StrictMode>,
+  </StrictMode>,
 );

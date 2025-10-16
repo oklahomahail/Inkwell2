@@ -1,4 +1,4 @@
-// src/App.tsx — provider composition at the root + profile-based routing
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
@@ -54,41 +54,62 @@ type QueuedOperation = {
 // All app logic lives here, safely *inside* the providers.
 function _AppShell() {
   return (
-    <Routes>
-      {/* Health check route */}
-      <Route path="/health" element={<HealthCheck />} />
+    <>
+      <header className="flex justify-between items-center p-4 border-b">
+        <div className="flex items-center gap-4">
+          <SignedOut>
+            <SignInButton />
+          </SignedOut>
+          <SignedIn>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
+        </div>
+      </header>
+      <Routes>
+        {/* Health check route */}
+        <Route path="/health" element={<HealthCheck />} />
 
-      {/* Login route */}
-      <Route path="/login" element={<Login />} />
+        {/* Login route */}
+        <Route path="/login" element={<Login />} />
 
-      {/* Profile picker */}
-      <Route path="/profiles" element={<ProfilePicker />} />
+        {/* Profile picker */}
+        <Route
+          path="/profiles"
+          element={
+            <SignedIn>
+              <ProfilePicker />
+            </SignedIn>
+          }
+        />
 
-      {/* Profile-specific routes */}
-      <Route
-        path="/p/:profileId/*"
-        element={
-          <ProfileGate>
-            <Routes>
-              {/* Tutorial routes */}
-              <Route path="tutorials/*" element={<TutorialRouter />} />
+        {/* Profile-specific routes */}
+        <Route
+          path="/p/:profileId/*"
+          element={
+            <SignedIn>
+              <ProfileGate>
+                <Routes>
+                  {/* Tutorial routes */}
+                  <Route path="tutorials/*" element={<TutorialRouter />} />
 
-              {/* Brand showcase route */}
-              <Route path="brand" element={<BrandPage />} />
+                  {/* Brand showcase route */}
+                  <Route path="brand" element={<BrandPage />} />
 
-              {/* Main app routes */}
-              <Route path="*" element={<_ProfileAppShell />} />
-            </Routes>
-          </ProfileGate>
-        }
-      />
+                  {/* Main app routes */}
+                  <Route path="*" element={<_ProfileAppShell />} />
+                </Routes>
+              </ProfileGate>
+            </SignedIn>
+          }
+        />
 
-      {/* Root redirect */}
-      <Route path="/" element={<Navigate to="/profiles" replace />} />
+        {/* Root redirect */}
+        <Route path="/" element={<Navigate to="/profiles" replace />} />
 
-      {/* Catch-all redirect */}
-      <Route path="*" element={<Navigate to="/profiles" replace />} />
-    </Routes>
+        {/* Catch-all redirect */}
+        <Route path="*" element={<Navigate to="/profiles" replace />} />
+      </Routes>
+    </>
   );
 }
 

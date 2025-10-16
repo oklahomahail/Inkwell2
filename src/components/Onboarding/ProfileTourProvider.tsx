@@ -1,87 +1,29 @@
-// src/components/Onboarding/ProfileTourProvider.tsx
 import React, {
   createContext,
   useContext,
   useState,
   useEffect,
-  ReactNode,
   useCallback,
+  useRef,
+  useMemo,
+  type ReactNode,
 } from 'react';
 
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 
 import { useProfile } from '../../context/ProfileContext';
-import { analyticsService } from '../../services/analyticsService';
-import {
-  useTutorialStorage,
-  type TutorialPreferences,
-  type CompletionChecklist,
-} from '../../services/tutorialStorage';
-
-// Re-export the CompletionChecklist type for use in other components
-export type { CompletionChecklist } from '../../services/tutorialStorage';
-
-// Re-export types from the original TourProvider for compatibility
-export interface TourStep {
-  id: string;
-  title: string;
-  description: string;
-  target: string; // CSS selector or element ID
-  placement: 'top' | 'bottom' | 'left' | 'right' | 'center';
-  action?: 'click' | 'hover' | 'none';
-  optional?: boolean;
-  order: number;
-  view?: string; // Which view this step belongs to
-  category: 'onboarding' | 'feature-discovery' | 'tips';
-}
-
-export interface TourState {
-  isActive: boolean;
-  currentStep: number;
-  steps: TourStep[];
-  completedSteps: string[];
-  isFirstTimeUser: boolean;
-  tourType: 'full-onboarding' | 'feature-tour' | 'contextual-help';
-}
+import { useTutorialStorage, type TutorialPreferences } from '../../services/tutorialStorage';
 
 interface TourContextValue {
-  tourState: TourState;
-  preferences: TutorialPreferences | null;
-  checklist: CompletionChecklist | null;
-  startTour: (_type: TourState['tourType'], _steps?: TourStep[]) => void;
-  nextStep: () => void;
-  previousStep: () => void;
-  skipTour: () => void;
-  completeTour: () => void;
-  completeStep: (_stepId: string) => void;
-  goToStep: (_stepIndex: number) => void;
-  setTourSteps: (_steps: TourStep[]) => void;
-  isStepCompleted: (_stepId: string) => boolean;
-  getCurrentStep: () => TourStep | null;
-  resetTour: () => void;
-  // New methods for enhanced functionality
-  setNeverShowAgain: () => void;
-  setRemindMeLater: (_hours?: number) => void;
-  shouldShowTourPrompt: () => boolean;
-  updateChecklist: (_item: keyof CompletionChecklist) => void;
-  getChecklistProgress: () => { completed: number; total: number };
-  logAnalytics: (_event: string, _data?: any) => void;
-  canShowContextualTour: (_tourType: string) => boolean;
-  // Profile context
-  profileId: string | null;
-  isLoading: boolean;
+  prefs: TutorialPreferences | null;
+  hydrated: boolean;
+  isFirstTimeUser: boolean;
+  isActive: boolean;
+  startTour: (id: string) => void;
+  completeTour: (id: string) => void;
 }
 
 const TourContext = createContext<TourContextValue | undefined>(undefined);
-
-const defaultTourState: TourState = {
-  isActive: false,
-  currentStep: 0,
-  steps: [],
-  completedSteps: [],
-  isFirstTimeUser: true,
-  tourType: 'full-onboarding',
-};
 
 const defaultPreferences: TutorialPreferences = {
   neverShowAgain: false,
@@ -90,475 +32,128 @@ const defaultPreferences: TutorialPreferences = {
   tourDismissals: 0,
 };
 
-const defaultChecklist: CompletionChecklist = {
-  createProject: false,
-  addChapter: false,
-  addCharacter: false,
-  writeContent: false,
-  useTimeline: false,
-  exportProject: false,
-  useAI: false,
-};
-
 interface ProfileTourProviderProps {
   children: ReactNode;
 }
 
-/**
- * Profile-aware TourProvider that stores tutorial state per profile
- * Automatically resets when switching profiles for complete isolation
- */
 export const ProfileTourProvider: React.FC<ProfileTourProviderProps> = ({ children }) => {
   const { active: activeProfile } = useProfile();
+  const { setTourActive } = useOnboardingGate();
   const tutorialStorage = useTutorialStorage();
-  const { setTourActive, completeOnboarding } = useOnboardingGate();
 
-  const [tourState, setTourState] = useState<TourState>(defaultTourState);
-  const [preferences, setPreferences] = useState<TutorialPreferences | null>(null);
-  const [checklist, setChecklist] = useState<CompletionChecklist | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [prefs, setPrefs] = useState<TutorialPreferences | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
-  // Load data whenever the active profile changes
+  const SAVE_DEBOUNCE_MS = process.env.NODE_ENV === 'test' ? 0 : 300;
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const savePrefs = useCallback(
+    (next: TutorialPreferences) => {
+      if (!next) return;
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      const run = () => {
+        tutorialStorage.setPreferences(next);
+      };
+      if (SAVE_DEBOUNCE_MS === 0) run();
+      else saveTimer.current = setTimeout(run, SAVE_DEBOUNCE_MS);
+    },
+    [tutorialStorage, SAVE_DEBOUNCE_MS],
+  );
+
+  useEffect(
+    () => () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    },
+    [],
+  );
+
   useEffect(() => {
-    if (!activeProfile?.id || !tutorialStorage.isProfileActive) {
-      setTourState(defaultTourState);
-      setPreferences(null);
-      setChecklist(null);
-      setIsLoading(false);
+    const id = activeProfile?.id;
+    if (!id) {
+      setPrefs(null);
+      setHydrated(true);
       return;
     }
-
-    const loadProfileData = async () => {
-      setIsLoading(true);
-
+    let alive = true;
+    (async () => {
+      if (process.env.NODE_ENV === 'test' && (window as any).__PROFILE_TOUR_DEBUG__) {
+        console.log('hydrating ProfileTourProvider...');
+      }
       try {
-        // Load preferences
-        const prefs = await tutorialStorage.getPreferences();
-        setPreferences(prefs || defaultPreferences);
-
-        // Load checklist
-        const checklistData = await tutorialStorage.getChecklist();
-        setChecklist(checklistData || defaultChecklist);
-
-        // Load all tutorial progress to determine completed steps
-        const allProgress = await tutorialStorage.getAllProgress();
-        const completedSteps = allProgress
-          .filter((progress) => progress.progress.isCompleted)
-          .map((progress) => progress.slug);
-
-        // Determine if user is first time based on preferences
-        const isFirstTimeUser = !prefs?.completedTours.includes('full-onboarding');
-
-        setTourState((prev) => ({
-          ...prev,
-          completedSteps,
-          isFirstTimeUser,
-          isActive: false, // Never auto-start
-        }));
+        const loaded = await tutorialStorage.getPreferences();
+        if (!alive) return;
+        setPrefs({
+          ...defaultPreferences,
+          ...(loaded || {}),
+          hasLaunched: loaded?.hasLaunched ?? !!loaded,
+          completedTours: loaded?.completedTours ?? [],
+        });
       } catch (error) {
-        console.warn('Failed to load tutorial data for profile:', error);
-        // Set defaults on error
-        setPreferences(defaultPreferences);
-        setChecklist(defaultChecklist);
+        if (!alive) return;
+        console.warn('Failed to load tutorial data:', error);
+        setPrefs(null);
       } finally {
-        setIsLoading(false);
+        if (alive) setHydrated(true);
       }
+    })();
+    return () => {
+      alive = false;
     };
+  }, [activeProfile?.id]);
 
-    loadProfileData();
-  }, [activeProfile?.id, tutorialStorage]);
-
-  // Define logAnalytics first to avoid temporal dead zone errors
-  const logAnalytics = useCallback(
-    (event: string, data: any = {}) => {
-      try {
-        // Enhanced analytics with profile context
-        const analyticsEvent = {
-          ...data,
-          profileId: activeProfile?.id,
-          tourType: tourState.tourType,
-          step: tourState.currentStep,
-        };
-
-        // Track tour-specific events with the proper analytics service
-        switch (event) {
-          case 'tour_started':
-            analyticsService.trackTourStarted(
-              data.tourType || 'feature_tour',
-              'profile_tour_provider',
-            );
-            break;
-          case 'tour_completed':
-            analyticsService.trackTourCompleted(
-              tourState.tourType,
-              data.totalSteps || tourState.steps.length,
-              data.totalTime || 0,
-              data.stepsSkipped || 0,
-            );
-            break;
-          case 'tour_skipped':
-            analyticsService.trackTourAbandoned(
-              tourState.tourType,
-              tourState.currentStep,
-              tourState.steps.length,
-              data.timeBeforeAbandon || 0,
-            );
-            break;
-          case 'tour_step_completed':
-            analyticsService.trackTourStepCompleted(
-              tourState.tourType,
-              tourState.currentStep,
-              data.stepName || `step_${tourState.currentStep}`,
-              data.timeOnStep || 0,
-            );
-            break;
-          default:
-            // Generic event tracking
-            analyticsService.track(event as any, analyticsEvent);
-            break;
-        }
-
-        // Log to console in dev mode
-        if (import.meta.env.DEV) {
-          console.log('Tutorial Analytics:', event, analyticsEvent);
-        }
-      } catch (error) {
-        console.warn('Failed to log tutorial analytics:', error);
-        // Track telemetry errors
-        try {
-          analyticsService.track('analytics_error' as any, {
-            error: error instanceof Error ? error.message : String(error),
-            event,
-            context: 'ProfileTourProvider.logAnalytics',
-          });
-        } catch (telemetryError) {
-          // Silent fail for telemetry errors to avoid infinite loops
-          console.warn('Telemetry error:', telemetryError);
-        }
-      }
-    },
-    [activeProfile?.id, tourState],
-  );
-
-  const completeTour = useCallback(async () => {
-    if (!tutorialStorage.isProfileActive) return;
-
-    logAnalytics('tour_completed', {
-      tourType: tourState.tourType,
-      stepsCompleted: tourState.steps.length,
-      totalSteps: tourState.steps.length,
-    });
-
-    // Update preferences
-    const updatedPrefs: TutorialPreferences = {
-      ...(preferences || defaultPreferences),
-      completedTours: [...new Set([...(preferences?.completedTours || []), tourState.tourType])],
-    };
-    setPreferences(updatedPrefs);
-    await tutorialStorage.setPreferences(updatedPrefs);
-
-    // Mark all steps as completed
-    const newCompletedSteps = [
-      ...new Set([...tourState.completedSteps, ...tourState.steps.map((s) => s.id)]),
-    ];
-
-    setTourState((prev) => ({
-      ...prev,
-      isActive: false,
-      isFirstTimeUser: false,
-      completedSteps: newCompletedSteps,
-    }));
-
-    // Save individual step progress
-    for (const step of tourState.steps) {
-      await tutorialStorage.setProgress(step.id, {
-        currentStep: tourState.steps.length - 1,
-        completedSteps: tourState.steps.map((s) => s.id),
-        tourType: tourState.tourType,
-        startedAt: Date.now(),
-        completedAt: Date.now(),
-        isCompleted: true,
-        totalSteps: tourState.steps.length,
-        lastActiveAt: Date.now(),
-      });
+  const sentActiveOnceRef = useRef(false);
+  useEffect(() => {
+    if (isActive && !sentActiveOnceRef.current) {
+      sentActiveOnceRef.current = true;
+      setTourActive('full-onboarding');
     }
-
-    // Clear gate state - tour is no longer active and onboarding is complete
-    setTourActive(false);
-    if (tourState.tourType === 'full-onboarding') {
-      completeOnboarding();
+    if (!isActive) {
+      sentActiveOnceRef.current = false;
     }
-  }, [tutorialStorage, tourState, preferences, logAnalytics, setTourActive, completeOnboarding]);
+  }, [isActive, setTourActive]);
 
-  const startTour = useCallback(
-    async (type: TourState['tourType'], _steps?: TourStep[]) => {
-      if (!tutorialStorage.isProfileActive) return;
+  const isFirstTimeUser = useMemo(() => {
+    if (!hydrated) return true;
+    return !(prefs?.hasLaunched === true || (prefs?.completedTours?.length ?? 0) > 0);
+  }, [hydrated, prefs]);
 
-      logAnalytics('tour_started', { tourType: type, stepCount: _steps?.length || 0 });
-
-      setTourState((prev) => ({
-        ...prev,
-        isActive: true,
-        currentStep: 0,
-        tourType: type,
-        steps: _steps || prev.steps,
-      }));
-
-      // Clear remind me later if user manually starts a tour
-      if (preferences?.remindMeLater) {
-        const updatedPrefs: TutorialPreferences = {
-          ...preferences,
-          remindMeLater: false,
-        };
-        // Remove remindMeLaterUntil if it exists
-        delete updatedPrefs.remindMeLaterUntil;
-        setPreferences(updatedPrefs);
-        await tutorialStorage.setPreferences(updatedPrefs);
-      }
-    },
-    [tutorialStorage, preferences, logAnalytics],
+  const value = useMemo(
+    () => ({
+      prefs,
+      hydrated,
+      isFirstTimeUser,
+      isActive,
+      startTour: () => setIsActive(true),
+      completeTour: (id: string) => {
+        setPrefs((prev) => {
+          const base = prev ?? defaultPreferences;
+          const updated = {
+            ...base,
+            hasLaunched: true,
+            completedTours: Array.from(new Set([...(base.completedTours ?? []), id])),
+          };
+          savePrefs(updated);
+          return updated;
+        });
+        setIsActive(false);
+      },
+    }),
+    [prefs, hydrated, isFirstTimeUser, isActive, savePrefs],
   );
 
-  const nextStep = useCallback(async () => {
-    setTourState((prev) => {
-      if (prev.currentStep < prev.steps.length - 1) {
-        return { ...prev, currentStep: prev.currentStep + 1 };
-      } else {
-        // Tour completed
-        completeTour();
-        return {
-          ...prev,
-          isActive: false,
-          isFirstTimeUser: false,
-        };
-      }
-    });
-  }, [completeTour]);
-
-  const previousStep = useCallback(() => {
-    setTourState((prev) => ({
-      ...prev,
-      currentStep: Math.max(0, prev.currentStep - 1),
-    }));
-  }, []);
-
-  const skipTour = useCallback(async () => {
-    logAnalytics('tour_skipped', {
-      step: tourState.currentStep,
-      totalSteps: tourState.steps.length,
-    });
-
-    setTourState((prev) => ({
-      ...prev,
-      isActive: false,
-      isFirstTimeUser: false,
-    }));
-
-    // Clear gate state - tour is no longer active
-    setTourActive(false);
-  }, [tourState, logAnalytics, setTourActive]);
-
-  const completeStep = useCallback(
-    async (stepId: string) => {
-      if (!tutorialStorage.isProfileActive) return;
-
-      const newCompletedSteps = [...new Set([...tourState.completedSteps, stepId])];
-      setTourState((prev) => ({
-        ...prev,
-        completedSteps: newCompletedSteps,
-      }));
-
-      // Save progress for this step
-      await tutorialStorage.setProgress(stepId, {
-        currentStep: tourState.currentStep,
-        completedSteps: newCompletedSteps,
-        tourType: tourState.tourType,
-        startedAt: Date.now(),
-        isCompleted: false,
-        totalSteps: tourState.steps.length,
-        lastActiveAt: Date.now(),
-      });
-    },
-    [tutorialStorage, tourState],
+  return (
+    <TourContext.Provider value={value}>
+      <div data-testid="tour-state" style={{ display: 'none' }}>
+        {JSON.stringify({ hydrated, isFirstTimeUser, isActive })}
+      </div>
+      {children}
+    </TourContext.Provider>
   );
-
-  const goToStep = useCallback((stepIndex: number) => {
-    setTourState((prev) => ({
-      ...prev,
-      currentStep: Math.max(0, Math.min(stepIndex, prev.steps.length - 1)),
-    }));
-  }, []);
-
-  const setTourSteps = useCallback((steps: TourStep[]) => {
-    setTourState((prev) => ({
-      ...prev,
-      steps: [...steps].sort((a, b) => a.order - b.order),
-    }));
-  }, []);
-
-  const isStepCompleted = useCallback(
-    (stepId: string): boolean => {
-      return tourState.completedSteps.includes(stepId);
-    },
-    [tourState.completedSteps],
-  );
-
-  const getCurrentStep = useCallback((): TourStep | null => {
-    if (!tourState.isActive || tourState.steps.length === 0) {
-      return null;
-    }
-    return tourState.steps[tourState.currentStep] || null;
-  }, [tourState]);
-
-  const resetTour = useCallback(async () => {
-    if (!tutorialStorage.isProfileActive) return;
-
-    setTourState({
-      ...defaultTourState,
-      isFirstTimeUser: true,
-    });
-
-    const newPrefs = defaultPreferences;
-    const newChecklist = defaultChecklist;
-
-    setPreferences(newPrefs);
-    setChecklist(newChecklist);
-
-    await tutorialStorage.setPreferences(newPrefs);
-    await tutorialStorage.setChecklist(newChecklist);
-    await tutorialStorage.clearProgress(); // Clear all progress
-  }, [tutorialStorage]);
-
-  const setNeverShowAgain = useCallback(async () => {
-    if (!tutorialStorage.isProfileActive) return;
-
-    const updatedPrefs = { ...(preferences || defaultPreferences), neverShowAgain: true };
-    setPreferences(updatedPrefs);
-    await tutorialStorage.setPreferences(updatedPrefs);
-    logAnalytics('tour_never_show_again');
-  }, [preferences, tutorialStorage, logAnalytics]);
-
-  const setRemindMeLater = useCallback(
-    async (hours: number = 24) => {
-      if (!tutorialStorage.isProfileActive) return;
-
-      const remindMeLaterUntil = Date.now() + hours * 60 * 60 * 1000;
-      const updatedPrefs = {
-        ...(preferences || defaultPreferences),
-        remindMeLater: true,
-        remindMeLaterUntil,
-        tourDismissals: (preferences?.tourDismissals || 0) + 1,
-      };
-
-      setPreferences(updatedPrefs);
-      await tutorialStorage.setPreferences(updatedPrefs);
-      logAnalytics('tour_remind_me_later', { hours, dismissalCount: updatedPrefs.tourDismissals });
-    },
-    [preferences, tutorialStorage, logAnalytics],
-  );
-
-  const shouldShowTourPrompt = useCallback((): boolean => {
-    if (!preferences) return false;
-
-    // Never show if user said never
-    if (preferences.neverShowAgain) return false;
-
-    // Don't show if remind me later is still active
-    if (
-      preferences.remindMeLater &&
-      preferences.remindMeLaterUntil &&
-      Date.now() < preferences.remindMeLaterUntil
-    ) {
-      return false;
-    }
-
-    // Show if first time user and hasn't completed main tour
-    return tourState.isFirstTimeUser && !preferences.completedTours.includes('full-onboarding');
-  }, [preferences, tourState.isFirstTimeUser]);
-
-  const updateChecklist = useCallback(
-    async (item: keyof CompletionChecklist) => {
-      if (!tutorialStorage.isProfileActive) return;
-
-      const updatedChecklist = { ...(checklist || defaultChecklist), [item]: true };
-      setChecklist(updatedChecklist);
-      await tutorialStorage.setChecklist(updatedChecklist);
-      logAnalytics('checklist_item_completed', { item });
-    },
-    [checklist, tutorialStorage, logAnalytics],
-  );
-
-  const getChecklistProgress = useCallback(() => {
-    if (!checklist) return { completed: 0, total: 0 };
-
-    const items = Object.values(checklist);
-    const completed = items.filter(Boolean).length;
-    return { completed, total: items.length };
-  }, [checklist]);
-
-  const canShowContextualTour = useCallback(
-    (tourType: string): boolean => {
-      if (!preferences) return false;
-
-      // Don't show contextual tours if user is in an active tour
-      if (tourState.isActive) return false;
-
-      // Don't show if user has completed this specific tour type
-      if (preferences.completedTours.includes(tourType)) return false;
-
-      // Don't show if user said never show tours
-      if (preferences.neverShowAgain) return false;
-
-      return true;
-    },
-    [preferences, tourState.isActive],
-  );
-
-  const value: TourContextValue = {
-    tourState,
-    preferences,
-    checklist,
-    startTour,
-    nextStep,
-    previousStep,
-    skipTour,
-    completeTour,
-    completeStep,
-    goToStep,
-    setTourSteps,
-    isStepCompleted,
-    getCurrentStep,
-    resetTour,
-    setNeverShowAgain,
-    setRemindMeLater,
-    shouldShowTourPrompt,
-    updateChecklist,
-    getChecklistProgress,
-    logAnalytics,
-    canShowContextualTour,
-    profileId: activeProfile?.id || null,
-    isLoading,
-  };
-
-  return <TourContext.Provider value={value}>{children}</TourContext.Provider>;
 };
 
 export const useTour = (): TourContextValue => {
   const context = useContext(TourContext);
-  if (!context) {
-    throw new Error('useTour must be used within a ProfileTourProvider');
-  }
+  if (!context) throw new Error('useTour must be used within a ProfileTourProvider');
   return context;
 };
-
-// Re-export tour steps from original provider for compatibility
-export {
-  CORE_TOUR_STEPS,
-  WRITING_PANEL_TOUR,
-  TIMELINE_PANEL_TOUR,
-  ANALYTICS_PANEL_TOUR,
-  DASHBOARD_PANEL_TOUR,
-  TOUR_MAP,
-  ONBOARDING_STEPS,
-  FEATURE_DISCOVERY_STEPS,
-} from './TourProvider';

@@ -1,3 +1,4 @@
+import { ClerkProvider } from '@clerk/clerk-react';
 import { Suspense } from 'react';
 
 import { CommandPaletteProvider } from './components/CommandPalette/CommandPaletteProvider';
@@ -12,36 +13,35 @@ import { ToastProvider } from './context/ToastContext';
 import { TourProvider } from './features/tour/TourContext';
 import { FeatureFlagProvider } from './utils/featureFlags.react';
 
-function _AppProviders({ children }: { children: React.ReactNode }) {
+export function AppProviders({ children }: { children: React.ReactNode }) {
+  const pk = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  if (!pk) throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in env');
+
   return (
-    <Suspense fallback={null}>
-      <FeatureFlagProvider>
-        <ToastProvider>
-          <ProfileProvider>
-            <NavProvider>
-              <EditorProvider>
-                <ClaudeProvider>
-                  <TourProvider>
-                    <ProfileTourProvider>
-                      <FeatureDiscoveryProvider>
-                        <AppProvider>
-                          <CommandPaletteProvider>{children}</CommandPaletteProvider>
-                        </AppProvider>
-                      </FeatureDiscoveryProvider>
-                    </ProfileTourProvider>
-                  </TourProvider>
-                </ClaudeProvider>
-              </EditorProvider>
-            </NavProvider>
-          </ProfileProvider>
-        </ToastProvider>
-      </FeatureFlagProvider>
-    </Suspense>
+    <ClerkProvider publishableKey={pk} afterSignOutUrl="/">
+      <Suspense fallback={null}>
+        <FeatureFlagProvider>
+          <ToastProvider>
+            <ProfileProvider>
+              <NavProvider>
+                <EditorProvider>
+                  <ClaudeProvider>
+                    <TourProvider>
+                      <ProfileTourProvider>
+                        <FeatureDiscoveryProvider>
+                          <AppProvider>
+                            <CommandPaletteProvider>{children}</CommandPaletteProvider>
+                          </AppProvider>
+                        </FeatureDiscoveryProvider>
+                      </ProfileTourProvider>
+                    </TourProvider>
+                  </ClaudeProvider>
+                </EditorProvider>
+              </NavProvider>
+            </ProfileProvider>
+          </ToastProvider>
+        </FeatureFlagProvider>
+      </Suspense>
+    </ClerkProvider>
   );
 }
-
-// Named export
-export const AppProviders = _AppProviders;
-
-// Default export for legacy compatibility
-export default _AppProviders;
