@@ -1,6 +1,12 @@
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+  RedirectToSignIn,
+} from '@clerk/clerk-react';
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 // UI + panels
 import ClaudeAssistant from './components/ClaudeAssistant';
@@ -33,6 +39,7 @@ import { ProfilePicker } from './routes/shell/ProfilePicker';
 // Services
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
+import { isPublicRoute } from './utils/auth';
 
 // Debug utilities (development only)
 if (import.meta.env.DEV) {
@@ -53,6 +60,13 @@ type QueuedOperation = {
 
 // All app logic lives here, safely *inside* the providers.
 function _AppShell() {
+  const location = useLocation();
+  const isPublic = isPublicRoute(location.pathname);
+
+  if (!isPublic) {
+    return <RedirectToSignIn />;
+  }
+
   return (
     <>
       <header className="flex justify-between items-center p-4 border-b">

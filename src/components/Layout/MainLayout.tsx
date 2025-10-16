@@ -18,7 +18,8 @@ import {
 import React, { useState, useEffect } from 'react';
 
 import Logo from '@/components/Logo';
-import { BRAND_NAME } from '@/constants/brand';
+import { BRAND_NAME, ORGANIZATION_NAME } from '@/constants/brand';
+import { ALT_TAGLINE } from '@/constants/branding';
 import { useAppContext, View } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
 import { useFeatureFlag } from '@/utils/flags';
@@ -621,7 +622,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                 <span className="font-medium">Inkwell</span>
               </div>
               <span className="text-slate-300 dark:text-slate-600">by</span>
-              <span className="font-medium text-slate-600 dark:text-slate-300">Nexus Partners</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">
+                {ORGANIZATION_NAME}
+              </span>
+              <span className="text-slate-300 dark:text-slate-600">•</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">{ALT_TAGLINE}</span>
             </div>
           </div>
         </footer>
