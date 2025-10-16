@@ -1,0 +1,22 @@
+// Import from our own auth utilities instead of Next.js
+import { isPublicRoute } from './src/utils/auth';
+
+// Simple middleware that uses our isPublicRoute function
+export default function middleware(request: Request) {
+  const url = new URL(request.url);
+  const isPublic = isPublicRoute(url.pathname);
+  
+  // If it's not a public route and the user is not authenticated,
+  // redirect to the sign-in page
+  if (!isPublic) {
+    // In a real middleware, we would check auth here
+    // Since we're using React Router, this logic will be handled client-side
+  }
+  
+  return new Response(null);
+}
+
+// Configure which paths this middleware will run on
+export const config = {
+  matcher: ['/((?!api/webhooks|.*\\..*).*)'],
+};
