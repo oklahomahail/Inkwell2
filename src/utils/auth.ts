@@ -1,6 +1,6 @@
-import { createRouteMatcher } from '@clerk/clerk-react';
+import { match } from 'path-to-regexp';
 
-export const isPublicRoute = createRouteMatcher([
+const publicPaths = [
   '/',
   '/sign-in(.*)',
   '/sign-up(.*)',
@@ -16,4 +16,11 @@ export const isPublicRoute = createRouteMatcher([
   '/*.map',
   '/*.json',
   '/_next/(.*)',
-]);
+];
+
+// Create matcher functions for each path pattern
+const publicPathMatchers = publicPaths.map((path) => match(path, { end: false }));
+
+export const isPublicRoute = (path: string): boolean => {
+  return publicPathMatchers.some((matcher) => matcher(path) !== null);
+};
