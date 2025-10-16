@@ -3,7 +3,7 @@ import { z } from 'zod';
 const profileSettingsSchema = z.object({
   theme: z.enum(['light', 'dark', 'system']).optional(),
   defaultProject: z.string().optional(),
-  preferences: z.record(z.any()).optional(),
+  preferences: z.record(z.string(), z.any()).optional(),
 });
 
 export const profileSchema = z.object({
