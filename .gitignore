@@ -7,6 +7,9 @@ build/
 .env
 .env.local
 .env.*.local
+*.env
+*.key
+*.pem
 
 # Cache and temporary files
 .vite/
@@ -48,6 +51,12 @@ reset-dev.sh
 .DS_Store
 __MACOSX/
 .vercel
+
+# Documents and secrets
+*.docx
+*.xlsx
+*.pptx
+/secrets/
 # editor/sed backups
 *.bak
 *.bak?

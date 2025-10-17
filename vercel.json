@@ -8,6 +8,12 @@
     { "source": "/api/login", "destination": "/api/login.ts" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
+  "redirects": [
+    { "source": "/app", "destination": "/", "permanent": true },
+    { "source": "/login", "destination": "/sign-in", "permanent": true },
+    { "source": "/register", "destination": "/sign-up", "permanent": true },
+    { "source": "/docs", "destination": "https://docs.inkwell.app", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/site.webmanifest",

@@ -8,6 +8,8 @@
     "pnpm": ">=9"
   },
   "scripts": {
+    "changeset": "changeset",
+    "release": "changeset publish",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -92,6 +94,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",

@@ -49,3 +49,20 @@ jobs:
       - name: Build
         run: pnpm build:strict
 
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Secret scanning
+        uses: github/secret-scanning/actions/scan@v1
+      
+      - name: Check for stale TODOs
+        run: |
+          ! git grep -nE 'TODO\(>30d\)' -- ':!node_modules'
+      
+      - name: Validate environment variables
+        run: |
+          chmod +x ./scripts/check-env.sh
+          ./scripts/check-env.sh
+

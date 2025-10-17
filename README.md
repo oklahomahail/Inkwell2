@@ -1,9 +1,9 @@
 # Inkwell — Find your story. Write it well.
 
-**Inkwell** is a professional-grade writing platform built for novelists, screenwriters, and serious storytellers. Combining distraction-free writing with intelligent AI assistance and visual story management, Inkwell helps authors bring their stories to life. Because great stories deserve great tools.
+**Inkwell** is a professional-grade writing platform built for novelists, screenwriters, and serious storytellers. Combining distraction-free writing with intelligent AI assistance and visual story management, Inkwell helps authors bring their stories to life.
 
 **Built with React + TypeScript + TailwindCSS** • **Powered by Claude AI** • **Local-first & Private**  
-**🎨 Professional Blue & Gold Brand Identity** • **Accessible Design** • **PWA Ready**
+**🎨 Professional Deep Navy & Warm Gold Brand Identity** • **Accessible Design** • **PWA Ready**
 
 ---
 
@@ -125,11 +125,27 @@ cd Inkwell2
 # Install dependencies
 pnpm install
 
+# Set up environment
+cp .env.example .env
+# Fill in required variables in .env:
+# VITE_CLERK_PUBLISHABLE_KEY=
+# VITE_BASE_URL=
+
 # Start development server
 pnpm dev
 
 # Open http://localhost:5173
 ```
+
+## Documentation
+
+For detailed documentation, see the `/docs` directory:
+
+- **Developer Setup**: [docs/dev/setup.md](docs/dev/setup.md)
+- **Deployment Guide**: [docs/ops/01-deploy.md](docs/ops/01-deploy.md)
+- **Authentication**: [docs/ops/02-auth.md](docs/ops/02-auth.md)
+- **Release Process**: [docs/dev/release.md](docs/dev/release.md)
+- **Product Roadmap**: [docs/product/roadmap.md](docs/product/roadmap.md)
 
 ### Authentication Setup (Clerk)
 
