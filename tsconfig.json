@@ -42,10 +42,7 @@
       "@/utils/*": ["src/utils/*"],
       "@/services/*": ["src/services/*"],
       "@/hooks/*": ["src/hooks/*"]
-    },
-
-    /* Type Declarations */
-    "types": ["vite/client", "node"]
+    }
   },
   "include": ["src/types/shims.d.ts", "src/**/*"],
   "exclude": ["src/test/**", "**/__tests__/**", "**/*.test.*", "src/bench/**"],
