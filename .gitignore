@@ -57,6 +57,9 @@ __MACOSX/
 *.xlsx
 *.pptx
 /secrets/
+
+# Repository maintenance
+.bfg-replacements.txt
 # editor/sed backups
 *.bak
 *.bak?
