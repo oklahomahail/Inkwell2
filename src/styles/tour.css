@@ -1,0 +1,135 @@
+/**
+ * Inkwell Spotlight Tour Animations
+ *
+ * Provides buttery-smooth animations for the tour overlay:
+ * - Pulsing highlight effect for interactive elements
+ * - Smooth fade transitions for backdrop and popover
+ */
+
+@keyframes inkwell-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+
+  70% {
+    transform: scale(1.06);
+    opacity: 0.2;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+}
+
+.animate-inkwell-pulse {
+  animation: inkwell-pulse 1.6s ease-in-out infinite;
+}
+
+/* Fade-in for tour overlay elements */
+@keyframes tour-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tour-fade-in {
+  animation: tour-fade-in 0.3s ease-out;
+}
+
+/* Spotlight mask transition */
+.tour-spotlight-mask {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Popover slide-in based on placement */
+@keyframes tour-slide-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tour-slide-top {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tour-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes tour-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.tour-slide-bottom {
+  animation: tour-slide-bottom 0.3s ease-out;
+}
+
+.tour-slide-top {
+  animation: tour-slide-top 0.3s ease-out;
+}
+
+.tour-slide-left {
+  animation: tour-slide-left 0.3s ease-out;
+}
+
+.tour-slide-right {
+  animation: tour-slide-right 0.3s ease-out;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-inkwell-pulse {
+    animation: none;
+    opacity: 0.9;
+  }
+
+  .tour-fade-in,
+  .tour-slide-bottom,
+  .tour-slide-top,
+  .tour-slide-left,
+  .tour-slide-right {
+    animation: none;
+  }
+
+  .tour-spotlight-mask {
+    transition: none;
+  }
+}
