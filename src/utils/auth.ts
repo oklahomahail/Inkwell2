@@ -2,20 +2,20 @@ import { match } from 'path-to-regexp';
 
 const publicPaths = [
   '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
+  '/sign-in/:path*',
+  '/sign-up/:path*',
   '/favicon.ico',
   '/robots.txt',
   '/site.webmanifest',
-  '/assets/(.*)',
-  '/images/(.*)',
-  '/fonts/(.*)',
-  '/static/(.*)',
+  '/assets/:path*',
+  '/images/:path*',
+  '/fonts/:path*',
+  '/static/:path*',
   '/*.css',
   '/*.js',
   '/*.map',
   '/*.json',
-  '/_next/(.*)',
+  '/_next/:path*',
 ];
 
 // Create matcher functions for each path pattern
