@@ -69,6 +69,9 @@ export function useFocusMode(): FocusModeState {
       // Ensure cleanup when focus mode is disabled
       document.body.classList.remove('focus-mode');
       document.body.style.overflow = '';
+
+      // Return undefined explicitly to satisfy TypeScript
+      return undefined;
     }
   }, [isFocusMode]);
 
