@@ -22,3 +22,6 @@ export function useCommandPaletteContext() {
   if (!ctx) throw new Error('useCommandPaletteContext must be used within CommandPaletteProvider');
   return ctx;
 }
+
+// Convenience alias
+export const useCommandPalette = useCommandPaletteContext;

@@ -5,6 +5,10 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+if (!process.env.VITE_CLERK_PUBLISHABLE_KEY) {
+  console.warn('Warning: VITE_CLERK_PUBLISHABLE_KEY is not set. Clerk may fail at runtime.');
+}
+
 export default defineConfig({
   plugins: [
     react(),

@@ -1,11 +1,100 @@
-# Inkwell — Find your story. Write it well.
+# Inkwell Studio
 
-**Inkwell** is a professional-grade writing platform built for novelists, screenwriters, and serious storytellers. Combining distraction-free writing with intelligent AI assistance and visual story management, Inkwell helps authors bring their stories to life. Because great stories deserve great tools.
+> A focused, local-first writing studio for long-form fiction.
 
-**Built with React + TypeScript + TailwindCSS** • **Powered by Claude AI** • **Local-first & Private**  
-**🎨 Professional Blue & Gold Brand Identity** • **Accessible Design** • **PWA Ready**
+[Docs](/docs/dev/setup.md) · [Roadmap](/docs/product/roadmap.md) · [Changelog](./CHANGELOG.md)
 
 ---
+
+## Overview
+
+Inkwell helps writers plan, draft, and revise with structure. It blends creative flow with organized systems: chapters and scenes, character bibles, clue tracking, timeline checks, progress analytics, and AI-assisted drafting.
+
+## Features
+
+- Chapter & scene tracker with reordering
+- Character profiles (bios, arcs, relationships)
+- Clue tracker (planting → resolution mapping)
+- Writing progress: word count, streaks, goals
+- Story notes with tagging
+- Timeline conflict checker
+- Theme & motif tracker
+- Offline-first (IndexedDB), instant startup
+- Dark mode, keyboard shortcuts, command palette
+- Claude/OpenAI assistant panel (generate or critique)
+- Export/import project data
+
+## Quick Start
+
+```bash
+pnpm install
+cp .env.example .env.local   # fill in required VITE_* values
+pnpm dev
+```
+
+## Scripts
+
+```bash
+pnpm dev        # start app
+pnpm test       # unit tests
+pnpm typecheck  # TS
+pnpm lint       # eslint
+pnpm build      # production build
+pnpm tree:update # regenerate file tree in README
+```
+
+## Configuration
+
+| Key                        | Required | Purpose                     |
+| -------------------------- | -------- | --------------------------- |
+| VITE_CLERK_PUBLISHABLE_KEY | yes      | Clerk frontend key          |
+| VITE_BASE_URL              | yes      | App origin for redirects    |
+| VITE_SENTRY_DSN            | no       | Error reporting (prod only) |
+
+See [/docs/ops/01-deploy.md](/docs/ops/01-deploy.md) and [/docs/ops/03-secrets.md](/docs/ops/03-secrets.md) for full guidance.
+
+## Architecture
+
+Client-side React + Vite, local storage via IndexedDB, auth via Clerk, feature-flagged analytics, and optional AI integrations.
+
+```
+React (Vite)
+ ├─ UI (Tailwind)
+ ├─ State (Context + hooks)
+ ├─ Storage (IndexedDB)
+ ├─ Features (chapters, characters, clues, timeline)
+ ├─ AI (Claude/OpenAI adapter)
+└─ Auth (Clerk)
+```
+
+## Project Tree
+
+<!-- TREE:BEGIN -->
+
+```
+src/
+  components/
+  features/
+  hooks/
+  services/
+  utils/
+  styles/
+  types/
+docs/
+  dev/
+  ops/
+  product/
+```
+
+<!-- TREE:END -->
+
+## Contributing
+
+See [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for branching, commits, and PR checks.
+
+## License
+
+MIT
 
 ## Current Features (October 2025)
 
@@ -125,10 +214,47 @@ cd Inkwell2
 # Install dependencies
 pnpm install
 
+# Set up environment
+cp .env.example .env
+# Fill in required variables in .env:
+# VITE_CLERK_PUBLISHABLE_KEY=
+# VITE_BASE_URL=
+
 # Start development server
 pnpm dev
 
 # Open http://localhost:5173
+```
+
+## Documentation
+
+For detailed documentation, see the `/docs` directory:
+
+- **Developer Setup**: [docs/dev/setup.md](docs/dev/setup.md)
+- **Deployment Guide**: [docs/ops/01-deploy.md](docs/ops/01-deploy.md)
+- **Authentication**: [docs/ops/02-auth.md](docs/ops/02-auth.md)
+- **Release Process**: [docs/dev/release.md](docs/dev/release.md)
+- **Product Roadmap**: [docs/product/roadmap.md](docs/product/roadmap.md)
+
+### Authentication Setup (Clerk)
+
+1. Install Clerk dependencies (if not present):
+
+```bash
+pnpm add @clerk/clerk-react
+```
+
+2. Create `.env` from `.env.example` and fill in:
+
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+```
+
+3. Run tests deterministically:
+
+```bash
+pnpm vitest run --pool=forks --sequence.concurrent=false
 ```
 
 ### Development Commands

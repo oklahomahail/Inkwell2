@@ -7,7 +7,8 @@ import { InkwellFeather } from '@/components/icons';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 import { featureFlagService } from '@/services/featureFlagService';
 
-import { useTour, CORE_TOUR_STEPS } from './ProfileTourProvider';
+import { useTour } from './ProfileTourProvider';
+import { CORE_TOUR_STEPS } from './tourRegistry';
 import { startTourSafely, getSafeTourSteps } from './utils/tourSafety';
 
 interface WelcomeModalProps {
@@ -74,14 +75,14 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
 
   const handleRemindLater = () => {
     logAnalytics('welcome_modal_remind_later');
-    setRemindMeLater(24); // Remind in 24 hours
+    setRemindMeLater(true); // Remind later
     snoozeModal(24); // Also update gate
     onClose();
   };
 
   const handleNeverShow = () => {
     logAnalytics('welcome_modal_never_show');
-    setNeverShowAgain();
+    setNeverShowAgain(true);
     dismissModal(); // Also update gate
     onClose();
   };

@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Self-healing repository features
+  - Environment variables normalization with runtime guards
+  - Structured documentation in `/docs` directory
+  - Repository hygiene improvements
+  - CI workflow for automated checks
+  - Release process documentation
+  - Branch protection automation script
+
 ## [1.0.3] - 2025-10-13
 
 ### Fixed

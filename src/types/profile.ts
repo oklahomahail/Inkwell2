@@ -5,6 +5,7 @@ export type ProfileId = string;
 export interface Profile {
   id: ProfileId;
   name: string;
+  ownerId?: string;
   displayName?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -16,6 +17,9 @@ export interface Profile {
     defaultProject?: string;
     preferences?: Record<string, any>;
   };
+  archivedAt?: string;
+  deleted?: boolean;
+  deletedAt?: string;
 }
 
 export interface ProfileState {

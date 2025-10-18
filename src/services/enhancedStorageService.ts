@@ -31,8 +31,15 @@ export class EnhancedStorageService {
   private static _initialized = false;
   private static _cleanup?: () => void;
 
-  private static autoSnapshotEnabled = true;
-  private static lastAutoSnapshot = Date.now();
+  private static get autoSnapshotEnabled(): boolean {
+    const enabled = localStorage.getItem(this.AUTO_SNAPSHOT_KEY);
+    return enabled === null ? true : enabled === 'true';
+  }
+
+  private static set autoSnapshotEnabled(value: boolean) {
+    localStorage.setItem(this.AUTO_SNAPSHOT_KEY, value.toString());
+  }
+  private static readonly AUTO_SNAPSHOT_KEY = 'inkwell_auto_snapshot_enabled';
   private static readonly autoSnapshotInterval = 10 * 60 * 1000; // 10 minutes
 
   // ==============================================
@@ -326,8 +333,11 @@ export class EnhancedStorageService {
   /**
    * Enable/disable auto-snapshots
    */
+  private static lastAutoSnapshot = 0; // Initialize to 0 to force first snapshot
+
   static setAutoSnapshotEnabled(enabled: boolean): void {
     this.autoSnapshotEnabled = enabled;
+    localStorage.setItem(this.AUTO_SNAPSHOT_KEY, enabled.toString());
     console.log(`Auto-snapshots ${enabled ? 'enabled' : 'disabled'}`);
   }
 
@@ -454,8 +464,7 @@ export class EnhancedStorageService {
       return;
     }
 
-    const timeSinceLastSnapshot = Date.now() - this.lastAutoSnapshot;
-    if (timeSinceLastSnapshot > this.autoSnapshotInterval) {
+    if (this.lastAutoSnapshot === 0) {
       // Create snapshot in background
       setTimeout(() => {
         this.maybeCreateSnapshotAsync(project).catch(console.error);

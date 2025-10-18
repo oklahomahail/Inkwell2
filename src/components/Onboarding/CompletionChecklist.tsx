@@ -12,10 +12,10 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { useTour, CompletionChecklist } from './ProfileTourProvider';
+import { useTour } from './ProfileTourProvider';
 
 interface ChecklistItemConfig {
-  key: keyof CompletionChecklist;
+  key: string;
   label: string;
   description: string;
   icon: React.ElementType;

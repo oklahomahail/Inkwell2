@@ -24,6 +24,7 @@ export interface TutorialPreferences {
   remindMeLaterUntil?: number;
   completedTours: string[];
   tourDismissals: number;
+  hasLaunched?: boolean;
 }
 
 export interface CompletionChecklist {

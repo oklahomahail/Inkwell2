@@ -4,8 +4,9 @@ import { Routes, Route, useParams, Navigate } from 'react-router-dom';
 
 import { useProfile } from '../../context/ProfileContext';
 
-import { useTour, TOUR_MAP } from './ProfileTourProvider';
+import { useTour } from './ProfileTourProvider';
 import TourOverlay from './TourOverlay';
+import { TOUR_MAP } from './tourRegistry';
 
 /**
  * Tutorial page component that handles displaying tutorials with deep links
@@ -13,7 +14,7 @@ import TourOverlay from './TourOverlay';
 function _TutorialPage() {
   const { slug, step } = useParams<{ slug: string; step?: string }>();
   const { active: activeProfile } = useProfile();
-  const { startTour, setTourSteps, goToStep, tourState } = useTour();
+  const { startTour, setTourSteps, goToStep, tourState } = useTour() as any;
 
   React.useEffect(() => {
     if (!slug || !activeProfile?.id) return;
@@ -26,7 +27,7 @@ function _TutorialPage() {
     }
 
     // Set up the tutorial
-    setTourSteps(tourSteps);
+    setTourSteps(tourSteps, { goTo: 0 });
 
     // Determine tour type based on slug
     let tourType: 'full-onboarding' | 'feature-tour' | 'contextual-help';
@@ -45,7 +46,7 @@ function _TutorialPage() {
     }
 
     // Start the tutorial if not already active
-    if (!tourState.isActive) {
+    if (!tourState?.isActive) {
       void startTour(tourType, tourSteps);
     }
 
@@ -98,7 +99,7 @@ function _TutorialPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Tutorial overlay will be displayed by the TourProvider */}
-      {tourState.isActive && <TourOverlay />}
+      {tourState?.isActive && <TourOverlay />}
 
       {/* Tutorial content/preview could go here if needed */}
       <div className="container mx-auto py-8">
@@ -119,7 +120,7 @@ function _TutorialPage() {
                     <li
                       key={tStep.id}
                       className={`text-sm ${
-                        tourState.currentStep === index
+                        tourState?.currentStep === index
                           ? 'text-blue-600 dark:text-blue-400 font-medium'
                           : 'text-gray-600 dark:text-gray-400'
                       }`}
@@ -136,21 +137,21 @@ function _TutorialPage() {
                   <div className="text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Current Step: </span>
                     <span className="font-medium">
-                      {tourState.currentStep + 1} of {tourSteps.length}
+                      {(tourState?.currentStep ?? 0) + 1} of {tourSteps.length}
                     </span>
                   </div>
                   <div className="text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Active: </span>
                     <span
-                      className={`font-medium ${tourState.isActive ? 'text-green-600' : 'text-gray-500'}`}
+                      className={`font-medium ${tourState?.isActive ? 'text-green-600' : 'text-gray-500'}`}
                     >
-                      {tourState.isActive ? 'Yes' : 'No'}
+                      {tourState?.isActive ? 'Yes' : 'No'}
                     </span>
                   </div>
                   <div className="text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Completed Steps: </span>
                     <span className="font-medium">
-                      {tourState.completedSteps.length} / {tourSteps.length}
+                      {tourState?.completedSteps?.length ?? 0} / {tourSteps.length}
                     </span>
                   </div>
                 </div>
@@ -175,7 +176,7 @@ function _TutorialPage() {
  */
 function _TutorialIndex() {
   const { active: activeProfile } = useProfile();
-  const { startTour, setTourSteps, preferences } = useTour();
+  const { startTour, setTourSteps, preferences } = useTour() as any;
 
   const handleStartTutorial = async (slug: string) => {
     const tourSteps = TOUR_MAP[slug as keyof typeof TOUR_MAP];
@@ -198,7 +199,7 @@ function _TutorialIndex() {
         tourType = 'contextual-help';
     }
 
-    await startTour(tourType, tourSteps);
+    await (startTour as any)(tourType, tourSteps);
 
     // Navigate to the tutorial page
     window.location.href = `/p/${activeProfile?.id}/tutorials/${slug}`;
