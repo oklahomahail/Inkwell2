@@ -1,6 +1,6 @@
-import { useUser } from '@clerk/clerk-react';
 import { useEffect } from 'react';
 
+import { useAuth } from '@/context/AuthContext';
 import { devBackfill } from '@/utils/devBackfill';
 
 const { backfillProfilesForCurrentUser } = devBackfill();
@@ -8,10 +8,10 @@ const { backfillProfilesForCurrentUser } = devBackfill();
 const BACKFILL_KEY = 'inkwell.backfill.v1.completed';
 
 export function FirstLoginBackfill() {
-  const { isSignedIn, user } = useUser();
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (!isSignedIn || !user?.id) return;
+    if (!user?.id) return;
     const done = localStorage.getItem(BACKFILL_KEY);
     if (done === 'true') return;
 
@@ -23,7 +23,7 @@ export function FirstLoginBackfill() {
         console.error('Backfill failed:', e);
       }
     })();
-  }, [isSignedIn, user?.id]);
+  }, [user?.id]);
 
   return null;
 }

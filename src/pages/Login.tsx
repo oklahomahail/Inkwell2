@@ -1,35 +1,96 @@
 import { useState } from 'react';
 
 import Logo from '@/components/Logo';
+import { useAuth } from '@/context/AuthContext';
 
 export default function _Login() {
-  const [code, setCode] = useState('');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const { signInWithEmail } = useAuth();
 
   async function _onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
     try {
-      const r = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
-      });
-      const data = await r.json();
-      if (!data.ok) {
-        setError(data.error || 'Login failed');
+      const { error: signInError } = await signInWithEmail(email);
+      if (signInError) {
+        setError(signInError.message);
         setLoading(false);
-        return;
+      } else {
+        setSent(true);
+        setLoading(false);
       }
-      const q = new URLSearchParams(location.search);
-      const next = q.get('next') || '/';
-      location.replace(next);
-    } catch {
+    } catch (err) {
       setError('Network error');
       setLoading(false);
     }
+  }
+
+  if (sent) {
+    return (
+      <main className="min-h-screen grid grid-cols-1 md:grid-cols-2">
+        {/* Left side - Brand */}
+        <div className="hidden md:flex items-center justify-center bg-inkwell-navy p-8">
+          <div className="text-center">
+            <Logo variant="wordmark-dark" size={64} className="mx-auto mb-8 drop-shadow-lg" />
+            <h2 className="text-2xl font-light text-white/90 mb-4">Professional Writing Studio</h2>
+            <p className="text-white/70 max-w-md leading-relaxed">
+              Craft extraordinary stories with tools designed for serious writers.
+            </p>
+          </div>
+        </div>
+
+        {/* Right side - Success message */}
+        <div className="flex items-center justify-center bg-white dark:bg-gray-900 p-8">
+          <div className="w-full max-w-sm">
+            <div className="text-center mb-8 md:hidden">
+              <Logo variant="wordmark-light" size={48} className="mx-auto mb-4" />
+            </div>
+
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-green-600 dark:text-green-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                Check your email
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                We've sent a magic link to{' '}
+                <strong className="text-gray-900 dark:text-white">{email}</strong>.
+              </p>
+              <p className="text-gray-600 dark:text-gray-400">
+                Click the link in your email to sign in.
+              </p>
+              <button
+                onClick={() => {
+                  setSent(false);
+                  setEmail('');
+                }}
+                className="text-sm text-inkwell-navy dark:text-blue-400 hover:underline mt-4"
+              >
+                Use a different email
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -56,16 +117,18 @@ export default function _Login() {
           <form onSubmit={_onSubmit} className="space-y-6">
             <div className="text-center">
               <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
-                Welcome back
+                Welcome to Inkwell
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">Enter your access code to continue</p>
+              <p className="text-gray-600 dark:text-gray-400">Sign in with your email address</p>
             </div>
 
             <div>
               <input
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="Access code"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
                 className="w-full rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white px-4 py-3 outline-none focus:ring-2 focus:ring-inkwell-navy focus:border-transparent transition-colors"
                 autoFocus
               />
@@ -81,11 +144,11 @@ export default function _Login() {
               disabled={loading}
               className="w-full rounded-lg bg-inkwell-navy hover:bg-inkwell-navy-700 disabled:opacity-60 text-white py-3 font-medium transition-colors shadow-sm hover:shadow-md"
             >
-              {loading ? 'Checking…' : 'Enter Inkwell'}
+              {loading ? 'Sending magic link…' : 'Send magic link'}
             </button>
 
             <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-              Need help? Contact your Inkwell administrator.
+              We'll email you a link to sign in. No password needed.
             </p>
           </form>
         </div>

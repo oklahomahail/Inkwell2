@@ -1,10 +1,3 @@
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-  RedirectToSignIn,
-} from '@clerk/clerk-react';
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
@@ -29,6 +22,7 @@ import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
 // Context and providers
 import { useAppContext } from './context/AppContext';
+import { useAuth } from './context/AuthContext';
 import { useEditorContext } from './context/EditorContext';
 // Pages
 import BrandPage from './pages/Brand';
@@ -61,46 +55,53 @@ type QueuedOperation = {
 // All app logic lives here, safely *inside* the providers.
 function _AppShell() {
   const location = useLocation();
+  const { user, loading, signOut } = useAuth();
   const isPublic = isPublicRoute(location.pathname);
 
-  if (!isPublic) {
-    return <RedirectToSignIn />;
+  // Show nothing while loading
+  if (loading) return null;
+
+  // Redirect to sign-in if not on public route and not signed in
+  if (!isPublic && !user) {
+    return <Navigate to="/sign-in" replace />;
   }
 
   return (
     <>
       <header className="flex justify-between items-center p-4 border-b">
         <div className="flex items-center gap-4">
-          <SignedOut>
-            <SignInButton />
-          </SignedOut>
-          <SignedIn>
-            <UserButton afterSignOutUrl="/" />
-          </SignedIn>
+          {!user ? (
+            <a href="/sign-in" className="text-blue-600 hover:text-blue-700">
+              Sign in
+            </a>
+          ) : (
+            <button onClick={signOut} className="text-sm text-gray-600 hover:text-gray-900">
+              Sign out
+            </button>
+          )}
         </div>
       </header>
       <Routes>
         {/* Health check route */}
         <Route path="/health" element={<HealthCheck />} />
 
-        {/* Login route */}
-        <Route path="/login" element={<Login />} />
+        {/* Sign-in route */}
+        <Route path="/sign-in" element={<Login />} />
 
-        {/* Profile picker */}
+        {/* Legacy login route - redirect to sign-in */}
+        <Route path="/login" element={<Navigate to="/sign-in" replace />} />
+
+        {/* Profile picker - protected */}
         <Route
           path="/profiles"
-          element={
-            <SignedIn>
-              <ProfilePicker />
-            </SignedIn>
-          }
+          element={user ? <ProfilePicker /> : <Navigate to="/sign-in" replace />}
         />
 
-        {/* Profile-specific routes */}
+        {/* Profile-specific routes - protected */}
         <Route
           path="/p/:profileId/*"
           element={
-            <SignedIn>
+            user ? (
               <ProfileGate>
                 <Routes>
                   {/* Tutorial routes */}
@@ -113,7 +114,9 @@ function _AppShell() {
                   <Route path="*" element={<_ProfileAppShell />} />
                 </Routes>
               </ProfileGate>
-            </SignedIn>
+            ) : (
+              <Navigate to="/sign-in" replace />
+            )
           }
         />
 

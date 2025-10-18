@@ -1,16 +1,16 @@
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { Navigate } from 'react-router-dom';
+
+import { useAuth } from '@/context/AuthContext';
 
 interface AuthGateProps {
   children: React.ReactNode;
 }
 
 export function AuthGate({ children }: AuthGateProps) {
-  return (
-    <>
-      <SignedIn>{children}</SignedIn>
-      <SignedOut>
-        <RedirectToSignIn />
-      </SignedOut>
-    </>
-  );
+  const { user, loading } = useAuth();
+
+  if (loading) return null;
+  if (!user) return <Navigate to="/sign-in" replace />;
+
+  return <>{children}</>;
 }

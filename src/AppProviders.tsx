@@ -1,10 +1,10 @@
-import { ClerkProvider } from '@clerk/clerk-react';
 import { Suspense } from 'react';
 
 import { CommandPaletteProvider } from './components/CommandPalette/CommandPaletteProvider';
 import { FeatureDiscoveryProvider } from './components/Onboarding/FeatureDiscovery';
 import { ProfileTourProvider } from './components/Onboarding/ProfileTourProvider';
 import { AppProvider } from './context/AppContext';
+import { AuthProvider } from './context/AuthContext';
 import { ClaudeProvider } from './context/ClaudeProvider';
 import { EditorProvider } from './context/EditorContext';
 import { NavProvider } from './context/NavContext';
@@ -14,20 +14,8 @@ import { TourProvider } from './features/tour/TourContext';
 import { FeatureFlagProvider } from './utils/featureFlags.react';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
-  const pk = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-  if (!pk) throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in env');
-
-  // Force use of Clerk's default infrastructure to bypass custom domain SSL issues
-  // Set proxyUrl to undefined for all environments to disable clerk.leadwithnexus.com
-  // This bypasses the broken clerk.leadwithnexus.com SSL certificate
-  const clerkOptions = {
-    publishableKey: pk,
-    afterSignOutUrl: '/',
-    proxyUrl: undefined, // Disable custom domain proxy completely
-  };
-
   return (
-    <ClerkProvider {...clerkOptions}>
+    <AuthProvider>
       <Suspense fallback={null}>
         <FeatureFlagProvider>
           <ToastProvider>
@@ -51,6 +39,6 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
           </ToastProvider>
         </FeatureFlagProvider>
       </Suspense>
-    </ClerkProvider>
+    </AuthProvider>
   );
 }

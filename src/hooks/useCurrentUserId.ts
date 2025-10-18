@@ -1,6 +1,6 @@
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '@/context/AuthContext';
 
 export function useCurrentUserId() {
-  const { user, isSignedIn } = useUser();
-  return isSignedIn ? (user?.id ?? null) : null;
+  const { user } = useAuth();
+  return user?.id ?? null;
 }
