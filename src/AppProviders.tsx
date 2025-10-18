@@ -18,12 +18,11 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   if (!pk) throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in env');
 
   // Force use of Clerk's default infrastructure to bypass custom domain SSL issues
+  // Set proxyUrl to undefined for all environments to disable clerk.leadwithnexus.com
   const clerkOptions = {
     publishableKey: pk,
     afterSignOutUrl: '/',
-    ...(import.meta.env.PROD && {
-      proxyUrl: undefined, // Disable proxy in production, use default Clerk infrastructure
-    }),
+    proxyUrl: undefined, // Disable custom domain proxy completely
   };
 
   return (
