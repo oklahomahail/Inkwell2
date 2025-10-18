@@ -12,6 +12,7 @@
     "release": "changeset publish",
     "tree": "npx tree -L 2 -I 'node_modules|dist|build|coverage|.vercel|.DS_Store'",
     "tree:update": "node scripts/insert-tree.js",
+    "check:clerk-env": "node scripts/verify-clerk-env.mjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
