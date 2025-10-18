@@ -96,7 +96,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   // Command Palette
-  const { openPalette } = useCommandPalette();
+  const { open: openPalette } = useCommandPalette();
 
   // Feature flags
   const isPlotBoardsEnabled = useFeatureFlag('plotBoards');

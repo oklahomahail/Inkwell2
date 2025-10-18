@@ -59,7 +59,7 @@ export default function Topbar({
   const { autoSave } = state;
   const { isFocusMode, toggleFocusMode } = useFocusMode();
   const { project } = useCurrentProject();
-  const { openPalette } = useCommandPalette();
+  const { open: openPalette } = useCommandPalette();
 
   const effectiveName = projectName ?? project?.name ?? 'Inkwell';
 

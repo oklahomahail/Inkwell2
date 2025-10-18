@@ -38,9 +38,17 @@ vi.mock('../PWA', () => ({
 // Mock the CommandPaletteContext
 vi.mock('@/context/CommandPaletteContext', () => ({
   useCommandPalette: () => ({
-    openPalette: vi.fn(),
-    closePalette: vi.fn(),
+    open: vi.fn(),
+    close: vi.fn(),
+    toggle: vi.fn(),
     isOpen: false,
+    query: '',
+    selectedIndex: 0,
+    setQuery: vi.fn(),
+    executeCommand: vi.fn(),
+    registerCommand: vi.fn(),
+    unregisterCommand: vi.fn(),
+    filteredCommands: [],
   }),
 }));
 
