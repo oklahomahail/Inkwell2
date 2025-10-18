@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from 'react';
 
 import { AccountMenu } from '@/components/Modals/AccountMenu';
-import { NotificationsPanel } from '@/components/Modals/NotificationsPanel';
 import { ShortcutsModal } from '@/components/Modals/ShortcutsModal';
+import { NotificationsPanel } from '@/components/NotificationsPanel';
 import { Avatar } from '@/components/ui/Avatar';
 import { useAppContext } from '@/context/AppContext';
 import { useCurrentProject } from '@/context/AppContext';
