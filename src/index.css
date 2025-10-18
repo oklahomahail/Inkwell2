@@ -3,6 +3,7 @@
 
 /* Import Professional Design System */
 @import url('./styles/design-system.css');
+@import url('./styles/tour.css');
 
 @tailwind base;
 @tailwind components;
@@ -12,13 +13,13 @@
 :root {
   --font-serif: 'Source Serif Pro', ui-serif, georgia, serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  
+
   /* Brand Colors */
   --color-navy: #0c1c3d;
   --color-gold: #d4a537;
   --color-charcoal: #222;
   --color-paper: #fff;
-  
+
   /* Text hierarchy */
   --ink-fg: #0c1c3d;
   --ink-fg-muted: #475569;
@@ -36,7 +37,12 @@ body {
 }
 
 /* Brand typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-serif);
   color: var(--ink-fg);
 }
@@ -66,6 +72,7 @@ h1, h2, h3, h4, h5, h6 {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -86,7 +93,12 @@ h1, h2, h3, h4, h5, h6 {
   @apply text-gray-900;
 }
 
-.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
   @apply text-gray-900;
 }
 
@@ -107,6 +119,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Analytics Component Styles */
+
 /* Add this to src/styles/components.css or src/index.css */
 
 /* Analytics View Container */
@@ -406,6 +419,7 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0.5;
     transform: scale(1);
   }
+
   to {
     opacity: 1;
     transform: scale(1.02);
@@ -417,6 +431,7 @@ h1, h2, h3, h4, h5, h6 {
     background-position: 0% 100%;
     opacity: 0;
   }
+
   to {
     background-position: 0% 0%;
     opacity: 1;
@@ -428,10 +443,12 @@ h1, h2, h3, h4, h5, h6 {
     transform: scale(0.8);
     opacity: 0;
   }
+
   50% {
     transform: scale(1.1);
     opacity: 0.6;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;

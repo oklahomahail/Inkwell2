@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+import { triggerDashboardView } from '@/components/Onboarding/tourTriggers';
 import { supabase } from '@/lib/supabaseClient';
 
 import type { User, AuthError } from '@supabase/supabase-js';
@@ -35,6 +36,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Fire dashboard view trigger on successful sign-in
+      if (_event === 'SIGNED_IN' && session?.user) {
+        triggerDashboardView();
+      }
     });
 
     return () => {

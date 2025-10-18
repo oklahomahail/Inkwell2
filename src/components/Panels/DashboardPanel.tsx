@@ -5,6 +5,7 @@ import React from 'react';
 // Import the context hook directly - make sure there's only one import
 import ExportReadyBadge from '@/components/Badges/ExportReadyBadge';
 import Welcome from '@/components/Dashboard/Welcome';
+import { triggerOnProjectCreated } from '@/components/Onboarding/tourTriggers';
 import { useAppContext } from '@/context/AppContext';
 
 const DashboardPanel: React.FC = () => {
@@ -21,6 +22,9 @@ const DashboardPanel: React.FC = () => {
     };
     addProject({ ...newProject, chapters: [], characters: [], beatSheet: [] });
     setCurrentProjectId(newProject.id);
+
+    // Fire tour trigger for project creation
+    triggerOnProjectCreated(newProject.id);
   };
 
   return (
