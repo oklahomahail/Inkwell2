@@ -17,13 +17,16 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   const pk = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
   if (!pk) throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in env');
 
+  // Extract account ID from publishable key to construct default Clerk CDN URL
+  // Format: pk_live_xxx or pk_test_xxx
+  const accountId = pk.split('_')[2]; // Get the account-specific part
+
   // Force use of Clerk's default CDN to bypass custom domain SSL issues
   const clerkOptions = {
     publishableKey: pk,
     afterSignOutUrl: '/',
-    ...(import.meta.env.PROD && {
-      proxyUrl: undefined, // Disable proxy, use default Clerk infrastructure
-    }),
+    // Override with Clerk's default CDN (bypass clerk.leadwithnexus.com)
+    clerkJSUrl: `https://${accountId}.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js`,
   };
 
   return (
