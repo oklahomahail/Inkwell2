@@ -17,8 +17,17 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   const pk = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
   if (!pk) throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in env');
 
+  // Force use of Clerk's default CDN to bypass custom domain SSL issues
+  const clerkOptions = {
+    publishableKey: pk,
+    afterSignOutUrl: '/',
+    ...(import.meta.env.PROD && {
+      proxyUrl: undefined, // Disable proxy, use default Clerk infrastructure
+    }),
+  };
+
   return (
-    <ClerkProvider publishableKey={pk} afterSignOutUrl="/">
+    <ClerkProvider {...clerkOptions}>
       <Suspense fallback={null}>
         <FeatureFlagProvider>
           <ToastProvider>
