@@ -262,6 +262,85 @@ Set up alerts in Supabase:
    - Database errors
    - API rate limit hits
 
+## Advanced Features
+
+### Deep Link Support (Built-in)
+
+The authentication system supports deep linking out of the box. If a user tries to access `/p/project-123` while logged out, they'll be redirected to sign-in with a `redirect` parameter, and after authentication, they'll land back on `/p/project-123`.
+
+**How it works:**
+
+1. User visits protected route (e.g., `/p/project-123`)
+2. Redirected to `/sign-in?redirect=/p/project-123`
+3. After magic link authentication, redirected to `/p/project-123`
+
+**Example:**
+
+```
+https://inkwell.leadwithnexus.com/sign-in?redirect=/p/my-novel
+```
+
+No additional configuration needed - it just works!
+
+### Expired/Used Link Handling
+
+The login page automatically detects and handles expired or already-used magic links with friendly error messages:
+
+- **Expired link**: "This magic link has expired or already been used. Request a new one below."
+- **Rate limited**: Shows countdown timer and friendly message
+- **Network error**: "Unable to connect. Please check your internet connection."
+
+### Server-Side JWT Verification
+
+For API endpoints that need authentication, use the provided JWT verification utility:
+
+**File:** `api/auth/verifySupabaseJwt.ts`
+
+```typescript
+import { verifyAuth } from './auth/verifySupabaseJwt';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const user = await verifyAuth(req.headers.authorization as string);
+
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // Safe to use user.sub (UUID) and user.email
+  return res.json({ userId: user.sub, email: user.email });
+}
+```
+
+**Setting up the API:**
+
+1. Add `SUPABASE_URL` (without VITE\_ prefix) to your Vercel environment variables
+2. The JWT verification uses Supabase's JWKS endpoint for secure token validation
+3. Tokens are verified for signature, expiration, and authenticity
+
+**Example API call from frontend:**
+
+```typescript
+import { authedFetch } from '@/lib/authedFetch';
+
+const response = await authedFetch('/api/projects', {
+  method: 'POST',
+  body: JSON.stringify({ name: 'My Novel' }),
+});
+```
+
+The `authedFetch` utility automatically includes the Bearer token from the user's Supabase session.
+
+### CI Environment Check
+
+The project includes a CI check to ensure `.env.example` is kept up-to-date:
+
+```bash
+pnpm run check:env
+```
+
+This runs automatically in CI and verifies that all required `VITE_` variables are documented in `.env.example`.
+
 ## Optional Enhancements
 
 ### Add Google OAuth

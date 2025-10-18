@@ -74,13 +74,14 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - name: Verify Clerk environment
-        run: pnpm run check:clerk-env
-        env:
-          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      - name: Check environment variables
+        run: pnpm run check:env
       - name: Build
         run: pnpm build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_BASE_URL: https://inkwell.leadwithnexus.com
 
   hygiene:
     runs-on: ubuntu-latest
@@ -102,7 +103,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -115,12 +116,11 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
-          
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Check README tree freshness
         run: |
           pnpm tree:update
           git diff --exit-code README.md || (echo "::error::README.md tree out of date. Run 'pnpm tree:update' locally." && exit 1)
-

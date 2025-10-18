@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import Logo from '@/components/Logo';
 import { useAuth } from '@/context/AuthContext';
@@ -6,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 const RATE_LIMIT_SECONDS = 30;
 
 export default function _Login() {
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -13,6 +15,9 @@ export default function _Login() {
   const [rateLimited, setRateLimited] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const { signInWithEmail } = useAuth();
+
+  // Capture redirect param for deep link support
+  const redirectPath = searchParams.get('redirect') ?? undefined;
 
   // Rate limit countdown
   useEffect(() => {
@@ -38,7 +43,7 @@ export default function _Login() {
     setLoading(true);
 
     try {
-      const { error: signInError } = await signInWithEmail(email);
+      const { error: signInError } = await signInWithEmail(email, redirectPath);
 
       if (signInError) {
         // Provide user-friendly error messages
@@ -50,6 +55,13 @@ export default function _Login() {
           friendlyError = 'Please enter a valid email address.';
         } else if (signInError.message.includes('not authorized')) {
           friendlyError = 'Sign-ups are currently restricted. Contact support for access.';
+        } else if (
+          signInError.message.includes('already used') ||
+          signInError.message.includes('expired') ||
+          signInError.message.includes('invalid token')
+        ) {
+          friendlyError =
+            'This magic link has expired or already been used. Request a new one below.';
         }
 
         setError(friendlyError);

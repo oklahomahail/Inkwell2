@@ -8,7 +8,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  signInWithEmail: (email: string) => Promise<{ error: AuthError | null }>;
+  signInWithEmail: (email: string, redirectPath?: string) => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -46,11 +46,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await supabase.auth.signOut();
   };
 
-  const signInWithEmail = async (email: string) => {
+  const signInWithEmail = async (email: string, redirectPath?: string) => {
+    // Support deep link redirect: if user came from /p/project-123, send them back there
+    const finalRedirect = redirectPath ?? '/profiles';
+    const redirectUrl = new URL(finalRedirect, window.location.origin).toString();
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/profiles`,
+        emailRedirectTo: redirectUrl,
         shouldCreateUser: true, // Allow new user sign-ups
       },
     });
