@@ -19,6 +19,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 
   // Force use of Clerk's default infrastructure to bypass custom domain SSL issues
   // Set proxyUrl to undefined for all environments to disable clerk.leadwithnexus.com
+  // This bypasses the broken clerk.leadwithnexus.com SSL certificate
   const clerkOptions = {
     publishableKey: pk,
     afterSignOutUrl: '/',
