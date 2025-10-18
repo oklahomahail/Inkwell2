@@ -24,6 +24,14 @@ vi.mock('@/components/PWA', () => ({
   PWAOfflineIndicator: () => <div>PWAOfflineIndicator</div>,
 }));
 
+vi.mock('@/context/CommandPaletteContext', () => ({
+  useCommandPalette: () => ({
+    openPalette: vi.fn(),
+    closePalette: vi.fn(),
+    isOpen: false,
+  }),
+}));
+
 const mockDispatch = vi.fn();
 const mockAppState = {
   view: View.Dashboard,

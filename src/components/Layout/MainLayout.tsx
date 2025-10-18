@@ -21,6 +21,7 @@ import Logo from '@/components/Logo';
 import { BRAND_NAME, ORGANIZATION_NAME } from '@/constants/brand';
 import { ALT_TAGLINE } from '@/constants/branding';
 import { useAppContext, View } from '@/context/AppContext';
+import { useCommandPalette } from '@/context/CommandPaletteContext';
 import { cn } from '@/lib/utils';
 import { useFeatureFlag } from '@/utils/flags';
 
@@ -90,10 +91,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const [isMobile, setIsMobile] = useState(false);
 
   // Modal states for header actions
-  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+
+  // Command Palette
+  const { openPalette } = useCommandPalette();
 
   // Feature flags
   const isPlotBoardsEnabled = useFeatureFlag('plotBoards');
@@ -204,7 +207,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       // Command/Ctrl + K for command palette
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        handleOpenCommandPalette();
+        openPalette();
       }
       // Command/Ctrl + Shift + F for search
       else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'F') {
@@ -251,10 +254,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     document.documentElement.classList.toggle('dark', newDarkMode);
   };
 
-  // Header action handlers
-  const handleOpenCommandPalette = () => {
-    setIsCommandPaletteOpen(true);
-  };
+  // Header action handlers (Command Palette now uses CommandPaletteProvider via Cmd+K)
 
   const handleOpenSearch = () => {
     setIsSearchModalOpen(true);
@@ -375,7 +375,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         {!sidebarCollapsed && (
           <div className="p-4">
             <button
-              onClick={handleOpenCommandPalette}
+              onClick={openPalette}
               className={cn(
                 'w-full flex items-center gap-3',
                 'px-3 py-2 text-sm text-slate-600 dark:text-slate-400',
@@ -531,7 +531,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                 <ProfileSwitcher />
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={handleOpenCommandPalette}
+                    onClick={openPalette}
                     className="btn btn-ghost btn-sm"
                     aria-label="Open command palette (⌘K)"
                     title="Command Palette (⌘K)"
@@ -634,39 +634,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
       {/* Modal Components */}
 
-      {/* Command Palette Modal */}
-      {isCommandPaletteOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                  Command Palette
-                </h2>
-                <button
-                  onClick={() => setIsCommandPaletteOpen(false)}
-                  className="btn btn-ghost btn-sm p-2"
-                  aria-label="Close command palette"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              <p className="text-slate-600 dark:text-slate-400">
-                Command palette coming soon! Use ⌘K to open.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Command Palette is handled by CommandPaletteProvider (Cmd+K) */}
 
       {/* Search Modal */}
       {isSearchModalOpen && (

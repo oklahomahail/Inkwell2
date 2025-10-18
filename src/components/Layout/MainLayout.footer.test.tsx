@@ -35,6 +35,15 @@ vi.mock('../PWA', () => ({
   PWAOfflineIndicator: () => <div data-testid="pwa-indicator">PWA Indicator</div>,
 }));
 
+// Mock the CommandPaletteContext
+vi.mock('@/context/CommandPaletteContext', () => ({
+  useCommandPalette: () => ({
+    openPalette: vi.fn(),
+    closePalette: vi.fn(),
+    isOpen: false,
+  }),
+}));
+
 // Mock the ProfileSwitcher component
 vi.mock('../ProfileSwitcher', () => ({
   ProfileSwitcher: () => <div data-testid="profile-switcher">Profile</div>,

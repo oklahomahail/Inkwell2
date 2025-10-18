@@ -1,5 +1,5 @@
 // src/components/ViewSwitcher.tsx - Fixed
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, lazy, Suspense } from 'react';
 
 import { useAppContext, View } from '@/context/AppContext';
 
@@ -12,11 +12,13 @@ import { useFeatureDiscovery } from '../hooks/useAnalyticsTracking';
 
 import EnhancedDashboard from './Dashboard/EnhancedDashboard';
 import { FeatureErrorBoundary } from './ErrorBoundary';
-import { AnalyticsPanel } from './Panels';
-import { TimelinePanel, SettingsPanel } from './Panels';
+import { TimelinePanel } from './Panels';
 import StoryPlanningView from './Views/StoryPlanningView';
 import EnhancedWritingPanel from './Writing/EnhancedWritingPanel';
-// Feature-flagged imports
+
+// Lazy-load Analysis and Settings panels
+const AnalyticsPanel = lazy(() => import('@/components/Panels/AnalyticsPanel'));
+const SettingsPanel = lazy(() => import('@/components/Panels/SettingsPanel'));
 
 const ViewSwitcher: React.FC = () => {
   const { state, currentProject, updateProject } = useAppContext();
@@ -92,7 +94,15 @@ const ViewSwitcher: React.FC = () => {
     case View.Analysis:
       return (
         <FeatureErrorBoundary featureName="Analytics">
-          <AnalyticsPanel />
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-500">Loading Analytics...</p>
+              </div>
+            }
+          >
+            <AnalyticsPanel />
+          </Suspense>
         </FeatureErrorBoundary>
       );
     case View.Planning:
@@ -114,7 +124,15 @@ const ViewSwitcher: React.FC = () => {
     case View.Settings:
       return (
         <FeatureErrorBoundary featureName="Settings">
-          <SettingsPanel />
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-500">Loading Settings...</p>
+              </div>
+            }
+          >
+            <SettingsPanel />
+          </Suspense>
         </FeatureErrorBoundary>
       );
     default:
