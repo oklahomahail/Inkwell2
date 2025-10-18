@@ -58,8 +58,17 @@ function _AppShell() {
   const { user, loading, signOut } = useAuth();
   const isPublic = isPublicRoute(location.pathname);
 
-  // Show nothing while loading
-  if (loading) return null;
+  // Show loading spinner while checking auth (prevents content flash)
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-inkwell-navy border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Redirect to sign-in if not on public route and not signed in
   if (!isPublic && !user) {

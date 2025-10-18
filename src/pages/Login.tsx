@@ -1,32 +1,91 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Logo from '@/components/Logo';
 import { useAuth } from '@/context/AuthContext';
+
+const RATE_LIMIT_SECONDS = 30;
 
 export default function _Login() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const { signInWithEmail } = useAuth();
+
+  // Rate limit countdown
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (countdown === 0 && rateLimited) {
+      setRateLimited(false);
+    }
+    return undefined;
+  }, [countdown, rateLimited]);
 
   async function _onSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // Check rate limit
+    if (rateLimited) {
+      setError(`Please wait ${countdown} seconds before requesting another link`);
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
     try {
       const { error: signInError } = await signInWithEmail(email);
+
       if (signInError) {
-        setError(signInError.message);
+        // Provide user-friendly error messages
+        let friendlyError = signInError.message;
+
+        if (signInError.message.includes('rate limit')) {
+          friendlyError = 'Too many attempts. Please try again in a few minutes.';
+        } else if (signInError.message.includes('invalid')) {
+          friendlyError = 'Please enter a valid email address.';
+        } else if (signInError.message.includes('not authorized')) {
+          friendlyError = 'Sign-ups are currently restricted. Contact support for access.';
+        }
+
+        setError(friendlyError);
         setLoading(false);
+
+        // Log auth error for telemetry
+        console.warn('[Auth] Sign-in error:', {
+          email,
+          error: signInError.message,
+          timestamp: new Date().toISOString(),
+        });
       } else {
         setSent(true);
         setLoading(false);
+
+        // Set rate limit after successful send
+        setRateLimited(true);
+        setCountdown(RATE_LIMIT_SECONDS);
+
+        // Log success for telemetry
+        console.info('[Auth] Magic link sent:', {
+          email,
+          timestamp: new Date().toISOString(),
+        });
       }
     } catch (err) {
-      setError('Network error');
+      const errorMessage = err instanceof Error ? err.message : 'Network error';
+      setError('Unable to connect. Please check your internet connection.');
       setLoading(false);
+
+      // Log network error for telemetry
+      console.error('[Auth] Network error:', {
+        email,
+        error: errorMessage,
+        timestamp: new Date().toISOString(),
+      });
     }
   }
 
@@ -75,17 +134,40 @@ export default function _Login() {
                 <strong className="text-gray-900 dark:text-white">{email}</strong>.
               </p>
               <p className="text-gray-600 dark:text-gray-400">
-                Click the link in your email to sign in.
+                Click the link in your email to sign in. The link will expire in 1 hour.
               </p>
-              <button
-                onClick={() => {
-                  setSent(false);
-                  setEmail('');
-                }}
-                className="text-sm text-inkwell-navy dark:text-blue-400 hover:underline mt-4"
-              >
-                Use a different email
-              </button>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <strong>Note:</strong> Email delivery can take up to a minute. Check your spam
+                folder if you don't see it.
+              </div>
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={() => {
+                    setSent(false);
+                    setEmail('');
+                    setRateLimited(false);
+                    setCountdown(0);
+                  }}
+                  className="text-sm text-inkwell-navy dark:text-blue-400 hover:underline"
+                >
+                  Use a different email
+                </button>
+                <span className="text-gray-300 dark:text-gray-600">•</span>
+                <button
+                  onClick={async () => {
+                    if (rateLimited) {
+                      setError(`Please wait ${countdown} seconds before requesting another link`);
+                      return;
+                    }
+                    setSent(false);
+                    await _onSubmit({ preventDefault: () => {} } as React.FormEvent);
+                  }}
+                  disabled={rateLimited}
+                  className="text-sm text-inkwell-navy dark:text-blue-400 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {rateLimited ? `Resend in ${countdown}s` : 'Resend link'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
