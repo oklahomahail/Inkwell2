@@ -33,7 +33,8 @@ function updateReadme() {
   const end = "<!-- TREE:END -->";
   const pattern = new RegExp(`${start}[\\s\\S]*?${end}`, "m");
 
-  const replacement = `${start}\n\`\`\`\n${tree}\n\`\`\`\n${end}`;
+  // Include blank lines to match Prettier's markdown formatting
+  const replacement = `${start}\n\n\`\`\`\n${tree}\n\`\`\`\n\n${end}`;
   const newReadme = readme.replace(pattern, replacement);
 
   fs.writeFileSync(readmePath, newReadme, "utf8");
