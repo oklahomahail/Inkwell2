@@ -1,26 +1,36 @@
-import { match } from 'path-to-regexp';
-
+// Simple string matching for public routes - no regex needed
 const publicPaths = [
   '/',
-  '/sign-in/:path*',
-  '/sign-up/:path*',
+  '/sign-in',
+  '/sign-up',
   '/favicon.ico',
   '/robots.txt',
   '/site.webmanifest',
-  '/assets/:path*',
-  '/images/:path*',
-  '/fonts/:path*',
-  '/static/:path*',
-  '/*.css',
-  '/*.js',
-  '/*.map',
-  '/*.json',
-  '/_next/:path*',
 ];
 
-// Create matcher functions for each path pattern
-const publicPathMatchers = publicPaths.map((path) => match(path, { end: false }));
+const publicPrefixes = ['/assets/', '/images/', '/fonts/', '/static/', '/_next/'];
+
+const publicExtensions = ['.css', '.js', '.map', '.json'];
 
 export const isPublicRoute = (path: string): boolean => {
-  return publicPathMatchers.some((matcher) => matcher(path) !== null);
+  // Check exact matches
+  if (publicPaths.includes(path)) {
+    return true;
+  }
+
+  // Check path prefixes (e.g., /sign-in/something, /assets/something)
+  if (
+    path.startsWith('/sign-in') ||
+    path.startsWith('/sign-up') ||
+    publicPrefixes.some((prefix) => path.startsWith(prefix))
+  ) {
+    return true;
+  }
+
+  // Check file extensions
+  if (publicExtensions.some((ext) => path.endsWith(ext))) {
+    return true;
+  }
+
+  return false;
 };
