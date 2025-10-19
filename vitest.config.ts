@@ -17,7 +17,8 @@ export default defineConfig({
     include: [
       'src/utils/**/*.{test,spec}.ts',
       'src/services/**/*.{test,spec}.ts',
-      'src/components/**/*.{test,spec}.tsx'
+      'src/components/**/*.{test,spec}.tsx',
+      'src/pages/**/*.{test,spec}.tsx',
     ],
     coverage: {
       enabled: true,
