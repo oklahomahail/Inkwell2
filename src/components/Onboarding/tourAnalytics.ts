@@ -36,9 +36,9 @@ function isDNTEnabled(): boolean {
   if (typeof navigator === 'undefined') return true;
   return (
     navigator.doNotTrack === '1' ||
-    // @ts-expect-error - legacy DNT property
+    // @ts-ignore - legacy DNT property
     navigator.doNotTrack === 'yes' ||
-    // @ts-expect-error - legacy msDoNotTrack
+    // @ts-ignore - legacy msDoNotTrack
     navigator.msDoNotTrack === '1'
   );
 }

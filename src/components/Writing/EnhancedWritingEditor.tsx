@@ -28,7 +28,7 @@ import { useAppContext } from '../../context/AppContext';
 import { storageService } from '../../services/storageService';
 import { Scene, Chapter } from '../../types/writing';
 import { debounce as debounceUtil } from '../../utils/debounce';
-import { focusWritingEditor } from '../../utils/focusUtils';
+import { _focusWritingEditor as focusWritingEditor } from '../../utils/focusUtils';
 import ConsistencyIssuesPanel from '../editor/ConsistencyIssuesPanel';
 import { ConsistencyExtension } from '../editor/extensions/ConsistencyExtension';
 
