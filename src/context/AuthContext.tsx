@@ -88,7 +88,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // This ensures emailRedirectTo always targets /auth/callback
     const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent(finalRedirect)}`;
 
-    console.info('[Auth] Sending magic link with redirect to:', finalRedirect);
+    console.info('[Auth] Sending magic link with:');
+    console.info('  - Final redirect destination:', finalRedirect);
+    console.info('  - Callback URL (emailRedirectTo):', callbackUrl);
+    console.info('  - Origin:', origin);
+    console.info('⚠️  IMPORTANT: This callback URL must be whitelisted in Supabase Dashboard!');
+    console.info('  - Go to: Supabase → Authentication → URL Configuration → Redirect URLs');
+    console.info(`  - Add: ${callbackUrl.split('?')[0]}`);
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -100,6 +106,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (error) {
       console.error('[Auth] Sign-in failed:', error.message);
+    } else {
+      console.info('[Auth] Magic link sent successfully! Check your email.');
     }
 
     return { error };

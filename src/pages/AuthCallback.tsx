@@ -33,19 +33,41 @@ function normalizeSafeRedirect(path: string | null): string {
 
 export default function AuthCallback() {
   const navigate = useNavigate();
-  const { search } = useLocation();
+  const location = useLocation();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams(search);
-    const code = params.get('code') || params.get('token_hash');
-    const nextParam = params.get('next');
+    // Check both query params and hash params (Supabase might use either)
+    const searchParams = new URLSearchParams(location.search);
+    const hashParams = new URLSearchParams(location.hash.substring(1));
+
+    const code =
+      searchParams.get('code') ||
+      searchParams.get('token_hash') ||
+      hashParams.get('access_token') ||
+      hashParams.get('refresh_token');
+
+    const nextParam = searchParams.get('next') || hashParams.get('next');
     const next = normalizeSafeRedirect(nextParam);
+
+    console.log('[AuthCallback] Starting auth callback with params:', {
+      hasCode: !!code,
+      codeLength: code?.length,
+      nextParam,
+      normalizedNext: next,
+      fullURL: window.location.href,
+      pathname: location.pathname,
+      search: location.search,
+      hash: location.hash,
+      searchParams: Object.fromEntries(searchParams.entries()),
+      hashParams: Object.fromEntries(hashParams.entries()),
+    });
 
     (async () => {
       try {
         if (!code) {
           console.error('[AuthCallback] No code found in URL');
+          console.error('[AuthCallback] Full URL was:', window.location.href);
           navigate('/sign-in?error=missing_code', { replace: true });
           return;
         }
@@ -76,7 +98,7 @@ export default function AuthCallback() {
         });
       }
     })();
-  }, [search, navigate]);
+  }, [location.search, location.hash, navigate]);
 
   if (error) {
     return (
