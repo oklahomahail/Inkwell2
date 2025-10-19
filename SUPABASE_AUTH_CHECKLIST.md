@@ -358,3 +358,126 @@ ProtectedRoute sees user is authenticated
            ↓
 User lands on /p/project-123 ✅
 ```
+
+---
+
+## 🗄️ Database Setup - Auto-Create Profiles
+
+### Overview
+
+To prevent race conditions and ensure smooth onboarding, user profiles are automatically created via a PostgreSQL trigger when a user signs up.
+
+### Migration File
+
+Location: [`supabase/migrations/20250119000000_auto_create_profiles.sql`](supabase/migrations/20250119000000_auto_create_profiles.sql)
+
+**What it does**:
+
+1. Creates `public.profiles` table
+2. Sets up Row Level Security (RLS) policies
+3. Creates PostgreSQL trigger to auto-create profile on sign-up
+4. Backfills profiles for existing users
+5. Adds `onboarding_completed` flag for onboarding flow
+
+### Running the Migration
+
+**Option 1: Supabase Dashboard** (Easiest)
+
+```
+1. Go to https://app.supabase.com/project/YOUR_PROJECT/sql
+2. Click "New query"
+3. Copy contents of supabase/migrations/20250119000000_auto_create_profiles.sql
+4. Paste and click "Run"
+```
+
+**Option 2: Supabase CLI**
+
+```bash
+supabase link --project-ref YOUR_PROJECT_ID
+supabase db push
+```
+
+See [`supabase/README.md`](supabase/README.md) for detailed instructions.
+
+### Profile Schema
+
+```typescript
+interface UserProfile {
+  id: string; // UUID - references auth.users(id)
+  email: string | null;
+  display_name: string | null; // Set during onboarding
+  avatar_url: string | null;
+  timezone: string; // Defaults to 'UTC'
+  onboarding_completed: boolean; // Controls onboarding flow
+  created_at: string;
+  updated_at: string;
+}
+```
+
+### RLS Policies
+
+- ✅ Users can SELECT their own profile (`auth.uid() = id`)
+- ✅ Users can UPDATE their own profile (`auth.uid() = id`)
+- ✅ Users can INSERT their own profile (`auth.uid() = id`)
+
+### Testing the Migration
+
+After running the migration, test it:
+
+```sql
+-- 1. Sign up a new user via magic link
+-- 2. Verify profile was auto-created:
+SELECT * FROM public.profiles WHERE id = auth.uid();
+
+-- Expected result:
+-- - Profile exists immediately
+-- - email is populated
+-- - display_name is NULL (set during onboarding)
+-- - onboarding_completed is FALSE
+```
+
+### Onboarding Flow
+
+With this migration in place, the onboarding flow is:
+
+```
+1. User signs up → Magic link sent
+2. User clicks link → /auth/callback exchanges code
+3. Database trigger auto-creates profile row
+4. Callback redirects to /profiles
+5. ProfilePicker checks: profile.onboarding_completed === false
+6. If false → Show onboarding modal/wizard
+7. User fills in display_name, timezone, etc.
+8. Update profile, set onboarding_completed = true
+9. Redirect to dashboard ✅
+```
+
+**Idempotent**: If user already completed onboarding, skip to dashboard.
+
+### Post-Migration Checklist
+
+- [ ] Run migration in Supabase dashboard
+- [ ] Verify `public.profiles` table exists
+- [ ] Check RLS is enabled
+- [ ] Test profile auto-creation by signing up a new user
+- [ ] Verify existing users have profiles backfilled
+- [ ] Test that users can only access their own profile
+
+---
+
+## 📋 Updated Summary Status
+
+| Item                           | Status | Action Required                                        |
+| ------------------------------ | ------ | ------------------------------------------------------ |
+| Auth callback route            | ✅     | None - implemented                                     |
+| emailRedirectTo uses callback  | ✅     | None - uses `/auth/callback`                           |
+| Loading-aware route protection | ✅     | None - prevents race conditions                        |
+| Auth state management          | ✅     | None - proper session handling                         |
+| Brand colors in Tailwind       | ✅     | None                                                   |
+| Sign-in page branding          | ✅     | None - logo fixed                                      |
+| **Database migration created** | ✅     | **Run migration in Supabase**                          |
+| **UserProfile types defined**  | ✅     | None                                                   |
+| Supabase Site URL              | ⚠️     | **Manual verification in dashboard**                   |
+| Supabase Redirect URLs         | ⚠️     | **Manual configuration - MUST include /auth/callback** |
+| Service Worker cleanup         | ⚠️     | **Post-deployment browser action**                     |
+| Logo assets verification       | ✅     | None - all files exist                                 |
