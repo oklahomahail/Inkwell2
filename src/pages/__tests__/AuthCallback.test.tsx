@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, it, vi, expect, beforeEach } from 'vitest';
+import '@testing-library/jest-dom';
 
 import { supabase } from '@/lib/supabaseClient';
 import AuthCallback from '@/pages/AuthCallback';
@@ -19,7 +20,7 @@ function AppShell() {
   return (
     <Routes>
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/profiles" element={<div>PROFILES</div>} />
+      <Route path="/dashboard" element={<div>DASHBOARD</div>} />
       <Route path="/sign-in" element={<div>SIGNIN</div>} />
     </Routes>
   );
@@ -34,7 +35,7 @@ describe('AuthCallback', () => {
     (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
 
     render(
-      <MemoryRouter initialEntries={['/auth/callback?code=abc&next=%2Fprofiles']}>
+      <MemoryRouter initialEntries={['/auth/callback?code=abc&next=%2Fdashboard']}>
         <AppShell />
       </MemoryRouter>,
     );
@@ -42,7 +43,7 @@ describe('AuthCallback', () => {
     expect(screen.getByText(/Signing you in/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText('PROFILES')).toBeInTheDocument();
+      expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
     });
 
     expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('abc');
@@ -67,7 +68,7 @@ describe('AuthCallback', () => {
     });
 
     render(
-      <MemoryRouter initialEntries={['/auth/callback?code=abc&next=%2Fprofiles']}>
+      <MemoryRouter initialEntries={['/auth/callback?code=abc&next=%2Fdashboard']}>
         <AppShell />
       </MemoryRouter>,
     );
@@ -81,19 +82,19 @@ describe('AuthCallback', () => {
     (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
 
     render(
-      <MemoryRouter initialEntries={['/auth/callback?token_hash=xyz&next=%2Fprofiles']}>
+      <MemoryRouter initialEntries={['/auth/callback?token_hash=xyz&next=%2Fdashboard']}>
         <AppShell />
       </MemoryRouter>,
     );
 
     await waitFor(() => {
-      expect(screen.getByText('PROFILES')).toBeInTheDocument();
+      expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
     });
 
     expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('xyz');
   });
 
-  it('defaults to /profiles when next parameter is missing', async () => {
+  it('defaults to /dashboard when next parameter is missing', async () => {
     (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
 
     render(
@@ -103,8 +104,8 @@ describe('AuthCallback', () => {
     );
 
     await waitFor(() => {
-      // Should navigate to default path (/profiles)
-      expect(screen.getByText('PROFILES')).toBeInTheDocument();
+      // Should navigate to default path (/dashboard)
+      expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
     });
 
     expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('abc');
@@ -122,8 +123,8 @@ describe('AuthCallback', () => {
       );
 
       await waitFor(() => {
-        // Should fall back to /profiles instead of redirecting to evil.com
-        expect(screen.getByText('PROFILES')).toBeInTheDocument();
+        // Should fall back to /dashboard instead of redirecting to evil.com
+        expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
       });
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
@@ -145,7 +146,7 @@ describe('AuthCallback', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('PROFILES')).toBeInTheDocument();
+        expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
       });
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
@@ -167,7 +168,7 @@ describe('AuthCallback', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('PROFILES')).toBeInTheDocument();
+        expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
       });
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
@@ -183,15 +184,15 @@ describe('AuthCallback', () => {
 
       render(
         <MemoryRouter
-          initialEntries={['/auth/callback?code=abc&next=%2Fprofiles%3Ftab%3Dsettings']}
+          initialEntries={['/auth/callback?code=abc&next=%2Fdashboard%3Ftab%3Dsettings']}
         >
           <AppShell />
         </MemoryRouter>,
       );
 
       await waitFor(() => {
-        // Should allow /profiles?tab=settings
-        expect(screen.getByText('PROFILES')).toBeInTheDocument();
+        // Should allow /dashboard?tab=settings
+        expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
       });
     });
   });
