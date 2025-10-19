@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
+import { triggerCharactersAdded } from '@/utils/tourTriggers';
 
 interface Character {
   id: string;
@@ -52,6 +53,11 @@ const CharacterManager: React.FC = () => {
     if (!selectedCharacter) return;
 
     if (showNewCharacterForm) {
+      // Fire tour trigger on first character added
+      if (characters.length === 0) {
+        triggerCharactersAdded();
+      }
+
       setCharacters([...characters, selectedCharacter]);
       setShowNewCharacterForm(false);
     } else {

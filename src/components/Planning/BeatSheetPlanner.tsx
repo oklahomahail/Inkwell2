@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
+import { triggerBeatSheetCompleted } from '@/utils/tourTriggers';
 
 interface Beat {
   id: string;
@@ -143,6 +144,12 @@ const BeatSheetPlanner: React.FC = () => {
   const updateBeat = (beatId: string, updates: Partial<Beat>) => {
     if (!currentBeatSheet) return;
 
+    // Check if this is the first beat content addition
+    const isFirstBeatContent =
+      updates.content &&
+      updates.content.trim() &&
+      currentBeatSheet.beats.every((b) => !b.content || !b.content.trim());
+
     const updatedBeats = currentBeatSheet.beats.map((beat) =>
       beat.id === beatId ? { ...beat, ...updates } : beat,
     );
@@ -152,6 +159,11 @@ const BeatSheetPlanner: React.FC = () => {
       beats: updatedBeats,
       updatedAt: new Date(),
     });
+
+    // Fire tour trigger on first beat content addition
+    if (isFirstBeatContent) {
+      triggerBeatSheetCompleted();
+    }
   };
 
   // Save beat sheet (would integrate with storage)

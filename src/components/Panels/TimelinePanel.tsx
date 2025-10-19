@@ -25,6 +25,7 @@ import { timelineService } from '@/services/timelineService';
 import type { EnhancedProject } from '@/types/project';
 import type { TimelineItem } from '@/types/timeline';
 import { logActivity } from '@/utils/activityLogger';
+import { triggerTimelineVisited } from '@/utils/tourTriggers';
 
 type TimelineTab = 'events' | 'validation' | 'linkages' | 'navigation';
 
@@ -61,6 +62,11 @@ const TimelinePanel: React.FC = () => {
     },
   });
   const [selectedSceneId, setSelectedSceneId] = useState<string | undefined>();
+
+  // Fire tour trigger on component mount
+  useEffect(() => {
+    triggerTimelineVisited();
+  }, []);
 
   // Load timeline events for current project
   useEffect(() => {
@@ -256,7 +262,7 @@ const TimelinePanel: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
+    <div data-tour="timeline-panel-root" className="flex flex-col h-full bg-white dark:bg-gray-900">
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
         <div>

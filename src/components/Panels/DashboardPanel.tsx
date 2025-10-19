@@ -38,6 +38,7 @@ const DashboardPanel: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Projects</h2>
           <button
             onClick={createNewProject}
+            data-tour="create-project-btn"
             className="flex items-center gap-2 px-4 py-2 bg-inkwell-navy text-white rounded-lg hover:bg-inkwell-navy-700 transition-colors"
           >
             <PlusCircle className="w-4 h-4" />

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 
 import WritingAnalyticsView from '@/components/Analytics/WritingAnalyticsView';
 import { useAppContext } from '@/context/AppContext';
+import { triggerAnalyticsVisited } from '@/utils/tourTriggers';
 
 interface WritingSession {
   date: string;
@@ -15,6 +16,12 @@ const AnalyticsPanel: React.FC = () => {
   const { state, currentProject } = useAppContext();
   const [sessions, setSessions] = useState<WritingSession[]>([]);
   const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('advanced');
+
+  // Fire tour trigger on component mount
+  useEffect(() => {
+    triggerAnalyticsVisited();
+  }, []);
+
   useEffect(() => {
     const savedSessions = localStorage.getItem(
       `sessions-${currentProject?.id ?? state.currentProjectId ?? 'default'}`,
@@ -46,7 +53,7 @@ const AnalyticsPanel: React.FC = () => {
     );
 
     return (
-      <div className="p-6 space-y-6">
+      <div data-tour="analytics-panel-root" className="p-6 space-y-6">
         {/* Header with View Toggle */}
         <div className="flex items-center justify-between">
           <div>

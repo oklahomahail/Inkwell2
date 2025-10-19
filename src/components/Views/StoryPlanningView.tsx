@@ -1,8 +1,9 @@
 // src/components/Views/StoryPlanningView.tsx - Enhanced with Story Architect Flow
 import { BookOpen, Users, Map, FileText, BarChart3, Wand2 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { useToast } from '@/context/toast';
+import { triggerStoryPlanningOpen, triggerWorldBuildingVisited } from '@/utils/tourTriggers';
 
 import { type GeneratedOutline } from '../../services/storyArchitectService';
 import BeatSheetPlanner from '../Planning/BeatSheetPlanner';
@@ -16,6 +17,11 @@ const StoryPlanningView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<PlanningTab>('overview');
   const [showArchitectFlow, setShowArchitectFlow] = useState(false);
   const { showToast } = useToast();
+
+  // Fire tour trigger on component mount
+  useEffect(() => {
+    triggerStoryPlanningOpen();
+  }, []);
 
   const tabs = [
     { id: 'overview' as const, label: 'Overview', icon: FileText },
@@ -72,7 +78,13 @@ const StoryPlanningView: React.FC = () => {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    if (tab.id === 'world') {
+                      triggerWorldBuildingVisited();
+                    }
+                  }}
+                  data-tour={`planner-tab-${tab.id}`}
                   className={`
                     flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors
                     ${

@@ -5,12 +5,14 @@ import React, { useState, useEffect, type ChangeEvent } from 'react';
 import { PrivacyControls } from '@/components/Privacy/PrivacyControls';
 import BackupControls from '@/components/Settings/BackupControls';
 import SnapshotHistoryDialog from '@/components/Settings/SnapshotHistoryDialog';
+import { TourReplayButton } from '@/components/Settings/TourReplayButton';
 import { Button } from '@/components/ui/Button';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
 import claudeService from '@/services/claudeService';
 import { phraseAnalysisService, DEFAULT_PHRASE_HYGIENE_SETTINGS } from '@/utils/textAnalysis';
 import type { PhraseHygieneSettings } from '@/utils/textAnalysis';
+import { triggerAiIntegrationConfigured } from '@/utils/tourTriggers';
 
 const SettingsPanel: React.FC = () => {
   const { state, claudeActions, claude, currentProject } = useAppContext();
@@ -85,6 +87,9 @@ const SettingsPanel: React.FC = () => {
       claudeActions.configureApiKey(trimmed);
       setApiKey('');
       showToast('Claude API key updated successfully!', 'success');
+
+      // Fire tour trigger on AI integration configuration
+      triggerAiIntegrationConfigured();
     } catch (_error) {
       const errorMessage = _error instanceof Error ? _error.message : 'Failed to update API key';
       showToast(errorMessage, 'error');
@@ -743,6 +748,15 @@ const SettingsPanel: React.FC = () => {
           <div className="text-gray-300">
             <PrivacyControls />
           </div>
+        </div>
+
+        {/* Help & Onboarding */}
+        <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
+          <h3 className="text-xl font-semibold text-white mb-4">Help & Onboarding</h3>
+          <p className="text-sm text-gray-400 mb-6">
+            Replay the interactive tour or access help resources
+          </p>
+          <TourReplayButton />
         </div>
 
         {/* About */}
