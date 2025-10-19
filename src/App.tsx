@@ -27,7 +27,7 @@ import { useEditorContext } from './context/EditorContext';
 // Pages
 import AuthCallback from './pages/AuthCallback';
 import BrandPage from './pages/Brand';
-import Login from './pages/Login';
+import SignIn from './pages/SignIn';
 // Profile routing components
 import { ProfileGate } from './routes/shell/ProfileGate';
 import { ProfilePicker } from './routes/shell/ProfilePicker';
@@ -99,7 +99,7 @@ function _AppShell() {
         <Route path="/auth/callback" element={<AuthCallback />} />
 
         {/* Sign-in route */}
-        <Route path="/sign-in" element={<Login />} />
+        <Route path="/sign-in" element={<SignIn />} />
 
         {/* Legacy login route - redirect to sign-in */}
         <Route path="/login" element={<Navigate to="/sign-in" replace />} />
