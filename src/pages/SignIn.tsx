@@ -38,7 +38,11 @@ export default function SignIn() {
     <div className="flex min-h-screen items-center justify-center bg-inkwell-blue">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
         <div className="mb-6 text-center">
-          <img src="/logo-dark.png" alt="Inkwell logo" className="mx-auto mb-4 h-16" />
+          <img
+            src="/brand/inkwell-lockup-dark.svg"
+            alt="Inkwell logo"
+            className="mx-auto mb-4 h-16"
+          />
           <h2 className="text-2xl font-bold text-gray-900">Welcome to Inkwell</h2>
           <p className="mt-1 text-sm italic text-gray-600">find your story, weave it well</p>
         </div>
