@@ -109,4 +109,90 @@ describe('AuthCallback', () => {
 
     expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('abc');
   });
+
+  describe('Security: Open Redirect Protection', () => {
+    it('rejects absolute URL redirects (https://)', async () => {
+      (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      render(
+        <MemoryRouter initialEntries={['/auth/callback?code=abc&next=https://evil.com']}>
+          <AppShell />
+        </MemoryRouter>,
+      );
+
+      await waitFor(() => {
+        // Should fall back to /profiles instead of redirecting to evil.com
+        expect(screen.getByText('PROFILES')).toBeInTheDocument();
+      });
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Rejected absolute URL redirect'),
+        expect.stringContaining('evil.com'),
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('rejects protocol-relative URL redirects (//)', async () => {
+      (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      render(
+        <MemoryRouter initialEntries={['/auth/callback?code=abc&next=//evil.com/path']}>
+          <AppShell />
+        </MemoryRouter>,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('PROFILES')).toBeInTheDocument();
+      });
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Rejected absolute URL redirect'),
+        expect.stringContaining('//evil.com'),
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('rejects invalid paths with special characters', async () => {
+      (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      render(
+        <MemoryRouter initialEntries={['/auth/callback?code=abc&next=<script>alert(1)</script>']}>
+          <AppShell />
+        </MemoryRouter>,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('PROFILES')).toBeInTheDocument();
+      });
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Rejected invalid redirect path'),
+        expect.anything(),
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('allows valid same-origin paths', async () => {
+      (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
+
+      render(
+        <MemoryRouter
+          initialEntries={['/auth/callback?code=abc&next=%2Fprofiles%3Ftab%3Dsettings']}
+        >
+          <AppShell />
+        </MemoryRouter>,
+      );
+
+      await waitFor(() => {
+        // Should allow /profiles?tab=settings
+        expect(screen.getByText('PROFILES')).toBeInTheDocument();
+      });
+    });
+  });
 });

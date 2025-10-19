@@ -12,6 +12,33 @@ interface AuthContextType {
   signInWithEmail: (email: string, redirectPath?: string) => Promise<{ error: AuthError | null }>;
 }
 
+/**
+ * Validates and normalizes a redirect path to prevent open redirects
+ * Only allows same-origin paths starting with /
+ * @param path - The path to validate
+ * @returns Normalized safe path, or /profiles as fallback
+ */
+function normalizeSafeRedirect(path: string | null | undefined): string {
+  if (!path) return '/profiles';
+
+  // Only allow same-origin paths: must start with / and not contain protocol/host
+  const safePathPattern = /^\/[^\s]*$/;
+
+  // Reject anything that looks like an absolute URL
+  if (path.includes('://') || path.startsWith('//')) {
+    console.warn('[Auth] Rejected absolute URL redirect:', path);
+    return '/profiles';
+  }
+
+  // Validate against safe path pattern
+  if (!safePathPattern.test(path)) {
+    console.warn('[Auth] Rejected invalid redirect path:', path);
+    return '/profiles';
+  }
+
+  return path;
+}
+
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
@@ -53,12 +80,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signInWithEmail = async (email: string, redirectPath?: string) => {
-    // Support deep link redirect: if user came from /p/project-123, send them back there
-    const finalRedirect = redirectPath ?? '/profiles';
+    // Normalize and validate redirect path to prevent open redirects
+    const finalRedirect = normalizeSafeRedirect(redirectPath);
     const origin = window.location.origin;
 
     // Build callback URL with the intended destination as a query param
+    // This ensures emailRedirectTo always targets /auth/callback
     const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent(finalRedirect)}`;
+
+    console.info('[Auth] Sending magic link with redirect to:', finalRedirect);
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -67,6 +97,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         shouldCreateUser: true, // Allow new user sign-ups
       },
     });
+
+    if (error) {
+      console.error('[Auth] Sign-in failed:', error.message);
+    }
+
     return { error };
   };
 

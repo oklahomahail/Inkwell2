@@ -3,6 +3,34 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { supabase } from '@/lib/supabaseClient';
 
+/**
+ * Validates and normalizes a redirect path to prevent open redirects
+ * Only allows same-origin paths starting with /
+ * @param path - The path to validate
+ * @returns Normalized safe path, or /profiles as fallback
+ */
+function normalizeSafeRedirect(path: string | null): string {
+  if (!path) return '/profiles';
+
+  // Only allow same-origin paths: must start with / and not contain protocol/host
+  // Regex: starts with /, followed by any non-whitespace chars (but no // which could be protocol)
+  const safePathPattern = /^\/[^\s]*$/;
+
+  // Reject anything that looks like an absolute URL
+  if (path.includes('://') || path.startsWith('//')) {
+    console.warn('[AuthCallback] Rejected absolute URL redirect:', path);
+    return '/profiles';
+  }
+
+  // Validate against safe path pattern
+  if (!safePathPattern.test(path)) {
+    console.warn('[AuthCallback] Rejected invalid redirect path:', path);
+    return '/profiles';
+  }
+
+  return path;
+}
+
 export default function AuthCallback() {
   const navigate = useNavigate();
   const { search } = useLocation();
@@ -11,7 +39,8 @@ export default function AuthCallback() {
   useEffect(() => {
     const params = new URLSearchParams(search);
     const code = params.get('code') || params.get('token_hash');
-    const next = params.get('next') || '/profiles';
+    const nextParam = params.get('next');
+    const next = normalizeSafeRedirect(nextParam);
 
     (async () => {
       try {
@@ -26,6 +55,13 @@ export default function AuthCallback() {
 
         if (exchangeError) {
           console.error('[AuthCallback] Exchange failed:', exchangeError);
+          // Check for specific error types
+          if (
+            exchangeError.message?.includes('expired') ||
+            exchangeError.message?.includes('used')
+          ) {
+            throw new Error('This link has expired or been used. Please request a new one.');
+          }
           throw exchangeError;
         }
 

@@ -465,7 +465,172 @@ With this migration in place, the onboarding flow is:
 
 ---
 
-## 📋 Updated Summary Status
+## 🔒 Security Hardening Checklist
+
+### 1. Open Redirect Protection
+
+**Status**: ✅ IMPLEMENTED
+
+**Protection in place**:
+
+Both [AuthCallback.tsx](src/pages/AuthCallback.tsx:12-32) and [AuthContext.tsx](src/context/AuthContext.tsx:21-40) now include `normalizeSafeRedirect()` function:
+
+```typescript
+function normalizeSafeRedirect(path: string | null): string {
+  if (!path) return '/profiles';
+
+  // Only allow same-origin paths starting with /
+  const safePathPattern = /^\/[^\s]*$/;
+
+  // Reject absolute URLs
+  if (path.includes('://') || path.startsWith('//')) {
+    console.warn('Rejected absolute URL redirect:', path);
+    return '/profiles';
+  }
+
+  // Validate against safe path pattern
+  if (!safePathPattern.test(path)) {
+    console.warn('Rejected invalid redirect path:', path);
+    return '/profiles';
+  }
+
+  return path;
+}
+```
+
+✅ **Security guarantees**:
+
+- Only same-origin paths allowed (must start with `/`)
+- Absolute URLs rejected (no `://` or `//` allowed)
+- Falls back to `/profiles` for invalid paths
+- Logs warnings for security audit trail
+
+### 2. Tighten Redirect URLs (Post-Stabilization)
+
+**Status**: ⚠️ TODO AFTER TESTING STABILIZES
+
+**Current Configuration** (permissive for development):
+
+```
+https://inkwell.leadwithnexus.com/auth/callback
+https://inkwell.leadwithnexus.com/**
+http://localhost:5173/auth/callback
+http://localhost:5173/**
+```
+
+**Recommended Final Configuration** (production-hardened):
+
+```
+https://inkwell.leadwithnexus.com
+https://inkwell.leadwithnexus.com/auth/callback
+http://localhost:5173
+http://localhost:5173/auth/callback
+```
+
+**Action Required**: Once stable, remove wildcard `/**` URLs to reduce attack surface
+
+### 3. OAuth Provider Support (Future)
+
+**Status**: 📋 READY FOR FUTURE IMPLEMENTATION
+
+When enabling Google/Apple sign-in, use the same callback flow:
+
+```typescript
+await supabase.auth.signInWithOAuth({
+  provider: 'google', // or 'apple'
+  options: {
+    redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+  },
+});
+```
+
+**Supabase Dashboard Configuration**:
+
+- **Google**: Add authorized redirect URIs in Google Cloud Console
+  - `https://YOUR_PROJECT_ID.supabase.co/auth/v1/callback`
+  - `https://inkwell.leadwithnexus.com/auth/callback`
+- **Apple**: Configure return URLs and Services ID
+  - `https://YOUR_PROJECT_ID.supabase.co/auth/v1/callback`
+
+### 4. Enhanced Error Handling
+
+**Status**: ✅ IMPLEMENTED
+
+**Error cases now handled**:
+
+1. **Missing code**: Redirects to `/sign-in?error=missing_code`
+2. **Exchange failure**: Shows user-friendly error page with retry button
+3. **Expired/used link**: Detects and shows specific error message
+4. **Stale magic link**: Prompts user to request a new link
+
+Example from [AuthCallback.tsx:56-62](src/pages/AuthCallback.tsx#L56-L62):
+
+```typescript
+if (exchangeError) {
+  console.error('[AuthCallback] Exchange failed:', exchangeError);
+  if (exchangeError.message?.includes('expired') || exchangeError.message?.includes('used')) {
+    throw new Error('This link has expired or been used. Please request a new one.');
+  }
+  throw exchangeError;
+}
+```
+
+### 5. Auth Event Logging
+
+**Status**: ✅ BASIC LOGGING IN PLACE
+
+**Current logging points**:
+
+- ✅ `[Auth] Sending magic link with redirect to: <path>`
+- ✅ `[Auth] Sign-in failed: <error>`
+- ✅ `[AuthCallback] Exchanging code for session`
+- ✅ `[AuthCallback] Session created, redirecting to: <path>`
+- ✅ `[AuthCallback] No code found in URL`
+- ✅ `[AuthCallback] Exchange failed: <error>`
+- ✅ `[AuthCallback] Rejected absolute URL redirect: <path>`
+
+**Future enhancement**: Consider adding Sentry breadcrumbs:
+
+```typescript
+import * as Sentry from '@sentry/react';
+
+// In exchangeCodeForSession error handler:
+Sentry.addBreadcrumb({
+  category: 'auth',
+  message: 'Code exchange failed',
+  level: 'error',
+  data: { error: exchangeError.message },
+});
+```
+
+### 6. Manual Edge Case Testing Checklist
+
+**Status**: ⚠️ MANUAL TESTING REQUIRED
+
+- [ ] **Stale magic link**: Use a link twice → expect graceful error
+- [ ] **Missing code param**: Navigate to `/auth/callback` without code → redirect to `/sign-in?error=missing_code`
+- [ ] **Complex deep link**: Try `/p/abc?tab=2&draft=1` → preserved through auth flow
+- [ ] **Open redirect attempt**: Try `next=https://evil.com` → should redirect to `/profiles` with warning
+- [ ] **Protocol-relative URL**: Try `next=//evil.com` → should redirect to `/profiles` with warning
+- [ ] **Invalid path**: Try `next=<script>alert(1)</script>` → should redirect to `/profiles`
+
+### 7. Preview/Development Environment URLs
+
+**Status**: ⚠️ TODO WHEN USING VERCEL PREVIEW
+
+**For Vercel preview deployments**:
+
+Add preview domain temporarily to Redirect URLs:
+
+```
+https://inkwell-<COMMIT_HASH>.vercel.app/auth/callback
+```
+
+**Security note**: Prune preview URLs when done to minimize attack surface
+
+---
+
+## 📋 Complete Summary Status
 
 | Item                           | Status | Action Required                                        |
 | ------------------------------ | ------ | ------------------------------------------------------ |
@@ -473,11 +638,17 @@ With this migration in place, the onboarding flow is:
 | emailRedirectTo uses callback  | ✅     | None - uses `/auth/callback`                           |
 | Loading-aware route protection | ✅     | None - prevents race conditions                        |
 | Auth state management          | ✅     | None - proper session handling                         |
+| **Open redirect protection**   | ✅     | None - safe path validation in place                   |
+| **Enhanced error handling**    | ✅     | None - expired/used links handled gracefully           |
+| **Auth event logging**         | ✅     | Optional: Add Sentry breadcrumbs                       |
 | Brand colors in Tailwind       | ✅     | None                                                   |
 | Sign-in page branding          | ✅     | None - logo fixed                                      |
 | **Database migration created** | ✅     | **Run migration in Supabase**                          |
 | **UserProfile types defined**  | ✅     | None                                                   |
 | Supabase Site URL              | ⚠️     | **Manual verification in dashboard**                   |
 | Supabase Redirect URLs         | ⚠️     | **Manual configuration - MUST include /auth/callback** |
+| **Tighten redirect URLs**      | ⚠️     | **Remove wildcards after testing stabilizes**          |
 | Service Worker cleanup         | ⚠️     | **Post-deployment browser action**                     |
+| **Manual edge case testing**   | ⚠️     | **Test stale links, open redirects, deep linking**     |
 | Logo assets verification       | ✅     | None - all files exist                                 |
+| **OAuth providers**            | 📋     | Future: Add Google/Apple configuration                 |
