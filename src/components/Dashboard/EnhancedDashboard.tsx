@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { InkwellFeather } from '@/components/icons';
 import type { InkwellIconName } from '@/components/icons/InkwellFeather';
 import { useAppContext, View } from '@/context/AppContext';
+import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 
 const EnhancedDashboard: React.FC = () => {
   const { state, currentProject, addProject, setCurrentProjectId, dispatch } = useAppContext();
@@ -25,6 +26,9 @@ const EnhancedDashboard: React.FC = () => {
 
       addProject({ ...newProject, chapters: [], characters: [], beatSheet: [] });
       setCurrentProjectId(newProject.id);
+
+      // Fire tour trigger for project creation
+      triggerOnProjectCreated(newProject.id);
 
       // Auto-navigate to writing after creation
       setTimeout(() => {

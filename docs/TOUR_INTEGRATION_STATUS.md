@@ -1,44 +1,54 @@
 # Inkwell Spotlight Tour - Integration Status
 
+**Last Updated**: Phase 2 - In Progress
+
 This document tracks the integration status of the Inkwell Spotlight Tour into the production codebase.
 
-## ✅ Completed Integration Steps
+## ✅ Completed Integration Steps (Phase 2 Progress)
 
-### 1. Tour CSS Import
-
-**Status**: ✅ Complete
+### 1. Tour CSS Import ✅
 
 **File**: `src/index.css`
 
 - Added `@import url('./styles/tour.css');` on line 6
 - Tour animations (pulse, fade, slide) now load globally
 
-### 2. Auth Success Trigger (onLogin → dashboardView)
-
-**Status**: ✅ Complete
+### 2. Auth Success Trigger (onLogin → dashboardView) ✅
 
 **File**: `src/context/AuthContext.tsx`
 
-- Added import: `import { triggerDashboardView } from '@/components/Onboarding/tourTriggers';`
-- Added trigger in `onAuthStateChange` callback (lines 40-43):
-  ```typescript
-  if (_event === 'SIGNED_IN' && session?.user) {
-    triggerDashboardView();
-  }
-  ```
+- Added `triggerDashboardView()` on SIGNED_IN event
 - Fires when user successfully authenticates via magic link
 
-### 3. Project Creation Trigger - DashboardPanel
+### 3-6. ALL Project Creation Triggers ✅ (4/4 locations complete)
 
-**Status**: ✅ Complete
+All 4 project creation paths now fire `triggerOnProjectCreated()`:
 
-**File**: `src/components/Panels/DashboardPanel.tsx`
+**3a. DashboardPanel.tsx** ✅
 
-- Added import: `import { triggerOnProjectCreated } from '@/components/Onboarding/tourTriggers';`
-- Added trigger in `createNewProject()` function (lines 26-27):
-  ```typescript
-  triggerOnProjectCreated(newProject.id);
-  ```
+- Primary dashboard "New Project" button wired
+
+**3b. EnhancedDashboard.tsx** ✅
+
+- Enhanced dashboard UI wired
+- Trigger fires after `setCurrentProjectId()`
+
+**3c. TemplateSelector.tsx** ✅
+
+- Template-based project creation wired
+- Trigger fires before navigation
+
+**3d. useCommands.ts** ✅
+
+- Command palette "New Project" command wired
+- Stored newProjectId before triggering
+
+### 7. Writing Panel Trigger (writingPanelOpen) ✅
+
+**File**: `src/components/Writing/EnhancedWritingEditor.tsx`
+
+- Added `triggerWritingPanelOpen()` after initial scene loads (loadInitialScene useEffect)
+- Fires when writing panel mounts with first scene ready
 
 ---
 

@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useAppContext, View } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
 import { Command } from '@/types/commands';
+import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 
 export function _useCommands(
   _selectedText?: string,
@@ -94,8 +95,9 @@ export function _useCommands(
         action: () => {
           const projectName = prompt('Enter project name:');
           if (projectName) {
+            const newProjectId = crypto.randomUUID();
             addProject({
-              id: crypto.randomUUID(),
+              id: newProjectId,
               name: projectName,
               description: '',
               content: '',
@@ -105,6 +107,10 @@ export function _useCommands(
               characters: [],
               beatSheet: [],
             });
+
+            // Fire tour trigger for project creation
+            triggerOnProjectCreated(newProjectId);
+
             _onCommandExecute?.('project-new');
             showToast(`Created project: ${projectName}`, 'success');
           }

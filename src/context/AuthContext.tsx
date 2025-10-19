@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-import { triggerDashboardView } from '@/components/Onboarding/tourTriggers';
 import { supabase } from '@/lib/supabaseClient';
+import { triggerDashboardView } from '@/utils/tourTriggers';
 
 import type { User, AuthError } from '@supabase/supabase-js';
 
