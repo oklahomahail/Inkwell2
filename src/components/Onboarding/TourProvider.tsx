@@ -28,14 +28,7 @@ const CHECKLIST_KEY = 'inkwell-completion-checklist';
 import { type TourStep as BaseTourStep } from './tourRegistry';
 
 export interface TourStep extends BaseTourStep {
-  description: string;
-  target: string;
-  placement: 'top' | 'bottom' | 'left' | 'right' | 'center';
   action?: 'click' | 'hover' | 'none';
-  optional?: boolean;
-  order: number;
-  category: 'onboarding' | 'feature-discovery' | 'tips';
-  view?: string;
 }
 
 export interface TourState {
@@ -346,7 +339,10 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setTourState((p) => ({ ...p, currentStep: Math.max(0, Math.min(idx, p.steps.length - 1)) }));
 
   const setTourSteps = (steps: TourStep[]) =>
-    setTourState((p) => ({ ...p, steps: [...steps].sort((a, b) => a.order - b.order) }));
+    setTourState((p) => ({
+      ...p,
+      steps: [...steps].sort((a, b) => (a.order || 0) - (b.order || 0)),
+    }));
 
   const isStepCompleted = (id: string) => tourState.completedSteps.includes(id);
 

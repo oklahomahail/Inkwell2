@@ -81,7 +81,9 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
         )}
       </button>
       <div className="flex-1 min-w-0">
-        <h4 className={`text-sm font-medium truncate ${getChapterStatusColor(chapter.status)}`}>
+        <h4
+          className={`text-sm font-medium truncate ${getChapterStatusColor(chapter.status || 'draft')}`}
+        >
           {chapter.title}
         </h4>
         <p className="text-xs text-gray-500">
@@ -111,7 +113,7 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
         `}
         onClick={() => onSceneSelect(scene, chapter)}
       >
-        {getStatusIcon(scene.status)}
+        {getStatusIcon(scene.status || 'draft')}
         <div className="flex-1 min-w-0">
           <p className="text-sm text-gray-900 truncate">{scene.title}</p>
           <p className="text-xs text-gray-500">{scene.wordCount?.toLocaleString() || 0} words</p>

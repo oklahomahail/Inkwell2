@@ -44,7 +44,9 @@ export async function startTourSafely(
     // Extract concrete selectors that need to exist
     const mustExist = steps
       .map((step) => step.target)
-      .filter((selector) => typeof selector === 'string' && selector.startsWith('#'))
+      .filter(
+        (selector): selector is string => typeof selector === 'string' && selector.startsWith('#'),
+      )
       .filter((selector, index, array) => array.indexOf(selector) === index); // Remove duplicates
 
     // Wait for all required elements to exist
@@ -89,7 +91,7 @@ export function getSafeTourSteps(steps: TourStep[]): TourStep[] {
     };
 
     // If the target might be missing, check for fallback
-    if (step.target !== '#tour-viewport-anchor' && fallbackMap[step.target]) {
+    if (step.target && step.target !== '#tour-viewport-anchor' && fallbackMap[step.target]) {
       return {
         ...step,
         target: step.target, // Keep original target for now

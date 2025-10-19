@@ -682,7 +682,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
           sceneTitle={currentScene?.title || ''}
           currentContent={editor?.getText() || ''}
           position="popup"
-          popupPosition={toolbarPosition}
+          popupPosition="bottom"
           onClose={() => {
             setShowPopupToolbar(false);
             setSelectedText('');
