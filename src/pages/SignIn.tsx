@@ -1,18 +1,23 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { useAuth } from '@/context/AuthContext';
 
 export default function SignIn() {
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { signInWithEmail } = useAuth();
 
+  // Get redirect path from query params (set by ProtectedRoute)
+  const redirectPath = searchParams.get('redirect') || undefined;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    const { error: signInError } = await signInWithEmail(email);
+    const { error: signInError } = await signInWithEmail(email, redirectPath);
     if (signInError) {
       setError(signInError.message);
     } else {

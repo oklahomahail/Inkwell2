@@ -55,12 +55,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithEmail = async (email: string, redirectPath?: string) => {
     // Support deep link redirect: if user came from /p/project-123, send them back there
     const finalRedirect = redirectPath ?? '/profiles';
-    const redirectUrl = new URL(finalRedirect, window.location.origin).toString();
+    const origin = window.location.origin;
+
+    // Build callback URL with the intended destination as a query param
+    const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent(finalRedirect)}`;
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: redirectUrl,
+        emailRedirectTo: callbackUrl,
         shouldCreateUser: true, // Allow new user sign-ups
       },
     });

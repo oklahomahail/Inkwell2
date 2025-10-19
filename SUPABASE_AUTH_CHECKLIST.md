@@ -16,74 +16,107 @@ This checklist covers all required Supabase configuration and branding consisten
 
 ### 2. Redirect URLs Configuration
 
-**Status**: ⚠️ NEEDS VERIFICATION IN SUPABASE DASHBOARD
+**Status**: ⚠️ CRITICAL - MUST BE CONFIGURED
 
-- [ ] **Add Additional Redirect URLs** in Supabase Dashboard
-  - Production: `https://inkwell.leadwithnexus.com/**`
-  - Development: `http://localhost:5173/**`
+- [ ] **Add Additional Redirect URLs** in Supabase Dashboard:
+  - **Production callback**: `https://inkwell.leadwithnexus.com/auth/callback`
+  - **Production wildcard**: `https://inkwell.leadwithnexus.com/**`
+  - **Development callback**: `http://localhost:5173/auth/callback`
+  - **Development wildcard**: `http://localhost:5173/**`
   - Location: Supabase Dashboard → Authentication → URL Configuration → Redirect URLs
 
-**Action Required**: Manually add both URLs to Supabase dashboard if not already present
+**⚠️ CRITICAL**: The callback URL `/auth/callback` MUST be whitelisted or Supabase will drop the `redirect_to` parameter and you'll get infinite redirect loops!
 
-### 3. Code Implementation - emailRedirectTo
+**Action Required**: Manually add all four URLs to Supabase dashboard
 
-**Status**: ✅ CORRECT
+### 3. Code Implementation - Auth Callback Route
 
-**Current Implementation** ([src/context/AuthContext.tsx:58](src/context/AuthContext.tsx#L58)):
+**Status**: ✅ IMPLEMENTED
+
+**New dedicated callback route** ([src/pages/AuthCallback.tsx](src/pages/AuthCallback.tsx)):
 
 ```typescript
-const redirectUrl = new URL(finalRedirect, window.location.origin).toString();
+// Exchanges one-time code for session
+const code = params.get('code') || params.get('token_hash');
+const next = params.get('next') || '/profiles';
+
+const { error } = await supabase.auth.exchangeCodeForSession(code);
+if (!error) {
+  navigate(next, { replace: true });
+}
+```
+
+✅ **Prevents infinite redirect loops** by:
+
+1. Accepting the one-time code from Supabase
+2. Exchanging it for a proper session
+3. Redirecting to the intended destination
+
+**Route added**: `/auth/callback` (public route, no auth required)
+
+### 4. Code Implementation - emailRedirectTo
+
+**Status**: ✅ UPDATED - Now uses callback route
+
+**Current Implementation** ([src/context/AuthContext.tsx:61](src/context/AuthContext.tsx#L61)):
+
+```typescript
+const finalRedirect = redirectPath ?? '/profiles';
+const origin = window.location.origin;
+
+// Build callback URL with the intended destination as a query param
+const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent(finalRedirect)}`;
 
 const { error } = await supabase.auth.signInWithOtp({
   email,
   options: {
-    emailRedirectTo: redirectUrl,
+    emailRedirectTo: callbackUrl,
     shouldCreateUser: true,
   },
 });
 ```
 
-✅ **Correctly using fully qualified URLs** - Uses `window.location.origin` which resolves to:
+✅ **How the flow works**:
 
-- Production: `https://inkwell.leadwithnexus.com`
-- Development: `http://localhost:5173`
+1. User clicks magic link in email
+2. Supabase redirects to: `https://inkwell.leadwithnexus.com/auth/callback?code=xxx&next=/profiles`
+3. AuthCallback page exchanges code for session
+4. User is redirected to their intended destination (e.g., `/profiles` or `/p/project-123`)
 
 **No action required** - Implementation is correct
 
-### 4. Auth Callback Handling
+### 5. Auth State Management
 
-**Status**: ✅ CORRECT
+**Status**: ✅ LOADING-AWARE
 
-**Current Implementation** ([src/context/AuthContext.tsx:34-44](src/context/AuthContext.tsx#L34-L44)):
+**ProtectedRoute** ([src/components/ProtectedRoute.tsx](src/components/ProtectedRoute.tsx)):
 
 ```typescript
-const {
-  data: { subscription },
-} = supabase.auth.onAuthStateChange((_event, session) => {
-  setUser(session?.user ?? null);
-  setLoading(false);
+const { user, loading } = useAuth();
 
-  // Fire dashboard view trigger on successful sign-in
-  if (_event === 'SIGNED_IN' && session?.user) {
-    triggerDashboardView();
-  }
-});
+// Show spinner while checking auth status (prevents false redirects)
+if (loading) {
+  return <LoadingSpinner />;
+}
+
+// Only redirect if truly unauthenticated
+if (!user) {
+  return <Navigate to={`/sign-in?redirect=${location.pathname}`} replace />;
+}
 ```
 
-✅ **Properly handles auth state changes** including hash/code from magic link
-✅ **Routes to appropriate location** after authentication
+✅ **Prevents race conditions** by waiting for initial session check to complete before redirecting
 
-**No action required** - Callback handling is correct
+**No action required** - Implementation is correct
 
-### 5. Service Worker Management
+### 6. Service Worker Management
 
-**Status**: ⚠️ ACTION RECOMMENDED
+**Status**: ⚠️ ACTION RECOMMENDED POST-DEPLOYMENT
 
 **Current Status**:
 
 - Service worker is conditionally registered via `pwaService.ts`
 - Only registers in production mode
-- Located at: [src/services/pwaService.ts](src/services/pwaService.ts)
 
 **Recommended Actions**:
 
@@ -138,7 +171,7 @@ colors: {
 **Current Implementation** ([src/pages/SignIn.tsx](src/pages/SignIn.tsx)):
 
 - ✅ Background: `bg-inkwell-blue` (#13294B)
-- ✅ Logo: `/logo-dark.png` displayed
+- ✅ Logo: `/brand/inkwell-lockup-dark.svg` (fixed from broken `/logo-dark.png`)
 - ✅ Tagline: "find your story, weave it well"
 - ✅ Button hover: `hover:bg-inkwell-gold`
 - ✅ Input focus: `focus:border-inkwell-blue`
@@ -151,6 +184,8 @@ colors: {
 
 - ✅ [src/pages/SignIn.tsx](src/pages/SignIn.tsx)
 - ✅ [src/pages/Login.tsx](src/pages/Login.tsx)
+- ✅ [src/pages/AuthCallback.tsx](src/pages/AuthCallback.tsx) - NEW
+- ✅ [src/components/ProtectedRoute.tsx](src/components/ProtectedRoute.tsx) - UPDATED
 - ✅ [src/components/Layout/Footer.tsx](src/components/Layout/Footer.tsx)
 - ✅ [src/components/Layout/FooterLight.tsx](src/components/Layout/FooterLight.tsx)
 - ✅ [src/components/Brand/InkwellLogo.tsx](src/components/Brand/InkwellLogo.tsx)
@@ -169,17 +204,17 @@ colors: {
 
 ### 4. Logo Assets
 
-**Status**: ✅ ASSETS EXIST
+**Status**: ✅ ASSETS VERIFIED
 
-**Required Logo Files**:
+**Logo Files** (all exist in `/public/brand/`):
 
-- ✅ `/logo-dark.png` - Used in Sign-In page
-- ✅ `/brand/` directory - Contains brand assets
-
-**Verification Needed**:
-
-- [ ] Verify `/logo-dark.png` exists in `public/` directory
-- [ ] Verify logo displays correctly on all pages
+- ✅ `inkwell-lockup-dark.svg` - Used in Sign-In page
+- ✅ `inkwell-lockup-horizontal.svg`
+- ✅ `inkwell-feather-navy.svg`
+- ✅ `inkwell-feather-gold.svg`
+- ✅ `inkwell-wordmark-navy.svg`
+- ✅ `inkwell-wordmark-gold.svg`
+- ✅ `inkwell-icon-square.svg`
 
 ---
 
@@ -187,76 +222,90 @@ colors: {
 
 ### Pre-Deployment Checklist
 
-- [x] Code uses fully qualified URLs for auth redirects
+- [x] Code uses callback route for auth redirects
+- [x] Callback route exchanges code for session
+- [x] ProtectedRoute is loading-aware
 - [x] Brand colors defined in Tailwind config
-- [x] Sign-in page uses correct branding
+- [x] Sign-in page uses correct branding and logo
 - [ ] Supabase Site URL configured
-- [ ] Supabase Redirect URLs configured
+- [ ] Supabase Redirect URLs configured (including /auth/callback!)
 
 ### Post-Deployment Actions
 
-1. **Verify Supabase Configuration**:
+**1. Verify Supabase Configuration**:
 
-   ```bash
-   # Navigate to: https://app.supabase.com/project/YOUR_PROJECT/auth/url-configuration
-   # Verify:
-   # - Site URL: https://inkwell.leadwithnexus.com
-   # - Redirect URLs include:
-   #   - https://inkwell.leadwithnexus.com/**
-   #   - http://localhost:5173/**
-   ```
+```bash
+# Navigate to: https://app.supabase.com/project/YOUR_PROJECT/auth/url-configuration
 
-2. **Clear Service Worker & Cache**:
+# Verify Site URL:
+https://inkwell.leadwithnexus.com
 
-   ```javascript
-   // In browser console on https://inkwell.leadwithnexus.com:
+# Verify Redirect URLs include ALL of these:
+https://inkwell.leadwithnexus.com/auth/callback
+https://inkwell.leadwithnexus.com/**
+http://localhost:5173/auth/callback
+http://localhost:5173/**
+```
 
-   // 1. Unregister all service workers
-   navigator.serviceWorker.getRegistrations().then((registrations) => {
-     console.log(`Found ${registrations.length} service workers`);
-     registrations.forEach((registration) => {
-       registration.unregister();
-       console.log('Unregistered:', registration.scope);
-     });
-   });
+**2. Clear Service Worker & Cache**:
 
-   // 2. Clear all caches
-   caches.keys().then((names) => {
-     names.forEach((name) => caches.delete(name));
-     console.log('Cleared all caches');
-   });
+```javascript
+// In browser console on https://inkwell.leadwithnexus.com:
 
-   // 3. Hard reload (Cmd+Shift+R or Ctrl+Shift+R)
-   ```
+// 1. Unregister all service workers
+navigator.serviceWorker.getRegistrations().then((registrations) => {
+  console.log(`Found ${registrations.length} service workers`);
+  registrations.forEach((registration) => {
+    registration.unregister();
+    console.log('Unregistered:', registration.scope);
+  });
+});
 
-3. **Test Auth Flow**:
-   - [ ] Visit https://inkwell.leadwithnexus.com/sign-in
-   - [ ] Enter email and click "Send magic link"
-   - [ ] Check email for magic link
-   - [ ] Click magic link in email
-   - [ ] Verify redirect to https://inkwell.leadwithnexus.com/profiles
-   - [ ] Verify user is signed in
+// 2. Clear all caches
+caches.keys().then((names) => {
+  names.forEach((name) => caches.delete(name));
+  console.log('Cleared all caches');
+});
 
-4. **Verify Branding**:
-   - [ ] Check logo displays on sign-in page
-   - [ ] Verify Inkwell blue background (#13294B)
-   - [ ] Verify gold hover state (#D4AF37)
-   - [ ] Check tagline: "find your story, weave it well"
+// 3. Hard reload (Cmd+Shift+R or Ctrl+Shift+R)
+```
+
+**3. Test Full Auth Flow**:
+
+- [ ] Visit https://inkwell.leadwithnexus.com/sign-in
+- [ ] Enter email and click "Send magic link"
+- [ ] Check email for magic link
+- [ ] Click magic link in email
+- [ ] **Verify redirect to `/auth/callback` with code parameter**
+- [ ] **Verify immediate redirect to intended destination** (e.g., `/profiles`)
+- [ ] Verify user is signed in (check for session)
+- [ ] Try accessing protected route (should stay authenticated)
+- [ ] Test deep linking: go to protected page while logged out, sign in, verify redirect back
+
+**4. Verify Branding**:
+
+- [ ] Check logo displays on sign-in page
+- [ ] Verify Inkwell blue background (#13294B)
+- [ ] Verify gold hover state (#D4AF37)
+- [ ] Check tagline: "find your story, weave it well"
+- [ ] Verify loading spinner uses Inkwell blue
 
 ---
 
 ## 📋 Summary Status
 
-| Item                                      | Status | Action Required                  |
-| ----------------------------------------- | ------ | -------------------------------- |
-| emailRedirectTo uses fully qualified URLs | ✅     | None                             |
-| Auth callback handling                    | ✅     | None                             |
-| Brand colors in Tailwind                  | ✅     | None                             |
-| Sign-in page branding                     | ✅     | None                             |
-| Supabase Site URL                         | ⚠️     | Manual verification in dashboard |
-| Supabase Redirect URLs                    | ⚠️     | Manual verification in dashboard |
-| Service Worker cleanup                    | ⚠️     | Post-deployment browser action   |
-| Logo assets verification                  | ⚠️     | Verify files exist               |
+| Item                           | Status | Action Required                                        |
+| ------------------------------ | ------ | ------------------------------------------------------ |
+| Auth callback route            | ✅     | None - implemented                                     |
+| emailRedirectTo uses callback  | ✅     | None - uses `/auth/callback`                           |
+| Loading-aware route protection | ✅     | None - prevents race conditions                        |
+| Auth state management          | ✅     | None - proper session handling                         |
+| Brand colors in Tailwind       | ✅     | None                                                   |
+| Sign-in page branding          | ✅     | None - logo fixed                                      |
+| Supabase Site URL              | ⚠️     | **Manual verification in dashboard**                   |
+| Supabase Redirect URLs         | ⚠️     | **Manual configuration - MUST include /auth/callback** |
+| Service Worker cleanup         | ⚠️     | **Post-deployment browser action**                     |
+| Logo assets verification       | ✅     | None - all files exist                                 |
 
 ---
 
@@ -265,16 +314,47 @@ colors: {
 - **Supabase Dashboard**: https://app.supabase.com/project/YOUR_PROJECT/auth/url-configuration
 - **Production Site**: https://inkwell.leadwithnexus.com
 - **Sign-In Page**: https://inkwell.leadwithnexus.com/sign-in
+- **Auth Callback**: https://inkwell.leadwithnexus.com/auth/callback
 - **GitHub Repository**: https://github.com/your-org/inkwell
 
 ---
 
 ## 📝 Notes
 
-1. **Why fully qualified URLs matter**: Supabase requires absolute URLs for `emailRedirectTo` to prevent phishing attacks. The code correctly uses `window.location.origin` which dynamically resolves to the correct domain in both dev and production.
+1. **Why the callback route is critical**: Supabase sends users back with a one-time code that MUST be exchanged for a session. Without this exchange, there's no session, and the ProtectedRoute redirects to sign-in, creating an infinite loop.
 
-2. **Service Worker considerations**: Even though PWA is only enabled in production, any previously registered service workers might cache stale auth state. Clearing them ensures fresh authentication flow.
+2. **Why loading state matters**: The initial session check takes ~50-200ms. Without a loading state, the guard thinks the user is unauthenticated during this window and redirects them, even if they just signed in.
 
-3. **Redirect URL wildcards**: Using `/**` in Supabase redirect URLs allows any path on the domain, which is necessary for deep linking (e.g., redirecting to `/p/project-123` after auth).
+3. **Redirect URL wildcards**: Using `/**` in Supabase redirect URLs allows any path on the domain. The specific `/auth/callback` URL must also be listed explicitly for Supabase to accept it.
 
-4. **Brand consistency**: All interactive elements use Inkwell blue for primary actions and gold for hover/accent states, maintaining visual consistency across the platform.
+4. **Deep linking support**: The `redirect` query parameter preserves the user's intended destination across the entire auth flow: protected page → sign-in → magic link → callback → original destination.
+
+5. **Brand consistency**: All interactive elements use Inkwell blue for primary actions and gold for hover/accent states, maintaining visual consistency across the platform.
+
+---
+
+## 🔄 Auth Flow Diagram
+
+```
+User tries to access /p/project-123
+           ↓
+Not authenticated → ProtectedRoute redirects to /sign-in?redirect=%2Fp%2Fproject-123
+           ↓
+User enters email, clicks "Send magic link"
+           ↓
+signInWithEmail() sends emailRedirectTo: /auth/callback?next=%2Fp%2Fproject-123
+           ↓
+User clicks magic link in email
+           ↓
+Supabase redirects to: /auth/callback?code=ONE_TIME_CODE&next=%2Fp%2Fproject-123
+           ↓
+AuthCallback page:
+  1. Extracts code and next params
+  2. Calls supabase.auth.exchangeCodeForSession(code)
+  3. Creates session
+  4. Redirects to /p/project-123
+           ↓
+ProtectedRoute sees user is authenticated
+           ↓
+User lands on /p/project-123 ✅
+```

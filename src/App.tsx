@@ -25,6 +25,7 @@ import { useAppContext } from './context/AppContext';
 import { useAuth } from './context/AuthContext';
 import { useEditorContext } from './context/EditorContext';
 // Pages
+import AuthCallback from './pages/AuthCallback';
 import BrandPage from './pages/Brand';
 import Login from './pages/Login';
 // Profile routing components
@@ -93,6 +94,9 @@ function _AppShell() {
       <Routes>
         {/* Health check route */}
         <Route path="/health" element={<HealthCheck />} />
+
+        {/* Auth callback route - handles magic link code exchange */}
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
         {/* Sign-in route */}
         <Route path="/sign-in" element={<Login />} />

@@ -18,10 +18,11 @@ export const isPublicRoute = (path: string): boolean => {
     return true;
   }
 
-  // Check path prefixes (e.g., /sign-in/something, /assets/something)
+  // Check path prefixes (e.g., /sign-in/something, /assets/something, /auth/callback)
   if (
     path.startsWith('/sign-in') ||
     path.startsWith('/sign-up') ||
+    path.startsWith('/auth/callback') || // Allow auth callback for magic link code exchange
     publicPrefixes.some((prefix) => path.startsWith(prefix))
   ) {
     return true;
