@@ -27,7 +27,10 @@ import { useEditorContext } from './context/EditorContext';
 // Pages
 import AuthCallback from './pages/AuthCallback';
 import BrandPage from './pages/Brand';
+import ForgotPassword from './pages/ForgotPassword';
 import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
+import UpdatePassword from './pages/UpdatePassword';
 // Profile routing components
 import { ProfileGate } from './routes/shell/ProfileGate';
 import { ProfilePicker } from './routes/shell/ProfilePicker';
@@ -95,11 +98,14 @@ function _AppShell() {
         {/* Health check route */}
         <Route path="/health" element={<HealthCheck />} />
 
-        {/* Auth callback route - handles magic link code exchange */}
+        {/* Auth callback route - handles magic link code exchange and password reset flow */}
         <Route path="/auth/callback" element={<AuthCallback />} />
 
-        {/* Sign-in route */}
+        {/* Auth routes */}
         <Route path="/sign-in" element={<SignIn />} />
+        <Route path="/sign-up" element={<SignUp />} />
+        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+        <Route path="/auth/update-password" element={<UpdatePassword />} />
 
         {/* Legacy login route - redirect to sign-in */}
         <Route path="/login" element={<Navigate to="/sign-in" replace />} />

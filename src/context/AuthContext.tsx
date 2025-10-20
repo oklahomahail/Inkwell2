@@ -10,6 +10,8 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   signInWithEmail: (email: string, redirectPath?: string) => Promise<{ error: AuthError | null }>;
+  signInWithPassword: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUpWithPassword: (email: string, password: string) => Promise<{ error: AuthError | null }>;
 }
 
 /**
@@ -44,6 +46,8 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signOut: async () => {},
   signInWithEmail: async () => ({ error: null }),
+  signInWithPassword: async () => ({ error: null }),
+  signUpWithPassword: async () => ({ error: null }),
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -60,13 +64,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
 
       // Fire dashboard view trigger on successful sign-in
-      if (_event === 'SIGNED_IN' && session?.user) {
+      if (event === 'SIGNED_IN' && session?.user) {
         triggerDashboardView();
+      }
+
+      // Handle password recovery flow
+      if (event === 'PASSWORD_RECOVERY') {
+        console.log('[Auth] Password recovery event detected');
+        // Redirect to password update page
+        window.location.href = '/auth/update-password';
       }
     });
 
@@ -113,8 +124,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
+  const signInWithPassword = async (email: string, password: string) => {
+    console.info('[Auth] Attempting to sign in with email/password');
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error('[Auth] Password sign-in failed:', error.message);
+    } else {
+      console.info('[Auth] Password sign-in successful');
+    }
+
+    return { error };
+  };
+
+  const signUpWithPassword = async (email: string, password: string) => {
+    console.info('[Auth] Attempting to sign up with email/password');
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error('[Auth] Password sign-up failed:', error.message);
+    } else {
+      console.info('[Auth] Password sign-up successful');
+    }
+
+    return { error };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signOut, signInWithEmail }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        signOut,
+        signInWithEmail,
+        signInWithPassword,
+        signUpWithPassword,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

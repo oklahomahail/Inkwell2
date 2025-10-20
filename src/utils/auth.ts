@@ -3,6 +3,8 @@ const publicPaths = [
   '/',
   '/sign-in',
   '/sign-up',
+  '/auth/forgot-password',
+  '/auth/update-password',
   '/favicon.ico',
   '/robots.txt',
   '/site.webmanifest',
@@ -22,7 +24,9 @@ export const isPublicRoute = (path: string): boolean => {
   if (
     path.startsWith('/sign-in') ||
     path.startsWith('/sign-up') ||
-    path.startsWith('/auth/callback') || // Allow auth callback for magic link code exchange
+    path.startsWith('/auth/forgot-password') ||
+    path.startsWith('/auth/update-password') ||
+    path.startsWith('/auth/callback') || // Allow auth callback for magic link and password reset
     publicPrefixes.some((prefix) => path.startsWith(prefix))
   ) {
     return true;

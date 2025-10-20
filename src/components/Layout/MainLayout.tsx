@@ -16,6 +16,7 @@ import {
   Kanban,
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import Logo from '@/components/Logo';
 import { BRAND_NAME, ORGANIZATION_NAME } from '@/constants/brand';
@@ -27,6 +28,15 @@ import { useFeatureFlag } from '@/utils/flags';
 
 import { ProfileSwitcher } from '../ProfileSwitcher';
 import { PWAOfflineIndicator } from '../PWA';
+
+// Define auth routes that should not show the header/topbar
+const AUTH_ROUTES = [
+  '/sign-in',
+  '/sign-up',
+  '/auth/callback',
+  '/auth/forgot-password',
+  '/auth/update-password',
+];
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -89,6 +99,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(state.theme === 'dark');
   const [isMobile, setIsMobile] = useState(false);
+  const location = useLocation();
+
+  // Check if the current path is an auth route
+  const isAuthRoute = AUTH_ROUTES.some((route) => location.pathname.startsWith(route));
 
   // Modal states for header actions
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -282,6 +296,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
   const currentProject = state.projects.find((p) => p.id === state.currentProjectId);
 
+  // Don't render the layout for auth routes
+  if (isAuthRoute) {
+    return <>{children}</>;
+  }
+
   return (
     <div className={cn('main-layout flex', className)}>
       {/* Mobile sidebar overlay */}
@@ -293,198 +312,202 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         />
       )}
 
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          'sidebar',
-          'fixed left-0 top-0 h-full z-40',
-          'transition-all duration-300 ease-in-out',
-          'bg-white dark:bg-slate-800',
-          'border-r border-slate-200 dark:border-slate-700',
-          'flex flex-col',
-          // Desktop behavior
-          !isMobile && (sidebarCollapsed ? 'w-16' : 'w-64'),
-          // Mobile behavior - slide in/out
-          isMobile && (sidebarCollapsed ? '-translate-x-full w-64' : 'translate-x-0 w-64'),
-        )}
-        aria-hidden={isMobile && sidebarCollapsed}
-      >
-        {/* Sidebar Header */}
-        <div className="sidebar-header p-4 border-b border-slate-200 dark:border-slate-700">
-          <div className="flex items-center justify-between">
-            <div className={cn('flex items-center gap-3', sidebarCollapsed && 'justify-center')}>
-              <div className="flex-shrink-0">
-                {sidebarCollapsed ? (
-                  <Logo
-                    variant="svg-feather-gold"
-                    size={32}
-                    className="transition-all duration-300"
-                  />
-                ) : (
-                  <Logo
-                    variant="svg-feather-gold"
-                    size={32}
-                    className="transition-all duration-300"
-                  />
+      {/* Sidebar - only show on non-auth routes */}
+      {!isAuthRoute && (
+        <aside
+          className={cn(
+            'sidebar',
+            'fixed left-0 top-0 h-full z-40',
+            'transition-all duration-300 ease-in-out',
+            'bg-white dark:bg-slate-800',
+            'border-r border-slate-200 dark:border-slate-700',
+            'flex flex-col',
+            // Desktop behavior
+            !isMobile && (sidebarCollapsed ? 'w-16' : 'w-64'),
+            // Mobile behavior - slide in/out
+            isMobile && (sidebarCollapsed ? '-translate-x-full w-64' : 'translate-x-0 w-64'),
+          )}
+          aria-hidden={isMobile && sidebarCollapsed}
+        >
+          {/* Sidebar Header */}
+          <div className="sidebar-header p-4 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between">
+              <div className={cn('flex items-center gap-3', sidebarCollapsed && 'justify-center')}>
+                <div className="flex-shrink-0">
+                  {sidebarCollapsed ? (
+                    <Logo
+                      variant="svg-feather-gold"
+                      size={32}
+                      className="transition-all duration-300"
+                    />
+                  ) : (
+                    <Logo
+                      variant="svg-feather-gold"
+                      size={32}
+                      className="transition-all duration-300"
+                    />
+                  )}
+                </div>
+                {!sidebarCollapsed && (
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <h1 className="text-heading-sm text-slate-900 dark:text-white font-semibold truncate">
+                      {BRAND_NAME}
+                    </h1>
+                    <p className="text-caption text-slate-500 dark:text-slate-400 truncate">
+                      {currentProject?.name || 'No project'}
+                    </p>
+                  </div>
                 )}
               </div>
-              {!sidebarCollapsed && (
-                <div className="flex flex-col min-w-0 flex-1">
-                  <h1 className="text-heading-sm text-slate-900 dark:text-white font-semibold truncate">
-                    {BRAND_NAME}
-                  </h1>
-                  <p className="text-caption text-slate-500 dark:text-slate-400 truncate">
-                    {currentProject?.name || 'No project'}
-                  </p>
-                </div>
-              )}
-            </div>
-            <button
-              onClick={toggleSidebar}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  toggleSidebar();
-                }
-              }}
-              className={cn(
-                'btn-ghost btn-sm',
-                'w-8 h-8 p-0 flex-shrink-0',
-                'flex items-center justify-center',
-                'hover:bg-slate-100 dark:hover:bg-slate-700',
-                'transition-all duration-200',
-                'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800',
-                'rounded-md',
-                sidebarCollapsed ? 'ml-auto' : 'ml-2',
-              )}
-              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              aria-expanded={!sidebarCollapsed}
-              tabIndex={0}
-            >
-              <Menu
-                className={cn(
-                  'w-4 h-4 transition-transform duration-200',
-                  sidebarCollapsed && 'rotate-180',
-                )}
-              />
-            </button>
-          </div>
-        </div>
-
-        {/* Search/Command Palette */}
-        {!sidebarCollapsed && (
-          <div className="p-4">
-            <button
-              onClick={openPalette}
-              className={cn(
-                'w-full flex items-center gap-3',
-                'px-3 py-2 text-sm text-slate-600 dark:text-slate-400',
-                'bg-slate-50 dark:bg-slate-700/50',
-                'border border-slate-200 dark:border-slate-600',
-                'rounded-md hover:bg-slate-100 dark:hover:bg-slate-700',
-                'transition-colors focus-ring',
-              )}
-              aria-label="Open command palette"
-            >
-              <Search className="w-4 h-4" />
-              <span className="flex-1 text-left">Search or command...</span>
-              <kbd className="px-1.5 py-0.5 text-xs font-mono bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded">
-                ⌘K
-              </kbd>
-            </button>
-          </div>
-        )}
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4">
-          <div className="space-y-1">
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = state.view === item.view;
-
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleViewChange(item.view)}
-                  className={cn(
-                    'nav-item w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all',
-                    'focus-ring',
-                    isActive
-                      ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white',
-                    sidebarCollapsed && 'justify-center',
-                  )}
-                  title={sidebarCollapsed ? `${item.label} (${item.shortcut})` : undefined}
-                >
-                  <Icon className={cn('w-5 h-5', sidebarCollapsed ? 'mx-auto' : 'flex-shrink-0')} />
-                  {!sidebarCollapsed && (
-                    <>
-                      <span className="flex-1 text-left">{item.label}</span>
-                      <kbd className="text-xs text-slate-400 dark:text-slate-500 font-mono">
-                        {item.shortcut}
-                      </kbd>
-                    </>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </nav>
-
-        {/* Quick Actions */}
-        {!sidebarCollapsed && (
-          <div className="p-4 border-t border-slate-200 dark:border-slate-700">
-            <div className="space-y-2">
               <button
-                className="w-full btn btn-primary btn-sm"
+                onClick={toggleSidebar}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleSidebar();
+                  }
+                }}
+                className={cn(
+                  'btn-ghost btn-sm',
+                  'w-8 h-8 p-0 flex-shrink-0',
+                  'flex items-center justify-center',
+                  'hover:bg-slate-100 dark:hover:bg-slate-700',
+                  'transition-all duration-200',
+                  'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800',
+                  'rounded-md',
+                  sidebarCollapsed ? 'ml-auto' : 'ml-2',
+                )}
+                aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                aria-expanded={!sidebarCollapsed}
+                tabIndex={0}
+              >
+                <Menu
+                  className={cn(
+                    'w-4 h-4 transition-transform duration-200',
+                    sidebarCollapsed && 'rotate-180',
+                  )}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Search/Command Palette */}
+          {!sidebarCollapsed && (
+            <div className="p-4">
+              <button
+                onClick={openPalette}
+                className={cn(
+                  'w-full flex items-center gap-3',
+                  'px-3 py-2 text-sm text-slate-600 dark:text-slate-400',
+                  'bg-slate-50 dark:bg-slate-700/50',
+                  'border border-slate-200 dark:border-slate-600',
+                  'rounded-md hover:bg-slate-100 dark:hover:bg-slate-700',
+                  'transition-colors focus-ring',
+                )}
+                aria-label="Open command palette"
+              >
+                <Search className="w-4 h-4" />
+                <span className="flex-1 text-left">Search or command...</span>
+                <kbd className="px-1.5 py-0.5 text-xs font-mono bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded">
+                  ⌘K
+                </kbd>
+              </button>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <nav className="flex-1 p-4">
+            <div className="space-y-1">
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = state.view === item.view;
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => handleViewChange(item.view)}
+                    className={cn(
+                      'nav-item w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all',
+                      'focus-ring',
+                      isActive
+                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800'
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white',
+                      sidebarCollapsed && 'justify-center',
+                    )}
+                    title={sidebarCollapsed ? `${item.label} (${item.shortcut})` : undefined}
+                  >
+                    <Icon
+                      className={cn('w-5 h-5', sidebarCollapsed ? 'mx-auto' : 'flex-shrink-0')}
+                    />
+                    {!sidebarCollapsed && (
+                      <>
+                        <span className="flex-1 text-left">{item.label}</span>
+                        <kbd className="text-xs text-slate-400 dark:text-slate-500 font-mono">
+                          {item.shortcut}
+                        </kbd>
+                      </>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
+
+          {/* Quick Actions */}
+          {!sidebarCollapsed && (
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+              <div className="space-y-2">
+                <button
+                  className="w-full btn btn-primary btn-sm"
+                  onClick={() => {
+                    // TODO: Implement create project
+                    console.log('Create new project');
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                  New Project
+                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={toggleDarkMode}
+                    className="flex-1 btn btn-ghost btn-sm"
+                    aria-label="Toggle dark mode"
+                  >
+                    {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                    {isDarkMode ? 'Light' : 'Dark'}
+                  </button>
+                  <button className="btn btn-ghost btn-sm p-2" aria-label="Notifications">
+                    <Bell className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Collapsed mode quick actions */}
+          {sidebarCollapsed && (
+            <div className="p-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
+              <button
+                className="w-full btn btn-primary btn-sm p-2"
                 onClick={() => {
                   // TODO: Implement create project
                   console.log('Create new project');
                 }}
+                title="New Project"
               >
                 <Plus className="w-4 h-4" />
-                New Project
               </button>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={toggleDarkMode}
-                  className="flex-1 btn btn-ghost btn-sm"
-                  aria-label="Toggle dark mode"
-                >
-                  {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                  {isDarkMode ? 'Light' : 'Dark'}
-                </button>
-                <button className="btn btn-ghost btn-sm p-2" aria-label="Notifications">
-                  <Bell className="w-4 h-4" />
-                </button>
-              </div>
+              <button
+                onClick={toggleDarkMode}
+                className="w-full btn btn-ghost btn-sm p-2"
+                title="Toggle dark mode"
+              >
+                {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
             </div>
-          </div>
-        )}
-
-        {/* Collapsed mode quick actions */}
-        {sidebarCollapsed && (
-          <div className="p-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
-            <button
-              className="w-full btn btn-primary btn-sm p-2"
-              onClick={() => {
-                // TODO: Implement create project
-                console.log('Create new project');
-              }}
-              title="New Project"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-            <button
-              onClick={toggleDarkMode}
-              className="w-full btn btn-ghost btn-sm p-2"
-              title="Toggle dark mode"
-            >
-              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-          </div>
-        )}
-      </aside>
+          )}
+        </aside>
+      )}
 
       {/* Main Content */}
       <main
@@ -498,78 +521,101 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
           isMobile && 'ml-0',
         )}
       >
-        {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
-          <div className="px-4 md:px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                {/* Mobile hamburger menu */}
-                {isMobile && (
-                  <button
-                    onClick={toggleSidebar}
-                    className="btn btn-ghost btn-sm p-2 md:hidden"
-                    aria-label="Toggle navigation menu"
-                  >
-                    <Menu className="w-5 h-5" />
-                  </button>
-                )}
-                <h2 className="text-heading-lg text-slate-900 dark:text-white truncate">
-                  {navigationItems.find((item) => item.view === state.view)?.label || 'Dashboard'}
-                </h2>
-                {currentProject && (
-                  <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-slate-600 dark:text-slate-300">
-                      {currentProject.name}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-3">
-                <PWAOfflineIndicator variant="badge" />
-                <ProfileSwitcher />
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={openPalette}
-                    className="btn btn-ghost btn-sm"
-                    aria-label="Open command palette (⌘K)"
-                    title="Command Palette (⌘K)"
-                  >
-                    <Command className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={handleOpenSearch}
-                    className="btn btn-ghost btn-sm"
-                    aria-label="Search (⌘⇧F)"
-                    title="Search (⌘⇧F)"
-                  >
-                    <Search className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={handleOpenNotifications}
-                    className="btn btn-ghost btn-sm"
-                    aria-label="Notifications"
-                    title="Notifications"
-                  >
-                    <Bell className="w-4 h-4" />
-                  </button>
-                  {/* Settings Button */}
-                  <button
-                    onClick={handleOpenSettings}
-                    className="btn btn-ghost btn-sm"
-                    aria-label="Settings (⌘,)"
-                    title="Settings (⌘,)"
-                  >
-                    <Settings className="w-4 h-4" />
-                  </button>
-                  {/* Export Button */}
-                  {currentProject && (
+        {/* Top Bar - only show on non-auth routes */}
+        {!isAuthRoute && (
+          <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
+            <div className="px-4 md:px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  {/* Mobile hamburger menu */}
+                  {isMobile && (
                     <button
-                      onClick={handleExport}
+                      onClick={toggleSidebar}
+                      className="btn btn-ghost btn-sm p-2 md:hidden"
+                      aria-label="Toggle navigation menu"
+                    >
+                      <Menu className="w-5 h-5" />
+                    </button>
+                  )}
+                  <h2 className="text-heading-lg text-slate-900 dark:text-white truncate">
+                    {navigationItems.find((item) => item.view === state.view)?.label || 'Dashboard'}
+                  </h2>
+                  {currentProject && (
+                    <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm text-slate-600 dark:text-slate-300">
+                        {currentProject.name}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <PWAOfflineIndicator variant="badge" />
+                  <ProfileSwitcher />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={openPalette}
                       className="btn btn-ghost btn-sm"
-                      aria-label="Export (⌘E)"
-                      title="Export Project (⌘E)"
+                      aria-label="Open command palette (⌘K)"
+                      title="Command Palette (⌘K)"
+                    >
+                      <Command className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={handleOpenSearch}
+                      className="btn btn-ghost btn-sm"
+                      aria-label="Search (⌘⇧F)"
+                      title="Search (⌘⇧F)"
+                    >
+                      <Search className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={handleOpenNotifications}
+                      className="btn btn-ghost btn-sm"
+                      aria-label="Notifications"
+                      title="Notifications"
+                    >
+                      <Bell className="w-4 h-4" />
+                    </button>
+                    {/* Settings Button */}
+                    <button
+                      onClick={handleOpenSettings}
+                      className="btn btn-ghost btn-sm"
+                      aria-label="Settings (⌘,)"
+                      title="Settings (⌘,)"
+                    >
+                      <Settings className="w-4 h-4" />
+                    </button>
+                    {/* Export Button */}
+                    {currentProject && (
+                      <button
+                        onClick={handleExport}
+                        className="btn btn-ghost btn-sm"
+                        aria-label="Export (⌘E)"
+                        title="Export Project (⌘E)"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </button>
+                    )}
+                    {/* Help Button */}
+                    <button
+                      onClick={handleOpenHelp}
+                      className="btn btn-ghost btn-sm"
+                      aria-label="Help (?)"
+                      title="Help & Support (?)"
                     >
                       <svg
                         className="w-4 h-4"
@@ -581,32 +627,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
                     </button>
-                  )}
-                  {/* Help Button */}
-                  <button
-                    onClick={handleOpenHelp}
-                    className="btn btn-ghost btn-sm"
-                    aria-label="Help (?)"
-                    title="Help & Support (?)"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </header>
+          </header>
+        )}
 
         {/* Page Content */}
         <div className="p-6 flex-1">
