@@ -46,7 +46,9 @@ describe('AuthCallback', () => {
       expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
     });
 
-    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('abc');
+    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(
+      expect.stringContaining('/auth/callback?code=abc&next=%2Fdashboard'),
+    );
   });
 
   it('redirects to /sign-in on missing code', async () => {
@@ -91,7 +93,9 @@ describe('AuthCallback', () => {
       expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
     });
 
-    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('xyz');
+    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(
+      expect.stringContaining('/auth/callback?token_hash=xyz&next=%2Fdashboard'),
+    );
   });
 
   it('defaults to /dashboard when next parameter is missing', async () => {
@@ -108,7 +112,9 @@ describe('AuthCallback', () => {
       expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
     });
 
-    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('abc');
+    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(
+      expect.stringContaining('/auth/callback?code=abc'),
+    );
   });
 
   describe('Security: Open Redirect Protection', () => {
