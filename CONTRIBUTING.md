@@ -21,9 +21,10 @@ pnpm test:smoke # Run smoke tests
 ## Development Workflow
 
 1. **Fork** the repository and create a feature branch
-2. **Make your changes** following our coding standards
+2. **Make your changes** following our coding standards and [React Hooks Safety Guidelines](/docs/HOOKS_SAFETY.md)
 3. **Test thoroughly** - our pre-commit hooks will help catch issues
-4. **Submit a pull request** with a clear description
+4. **Run `node fix.eslint.js`** to check for and fix common issues
+5. **Submit a pull request** with a clear description
 
 ## 🛡️ Maintenance Playbook
 
