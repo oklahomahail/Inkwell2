@@ -17,14 +17,14 @@ type Props = {
 };
 
 const ASSET_MAP: Record<LogoVariant, { src: string; aspectRatio: number }> = {
-  'mark-light': { src: '/brand/4.png', aspectRatio: 1 }, // square - gold feather on white
-  'mark-dark': { src: '/brand/2.png', aspectRatio: 1 }, // square - gold feather on navy
-  'wordmark-light': { src: '/brand/3.png', aspectRatio: 4 }, // wide - navy text + gold feather on white
-  'wordmark-dark': { src: '/brand/1.png', aspectRatio: 4 }, // wide - gold text + feather on navy
+  'mark-light': { src: '/brand/logos/inkwell-feather-gold.svg', aspectRatio: 1 }, // square - gold feather on white
+  'mark-dark': { src: '/brand/logos/inkwell-feather-navy.svg', aspectRatio: 1 }, // square - gold feather on navy
+  'wordmark-light': { src: '/brand/logos/inkwell-wordmark-navy.svg', aspectRatio: 4 }, // wide - navy text + gold feather on white
+  'wordmark-dark': { src: '/brand/logos/inkwell-wordmark-gold.svg', aspectRatio: 4 }, // wide - gold text + feather on navy
   'outline-dark': { src: '/brand/6.png', aspectRatio: 1 }, // square - navy outline feather
   'outline-light': { src: '/brand/5.png', aspectRatio: 4 }, // wide - light on black
-  'svg-feather-gold': { src: '/brand/inkwell-feather-gold.optimized.svg', aspectRatio: 1 },
-  'svg-feather-navy': { src: '/brand/inkwell-feather-navy.optimized.svg', aspectRatio: 1 },
+  'svg-feather-gold': { src: '/brand/logos/inkwell-feather-gold.svg', aspectRatio: 1 },
+  'svg-feather-navy': { src: '/brand/logos/inkwell-feather-navy.svg', aspectRatio: 1 },
 };
 
 export default function Logo({ variant, size = 48, className }: Props) {
@@ -45,7 +45,7 @@ export default function Logo({ variant, size = 48, className }: Props) {
         }
         // If that fails too, use the alternate color
         else if (asset.src.includes('gold')) {
-          e.currentTarget.src = '/brand/inkwell-feather-navy.svg';
+          e.currentTarget.src = '/brand/logos/inkwell-feather-navy.svg';
         }
         // Last resort: use text fallback
         else {

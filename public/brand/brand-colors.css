@@ -1,0 +1,38 @@
+:root {
+  --inkwell-gold: #D4AF37;
+  --inkwell-navy: #13294B;
+  --inkwell-gray: #4E5666;
+  --inkwell-white: #FAFAFA;
+}
+
+.text-inkwell-gold {
+  color: var(--inkwell-gold);
+}
+
+.text-inkwell-navy {
+  color: var(--inkwell-navy);
+}
+
+.text-inkwell-gray {
+  color: var(--inkwell-gray);
+}
+
+.text-inkwell-white {
+  color: var(--inkwell-white);
+}
+
+.bg-inkwell-gold {
+  background-color: var(--inkwell-gold);
+}
+
+.bg-inkwell-navy {
+  background-color: var(--inkwell-navy);
+}
+
+.bg-inkwell-gray {
+  background-color: var(--inkwell-gray);
+}
+
+.bg-inkwell-white {
+  background-color: var(--inkwell-white);
+}

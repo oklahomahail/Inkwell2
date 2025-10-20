@@ -211,7 +211,7 @@ export default function SignIn() {
             onError={(e) => {
               console.error('Logo failed to load, falling back to wordmark');
               // First try the logo path
-              (e.currentTarget as HTMLImageElement).src = '/logo/inkwell-logo-white.svg';
+              (e.currentTarget as HTMLImageElement).src = '/brand/logos/inkwell-wordmark-gold.svg';
               // Add a second fallback in case the logo also fails
               (e.currentTarget as HTMLImageElement).onerror = () => {
                 console.error('Fallback logo also failed, using text wordmark');

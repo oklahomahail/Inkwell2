@@ -70,7 +70,7 @@ export const InkwellSplash: React.FC<InkwellSplashProps> = ({
           }`}
         >
           <img
-            src="/assets/inkwell-mark.svg"
+            src="/brand/logos/inkwell-feather-gold.svg"
             alt="Inkwell"
             className={`w-full h-full transition-all duration-500 ${
               animationPhase === 'filling' ? 'ink-loading' : ''
@@ -140,7 +140,11 @@ export const InkwellLoader: React.FC<InkwellLoaderProps> = ({ size = 'md' }) => 
 
   return (
     <div className={`${sizeClasses[size]} text-ink-primary`}>
-      <img src="/assets/icon-inkwell.svg" alt="Loading..." className="w-full h-full pulse-ink" />
+      <img
+        src="/brand/logos/inkwell-feather-gold.svg"
+        alt="Loading..."
+        className="w-full h-full pulse-ink"
+      />
     </div>
   );
 };
@@ -173,7 +177,7 @@ export const InkwellWordmark: React.FC<InkwellWordmarkProps> = ({
     <div className={`flex items-center space-x-2 ${className}`}>
       {withIcon && (
         <img
-          src="/assets/icon-inkwell.svg"
+          src="/brand/logos/inkwell-feather-gold.svg"
           alt="Inkwell"
           className={`${iconSizeClasses[size]} text-ink-primary transition-ink hover:glow-ink`}
         />
