@@ -24,6 +24,14 @@ Authentication is handled through Supabase, with the following flows:
 - Password reset
 - Account recovery
 
+### Authentication Troubleshooting
+
+If you encounter issues with authentication:
+
+- For email delivery problems during sign-up or password reset, see [Supabase Auth Email Troubleshooting](/docs/SUPABASE_AUTH_EMAIL_TROUBLESHOOTING.md)
+- For general auth flow issues, see [Auth Troubleshooting Guide](./AUTH_TROUBLESHOOTING.md)
+- For deployment settings, see [Supabase Auth Deployment Checklist](/docs/SUPABASE_AUTH_DEPLOYMENT_CHECKLIST.md)
+
 ## Features
 
 - Chapter & scene tracker with reordering
