@@ -1,20 +1,21 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import { supabase } from '@/lib/supabaseClient';
+import { useGo } from '@/utils/navigate';
 import { normalizeSafeRedirect } from '@/utils/safeRedirect';
 
 export default function SignIn() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const go = useGo();
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // If /sign-in?redirect=/p/xyz is used, preserve it
+  // If /sign-in?redirect=/p/xyz is used, preserve it after normalizing
   const desiredRedirect = useMemo(
-    () => normalizeSafeRedirect(searchParams.get('redirect')),
+    () => normalizeSafeRedirect(searchParams.get('redirect'), console.warn),
     [searchParams],
   );
 
@@ -25,72 +26,93 @@ export default function SignIn() {
       const { data } = await supabase.auth.getSession();
       if (!mounted) return;
       if (data.session) {
-        navigate(desiredRedirect, { replace: true });
+        go(desiredRedirect, { replace: true });
       }
     })();
     return () => {
       mounted = false;
     };
-  }, [navigate, desiredRedirect]);
+  }, [go, desiredRedirect]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      setSubmitting(true);
-      setError(null);
-      setMessage(null);
+      if (!email || submitting) return;
 
       try {
-        const emailRedirectTo = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(
-          desiredRedirect,
-        )}`;
+        setSubmitting(true);
+        setError(null);
 
-        const { error: signInError } = await supabase.auth.signInWithOtp({
+        const { error } = await supabase.auth.signInWithOtp({
           email,
-          options: { emailRedirectTo },
+          options: {
+            emailRedirectTo: window.location.origin + '/auth/callback?redirect=' + desiredRedirect,
+          },
         });
 
-        if (signInError) {
-          setError(signInError.message || 'Unable to send magic link.');
-          return;
-        }
-
-        setMessage(
-          'Check your email for a magic link. It can take up to a minute. Remember to check spam.',
-        );
+        if (error) throw error;
+        setMessage('Check your email for the magic link');
       } catch (err) {
-        setError('Unexpected error while sending the magic link.');
+        console.error('Sign-in error:', err);
+        setError(err instanceof Error ? err.message : 'Sign-in failed');
       } finally {
         setSubmitting(false);
       }
     },
-    [email, desiredRedirect],
+    [email, desiredRedirect, submitting],
   );
 
   return (
-    <div className="mx-auto max-w-md p-6">
-      <h1 className="text-2xl font-semibold mb-4">Sign in to Inkwell</h1>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <label className="block">
-          <span className="block text-sm mb-1">Email</span>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded border px-3 py-2"
-            placeholder="you@example.com"
-            autoComplete="email"
-          />
-        </label>
+    <div className="flex min-h-screen flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+          Sign in to Inkwell
+        </h2>
+      </div>
 
-        <button type="submit" disabled={submitting} className="w-full rounded px-3 py-2 border">
-          {submitting ? 'Sending…' : 'Send magic link'}
-        </button>
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
+          {message ? (
+            <div className="text-center text-emerald-600">{message}</div>
+          ) : (
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email address
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+              </div>
 
-        {!!message && <p className="text-sm text-green-700">{message}</p>}
-        {!!error && <p className="text-sm text-red-700">{error}</p>}
-      </form>
+              {error && (
+                <div className="rounded-md bg-red-50 p-4">
+                  <div className="text-sm text-red-700">{error}</div>
+                </div>
+              )}
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {submitting ? 'Sending...' : 'Send magic link'}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,35 +1,38 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import { supabase } from '@/lib/supabaseClient';
+import { useGo } from '@/utils/navigate';
 import { normalizeSafeRedirect } from '@/utils/safeRedirect';
 
 export default function AuthCallback() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const go = useGo();
 
   useEffect(() => {
     let mounted = true;
 
     (async () => {
-      // Exchange the "code" in this URL for a Supabase session
-      const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+      const code = searchParams.get('code');
+      const tokenHash = searchParams.get('token_hash');
+
+      if (!code && !tokenHash) {
+        go('/sign-in?error=callback', { replace: true });
+        return;
+      }
+
+      // Exchange the code/token for a Supabase session
+      const response = await supabase.auth.exchangeCodeForSession(window.location.href);
 
       if (!mounted) return;
 
-      if (error) {
-        // Optional: include code for easier debugging
-        navigate('/sign-in?error=callback', { replace: true });
+      if (response?.error || !response?.data?.session) {
+        go('/sign-in?error=callback', { replace: true });
         return;
       }
 
       // Optional: mark that onboarding tour should run on first open.
-      // Your dashboard can check this flag on mount and start the tour once,
-      // then clear it after completion.
       try {
-        // Only set the tour flag if this is the user's very first session.
-        // If you have a better signal available (e.g., profile.createdAt),
-        // replace this with that check.
         const firstLoginFlag = localStorage.getItem('tourCompleted');
         if (!firstLoginFlag) {
           localStorage.setItem('tourShouldStart', '1');
@@ -38,14 +41,16 @@ export default function AuthCallback() {
         // Ignore storage errors
       }
 
-      const redirectTo = normalizeSafeRedirect(searchParams.get('redirect'));
-      navigate(redirectTo, { replace: true });
+      const next = searchParams.get('next');
+      const redirect = searchParams.get('redirect');
+      const redirectTo = normalizeSafeRedirect(next || redirect, console.warn);
+      go(redirectTo, { replace: true });
     })();
 
     return () => {
       mounted = false;
     };
-  }, [navigate, searchParams]);
+  }, [go, searchParams]);
 
-  return <p>Signing you in…</p>;
+  return <p>Signing you in...</p>;
 }

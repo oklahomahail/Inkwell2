@@ -1,14 +1,28 @@
-import { render } from '@testing-library/react';
-import * as rrd from 'react-router-dom';
-import { vi } from 'vitest';
+import { Routes, Route } from 'react-router-dom';
+import { vi, it, expect } from 'vitest';
 
-import SignIn from '@/pages/SignIn';
+import { renderWithRouter } from '../../test/utils/renderWithRouter';
+import SignIn from '../SignIn';
 
-it('warns when redirect query is unsafe', () => {
+// Our navigate wrapper is irrelevant for this test; keep it inert.
+vi.mock('@/utils/navigate', () => ({ useGo: () => vi.fn() }));
+
+it('warns and normalizes when redirect is unsafe on SignIn', () => {
   const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-  const params = new URLSearchParams('redirect=https://evil.com');
-  vi.spyOn(rrd, 'useSearchParams').mockReturnValue([params, vi.fn()] as any);
-  render(<SignIn />);
-  expect(warn).toHaveBeenCalledWith('Blocked unsafe redirect', 'https://evil.com');
+
+  const ui = (
+    <Routes>
+      <Route path="/sign-in" element={<SignIn />} />
+    </Routes>
+  );
+
+  renderWithRouter(ui, {
+    initialEntries: ['/sign-in?redirect=https://evil.com'],
+  });
+
+  expect(warn).toHaveBeenCalled();
+  expect(warn.mock.calls[0][0]).toMatch(/unsafe redirect/i);
+  expect(warn.mock.calls[0][1]).toBe('https://evil.com');
+
   warn.mockRestore();
 });

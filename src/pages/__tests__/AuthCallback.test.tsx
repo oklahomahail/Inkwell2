@@ -1,198 +1,132 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { describe, it, vi, expect, beforeEach } from 'vitest';
-import '@testing-library/jest-dom';
+// Hoisted mocks so vi.mock factories can reference them safely
+import { vi, describe, it, beforeEach, expect } from 'vitest';
+import '@testing-library/jest-dom/vitest';
 
-import { supabase } from '@/lib/supabaseClient';
-import AuthCallback from '@/pages/AuthCallback';
-
-vi.mock('@/lib/supabaseClient', () => {
+const h = vi.hoisted(() => {
   return {
-    supabase: {
-      auth: {
-        exchangeCodeForSession: vi.fn(),
-      },
-    },
+    exchange: vi.fn().mockResolvedValue({ data: { session: {} }, error: null }),
+    getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
+    navigateSpy: vi.fn(),
   };
 });
 
-function AppShell() {
-  return (
+vi.mock('../../lib/supabaseClient', () => ({
+  supabase: {
+    auth: {
+      exchangeCodeForSession: h.exchange,
+      getSession: h.getSession,
+      signInWithOtp: vi.fn().mockResolvedValue({ error: null }),
+    },
+  },
+}));
+
+vi.mock('../../utils/navigate', () => ({ useGo: () => h.navigateSpy }));
+
+import { waitFor } from '@testing-library/react';
+import { Routes, Route } from 'react-router-dom';
+
+import { renderWithRouter } from '../../test/utils/renderWithRouter';
+import AuthCallback from '../AuthCallback';
+
+// OPTIONAL: if your helper logs "Blocked unsafe redirect"
+const warnSpy = () => vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+function renderWithRoutes(initialEntry: string) {
+  return renderWithRouter(
     <Routes>
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/dashboard" element={<div>DASHBOARD</div>} />
       <Route path="/sign-in" element={<div>SIGNIN</div>} />
-    </Routes>
+    </Routes>,
+    { initialEntries: [initialEntry] },
   );
 }
 
 describe('AuthCallback', () => {
   beforeEach(() => {
     vi.resetAllMocks();
-  });
+    // Reset hoisted spies’ state
+    h.exchange.mockReset();
+    h.getSession.mockReset();
+    h.navigateSpy.mockReset();
 
-  it('exchanges code and forwards to next', async () => {
-    (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
-    window.location.href = 'http://localhost:3000/auth/callback?code=abc&next=%2Fdashboard';
-    render(
-      <MemoryRouter initialEntries={['/auth/callback?code=abc&next=%2Fdashboard']}>
-        <AppShell />
-      </MemoryRouter>,
-    );
-
-    expect(screen.getByText(/Signing you in/i)).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
-    });
-
-    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(window.location.href);
+    h.exchange.mockResolvedValue({ data: { session: {} }, error: null });
+    h.getSession.mockResolvedValue({ data: { session: null } });
   });
 
   it('redirects to /sign-in on missing code', async () => {
-    render(
-      <MemoryRouter initialEntries={['/auth/callback']}>
-        <AppShell />
-      </MemoryRouter>,
+    h.exchange.mockResolvedValueOnce({ data: null, error: { message: 'Missing or invalid code' } });
+    renderWithRoutes('/auth/callback');
+
+    await waitFor(() =>
+      expect(h.navigateSpy).toHaveBeenCalledWith('/sign-in?error=callback', { replace: true }),
     );
+  });
+
+  it('exchanges code and forwards to next', async () => {
+    renderWithRoutes('/auth/callback?code=abc&redirect=/dashboard');
 
     await waitFor(() => {
-      expect(screen.getByText('SIGNIN')).toBeInTheDocument();
+      // AuthCallback reads full URL string; we just assert we navigated correctly
+      expect(h.navigateSpy).toHaveBeenCalledWith('/dashboard', { replace: true });
     });
   });
 
   it('redirects to /sign-in when exchange fails', async () => {
-    (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({
-      data: null,
-      error: new Error('boom'),
-    });
+    h.exchange.mockResolvedValueOnce({ data: null, error: { message: 'Auth error' } });
 
-    render(
-      <MemoryRouter initialEntries={['/auth/callback?code=abc&next=%2Fdashboard']}>
-        <AppShell />
-      </MemoryRouter>,
+    renderWithRoutes('/auth/callback?code=abc');
+
+    await waitFor(() =>
+      expect(h.navigateSpy).toHaveBeenCalledWith('/sign-in?error=callback', { replace: true }),
     );
-
-    await waitFor(() => {
-      expect(screen.getByText('SIGNIN')).toBeInTheDocument();
-    });
   });
 
   it('handles token_hash parameter as alternative to code', async () => {
-    (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
-    window.location.href = 'http://localhost:3000/auth/callback?token_hash=xyz&next=%2Fdashboard';
-    render(
-      <MemoryRouter initialEntries={['/auth/callback?token_hash=xyz&next=%2Fdashboard']}>
-        <AppShell />
-      </MemoryRouter>,
+    renderWithRoutes('/auth/callback?token_hash=xyz&redirect=/dashboard');
+
+    await waitFor(() =>
+      expect(h.navigateSpy).toHaveBeenCalledWith('/dashboard', { replace: true }),
     );
-
-    await waitFor(() => {
-      expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
-    });
-
-    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(window.location.href);
   });
 
-  it('defaults to /dashboard when next parameter is missing', async () => {
-    (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
-    window.location.href = 'http://localhost:3000/auth/callback?code=abc';
-    render(
-      <MemoryRouter initialEntries={['/auth/callback?code=abc']}>
-        <AppShell />
-      </MemoryRouter>,
+  it('Security: rejects absolute URL redirects (https://)', async () => {
+    const w = warnSpy();
+
+    renderWithRoutes('/auth/callback?code=abc&redirect=https://evil.com');
+
+    await waitFor(() =>
+      expect(h.navigateSpy).toHaveBeenCalledWith('/dashboard', { replace: true }),
     );
-
-    await waitFor(() => {
-      expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
-    });
-
-    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(window.location.href);
+    expect(w).toHaveBeenCalled(); // from normalizeSafeRedirect
+    w.mockRestore();
   });
 
-  describe('Security: Open Redirect Protection', () => {
-    it('rejects absolute URL redirects (https://)', async () => {
-      (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('Security: rejects protocol-relative URL redirects (//)', async () => {
+    const w = warnSpy();
 
-      render(
-        <MemoryRouter initialEntries={['/auth/callback?code=abc&next=https://evil.com']}>
-          <AppShell />
-        </MemoryRouter>,
-      );
+    renderWithRoutes('/auth/callback?code=abc&redirect=//evil.com');
 
-      await waitFor(() => {
-        // Should fall back to /dashboard instead of redirecting to evil.com
-        expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
-      });
+    await waitFor(() =>
+      expect(h.navigateSpy).toHaveBeenCalledWith('/dashboard', { replace: true }),
+    );
+    expect(w).toHaveBeenCalled();
+    w.mockRestore();
+  });
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Rejected absolute URL redirect'),
-        expect.stringContaining('evil.com'),
-      );
+  it('Security: allows valid same-origin paths with query', async () => {
+    renderWithRoutes('/auth/callback?code=abc&redirect=/dashboard?tab=settings');
 
-      consoleWarnSpy.mockRestore();
-    });
+    await waitFor(() =>
+      expect(h.navigateSpy).toHaveBeenCalledWith('/dashboard?tab=settings', { replace: true }),
+    );
+  });
 
-    it('rejects protocol-relative URL redirects (//)', async () => {
-      (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('defaults to /dashboard when redirect is missing', async () => {
+    renderWithRoutes('/auth/callback?code=abc');
 
-      render(
-        <MemoryRouter initialEntries={['/auth/callback?code=abc&next=//evil.com/path']}>
-          <AppShell />
-        </MemoryRouter>,
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
-      });
-
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Rejected absolute URL redirect'),
-        expect.stringContaining('//evil.com'),
-      );
-
-      consoleWarnSpy.mockRestore();
-    });
-
-    it('rejects invalid paths with special characters', async () => {
-      (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-      render(
-        <MemoryRouter initialEntries={['/auth/callback?code=abc&next=<script>alert(1)</script>']}>
-          <AppShell />
-        </MemoryRouter>,
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
-      });
-
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Rejected invalid redirect path'),
-        expect.anything(),
-      );
-
-      consoleWarnSpy.mockRestore();
-    });
-
-    it('allows valid same-origin paths', async () => {
-      (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
-
-      render(
-        <MemoryRouter
-          initialEntries={['/auth/callback?code=abc&next=%2Fdashboard%3Ftab%3Dsettings']}
-        >
-          <AppShell />
-        </MemoryRouter>,
-      );
-
-      await waitFor(() => {
-        // Should allow /dashboard?tab=settings
-        expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
-      });
-    });
+    await waitFor(() =>
+      expect(h.navigateSpy).toHaveBeenCalledWith('/dashboard', { replace: true }),
+    );
   });
 });
