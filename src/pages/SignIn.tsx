@@ -2,21 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { supabase } from '@/lib/supabaseClient';
-
-/**
- * Only allow same-origin, absolute paths like "/dashboard" or "/p/123".
- * Everything else falls back to "/dashboard".
- */
-function normalizeSafeRedirect(raw: string | null): string {
-  if (!raw) return '/dashboard';
-  try {
-    // Must start with a single "/" and not be protocol/host-prefixed
-    if (raw.startsWith('/') && !raw.startsWith('//')) return raw;
-    return '/dashboard';
-  } catch {
-    return '/dashboard';
-  }
-}
+import { normalizeSafeRedirect } from '@/utils/safeRedirect';
 
 export default function SignIn() {
   const [searchParams] = useSearchParams();

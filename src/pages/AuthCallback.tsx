@@ -2,15 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { supabase } from '@/lib/supabaseClient';
-
-/**
- * Match the same safety behavior as SignIn.tsx.
- */
-function normalizeSafeRedirect(raw: string | null): string {
-  if (!raw) return '/dashboard';
-  if (raw.startsWith('/') && !raw.startsWith('//')) return raw;
-  return '/dashboard';
-}
+import { normalizeSafeRedirect } from '@/utils/safeRedirect';
 
 export default function AuthCallback() {
   const [searchParams] = useSearchParams();
