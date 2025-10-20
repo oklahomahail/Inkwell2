@@ -56,10 +56,14 @@ export default function SignIn() {
         setSubmitting(true);
         setError(null);
 
+        // Add debug for what redirect URL we're using
+        const callbackUrl = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(desiredRedirect)}`;
+        console.log('[SignIn] Using redirect URL:', callbackUrl);
+
         const { error } = await supabase.auth.signInWithOtp({
           email,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${desiredRedirect}`,
+            emailRedirectTo: callbackUrl,
           },
         });
 

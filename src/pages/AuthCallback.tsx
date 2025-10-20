@@ -55,8 +55,12 @@ export default function AuthCallback() {
       const url = new URL(window.location.origin + loc.pathname + loc.search + loc.hash);
 
       // Preserve any redirect the app passed through
-      const redirectParam = getParam(url, 'redirect');
+      // Check for both "redirect" and "view" parameters (the latter appears in production)
+      const redirectParam = getParam(url, 'redirect') || getParam(url, 'view');
       const redirectTo = normalizeSafeRedirect(redirectParam);
+
+      // Log the redirect path for debugging
+      console.log('[AuthCallback] Will redirect to:', redirectTo);
 
       // Supabase can return either:
       // 1) ?code=...   (new GoTrue flow)
@@ -68,9 +72,16 @@ export default function AuthCallback() {
 
       // Enhanced debug info for troubleshooting
       console.log('[AuthCallback] href', window.location.href);
+      console.log('[AuthCallback] url object', {
+        pathname: url.pathname,
+        search: url.search,
+        hash: url.hash,
+        fullParams: Object.fromEntries(url.searchParams.entries()),
+      });
       console.log('[AuthCallback] code?', getParam(url, 'code'));
       console.log('[AuthCallback] token_hash?', getParam(url, 'token_hash'));
       console.log('[AuthCallback] type?', getParam(url, 'type'));
+      console.log('[AuthCallback] view?', getParam(url, 'view'));
 
       if (code) console.log('[AuthCallback] Using code flow');
       if (tokenHash) console.log('[AuthCallback] Using token_hash flow');
@@ -163,16 +174,77 @@ export default function AuthCallback() {
           return;
         }
 
+        // Handle case where we get type but no token_hash (happens in production)
+        if (type && !code && !tokenHash) {
+          // This is a special case we're seeing in production where only a type parameter is present
+          // Try to use the type directly with verifyOtp
+          console.log(`[AuthCallback] Trying type-only verification with type=${type}`);
+
+          try {
+            // Use type with empty token_hash - this might work if Supabase is using a new flow
+            const verifyType = type === 'recovery' || type === 'email_change' ? type : 'signup';
+            const { data, error } = await supabase.auth.verifyOtp({
+              type: verifyType,
+              token_hash: '', // Empty but present
+            });
+
+            if (!error && data?.session) {
+              console.log('[AuthCallback] Type-only verification successful');
+              go(redirectTo, { replace: true });
+              return;
+            }
+
+            // If that failed, try getting the session directly as a fallback
+            console.log('[AuthCallback] Checking for existing session as fallback');
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (sessionData?.session) {
+              console.log('[AuthCallback] Found existing session, proceeding to redirect');
+              go(redirectTo, { replace: true });
+              return;
+            }
+
+            throw new Error('Type-only verification failed');
+          } catch (e) {
+            console.warn('[AuthCallback] Type-only verification failed:', e);
+            // Continue to error case below
+          }
+        }
+
         // No code or token_hash? Bail with a generic error message and sentinel
         console.warn('[AuthCallback] No code or token_hash found in URL');
+        console.warn('[AuthCallback] URL details:', {
+          fullUrl: window.location.href,
+          pathname: url.pathname,
+          search: url.search,
+          hash: url.hash,
+          foundParams: Object.fromEntries(url.searchParams.entries()),
+        });
+
+        // Attempt a last-resort session check
+        const { data: lastResortSession } = await supabase.auth.getSession();
+        if (lastResortSession?.session) {
+          console.log(
+            '[AuthCallback] Found valid session despite missing params, proceeding to redirect',
+          );
+          go(redirectTo, { replace: true });
+          return;
+        }
 
         // We can reuse the isTest variable from above
         if (isTest) {
           // Keep simple for tests
           go(`/sign-in?error=callback`, { replace: true });
         } else {
-          // In production add sentinel
-          go(`/sign-in?error=callback&reason=missing_params&_once=1`, { replace: true });
+          // In production add sentinel with more details
+          const params = new URLSearchParams({
+            error: 'callback',
+            reason: 'missing_params',
+            _once: '1',
+            view: getParam(url, 'view') || 'none',
+            type: type || 'none',
+            has_hash: url.hash ? 'yes' : 'no',
+          });
+          go(`/sign-in?${params.toString()}`, { replace: true });
         }
       } catch (err: any) {
         // Avoid loops: push a single error and stop.
