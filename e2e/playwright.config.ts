@@ -1,9 +1,8 @@
-// playwright.config.ts
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   // Directory containing test files
-  testDir: 'e2e',
+  testDir: './',
 
   // Maximum time one test can run for
   timeout: 30000,
@@ -22,6 +21,7 @@ export default defineConfig({
     {
       name: 'chromium',
       use: {
+        // Use the standard Chromium browser
         browserName: 'chromium',
         // All requests we send have credentials (cookies, etc)
         contextOptions: {
