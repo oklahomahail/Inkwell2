@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 
 import { supabase } from '@/lib/supabaseClient';
@@ -29,20 +29,12 @@ function normalizeSafeRedirect(path: string | null | undefined, warn = console.w
 }
 
 export default function AuthCallback() {
-  // Use only one navigation hook to avoid React hook order issues
-  const go = useGo(); // This already uses useNavigate internally
+  const go = useGo(); // Single navigation source
   const loc = useLocation();
   const [searchParams] = useSearchParams();
-  const onceRef = useRef(false);
 
   useEffect(() => {
-    // Strong one-shot guard to prevent double processing
-    // This is critical to prevent React 19's strict effects from causing problems
-    if (onceRef.current) {
-      console.log('[AuthCallback] Skipping duplicate effect execution');
-      return;
-    }
-    onceRef.current = true;
+    let mounted = true;
 
     // For test debugging
     console.log('[AuthCallback] Effect running - processing authentication');
@@ -296,14 +288,18 @@ export default function AuthCallback() {
         // In test environment, keep the simple error format to match test expectations
         // We can reuse the isTest variable from above
         if (isTest) {
-          go(`/sign-in?error=callback`, { replace: true });
+          if (mounted) go(`/sign-in?error=callback`, { replace: true });
         } else {
           // In production, include the sentinel to prevent auto-retry
-          go(`/sign-in?error=callback&reason=${reason}&_once=1`, { replace: true });
+          if (mounted) go(`/sign-in?error=callback&reason=${reason}&_once=1`, { replace: true });
         }
       }
     })();
-  }, [go]);
+
+    return () => {
+      mounted = false;
+    };
+  }, [go, loc.pathname, loc.search, loc.hash]);
 
   // Utility function for troubleshooting: can be called from DevTools to clear service workers
   // that might interfere with auth routes

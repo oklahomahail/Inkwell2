@@ -2,7 +2,9 @@
 
 import { ChevronDown, User, Plus, Settings } from 'lucide-react';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import {} from 'react-router-dom';
+import { useGo } from '@/utils/navigate';
 
 import { useProfileContext } from '../context/ProfileContext';
 import { Profile } from '../types/profile';
@@ -11,17 +13,16 @@ interface ProfileSwitcherProps {
   className?: string;
 }
 
-export const ProfileSwitcher = _ProfileSwitcher;
-
-export function _ProfileSwitcher({ className = '' }: ProfileSwitcherProps) {
-  const navigate = useNavigate();
+// Export a properly-named React component
+function ProfileSwitcher({ className = '' }: ProfileSwitcherProps) {
+  const go = useGo();
   const { profiles, activeProfile, setActiveProfile } = useProfileContext();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleProfileSwitch = async (profile: Profile) => {
     try {
       await setActiveProfile(profile.id);
-      navigate(`/p/${profile.id}/dashboard`);
+      go(`/p/${profile.id}/dashboard`);
       setIsOpen(false);
     } catch (error) {
       console.error('Failed to switch profile:', error);
@@ -30,13 +31,13 @@ export function _ProfileSwitcher({ className = '' }: ProfileSwitcherProps) {
   };
 
   const handleCreateProfile = () => {
-    navigate('/profiles');
+    go('/profiles');
     setIsOpen(false);
   };
 
   const handleManageProfiles = () => {
     // Could navigate to a profile management page in the future
-    navigate('/profiles');
+    go('/profiles');
     setIsOpen(false);
   };
 
@@ -167,3 +168,6 @@ export function _ProfileSwitcher({ className = '' }: ProfileSwitcherProps) {
     </div>
   );
 }
+
+// Export the component
+export { ProfileSwitcher };

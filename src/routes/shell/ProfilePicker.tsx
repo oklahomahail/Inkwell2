@@ -2,9 +2,10 @@
 
 import { Plus, User, Palette } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
+import {} from 'react-router-dom';
 import { cn } from '@/utils';
+import { useGo } from '@/utils/navigate';
 
 import { BRAND_NAME, TAGLINE_PRIMARY } from '../../constants/brand';
 import { useProfileContext } from '../../context/ProfileContext';
@@ -21,8 +22,8 @@ const PRESET_COLORS = [
   '#84CC16', // lime
 ];
 
-function _ProfilePicker() {
-  const navigate = useNavigate();
+function ProfilePicker() {
+  const go = useGo();
   const { profiles, createProfile, setActiveProfile, isLoading, error } = useProfileContext();
   const [isCreating, setIsCreating] = useState(false);
   const [newProfileName, setNewProfileName] = useState('');
@@ -33,7 +34,7 @@ function _ProfilePicker() {
   const handleSelectProfile = async (profile: Profile) => {
     try {
       await setActiveProfile(profile.id);
-      navigate(`/p/${profile.id}/dashboard`);
+      go(`/p/${profile.id}/dashboard`);
     } catch (error) {
       console.error('Failed to select profile:', error);
       setFormError('Failed to select profile. Please try again.');
@@ -72,11 +73,11 @@ function _ProfilePicker() {
       // If create/find succeeded, try to activate. Don't show create error if this fails
       try {
         await setActiveProfile(profile.id);
-        navigate(`/p/${profile.id}/dashboard`);
+        go(`/p/${profile.id}/dashboard`);
       } catch (activationError) {
         console.warn('Profile created/found but failed to set active:', activationError);
         // Still navigate - the profile exists, activation can be retried
-        navigate(`/p/${profile.id}/dashboard`);
+        go(`/p/${profile.id}/dashboard`);
       }
     } catch (error: any) {
       console.error('Failed to create profile:', error);
@@ -87,7 +88,7 @@ function _ProfilePicker() {
         if (existingProfile) {
           try {
             await setActiveProfile(existingProfile.id);
-            navigate(`/p/${existingProfile.id}/dashboard`);
+            go(`/p/${existingProfile.id}/dashboard`);
             return;
           } catch (activationError) {
             console.warn('Found existing profile but failed to activate:', activationError);
@@ -320,4 +321,4 @@ function FeatherMark(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-export const ProfilePicker = _ProfilePicker;
+export { ProfilePicker };

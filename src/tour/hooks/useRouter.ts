@@ -2,10 +2,12 @@
 // Simple router hook for tour navigation
 
 import { useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+
+import { useGo } from '@/utils/navigate';
 
 export function useRouter() {
-  const navigate = useNavigate();
+  const go = useGo();
   const location = useLocation();
 
   const getCurrentPath = useCallback(() => {
@@ -16,9 +18,9 @@ export function useRouter() {
     getCurrentPath,
     navigate: useCallback(
       (path: string) => {
-        navigate(path);
+        go(path);
       },
-      [navigate],
+      [go],
     ),
   };
 }

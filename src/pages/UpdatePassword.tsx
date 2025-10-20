@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 import { supabase } from '@/lib/supabaseClient';
+import { useGo } from '@/utils/navigate';
 import { normalizeSafeRedirect } from '@/utils/safeRedirect';
 
 export default function UpdatePassword() {
-  const navigate = useNavigate();
+  const go = useGo();
   const [searchParams] = useSearchParams();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,12 +26,12 @@ export default function UpdatePassword() {
 
       if (!hasResetToken) {
         // Not in a valid password reset flow, redirect to sign in
-        navigate('/sign-in', { replace: true });
+        go('/sign-in', { replace: true });
       }
     };
 
     checkResetFlowValid();
-  }, [navigate]);
+  }, [go]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -64,7 +65,7 @@ export default function UpdatePassword() {
 
         // Auto-redirect after a short delay
         setTimeout(() => {
-          navigate(redirect, { replace: true });
+          go(redirect, { replace: true });
         }, 1500);
       } catch (err) {
         console.error('[UpdatePassword] Error updating password:', err);
@@ -73,7 +74,7 @@ export default function UpdatePassword() {
         setSubmitting(false);
       }
     },
-    [password, confirmPassword],
+    [password, confirmPassword, go, redirect],
   );
 
   return (

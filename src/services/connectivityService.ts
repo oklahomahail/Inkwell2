@@ -112,7 +112,7 @@ class ConnectivityService {
             );
           }
         }
-      } catch (error) {
+      } catch (_error) {
         console.error(`Error processing queued ${item.operation} for ${item.key}:`, error);
         item.retryCount++;
         if (item.retryCount < ConnectivityService.MAX_RETRIES) {
@@ -181,7 +181,7 @@ class ConnectivityService {
     // Immediately call with current status
     try {
       callback(this.getStatus());
-    } catch (error) {
+    } catch (_error) {
       console.error('Error in status change callback:', error);
       // Remove the callback if it errors on first call
       const index = this.listeners.indexOf(callback);
@@ -303,7 +303,7 @@ class ConnectivityService {
           console.error(`Unknown queued operation: ${item.operation}`);
           return false;
       }
-    } catch (error) {
+    } catch (_error) {
       console.error(`Failed to execute queued ${item.operation} for ${item.key}:`, error);
       return false;
     }
@@ -316,7 +316,7 @@ class ConnectivityService {
         this.queue = JSON.parse(result.data);
         console.log(`Loaded ${this.queue.length} queued operations from storage`);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to load offline queue:', error);
       this.queue = [];
     }
@@ -331,7 +331,7 @@ class ConnectivityService {
       if (!result.success) {
         console.error('Failed to save offline queue:', result.error);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to save offline queue:', error);
     }
   }
@@ -341,7 +341,7 @@ class ConnectivityService {
     for (const listener of this.listeners) {
       try {
         listener(status);
-      } catch (error) {
+      } catch (_error) {
         console.error('Connectivity listener error:', error);
       }
     }
