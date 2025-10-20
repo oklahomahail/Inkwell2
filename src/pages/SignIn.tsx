@@ -63,21 +63,24 @@ export default function SignIn() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen flex-col justify-center bg-inkwell-blue py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+        <div className="flex justify-center">
+          <img src="/logo/inkwell-logo-white.svg" alt="Inkwell" className="h-16 w-auto" />
+        </div>
+        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-white">
           Sign in to Inkwell
         </h2>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white px-4 py-8 shadow-lg border-t-4 border-inkwell-gold sm:rounded-lg sm:px-10 relative overflow-hidden">
           {message ? (
             <div className="text-center text-emerald-600">{message}</div>
           ) : (
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="email" className="block text-sm font-medium text-inkwell-blue">
                   Email address
                 </label>
                 <div className="mt-1">
@@ -89,7 +92,7 @@ export default function SignIn() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-inkwell-gold focus:outline-none focus:ring-inkwell-gold sm:text-sm"
                   />
                 </div>
               </div>
@@ -104,7 +107,7 @@ export default function SignIn() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex w-full justify-center rounded-md border border-transparent bg-inkwell-blue px-4 py-3 text-sm font-medium text-white shadow-sm hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-inkwell-gold focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {submitting ? 'Sending...' : 'Send magic link'}
                 </button>
