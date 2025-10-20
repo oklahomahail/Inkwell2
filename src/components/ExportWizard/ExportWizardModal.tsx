@@ -8,7 +8,7 @@ interface ExportWizardModalProps {
   onClose: () => void;
 }
 
-function ExportWizardModal({ isOpen, projectId, onClose }: ExportWizardModalProps) {
+export function ExportWizardModal({ isOpen, projectId, onClose }: ExportWizardModalProps) {
   // Handle escape key
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -49,4 +49,3 @@ function ExportWizardModal({ isOpen, projectId, onClose }: ExportWizardModalProp
 }
 
 // Default export for compatibility
-export default ExportWizardModal;

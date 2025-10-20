@@ -7,8 +7,8 @@ export interface Profile {
   name: string;
   ownerId?: string;
   displayName?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
   color?: string;
   avatar?: string;
   description?: string;

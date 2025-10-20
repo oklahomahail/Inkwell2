@@ -161,7 +161,7 @@ export function usePWA() {
   const defaultState = {
     isOfflineReady: false,
     needsRefresh: false,
-    updateApp: () => {},
+    updateApp: (_forceReload?: boolean) => {},
     installApp: () => Promise.resolve(false),
     canInstall: false,
     isOffline: false,
@@ -172,9 +172,9 @@ export function usePWA() {
   // For now, we'll return the default state to fix linting errors
   return {
     ...defaultState,
-    updateApp: () => {
+    updateApp: (forceReload?: boolean) => {
       if (process.env.NODE_ENV === 'production') {
-        console.log('Update app called');
+        console.log('Update app called', forceReload ? 'with force reload' : '');
       }
     },
     installApp: () => {

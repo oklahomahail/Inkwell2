@@ -8,7 +8,7 @@ import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect, useRef } from 'react';
 
 import { useEditorContext } from '@/context/EditorContext';
-import { _useAdvancedFocusMode as useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
+import { useAdvancedFocusMode } from '@/hooks/useAdvancedFocusMode';
 import { cn } from '@/lib/utils';
 
 type Props = {

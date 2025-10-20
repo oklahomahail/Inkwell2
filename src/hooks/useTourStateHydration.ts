@@ -1,7 +1,7 @@
 // src/hooks/useTourStateHydration.ts
 import { useEffect } from 'react';
 
-import { _useProfile as useProfile } from '../context/ProfileContext';
+import { useProfile } from '../context/ProfileContext';
 import { createTourStorage } from '../services/simpleTourStorage';
 
 /**

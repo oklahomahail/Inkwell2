@@ -117,6 +117,18 @@ function ProfilePicker() {
     }
   }, [profiles.length]);
 
+  // Helper to format dates that might be strings or Date objects
+  const formatDate = (date: string | Date): string => {
+    try {
+      if (typeof date === 'string') {
+        return new Date(date).toLocaleDateString();
+      }
+      return date.toLocaleDateString();
+    } catch (error) {
+      return 'Invalid date';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -202,7 +214,7 @@ function ProfilePicker() {
                         {profile.displayName || profile.name}
                       </p>
                       <p className="text-sm text-gray-500">
-                        Created {profile.createdAt.toLocaleDateString()}
+                        Created {formatDate(profile.createdAt)}
                       </p>
                     </div>
                   </button>

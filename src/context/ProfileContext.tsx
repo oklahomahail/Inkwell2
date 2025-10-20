@@ -156,12 +156,14 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
       const newProfile: Profile = {
         id: uuidv4(),
         name: trimmedName,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        preferences: {
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        settings: {
           theme: 'system',
-          defaultView: 'dashboard',
-          ...options.preferences,
+          preferences: {
+            defaultView: 'dashboard',
+            ...(options.settings?.preferences || {}),
+          },
         },
         ...options,
       };
@@ -238,12 +240,12 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
 
       // Set active profile if one exists and is still valid
       if (activeProfileId) {
-        let profile = state.profiles.find((p) => p.id === profileId);
+        let profile = state.profiles.find((p) => p.id === activeProfileId);
 
         // Check saved profile storage if not in current state
         if (!profile) {
           try {
-            profile = profiles.find((p) => p.id === profileId);
+            profile = profiles.find((p) => p.id === activeProfileId);
           } catch {
             // Unable to set active profile
             dispatch({ type: 'SET_ACTIVE_PROFILE', payload: null });
@@ -256,10 +258,14 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
           // If active profile no longer exists, pick the first available one
           const refreshed = loadProfilesFromStorage();
           if (refreshed.length > 0) {
-            profile = refreshed.find((p) => p.id === profileId);
+            profile = refreshed.find((p) => p.id === activeProfileId);
             if (!profile) {
               const fallback = refreshed[0];
-              dispatch({ type: 'SET_ACTIVE_PROFILE', payload: fallback });
+              if (fallback) {
+                dispatch({ type: 'SET_ACTIVE_PROFILE', payload: fallback });
+              } else {
+                dispatch({ type: 'SET_ACTIVE_PROFILE', payload: null });
+              }
             }
           }
         }
@@ -269,18 +275,17 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
   }, [state.profiles]);
 
   const setActiveProfile = useCallback(
-    (profileId: ProfileId) => {
+    async (profileId: ProfileId): Promise<void> => {
       // Find profile by ID
       const profile = state.profiles.find((p) => p.id === profileId);
 
       if (profile) {
         dispatch({ type: 'SET_ACTIVE_PROFILE', payload: profile });
         saveActiveProfileToStorage(profileId);
-        return profile;
+        return;
       }
 
       console.error(`Profile with id ${profileId} not found`);
-      return null;
     },
     [state.profiles],
   );

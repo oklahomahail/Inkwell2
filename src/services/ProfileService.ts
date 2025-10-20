@@ -7,6 +7,18 @@ const getCurrentUser = () => {
 };
 
 class ProfileService {
+  // Helper function to ensure date fields are proper Date objects
+  private static ensureDates(profile: Profile): any {
+    const result = { ...profile };
+    if (typeof result.createdAt === 'string') {
+      result.createdAt = new Date(result.createdAt);
+    }
+    if (typeof result.updatedAt === 'string') {
+      result.updatedAt = new Date(result.updatedAt);
+    }
+    return result;
+  }
+
   static async createProfile(name: string, options?: Partial<Profile>): Promise<Profile> {
     const user = await getCurrentUser();
     const now = new Date();
@@ -20,7 +32,7 @@ class ProfileService {
       ...options,
     } as Profile;
 
-    await db.profiles.put(profile);
+    await db.profiles.put(ProfileService.ensureDates(profile));
     return profile;
   }
 
@@ -111,7 +123,7 @@ class ProfileService {
       updatedAt: new Date(),
     } as Profile;
 
-    await db.profiles.put(updatedProfile);
+    await db.profiles.put(ProfileService.ensureDates(updatedProfile));
     return updatedProfile;
   }
 

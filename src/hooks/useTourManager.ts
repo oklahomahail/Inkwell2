@@ -1,7 +1,7 @@
 // src/hooks/useTourManager.ts
 import { useCallback, useRef } from 'react';
 
-import { _useProfile as useProfile } from '../context/ProfileContext';
+import { useProfile } from '../context/ProfileContext';
 import { createTourStorage, TourName, TourProgress } from '../services/simpleTourStorage';
 import { waitForElement } from '../utils/domUtils';
 
