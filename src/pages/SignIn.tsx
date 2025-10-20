@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 
 import { supabase } from '@/lib/supabaseClient';
@@ -34,25 +34,35 @@ export default function SignIn() {
   // IMPORTANT: Only redirect if session is truthy, never on null during first render
   useEffect(() => {
     let mounted = true;
+    const logPrefix = '[SignIn]';
+
+    // Use a ref to track if we've logged the session check message
+    // to reduce console spam in dev mode with strict effects
+    const hasLoggedRef = useRef(false);
+
     // Check for _once sentinel to prevent auto-retry loops
     const hasOnceSentinel = searchParams.get('_once') === '1';
 
     if (hasOnceSentinel) {
-      console.log('[SignIn] Skipping auto-session check due to _once sentinel');
+      console.log(`${logPrefix} Skipping auto-session check due to _once sentinel`);
       return; // Don't auto-retry if we're coming from an error with _once=1
     }
 
     (async () => {
-      console.log('[SignIn] Checking for existing session');
+      if (!hasLoggedRef.current) {
+        console.log(`${logPrefix} Checking for existing session`);
+        hasLoggedRef.current = true;
+      }
+
       const { data } = await supabase.auth.getSession();
       if (!mounted) return;
+
       if (data?.session) {
-        console.log('[SignIn] Found active session, redirecting to', desiredRedirect);
+        console.log(`${logPrefix} Found active session, redirecting to`, desiredRedirect);
         go(desiredRedirect, { replace: true });
-      } else {
-        console.log('[SignIn] No active session found');
       }
     })();
+
     return () => {
       mounted = false;
     };
@@ -75,13 +85,46 @@ export default function SignIn() {
           password,
         });
 
-        if (error) throw error;
+        if (error) {
+          // Handle specific error cases
+          if (error.status === 500) {
+            console.error('[SignIn] Server error (500):', error);
+            setError(
+              'Server error. Please try again later or contact support if the problem persists.',
+            );
+            return;
+          }
+
+          // Handle specific auth errors with user-friendly messages
+          if (error.message.includes('Invalid login')) {
+            setError('Invalid email or password. Please try again.');
+            return;
+          }
+
+          throw error;
+        }
 
         console.log('[SignIn] Sign in successful, redirecting to', desiredRedirect);
         go(desiredRedirect, { replace: true });
       } catch (err) {
         console.error('[SignIn] Sign-in error:', err);
-        setError(err instanceof Error ? err.message : 'Sign-in failed');
+
+        // Provide more user-friendly error messages
+        if (err instanceof Error) {
+          const errorMessage = err.message;
+          if (errorMessage.includes('email') && errorMessage.includes('invalid')) {
+            setError('Please enter a valid email address.');
+          } else if (
+            errorMessage.includes('too many requests') ||
+            errorMessage.includes('rate limit')
+          ) {
+            setError('Too many sign-in attempts. Please try again later.');
+          } else {
+            setError(errorMessage);
+          }
+        } else {
+          setError('Sign-in failed. Please try again.');
+        }
       } finally {
         setSubmitting(false);
       }
@@ -111,12 +154,42 @@ export default function SignIn() {
           },
         });
 
-        if (error) throw error;
+        if (error) {
+          // Handle specific error cases
+          if (error.status === 500) {
+            console.error('[SignIn] Magic link server error (500):', error);
+            setError(
+              'Server error. This could be due to email delivery issues. Please try again later or use password sign-in instead.',
+            );
+            return;
+          }
+
+          throw error;
+        }
 
         setMessage('Check your email for the magic link');
+        console.log('[SignIn] Magic link sent successfully to', email);
       } catch (err) {
         console.error('[SignIn] Magic link error:', err);
-        setError(err instanceof Error ? err.message : 'Failed to send magic link');
+
+        // Provide more user-friendly error messages
+        if (err instanceof Error) {
+          const errorMessage = err.message;
+          if (errorMessage.includes('email') && errorMessage.includes('invalid')) {
+            setError('Please enter a valid email address.');
+          } else if (
+            errorMessage.includes('too many requests') ||
+            errorMessage.includes('rate limit')
+          ) {
+            setError(
+              'Too many magic link requests. Please try again later or use password sign-in.',
+            );
+          } else {
+            setError(errorMessage);
+          }
+        } else {
+          setError('Failed to send magic link. Please try again or use password sign-in.');
+        }
       } finally {
         setSubmitting(false);
       }

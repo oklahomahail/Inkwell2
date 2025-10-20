@@ -144,13 +144,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUpWithPassword = async (email: string, password: string) => {
     console.info('[Auth] Attempting to sign up with email/password');
 
+    // Build the redirect URL for email confirmation
+    const origin = window.location.origin;
+    const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent('/dashboard')}`;
+
+    console.info('[Auth] Using emailRedirectTo:', callbackUrl);
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: callbackUrl,
+      },
     });
 
     if (error) {
-      console.error('[Auth] Password sign-up failed:', error.message);
+      console.error('[Auth] Password sign-up failed:', error.message, error);
     } else {
       console.info('[Auth] Password sign-up successful');
     }

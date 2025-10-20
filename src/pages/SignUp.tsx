@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 
 import { supabase } from '@/lib/supabaseClient';
@@ -23,18 +23,27 @@ export default function SignUp() {
   // Session guard: if already signed in, skip the page entirely
   useEffect(() => {
     let mounted = true;
+    const logPrefix = '[SignUp]';
+
+    // Use a ref to track if we've logged the session check message
+    // to reduce console spam in dev mode with strict effects
+    const hasLoggedRef = useRef(false);
 
     (async () => {
-      console.log('[SignUp] Checking for existing session');
+      if (!hasLoggedRef.current) {
+        console.log(`${logPrefix} Checking for existing session`);
+        hasLoggedRef.current = true;
+      }
+
       const { data } = await supabase.auth.getSession();
       if (!mounted) return;
+
       if (data?.session) {
-        console.log('[SignUp] Found active session, redirecting to', desiredRedirect);
+        console.log(`${logPrefix} Found active session, redirecting to`, desiredRedirect);
         go(desiredRedirect, { replace: true });
-      } else {
-        console.log('[SignUp] No active session found');
       }
     })();
+
     return () => {
       mounted = false;
     };
@@ -51,14 +60,42 @@ export default function SignUp() {
 
         console.log('[SignUp] Attempting to sign up with email/password');
 
+        // Build callback URL with the desired redirect as a query param
+        const callbackUrl = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(desiredRedirect)}`;
+
+        console.log('[SignUp] Using emailRedirectTo:', callbackUrl);
+
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: callbackUrl,
+          },
         });
 
-        if (error) throw error;
+        if (error) {
+          // Handle specific error cases
+          if (error.status === 500) {
+            console.error('[SignUp] Server error (500):', error);
+            setError(
+              'Server error. This could be due to email delivery issues. Please try again later or contact support if the problem persists.',
+            );
+            return;
+          }
 
-        if (data?.user?.identities?.length === 0) {
+          if (error.message.includes('already registered')) {
+            setError('An account with this email already exists. Please sign in instead.');
+            return;
+          }
+
+          throw error;
+        }
+
+        if (!data?.user) {
+          throw new Error('Signup failed: No user data returned');
+        }
+
+        if (data.user.identities?.length === 0) {
           // User already exists
           setError('An account with this email already exists. Please sign in instead.');
           return;
@@ -66,7 +103,7 @@ export default function SignUp() {
 
         console.log('[SignUp] Sign up successful');
 
-        if (data.user?.identities?.[0]?.identity_data?.email_verified) {
+        if (data.user.identities?.[0]?.identity_data?.email_verified) {
           // Email already verified, proceed to dashboard
           go(desiredRedirect, { replace: true });
         } else {
@@ -75,7 +112,20 @@ export default function SignUp() {
         }
       } catch (err) {
         console.error('[SignUp] Sign-up error:', err);
-        setError(err instanceof Error ? err.message : 'Sign-up failed');
+
+        // Provide more user-friendly error messages
+        if (err instanceof Error) {
+          const errorMessage = err.message;
+          if (errorMessage.includes('email') && errorMessage.includes('invalid')) {
+            setError('Please enter a valid email address.');
+          } else if (errorMessage.includes('password') && errorMessage.includes('length')) {
+            setError('Password must be at least 6 characters long.');
+          } else {
+            setError(errorMessage);
+          }
+        } else {
+          setError('Sign-up failed. Please try again later.');
+        }
       } finally {
         setSubmitting(false);
       }
