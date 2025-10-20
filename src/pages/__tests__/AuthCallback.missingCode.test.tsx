@@ -1,4 +1,5 @@
 // IMPORTANT: define hoisted mocks FIRST
+import { waitFor } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 
@@ -26,8 +27,6 @@ vi.mock('../../lib/supabaseClient', () => ({
 
 // Mock the navigation wrapper (never mock react-router directly)
 vi.mock('../../utils/navigate', () => ({ useGo: () => h.navigateSpy }));
-
-import { waitFor } from '@testing-library/react';
 
 import { renderWithRouter } from '../../test/utils/renderWithRouter';
 import AuthCallback from '../AuthCallback';

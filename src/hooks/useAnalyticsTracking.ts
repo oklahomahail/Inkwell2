@@ -7,7 +7,7 @@ import { useAnalytics } from '../services/analyticsService';
 // Feature usage tracking
 const featureFirstUseMap = new Map<string, boolean>();
 
-function _useAnalyticsTracking() {
+function useAnalyticsTrackingImpl() {
   const analytics = useAnalytics();
   const { state } = useAppContext();
   const sessionStartTime = useRef(Date.now());
@@ -99,7 +99,7 @@ function _useAnalyticsTracking() {
 }
 
 // Hook for writing session tracking
-function _useWritingSessionTracking() {
+function useWritingSessionTrackingImpl() {
   const { trackWritingSessionStart, trackWritingSessionEnd } = useAnalyticsTracking();
   const { currentProject } = useAppContext();
   const sessionRef = useRef<{
@@ -172,7 +172,7 @@ function _useWritingSessionTracking() {
 }
 
 // Hook for tour/onboarding tracking
-function _useTourTracking() {
+function useTourTrackingImpl() {
   const { trackTourStarted, trackTourStepCompleted, trackTourAbandoned, trackTourCompleted } =
     useAnalyticsTracking();
   const tourStateRef = useRef<{
@@ -269,7 +269,7 @@ function _useTourTracking() {
 }
 
 // Hook for feature discovery tracking
-function _useFeatureDiscovery() {
+function useFeatureDiscoveryImpl() {
   const { trackFeatureFirstUse } = useAnalyticsTracking();
 
   const recordFeatureUse = useCallback(
@@ -342,7 +342,7 @@ function _useFeatureDiscovery() {
 }
 
 // Named exports
-export const useAnalyticsTracking = _useAnalyticsTracking;
-export const useWritingSessionTracking = _useWritingSessionTracking;
-export const useTourTracking = _useTourTracking;
-export const useFeatureDiscovery = _useFeatureDiscovery;
+export const useAnalyticsTracking = useAnalyticsTrackingImpl;
+export const useWritingSessionTracking = useWritingSessionTrackingImpl;
+export const useTourTracking = useTourTrackingImpl;
+export const useFeatureDiscovery = useFeatureDiscoveryImpl;

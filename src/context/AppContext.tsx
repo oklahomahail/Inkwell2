@@ -179,7 +179,7 @@ export interface AppContextValue {
 export const AppContext = createContext<AppContextValue | null>(null);
 
 // ===== INTERNAL HOOKS =====
-export function _useAppContext(): AppContextValue {
+export function useAppContext(): AppContextValue {
   const context = useContext(AppContext);
   if (!context) {
     throw new Error('useAppContext must be used within an AppProvider');
@@ -187,9 +187,9 @@ export function _useAppContext(): AppContextValue {
   return context;
 }
 
-export function _useCurrentProject() {
-  const { state } = _useAppContext();
-  const project = state.projects.find((p) => p.id === state.currentProjectId) || null;
+export function useCurrentProject() {
+  const { state } = useAppContext();
+  const project = state.projects.find((p: any) => p.id === state.currentProjectId) || null;
   return { project };
 }
 
@@ -327,21 +327,18 @@ function AppProviderInner({ children }: { children: ReactNode }) {
 }
 
 // ===== PUBLIC PROVIDER (and alias) =====
-export function _AppProvider({ children }: { children: ReactNode }) {
+export function AppProvider({ children }: { children: ReactNode }) {
   return <AppProviderInner>{children}</AppProviderInner>;
 }
 
 // UI ready hook for onboarding
 export function useUIReady() {
-  const { state } = _useAppContext();
+  const { state } = useAppContext();
   return {
     isReady: !state.isLoading && state.error === null,
   };
 }
 
 // ✅ Public aliases expected by consumers/tests
-export const useAppContext = _useAppContext;
-export const useCurrentProject = _useCurrentProject;
-export const AppProvider = _AppProvider;
 
 export default AppProvider;

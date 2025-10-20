@@ -8,6 +8,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { ProfileProvider } from '@/context/ProfileContext';
 import { analyticsService } from '@/services/analyticsService';
 
+import OnboardingOrchestrator from './OnboardingOrchestrator';
 import { ProfileTourProvider } from './ProfileTourProvider';
 import { makeMockStorage, TestTourWrapper } from './testUtils';
 
@@ -30,7 +31,6 @@ vi.mock('./TourOverlay', () => ({
   default: vi.fn(() => <div>Tour overlay mock</div>),
 }));
 
-import OnboardingOrchestrator from './OnboardingOrchestrator';
 import { TestTourComponent } from './TourGating.components';
 import { TourProvider, useTour } from './TourProvider';
 

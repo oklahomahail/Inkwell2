@@ -14,7 +14,7 @@ export interface UseTimelineResult {
   clear: () => void;
 }
 
-export default function _useTimeline(initial: TimelineItem[] = []): UseTimelineResult {
+export default function useTimeline(initial: TimelineItem[] = []): UseTimelineResult {
   const [items, setItems] = useState<TimelineItem[]>(() =>
     [...initial].sort((a, b) => a.timestamp - b.timestamp),
   );

@@ -57,7 +57,7 @@ type QueuedOperation = {
 };
 
 // All app logic lives here, safely *inside* the providers.
-function _AppShell() {
+function AppShell() {
   const location = useLocation();
   const { user, loading, signOut } = useAuth();
   const isPublic = isPublicRoute(location.pathname);
@@ -130,7 +130,7 @@ function _AppShell() {
                   <Route path="brand" element={<BrandPage />} />
 
                   {/* Main app routes */}
-                  <Route path="*" element={<_ProfileAppShell />} />
+                  <Route path="*" element={<ProfileAppShell />} />
                 </Routes>
               </ProfileGate>
             ) : (
@@ -150,7 +150,7 @@ function _AppShell() {
 }
 
 // Profile-specific app shell (the original app logic)
-function _ProfileAppShell() {
+function ProfileAppShell() {
   const { claude, currentProject } = useAppContext();
   const { insertText } = useEditorContext();
 
@@ -262,10 +262,7 @@ function _ProfileAppShell() {
 
         {/* Offline Queue Modal */}
         {showOfflineQueue && (
-          <_OfflineQueueModal
-            isOpen={showOfflineQueue}
-            onClose={() => setShowOfflineQueue(false)}
-          />
+          <OfflineQueueModal isOpen={showOfflineQueue} onClose={() => setShowOfflineQueue(false)} />
         )}
 
         {/* Command Palette UI */}
@@ -283,14 +280,14 @@ function _ProfileAppShell() {
 
         {/* Dev-only debug panels */}
         {import.meta.env.DEV && <DebugSearchPanel />}
-        {import.meta.env.DEV && <_StorageDebugPanel />}
+        {import.meta.env.DEV && <StorageDebugPanel />}
       </MainLayout>
     </>
   );
 }
 
 // Offline Queue Management Modal
-function _OfflineQueueModal(_props: OfflineQueueModalProps) {
+function OfflineQueueModal(_props: OfflineQueueModalProps) {
   const { isOpen, onClose } = _props;
   const [queuedOperations, setQueuedOperations] = useState<QueuedOperation[]>([]);
 
@@ -350,7 +347,7 @@ function _OfflineQueueModal(_props: OfflineQueueModalProps) {
 }
 
 // Development Storage Debug Panel
-function _StorageDebugPanel() {
+function StorageDebugPanel() {
   const [stats, setStats] = useState<any>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -465,7 +462,7 @@ interface _AppShellProps {}
 export default function _App() {
   return (
     <AppErrorBoundary level="app">
-      <_AppShell />
+      <AppShell />
     </AppErrorBoundary>
   );
 }

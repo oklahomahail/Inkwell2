@@ -1,11 +1,11 @@
 import { useState, useCallback } from 'react';
 
-import { _useCommands } from './useCommands';
+import { useCommands } from './useCommands';
 
-export function _useCommandPalette(selectedText?: string) {
+export function useCommandPalette(selectedText?: string) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const commands = _useCommands(selectedText, (commandId) => {
+  const commands = useCommands(selectedText, (commandId) => {
     console.log(`Executed command: ${commandId}`);
   });
 

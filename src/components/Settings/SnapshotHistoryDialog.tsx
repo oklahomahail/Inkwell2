@@ -13,7 +13,7 @@ interface SnapshotHistoryDialogProps {
   onOpenChange: (_open: boolean) => void;
 }
 
-export default function _SnapshotHistoryDialog({ open, onOpenChange }: SnapshotHistoryDialogProps) {
+export default function SnapshotHistoryDialog({ open, onOpenChange }: SnapshotHistoryDialogProps) {
   const { project } = useCurrentProject();
   const [snapshots, setSnapshots] = useState<SnapshotMeta[]>([]);
   const [loading, setLoading] = useState(false);

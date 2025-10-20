@@ -11,7 +11,7 @@ import { TOUR_MAP } from './tourRegistry';
 /**
  * Tutorial page component that handles displaying tutorials with deep links
  */
-function _TutorialPage() {
+function TutorialPage() {
   const { slug, step } = useParams<{ slug: string; step?: string }>();
   const { active: activeProfile } = useProfile();
   const { startTour, setTourSteps, goToStep, tourState } = useTour() as any;
@@ -174,7 +174,7 @@ function _TutorialPage() {
 /**
  * Tutorial index page showing available tutorials
  */
-function _TutorialIndex() {
+function TutorialIndexComponent() {
   const { active: activeProfile } = useProfile();
   const { startTour, setTourSteps, preferences } = useTour() as any;
 
@@ -328,7 +328,7 @@ function _TutorialIndex() {
 /**
  * Main tutorial router component
  */
-function _TutorialRouter() {
+function TutorialRouterComponent() {
   return (
     <Routes>
       {/* Tutorial index */}
@@ -347,8 +347,7 @@ function _TutorialRouter() {
 }
 
 // Local identifiers for internal components used in JSX
-const TutorialPage = _TutorialPage;
-const TutorialIndex = _TutorialIndex;
+const TutorialIndex = TutorialIndexComponent;
 
 // Named export
-export const TutorialRouter = _TutorialRouter;
+export const TutorialRouter = TutorialRouterComponent;

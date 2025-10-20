@@ -60,7 +60,7 @@ export function PowerToolsMenu({ projectId: _projectId, onToolSelect }: PowerToo
     setSearchQuery('');
   };
 
-  const onHelpClose = () => {
+  const _onHelpClose = () => {
     setHelpOpen(false);
   };
 

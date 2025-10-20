@@ -216,7 +216,7 @@ export const usePlotBoardStore = create<PlotBoardStore>()((set, get) => ({
       if (templateId) {
         const template = get().templates[templateId];
         if (template) {
-          const colors = generateColors();
+          const _colors = generateColors();
           board.columns = template.columns.map((colTemplate, index) => {
             const column = createPlotColumn(
               board.id,

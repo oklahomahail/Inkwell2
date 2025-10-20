@@ -75,7 +75,7 @@ export async function startTourSafely(
  * @returns Modified steps with fallback targets for missing elements
  */
 export function getSafeTourSteps(steps: TourStep[]): TourStep[] {
-  interface StepWithOriginalTarget extends TourStep {
+  interface _StepWithOriginalTarget extends TourStep {
     originalTarget?: string;
   }
   return steps.map((step) => {

@@ -118,7 +118,7 @@ const isSuppressed = () => !!sessionStorage.getItem('inkwell:tour:suppress');
 const QUICK_TOUR_DISABLED = true;
 const isQuickTour = (t: TourState['tourType']) => t === 'full-onboarding';
 
-const cleanupTourParams = () => {
+const _cleanupTourParams = () => {
   const url = new URL(window.location.href);
   if (url.searchParams.has('tour')) {
     url.searchParams.delete('tour');
@@ -412,7 +412,7 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Handle spotlight tour events from TourController
   useEffect(() => {
     const handleSpotlightTour = (event: CustomEvent) => {
-      const { steps, profileId, options } = event.detail;
+      const { steps, _profileId, _options } = event.detail;
       if (steps && steps.length > 0) {
         // Convert spotlight steps to tour steps format
         const tourSteps: TourStep[] = steps.map((step: any, index: number) => ({

@@ -16,7 +16,7 @@ type WritingAPI = {
   dispatch: Dispatch<any>;
 };
 
-export default function _useWriting(): WritingAPI {
+export default function useWriting(): WritingAPI {
   const { currentProject, dispatch } = useAppContext();
 
   const state = useMemo<WritingState>(() => {

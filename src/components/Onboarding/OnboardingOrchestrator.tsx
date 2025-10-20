@@ -30,7 +30,13 @@ import type { TourType } from './steps/Step.types';
 
 export function OnboardingOrchestrator() {
   const inRouter = useIsInRouter();
-  const location = inRouter ? useLocation() : { pathname: window.location.pathname };
+  // Always call the hook, but only use its result when in a router
+  const routerLocation = useLocation();
+  // Derive the location object safely
+  const location = useMemo(() => {
+    return inRouter ? routerLocation : { pathname: window.location.pathname };
+  }, [inRouter, routerLocation]);
+
   const [open, setOpen] = useState(false);
   const [tourType, setTourType] = useState<TourType>('full-onboarding');
   const launchedThisSession = useRef(false);

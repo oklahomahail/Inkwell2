@@ -31,7 +31,7 @@ function normalizeSafeRedirect(path: string | null | undefined, warn = console.w
 export default function AuthCallback() {
   const go = useGo(); // Single navigation source
   const loc = useLocation();
-  const [searchParams] = useSearchParams();
+  const [_searchParams] = useSearchParams();
 
   useEffect(() => {
     let mounted = true;

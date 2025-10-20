@@ -11,7 +11,7 @@ interface CommandPaletteProps {
   placeholder?: string;
 }
 
-export function _CommandPalette({
+export function CommandPalette({
   isOpen,
   onClose,
   commands,

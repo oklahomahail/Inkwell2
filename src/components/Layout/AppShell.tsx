@@ -11,7 +11,7 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
-function _AppShell({ children }: AppShellProps) {
+function AppShellComponent({ children }: AppShellProps) {
   // Initialize tour autostart hooks after providers/portals are mounted
   // Use a simple default profile identifier; no storage coupling needed
   const profileId = 'default';
@@ -29,4 +29,4 @@ function _AppShell({ children }: AppShellProps) {
   );
 }
 
-export const AppShell = _AppShell;
+export const AppShell = AppShellComponent;

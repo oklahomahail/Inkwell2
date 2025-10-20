@@ -23,9 +23,49 @@ interface PlotBoardsProps {
 }
 
 export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
+  // All hooks must be called unconditionally at the top level
   const isPlotBoardsEnabled = useFeatureFlag('plotBoards');
 
-  // Feature flag check
+  // Store access hooks - always called regardless of feature flag
+  const {
+    boards,
+    activeBoard,
+    templates: _templates,
+    isLoading,
+    lastError,
+    createBoard,
+    deleteBoard,
+    duplicateBoard,
+    setActiveBoard,
+    getBoardsByProject,
+    getTemplatesByCategory,
+  } = usePlotBoardStore();
+
+  const _settingsStore = useSettingsStore();
+  const { chapters } = useChaptersStore();
+
+  // Chapter integration
+  const integration = usePlotBoardIntegration({
+    boardId: activeBoard,
+    projectId,
+    autoSync: true,
+  });
+
+  // Local state - always called unconditionally
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showChapterSync, setShowChapterSync] = useState(false);
+  const [showBoardSelector, setShowBoardSelector] = useState(false);
+  const [_selectedCard, setSelectedCard] = useState<PlotCardType | null>(null);
+  const [_selectedColumn, setSelectedColumn] = useState<PlotColumnType | null>(null);
+  const [_selectedBoard, setSelectedBoard] = useState<PlotBoardType | null>(null);
+  const [activeTab, setActiveTab] = useState<'board' | 'insights'>('board');
+
+  // Initialize store
+  useEffect(() => {
+    initializePlotBoardStore();
+  }, []);
+
+  // Feature flag check - render different UI based on flag, but after all hooks
   if (!isPlotBoardsEnabled) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -76,44 +116,6 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
       </div>
     );
   }
-
-  const {
-    boards,
-    activeBoard,
-    templates: _templates,
-    isLoading,
-    lastError,
-    createBoard,
-    deleteBoard,
-    duplicateBoard,
-    setActiveBoard,
-    getBoardsByProject,
-    getTemplatesByCategory,
-  } = usePlotBoardStore();
-
-  const _settingsStore = useSettingsStore();
-  const { chapters } = useChaptersStore();
-
-  // Chapter integration
-  const integration = usePlotBoardIntegration({
-    boardId: activeBoard,
-    projectId,
-    autoSync: true,
-  });
-
-  // Local state
-  const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [showChapterSync, setShowChapterSync] = useState(false);
-  const [showBoardSelector, setShowBoardSelector] = useState(false);
-  const [_selectedCard, setSelectedCard] = useState<PlotCardType | null>(null);
-  const [_selectedColumn, setSelectedColumn] = useState<PlotColumnType | null>(null);
-  const [_selectedBoard, setSelectedBoard] = useState<PlotBoardType | null>(null);
-  const [activeTab, setActiveTab] = useState<'board' | 'insights'>('board');
-
-  // Initialize store
-  useEffect(() => {
-    initializePlotBoardStore();
-  }, []);
 
   // Get current project's boards and chapters
   const projectBoards = getBoardsByProject(projectId);

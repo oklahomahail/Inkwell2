@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 
-import { _usePrefs } from '../../services/prefsService'; // Adjust import path as needed
+import { usePrefs } from '../../services/prefsService'; // Adjust import path as needed
 
 import { useTourSafe } from './TourContext';
 
-export function _useTourLaunchGate() {
+export function useTourLaunchGate() {
   const { start, isActive } = useTourSafe();
-  const { get, set } = _usePrefs();
+  const { get, set } = usePrefs();
 
   useEffect(() => {
     if (isActive) return;

@@ -34,7 +34,10 @@ interface TestTourWrapperProps {
   onTourStart?: () => void;
 }
 
-export const TestTourWrapper: React.FC<TestTourWrapperProps> = ({ children, onTourStart }) => (
+export const TestTourWrapper: React.FC<TestTourWrapperProps> = ({
+  children,
+  onTourStart: _onTourStart,
+}) => (
   <ProfileProvider>
     <ProfileTourProvider>
       <TourProvider>{children}</TourProvider>

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
  * - Current daily streak (resets if no words written today)
  * - Last active timestamp (useful for activity logs)
  */
-export function _useProjectStats(initialWordCount: number = 0) {
+export function useProjectStats(initialWordCount: number = 0) {
   const [wordCount, setWordCount] = useState(initialWordCount);
   const [streak, setStreak] = useState(0);
   const [lastActive, setLastActive] = useState<Date | null>(null);

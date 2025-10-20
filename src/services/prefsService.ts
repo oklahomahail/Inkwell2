@@ -1,6 +1,6 @@
 type PrefsKey = `${string}.${string}`;
 
-export function _usePrefs() {
+export function usePrefs() {
   const get = (key: PrefsKey): boolean | undefined => {
     const value = localStorage.getItem(`pref.${key}`);
     return value ? JSON.parse(value) : undefined;

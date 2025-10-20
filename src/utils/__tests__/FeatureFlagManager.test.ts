@@ -1,13 +1,13 @@
 import { vi, beforeEach, afterEach, describe, it, expect } from 'vitest';
 
-import { MockFeatureFlagManager, FEATURE_FLAGS } from './mockFeatureFlagManager';
-
 // Ensure the FeatureFlagManager module is mocked before importing it
 vi.mock('../FeatureFlagManager', () => ({
   FeatureFlagManager: MockFeatureFlagManager,
 }));
 
 import { FeatureFlagManager } from '../FeatureFlagManager';
+
+import { MockFeatureFlagManager, FEATURE_FLAGS } from './mockFeatureFlagManager';
 
 // Mock localStorage
 const mockLocalStorage = {

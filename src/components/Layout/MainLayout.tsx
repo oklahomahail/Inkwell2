@@ -177,7 +177,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
     // Listen for system theme changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleThemeChange = (e: MediaQueryListEvent) => {
+    const _handleThemeChange = (e: MediaQueryListEvent) => {
       if (!localStorage.getItem('inkwell-dark-mode')) {
         setIsDarkMode(e.matches);
         dispatch({ type: 'SET_THEME', payload: e.matches ? 'dark' : 'light' });
@@ -216,6 +216,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   }, [isDarkMode]);
 
   // Keyboard shortcuts for header actions
+
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
       // Command/Ctrl + K for command palette

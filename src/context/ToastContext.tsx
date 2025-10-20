@@ -3,9 +3,7 @@ import React, { useState, useCallback, useMemo, type ReactNode } from 'react';
 
 import { ToastContext, type ToastContextValue, type Toast, type ToastType } from './toast';
 
-export const ToastProvider = _ToastProvider;
-
-export function _ToastProvider({ children }: { children: ReactNode }) {
+export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const removeToast = useCallback((id: string) => {

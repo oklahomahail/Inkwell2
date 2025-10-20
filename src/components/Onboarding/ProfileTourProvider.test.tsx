@@ -1,4 +1,8 @@
-import { vi } from 'vitest';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
+import { useEffect } from 'react';
+import { afterEach, afterAll, beforeEach, describe, it, expect, vi } from 'vitest';
+
+import { ProfileTourProvider, useTour } from './ProfileTourProvider';
 
 const mockProfile = { id: 'test-profile-id', name: 'Test' };
 
@@ -21,7 +25,7 @@ const tutorialSpies = vi.hoisted(() => ({
 
 // Match provider's import exactly
 vi.mock('../../context/ProfileContext', () => {
-  const React = require('react');
+  const _React = require('react');
   const useProfile = () => ({ active: mockProfile });
   return { useProfile };
 });
@@ -51,8 +55,7 @@ vi.mock('@/services/analyticsService', () => ({
     shutdown: vi.fn(),
   },
 }));
-import { afterEach, afterAll } from 'vitest';
-import { cleanup } from '@testing-library/react';
+// These imports are already at the top
 
 afterEach(() => {
   // If a test enabled fake timers, always restore
@@ -86,10 +89,7 @@ afterAll(async () => {
   vi.useRealTimers();
 });
 
-import React, { useEffect } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-
-import { ProfileTourProvider, useTour } from './ProfileTourProvider';
+// These imports are already at the top
 
 function renderWithProvider(children: React.ReactNode) {
   return render(<ProfileTourProvider>{children}</ProfileTourProvider>);

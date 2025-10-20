@@ -37,11 +37,16 @@ export function useExportWizard(): UseExportWizardReturn {
 // Optional: Global export wizard state (if you want to share state across components)
 let globalExportWizard: UseExportWizardReturn | null = null;
 
-export function _useGlobalExportWizard(): UseExportWizardReturn {
-  if (!globalExportWizard) {
-    // This would need proper state management in a real app
-    // For now, just return a local instance
-    return useExportWizard();
+export function useGlobalExportWizard(): UseExportWizardReturn {
+  // Always create a new instance to avoid conditional hook calls
+  // In a real implementation, we would use a more sophisticated state management approach
+  const localInstance = useExportWizard();
+
+  // If a global instance exists, return it
+  if (globalExportWizard) {
+    return globalExportWizard;
   }
-  return globalExportWizard;
+
+  // Otherwise, use the local instance
+  return localInstance;
 }

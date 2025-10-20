@@ -1,3 +1,5 @@
+import React, { useState, useEffect, useMemo } from 'react';
+
 type _PerformanceData = {
   date: string;
   wordCount: number;
@@ -26,7 +28,7 @@ function _toNumber(v: unknown): number | null {
   return null;
 }
 
-export default function _PerformanceChart({
+export default function PerformanceChart({
   title,
   type = 'trend',
   rows = [],
@@ -133,6 +135,3 @@ export default function _PerformanceChart({
     </div>
   );
 }
-
-// Import needed types and hooks
-import { useEffect, useMemo, useState } from 'react';

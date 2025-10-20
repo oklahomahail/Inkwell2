@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { useCurrentProject } from '@/context/AppContext';
 import { performBackup, performImport } from '@/services/backupExport';
 
-export default function _BackupControls() {
+export default function BackupControls() {
   const { project } = useCurrentProject();
   const [busy, setBusy] = useState<'backup' | 'import' | null>(null);
   const pid = project?.id ?? 'default';

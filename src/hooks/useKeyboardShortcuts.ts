@@ -8,7 +8,7 @@ interface KeyboardShortcut {
   action: () => void;
   description?: string;
 }
-export function _useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled = true) {
+export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled = true) {
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!enabled) return;

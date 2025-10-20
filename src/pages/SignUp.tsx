@@ -20,14 +20,14 @@ export default function SignUp() {
     [searchParams],
   );
 
+  // Use a ref to track if we've logged the session check message
+  // to reduce console spam in dev mode with strict effects
+  const hasLoggedRef = useRef(false);
+
   // Session guard: if already signed in, skip the page entirely
   useEffect(() => {
     let mounted = true;
     const logPrefix = '[SignUp]';
-
-    // Use a ref to track if we've logged the session check message
-    // to reduce console spam in dev mode with strict effects
-    const hasLoggedRef = useRef(false);
 
     (async () => {
       if (!hasLoggedRef.current) {

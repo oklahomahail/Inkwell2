@@ -27,7 +27,7 @@ export interface UseNotificationsApi {
   clear: () => void;
 }
 
-export function _useNotifications(): UseNotificationsApi {
+export function useNotifications(): UseNotificationsApi {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const idSeq = useRef(1000);

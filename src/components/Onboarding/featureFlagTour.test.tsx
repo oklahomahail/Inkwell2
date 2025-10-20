@@ -52,7 +52,7 @@ describe('Tour Feature Flag Integration', () => {
     vi.resetAllMocks();
     mockSessionStorage.clear();
     // Default state - both flags off
-    (featureManager.isEnabled as any).mockImplementation((flag: FeatureName) => false);
+    (featureManager.isEnabled as any).mockImplementation((_flag: FeatureName) => false);
     Object.defineProperty(window, 'sessionStorage', { value: mockSessionStorage });
   });
 
@@ -69,7 +69,7 @@ describe('Tour Feature Flag Integration', () => {
 
       // Create test component
       const TestComponent = () => {
-        const { startTour } = useTour();
+        const { startTour: _startTour } = useTour();
         useSimpleTourAutostart();
         return <div data-testid="quick-tour">Test</div>;
       };

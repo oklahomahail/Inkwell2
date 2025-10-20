@@ -15,7 +15,7 @@ type Session = {
   productivity?: number;
 };
 
-export default function _WritingAnalyticsView() {
+export default function WritingAnalyticsView() {
   const { currentProject } = useAppContext();
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
 

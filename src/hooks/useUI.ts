@@ -10,15 +10,12 @@ export type UIContextValue = {
 export const UIContext = createContext<UIContextValue | undefined>(undefined);
 
 /** Internal hook (pre-existing name) */
-export function _useUI(): UIContextValue {
+export function useUI(): UIContextValue {
   const ctx = useContext(UIContext);
   if (!ctx) {
     throw new Error('useUI must be used within a UIContext.Provider');
   }
   return ctx;
 }
-
-/** ✅ Public alias expected by tests and components */
-export const useUI = _useUI;
 
 export default useUI;

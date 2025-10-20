@@ -8,7 +8,7 @@ interface ProfileAppShellProps {
   children?: React.ReactNode;
 }
 
-function _ProfileAppShell({ children }: ProfileAppShellProps) {
+function ProfileAppShellComponent({ children }: ProfileAppShellProps) {
   const { profileId } = useParams<{ profileId: string }>();
   const { activeProfile } = useProfile();
 
@@ -19,4 +19,4 @@ function _ProfileAppShell({ children }: ProfileAppShellProps) {
   return <div className="profile-shell">{children}</div>;
 }
 
-export const ProfileAppShell = _ProfileAppShell;
+export const ProfileAppShell = ProfileAppShellComponent;

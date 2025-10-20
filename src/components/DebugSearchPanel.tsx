@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 type Status = { available: boolean; enabled: boolean; status?: any };
 type Metrics = { p50: number; p95: number; queries: number };
-export default function _DebugSearchPanel() {
+export default function DebugSearchPanel() {
   const [m, setM] = useState<Metrics>({ p50: 0, p95: 0, queries: 0 });
   const [status, setStatus] = useState<Status>({ available: false, enabled: false });
   const refresh = () => {

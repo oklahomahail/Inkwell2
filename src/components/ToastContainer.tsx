@@ -7,7 +7,7 @@ export type ToastContainerProps = {
   className?: string;
 };
 
-export function _ToastContainer({ className = '' }: ToastContainerProps) {
+export function ToastContainer({ className = '' }: ToastContainerProps) {
   const { toasts, removeToast } = useToast();
 
   return (
@@ -32,5 +32,4 @@ export function _ToastContainer({ className = '' }: ToastContainerProps) {
   );
 }
 
-export const ToastContainer = _ToastContainer;
-export default _ToastContainer;
+export default ToastContainer;

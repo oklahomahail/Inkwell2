@@ -13,11 +13,17 @@ interface OptionsStepProps {
 }
 
 export const OptionsStep: React.FC<OptionsStepProps> = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   premise,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onChange,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onNext,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onPrevious,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onGenerate,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   isGenerating,
 }) => {
   return <div>{/* Options step implementation */}</div>;
@@ -32,9 +38,13 @@ interface ReviewStepProps {
 }
 
 export const ReviewStep: React.FC<ReviewStepProps> = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   outline,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onNext,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onPrevious,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onRegenerate,
 }) => {
   return <div>{/* Review step implementation */}</div>;
@@ -57,11 +67,17 @@ interface IntegrationStepProps {
 }
 
 export const IntegrationStep: React.FC<IntegrationStepProps> = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   outline,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   options,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onOptionsChange,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onIntegrate,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onPrevious,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   currentProject,
 }) => {
   return <div>{/* Integration step implementation */}</div>;

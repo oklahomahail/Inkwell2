@@ -12,7 +12,7 @@ export interface AssistantActions {
   toggle: () => void;
 }
 
-export default function _useWritingAssistant(): AssistantActions {
+export default function useWritingAssistant(): AssistantActions {
   const { claudeActions } = useAppContext();
 
   const send = useCallback(

@@ -361,13 +361,12 @@ export function _traceComponentRender(componentName: string, props?: unknown): s
 /**
  * React Hook for tracing component renders
  */
-export function _useTraceRender(componentName: string, dependencies?: unknown[]): void {
-  if (!featureFlags.isEnabled?.('performanceMonitoring')) return;
-
+export function useTraceRender(componentName: string, dependencies?: unknown[]): void {
   const traceId = React.useRef<string>('');
   const renderCount = React.useRef(0);
 
   React.useEffect(() => {
+    if (!featureFlags.isEnabled?.('performanceMonitoring')) return;
     renderCount.current += 1;
     traceId.current = traceComponentRender(componentName, {
       renderNumber: renderCount.current,
@@ -383,7 +382,7 @@ export function _useTraceRender(componentName: string, dependencies?: unknown[])
 /**
  * React Hook for tracing store actions
  */
-export function _useTraceStore(storeName: string) {
+export function useTraceStore(storeName: string) {
   return React.useCallback(
     (actionName: string, _payload?: unknown) => {
       const id = traceStoreAction(storeName, actionName, payload);

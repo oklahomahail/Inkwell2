@@ -5,7 +5,7 @@ import { useToast } from '@/context/toast';
 import { Command } from '@/types/commands';
 import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 
-export function _useCommands(
+export function useCommands(
   _selectedText?: string,
   _onCommandExecute?: (commandId: string) => void,
 ): Command[] {

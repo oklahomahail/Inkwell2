@@ -1,9 +1,8 @@
 import { render, screen, act } from '@testing-library/react';
 import React from 'react';
+import { vi, beforeEach, describe, it, expect } from 'vitest';
 
 import { MockFeatureFlagManager } from './mockFeatureFlagManager';
-
-import { vi, beforeEach } from 'vitest';
 
 // Ensure the FeatureFlagManager module is mocked before importing it
 vi.mock('../FeatureFlagManager', () => ({

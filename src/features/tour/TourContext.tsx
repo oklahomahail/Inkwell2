@@ -18,7 +18,7 @@ const noopApi: TourApi = {
 
 const TourContext = createContext<TourApi | null>(null);
 
-function _TourProvider({ children }: { children: React.ReactNode }) {
+function TourProvider({ children }: { children: React.ReactNode }) {
   // Your existing tour implementation here
   const value: TourApi = {
     start() {},
@@ -31,13 +31,12 @@ function _TourProvider({ children }: { children: React.ReactNode }) {
   return <TourContext.Provider value={value}>{children}</TourContext.Provider>;
 }
 
-function _useTourSafe(): TourApi {
+function useTourSafe(): TourApi {
   return useContext(TourContext) ?? noopApi;
 }
 
 // Named exports
-export const TourProvider = _TourProvider;
-export const useTourSafe = _useTourSafe;
+export { TourProvider, useTourSafe };
 
 // Default export (for legacy support)
-export default _TourProvider;
+export default TourProvider;

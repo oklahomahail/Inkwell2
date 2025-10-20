@@ -6,7 +6,8 @@ import { EXPORT_FORMAT } from '@/consts/writing';
 import { useToast } from '@/context/toast';
 import { exportService, ExportOptions } from '@/services/exportService';
 
-interface ExportDialogFormat extends ExportOptions {
+// Prefixing with underscore to indicate an unused type
+interface _ExportDialogFormat extends ExportOptions {
   isOpen: boolean;
   onClose: () => void;
   projectId: string;

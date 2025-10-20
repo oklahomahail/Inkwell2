@@ -21,7 +21,7 @@ type WizardStep = 'format' | 'style' | 'proofread' | 'review' | 'processing' | '
 
 const WIZARD_STEPS: WizardStep[] = ['format', 'style', 'proofread', 'review'];
 
-export default function _ExportWizard({ projectId, onClose }: ExportWizardProps) {
+export default function ExportWizard({ projectId, onClose }: ExportWizardProps) {
   const [currentStep, setCurrentStep] = useState<WizardStep>('format');
   const [format, setFormat] = useState<ExportFormat>('PDF');
   const [style, setStyle] = useState('classic-manuscript');

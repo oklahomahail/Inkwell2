@@ -1,5 +1,5 @@
 // src/components/CommandPalette/CommandPaletteProvider.tsx
-import React, { useEffect, useState, type ReactNode } from 'react';
+import React, { useCallback, useEffect, useState, type ReactNode } from 'react';
 
 import { SCENE_STATUS, CHAPTER_STATUS, EXPORT_FORMAT } from '@/consts/writing';
 import { useAppContext, View } from '@/context/AppContext';
@@ -44,7 +44,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
   });
 
   // --- commands ---
-  const createNewChapter = async () => {
+  const createNewChapter = useCallback(async () => {
     if (!currentProject) return showToast('No project selected', 'error');
     try {
       const existing = await storageService.loadWritingChapters(currentProject.id);
@@ -65,9 +65,9 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.error(e);
       showToast('Failed to create chapter', 'error');
     }
-  };
+  }, [currentProject, storageService, showToast, setView]);
 
-  const createNewScene = async () => {
+  const createNewScene = useCallback(async () => {
     if (!currentProject) {
       showToast('No project selected', 'error');
       return;
@@ -101,9 +101,9 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.error(e);
       showToast('Failed to create scene', 'error');
     }
-  };
+  }, [currentProject, showToast, createNewChapter, storageService, setView]);
 
-  const showWordCount = async () => {
+  const showWordCount = useCallback(async () => {
     if (!currentProject) return showToast('No project selected', 'error');
     try {
       const chapters = await storageService.loadWritingChapters(currentProject.id);
@@ -123,16 +123,16 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.error(e);
       showToast('Failed to calculate word count', 'error');
     }
-  };
+  }, [currentProject, showToast, storageService]);
 
-  const openExportDialog = () => {
+  const openExportDialog = useCallback(() => {
     if (!currentProject) return showToast('No project selected', 'error');
     const btn = document.getElementById('global-export-trigger');
     if (btn) btn.click();
     else showToast('Export dialog not available', 'error');
-  };
+  }, [currentProject, showToast]);
 
-  const quickExportMarkdown = async () => {
+  const quickExportMarkdown = useCallback(async () => {
     if (!currentProject) return showToast('No project selected', 'error');
     try {
       showToast('Exporting to Markdown...', 'info');
@@ -144,9 +144,9 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.error(e);
       showToast('Export failed', 'error');
     }
-  };
+  }, [currentProject, showToast, exportService]);
 
-  const quickExportPDF = async () => {
+  const quickExportPDF = useCallback(async () => {
     if (!currentProject) return showToast('No project selected', 'error');
     try {
       showToast('Opening PDF export...', 'info');
@@ -158,9 +158,9 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.error(e);
       showToast('Export failed', 'error');
     }
-  };
+  }, [currentProject, showToast, exportService]);
 
-  const backupProject = async () => {
+  const backupProject = useCallback(async () => {
     if (!currentProject) return showToast('No project selected', 'error');
     try {
       const chapters = await storageService.loadWritingChapters(currentProject.id);
@@ -184,7 +184,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.error(e);
       showToast('Failed to create backup', 'error');
     }
-  };
+  }, [currentProject, showToast, storageService]);
 
   // Build commands when deps change
   useEffect(() => {
@@ -397,7 +397,20 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     ];
 
     setState((prev) => ({ ...prev, commands: cmds }));
-  }, [setView, claudeActions, currentProject, projects, showToast]);
+  }, [
+    setView,
+    claudeActions,
+    currentProject,
+    projects,
+    showToast,
+    backupProject,
+    createNewChapter,
+    createNewScene,
+    openExportDialog,
+    quickExportMarkdown,
+    quickExportPDF,
+    showWordCount,
+  ]);
 
   // ---- filtering ----
   const filteredCommands = state.commands.filter((c) => {
@@ -412,8 +425,14 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
   });
 
   // ---- API expected by context ----
-  const open = () => setState((p) => ({ ...p, isOpen: true, query: '', selectedIndex: 0 }));
-  const close = () => setState((p) => ({ ...p, isOpen: false, query: '', selectedIndex: 0 }));
+  const open = useCallback(
+    () => setState((p) => ({ ...p, isOpen: true, query: '', selectedIndex: 0 })),
+    [setState],
+  );
+  const close = useCallback(
+    () => setState((p) => ({ ...p, isOpen: false, query: '', selectedIndex: 0 })),
+    [setState],
+  );
   const toggle = () =>
     setState((p) => ({ ...p, isOpen: !p.isOpen, selectedIndex: p.isOpen ? 0 : p.selectedIndex }));
 
@@ -424,15 +443,18 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       selectedIndex: 0,
     }));
 
-  const executeCommand = async (cmd: Command) => {
-    try {
-      await cmd.action();
-      close();
-    } catch (e) {
-      console.error('Failed to execute command:', e);
-      showToast(`Failed to execute ${cmd.label}`, 'error');
-    }
-  };
+  const executeCommand = useCallback(
+    async (cmd: Command) => {
+      try {
+        await cmd.action();
+        close();
+      } catch (e) {
+        console.error('Failed to execute command:', e);
+        showToast(`Failed to execute ${cmd.label}`, 'error');
+      }
+    },
+    [close, showToast],
+  );
 
   const registerCommand = (cmd: Command) =>
     setState((p) => ({ ...p, commands: [...p.commands.filter((c) => c.id !== cmd.id), cmd] }));
@@ -479,7 +501,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [state.isOpen, state.selectedIndex, filteredCommands]);
+  }, [state.isOpen, state.selectedIndex, filteredCommands, open, close, executeCommand]);
 
   // --- build the context payload ONCE ---
   const ctx: CommandPaletteContextValue = {

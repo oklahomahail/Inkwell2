@@ -30,15 +30,15 @@ export default function SignIn() {
     }
   }, [searchParams]);
 
+  // Use a ref to track if we've logged the session check message
+  // to reduce console spam in dev mode with strict effects
+  const hasLoggedRef = useRef(false);
+
   // Session guard: if already signed in, skip the page entirely
   // IMPORTANT: Only redirect if session is truthy, never on null during first render
   useEffect(() => {
     let mounted = true;
     const logPrefix = '[SignIn]';
-
-    // Use a ref to track if we've logged the session check message
-    // to reduce console spam in dev mode with strict effects
-    const hasLoggedRef = useRef(false);
 
     // Check for _once sentinel to prevent auto-retry loops
     const hasOnceSentinel = searchParams.get('_once') === '1';
@@ -80,7 +80,7 @@ export default function SignIn() {
 
         console.log('[SignIn] Attempting sign in with email/password');
 
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data: _data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });

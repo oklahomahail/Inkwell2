@@ -53,9 +53,7 @@ const AMBIENT_SOUNDS = [
   { id: 'library', name: 'Library Ambience', url: '/sounds/library.mp3' },
 ];
 
-export const useAdvancedFocusMode = _useAdvancedFocusMode;
-
-export function _useAdvancedFocusMode() {
+export function useAdvancedFocusMode() {
   // Basic focus mode state
   const [isFocusMode, setIsFocusMode] = useState(false);
 

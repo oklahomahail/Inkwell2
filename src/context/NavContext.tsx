@@ -34,9 +34,7 @@ interface NavProviderProps {
  * Replaces global event listeners and provides a single source of truth for navigation.
  * Includes safe fallbacks for stale IDs and deep linking support.
  */
-export const NavProvider = _NavProvider;
-
-export function _NavProvider({ children, initialState = {} }: NavProviderProps) {
+export function NavProvider({ children, initialState = {} }: NavProviderProps) {
   const [state, setState] = useState<NavigationState>({
     currentView: 'dashboard',
     currentProjectId: null,
@@ -211,9 +209,7 @@ export function _NavProvider({ children, initialState = {} }: NavProviderProps) 
 /**
  * Hook to access navigation context
  */
-export const useNavigation = _useNavigation;
-
-export function _useNavigation(): NavContextValue {
+export function useNavigation(): NavContextValue {
   const context = useContext(NavContext);
   if (!context) {
     // Fail-soft in production so UI doesn't white-screen

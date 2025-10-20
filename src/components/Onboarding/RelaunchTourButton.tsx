@@ -26,7 +26,7 @@ type Props = {
  * 2. Event dispatch for OnboardingOrchestrator
  * 3. URL param trigger (fallback)
  */
-export default function _RelaunchTourButton({
+export default function RelaunchTourButton({
   tourType = 'full-onboarding',
   className,
   label = 'Relaunch Onboarding',

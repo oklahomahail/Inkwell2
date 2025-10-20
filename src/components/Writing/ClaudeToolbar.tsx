@@ -27,7 +27,7 @@ import { useToast } from '@/context/toast';
 
 import { type ClaudeToolbarProps } from './ClaudeToolbarTypes';
 
-interface ClaudeToolbarInternalProps extends Omit<ClaudeToolbarProps, 'onInsertText'> {
+interface _ClaudeToolbarInternalProps extends Omit<ClaudeToolbarProps, 'onInsertText'> {
   onInsertText?: (text: string, replaceSelection?: boolean) => void;
   onClose?: () => void;
   className?: string;

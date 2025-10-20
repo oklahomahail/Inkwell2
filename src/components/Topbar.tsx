@@ -43,9 +43,13 @@ function getTimeAgo(date: Date) {
 }
 
 export default function Topbar({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onOpenNotifications,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onToggleTheme,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onToggleClaude,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   theme,
   projectName,
 }: TopbarProps) {
@@ -57,13 +61,13 @@ export default function Topbar({
   // Real auto-save state
   const { state } = useAppContext();
   const { autoSave } = state;
-  const { isFocusMode, toggleFocusMode } = useFocusMode();
+  const { isFocusMode: _isFocusMode, toggleFocusMode: _toggleFocusMode } = useFocusMode();
   const { project } = useCurrentProject();
   const { open: openPalette } = useCommandPalette();
 
   const effectiveName = projectName ?? project?.name ?? 'Inkwell';
 
-  const handleSaveSnapshot = useCallback(async () => {
+  const _handleSaveSnapshot = useCallback(async () => {
     if (!project) return;
     await snapshotService.makeSnapshot(project, { label: 'Manual Snapshot' });
     // Optionally trigger a toast if your app exposes one via context

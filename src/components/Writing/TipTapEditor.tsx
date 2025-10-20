@@ -22,7 +22,7 @@ type Props = {
   wordCountGoal?: number;
 };
 
-export default function _TipTapEditor({
+export default function TipTapEditor({
   value,
   onChange,
   onWordCountChange,

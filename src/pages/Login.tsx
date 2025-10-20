@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 
 const RATE_LIMIT_SECONDS = 30;
 
-export default function _Login() {
+export default function Login() {
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);

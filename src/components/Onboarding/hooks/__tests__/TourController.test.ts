@@ -4,7 +4,7 @@ import { TourController } from '../TourController';
 
 describe('TourController', () => {
   let controller: TourController;
-  const mockEvent = { detail: expect.any(Object) };
+  const _mockEvent = { detail: expect.any(Object) };
   const id = 'test-tour';
 
   beforeEach(() => {

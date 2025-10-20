@@ -6,7 +6,7 @@ interface PacingGraphProps {
   data: PacingPoint[];
 }
 
-function _PacingGraph({ data }: PacingGraphProps) {
+function PacingGraph({ data }: PacingGraphProps) {
   const [R, setR] = useState<any>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -101,4 +101,4 @@ function _PacingGraph({ data }: PacingGraphProps) {
   );
 }
 
-export const PacingGraph = _PacingGraph;
+export { PacingGraph };

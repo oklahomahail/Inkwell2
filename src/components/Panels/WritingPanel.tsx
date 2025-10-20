@@ -32,7 +32,7 @@ interface WritingPanelProps {
 const WritingPanel: React.FC<WritingPanelProps> = ({
   draftText,
   onChangeText,
-  onTextSelect,
+  onTextSelect: _onTextSelect,
   selectedText,
 }) => {
   const { currentProject, updateProject } = useAppContext();

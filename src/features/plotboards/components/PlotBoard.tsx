@@ -33,7 +33,8 @@ import { VirtualizedColumn } from './VirtualizedColumn';
 
 // PlotBoard types and interfaces
 import type { CardEventHandlers } from '../types/handlers';
-type DragEvent = DragStartEvent | DragEndEvent | DragOverEvent;
+// Used in other components
+type _DragEvent = DragStartEvent | DragEndEvent | DragOverEvent;
 
 interface PlotBoardProps extends CardEventHandlers {
   board: PlotBoardType;
@@ -47,7 +48,9 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
   onEditColumn,
   onEditBoard,
   className = '',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onBeforeCardCreate,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onBeforeCardDelete,
 }) => {
   // Store actions
@@ -80,7 +83,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
       return () => clearTimeout(timer);
     }
     return () => {}; // Always return cleanup function
-  }, [keyboardNav.announcements]);
+  }, [keyboardNav.announcements, keyboardNav]);
 
   // Undo/Redo system
   const undoRedo = useUndoRedo(board.id, async (restoredBoard) => {

@@ -5,9 +5,7 @@ import { analyticsService } from '../../../services/analyticsService';
 import { featureFlags } from '../../../utils/flags';
 import { usePlotBoardStore } from '../store';
 
-export const usePlotAnalysis = _usePlotAnalysis;
-
-export function _usePlotAnalysis(profileId: string, projectId: string) {
+export function usePlotAnalysis(profileId: string, projectId: string) {
   const { boards, activeBoard, analysisByProjectId, setAnalysis } = usePlotBoardStore();
 
   const analysis = analysisByProjectId[projectId];

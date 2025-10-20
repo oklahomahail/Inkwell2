@@ -1,4 +1,6 @@
 // Hoisted mocks so vi.mock factories can reference them safely
+import { waitFor } from '@testing-library/react';
+import { Routes, Route } from 'react-router-dom';
 import { vi, describe, it, beforeEach, expect } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 
@@ -21,9 +23,6 @@ vi.mock('../../lib/supabaseClient', () => ({
 }));
 
 vi.mock('../../utils/navigate', () => ({ useGo: () => h.navigateSpy }));
-
-import { waitFor } from '@testing-library/react';
-import { Routes, Route } from 'react-router-dom';
 
 import { renderWithRouter } from '../../test/utils/renderWithRouter';
 import AuthCallback from '../AuthCallback';
