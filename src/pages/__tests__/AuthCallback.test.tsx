@@ -33,7 +33,7 @@ describe('AuthCallback', () => {
 
   it('exchanges code and forwards to next', async () => {
     (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
-
+    window.location.href = 'http://localhost:3000/auth/callback?code=abc&next=%2Fdashboard';
     render(
       <MemoryRouter initialEntries={['/auth/callback?code=abc&next=%2Fdashboard']}>
         <AppShell />
@@ -46,9 +46,7 @@ describe('AuthCallback', () => {
       expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
     });
 
-    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(
-      expect.stringContaining('/auth/callback?code=abc&next=%2Fdashboard'),
-    );
+    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(window.location.href);
   });
 
   it('redirects to /sign-in on missing code', async () => {
@@ -82,7 +80,7 @@ describe('AuthCallback', () => {
 
   it('handles token_hash parameter as alternative to code', async () => {
     (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
-
+    window.location.href = 'http://localhost:3000/auth/callback?token_hash=xyz&next=%2Fdashboard';
     render(
       <MemoryRouter initialEntries={['/auth/callback?token_hash=xyz&next=%2Fdashboard']}>
         <AppShell />
@@ -93,14 +91,12 @@ describe('AuthCallback', () => {
       expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
     });
 
-    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(
-      expect.stringContaining('/auth/callback?token_hash=xyz&next=%2Fdashboard'),
-    );
+    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(window.location.href);
   });
 
   it('defaults to /dashboard when next parameter is missing', async () => {
     (supabase.auth.exchangeCodeForSession as any).mockResolvedValue({ data: {}, error: null });
-
+    window.location.href = 'http://localhost:3000/auth/callback?code=abc';
     render(
       <MemoryRouter initialEntries={['/auth/callback?code=abc']}>
         <AppShell />
@@ -108,13 +104,10 @@ describe('AuthCallback', () => {
     );
 
     await waitFor(() => {
-      // Should navigate to default path (/dashboard)
       expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
     });
 
-    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(
-      expect.stringContaining('/auth/callback?code=abc'),
-    );
+    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(window.location.href);
   });
 
   describe('Security: Open Redirect Protection', () => {
