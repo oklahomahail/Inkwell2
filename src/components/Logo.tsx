@@ -23,8 +23,8 @@ const ASSET_MAP: Record<LogoVariant, { src: string; aspectRatio: number }> = {
   'wordmark-dark': { src: '/brand/1.png', aspectRatio: 4 }, // wide - gold text + feather on navy
   'outline-dark': { src: '/brand/6.png', aspectRatio: 1 }, // square - navy outline feather
   'outline-light': { src: '/brand/5.png', aspectRatio: 4 }, // wide - light on black
-  'svg-feather-gold': { src: '/brand/inkwell-feather-gold.svg', aspectRatio: 1 },
-  'svg-feather-navy': { src: '/brand/inkwell-feather-navy.svg', aspectRatio: 1 },
+  'svg-feather-gold': { src: '/brand/inkwell-feather-gold.optimized.svg', aspectRatio: 1 },
+  'svg-feather-navy': { src: '/brand/inkwell-feather-navy.optimized.svg', aspectRatio: 1 },
 };
 
 export default function Logo({ variant, size = 48, className }: Props) {
@@ -38,6 +38,21 @@ export default function Logo({ variant, size = 48, className }: Props) {
       width={width}
       height={size}
       className={cn('select-none', className)}
+      onError={(e) => {
+        // Try fallback to non-optimized version first
+        if (asset.src.includes('.optimized.')) {
+          e.currentTarget.src = asset.src.replace('.optimized', '');
+        }
+        // If that fails too, use the alternate color
+        else if (asset.src.includes('gold')) {
+          e.currentTarget.src = '/brand/inkwell-feather-navy.svg';
+        }
+        // Last resort: use text fallback
+        else {
+          e.currentTarget.onerror = null; // Prevent infinite error loop
+          e.currentTarget.alt = 'Inkwell';
+        }
+      }}
     />
   );
 }

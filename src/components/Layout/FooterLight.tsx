@@ -1,7 +1,6 @@
 // src/components/Layout/FooterLight.tsx
 import React from 'react';
 
-import InkwellFeatherNavy from '@/assets/brand/inkwell-feather-navy.svg';
 import { TAGLINE_SECONDARY } from '@/constants/brand';
 
 export function FooterLight() {
@@ -14,7 +13,16 @@ export function FooterLight() {
         {/* Brand */}
         <div className="flex flex-col items-start gap-1">
           <div className="flex items-center gap-2">
-            <img src={InkwellFeatherNavy} alt="Inkwell logo" className="h-5 w-5 shrink-0" />
+            <img
+              src="/brand/inkwell-feather-navy.optimized.svg"
+              alt="Inkwell logo"
+              className="h-5 w-5 shrink-0"
+              onError={(e) => {
+                if (e.currentTarget.src.includes('.optimized.')) {
+                  e.currentTarget.src = '/brand/inkwell-feather-navy.svg';
+                }
+              }}
+            />
             <span className="font-serif font-semibold text-lg tracking-wide text-inkwell-navy">
               Inkwell
             </span>
