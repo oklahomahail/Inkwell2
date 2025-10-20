@@ -4,6 +4,20 @@ import { vi, it, expect } from 'vitest';
 import { renderWithRouter } from '../../test/utils/renderWithRouter';
 import SignIn from '../SignIn';
 
+// Mock Supabase client
+vi.mock('@supabase/supabase-js', () => {
+  return {
+    createClient: () => ({
+      auth: {
+        signInWithOtp: vi.fn(),
+        onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+        getSession: vi.fn(() => Promise.resolve({ data: { session: null }, error: null })),
+      },
+      from: vi.fn(),
+    }),
+  };
+});
+
 // Our navigate wrapper is irrelevant for this test; keep it inert.
 vi.mock('@/utils/navigate', () => ({ useGo: () => vi.fn() }));
 
