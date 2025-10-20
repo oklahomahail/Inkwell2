@@ -70,7 +70,8 @@ export default [
       'unused-imports/no-unused-vars': 'off',
 
       // React
-      'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/rules-of-hooks': 'error', // Enforce Rules of Hooks
+      'react-hooks/exhaustive-deps': 'warn', // Verify the list of dependencies for Hooks (warn to start with)
       'react-refresh/only-export-components': 'off',
 
       // Import order (with blank lines between groups; internal '@/**' grouped)
@@ -104,6 +105,18 @@ export default [
           selector: 'ImportExpression[source.value=/tutorialStorage/]',
           message: 'Dynamic import of tutorialStorage is not allowed. Use static imports to prevent TDZ errors.',
         },
+      ],
+      
+      // Navigation hooks safety: prevent mixing useNavigate and useGo in the same file
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [{
+            name: 'react-router-dom',
+            importNames: ['useNavigate'],
+            message: 'Please use "useGo" from "@/utils/navigate" instead of direct useNavigate to maintain consistency and testability.'
+          }]
+        }
       ],
 
       // Prevent typical loops and keep layers clean:

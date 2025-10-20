@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 
 import { supabase } from '@/lib/supabaseClient';
 import { useGo } from '@/utils/navigate';
@@ -29,8 +29,8 @@ function normalizeSafeRedirect(path: string | null | undefined, warn = console.w
 }
 
 export default function AuthCallback() {
-  const nav = useNavigate();
-  const go = useGo(); // For compatibility with tests
+  // Use only one navigation hook to avoid React hook order issues
+  const go = useGo(); // This already uses useNavigate internally
   const loc = useLocation();
   const [searchParams] = useSearchParams();
   const onceRef = useRef(false);
@@ -303,7 +303,7 @@ export default function AuthCallback() {
         }
       }
     })();
-  }, [go, nav, loc, searchParams]);
+  }, [go]);
 
   // Utility function for troubleshooting: can be called from DevTools to clear service workers
   // that might interfere with auth routes
