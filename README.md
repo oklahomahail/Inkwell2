@@ -10,6 +10,20 @@
 
 Inkwell helps writers plan, draft, and revise with structure. It blends creative flow with organized systems: chapters and scenes, character bibles, clue tracking, timeline checks, progress analytics, and AI-assisted drafting.
 
+## Authentication
+
+Inkwell supports the following authentication methods:
+
+- Email/Password authentication
+- Magic link authentication (passwordless email)
+
+Authentication is handled through Supabase, with the following flows:
+
+- Sign in (email/password or magic link)
+- Sign up (with email verification)
+- Password reset
+- Account recovery
+
 ## Features
 
 - Chapter & scene tracker with reordering
