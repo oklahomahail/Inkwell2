@@ -20,19 +20,32 @@ export default function SignIn() {
   );
 
   // Session guard: if already signed in, skip the page entirely
+  // IMPORTANT: Only redirect if session is truthy, never on null during first render
   useEffect(() => {
     let mounted = true;
+    // Check for _once sentinel to prevent auto-retry loops
+    const hasOnceSentinel = searchParams.get('_once') === '1';
+
+    if (hasOnceSentinel) {
+      console.log('[SignIn] Skipping auto-session check due to _once sentinel');
+      return; // Don't auto-retry if we're coming from an error with _once=1
+    }
+
     (async () => {
+      console.log('[SignIn] Checking for existing session');
       const { data } = await supabase.auth.getSession();
       if (!mounted) return;
-      if (data.session) {
+      if (data?.session) {
+        console.log('[SignIn] Found active session, redirecting to', desiredRedirect);
         go(desiredRedirect, { replace: true });
+      } else {
+        console.log('[SignIn] No active session found');
       }
     })();
     return () => {
       mounted = false;
     };
-  }, [go, desiredRedirect]);
+  }, [go, desiredRedirect, searchParams]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -46,7 +59,7 @@ export default function SignIn() {
         const { error } = await supabase.auth.signInWithOtp({
           email,
           options: {
-            emailRedirectTo: window.location.origin + '/auth/callback?redirect=' + desiredRedirect,
+            emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${desiredRedirect}`,
           },
         });
 
