@@ -7,10 +7,14 @@ const supabaseUrl =
 const supabaseAnonKey =
   import.meta.env.VITE_SUPABASE_ANON_KEY ?? (isTest ? 'test-anon-key' : undefined);
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!isTest && (!supabaseUrl || !supabaseAnonKey)) {
   throw new Error(
     'Missing Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.',
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use safe defaults for testing environment
+const finalSupabaseUrl = supabaseUrl || 'http://localhost:54321';
+const finalSupabaseAnonKey = supabaseAnonKey || 'test-anon-key';
+
+export const supabase = createClient(finalSupabaseUrl, finalSupabaseAnonKey);
