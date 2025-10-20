@@ -59,17 +59,18 @@ pnpm tree:update # regenerate file tree in README
 
 ## Configuration
 
-| Key                        | Required | Purpose                     |
-| -------------------------- | -------- | --------------------------- |
-| VITE_CLERK_PUBLISHABLE_KEY | yes      | Clerk frontend key          |
-| VITE_BASE_URL              | yes      | App origin for redirects    |
-| VITE_SENTRY_DSN            | no       | Error reporting (prod only) |
+| Key                    | Required | Purpose                     |
+| ---------------------- | -------- | --------------------------- |
+| VITE_SUPABASE_URL      | yes      | Supabase API URL            |
+| VITE_SUPABASE_ANON_KEY | yes      | Supabase anonymous API key  |
+| VITE_BASE_URL          | yes      | App origin for redirects    |
+| VITE_SENTRY_DSN        | no       | Error reporting (prod only) |
 
 See [/docs/ops/01-deploy.md](/docs/ops/01-deploy.md) and [/docs/ops/03-secrets.md](/docs/ops/03-secrets.md) for full guidance.
 
 ## Architecture
 
-Client-side React + Vite, local storage via IndexedDB, auth via Clerk, feature-flagged analytics, and optional AI integrations.
+Client-side React + Vite, local storage via IndexedDB, auth via Supabase, feature-flagged analytics, and optional AI integrations.
 
 ```
 React (Vite)
@@ -78,7 +79,7 @@ React (Vite)
  ├─ Storage (IndexedDB)
  ├─ Features (chapters, characters, clues, timeline)
  ├─ AI (Claude/OpenAI adapter)
-└─ Auth (Clerk)
+└─ Auth (Supabase)
 ```
 
 ## Project Tree
@@ -250,22 +251,26 @@ For detailed documentation, see the `/docs` directory:
 - **Release Process**: [docs/dev/release.md](docs/dev/release.md)
 - **Product Roadmap**: [docs/product/roadmap.md](docs/product/roadmap.md)
 
-### Authentication Setup (Clerk)
+### Authentication Setup (Supabase)
 
-1. Install Clerk dependencies (if not present):
+1. Create a project in [Supabase](https://supabase.com)
 
-```bash
-pnpm add @clerk/clerk-react
-```
-
-2. Create `.env` from `.env.example` and fill in:
+2. Create `.env.local` from `.env.example` and fill in:
 
 ```bash
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-3. Run tests deterministically:
+3. Configure Supabase Authentication settings:
+   - Enable Email/Password sign-in
+   - Configure SMTP settings for password reset emails
+   - Set up email templates for password reset
+   - Add redirect URLs in Supabase Dashboard → Authentication → URL Configuration:
+     - `https://your-domain.com/auth/callback`
+     - `http://localhost:5173/auth/callback` (for local development)
+
+4. Run tests deterministically:
 
 ```bash
 pnpm vitest run --pool=forks --sequence.concurrent=false

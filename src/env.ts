@@ -6,7 +6,7 @@
  */
 
 // Required environment variables - app will not start without these
-const required = ['VITE_CLERK_PUBLISHABLE_KEY', 'VITE_BASE_URL'] as const;
+const required = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE_BASE_URL'] as const;
 
 // Validate all required environment variables are present
 for (const key of required) {

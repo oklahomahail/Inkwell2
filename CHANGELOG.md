@@ -11,6 +11,18 @@
   - CI workflow for automated checks
   - Release process documentation
   - Branch protection automation script
+- Enhanced authentication system
+  - Email/password authentication
+  - Combined UI for magic link and password sign-in
+  - Improved password reset flow
+  - Better redirect handling across auth flows
+  - Updated branding on authentication pages
+
+### Fixed
+
+- Logo rendering in authentication pages
+- Topbar display on authentication routes
+- SVG asset paths with robust fallback logic
 
 ## [1.0.3] - 2025-10-13
 
@@ -686,14 +698,6 @@ All notable changes to this project are documented here.
 - Performance testing with large project datasets
 - Cross-browser compatibility verification
 - Accessibility compliance testing
-
-### Documentation
-
-- Updated README with comprehensive feature descriptions
-- Detailed onboarding guide for new users
-- Advanced features documentation for power users
-- Developer documentation for contributing to the project
-- API documentation for new hooks and services
 
 ---
 
