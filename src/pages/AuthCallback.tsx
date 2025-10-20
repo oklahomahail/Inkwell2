@@ -177,33 +177,61 @@ export default function AuthCallback() {
         // Handle case where we get type but no token_hash (happens in production)
         if (type && !code && !tokenHash) {
           // This is a special case we're seeing in production where only a type parameter is present
-          // Try to use the type directly with verifyOtp
+          // This can happen with newer Supabase versions where the auth flow has changed
           console.log(`[AuthCallback] Trying type-only verification with type=${type}`);
 
           try {
-            // Use type with empty token_hash - this might work if Supabase is using a new flow
+            // First check if we already have a valid session - this is the most common case
+            // when a token-based auth completed but redirected without code/token_hash
+            console.log('[AuthCallback] Checking for existing session as primary strategy');
+            const { data: sessionData } = await supabase.auth.getSession();
+
+            if (sessionData?.session) {
+              console.log(
+                '[AuthCallback] Found existing session in type-only flow, proceeding to redirect',
+              );
+
+              // Mark onboarding tour since this is still a successful auth
+              try {
+                const firstLoginFlag = localStorage.getItem('tourCompleted');
+                if (!firstLoginFlag) {
+                  localStorage.setItem('tourShouldStart', '1');
+                }
+              } catch {
+                // Ignore storage errors
+              }
+
+              go(redirectTo, { replace: true });
+              return;
+            }
+
+            // If no session, try the fallback OTP verification with empty token_hash
+            console.log('[AuthCallback] No session found, trying OTP verification as fallback');
             const verifyType = type === 'recovery' || type === 'email_change' ? type : 'signup';
             const { data, error } = await supabase.auth.verifyOtp({
               type: verifyType,
-              token_hash: '', // Empty but present
+              token_hash: '', // Empty but present - might work with some Supabase versions
             });
 
             if (!error && data?.session) {
-              console.log('[AuthCallback] Type-only verification successful');
+              console.log('[AuthCallback] Type-only OTP verification successful');
               go(redirectTo, { replace: true });
               return;
             }
 
-            // If that failed, try getting the session directly as a fallback
-            console.log('[AuthCallback] Checking for existing session as fallback');
-            const { data: sessionData } = await supabase.auth.getSession();
-            if (sessionData?.session) {
-              console.log('[AuthCallback] Found existing session, proceeding to redirect');
+            // Last chance - try refreshing the session
+            console.log('[AuthCallback] Trying session refresh as last resort');
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+
+            if (!refreshError && refreshData?.session) {
+              console.log('[AuthCallback] Session refresh successful');
               go(redirectTo, { replace: true });
               return;
             }
 
-            throw new Error('Type-only verification failed');
+            throw new Error(
+              `Type-only verification failed: ${error?.message || refreshError?.message || 'Unknown reason'}`,
+            );
           } catch (e) {
             console.warn('[AuthCallback] Type-only verification failed:', e);
             // Continue to error case below
@@ -212,22 +240,34 @@ export default function AuthCallback() {
 
         // No code or token_hash? Bail with a generic error message and sentinel
         console.warn('[AuthCallback] No code or token_hash found in URL');
+
+        // Dump full debugging information to console
+        const allParams = Object.fromEntries(url.searchParams.entries());
         console.warn('[AuthCallback] URL details:', {
           fullUrl: window.location.href,
           pathname: url.pathname,
           search: url.search,
           hash: url.hash,
-          foundParams: Object.fromEntries(url.searchParams.entries()),
+          foundParams: allParams,
+          redirectTo,
+          view: getParam(url, 'view'),
+          type,
         });
 
-        // Attempt a last-resort session check
-        const { data: lastResortSession } = await supabase.auth.getSession();
+        // Attempt a last-resort session check - this sometimes works if the Supabase auth
+        // happened but the redirect parameters were stripped
+        console.log('[AuthCallback] Attempting final session check before giving up');
+        const { data: lastResortSession, error: sessionError } = await supabase.auth.getSession();
+
         if (lastResortSession?.session) {
           console.log(
             '[AuthCallback] Found valid session despite missing params, proceeding to redirect',
+            { user: lastResortSession.session.user.email },
           );
           go(redirectTo, { replace: true });
           return;
+        } else {
+          console.warn('[AuthCallback] No session found in last-resort check', { sessionError });
         }
 
         // We can reuse the isTest variable from above
@@ -243,6 +283,7 @@ export default function AuthCallback() {
             view: getParam(url, 'view') || 'none',
             type: type || 'none',
             has_hash: url.hash ? 'yes' : 'no',
+            params: JSON.stringify(allParams).substring(0, 100),
           });
           go(`/sign-in?${params.toString()}`, { replace: true });
         }

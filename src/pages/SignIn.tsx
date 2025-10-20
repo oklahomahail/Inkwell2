@@ -56,16 +56,27 @@ export default function SignIn() {
         setSubmitting(true);
         setError(null);
 
-        // Add debug for what redirect URL we're using
-        const callbackUrl = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(desiredRedirect)}`;
+        // Add debug for what redirect URL we're using - ensure it includes both redirect and view params
+        // view=dashboard is important as it seems to be used by Supabase in production
+        const callbackUrl = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(desiredRedirect)}&view=dashboard`;
         console.log('[SignIn] Using redirect URL:', callbackUrl);
 
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: callbackUrl,
-          },
-        });
+        try {
+          const { error, data } = await supabase.auth.signInWithOtp({
+            email,
+            options: {
+              emailRedirectTo: callbackUrl,
+            },
+          });
+
+          // Log the actual redirect URL that Supabase is using (could be different)
+          console.log('[SignIn] Supabase response:', { error, data });
+
+          if (error) throw error;
+        } catch (authError) {
+          console.error('[SignIn] Supabase auth error:', authError);
+          throw authError; // Re-throw for the outer catch block
+        }
 
         if (error) throw error;
         setMessage('Check your email for the magic link');
