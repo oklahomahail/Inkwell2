@@ -469,33 +469,49 @@ With this migration in place, the onboarding flow is:
 
 ### 1. Open Redirect Protection
 
-**Status**: ✅ IMPLEMENTED
+**Status**: ✅ IMPLEMENTED & ENHANCED
 
 **Protection in place**:
 
-Both [AuthCallback.tsx](src/pages/AuthCallback.tsx:12-32) and [AuthContext.tsx](src/context/AuthContext.tsx:21-40) now include `normalizeSafeRedirect()` function:
+Logic has been centralized in [`src/utils/safeRedirect.ts`](src/utils/safeRedirect.ts) to provide consistent behavior across components:
 
 ```typescript
-function normalizeSafeRedirect(path: string | null): string {
-  if (!path) return '/profiles';
+// Centralize logic so tests are consistent everywhere.
+export function normalizeSafeRedirect(
+  raw: string | null | undefined,
+  warn: (msg: string, value?: unknown) => void = console.warn,
+  fallback = '/dashboard',
+): string {
+  if (!raw) return fallback;
 
-  // Only allow same-origin paths starting with /
-  const safePathPattern = /^\/[^\s]*$/;
+  // Allow only root-relative paths like "/foo" (with optional ?query and #hash)
+  const isRootRelative = raw.startsWith('/') && !raw.startsWith('//');
 
-  // Reject absolute URLs
-  if (path.includes('://') || path.startsWith('//')) {
-    console.warn('Rejected absolute URL redirect:', path);
-    return '/profiles';
+  if (isRootRelative) {
+    try {
+      const u = new URL(raw, 'http://local.test'); // dummy base
+      // Preserve path + query + hash
+      const normalized = `${u.pathname}${u.search}${u.hash}`;
+      return normalized || fallback;
+    } catch {
+      warn('Blocked unsafe redirect', raw);
+      return fallback;
+    }
   }
 
-  // Validate against safe path pattern
-  if (!safePathPattern.test(path)) {
-    console.warn('Rejected invalid redirect path:', path);
-    return '/profiles';
-  }
-
-  return path;
+  // Absolute/protocol-relative/anything else → warn + fallback
+  warn('Blocked unsafe redirect', raw);
+  return fallback;
 }
+```
+
+**Key improvements**:
+
+1. **Query string preservation**: Now correctly preserves query parameters and hash fragments
+2. **Explicit warning function**: Takes `console.warn` as a parameter, enabling proper test spying
+3. **Centralized implementation**: Single source of truth used by both `SignIn.tsx` and `AuthCallback.tsx`
+4. **Better pattern matching**: Uses URL parsing for more robust validation
+
 ```
 
 ✅ **Security guarantees**:
@@ -512,20 +528,24 @@ function normalizeSafeRedirect(path: string | null): string {
 **Current Configuration** (permissive for development):
 
 ```
+
 https://inkwell.leadwithnexus.com/auth/callback
 https://inkwell.leadwithnexus.com/**
 http://localhost:5173/auth/callback
 http://localhost:5173/**
+
 ```
 
 **Recommended Final Configuration** (production-hardened):
 
 ```
+
 https://inkwell.leadwithnexus.com
 https://inkwell.leadwithnexus.com/auth/callback
 http://localhost:5173
 http://localhost:5173/auth/callback
-```
+
+````
 
 **Action Required**: Once stable, remove wildcard `/**` URLs to reduce attack surface
 
@@ -542,7 +562,7 @@ await supabase.auth.signInWithOAuth({
     redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
   },
 });
-```
+````
 
 **Supabase Dashboard Configuration**:
 
@@ -627,6 +647,80 @@ https://inkwell-<COMMIT_HASH>.vercel.app/auth/callback
 ```
 
 **Security note**: Prune preview URLs when done to minimize attack surface
+
+### 8. CI Authentication Smoke Test
+
+**Status**: 🆕 RECOMMENDED IMPLEMENTATION
+
+**Suggested Approach**:
+
+Add a smoke test in the CI pipeline that runs against your Vercel preview deployment to catch regressions in the authentication flow, especially after Supabase SDK upgrades:
+
+```yaml
+# In .github/workflows/ci.yml
+jobs:
+  # ... existing jobs
+
+  e2e-auth-smoke-test:
+    name: Auth Flow Smoke Test
+    needs: [deploy-preview] # Run after preview deployment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Playwright
+        run: npm init playwright@latest --yes
+
+      - name: Run Auth Smoke Test
+        run: npx playwright test auth-smoke.spec.ts
+        env:
+          PREVIEW_URL: ${{ needs.deploy-preview.outputs.preview_url }}
+          TEST_EMAIL: 'test-user@example.com' # Use a Supabase test account
+```
+
+**Example Test** (tests/auth-smoke.spec.ts):
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('Authentication flow preserves redirect URL with query parameters', async ({ page }) => {
+  // Test complex path with query params
+  const targetPath = '/p/test-123?tab=characters&view=grid';
+
+  // 1. Visit sign-in page with redirect
+  await page.goto(`${process.env.PREVIEW_URL}/sign-in?redirect=${encodeURIComponent(targetPath)}`);
+
+  // 2. Fill in email (using mock mode if available)
+  await page.fill('input[type="email"]', process.env.TEST_EMAIL);
+  await page.click('button[type="submit"]');
+
+  // 3. Verify success message shown
+  await expect(page.locator('text=Check your email')).toBeVisible();
+
+  // 4. In mock mode: simulate OTP flow by directly calling the callback URL
+  if (process.env.MOCK_AUTH === 'true') {
+    // This would depend on your mock implementation
+    await page.goto(
+      `${process.env.PREVIEW_URL}/auth/callback?code=mock-code&redirect=${encodeURIComponent(targetPath)}`,
+    );
+
+    // 5. Verify redirected to original page with query params preserved
+    expect(page.url()).toContain(targetPath);
+  }
+});
+```
+
+**Benefits**:
+
+1. Catches breaking changes in Supabase SDK upgrades
+2. Validates that query parameters are preserved through redirect flow
+3. Ensures auth callback works correctly in production environments
+4. Can be extended to test error paths and security protections
 
 ---
 
