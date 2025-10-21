@@ -29,7 +29,8 @@ export default function RequireAuth({ children }: RequireAuthProps) {
 
   // If not authenticated, redirect to sign-in with the current path as redirect target
   if (!user || !session) {
-    const redirectPath = `/sign-in?view=dashboard&redirect=${encodeURIComponent(location.pathname)}`;
+    // Just use the redirect parameter without the view=dashboard that might confuse rendering
+    const redirectPath = `/sign-in?redirect=${encodeURIComponent(location.pathname)}`;
     return <Navigate to={redirectPath} replace state={{ redirect: location.pathname }} />;
   }
 

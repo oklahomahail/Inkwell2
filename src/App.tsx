@@ -87,12 +87,8 @@ function RootRedirect() {
   }
 
   // If user is authenticated, go to dashboard
-  // If not authenticated, go to sign-in with view=dashboard parameter
-  return user ? (
-    <Navigate to="/dashboard" replace />
-  ) : (
-    <Navigate to="/sign-in?view=dashboard" replace />
-  );
+  // If not authenticated, go to sign-in page (without any confusing query parameters)
+  return user ? <Navigate to="/dashboard" replace /> : <Navigate to="/sign-in" replace />;
 }
 
 // All app logic lives here, safely *inside* the providers.

@@ -51,16 +51,31 @@ export default function AuthPage({ mode }: AuthPageProps) {
 
     (async () => {
       if (!hasLoggedRef.current) {
-        console.log(`${logPrefix} Checking for existing session`);
+        console.log(`${logPrefix} Checking for existing session`, {
+          mode,
+          desiredRedirect,
+          searchParams: Object.fromEntries(searchParams.entries()),
+          loading,
+        });
         hasLoggedRef.current = true;
       }
 
       try {
         // Wait for the auth state to be fully hydrated
-        if (loading || !mounted) return;
+        if (loading || !mounted) {
+          console.log(`${logPrefix} Auth state still loading or component unmounted`, {
+            loading,
+            mounted,
+          });
+          return;
+        }
 
         if (session) {
-          console.log(`${logPrefix} Found active session, redirecting to`, desiredRedirect);
+          console.log(`${logPrefix} Found active session, redirecting to`, desiredRedirect, {
+            sessionUser: session?.user?.email,
+            sessionExpiry: session?.expires_at,
+          });
+
           // Prevent multiple redirects
           if (!isRedirecting) {
             setIsRedirecting(true);
@@ -68,7 +83,10 @@ export default function AuthPage({ mode }: AuthPageProps) {
             go(desiredRedirect, { replace: true });
           }
         } else {
-          console.log(`${logPrefix} No active session found, staying on auth page`);
+          console.log(`${logPrefix} No active session found, staying on auth page`, {
+            searchParams: Object.fromEntries(searchParams.entries()),
+            view: searchParams.get('view'),
+          });
         }
       } catch (error) {
         console.error(`${logPrefix} Error checking session:`, error);
@@ -78,7 +96,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
     return () => {
       mounted = false;
     };
-  }, [go, desiredRedirect, searchParams, isRedirecting]);
+  }, [go, desiredRedirect, searchParams, isRedirecting, mode, session, loading]);
 
   // Configure mode-specific UI elements
   const chrome = useMemo(() => {
