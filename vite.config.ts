@@ -118,9 +118,17 @@ export default defineConfig({
               additionalManifestEntries: [
                 { url: '/', revision: `v2025-10-21.1-${Date.now().toString()}` },
                 { url: '/site.webmanifest', revision: `v2025-10-21.1-${Date.now().toString()}` },
+                { url: '/manifest.json', revision: `v2025-10-21.1-${Date.now().toString()}` },
               ],
             },
-            includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png'],
+            includeAssets: [
+              'favicon.ico',
+              'icon-192.png',
+              'icon-512.png',
+              'site.webmanifest',
+              'manifest.json',
+              'icons/*.png',
+            ],
             manifest: {
               name: 'Inkwell - Professional Writing Studio',
               short_name: 'Inkwell',

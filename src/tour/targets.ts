@@ -2,6 +2,8 @@
 // File: src/tour/targets.ts
 // Robust target resolution with MutationObserver and fallbacks
 
+import { safeObserve } from '../utils/safeObserve';
+
 /**
  * Resolves a target element by trying multiple selectors with retry logic
  * Uses MutationObserver to watch for DOM changes during retry window
@@ -29,15 +31,10 @@ export async function resolveTarget(
 
   // Set up retry with MutationObserver
   return new Promise<HTMLElement | null>((resolve) => {
-    // Watch for DOM changes - with guard for safety
+    // Watch for DOM changes using safer approach
     const node = document.body;
-    if (!node || !(node instanceof Node)) {
-      console.warn('resolveTarget: document.body is not a Node');
-      setTimeout(() => resolve(tryFind()), 100); // Fallback to simple timeout
-      return;
-    }
 
-    // Create observer after we know we have a valid node
+    // Create observer using the safer pattern
     let observer: MutationObserver | null = null;
     try {
       observer = new MutationObserver(() => {
@@ -48,16 +45,17 @@ export async function resolveTarget(
         }
       });
 
-      try {
-        observer.observe(node, {
+      // Use safeObserve utility to prevent crashes
+      if (
+        !safeObserve(node, observer, {
           childList: true,
           subtree: true,
           attributes: true,
           attributeFilter: ['class', 'style', 'data-tour'],
-        });
-      } catch (e) {
-        console.warn('[MO] observe skipped, invalid node', e, node);
-        setTimeout(() => resolve(tryFind()), 100); // Fallback
+        })
+      ) {
+        // If observation fails, use timeout fallback
+        setTimeout(() => resolve(tryFind()), 100);
         return;
       }
     } catch (e) {
@@ -110,13 +108,8 @@ export function findTargetWithRetry(
 
     // Get the node to observe (default to document.body)
     const node = rootNode instanceof Document ? rootNode.body : rootNode;
-    if (!node || !(node instanceof Node)) {
-      console.warn('findTargetWithRetry: rootNode is not a Node:', rootNode);
-      setTimeout(() => resolve(tryFind()), 100); // Fallback to simple timeout
-      return;
-    }
 
-    // Create observer after we know we have a valid node
+    // Create observer and use our safe observe utility
     let observer: MutationObserver | null = null;
     try {
       observer = new MutationObserver(() => {
@@ -127,16 +120,17 @@ export function findTargetWithRetry(
         }
       });
 
-      try {
-        observer.observe(node, {
+      // Use safeObserve utility to prevent crashes
+      if (
+        !safeObserve(node, observer, {
           childList: true,
           subtree: true,
           attributes: true,
           attributeFilter: ['class', 'style', 'data-tour'],
-        });
-      } catch (e) {
-        console.warn('[MO] observe skipped, invalid node', e, node);
-        setTimeout(() => resolve(tryFind()), 100); // Fallback
+        })
+      ) {
+        // If observation fails, use timeout fallback
+        setTimeout(() => resolve(tryFind()), 100);
         return;
       }
     } catch (e) {

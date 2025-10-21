@@ -6,6 +6,7 @@
   "framework": "vite",
   "rewrites": [
     { "source": "/site.webmanifest", "destination": "/site.webmanifest" },
+    { "source": "/manifest.json", "destination": "/manifest.json" },
     { "source": "/icons/(.*)", "destination": "/icons/$1" },
     { "source": "/api/login", "destination": "/api/login.ts" },
     { "source": "/(.*)", "destination": "/index.html" }
@@ -25,6 +26,19 @@
   "headers": [
     {
       "source": "/site.webmanifest",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.json",
       "headers": [
         {
           "key": "Content-Type",

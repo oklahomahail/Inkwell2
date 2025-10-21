@@ -2,11 +2,14 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { safeObserve } from '../../../utils/safeObserve';
+
 import { startTour, isTourRunning } from './TourController';
 import { getTourProgress, resetProgress, markTourLaunched } from './useTutorialStorage';
 
 const FEATURE_TOUR_ID = 'feature-tour';
-const DASHBOARD_PATH = '/profiles';
+const DASHBOARD_PATH = '/'; // Main dashboard path
+const EXCLUDED_PATHS = ['/profiles']; // Paths where tours should not run
 
 function targetsExist(selectors: string[]) {
   return selectors.every((sel) => !!document.querySelector(sel));
@@ -41,13 +44,8 @@ function whenTargetsReady(selectors: string[], timeoutMs = 8000): Promise<boolea
 
     // Get the root node to observe
     const node = document.documentElement;
-    if (!node || !(node instanceof Node)) {
-      console.warn('whenTargetsReady: document.documentElement is not a Node');
-      setTimeout(() => finalize(targetsExist(selectors)), 100); // Fallback to simple timeout
-      return;
-    }
 
-    // Create observer after we know we have a valid node
+    // Create observer with safer approach
     let observer: MutationObserver | null = null;
     try {
       observer = new MutationObserver(() => {
@@ -55,11 +53,10 @@ function whenTargetsReady(selectors: string[], timeoutMs = 8000): Promise<boolea
         else if (Date.now() > deadline) finalize(false);
       });
 
-      try {
-        observer.observe(node, { childList: true, subtree: true });
-      } catch (e) {
-        console.warn('[MO] observe skipped, invalid node', e, node);
-        setTimeout(() => finalize(targetsExist(selectors)), 100); // Fallback
+      // Use safeObserve utility to prevent crashes
+      if (!safeObserve(node, observer, { childList: true, subtree: true })) {
+        // If observation fails, use timeout fallback
+        setTimeout(() => finalize(targetsExist(selectors)), 100);
         return;
       }
     } catch (error) {
@@ -79,7 +76,13 @@ export function useSpotlightAutostart(stepSelectors: string[]) {
 
   useEffect(() => {
     if (once.current) return;
+
+    // Skip tour on excluded paths (like /profiles)
+    if (EXCLUDED_PATHS.some((path) => loc.pathname.startsWith(path))) return;
+
+    // Only run on main dashboard path
     if (!loc.pathname.startsWith(DASHBOARD_PATH)) return;
+
     if (isTourRunning()) return;
 
     const progress = (getTourProgress(FEATURE_TOUR_ID) || {}) as { completed?: boolean };
