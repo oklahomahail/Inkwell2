@@ -28,8 +28,8 @@ import { useEditorContext } from './context/EditorContext';
 import AuthCallback from './pages/AuthCallback';
 import BrandPage from './pages/Brand';
 import ForgotPassword from './pages/ForgotPassword';
-import SignIn from './pages/SignIn';
-import SignUp from './pages/SignUp';
+import SignIn from './pages/SignInPage';
+import SignUp from './pages/SignUpPage';
 import UpdatePassword from './pages/UpdatePassword';
 // Profile routing components
 import { ProfileGate } from './routes/shell/ProfileGate';
