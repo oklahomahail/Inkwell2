@@ -29,49 +29,69 @@ export function AuthForm({
     setActiveTab('password');
   }, [mode]);
 
+  // Mode-specific validation and submission logic
+  const handleSignIn = async () => {
+    if (activeTab === 'password') {
+      // Sign in with email/password
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      go(normalizeSafeRedirect(redirect));
+      return;
+    } else {
+      // Magic Link flow (only available for sign-in)
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+        },
+      });
+
+      if (error) throw error;
+      setNotice('Magic link sent. Check your email.');
+    }
+  };
+
+  const handleSignUp = async () => {
+    // Sign up requires email/password validation
+    if (!password || password.length < 8) {
+      setErr('Use at least 8 characters.');
+      return false;
+    }
+
+    if (password !== confirm) {
+      setErr('Passwords do not match.');
+      return false;
+    }
+
+    // Create new account
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+      },
+    });
+
+    if (error) throw error;
+    setNotice('Check your email to confirm your account.');
+    return true;
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr(null);
     setNotice(null);
     setLoading(true);
+
     try {
-      if (activeTab === 'password') {
-        if (mode === 'signup') {
-          if (!password || password.length < 8) {
-            setErr('Use at least 8 characters.');
-            setLoading(false);
-            return;
-          }
-          if (password !== confirm) {
-            setErr('Passwords do not match.');
-            setLoading(false);
-            return;
-          }
-          const { error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
-            },
-          });
-          if (error) throw error;
-          setNotice('Check your email to confirm your account.');
-        } else {
-          const { error } = await supabase.auth.signInWithPassword({ email, password });
-          if (error) throw error;
-          go(normalizeSafeRedirect(redirect));
-          return;
-        }
+      if (mode === 'signup') {
+        await handleSignUp();
       } else {
-        // Magic Link flow
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
-          },
-        });
-        if (error) throw error;
-        setNotice('Magic link sent. Check your email.');
+        await handleSignIn();
       }
     } catch (e: any) {
       setErr(e?.message || 'Something went wrong.');
@@ -82,27 +102,39 @@ export function AuthForm({
 
   const showConfirm = mode === 'signup' && activeTab === 'password';
 
+  // Mode-specific UI helpers
   const tabBtn = (k: 'password' | 'magic', label: string) => (
     <button
       type="button"
       onClick={() => setActiveTab(k)}
       className={`px-3 py-2 text-sm font-medium ${activeTab === k ? 'text-[#13294B] border-b-2 border-[#D4AF37]' : 'text-slate-500'}`}
+      aria-pressed={activeTab === k}
     >
       {label}
     </button>
   );
 
+  // Mode-specific labels and hints
+  const emailPlaceholder = mode === 'signin' ? 'Enter your email' : 'Enter your email address';
+  const passwordPlaceholder =
+    mode === 'signin' ? 'Enter your password' : 'Create a strong password';
+  const passwordLabel = mode === 'signin' ? 'Password' : 'Create password';
+
   return (
     <form onSubmit={onSubmit} className="space-y-5">
+      {/* Tab selector - only show Magic Link option for sign-in */}
       <div className="flex items-center gap-4 border-b pb-2">
         {tabBtn('password', 'Email & Password')}
-        <span className="h-5 w-px bg-slate-200" />
-        <span className={`${mode === 'signup' ? 'opacity-50 pointer-events-none' : ''}`}>
-          {tabBtn('magic', 'Magic Link')}
-        </span>
+        {mode === 'signin' && (
+          <>
+            <span className="h-5 w-px bg-slate-200" />
+            {tabBtn('magic', 'Magic Link')}
+          </>
+        )}
       </div>
 
       <div className="space-y-4">
+        {/* Email field - common to both modes */}
         <div>
           <label htmlFor="email-input" className="block text-sm font-medium text-slate-700">
             Email address
@@ -115,6 +147,7 @@ export function AuthForm({
             onChange={(e) => setEmail(e.target.value)}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-[#D4AF37]"
             autoComplete="email"
+            placeholder={emailPlaceholder}
           />
         </div>
 
@@ -122,7 +155,7 @@ export function AuthForm({
           <>
             <div>
               <label htmlFor="password-input" className="block text-sm font-medium text-slate-700">
-                Password
+                {passwordLabel}
               </label>
               <input
                 id="password-input"
@@ -132,6 +165,8 @@ export function AuthForm({
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-[#D4AF37]"
                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                placeholder={passwordPlaceholder}
+                minLength={mode === 'signup' ? 8 : undefined}
               />
               {mode === 'signin' && (
                 <div className="mt-2 text-right">
@@ -158,6 +193,7 @@ export function AuthForm({
                   onChange={(e) => setConfirm(e.target.value)}
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-[#D4AF37]"
                   autoComplete="new-password"
+                  placeholder="Confirm your password"
                 />
               </div>
             )}
@@ -165,22 +201,37 @@ export function AuthForm({
         )}
       </div>
 
+      {/* Error and notification handling */}
       {err && <p className="text-sm text-red-600">{err}</p>}
       {notice && <p className="text-sm text-emerald-700">{notice}</p>}
 
+      {/* Mode-specific submission button */}
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-xl bg-[#13294B] px-4 py-3 font-semibold text-white ring-1 ring-black/5 hover:opacity-90 disabled:opacity-60"
+        className={`w-full rounded-xl ${
+          mode === 'signup' ? 'bg-[#13294B] text-white' : 'bg-[#13294B] text-white'
+        } px-4 py-3 font-semibold ring-1 ring-black/5 hover:opacity-90 disabled:opacity-60`}
+        data-testid={`${mode}-button`}
       >
         {loading ? 'Please wait…' : primaryCtaLabel}
       </button>
 
+      {/* Mode-specific helper text */}
       {mode === 'signin' && activeTab === 'password' && (
-        <p className="text-center text-xs text-slate-500">Trouble signing in? Use Magic Link.</p>
+        <p className="text-center text-xs text-slate-500">
+          Trouble signing in? Use Magic Link instead.
+        </p>
+      )}
+      {mode === 'signin' && activeTab === 'magic' && (
+        <p className="text-center text-xs text-slate-500">
+          We'll email you a magic link for a password-free sign in.
+        </p>
       )}
       {mode === 'signup' && (
-        <p className="text-center text-xs text-slate-500">Takes less than a minute.</p>
+        <p className="text-center text-xs text-slate-500">
+          Creating an account takes less than a minute.
+        </p>
       )}
     </form>
   );

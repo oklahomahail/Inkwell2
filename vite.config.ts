@@ -12,6 +12,9 @@ if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY) {
 }
 
 export default defineConfig({
+  build: {
+    sourcemap: true, // Enable source maps for better debugging in production
+  },
   plugins: [
     react(),
     ...(process.env.VITE_ENABLE_PWA === 'false'
