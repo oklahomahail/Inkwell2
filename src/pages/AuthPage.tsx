@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
+import AuthFooter from '@/components/Auth/AuthFooter';
 import { AuthForm } from '@/components/Auth/AuthForm';
 import { AuthFormMode } from '@/components/Auth/AuthForm';
+import AuthHeader from '@/components/Auth/AuthHeader';
 import { useAuth } from '@/context/AuthContext';
 import { useGo } from '@/utils/navigate';
 import { normalizeSafeRedirect } from '@/utils/safeRedirect';
@@ -150,6 +152,17 @@ export default function AuthPage({ mode }: AuthPageProps) {
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
           }}
         >
+          <AuthHeader
+            title={mode === 'signin' ? 'Sign in to Inkwell' : 'Create your Inkwell account'}
+            subtitle={
+              mode === 'signin'
+                ? 'Welcome back, pick up where you left off.'
+                : 'Start crafting your stories today.'
+            }
+            logoSrc="/brand/inkwell-lockup-horizontal.svg"
+            className="text-inkwell-gold mb-6"
+          />
+
           {notice && (
             <div
               className="mb-6 p-4 rounded-md flex items-center"
@@ -177,20 +190,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
             primaryCtaLabel={chrome.primaryCtaLabel}
           />
 
-          <div className="text-sm text-center mt-6">
-            {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-            <Link
-              to={`/${mode === 'signin' ? 'sign-up' : 'sign-in'}${
-                desiredRedirect !== '/dashboard'
-                  ? `?redirect=${encodeURIComponent(desiredRedirect)}`
-                  : ''
-              }`}
-              style={{ color: '#13294B' }}
-              className="font-medium hover:underline"
-            >
-              {mode === 'signin' ? 'Sign up' : 'Sign in'}
-            </Link>
-          </div>
+          <AuthFooter mode={mode === 'signin' ? 'signin' : 'signup'} redirect={desiredRedirect} />
         </div>
       </div>
     </div>

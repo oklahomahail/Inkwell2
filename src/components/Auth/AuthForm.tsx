@@ -271,24 +271,7 @@ export function AuthForm({
         </p>
       )}
 
-      {/* Account switching links */}
-      <div className="text-sm text-center mt-6">
-        {mode === 'signin' ? (
-          <>
-            Don't have an account?{' '}
-            <a href="/sign-up" className="text-[#13294B] font-medium hover:underline">
-              Sign up
-            </a>
-          </>
-        ) : (
-          <>
-            Already have an account?{' '}
-            <a href="/sign-in" className="text-[#13294B] font-medium hover:underline">
-              Sign in
-            </a>
-          </>
-        )}
-      </div>
+      {/* Account switching links removed - now handled by AuthFooter component */}
     </form>
   );
 }
