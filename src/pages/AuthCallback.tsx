@@ -47,8 +47,9 @@ export default function AuthCallback() {
       const url = new URL(window.location.origin + loc.pathname + loc.search + loc.hash);
 
       // Preserve any redirect the app passed through
-      // Check for both "redirect" and "view" parameters (the latter appears in production)
-      const redirectParam = getParam(url, 'redirect') || getParam(url, 'view');
+      // Check for any of the known redirect parameter names ("next", "redirect", "view")
+      const redirectParam =
+        getParam(url, 'next') || getParam(url, 'redirect') || getParam(url, 'view');
       const redirectTo = normalizeSafeRedirect(redirectParam);
 
       // Log the redirect path for debugging
