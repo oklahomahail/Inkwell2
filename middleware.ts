@@ -12,10 +12,10 @@ export default function middleware(request: Request) {
     return Response.redirect(new URL('/sign-in', request.url), 308);
   }
 
-  // Fix for sign-in page rendering issues - check if we need to pass the HTML
+  // Fix for sign-in page rendering issues - don't process these paths
   if (pathname === '/sign-in' || pathname === '/sign-up') {
-    // Don't intercept the actual HTML rendering, let the app handle it
-    return new Response(null);
+    // Skip middleware processing for sign-in and sign-up pages
+    return;
   }
 
   // No redirect needed, continue to the destination
