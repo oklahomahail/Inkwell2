@@ -30,8 +30,8 @@ export function AuthForm({
     setActiveTab('password');
   }, [mode]);
 
-  // Prepare the callback URL for auth redirects
-  const emailRedirectTo = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`;
+  // Prepare the callback URL for auth redirects - ensure we use the consistent naming for params
+  const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}`;
 
   // Mode-specific validation and submission logic
   const handleSignIn = async () => {

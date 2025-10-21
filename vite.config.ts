@@ -12,6 +12,9 @@ if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY) {
 }
 
 export default defineConfig({
+  // Ensure we're serving from root, not relative path
+  base: '/',
+
   // Build configuration
   build: {
     sourcemap: true, // Enable source maps for better debugging in production
