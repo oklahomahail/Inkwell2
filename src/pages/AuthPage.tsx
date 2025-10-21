@@ -33,6 +33,8 @@ export default function AuthPage({ mode }: AuthPageProps) {
 
   // Use a ref to track if we've logged the session check message
   const hasLoggedRef = useRef(false);
+  // Track if we're redirecting to avoid race conditions
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Session guard: if already signed in, skip the page entirely
   useEffect(() => {
@@ -47,25 +49,38 @@ export default function AuthPage({ mode }: AuthPageProps) {
       return; // Don't auto-retry if we're coming from an error with _once=1
     }
 
+    // Use the context's auth instead of directly querying Supabase
+    // This ensures we're using the same auth state as the rest of the app
     (async () => {
       if (!hasLoggedRef.current) {
         console.log(`${logPrefix} Checking for existing session`);
         hasLoggedRef.current = true;
       }
 
-      const { data } = await supabase.auth.getSession();
-      if (!mounted) return;
+      try {
+        // Wait for the auth state to be fully hydrated
+        const { data } = await supabase.auth.getSession();
+        if (!mounted) return;
 
-      if (data?.session) {
-        console.log(`${logPrefix} Found active session, redirecting to`, desiredRedirect);
-        go(desiredRedirect, { replace: true });
+        if (data?.session) {
+          console.log(`${logPrefix} Found active session, redirecting to`, desiredRedirect);
+          // Prevent multiple redirects
+          if (!isRedirecting) {
+            setIsRedirecting(true);
+            go(desiredRedirect, { replace: true });
+          }
+        } else {
+          console.log(`${logPrefix} No active session found, staying on auth page`);
+        }
+      } catch (error) {
+        console.error(`${logPrefix} Error checking session:`, error);
       }
     })();
 
     return () => {
       mounted = false;
     };
-  }, [go, desiredRedirect, searchParams]);
+  }, [go, desiredRedirect, searchParams, isRedirecting]);
 
   // Configure mode-specific UI elements
   const chrome = useMemo(() => {

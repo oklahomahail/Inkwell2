@@ -6,7 +6,7 @@
   "framework": "vite",
   "rewrites": [
     { "source": "/api/login", "destination": "/api/login.ts" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "^(?!\\/site\\.webmanifest|\\/icons\\/|\\/api\\/).*", "destination": "/index.html" }
   ],
   "redirects": [
     { "source": "/app", "destination": "/", "permanent": true },

@@ -60,8 +60,21 @@ type QueuedOperation = {
 // RootRedirect component to intelligently handle the root route based on auth state
 function RootRedirect() {
   const { user, loading } = useAuth();
+  // Use state to track if we've already initiated a redirect
+  const [hasInitiatedRedirect, setHasInitiatedRedirect] = useState(false);
 
-  if (loading) {
+  // Only redirect once auth state is fully loaded and we haven't already redirected
+  useEffect(() => {
+    if (!loading && !hasInitiatedRedirect) {
+      setHasInitiatedRedirect(true);
+      console.log(
+        '[RootRedirect] Auth loaded, user state:',
+        user ? 'authenticated' : 'unauthenticated',
+      );
+    }
+  }, [loading, user, hasInitiatedRedirect]);
+
+  if (loading || !hasInitiatedRedirect) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
@@ -167,14 +180,21 @@ function AppShell() {
         {/* Root redirect */}
         <Route path="/" element={<RootRedirect />} />
 
-        {/* Dashboard route */}
+        {/* Dashboard route with proper loading state handling */}
         <Route
           path="/dashboard"
           element={
-            user ? (
+            loading ? (
+              <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="text-center">
+                  <div className="w-12 h-12 border-4 border-inkwell-navy border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
+                </div>
+              </div>
+            ) : user ? (
               <Navigate to={`/p/${user.id}`} replace />
             ) : (
-              <Navigate to="/sign-in?view=dashboard" replace />
+              <Navigate to="/sign-in?view=dashboard&_once=1" replace />
             )
           }
         />
