@@ -18,7 +18,7 @@
     { "source": "/docs", "destination": "https://docs.inkwell.app", "permanent": true },
     {
       "source": "/",
-      "has": [{ "type": "host", "value": "inkwel.leadwithnexus.com" }],
+      "has": [{ "type": "host", "value": "inkwell.leadwithnexus.com" }],
       "destination": "/sign-in?view=dashboard",
       "permanent": false
     }
