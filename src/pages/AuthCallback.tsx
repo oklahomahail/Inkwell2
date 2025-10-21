@@ -1,7 +1,15 @@
 import { useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 
+import { useProfileContext } from '@/context/ProfileContext';
+import {
+  getRememberedProfileId,
+  rememberProfileId,
+  syncLastProfileToUserMetadata,
+} from '@/lib/profileMemory';
+import { resolvePostAuthRoute } from '@/lib/resolvePostAuth';
 import { supabase } from '@/lib/supabaseClient';
+import { shouldStartTourForUser } from '@/lib/tourEligibility';
 import { useGo } from '@/utils/navigate';
 
 function getParam(url: URL, key: string): string | null {
@@ -32,6 +40,7 @@ export default function AuthCallback() {
   const go = useGo(); // Single navigation source
   const loc = useLocation();
   const [_searchParams] = useSearchParams();
+  const { profiles, loadProfiles } = useProfileContext();
 
   useEffect(() => {
     let mounted = true;
@@ -50,10 +59,10 @@ export default function AuthCallback() {
       // Check for any of the known redirect parameter names ("next", "redirect", "view")
       const redirectParam =
         getParam(url, 'next') || getParam(url, 'redirect') || getParam(url, 'view');
-      const redirectTo = normalizeSafeRedirect(redirectParam);
+      const rawRedirectTo = normalizeSafeRedirect(redirectParam);
 
       // Log the redirect path for debugging
-      console.log('[AuthCallback] Will redirect to:', redirectTo);
+      console.log('[AuthCallback] Raw redirect to:', rawRedirectTo);
 
       // Supabase can return either:
       // 1) ?code=...   (new GoTrue flow)
@@ -101,74 +110,41 @@ export default function AuthCallback() {
 
           // In test environment for successful cases, go directly to redirectTo
           if (code || tokenHash) {
-            go(redirectTo, { replace: true });
+            go(rawRedirectTo, { replace: true });
             return;
           }
         }
 
+        // Handle authentication flows and set session
+        let authSuccess = false;
         if (code) {
           // Modern flow
-          // IMPORTANT: pass ONLY the code to exchangeCodeForSession
           const { data, error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) throw error;
           if (!data?.session) throw new Error('No session returned');
-
-          // Optional: mark that onboarding tour should run on first open.
-          try {
-            const firstLoginFlag = localStorage.getItem('tourCompleted');
-            if (!firstLoginFlag) {
-              localStorage.setItem('tourShouldStart', '1');
-            }
-          } catch {
-            // Ignore storage errors
-          }
-
-          // Success, go to requested path
-          go(redirectTo, { replace: true }); // Use go instead of nav for test compatibility
-          return;
-        }
-
-        if (tokenHash) {
+          authSuccess = true;
+        } else if (tokenHash) {
           // Legacy/verify-OTP flow
-          // Map Supabase 'type' to verifyOtp types
-          // For email confirmation after sign-up, type should be 'signup'
-          // IMPORTANT: type must exactly match one of the allowed values
           const verifyType = type === 'recovery' || type === 'email_change' ? type : 'signup';
-
           console.log(
             `[AuthCallback] Using verifyOtp with type="${verifyType}", token_hash=present`,
           );
-
           const { data, error } = await supabase.auth.verifyOtp({
-            type: verifyType, // Must be exactly: "signup" | "recovery" | "email_change"
-            token_hash: tokenHash, // Use token_hash, not token
+            type: verifyType,
+            token_hash: tokenHash,
           });
           if (error) throw error;
           if (!data?.session) {
             // Some verify flows confirm the email but do NOT create a session.
             // In that case, redirect to sign-in and show a "confirmed, please sign in" message.
-            go(`/sign-in?notice=confirmed&redirect=${encodeURIComponent(redirectTo)}`, {
+            go(`/sign-in?notice=confirmed&redirect=${encodeURIComponent(rawRedirectTo)}`, {
               replace: true,
             });
             return;
           }
-
-          // Optional: mark that onboarding tour should run on first open.
-          try {
-            const firstLoginFlag = localStorage.getItem('tourCompleted');
-            if (!firstLoginFlag) {
-              localStorage.setItem('tourShouldStart', '1');
-            }
-          } catch {
-            // Ignore storage errors
-          }
-
-          go(redirectTo, { replace: true });
-          return;
-        }
-
-        // Handle case where we get type but no token_hash (happens in production)
-        if (type && !code && !tokenHash) {
+          authSuccess = true;
+        } else if (type && !code && !tokenHash) {
+          // Handle special case - check for existing session
           // This is a special case we're seeing in production where only a type parameter is present
           // This can happen with newer Supabase versions where the auth flow has changed
           console.log(`[AuthCallback] Trying type-only verification with type=${type}`);
@@ -184,69 +160,60 @@ export default function AuthCallback() {
                 '[AuthCallback] Found existing session in type-only flow, proceeding to redirect',
               );
 
-              // Mark onboarding tour since this is still a successful auth
-              try {
-                const firstLoginFlag = localStorage.getItem('tourCompleted');
-                if (!firstLoginFlag) {
-                  localStorage.setItem('tourShouldStart', '1');
-                }
-              } catch {
-                // Ignore storage errors
-              }
-
-              go(redirectTo, { replace: true });
-              return;
-            }
-
-            // For signup type with no token/hash, we should NOT attempt OTP verification
-            // as it will always fail with a 400 error
-            if (type === 'signup') {
-              console.log('[AuthCallback] Signup confirmation detected, skipping OTP verification');
-
-              // Check for existing session one more time before sending to sign-in
-              // This helps when the hash fragment might have been stripped but the session cookie exists
-              console.log('[AuthCallback] Double-checking for existing session before redirecting');
-              const { data: finalSessionCheck } = await supabase.auth.getSession();
-
-              if (finalSessionCheck?.session) {
-                console.log(
-                  '[AuthCallback] Found existing session on second check, proceeding to dashboard',
-                );
-                go(redirectTo, { replace: true });
-                return;
-              }
-
-              // For signup confirmations, we should show a success message and redirect to sign-in
-              go(`/sign-in?notice=confirmed&redirect=${encodeURIComponent(redirectTo)}`, {
-                replace: true,
-              });
-              return;
-            } else if (type === 'recovery' && !tokenHash) {
-              // For recovery without token, redirect to forgot-password
-              console.log(
-                '[AuthCallback] Recovery without token detected, redirecting to forgot-password',
-              );
-              go('/auth/forgot-password', { replace: true });
-              return;
+              authSuccess = true;
             } else {
-              // For other types, try the fallback OTP verification
-              console.log('[AuthCallback] No session found, trying OTP verification as fallback');
-              const verifyType = type === 'recovery' || type === 'email_change' ? type : 'signup';
+              // For signup type with no token/hash, we should NOT attempt OTP verification
+              // as it will always fail with a 400 error
+              if (type === 'signup') {
+                console.log(
+                  '[AuthCallback] Signup confirmation detected, skipping OTP verification',
+                );
 
-              // Only attempt OTP verification if we have a token_hash from the URL
-              if (tokenHash) {
-                const { data, error } = await supabase.auth.verifyOtp({
-                  type: verifyType,
-                  token_hash: tokenHash,
-                });
+                // Check for existing session one more time before sending to sign-in
+                // This helps when the hash fragment might have been stripped but the session cookie exists
+                console.log(
+                  '[AuthCallback] Double-checking for existing session before redirecting',
+                );
+                const { data: finalSessionCheck } = await supabase.auth.getSession();
 
-                if (!error && data?.session) {
-                  console.log('[AuthCallback] Type-only OTP verification successful');
-                  go(redirectTo, { replace: true });
+                if (finalSessionCheck?.session) {
+                  console.log(
+                    '[AuthCallback] Found existing session on second check, proceeding to dashboard',
+                  );
+                  authSuccess = true;
+                } else {
+                  // For signup confirmations, we should show a success message and redirect to sign-in
+                  go(`/sign-in?notice=confirmed&redirect=${encodeURIComponent(rawRedirectTo)}`, {
+                    replace: true,
+                  });
                   return;
                 }
+              } else if (type === 'recovery' && !tokenHash) {
+                // For recovery without token, redirect to forgot-password
+                console.log(
+                  '[AuthCallback] Recovery without token detected, redirecting to forgot-password',
+                );
+                go('/auth/forgot-password', { replace: true });
+                return;
               } else {
-                console.log('[AuthCallback] Skipping OTP verification due to missing token_hash');
+                // For other types, try the fallback OTP verification
+                console.log('[AuthCallback] No session found, trying OTP verification as fallback');
+                const verifyType = type === 'recovery' || type === 'email_change' ? type : 'signup';
+
+                // Only attempt OTP verification if we have a token_hash from the URL
+                if (tokenHash) {
+                  const { data, error } = await supabase.auth.verifyOtp({
+                    type: verifyType,
+                    token_hash: tokenHash,
+                  });
+
+                  if (!error && data?.session) {
+                    console.log('[AuthCallback] Type-only OTP verification successful');
+                    authSuccess = true;
+                  }
+                } else {
+                  console.log('[AuthCallback] Skipping OTP verification due to missing token_hash');
+                }
               }
             }
 
@@ -256,8 +223,7 @@ export default function AuthCallback() {
 
             if (!refreshError && refreshData?.session) {
               console.log('[AuthCallback] Session refresh successful');
-              go(redirectTo, { replace: true });
-              return;
+              authSuccess = true;
             }
 
             throw new Error(
@@ -269,54 +235,47 @@ export default function AuthCallback() {
           }
         }
 
-        // No code or token_hash? Bail with a generic error message and sentinel
-        console.warn('[AuthCallback] No code or token_hash found in URL');
+        // If we've successfully authenticated, apply our profile resolution logic
+        if (authSuccess && mounted) {
+          try {
+            // 1. Get the user's profiles
+            await loadProfiles();
 
-        // Dump full debugging information to console
-        const allParams = Object.fromEntries(url.searchParams.entries());
-        console.warn('[AuthCallback] URL details:', {
-          fullUrl: window.location.href,
-          pathname: url.pathname,
-          search: url.search,
-          hash: url.hash,
-          foundParams: allParams,
-          redirectTo,
-          view: getParam(url, 'view'),
-          type,
-        });
+            // 2. Check tour eligibility
+            const {
+              data: { user },
+            } = await supabase.auth.getUser();
+            const shouldStartTour = await shouldStartTourForUser(user?.id || '');
 
-        // Attempt a last-resort session check - this sometimes works if the Supabase auth
-        // happened but the redirect parameters were stripped
-        console.log('[AuthCallback] Attempting final session check before giving up');
-        const { data: lastResortSession, error: sessionError } = await supabase.auth.getSession();
+            // 3. Get remembered profile ID
+            const rememberedProfileId = getRememberedProfileId();
 
-        if (lastResortSession?.session) {
-          console.log(
-            '[AuthCallback] Found valid session despite missing params, proceeding to redirect',
-            { user: lastResortSession.session.user.email },
-          );
-          go(redirectTo, { replace: true });
-          return;
-        } else {
-          console.warn('[AuthCallback] No session found in last-resort check', { sessionError });
+            // 4. Resolve the destination based on profiles and tour eligibility
+            const { path, profileId } = resolvePostAuthRoute(profiles, rememberedProfileId, {
+              shouldStartTour,
+            });
+
+            // 5. If a profile was resolved, remember it
+            if (profileId) {
+              rememberProfileId(profileId);
+              await syncLastProfileToUserMetadata(profileId);
+            }
+
+            // 6. Navigate to the resolved path
+            console.log('[AuthCallback] Resolved path:', path);
+            go(path, { replace: true });
+            return;
+          } catch (resolveError) {
+            console.error('[AuthCallback] Error resolving post-auth route:', resolveError);
+            // Fall back to the original redirect on error
+            go(rawRedirectTo, { replace: true });
+            return;
+          }
         }
 
-        // We can reuse the isTest variable from above
-        if (isTest) {
-          // Keep simple for tests
-          go(`/sign-in?error=callback`, { replace: true });
-        } else {
-          // In production add sentinel with more details
-          const params = new URLSearchParams({
-            error: 'callback',
-            reason: 'missing_params',
-            _once: '1',
-            view: getParam(url, 'view') || 'none',
-            type: type || 'none',
-            has_hash: url.hash ? 'yes' : 'no',
-            params: JSON.stringify(allParams).substring(0, 100),
-          });
-          go(`/sign-in?${params.toString()}`, { replace: true });
+        // Handle the default case - if we get here, we have no valid session
+        if (!authSuccess && mounted) {
+          go(`/sign-in?error=callback&reason=auth_failed`, { replace: true });
         }
       } catch (err: any) {
         // Avoid loops: push a single error and stop.
@@ -325,7 +284,6 @@ export default function AuthCallback() {
         console.error('[AuthCallback] Error processing authentication:', err);
 
         // In test environment, keep the simple error format to match test expectations
-        // We can reuse the isTest variable from above
         if (isTest) {
           if (mounted) go(`/sign-in?error=callback`, { replace: true });
         } else {
@@ -338,7 +296,7 @@ export default function AuthCallback() {
     return () => {
       mounted = false;
     };
-  }, [go, loc.pathname, loc.search, loc.hash]);
+  }, [go, loc.pathname, loc.search, loc.hash, profiles, loadProfiles]);
 
   // Utility function for troubleshooting: can be called from DevTools to clear service workers
   // that might interfere with auth routes

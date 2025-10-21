@@ -2,8 +2,16 @@
 
 import { Plus, User, Palette } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
 
-import {} from 'react-router-dom';
+import {
+  getRememberedProfileId,
+  rememberProfileId,
+  syncLastProfileToUserMetadata,
+} from '@/lib/profileMemory';
+import { resolvePostAuthRoute } from '@/lib/resolvePostAuth';
+import { supabase } from '@/lib/supabaseClient';
+import { shouldStartTourForUser } from '@/lib/tourEligibility';
 import { cn } from '@/utils';
 import { useGo } from '@/utils/navigate';
 
@@ -24,15 +32,73 @@ const PRESET_COLORS = [
 
 function ProfilePicker() {
   const go = useGo();
-  const { profiles, createProfile, setActiveProfile, isLoading, error } = useProfileContext();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const { profiles, createProfile, setActiveProfile, isLoading, error, loadProfiles } =
+    useProfileContext();
   const [isCreating, setIsCreating] = useState(false);
   const [newProfileName, setNewProfileName] = useState('');
   const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0]);
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
+  // Check for auto-resolution when view=dashboard is in the URL
+  useEffect(() => {
+    // Only run this logic when view=dashboard is specified
+    if (searchParams.get('view') === 'dashboard') {
+      const autoResolveProfile = async () => {
+        try {
+          // Make sure profiles are loaded
+          await loadProfiles();
+
+          // Check if there are any profiles to work with
+          if (profiles.length === 0) {
+            // No profiles, we need to stay on the picker page
+            return;
+          }
+
+          // Get user session to check tour eligibility
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          const shouldStartTour = await shouldStartTourForUser(user?.id || '');
+
+          // Get remembered profile ID
+          const rememberedProfileId = getRememberedProfileId();
+
+          // Resolve where to send the user
+          const { path, profileId } = resolvePostAuthRoute(profiles, rememberedProfileId, {
+            shouldStartTour,
+          });
+
+          // If a profile was resolved, remember it and navigate
+          if (profileId) {
+            rememberProfileId(profileId);
+            await syncLastProfileToUserMetadata(profileId);
+            await setActiveProfile(profileId);
+
+            // Modify the path to include the profile ID
+            const profilePath = `/p/${profileId}${path}`;
+            console.log(`[ProfilePicker] Auto-resolving to path: ${profilePath}`);
+
+            // Navigate to the resolved path
+            go(profilePath, { replace: true });
+          }
+        } catch (error) {
+          console.error('[ProfilePicker] Error auto-resolving profile:', error);
+        }
+      };
+
+      autoResolveProfile();
+    }
+  }, [searchParams, profiles, loadProfiles, go, setActiveProfile]);
+
   const handleSelectProfile = async (profile: Profile) => {
     try {
+      // Save the profile selection for future auto-resolution
+      rememberProfileId(profile.id);
+      await syncLastProfileToUserMetadata(profile.id);
+
       await setActiveProfile(profile.id);
       go(`/p/${profile.id}/dashboard`);
     } catch (error) {
