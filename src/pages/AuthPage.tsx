@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import AuthFooter from '@/components/Auth/AuthFooter';
-import { AuthForm } from '@/components/Auth/AuthForm';
-import { AuthFormMode } from '@/components/Auth/AuthForm';
-import AuthHeader from '@/components/Auth/AuthHeader';
-import { useAuth } from '@/context/AuthContext';
-import { useGo } from '@/utils/navigate';
-import { normalizeSafeRedirect } from '@/utils/safeRedirect';
+import AuthFooter from '../components/Auth/AuthFooter';
+import { AuthForm } from '../components/Auth/AuthForm';
+import { AuthFormMode } from '../components/Auth/AuthForm';
+import AuthHeader from '../components/Auth/AuthHeader';
+import { useAuth } from '../context/AuthContext';
+import { useGo } from '../utils/navigate';
+import { normalizeSafeRedirect } from '../utils/safeRedirect';
 
 interface AuthPageProps {
   mode: AuthFormMode;
