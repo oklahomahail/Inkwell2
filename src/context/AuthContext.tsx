@@ -21,7 +21,7 @@ interface AuthContextType {
  * @returns Normalized safe path, or /profiles as fallback
  */
 function normalizeSafeRedirect(path: string | null | undefined): string {
-  if (!path) return '/profiles';
+  if (!path) return '/dashboard';
 
   // Only allow same-origin paths: must start with / and not contain protocol/host
   const safePathPattern = /^\/[^\s]*$/;
@@ -29,13 +29,13 @@ function normalizeSafeRedirect(path: string | null | undefined): string {
   // Reject anything that looks like an absolute URL
   if (path.includes('://') || path.startsWith('//')) {
     console.warn('[Auth] Rejected absolute URL redirect:', path);
-    return '/profiles';
+    return '/dashboard';
   }
 
   // Validate against safe path pattern
   if (!safePathPattern.test(path)) {
     console.warn('[Auth] Rejected invalid redirect path:', path);
-    return '/profiles';
+    return '/dashboard';
   }
 
   return path;

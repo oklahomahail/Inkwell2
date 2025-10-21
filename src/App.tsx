@@ -44,6 +44,7 @@ if (import.meta.env.DEV) {
   import('./utils/debugOnboardingGate');
 }
 
+// Types for connectivity status
 interface ConnectivityStatus {
   isOnline: boolean;
   queuedWrites: number;
@@ -55,6 +56,30 @@ type QueuedOperation = {
   timestamp: number;
   retryCount?: number;
 };
+
+// RootRedirect component to intelligently handle the root route based on auth state
+function RootRedirect() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-inkwell-navy border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is authenticated, go to dashboard
+  // If not authenticated, go to sign-in with view=dashboard parameter
+  return user ? (
+    <Navigate to="/dashboard" replace />
+  ) : (
+    <Navigate to="/sign-in?view=dashboard" replace />
+  );
+}
 
 // All app logic lives here, safely *inside* the providers.
 function AppShell() {
@@ -140,10 +165,22 @@ function AppShell() {
         />
 
         {/* Root redirect */}
-        <Route path="/" element={<Navigate to="/profiles" replace />} />
+        <Route path="/" element={<RootRedirect />} />
+
+        {/* Dashboard route */}
+        <Route
+          path="/dashboard"
+          element={
+            user ? (
+              <Navigate to={`/p/${user.id}`} replace />
+            ) : (
+              <Navigate to="/sign-in?view=dashboard" replace />
+            )
+          }
+        />
 
         {/* Catch-all redirect */}
-        <Route path="*" element={<Navigate to="/profiles" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );

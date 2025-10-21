@@ -12,7 +12,13 @@
     { "source": "/app", "destination": "/", "permanent": true },
     { "source": "/login", "destination": "/sign-in", "permanent": true },
     { "source": "/register", "destination": "/sign-up", "permanent": true },
-    { "source": "/docs", "destination": "https://docs.inkwell.app", "permanent": true }
+    { "source": "/docs", "destination": "https://docs.inkwell.app", "permanent": true },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "inkwel.leadwithnexus.com" }],
+      "destination": "/sign-in?view=dashboard",
+      "permanent": false
+    }
   ],
   "headers": [
     {
