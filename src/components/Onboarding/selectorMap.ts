@@ -163,6 +163,13 @@ export function waitForTarget(
       return;
     }
 
+    // Guard against missing document.body (e.g. during auth flows or SSR)
+    if (!document || !document.body) {
+      console.warn('resolveSelector: document.body is not available');
+      setTimeout(() => resolve(null), 0);
+      return;
+    }
+
     // Set up observer
     const observer = new MutationObserver(() => {
       const el = resolveTarget(selectors);
@@ -173,10 +180,16 @@ export function waitForTarget(
       }
     });
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
+    try {
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    } catch (error) {
+      console.warn('MutationObserver failed:', error);
+      setTimeout(() => resolve(null), 0);
+      return;
+    }
 
     // Timeout fallback
     const timer = setTimeout(() => {

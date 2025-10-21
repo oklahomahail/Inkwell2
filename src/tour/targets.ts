@@ -18,6 +18,12 @@ export async function resolveTarget(
   const found = tryFind();
   if (found) return found;
 
+  // Guard against missing document.body (e.g. during auth flows or SSR)
+  if (!document || !document.body) {
+    console.warn('resolveTarget: document.body is not available');
+    return null;
+  }
+
   // Set up retry with MutationObserver
   return new Promise<HTMLElement | null>((resolve) => {
     const observer = new MutationObserver(() => {

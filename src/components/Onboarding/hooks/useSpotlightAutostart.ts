@@ -15,6 +15,13 @@ function targetsExist(selectors: string[]) {
 function whenTargetsReady(selectors: string[], timeoutMs = 8000): Promise<boolean> {
   // quick path
   if (targetsExist(selectors)) return Promise.resolve(true);
+
+  // Guard against missing document.documentElement (e.g. during auth flows or SSR)
+  if (!document || !document.documentElement) {
+    console.warn('whenTargetsReady: document.documentElement is not available');
+    return Promise.resolve(false);
+  }
+
   return new Promise((resolve) => {
     const deadline = Date.now() + timeoutMs;
     const observer = new MutationObserver(() => {
@@ -25,7 +32,14 @@ function whenTargetsReady(selectors: string[], timeoutMs = 8000): Promise<boolea
       observer.disconnect();
       resolve(ok);
     };
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+
+    try {
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    } catch (error) {
+      console.warn('MutationObserver failed:', error);
+      return resolve(false);
+    }
+
     // last-chance check on macrotask
     setTimeout(() => finalize(targetsExist(selectors)), timeoutMs);
   });

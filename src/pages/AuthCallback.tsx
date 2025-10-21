@@ -197,18 +197,40 @@ export default function AuthCallback() {
               return;
             }
 
-            // If no session, try the fallback OTP verification with empty token_hash
-            console.log('[AuthCallback] No session found, trying OTP verification as fallback');
-            const verifyType = type === 'recovery' || type === 'email_change' ? type : 'signup';
-            const { data, error } = await supabase.auth.verifyOtp({
-              type: verifyType,
-              token_hash: '', // Empty but present - might work with some Supabase versions
-            });
-
-            if (!error && data?.session) {
-              console.log('[AuthCallback] Type-only OTP verification successful');
-              go(redirectTo, { replace: true });
+            // For signup type with no token/hash, we should NOT attempt OTP verification
+            // as it will always fail with a 400 error
+            if (type === 'signup') {
+              console.log('[AuthCallback] Signup confirmation detected, skipping OTP verification');
+              // For signup confirmations, we should show a success message and redirect to sign-in
+              go('/sign-in?notice=confirmed', { replace: true });
               return;
+            } else if (type === 'recovery' && !tokenHash) {
+              // For recovery without token, redirect to forgot-password
+              console.log(
+                '[AuthCallback] Recovery without token detected, redirecting to forgot-password',
+              );
+              go('/auth/forgot-password', { replace: true });
+              return;
+            } else {
+              // For other types, try the fallback OTP verification
+              console.log('[AuthCallback] No session found, trying OTP verification as fallback');
+              const verifyType = type === 'recovery' || type === 'email_change' ? type : 'signup';
+
+              // Only attempt OTP verification if we have a token_hash from the URL
+              if (tokenHash) {
+                const { data, error } = await supabase.auth.verifyOtp({
+                  type: verifyType,
+                  token_hash: tokenHash,
+                });
+
+                if (!error && data?.session) {
+                  console.log('[AuthCallback] Type-only OTP verification successful');
+                  go(redirectTo, { replace: true });
+                  return;
+                }
+              } else {
+                console.log('[AuthCallback] Skipping OTP verification due to missing token_hash');
+              }
             }
 
             // Last chance - try refreshing the session
@@ -222,7 +244,7 @@ export default function AuthCallback() {
             }
 
             throw new Error(
-              `Type-only verification failed: ${error?.message || refreshError?.message || 'Unknown reason'}`,
+              `Type-only verification failed: ${refreshError?.message || 'Unknown reason'}`,
             );
           } catch (e) {
             console.warn('[AuthCallback] Type-only verification failed:', e);
