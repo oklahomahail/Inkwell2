@@ -20,15 +20,19 @@ export const isPublicRoute = (path: string): boolean => {
     return true;
   }
 
-  // Check path prefixes (e.g., /sign-in/something, /assets/something, /auth/callback)
+  // Check exact auth routes
   if (
-    path.startsWith('/sign-in') ||
-    path.startsWith('/sign-up') ||
-    path.startsWith('/auth/forgot-password') ||
-    path.startsWith('/auth/update-password') ||
-    path.startsWith('/auth/callback') || // Allow auth callback for magic link and password reset
-    publicPrefixes.some((prefix) => path.startsWith(prefix))
+    path === '/sign-in' ||
+    path === '/sign-up' ||
+    path === '/auth/forgot-password' ||
+    path === '/auth/update-password' ||
+    path === '/auth/callback' // Allow auth callback for magic link and password reset
   ) {
+    return true;
+  }
+
+  // Check asset prefixes
+  if (publicPrefixes.some((prefix) => path.startsWith(prefix))) {
     return true;
   }
 

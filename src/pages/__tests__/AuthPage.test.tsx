@@ -3,24 +3,25 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi } from 'vitest';
 
-import AuthPage from '../AuthPage';
-
-// Mock the supabase client
-vi.mock('@/lib/supabaseClient', () => ({
-  supabase: {
-    auth: {
-      getSession: vi.fn(() => Promise.resolve({ data: {} })),
-      signInWithPassword: vi.fn(),
-      signUp: vi.fn(),
-      signInWithOtp: vi.fn(),
-    },
-  },
+// Mock modules before importing components that use them
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({
+    loading: false,
+    user: null,
+    session: null,
+    signInWithEmail: vi.fn(),
+    signInWithPassword: vi.fn(),
+    signUpWithPassword: vi.fn(),
+    signOut: vi.fn(),
+  }),
 }));
 
-// Mock the useGo hook
 vi.mock('@/utils/navigate', () => ({
   useGo: () => vi.fn(),
 }));
+
+// Import the component after mocks are set up
+import AuthPage from '../AuthPage';
 
 describe('AuthPage', () => {
   it('renders sign-in page with correct title and button', () => {

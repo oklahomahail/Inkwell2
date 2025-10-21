@@ -7,6 +7,7 @@ import type { User, AuthError } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
+  session: any | null; // Added session access for components
   loading: boolean;
   signOut: () => Promise<void>;
   signInWithEmail: (email: string, redirectPath?: string) => Promise<{ error: AuthError | null }>;
@@ -43,6 +44,7 @@ function normalizeSafeRedirect(path: string | null | undefined): string {
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  session: null,
   loading: true,
   signOut: async () => {},
   signInWithEmail: async () => ({ error: null }),
@@ -52,12 +54,14 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null);
+      setSession(data.session);
       setLoading(false);
     });
 
@@ -66,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+      setSession(session);
       setLoading(false);
 
       // Fire dashboard view trigger on successful sign-in
@@ -171,6 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         user,
+        session,
         loading,
         signOut,
         signInWithEmail,

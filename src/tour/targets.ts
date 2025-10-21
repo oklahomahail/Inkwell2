@@ -87,7 +87,7 @@ export function findTargetWithRetry(
   // SSR guard
   if (typeof window === 'undefined') return Promise.resolve(null);
 
-  const { timeout = 2000, rootNode = document, retries = 3 } = options;
+  const { timeout = 2000, rootNode = document, _retries = 3 } = options;
 
   // Find element without retry first
   const tryFind = () => {
@@ -106,7 +106,7 @@ export function findTargetWithRetry(
   return new Promise((resolve) => {
     // Set up retry with MutationObserver
     const startTime = Date.now();
-    const checkTimeout = () => Date.now() - startTime > timeout;
+    const _checkTimeout = () => Date.now() - startTime > timeout;
 
     // Get the node to observe (default to document.body)
     const node = rootNode instanceof Document ? rootNode.body : rootNode;
@@ -150,4 +150,54 @@ export function findTargetWithRetry(
       resolve(tryFind()); // One final try before giving up
     }, timeout);
   });
+}
+
+// Import should be at the top of the file
+import { TourPlacement } from './types';
+
+/**
+ * Heuristic to choose a placement that fits in the viewport.
+ * - Tries the provided `preferred` first, then falls back to the side with the most space.
+ */
+export function getIdealPlacement(
+  anchor: Element | null | undefined,
+  preferred: TourPlacement = 'bottom',
+  margin = 16,
+): TourPlacement {
+  if (!anchor || typeof window === 'undefined') return preferred;
+
+  const rect = anchor.getBoundingClientRect();
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  const spaceTop = rect.top - margin;
+  const spaceBottom = vh - rect.bottom - margin;
+  const spaceLeft = rect.left - margin;
+  const spaceRight = vw - rect.right - margin;
+
+  const fits = (p: TourPlacement) => {
+    switch (p) {
+      case 'top':
+        return spaceTop > rect.height / 2 || spaceTop > 120;
+      case 'bottom':
+        return spaceBottom > rect.height / 2 || spaceBottom > 120;
+      case 'left':
+        return spaceLeft > rect.width / 2 || spaceLeft > 200;
+      case 'right':
+        return spaceRight > rect.width / 2 || spaceRight > 200;
+    }
+  };
+
+  if (fits(preferred)) return preferred;
+
+  // Choose the direction with the most available space
+  const bySpace: Array<[TourPlacement, number]> = [
+    ['top', spaceTop],
+    ['right', spaceRight],
+    ['bottom', spaceBottom],
+    ['left', spaceLeft],
+  ];
+  bySpace.sort((a, b) => b[1] - a[1]);
+
+  return bySpace[0][0];
 }

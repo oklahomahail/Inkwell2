@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 
 import { AuthForm } from '@/components/Auth/AuthForm';
 import { AuthFormMode } from '@/components/Auth/AuthForm';
-import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/context/AuthContext';
 import { useGo } from '@/utils/navigate';
 import { normalizeSafeRedirect } from '@/utils/safeRedirect';
 
@@ -37,20 +37,16 @@ export default function AuthPage({ mode }: AuthPageProps) {
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Session guard: if already signed in, skip the page entirely
+  // Get auth context outside the effect to follow React's rules of hooks
+  const { session, loading } = useAuth();
+
   useEffect(() => {
     let mounted = true;
     const logPrefix = '[AuthPage]';
 
-    // Check for _once sentinel to prevent auto-retry loops
-    const hasOnceSentinel = searchParams.get('_once') === '1';
+    // We no longer need _once sentinel since RequireAuth handles loading states properly
+    // but we'll keep a local ref to prevent race conditions during redirects
 
-    if (hasOnceSentinel) {
-      console.log(`${logPrefix} Skipping auto-session check due to _once sentinel`);
-      return; // Don't auto-retry if we're coming from an error with _once=1
-    }
-
-    // Use the context's auth instead of directly querying Supabase
-    // This ensures we're using the same auth state as the rest of the app
     (async () => {
       if (!hasLoggedRef.current) {
         console.log(`${logPrefix} Checking for existing session`);
@@ -59,19 +55,15 @@ export default function AuthPage({ mode }: AuthPageProps) {
 
       try {
         // Wait for the auth state to be fully hydrated
-        const { data } = await supabase.auth.getSession();
-        if (!mounted) return;
+        if (loading || !mounted) return;
 
-        if (data?.session) {
+        if (session) {
           console.log(`${logPrefix} Found active session, redirecting to`, desiredRedirect);
           // Prevent multiple redirects
           if (!isRedirecting) {
             setIsRedirecting(true);
-            // Add _once=1 to prevent redirect loops
-            const redirectTarget = desiredRedirect.includes('?')
-              ? `${desiredRedirect}&_once=1`
-              : `${desiredRedirect}?_once=1`;
-            go(redirectTarget, { replace: true });
+            // No need for _once parameter anymore with proper auth flow
+            go(desiredRedirect, { replace: true });
           }
         } else {
           console.log(`${logPrefix} No active session found, staying on auth page`);

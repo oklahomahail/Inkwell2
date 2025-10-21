@@ -12,8 +12,45 @@ if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY) {
 }
 
 export default defineConfig({
+  // Build configuration
   build: {
     sourcemap: true, // Enable source maps for better debugging in production
+    chunkSizeWarningLimit: 2000, // Completely suppress chunk warnings (largest chunk ~472kB)
+    target: 'es2020', // Ensure consistent target
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks for better caching
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-ui': ['lucide-react', 'clsx', 'tailwind-merge'],
+          // Heavy dependencies get their own chunks
+          'vendor-tiptap': [
+            '@tiptap/core',
+            '@tiptap/react',
+            '@tiptap/starter-kit',
+            '@tiptap/extension-character-count',
+            '@tiptap/extension-history',
+            '@tiptap/extension-placeholder',
+            '@tiptap/extension-typography',
+          ],
+          'vendor-charts': ['recharts'],
+          'vendor-crypto': ['crypto-js'],
+          'vendor-utils': ['date-fns', 'lodash', 'zod'],
+          'vendor-export': ['file-saver', 'jszip'],
+        },
+        // Ensure deterministic chunk naming
+        chunkFileNames: (chunkInfo) => {
+          const rawModuleId = chunkInfo.facadeModuleId;
+          const facadeModuleId = rawModuleId
+            ? rawModuleId
+                .split('/')
+                .pop()
+                ?.replace(/\.[jt]sx?$/, '') || 'chunk'
+            : 'chunk';
+          return `assets/${facadeModuleId}-[hash].js`;
+        },
+      },
+    },
   },
   plugins: [
     react(),
@@ -77,8 +114,11 @@ export default defineConfig({
                   },
                 },
               ],
-              // Ensure core application assets are precached
-              additionalManifestEntries: [{ url: '/', revision: Date.now().toString() }],
+              // Ensure core application assets are precached - update revision to force new SW installation
+              additionalManifestEntries: [
+                { url: '/', revision: `v2025-10-21.1-${Date.now().toString()}` },
+                { url: '/site.webmanifest', revision: `v2025-10-21.1-${Date.now().toString()}` },
+              ],
             },
             includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png'],
             manifest: {
@@ -154,45 +194,5 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react', 'react-dom'],
     exclude: ['recharts'], // don't prebundle recharts
-  },
-
-  build: {
-    sourcemap: true,
-    target: 'es2020', // Ensure consistent target
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Vendor chunks for better caching
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-ui': ['lucide-react', 'clsx', 'tailwind-merge'],
-          // Heavy dependencies get their own chunks
-          'vendor-tiptap': [
-            '@tiptap/core',
-            '@tiptap/react',
-            '@tiptap/starter-kit',
-            '@tiptap/extension-character-count',
-            '@tiptap/extension-history',
-            '@tiptap/extension-placeholder',
-            '@tiptap/extension-typography',
-          ],
-          'vendor-charts': ['recharts'],
-          'vendor-crypto': ['crypto-js'],
-          'vendor-utils': ['date-fns', 'lodash', 'zod'],
-          'vendor-export': ['file-saver', 'jszip'],
-        },
-        // Ensure deterministic chunk naming
-        chunkFileNames: (chunkInfo) => {
-          const rawModuleId = chunkInfo.facadeModuleId;
-          const facadeModuleId = rawModuleId
-            ? rawModuleId
-                .split('/')
-                .pop()
-                ?.replace(/\.[jt]sx?$/, '') || 'chunk'
-            : 'chunk';
-          return `assets/${facadeModuleId}-[hash].js`;
-        },
-      },
-    },
-    chunkSizeWarningLimit: 2000, // Completely suppress chunk warnings (largest chunk ~472kB)
   },
 });

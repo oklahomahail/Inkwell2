@@ -89,18 +89,25 @@ export function useSpotlightAutostart(stepSelectors: string[]) {
     if (!shouldAutostart) return;
     once.current = true;
 
-    // Give the page a tick to mount panels, then wait for targets
-    queueMicrotask(async () => {
-      const ok = await whenTargetsReady(stepSelectors);
-      if (!ok) return; // silently bail if targets never appear
+    // Use requestAnimationFrame to ensure the DOM is fully rendered before checking
+    // This helps avoid issues with MutationObserver by waiting for a paint cycle
+    requestAnimationFrame(() => {
+      // Then queue a microtask for additional safety
+      queueMicrotask(async () => {
+        const ok = await whenTargetsReady(stepSelectors);
+        if (!ok) {
+          // If a stale progress record is blocking, allow a one-time reset
+          resetProgress(FEATURE_TOUR_ID);
+          return; // silently bail if targets never appear
+        }
 
-      try {
-        startTour(FEATURE_TOUR_ID); // TourController has its own global double-start guard
-        markTourLaunched(FEATURE_TOUR_ID);
-      } catch {
-        // If a stale progress record is blocking, allow a one-time reset
-        resetProgress(FEATURE_TOUR_ID);
-      }
+        try {
+          startTour(FEATURE_TOUR_ID); // TourController has its own global double-start guard
+          markTourLaunched(FEATURE_TOUR_ID);
+        } catch (error) {
+          console.error('Error starting tour:', error);
+        }
+      });
     });
   }, [loc.pathname, stepSelectors]);
 }
