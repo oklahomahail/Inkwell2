@@ -95,24 +95,29 @@ const baseNavigationItems = [
 ];
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
+  // IMPORTANT: React Rule of Hooks - All hooks must be called at the top level, before any conditional logic
+  // First, get location to check auth route
+  const location = useLocation();
+
+  // We'll still determine if this is an auth route, but we'll move the early return later
+  // after ALL hooks have been called
+  const isAuthRoute = AUTH_ROUTES.some((route) => location.pathname.startsWith(route));
+
+  // ✅ ALL hooks must be called unconditionally, before any returns
   const { state, dispatch } = useAppContext();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(state.theme === 'dark');
   const [isMobile, setIsMobile] = useState(false);
-  const location = useLocation();
-
-  // Check if the current path is an auth route
-  const isAuthRoute = AUTH_ROUTES.some((route) => location.pathname.startsWith(route));
 
   // Modal states for header actions
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
-  // Command Palette
+  // Command Palette - must be called unconditionally
   const { open: openPalette } = useCommandPalette();
 
-  // Feature flags
+  // Feature flags - must be called unconditionally
   const isPlotBoardsEnabled = useFeatureFlag('plotBoards');
 
   // Dynamic navigation items based on feature flags
@@ -215,9 +220,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
 
-  // Keyboard shortcuts for header actions
-
+  // Keyboard shortcuts for header actions - only register if not on auth route
   useEffect(() => {
+    // Skip registering keyboard shortcuts for auth routes
+    if (isAuthRoute) return;
+
     const handleKeydown = (e: KeyboardEvent) => {
       // Command/Ctrl + K for command palette
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -248,7 +255,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
     document.addEventListener('keydown', handleKeydown);
     return () => document.removeEventListener('keydown', handleKeydown);
-  }, []);
+  }, [isAuthRoute, openPalette]);
 
   const handleViewChange = (view: View) => {
     dispatch({ type: 'SET_VIEW', payload: view });
@@ -299,7 +306,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
   // Don't render the layout for auth routes
   if (isAuthRoute) {
-    return <>{children}</>;
+    return <main className="min-h-screen">{children}</main>;
   }
 
   return (
