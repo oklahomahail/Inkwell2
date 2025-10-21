@@ -34,13 +34,25 @@ export async function resolveTarget(
       }
     });
 
-    // Watch for DOM changes
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'style', 'data-tour'],
-    });
+    // Watch for DOM changes - with guard for safety
+    const node = document.body;
+    if (!node || !(node instanceof Node)) {
+      console.warn('resolveTarget: document.body is not a Node');
+      setTimeout(() => resolve(tryFind()), 100); // Fallback to simple timeout
+      return;
+    }
+
+    try {
+      observer.observe(node, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-tour'],
+      });
+    } catch (e) {
+      console.warn('MutationObserver failed:', e);
+      setTimeout(() => resolve(tryFind()), 100); // Fallback to simple timeout
+    }
 
     // Set timeout to avoid hanging
     setTimeout(() => {

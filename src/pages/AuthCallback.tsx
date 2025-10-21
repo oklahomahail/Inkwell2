@@ -201,8 +201,24 @@ export default function AuthCallback() {
             // as it will always fail with a 400 error
             if (type === 'signup') {
               console.log('[AuthCallback] Signup confirmation detected, skipping OTP verification');
+
+              // Check for existing session one more time before sending to sign-in
+              // This helps when the hash fragment might have been stripped but the session cookie exists
+              console.log('[AuthCallback] Double-checking for existing session before redirecting');
+              const { data: finalSessionCheck } = await supabase.auth.getSession();
+
+              if (finalSessionCheck?.session) {
+                console.log(
+                  '[AuthCallback] Found existing session on second check, proceeding to dashboard',
+                );
+                go(redirectTo, { replace: true });
+                return;
+              }
+
               // For signup confirmations, we should show a success message and redirect to sign-in
-              go('/sign-in?notice=confirmed', { replace: true });
+              go(`/sign-in?notice=confirmed&redirect=${encodeURIComponent(redirectTo)}`, {
+                replace: true,
+              });
               return;
             } else if (type === 'recovery' && !tokenHash) {
               // For recovery without token, redirect to forgot-password

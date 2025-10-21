@@ -33,11 +33,20 @@ function whenTargetsReady(selectors: string[], timeoutMs = 8000): Promise<boolea
       resolve(ok);
     };
 
+    // Watch for DOM changes with guard for safety
+    const node = document.documentElement;
+    if (!node || !(node instanceof Node)) {
+      console.warn('whenTargetsReady: document.documentElement is not a Node');
+      setTimeout(() => finalize(targetsExist(selectors)), 100); // Fallback to simple timeout
+      return;
+    }
+
     try {
-      observer.observe(document.documentElement, { childList: true, subtree: true });
+      observer.observe(node, { childList: true, subtree: true });
     } catch (error) {
       console.warn('MutationObserver failed:', error);
-      return resolve(false);
+      setTimeout(() => finalize(targetsExist(selectors)), 100); // Try one more time
+      return;
     }
 
     // last-chance check on macrotask

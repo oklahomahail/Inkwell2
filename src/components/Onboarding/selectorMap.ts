@@ -180,14 +180,22 @@ export function waitForTarget(
       }
     });
 
+    // Watch for DOM changes - with guard for safety
+    const node = document.body;
+    if (!node || !(node instanceof Node)) {
+      console.warn('resolveSelector: document.body is not a Node');
+      setTimeout(() => resolve(resolveTarget(selectors)), 100); // Fallback to simple timeout
+      return;
+    }
+
     try {
-      observer.observe(document.body, {
+      observer.observe(node, {
         childList: true,
         subtree: true,
       });
     } catch (error) {
       console.warn('MutationObserver failed:', error);
-      setTimeout(() => resolve(null), 0);
+      setTimeout(() => resolve(resolveTarget(selectors)), 100); // Try one more time
       return;
     }
 
