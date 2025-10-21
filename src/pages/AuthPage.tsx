@@ -67,7 +67,11 @@ export default function AuthPage({ mode }: AuthPageProps) {
           // Prevent multiple redirects
           if (!isRedirecting) {
             setIsRedirecting(true);
-            go(desiredRedirect, { replace: true });
+            // Add _once=1 to prevent redirect loops
+            const redirectTarget = desiredRedirect.includes('?')
+              ? `${desiredRedirect}&_once=1`
+              : `${desiredRedirect}?_once=1`;
+            go(redirectTarget, { replace: true });
           }
         } else {
           console.log(`${logPrefix} No active session found, staying on auth page`);

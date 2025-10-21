@@ -10,6 +10,9 @@ export async function resolveTarget(
   selectors: string[],
   { timeout = 6000 }: { timeout?: number } = {},
 ): Promise<HTMLElement | null> {
+  // SSR guard
+  if (typeof window === 'undefined') return null;
+
   // Try to find the first matching element from the selector list
   const tryFind = () =>
     selectors.map((s) => document.querySelector(s)).find(Boolean) as HTMLElement | null;
@@ -26,14 +29,6 @@ export async function resolveTarget(
 
   // Set up retry with MutationObserver
   return new Promise<HTMLElement | null>((resolve) => {
-    const observer = new MutationObserver(() => {
-      const element = tryFind();
-      if (element) {
-        observer.disconnect();
-        resolve(element);
-      }
-    });
-
     // Watch for DOM changes - with guard for safety
     const node = document.body;
     if (!node || !(node instanceof Node)) {
@@ -42,13 +37,29 @@ export async function resolveTarget(
       return;
     }
 
+    // Create observer after we know we have a valid node
+    let observer: MutationObserver | null = null;
     try {
-      observer.observe(node, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['class', 'style', 'data-tour'],
+      observer = new MutationObserver(() => {
+        const element = tryFind();
+        if (element) {
+          if (observer) observer.disconnect();
+          resolve(element);
+        }
       });
+
+      try {
+        observer.observe(node, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['class', 'style', 'data-tour'],
+        });
+      } catch (e) {
+        console.warn('[MO] observe skipped, invalid node', e, node);
+        setTimeout(() => resolve(tryFind()), 100); // Fallback
+        return;
+      }
     } catch (e) {
       console.warn('MutationObserver failed:', e);
       setTimeout(() => resolve(tryFind()), 100); // Fallback to simple timeout
@@ -56,69 +67,87 @@ export async function resolveTarget(
 
     // Set timeout to avoid hanging
     setTimeout(() => {
-      observer.disconnect();
+      if (observer) observer.disconnect();
       resolve(tryFind()); // One final try before giving up
     }, timeout);
   });
 }
 
 /**
- * Gets the ideal placement for a spotlight based on viewport position
+ * Augment target finding with MutationObserver to handle DOM changes
  */
-export function getIdealPlacement(
-  element: HTMLElement,
-  preferredPlacement?: 'top' | 'right' | 'bottom' | 'left',
-): 'top' | 'right' | 'bottom' | 'left' {
-  if (!element) return preferredPlacement || 'bottom';
+export function findTargetWithRetry(
+  selector: string,
+  options: {
+    timeout?: number;
+    rootNode?: Document | Element | null;
+    retries?: number;
+  } = {},
+): Promise<Element | null> {
+  // SSR guard
+  if (typeof window === 'undefined') return Promise.resolve(null);
 
-  const rect = element.getBoundingClientRect();
-  const viewHeight = window.innerHeight;
-  const viewWidth = window.innerWidth;
+  const { timeout = 2000, rootNode = document, retries = 3 } = options;
 
-  // If preferred placement works, use it
-  if (preferredPlacement) {
-    const hasSpace = {
-      top: rect.top > 150,
-      right: viewWidth - rect.right > 300,
-      bottom: viewHeight - rect.bottom > 150,
-      left: rect.left > 300,
-    };
-    if (hasSpace[preferredPlacement]) return preferredPlacement;
-  }
-
-  // Otherwise find best fit
-  const spaceAvailable = {
-    top: rect.top,
-    right: viewWidth - rect.right,
-    bottom: viewHeight - rect.bottom,
-    left: rect.left,
+  // Find element without retry first
+  const tryFind = () => {
+    try {
+      return rootNode?.querySelector(selector) ?? null;
+    } catch (e) {
+      console.warn(`Invalid selector: ${selector}`, e);
+      return null;
+    }
   };
 
-  // Sort by available space and pick the best one
-  return Object.entries(spaceAvailable).sort(([, a], [, b]) => b - a)[0][0] as
-    | 'top'
-    | 'right'
-    | 'bottom'
-    | 'left';
-}
+  // Find element directly first
+  const element = tryFind();
+  if (element) return Promise.resolve(element);
 
-/**
- * Ensures the element is in view with smooth scrolling
- */
-export function scrollIntoViewIfNeeded(element: HTMLElement | null) {
-  if (!element) return;
+  return new Promise((resolve) => {
+    // Set up retry with MutationObserver
+    const startTime = Date.now();
+    const checkTimeout = () => Date.now() - startTime > timeout;
 
-  const rect = element.getBoundingClientRect();
-  const isInView =
-    rect.top >= 0 &&
-    rect.left >= 0 &&
-    rect.bottom <= window.innerHeight &&
-    rect.right <= window.innerWidth;
+    // Get the node to observe (default to document.body)
+    const node = rootNode instanceof Document ? rootNode.body : rootNode;
+    if (!node || !(node instanceof Node)) {
+      console.warn('findTargetWithRetry: rootNode is not a Node:', rootNode);
+      setTimeout(() => resolve(tryFind()), 100); // Fallback to simple timeout
+      return;
+    }
 
-  if (!isInView) {
-    element.scrollIntoView({
-      behavior: 'smooth',
-      block: 'nearest',
-    });
-  }
+    // Create observer after we know we have a valid node
+    let observer: MutationObserver | null = null;
+    try {
+      observer = new MutationObserver(() => {
+        const element = tryFind();
+        if (element) {
+          if (observer) observer.disconnect();
+          resolve(element);
+        }
+      });
+
+      try {
+        observer.observe(node, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['class', 'style', 'data-tour'],
+        });
+      } catch (e) {
+        console.warn('[MO] observe skipped, invalid node', e, node);
+        setTimeout(() => resolve(tryFind()), 100); // Fallback
+        return;
+      }
+    } catch (e) {
+      console.warn('MutationObserver failed:', e);
+      setTimeout(() => resolve(tryFind()), 100); // Fallback to simple timeout
+    }
+
+    // Set timeout to avoid hanging
+    setTimeout(() => {
+      if (observer) observer.disconnect();
+      resolve(tryFind()); // One final try before giving up
+    }, timeout);
+  });
 }

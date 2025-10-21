@@ -18,6 +18,7 @@ import {
   OfflineBanner,
   useStorageRecovery,
 } from './components/Recovery/StorageRecoveryBanner';
+import RequireAuth from './components/RequireAuth';
 import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
 // Context and providers
@@ -88,9 +89,9 @@ function RootRedirect() {
   // If user is authenticated, go to dashboard
   // If not authenticated, go to sign-in with view=dashboard parameter
   return user ? (
-    <Navigate to="/dashboard" replace />
+    <Navigate to="/dashboard?_once=1" replace />
   ) : (
-    <Navigate to="/sign-in?view=dashboard" replace />
+    <Navigate to="/sign-in?view=dashboard&_once=1" replace />
   );
 }
 
@@ -180,22 +181,18 @@ function AppShell() {
         {/* Root redirect */}
         <Route path="/" element={<RootRedirect />} />
 
-        {/* Dashboard route with proper loading state handling */}
+        {/* Dashboard route with proper auth guard */}
         <Route
           path="/dashboard"
           element={
-            loading ? (
-              <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                <div className="text-center">
-                  <div className="w-12 h-12 border-4 border-inkwell-navy border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
-                </div>
-              </div>
-            ) : user ? (
-              <Navigate to={`/p/${user.id}`} replace />
-            ) : (
-              <Navigate to="/sign-in?view=dashboard&_once=1" replace />
-            )
+            <RequireAuth>
+              {user ? (
+                <Navigate to={`/p/${user.id}`} replace />
+              ) : (
+                // This fallback should never happen as RequireAuth will handle it
+                <div>Error: User is authenticated but no user ID available</div>
+              )}
+            </RequireAuth>
           }
         />
 

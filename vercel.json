@@ -5,8 +5,10 @@
   "devCommand": "pnpm dev",
   "framework": "vite",
   "rewrites": [
+    { "source": "/site.webmanifest", "destination": "/site.webmanifest" },
+    { "source": "/icons/(.*)", "destination": "/icons/$1" },
     { "source": "/api/login", "destination": "/api/login.ts" },
-    { "source": "^(?!\\/site\\.webmanifest|\\/icons\\/|\\/api\\/).*", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "redirects": [
     { "source": "/app", "destination": "/", "permanent": true },

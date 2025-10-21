@@ -22,18 +22,24 @@ function whenTargetsReady(selectors: string[], timeoutMs = 8000): Promise<boolea
     return Promise.resolve(false);
   }
 
-  return new Promise((resolve) => {
-    const deadline = Date.now() + timeoutMs;
-    const observer = new MutationObserver(() => {
-      if (targetsExist(selectors)) finalize(true);
-      else if (Date.now() > deadline) finalize(false);
-    });
-    const finalize = (ok: boolean) => {
-      observer.disconnect();
-      resolve(ok);
-    };
+  // Create promise to control when we're ready
+  return new Promise<boolean>((finalize) => {
+    // SSR guard
+    if (typeof window === 'undefined') {
+      finalize(false);
+      return;
+    }
 
-    // Watch for DOM changes with guard for safety
+    // Early return if we can already find the target
+    if (targetsExist(selectors)) {
+      finalize(true);
+      return;
+    }
+
+    // Set up the deadline
+    const deadline = Date.now() + timeoutMs;
+
+    // Get the root node to observe
     const node = document.documentElement;
     if (!node || !(node instanceof Node)) {
       console.warn('whenTargetsReady: document.documentElement is not a Node');
@@ -41,8 +47,21 @@ function whenTargetsReady(selectors: string[], timeoutMs = 8000): Promise<boolea
       return;
     }
 
+    // Create observer after we know we have a valid node
+    let observer: MutationObserver | null = null;
     try {
-      observer.observe(node, { childList: true, subtree: true });
+      observer = new MutationObserver(() => {
+        if (targetsExist(selectors)) finalize(true);
+        else if (Date.now() > deadline) finalize(false);
+      });
+
+      try {
+        observer.observe(node, { childList: true, subtree: true });
+      } catch (e) {
+        console.warn('[MO] observe skipped, invalid node', e, node);
+        setTimeout(() => finalize(targetsExist(selectors)), 100); // Fallback
+        return;
+      }
     } catch (error) {
       console.warn('MutationObserver failed:', error);
       setTimeout(() => finalize(targetsExist(selectors)), 100); // Try one more time
