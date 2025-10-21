@@ -104,8 +104,11 @@ export function AuthForm({
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700">Email address</label>
+          <label htmlFor="email-input" className="block text-sm font-medium text-slate-700">
+            Email address
+          </label>
           <input
+            id="email-input"
             required
             type="email"
             value={email}
@@ -118,8 +121,11 @@ export function AuthForm({
         {activeTab === 'password' && (
           <>
             <div>
-              <label className="block text-sm font-medium text-slate-700">Password</label>
+              <label htmlFor="password-input" className="block text-sm font-medium text-slate-700">
+                Password
+              </label>
               <input
+                id="password-input"
                 required
                 type="password"
                 value={password}
@@ -138,8 +144,14 @@ export function AuthForm({
 
             {showConfirm && (
               <div>
-                <label className="block text-sm font-medium text-slate-700">Confirm password</label>
+                <label
+                  htmlFor="confirm-password-input"
+                  className="block text-sm font-medium text-slate-700"
+                >
+                  Confirm password
+                </label>
                 <input
+                  id="confirm-password-input"
                   required
                   type="password"
                   value={confirm}
