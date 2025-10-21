@@ -283,3 +283,56 @@ const {
 } = await supabase.auth.getUser();
 console.log('User:', user);
 ```
+
+---
+
+## Updated Authentication Flow (October 2025)
+
+### Recent Enhancements
+
+Our authentication system now handles all Supabase callback formats with improved robustness:
+
+1. **Code-based flow**: `?code=...` (modern PKCE flow)
+2. **Token-based flow**: `?token_hash=...&type=signup` (legacy/verification flow)
+3. **Hash-based flow**: `#access_token=...&refresh_token=...` (implicit flow)
+4. **Type-only flow**: `?type=signup` (with no token - email confirmation only)
+
+### New "Email Confirmed" Handling
+
+When a user confirms their email (with `type=signup`) but no session is created:
+
+1. User clicks email confirmation link
+2. System checks for session (twice)
+3. If no session, redirects to sign-in with special notice
+4. User sees "Email confirmed! You can now sign in" message
+5. User signs in normally
+
+### Troubleshooting "type=signup" with No Session
+
+If users confirm email but don't get automatically logged in:
+
+**Symptoms:**
+
+```
+[AuthCallback] Signup confirmation detected, skipping OTP verification
+[AuthCallback] Double-checking for existing session before redirecting
+[AuthCallback] No session found, redirecting to sign-in with confirmation notice
+```
+
+This is expected behavior when:
+
+- Email was confirmed but Supabase didn't create a session
+- User needs to sign in manually after confirming email
+
+**Solution:** No action needed - the system now properly handles this case by showing a helpful message.
+
+### Additional Fallbacks
+
+The authentication system now includes multiple fallbacks:
+
+1. Multiple session checks for edge cases
+2. Hash parameter detection for Supabase implicit flow
+3. Safe redirects that prevent open redirect vulnerabilities
+4. Detailed error logging with sentinel parameters
+
+For persistent issues, check the browser console for messages starting with `[AuthCallback]` to identify the specific error case.

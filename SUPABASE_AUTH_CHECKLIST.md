@@ -31,28 +31,58 @@ This checklist covers all required Supabase configuration and branding consisten
 
 ### 3. Code Implementation - Auth Callback Route
 
-**Status**: ✅ IMPLEMENTED
+**Status**: ✅ IMPLEMENTED & HARDENED (Oct 2025)
 
-**New dedicated callback route** ([src/pages/AuthCallback.tsx](src/pages/AuthCallback.tsx)):
+**Robust callback route** ([src/pages/AuthCallback.tsx](src/pages/AuthCallback.tsx)):
 
 ```typescript
-// Exchanges one-time code for session
-const code = params.get('code') || params.get('token_hash');
-const next = params.get('next') || '/profiles';
+// Supports multiple Supabase auth flows:
+// 1. Modern code flow: ?code=...
+// 2. Legacy OTP flow: ?token_hash=...&type=signup
+// 3. Implicit flow: #access_token=...&refresh_token=...
+// 4. Type-only flow: ?type=signup (email confirmation only)
 
-const { error } = await supabase.auth.exchangeCodeForSession(code);
-if (!error) {
-  navigate(next, { replace: true });
+// Multi-format parameter extraction
+const code = getParam(url, 'code');
+const tokenHash = getParam(url, 'token_hash');
+const type = getParam(url, 'type');
+
+// Comprehensive flow handling with fallbacks
+if (code) {
+  // Modern flow with PKCE
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  // ...
+} else if (tokenHash) {
+  // Legacy/verify-OTP flow
+  const { data, error } = await supabase.auth.verifyOtp({
+    type: verifyType,
+    token_hash: tokenHash,
+  });
+  // ...
+} else if (type && !code && !tokenHash) {
+  // Type-only flow (email confirmation)
+  // Multiple session checks + user-friendly messaging
+  // ...
+}
+
+// Final fallback for edge cases
+const { data: lastResortSession } = await supabase.auth.getSession();
+if (lastResortSession?.session) {
+  // Use existing session if available
+  // ...
 }
 ```
 
-✅ **Prevents infinite redirect loops** by:
+✅ **Enhanced security & UX features**:
 
-1. Accepting the one-time code from Supabase
-2. Exchanging it for a proper session
-3. Redirecting to the intended destination
+1. **Multi-format support** for all Supabase auth flows
+2. **Session recovery** for stripped parameters
+3. **User-friendly notices** for email confirmation
+4. **Robust error handling** with detailed logging
+5. **Anti-loop protection** with sentinel parameters
+6. **Safe redirect validation** to prevent open redirects
 
-**Route added**: `/auth/callback` (public route, no auth required)
+**No action required** - Implementation is hardened against edge cases
 
 ### 4. Code Implementation - emailRedirectTo
 
@@ -512,15 +542,6 @@ export function normalizeSafeRedirect(
 3. **Centralized implementation**: Single source of truth used by both `SignIn.tsx` and `AuthCallback.tsx`
 4. **Better pattern matching**: Uses URL parsing for more robust validation
 
-```
-
-✅ **Security guarantees**:
-
-- Only same-origin paths allowed (must start with `/`)
-- Absolute URLs rejected (no `://` or `//` allowed)
-- Falls back to `/profiles` for invalid paths
-- Logs warnings for security audit trail
-
 ### 2. Tighten Redirect URLs (Post-Stabilization)
 
 **Status**: ⚠️ TODO AFTER TESTING STABILIZES
@@ -545,7 +566,7 @@ https://inkwell.leadwithnexus.com/auth/callback
 http://localhost:5173
 http://localhost:5173/auth/callback
 
-````
+```
 
 **Action Required**: Once stable, remove wildcard `/**` URLs to reduce attack surface
 
@@ -562,7 +583,7 @@ await supabase.auth.signInWithOAuth({
     redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
   },
 });
-````
+```
 
 **Supabase Dashboard Configuration**:
 

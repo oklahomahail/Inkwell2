@@ -51,11 +51,14 @@ This checklist guides you through the process of configuring and deploying Supab
 ## Application Code Verification
 
 - [ ] **Verify Auth Pages**:
-  - SignIn (`/src/pages/SignIn.tsx`)
-  - SignUp (`/src/pages/SignUp.tsx`)
-  - ForgotPassword (`/src/pages/ForgotPassword.tsx`)
-  - UpdatePassword (`/src/pages/UpdatePassword.tsx`)
+  - Sign In (`/src/pages/AuthPage.tsx?mode=signin`)
+  - Sign Up (`/src/pages/AuthPage.tsx?mode=signup`)
+  - Password Reset (`/src/pages/AuthPage.tsx?mode=reset`)
   - AuthCallback (`/src/pages/AuthCallback.tsx`)
+    - **Enhanced (Oct 2025)**: Now handles multiple Supabase auth flows with robust fallbacks
+    - Supports code, token_hash, access_token hash, and type-only params
+    - Includes additional session checks and user-friendly notices
+    - See implementation details in the main file for all supported scenarios
 
 - [ ] **Check Auth Context**:
   - Verify AuthContext (`/src/context/AuthContext.tsx`) implements all needed methods
