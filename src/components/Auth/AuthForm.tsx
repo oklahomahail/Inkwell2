@@ -20,14 +20,18 @@ export function AuthForm({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  // default tab is password on every mount and route
+  // Default tab is password on every mount and route
   useEffect(() => {
     setActiveTab('password');
   }, [mode]);
+
+  // Prepare the callback URL for auth redirects
+  const emailRedirectTo = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`;
 
   // Mode-specific validation and submission logic
   const handleSignIn = async () => {
@@ -46,12 +50,14 @@ export function AuthForm({
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+          emailRedirectTo,
         },
       });
 
       if (error) throw error;
       setNotice('Magic link sent. Check your email.');
+      // Optional: redirect to a "check email" page instead
+      // go('/check-email?mode=signin', { replace: true });
     }
   };
 
@@ -67,17 +73,23 @@ export function AuthForm({
       return false;
     }
 
-    // Create new account
+    // Create new account with optional full name
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+        emailRedirectTo,
+        data: { full_name: fullName || undefined },
       },
     });
 
     if (error) throw error;
+
+    // If using email confirmation (recommended), show a message
     setNotice('Check your email to confirm your account.');
+    // Optional: redirect to a "check email" page instead
+    // go('/check-email?mode=signup', { replace: true });
+
     return true;
   };
 
@@ -134,6 +146,24 @@ export function AuthForm({
       </div>
 
       <div className="space-y-4">
+        {/* Full Name field - only for sign-up */}
+        {mode === 'signup' && (
+          <div>
+            <label htmlFor="fullname-input" className="block text-sm font-medium text-slate-700">
+              Full name
+            </label>
+            <input
+              id="fullname-input"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-[#D4AF37]"
+              autoComplete="name"
+              placeholder="Enter your full name"
+            />
+          </div>
+        )}
+
         {/* Email field - common to both modes */}
         <div>
           <label htmlFor="email-input" className="block text-sm font-medium text-slate-700">
@@ -170,7 +200,10 @@ export function AuthForm({
               />
               {mode === 'signin' && (
                 <div className="mt-2 text-right">
-                  <a href="/reset-password" className="text-sm text-[#13294B] hover:underline">
+                  <a
+                    href="/auth/forgot-password"
+                    className="text-sm text-[#13294B] hover:underline"
+                  >
                     Forgot your password?
                   </a>
                 </div>
@@ -209,30 +242,53 @@ export function AuthForm({
       <button
         type="submit"
         disabled={loading}
-        className={`w-full rounded-xl ${
-          mode === 'signup' ? 'bg-[#13294B] text-white' : 'bg-[#13294B] text-white'
-        } px-4 py-3 font-semibold ring-1 ring-black/5 hover:opacity-90 disabled:opacity-60`}
+        className={`w-full rounded-xl bg-[#13294B] text-white px-4 py-3 font-semibold ring-1 ring-black/5 hover:opacity-90 disabled:opacity-60`}
         data-testid={`${mode}-button`}
       >
-        {loading ? 'Please wait…' : primaryCtaLabel}
+        {loading
+          ? 'Please wait…'
+          : mode === 'signup'
+            ? 'Create account'
+            : activeTab === 'password'
+              ? 'Sign in'
+              : 'Send magic link'}
       </button>
 
       {/* Mode-specific helper text */}
       {mode === 'signin' && activeTab === 'password' && (
         <p className="text-center text-xs text-slate-500">
-          Trouble signing in? Use Magic Link instead.
+          Trouble signing in? Try the Magic Link tab for password-free sign in.
         </p>
       )}
       {mode === 'signin' && activeTab === 'magic' && (
         <p className="text-center text-xs text-slate-500">
-          We'll email you a magic link for a password-free sign in.
+          We'll email you a secure link for password-free access to your account.
         </p>
       )}
       {mode === 'signup' && (
         <p className="text-center text-xs text-slate-500">
-          Creating an account takes less than a minute.
+          By creating an account, you agree to our Terms of Service and Privacy Policy.
         </p>
       )}
+
+      {/* Account switching links */}
+      <div className="text-sm text-center mt-6">
+        {mode === 'signin' ? (
+          <>
+            Don't have an account?{' '}
+            <a href="/sign-up" className="text-[#13294B] font-medium hover:underline">
+              Sign up
+            </a>
+          </>
+        ) : (
+          <>
+            Already have an account?{' '}
+            <a href="/sign-in" className="text-[#13294B] font-medium hover:underline">
+              Sign in
+            </a>
+          </>
+        )}
+      </div>
     </form>
   );
 }
