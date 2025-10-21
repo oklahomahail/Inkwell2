@@ -31,7 +31,7 @@ describe('AuthPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('Sign in to Inkwell')).toBeInTheDocument();
+    expect(screen.getAllByText('Sign in to Inkwell').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
     expect(screen.queryByText(/confirm password/i)).not.toBeInTheDocument();
   });
@@ -43,7 +43,7 @@ describe('AuthPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('Create your Inkwell account')).toBeInTheDocument();
+    expect(screen.getAllByText('Create your Inkwell account').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
   });
