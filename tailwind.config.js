@@ -2,6 +2,10 @@
 module.exports = {
   darkMode: 'class', // Keep dark utilities inert since we never set .dark
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  safelist: [
+    'text-inkwell-charcoal',
+    'bg-inkwell-charcoal',
+  ],
 theme: {
     extend: {
       colors: {
@@ -9,6 +13,7 @@ theme: {
         inkwellGold: '#D4AF37',
         inkwellNavy: '#13294B',
         inkwellGray: '#4E5666',
+        inkwellCharcoal: '#2C3242',
         inkwellWhite: '#FAFAFA',
         // Nested colors
         // Inkwell Brand Color System (2025) - Updated Blue & Gold
@@ -16,6 +21,7 @@ theme: {
           navy: '#13294B',    // Deep Navy Blue (primary brand) 
           gold: '#D4AF37',    // Warm Gold (accent)
           gray: '#4E5666',    // Neutral Gray
+          charcoal: '#2C3242', // Charcoal (darker neutral)
           white: '#FAFAFA',   // Soft White
           // Accessible color variations for navy theme
           'navy-50': '#f1f5f9',   // Very light navy-blue for backgrounds
