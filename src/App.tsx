@@ -18,13 +18,13 @@ import {
   OfflineBanner,
   useStorageRecovery,
 } from './components/Recovery/StorageRecoveryBanner';
-import RequireAuth from './components/RequireAuth';
 import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
 // Context and providers
 import { useAppContext } from './context/AppContext';
 import { useAuth } from './context/AuthContext';
 import { useEditorContext } from './context/EditorContext';
+// Route guards
 // Pages
 import AuthCallback from './pages/AuthCallback';
 import BrandPage from './pages/Brand';
@@ -32,6 +32,8 @@ import ForgotPassword from './pages/ForgotPassword';
 import SignIn from './pages/SignInPage';
 import SignUp from './pages/SignUpPage';
 import UpdatePassword from './pages/UpdatePassword';
+import AnonOnlyRoute from './routes/AnonOnlyRoute';
+import ProtectedRoute from './routes/ProtectedRoute';
 // Profile routing components
 import { ProfileGate } from './routes/shell/ProfileGate';
 import { ProfilePicker } from './routes/shell/ProfilePicker';
@@ -136,9 +138,23 @@ function AppShell() {
         {/* Auth callback route - handles magic link code exchange and password reset flow */}
         <Route path="/auth/callback" element={<AuthCallback />} />
 
-        {/* Auth routes */}
-        <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/sign-up" element={<SignUp />} />
+        {/* Auth routes - protected from authenticated users */}
+        <Route
+          path="/sign-in"
+          element={
+            <AnonOnlyRoute>
+              <SignIn />
+            </AnonOnlyRoute>
+          }
+        />
+        <Route
+          path="/sign-up"
+          element={
+            <AnonOnlyRoute>
+              <SignUp />
+            </AnonOnlyRoute>
+          }
+        />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/update-password" element={<UpdatePassword />} />
 
@@ -148,14 +164,18 @@ function AppShell() {
         {/* Profile picker - protected */}
         <Route
           path="/profiles"
-          element={user ? <ProfilePicker /> : <Navigate to="/sign-in" replace />}
+          element={
+            <ProtectedRoute>
+              <ProfilePicker />
+            </ProtectedRoute>
+          }
         />
 
         {/* Profile-specific routes - protected */}
         <Route
           path="/p/:profileId/*"
           element={
-            user ? (
+            <ProtectedRoute>
               <ProfileGate>
                 <Routes>
                   {/* Tutorial routes */}
@@ -168,9 +188,7 @@ function AppShell() {
                   <Route path="*" element={<ProfileAppShell />} />
                 </Routes>
               </ProfileGate>
-            ) : (
-              <Navigate to="/sign-in" replace />
-            )
+            </ProtectedRoute>
           }
         />
 
@@ -181,18 +199,18 @@ function AppShell() {
         <Route
           path="/dashboard"
           element={
-            <RequireAuth>
+            <ProtectedRoute>
               {user ? (
                 <Navigate to={`/p/${user.id}`} replace />
               ) : (
-                // This fallback should never happen as RequireAuth will handle it
+                // This fallback should never happen as ProtectedRoute will handle it
                 <div>Error: User is authenticated but no user ID available</div>
               )}
-            </RequireAuth>
+            </ProtectedRoute>
           }
         />
 
-        {/* Catch-all redirect */}
+        {/* Not Found - explicit redirect to root */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

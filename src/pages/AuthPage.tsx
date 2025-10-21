@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import AuthFooter from '@/components/Auth/AuthFooter';
@@ -33,70 +33,12 @@ export default function AuthPage({ mode }: AuthPageProps) {
     }
   }, [searchParams]);
 
-  // Use a ref to track if we've logged the session check message
-  const hasLoggedRef = useRef(false);
-  // Track if we're redirecting to avoid race conditions
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  // Get auth context to access current state
+  const { loading } = useAuth();
 
-  // Session guard: if already signed in, skip the page entirely
-  // Get auth context outside the effect to follow React's rules of hooks
-  const { session, loading } = useAuth();
-
-  useEffect(() => {
-    let mounted = true;
-    const logPrefix = '[AuthPage]';
-
-    // We no longer need _once sentinel since RequireAuth handles loading states properly
-    // but we'll keep a local ref to prevent race conditions during redirects
-
-    (async () => {
-      if (!hasLoggedRef.current) {
-        console.log(`${logPrefix} Checking for existing session`, {
-          mode,
-          desiredRedirect,
-          searchParams: Object.fromEntries(searchParams.entries()),
-          loading,
-        });
-        hasLoggedRef.current = true;
-      }
-
-      try {
-        // Wait for the auth state to be fully hydrated
-        if (loading || !mounted) {
-          console.log(`${logPrefix} Auth state still loading or component unmounted`, {
-            loading,
-            mounted,
-          });
-          return;
-        }
-
-        if (session) {
-          console.log(`${logPrefix} Found active session, redirecting to`, desiredRedirect, {
-            sessionUser: session?.user?.email,
-            sessionExpiry: session?.expires_at,
-          });
-
-          // Prevent multiple redirects
-          if (!isRedirecting) {
-            setIsRedirecting(true);
-            // No need for _once parameter anymore with proper auth flow
-            go(desiredRedirect, { replace: true });
-          }
-        } else {
-          console.log(`${logPrefix} No active session found, staying on auth page`, {
-            searchParams: Object.fromEntries(searchParams.entries()),
-            view: searchParams.get('view'),
-          });
-        }
-      } catch (error) {
-        console.error(`${logPrefix} Error checking session:`, error);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [go, desiredRedirect, searchParams, isRedirecting, mode, session, loading]);
+  // Note: We no longer need to handle session redirect logic here
+  // The AnonOnlyRoute component will handle redirects for authenticated users
+  // This avoids any race conditions or double-rendering issues
 
   // Configure mode-specific UI elements
   const chrome = useMemo(() => {
