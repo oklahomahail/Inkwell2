@@ -9,6 +9,8 @@
     { "source": "/manifest.json", "destination": "/manifest.json" },
     { "source": "/icons/(.*)", "destination": "/icons/$1" },
     { "source": "/api/login", "destination": "/api/login.ts" },
+    { "source": "/sign-in", "destination": "/index.html" },
+    { "source": "/sign-up", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "redirects": [

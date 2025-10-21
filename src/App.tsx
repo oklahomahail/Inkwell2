@@ -101,11 +101,20 @@ function AppShell() {
 
   // Show loading spinner while checking auth (prevents content flash)
   if (loading) {
+    // Log loading state for debugging
+    console.log('[App] Auth loading state active, showing loading spinner');
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-inkwell-navy border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading authentication...</p>
+          <p className="text-xs text-gray-500 mt-2">
+            If this persists, please check console for errors.
+          </p>
+          <p className="text-xs text-gray-500">
+            Inkwell v{import.meta.env.VITE_APP_VERSION || '1.0.2'}
+          </p>
         </div>
       </div>
     );

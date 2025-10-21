@@ -17,6 +17,20 @@ export default function AuthPage({ mode }: AuthPageProps) {
   const [searchParams] = useSearchParams();
   const go = useGo();
 
+  // Add debugging on mount
+  useEffect(() => {
+    console.log('[AuthPage] Rendering AuthPage component', { mode });
+
+    // Report rendering status to the window for debugging
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('inkwell:debug', {
+          detail: { component: 'AuthPage', status: 'rendered', mode },
+        }),
+      );
+    }
+  }, [mode]);
+
   // If ?redirect=/path is used, preserve it after normalizing
   const desiredRedirect = useMemo(
     () => normalizeSafeRedirect(searchParams.get('redirect'), console.warn),
