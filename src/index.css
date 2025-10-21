@@ -376,7 +376,7 @@ h6 {
   }
 
   .text-inkwell-body {
-    @apply text-inkwell-charcoal font-sans leading-relaxed;
+    @apply text-inkwell-gray font-sans leading-relaxed;
   }
 
   .text-inkwell-gold {
