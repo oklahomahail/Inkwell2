@@ -59,6 +59,13 @@ This checklist guides you through the process of configuring and deploying Supab
     - Supports code, token_hash, access_token hash, and type-only params
     - Includes additional session checks and user-friendly notices
     - See implementation details in the main file for all supported scenarios
+    - **New features**:
+      - Multi-format parameter extraction from both search params and hash fragments
+      - Double session check for type=signup with no token/hash
+      - User-friendly confirmation banners with redirect preservation
+      - Comprehensive logging for troubleshooting
+      - Anti-loop protection with sentinel parameters
+      - Safe redirect validation to prevent open redirects
 
 - [ ] **Check Auth Context**:
   - Verify AuthContext (`/src/context/AuthContext.tsx`) implements all needed methods

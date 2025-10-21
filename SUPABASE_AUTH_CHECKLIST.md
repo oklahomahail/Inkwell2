@@ -61,8 +61,32 @@ if (code) {
   // ...
 } else if (type && !code && !tokenHash) {
   // Type-only flow (email confirmation)
-  // Multiple session checks + user-friendly messaging
-  // ...
+  // First check for existing session
+  const { data: sessionData } = await supabase.auth.getSession();
+
+  if (sessionData?.session) {
+    // Use existing session
+    go(redirectTo, { replace: true });
+    return;
+  }
+
+  // For signup type with no token/hash, perform double session check
+  if (type === 'signup') {
+    // Double-check for session before redirecting
+    const { data: finalSessionCheck } = await supabase.auth.getSession();
+
+    if (finalSessionCheck?.session) {
+      // Session found on second check
+      go(redirectTo, { replace: true });
+      return;
+    }
+
+    // Show confirmation message
+    go(`/sign-in?notice=confirmed&redirect=${encodeURIComponent(redirectTo)}`, {
+      replace: true,
+    });
+    return;
+  }
 }
 
 // Final fallback for edge cases
@@ -81,6 +105,8 @@ if (lastResortSession?.session) {
 4. **Robust error handling** with detailed logging
 5. **Anti-loop protection** with sentinel parameters
 6. **Safe redirect validation** to prevent open redirects
+7. **Double session check** for type=signup with no token/hash
+8. **Hash fragment support** for access_token/refresh_token extraction
 
 **No action required** - Implementation is hardened against edge cases
 

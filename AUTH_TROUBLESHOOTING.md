@@ -286,53 +286,74 @@ console.log('User:', user);
 
 ---
 
-## Updated Authentication Flow (October 2025)
+## Authentication Flow Enhancements (October 2025)
 
-### Recent Enhancements
+The authentication flow has been significantly enhanced to improve reliability and handle edge cases:
 
-Our authentication system now handles all Supabase callback formats with improved robustness:
+### Multiple Authentication Flow Support
 
-1. **Code-based flow**: `?code=...` (modern PKCE flow)
-2. **Token-based flow**: `?token_hash=...&type=signup` (legacy/verification flow)
-3. **Hash-based flow**: `#access_token=...&refresh_token=...` (implicit flow)
-4. **Type-only flow**: `?type=signup` (with no token - email confirmation only)
+Inkwell's AuthCallback.tsx now handles all Supabase authentication flow formats:
 
-### New "Email Confirmed" Handling
+1. **Code flow** (`?code=...`) - Modern Supabase auth
+2. **Token hash flow** (`?token_hash=...&type=signup`) - Legacy/OTP verification
+3. **Type-only flow** (`?type=signup`) - Email confirmation without tokens
+4. **Hash fragment flow** (`#access_token=...`) - JWT in hash fragment
 
-When a user confirms their email (with `type=signup`) but no session is created:
+### Silent Session Check for type=signup
 
-1. User clicks email confirmation link
-2. System checks for session (twice)
-3. If no session, redirects to sign-in with special notice
-4. User sees "Email confirmed! You can now sign in" message
-5. User signs in normally
+For signup confirmations without token_hash (which can happen when email providers strip URL parameters):
 
-### Troubleshooting "type=signup" with No Session
+```typescript
+// Double session check for type=signup with no token/hash
+if (type === 'signup') {
+  console.log('[AuthCallback] Signup confirmation detected, skipping OTP verification');
 
-If users confirm email but don't get automatically logged in:
+  // Check for existing session one more time before sending to sign-in
+  console.log('[AuthCallback] Double-checking for existing session before redirecting');
+  const { data: finalSessionCheck } = await supabase.auth.getSession();
 
-**Symptoms:**
+  if (finalSessionCheck?.session) {
+    console.log('[AuthCallback] Found existing session on second check, proceeding to dashboard');
+    go(redirectTo, { replace: true });
+    return;
+  }
 
+  // For signup confirmations, we should show a success message and redirect to sign-in
+  go(`/sign-in?notice=confirmed&redirect=${encodeURIComponent(redirectTo)}`, {
+    replace: true,
+  });
+  return;
+}
 ```
-[AuthCallback] Signup confirmation detected, skipping OTP verification
-[AuthCallback] Double-checking for existing session before redirecting
-[AuthCallback] No session found, redirecting to sign-in with confirmation notice
+
+### User-Friendly Confirmation Banner
+
+The sign-in page now displays a friendly confirmation banner when redirected with `?notice=confirmed`, providing better UX for email verification:
+
+```typescript
+// In AuthPage.tsx
+const [searchParams] = useSearchParams();
+const notice = searchParams.get('notice');
+
+// Display user-friendly banner for confirmed email
+{notice === 'confirmed' && (
+  <div className="mb-6 rounded-md bg-green-50 p-4 text-sm text-green-800">
+    <div className="flex">
+      <div className="flex-shrink-0">
+        <CheckCircleIcon className="h-5 w-5 text-green-400" />
+      </div>
+      <div className="ml-3">
+        <p>Your email has been confirmed! You can now sign in.</p>
+      </div>
+    </div>
+  </div>
+)}
 ```
 
-This is expected behavior when:
+### Additional Safeguards
 
-- Email was confirmed but Supabase didn't create a session
-- User needs to sign in manually after confirming email
-
-**Solution:** No action needed - the system now properly handles this case by showing a helpful message.
-
-### Additional Fallbacks
-
-The authentication system now includes multiple fallbacks:
-
-1. Multiple session checks for edge cases
-2. Hash parameter detection for Supabase implicit flow
-3. Safe redirects that prevent open redirect vulnerabilities
-4. Detailed error logging with sentinel parameters
-
-For persistent issues, check the browser console for messages starting with `[AuthCallback]` to identify the specific error case.
+1. **Multiple session checks** - Checks for existing sessions at several points
+2. **Robust parameter handling** - Extracts parameters from both search params and hash fragments
+3. **Safe redirect validation** - Prevents open redirects with path normalization
+4. **Anti-loop protection** - Adds sentinel parameters to prevent redirect loops
+5. **Comprehensive logging** - Detailed console logs for troubleshooting

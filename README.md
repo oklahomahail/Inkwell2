@@ -30,9 +30,9 @@ If you encounter issues with authentication:
 
 - For email delivery problems during sign-up or password reset, see [Supabase Auth Email Troubleshooting](/docs/SUPABASE_AUTH_EMAIL_TROUBLESHOOTING.md)
 - For general auth flow issues, see [Auth Troubleshooting Guide](./AUTH_TROUBLESHOOTING.md) (updated October 2025)
-- For deployment settings, see [Supabase Auth Deployment Checklist](/docs/SUPABASE_AUTH_DEPLOYMENT_CHECKLIST.md)
+- For deployment settings, see [Supabase Auth Deployment Checklist](/docs/SUPABASE_AUTH_DEPLOYMENT_CHECKLIST.md) (updated October 2025)
 - For React hooks issues in auth components, see [React Hooks Safety Guidelines](/docs/HOOKS_SAFETY.md)
-- For details on hardened authentication flow, see [Supabase Auth Checklist](./SUPABASE_AUTH_CHECKLIST.md)
+- For details on hardened authentication flow, see [Supabase Auth Checklist](./SUPABASE_AUTH_CHECKLIST.md) (updated October 2025)
 - For MutationObserver safety implementations, see [MutationObserver Guards](/docs/MUTATION_OBSERVER_GUARDS.md)
 
 ## Features
