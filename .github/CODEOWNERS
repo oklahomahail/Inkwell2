@@ -1,0 +1,29 @@
+# CODEOWNERS file defines who is responsible for reviewing changes to different parts of the codebase
+# https://docs.github.com/en/repositories/managing-your-repositories-settings-and-features/customizing-your-repository/about-code-owners
+
+# These owners will be the default owners for everything in the repo
+* @davehail
+
+# Build configuration files
+*.json @davehail
+vite.config.ts @davehail
+tailwind.config.js @davehail
+tsconfig.json @davehail
+
+# CI workflows
+.github/workflows/* @davehail
+
+# Core functionality
+src/core/* @davehail
+src/services/* @davehail
+supabase/* @davehail
+
+# Scripts and tools 
+scripts/* @davehail
+tools/* @davehail
+
+# Security-sensitive files
+src/utils/auth* @davehail
+api/auth/* @davehail
+
+# Add more specific owners for different parts of the codebase as needed

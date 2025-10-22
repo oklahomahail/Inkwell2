@@ -13,6 +13,10 @@ npx lint-staged
 echo "🛡️ Running corruption detection..."
 ./scripts/check-file-corruption.sh
 
+# Check for backup files
+echo "🔍 Checking for backup files..."
+./scripts/check-for-bak-files.sh
+
 # Run tests (but allow to pass if no tests exist)
 echo "🧪 Running tests..."
 npm test || true
