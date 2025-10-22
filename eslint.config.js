@@ -21,6 +21,8 @@ export default [
       'dev-dist/**',
       'coverage/**',
       'verbose/**',
+      'playwright-report/**',
+      'pnpm-lock.yaml',
     ],
   },
 

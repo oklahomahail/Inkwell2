@@ -46,8 +46,8 @@ jobs:
     name: Quality (lint + hygiene + readme-tree)
     needs: [changes]
     runs-on: ubuntu-latest
-    # Run when any of code/docs/infra changed
-    if: ${{ needs.changes.outputs.code == 'true' || needs.changes.outputs.docs == 'true' || needs.changes.outputs.infra == 'true' }}
+    # Run when any of code/docs/infra changed, or when pushing to main
+    if: ${{ needs.changes.outputs.code == 'true' || needs.changes.outputs.docs == 'true' || needs.changes.outputs.infra == 'true' || github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -80,7 +80,7 @@ jobs:
     name: Typecheck
     needs: [changes]
     runs-on: ubuntu-latest
-    if: ${{ needs.changes.outputs.code == 'true' }}
+    if: ${{ needs.changes.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -107,7 +107,7 @@ jobs:
     name: Test
     needs: [changes]
     runs-on: ubuntu-latest
-    if: ${{ needs.changes.outputs.code == 'true' }}
+    if: ${{ needs.changes.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -138,10 +138,10 @@ jobs:
         if: always()
 
   build:
-    name: Build (PR only)
+    name: Build
     needs: [changes]
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'pull_request' && needs.changes.outputs.code == 'true' }}
+    if: ${{ (github.event_name == 'pull_request' && needs.changes.outputs.code == 'true') || github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
 
