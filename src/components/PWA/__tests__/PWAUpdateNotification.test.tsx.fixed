@@ -1,0 +1,237 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import React from 'react';
+
+import { PWAUpdateNotification } from '../PWAUpdateNotification';
+
+// Mock data and state
+let mockNeedsRefresh = false;
+let mockIsOfflineReady = false;
+const mockUpdateApp = vi.fn().mockResolvedValue(undefined);
+const mockListeners: (() => void)[] = [];
+
+// Helper functions to update mock state
+const setNeedsRefresh = (value: boolean) => {
+  mockNeedsRefresh = value;
+};
+
+const setIsOfflineReady = (value: boolean) => {
+  mockIsOfflineReady = value;
+};
+
+const simulateUpdateAvailable = () => {
+  mockNeedsRefresh = true;
+  mockListeners.forEach(listener => listener());
+};
+
+// Mock the pwaService and usePWA hook
+vi.mock('../../../services/pwaService', () => {
+  return {
+    pwaService: {
+      onUpdateAvailable: vi.fn((callback) => {
+        mockListeners.push(callback);
+        // Call with initial state if needed
+        if (mockNeedsRefresh) {
+          callback();
+        }
+        // Return unsubscribe function
+        return () => {
+          const index = mockListeners.indexOf(callback);
+          if (index !== -1) {
+            mockListeners.splice(index, 1);
+          }
+        };
+      }),
+      simulateUpdateAvailable: () => {
+        simulateUpdateAvailable();
+      },
+    },
+    usePWA: () => ({
+      needsRefresh: mockNeedsRefresh,
+      isOfflineReady: mockIsOfflineReady,
+      updateApp: mockUpdateApp,
+      installApp: vi.fn().mockResolvedValue(false),
+      canInstall: false,
+      isOffline: false,
+    }),
+  };
+});
+
+describe('PWAUpdateNotification', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Reset the mock states
+    mockNeedsRefresh = false;
+    mockIsOfflineReady = false;
+    mockUpdateApp.mockClear();
+    mockListeners.length = 0;
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  describe('Visibility', () => {
+    it('shows nothing by default', () => {
+      const { container } = render(<PWAUpdateNotification />);
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it('shows update notification when needsRefresh is true', async () => {
+      await act(async () => {
+        setNeedsRefresh(true);
+        render(<PWAUpdateNotification />);
+      });
+
+      // Since there's no role="alert", we look for specific text
+      expect(screen.getByText('Update Available')).toBeInTheDocument();
+      expect(screen.getByText(/A new version of Inkwell is ready/i)).toBeInTheDocument();
+    });
+
+    it('shows offline ready notification when isOfflineReady is true', async () => {
+      await act(async () => {
+        setIsOfflineReady(true);
+        render(<PWAUpdateNotification />);
+      });
+
+      expect(screen.getByText('Ready for Offline Use')).toBeInTheDocument();
+      expect(screen.getByText(/Inkwell is now cached/i)).toBeInTheDocument();
+    });
+
+    it('respects autoShow prop', async () => {
+      await act(async () => {
+        setNeedsRefresh(true);
+        render(<PWAUpdateNotification autoShow={false} />);
+      });
+
+      // Should not show anything when autoShow is false
+      expect(screen.queryByText('Update Available')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Actions', () => {
+    it('calls updateApp when update button is clicked', async () => {
+      await act(async () => {
+        setNeedsRefresh(true);
+        render(<PWAUpdateNotification />);
+      });
+
+      const updateButton = screen.getByText('Update Now').closest('button');
+      expect(updateButton).toBeInTheDocument();
+      
+      await act(async () => {
+        fireEvent.click(updateButton!);
+      });
+      
+      expect(mockUpdateApp).toHaveBeenCalledTimes(1);
+      expect(mockUpdateApp).toHaveBeenCalledWith(true); // With force reload
+    });
+
+    it('dismisses offline ready notification when Got it button is clicked', async () => {
+      await act(async () => {
+        setIsOfflineReady(true);
+        render(<PWAUpdateNotification />);
+      });
+
+      // There should be a "Got it!" button
+      const gotItButton = screen.getByText('Got it!');
+      expect(gotItButton).toBeInTheDocument();
+      
+      await act(async () => {
+        fireEvent.click(gotItButton);
+      });
+      
+      // Notification should disappear
+      expect(screen.queryByText('Ready for Offline Use')).not.toBeInTheDocument();
+    });
+
+    it('shows loading state during update', async () => {
+      // Create a promise that we can resolve manually
+      let resolveUpdate: () => void;
+      const updatePromise = new Promise<void>((resolve) => {
+        resolveUpdate = resolve;
+      });
+      
+      mockUpdateApp.mockReturnValue(updatePromise);
+      
+      await act(async () => {
+        setNeedsRefresh(true);
+        render(<PWAUpdateNotification />);
+      });
+
+      const updateButton = screen.getByText('Update Now').closest('button');
+      
+      await act(async () => {
+        fireEvent.click(updateButton!);
+      });
+      
+      // Should show loading state
+      expect(screen.getByText('Updating...')).toBeInTheDocument();
+      
+      // Resolve the update
+      await act(async () => {
+        resolveUpdate!();
+      });
+    });
+  });
+
+  describe('Layout and styling', () => {
+    it('respects position prop', async () => {
+      await act(async () => {
+        setNeedsRefresh(true);
+        render(<PWAUpdateNotification position="top" />);
+      });
+      
+      // The notification container should have a class that positions it at top
+      const notification = screen.getByText('Update Available').closest('div')?.parentElement?.parentElement;
+      expect(notification).toHaveClass('top-4');
+    });
+
+    it('applies custom className', async () => {
+      const customClass = 'my-custom-class';
+      
+      await act(async () => {
+        setNeedsRefresh(true);
+        render(<PWAUpdateNotification className={customClass} />);
+      });
+      
+      // Find the outermost div that would have the custom class applied
+      const notification = screen.getByText('Update Available').closest('div')?.parentElement?.parentElement?.parentElement;
+      expect(notification).toHaveClass(customClass);
+    });
+  });
+
+  describe('Event handling', () => {
+    it('reacts to update available events', async () => {
+      const { rerender } = render(<PWAUpdateNotification />);
+      
+      // Initially not shown
+      expect(screen.queryByText('Update Available')).not.toBeInTheDocument();
+      
+      await act(async () => {
+        simulateUpdateAvailable();
+      });
+      
+      // Force re-render to see the changes
+      rerender(<PWAUpdateNotification />);
+      
+      // Should now be visible
+      expect(screen.getByText('Update Available')).toBeInTheDocument();
+    });
+
+    it('unsubscribes from events on unmount', async () => {
+      // Setup spy for the unsubscribe function
+      const unsubscribeSpy = vi.fn();
+      vi.spyOn(require('../../../services/pwaService').pwaService, 'onUpdateAvailable')
+        .mockReturnValue(unsubscribeSpy);
+      
+      const { unmount } = render(<PWAUpdateNotification />);
+      
+      // Unmount the component
+      unmount();
+      
+      // Check that the unsubscribe function was called
+      expect(unsubscribeSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+});

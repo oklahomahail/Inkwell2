@@ -26,6 +26,8 @@ export default defineConfig({
       reportsDirectory: './coverage',
       reporter: ['text', 'json-summary', 'html', 'lcov'],
 
+      // Coverage configuration
+
       // Only measure files touched by tests
       all: false,
       include: ['src/**/*.{ts,tsx}'],
@@ -57,12 +59,12 @@ export default defineConfig({
         'src/**/routes/**',
       ],
 
-      // Set reasonable thresholds
+      // Set reasonable thresholds - gradually increased to meet project goals
       thresholds: {
-        lines: 30,
-        functions: 30,
-        branches: 25,
-        statements: 30,
+        lines: 65,
+        functions: 55,
+        branches: 60,
+        statements: 65,
       },
     },
   },

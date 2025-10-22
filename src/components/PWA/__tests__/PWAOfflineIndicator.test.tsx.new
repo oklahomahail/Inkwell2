@@ -1,0 +1,323 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, act, waitFor } from '@testing-library/react';
+import React from 'react';
+
+import { PWAOfflineIndicator } from '../PWAOfflineIndicator';
+import { pwaService, OfflineStorageManager } from '../../../services/pwaService';
+
+// Mock data
+let mockIsOffline = false;
+const mockListeners: ((offline: boolean) => void)[] = [];
+let mockStorageInfo = {
+  quota: 100000000,  // 100 MB
+  usage: 25000000,   // 25 MB
+  percentUsed: 25,
+};
+let mockSyncQueue: any[] = [];
+
+// Helper functions to update mock state
+const setOffline = (offline: boolean) => {
+  mockIsOffline = offline;
+  mockListeners.forEach(listener => listener(offline));
+};
+
+const setStorageInfo = (info: typeof mockStorageInfo) => {
+  mockStorageInfo = info;
+};
+
+const setSyncQueue = (queue: any[]) => {
+  mockSyncQueue = queue;
+};
+
+// Mock the pwaService and OfflineStorageManager
+vi.mock('../../../services/pwaService', () => {
+  return {
+    pwaService: {
+      onOfflineStatusChange: vi.fn((callback) => {
+        mockListeners.push(callback);
+        // Call with initial state
+        callback(mockIsOffline);
+        // Return unsubscribe function
+        return () => {
+          const index = mockListeners.indexOf(callback);
+          if (index !== -1) {
+            mockListeners.splice(index, 1);
+          }
+        };
+      }),
+      isOffline: () => mockIsOffline,
+      // Function to trigger offline status change for testing
+      simulateOfflineChange: (offline: boolean) => {
+        setOffline(offline);
+      },
+    },
+    OfflineStorageManager: {
+      getSyncQueue: vi.fn(() => mockSyncQueue),
+      getStorageInfo: vi.fn().mockImplementation(async () => mockStorageInfo),
+    },
+  };
+});
+
+describe('PWAOfflineIndicator', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockIsOffline = false;
+    mockSyncQueue = [];
+    mockStorageInfo = {
+      quota: 100000000,  // 100 MB
+      usage: 25000000,   // 25 MB
+      percentUsed: 25,
+    };
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  describe('Rendering variants', () => {
+    it('renders minimal variant correctly in online state', async () => {
+      await act(async () => {
+        render(<PWAOfflineIndicator />);
+      });
+      
+      expect(screen.getByText('Online')).toBeInTheDocument();
+    });
+
+    it('renders minimal variant correctly in offline state', async () => {
+      await act(async () => {
+        render(<PWAOfflineIndicator />);
+        setOffline(true);
+      });
+      
+      expect(screen.getByText('Offline')).toBeInTheDocument();
+    });
+
+    it('renders detailed variant correctly in online state', async () => {
+      await act(async () => {
+        render(<PWAOfflineIndicator variant="detailed" />);
+      });
+      
+      expect(screen.getByText('Online')).toBeInTheDocument();
+      expect(screen.getByText('All changes saved and synced')).toBeInTheDocument();
+    });
+
+    it('renders detailed variant correctly in offline state', async () => {
+      await act(async () => {
+        render(<PWAOfflineIndicator variant="detailed" />);
+        setOffline(true);
+      });
+      
+      expect(screen.getByText('Offline')).toBeInTheDocument();
+      expect(screen.getByText('Changes will sync when online')).toBeInTheDocument();
+    });
+
+    it('renders badge variant correctly in online state', async () => {
+      await act(async () => {
+        render(<PWAOfflineIndicator variant="badge" />);
+      });
+      
+      // Should render a small indicator without much text
+      const element = screen.getByRole('status');
+      expect(element).toHaveClass('bg-green-500');
+    });
+
+    it('renders badge variant correctly in offline state', async () => {
+      await act(async () => {
+        render(<PWAOfflineIndicator variant="badge" />);
+        setOffline(true);
+      });
+      
+      // Should render a small indicator showing offline state
+      const element = screen.getByRole('status');
+      expect(element).toHaveClass('bg-gray-500');
+    });
+  });
+
+  describe('Sync queue status', () => {
+    it('shows sync queue count when items are pending in minimal variant', async () => {
+      setSyncQueue([
+        { id: '1', operation: 'save', key: 'item1' },
+        { id: '2', operation: 'update', key: 'item2' },
+      ]);
+      
+      await act(async () => {
+        render(<PWAOfflineIndicator />);
+        setOffline(true);
+      });
+      
+      expect(screen.getByText(/2 changes pending/i)).toBeInTheDocument();
+    });
+
+    it('shows sync queue count when items are pending in badge variant', async () => {
+      setSyncQueue([
+        { id: '1', operation: 'save', key: 'item1' },
+      ]);
+      
+      await act(async () => {
+        render(<PWAOfflineIndicator variant="badge" />);
+        setOffline(true);
+      });
+      
+      // Should show a badge with count
+      const element = screen.getByRole('status');
+      expect(element).toHaveClass('bg-yellow-500'); // Amber/yellow in offline with pending
+    });
+
+    it('shows detailed sync queue message in detailed variant', async () => {
+      setSyncQueue([
+        { id: '1', operation: 'save', key: 'item1' },
+        { id: '2', operation: 'update', key: 'item2' },
+        { id: '3', operation: 'delete', key: 'item3' },
+      ]);
+      
+      await act(async () => {
+        setStorageInfo({
+          quota: 100000000,
+          usage: 25000000,
+          percentUsed: 25,
+        });
+        render(<PWAOfflineIndicator variant="detailed" />);
+        setOffline(true);
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByText(/3 changes waiting/i)).toBeInTheDocument();
+      });
+    });
+
+    it('hides sync status when showSyncStatus is false', async () => {
+      setSyncQueue([
+        { id: '1', operation: 'save', key: 'item1' },
+        { id: '2', operation: 'update', key: 'item2' },
+      ]);
+      
+      await act(async () => {
+        render(<PWAOfflineIndicator showSyncStatus={false} />);
+        setOffline(true);
+      });
+      
+      expect(screen.queryByText(/changes pending/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/items in queue/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Storage information', () => {
+    it('shows storage information in detailed variant', async () => {
+      await act(async () => {
+        setStorageInfo({
+          quota: 100000000,  // 100 MB
+          usage: 25000000,   // 25 MB
+          percentUsed: 25,
+        });
+        render(<PWAOfflineIndicator variant="detailed" />);
+      });
+      
+      // Wait for the storage info to load
+      await waitFor(() => {
+        expect(screen.getByText(/25MB used/i)).toBeInTheDocument();
+      });
+    });
+
+    it('shows warning when storage is nearly full', async () => {
+      await act(async () => {
+        setStorageInfo({
+          quota: 100000000,  // 100 MB
+          usage: 85000000,   // 85 MB
+          percentUsed: 85,
+        });
+        render(<PWAOfflineIndicator variant="detailed" />);
+      });
+      
+      // Wait for storage info to load and warning to appear
+      await waitFor(() => {
+        expect(screen.getByText(/85MB used/i)).toBeInTheDocument();
+        expect(screen.getByText(/storage almost full/i)).toBeInTheDocument();
+      });
+    });
+
+    it('handles zero quota gracefully', async () => {
+      await act(async () => {
+        setStorageInfo({
+          quota: 0,
+          usage: 0,
+          percentUsed: 0,
+        });
+        render(<PWAOfflineIndicator variant="detailed" />);
+      });
+      
+      // Should not display storage info when quota is 0
+      expect(screen.queryByText(/used of/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Cleanup and event handling', () => {
+    it('unsubscribes from offline status changes on unmount', async () => {
+      // Setup spy for the unsubscribe function
+      const unsubscribeSpy = vi.fn();
+      vi.spyOn(pwaService, 'onOfflineStatusChange').mockReturnValue(unsubscribeSpy);
+      
+      const { unmount } = render(<PWAOfflineIndicator />);
+      
+      // Unmount the component
+      unmount();
+      
+      // Check that the unsubscribe function was called
+      expect(unsubscribeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('clears intervals on unmount', async () => {
+      // Mock setInterval and clearInterval
+      const originalSetInterval = global.setInterval;
+      const originalClearInterval = global.clearInterval;
+      const mockClearInterval = vi.fn();
+      
+      global.setInterval = vi.fn(() => 123) as any;
+      global.clearInterval = mockClearInterval as any;
+      
+      const { unmount } = render(<PWAOfflineIndicator variant="detailed" />);
+      
+      // Unmount the component
+      unmount();
+      
+      // Check clearInterval was called
+      expect(mockClearInterval).toHaveBeenCalledWith(123);
+      
+      // Restore original functions
+      global.setInterval = originalSetInterval;
+      global.clearInterval = originalClearInterval;
+    });
+  });
+
+  describe('Format bytes utility function', () => {
+    it('formats bytes correctly for different sizes', async () => {
+      // This test verifies the formatBytes function indirectly through the component rendering
+      await act(async () => {
+        setStorageInfo({
+          quota: 1024,
+          usage: 512,
+          percentUsed: 50,
+        });
+        render(<PWAOfflineIndicator variant="detailed" />);
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByText(/512B used of 1.0KB/i)).toBeInTheDocument();
+      });
+    });
+
+    it('handles zero bytes correctly', async () => {
+      await act(async () => {
+        setStorageInfo({
+          quota: 1024 * 1024,
+          usage: 0,
+          percentUsed: 0,
+        });
+        render(<PWAOfflineIndicator variant="detailed" />);
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByText(/0B used of 1.0MB/i)).toBeInTheDocument();
+      });
+    });
+  });
+});

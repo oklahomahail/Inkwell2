@@ -220,3 +220,13 @@ describe('EnhancedDashboard Component', () => {
     });*/
   });
 });
+function beforeEach(fn: () => void): void {
+  const globalBeforeEach = (globalThis as any).beforeEach;
+  if (typeof globalBeforeEach === 'function') {
+    // Delegate to the test runner's beforeEach if available
+    globalBeforeEach(fn);
+  } else {
+    // Fallback: run immediately (ensures setup still occurs in non-test environments)
+    fn();
+  }
+}

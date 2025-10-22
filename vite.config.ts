@@ -1,5 +1,5 @@
 // vite.config.ts
-import { fileURLToPath, URL } from 'node:url';
+import path from 'node:path';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
@@ -192,7 +192,7 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@': path.resolve(__dirname, 'src'),
     },
     dedupe: ['react', 'react-dom'],
   },

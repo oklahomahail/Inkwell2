@@ -17,7 +17,10 @@ export default [
       'src/test/**', 
       'bench/**', 
       'dev/**',
-      '.vercel/**'
+      '.vercel/**',
+      'dev-dist/**',
+      'coverage/**',
+      'verbose/**',
     ],
   },
 
