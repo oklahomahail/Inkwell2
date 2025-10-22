@@ -51,7 +51,7 @@
     "repo:audit": "pnpm -s audit:knip && pnpm -s audit:depcheck && pnpm -s audit:orphans && pnpm -s audit:cycles",
     "ci": "pnpm -s typecheck && pnpm -s lint && pnpm -s test:run && pnpm -s ci:audit",
     "ci:audit": "mkdir -p reports && pnpm -s audit:knip | tee reports/knip.txt && pnpm -s audit:depcheck | tee reports/depcheck.txt && pnpm -s audit:orphans | tee reports/madge-orphans.txt && pnpm -s audit:cycles | tee reports/madge-cycles.txt",
-    "lint:relaxed": "eslint \"src/**/*.{ts,tsx}\" --fix --cache --cache-location node_modules/.cache/eslint --rule '@typescript-eslint/no-explicit-any: off' --rule '@typescript-eslint/no-unused-vars: [warn, {\"argsIgnorePattern\":\"^_\",\"varsIgnorePattern\":\"^_\"}]' --rule 'react-hooks/exhaustive-deps: off' --rule 'react-refresh/only-export-components: off' --rule 'import/order: warn'",
+    "lint:relaxed": "eslint \"src/**/*.{ts,tsx}\" --fix --cache --cache-location node_modules/.cache/eslint",
     "pretypecheck": "npm run lint:relaxed",
     "check": "pnpm test && pnpm lint",
     "check:corruption": "./scripts/check-corruption.sh"
