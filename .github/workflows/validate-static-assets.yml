@@ -1,0 +1,100 @@
+name: Static Asset Validation
+
+on:
+  deployment_status:
+  workflow_dispatch:
+
+jobs:
+  validate-static-assets:
+    runs-on: ubuntu-latest
+    if: github.event.deployment_status.state == 'success' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Get deployment URL
+        id: deployment-url
+        run: |
+          if [ "${{ github.event_name }}" == "deployment_status" ]; then
+            echo "url=${{ github.event.deployment_status.target_url }}" >> $GITHUB_OUTPUT
+          else
+            echo "url=https://inkwell.leadwithnexus.com" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check static asset content types
+        run: |
+          echo "Validating static assets at ${{ steps.deployment-url.outputs.url }}"
+          
+          # Get the main page
+          MAIN_PAGE=$(curl -s "${{ steps.deployment-url.outputs.url }}")
+          
+          # Extract a JS asset path
+          JS_ASSET=$(echo "$MAIN_PAGE" | grep -o '/assets/[^"]*\.js' | head -1)
+          if [ -z "$JS_ASSET" ]; then
+            echo "❌ Could not find JS asset on main page"
+            exit 1
+          fi
+          
+          # Extract a CSS asset path
+          CSS_ASSET=$(echo "$MAIN_PAGE" | grep -o '/assets/[^"]*\.css' | head -1)
+          if [ -z "$CSS_ASSET" ]; then
+            echo "❌ Could not find CSS asset on main page"
+            exit 1
+          fi
+          
+          # Check JS asset
+          echo "Checking JS asset: $JS_ASSET"
+          JS_HEADERS=$(curl -s -I "${{ steps.deployment-url.outputs.url }}$JS_ASSET")
+          if ! echo "$JS_HEADERS" | grep -i "Content-Type" | grep -q "javascript"; then
+            echo "❌ JS asset has incorrect Content-Type:"
+            echo "$JS_HEADERS" | grep -i "Content-Type"
+            exit 1
+          else
+            echo "✅ JS asset has correct Content-Type"
+          fi
+          
+          # Check CSS asset
+          echo "Checking CSS asset: $CSS_ASSET"
+          CSS_HEADERS=$(curl -s -I "${{ steps.deployment-url.outputs.url }}$CSS_ASSET")
+          if ! echo "$CSS_HEADERS" | grep -i "Content-Type" | grep -q "text/css"; then
+            echo "❌ CSS asset has incorrect Content-Type:"
+            echo "$CSS_HEADERS" | grep -i "Content-Type"
+            exit 1
+          else
+            echo "✅ CSS asset has correct Content-Type"
+          fi
+          
+          # Check Service Worker
+          echo "Checking Service Worker: /registerSW.js"
+          SW_HEADERS=$(curl -s -I "${{ steps.deployment-url.outputs.url }}/registerSW.js")
+          if ! echo "$SW_HEADERS" | grep -i "Content-Type" | grep -q "javascript"; then
+            echo "❌ Service Worker has incorrect Content-Type:"
+            echo "$SW_HEADERS" | grep -i "Content-Type"
+            exit 1
+          else
+            echo "✅ Service Worker has correct Content-Type"
+          fi
+          
+          # Check Web Manifest
+          echo "Checking Web Manifest: /site.webmanifest"
+          MANIFEST_HEADERS=$(curl -s -I "${{ steps.deployment-url.outputs.url }}/site.webmanifest")
+          if ! echo "$MANIFEST_HEADERS" | grep -i "Content-Type" | grep -q "manifest"; then
+            echo "❌ Web Manifest has incorrect Content-Type:"
+            echo "$MANIFEST_HEADERS" | grep -i "Content-Type"
+            exit 1
+          else
+            echo "✅ Web Manifest has correct Content-Type"
+          fi
+          
+          echo "All static assets validated successfully!"
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Static asset validation failed for deployment ${{ steps.deployment-url.outputs.url }}. Check the action logs for details.'
+            })

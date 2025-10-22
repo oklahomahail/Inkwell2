@@ -32,3 +32,12 @@
 - [ ] No TypeScript errors (`pnpm tsc --noEmit`)
 - [ ] Linting passes (`pnpm lint`)
 - [ ] README tree updated if file structure changed (`pnpm tree:update`)
+
+## Static Asset Check (if applicable)
+
+<!-- If your changes affect middleware, routing, or static asset handling -->
+
+- [ ] JS/CSS assets load with correct Content-Type
+- [ ] Service worker (registerSW.js) loads correctly
+- [ ] Static assets bypass authentication (no redirects to /sign-in)
+- [ ] Verified with `./scripts/verify_deployment.sh` after deployment
