@@ -66,12 +66,32 @@ test.describe('Static Asset Verification', () => {
     const swResponse = await request.get('/registerSW.js');
     expect(swResponse.ok()).toBeTruthy();
     expect(swResponse.headers()['content-type']).toContain('application/javascript');
+
+    // Specifically check registerSW.js is not intercepted or served as HTML
+    expect(swResponse.headers()['content-type']).not.toContain('text/html');
+    expect(swResponse.status()).toBe(200);
+    expect(swResponse.url()).not.toContain('/sign-in');
+
+    // Verify content contains expected SW registration code (quick sanity check)
+    const content = await swResponse.text();
+    expect(content).toContain('navigator.serviceWorker');
   });
 
-  test('Web Manifest has correct content type', async ({ request }) => {
+  test('Web Manifest has correct content type and valid JSON', async ({ request }) => {
     const manifestResponse = await request.get('/site.webmanifest');
     expect(manifestResponse.ok()).toBeTruthy();
     expect(manifestResponse.headers()['content-type']).toContain('application/manifest+json');
+
+    // Validate that it's proper JSON
+    const content = await manifestResponse.text();
+    expect(() => JSON.parse(content)).not.toThrow();
+
+    // Verify it has required PWA fields
+    const manifest = JSON.parse(content);
+    expect(manifest).toHaveProperty('name');
+    expect(manifest).toHaveProperty('icons');
+    expect(manifest).toHaveProperty('start_url');
+    expect(manifest).toHaveProperty('display');
   });
 
   test('Static assets bypass auth middleware', async ({ request }) => {
@@ -98,6 +118,10 @@ test.describe('Static Asset Verification', () => {
       // Should not redirect to sign-in page
       expect(response.url()).not.toContain('/sign-in');
       expect(response.status()).not.toBe(302);
+
+      // Verify it wasn't intercepted by middleware and served as HTML
+      const contentType = response.headers()['content-type'] || '';
+      expect(contentType).not.toContain('text/html');
       expect(response.ok()).toBeTruthy();
     }
   });

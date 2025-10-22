@@ -1,6 +1,6 @@
 # Static Asset Quick Verification Card
 
-## 30-Second Checks
+## Quick Verification (1-2 minutes)
 
 1. **Network Tab (DevTools)**
    - Load app, filter for `.js` and `.css`
@@ -8,58 +8,58 @@
    - ❌ Status: 302 or Content-Type: text/html
 
 2. **Service Worker**
-   - Check Application > Service Workers tab
-   - ✅ Status: Activated/Running
-   - ❌ Status: Redundant/Failed
+   - Check `/registerSW.js` has Content-Type: application/javascript
+   - Application > Service Workers tab: Status should be Activated/Running
+   - ❌ Warning signs: Redundant/Failed or Multiple registrations
 
-3. **Direct Asset Access**
-   - Visit `/assets/[any-file].js` directly
+3. **HTML-only guarded test**
+   - Visit `/assets/[any-file].js` or `/images/[any-file]` directly
    - ✅ Shows file content or download dialog
-   - ❌ Redirects to sign-in
+   - ❌ Redirects to /sign-in (middleware intercept)
 
-## CLI Commands
+## CLI One-liners
 
 ```bash
-# Check JS asset
-curl -I https://inkwell.leadwithnexus.com/assets/index-[hash].js
-# Should show: Content-Type: application/javascript
+# JS/CSS served as the right type
+curl -I https://inkwell.leadwithnexus.com/assets/index-*.js
+curl -I https://inkwell.leadwithnexus.com/assets/index-*.css
 
-# Check CSS asset
-curl -I https://inkwell.leadwithnexus.com/assets/index-[hash].css
-# Should show: Content-Type: text/css
-
-# Check Service Worker
+# SW + manifest
 curl -I https://inkwell.leadwithnexus.com/registerSW.js
-# Should show: Content-Type: application/javascript
-
-# Check Manifest
 curl -I https://inkwell.leadwithnexus.com/site.webmanifest
-# Should show: Content-Type: application/manifest+json
 ```
 
-## Quick Fixes
+Look for:
 
-1. **For middleware issues:**
-   - Ensure matcher excludes static paths
-   - Add early return for static assets
+- JS: Content-Type: application/javascript
+- CSS: Content-Type: text/css
+- Manifest: Content-Type: application/manifest+json
 
-2. **For rewrite issues:**
-   - Put static asset rewrites first
-   - Make catch-all more specific
+## Caching Headers
 
-3. **For Service Worker:**
-   - Ensure it's in /public
-   - Add explicit rewrite
+- HTML/doc navigations: Cache-Control: no-store (or short max-age)
+- Static assets: Cache-Control: public, max-age=31536000, immutable
+- SW/manifest: max-age=86400 (1 day) or similar
 
-Run verification script:
+## PWA Sanity Check
+
+- Validate site.webmanifest is valid JSON (no trailing commas/comments)
+- Application > Service Workers: one active SW, correct scope (/)
+- No duplicate registrations
+
+## Prevent Regressions
+
+- **Middleware**: Keep Accept: text/html check and static path exclusions
+- **Rewrites**: Asset rewrites first, SPA catch-all last
+- **CI**: Run the static asset validation workflow
+- **Post-deploy**: Run verification script:
 
 ```bash
 ./scripts/verify_deployment.sh inkwell.leadwithnexus.com
 ```
 
-## Regression Guards
+## If Something Looks Off
 
-- Middleware: Keep Accept: text/html check
-- Rewrites: Keep asset-specific rules first
-- CI: Run static asset tests
-- Post-deploy: Check browser console for errors
+- Clear SW + cache: Application → Unregister SW → Hard reload
+- Check headers with `curl -I https://inkwell.leadwithnexus.com/path/with/issue`
+- Temporarily bypass middleware (early return NextResponse.next())

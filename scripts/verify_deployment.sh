@@ -22,9 +22,11 @@ check_content_type() {
   local headers=$(curl -s -I "$url")
   local content_type=$(echo "$headers" | grep -i "Content-Type" | head -1)
   local status_code=$(echo "$headers" | grep -i "HTTP/" | awk '{print $2}')
+  local cache_control=$(echo "$headers" | grep -i "Cache-Control" | head -1)
   
   echo "  Status: $status_code"
   echo "  Content-Type: $content_type"
+  echo "  Cache-Control: $cache_control"
   
   # Check if content type matches expected
   if echo "$content_type" | grep -q "$expected_type"; then
@@ -40,6 +42,26 @@ check_content_type() {
     
     if echo "$location" | grep -q "/sign-in"; then
       echo "  ❌ ERROR: Static asset redirected to /sign-in!"
+    fi
+  fi
+  
+  # Check caching headers for static assets vs HTML
+  if [[ "$description" == *"HTML"* || "$description" == *"route"* ]]; then
+    # HTML should have short or no cache
+    if echo "$cache_control" | grep -q "no-store\|no-cache\|max-age=0\|must-revalidate"; then
+      echo "  ✅ Cache-Control is appropriate for HTML"
+    else
+      echo "  ⚠️ HTML caching may be too aggressive"
+    fi
+  else
+    # Static assets should have longer cache times
+    if echo "$cache_control" | grep -q "max-age=[1-9]"; then
+      echo "  ✅ Cache-Control set for static asset"
+      if echo "$cache_control" | grep -q "immutable"; then
+        echo "  ✅ Using immutable for optimal caching"
+      fi
+    else
+      echo "  ⚠️ Missing or short cache time for static asset"
     fi
   fi
   
@@ -78,7 +100,22 @@ check_content_type "$BASE_URL/registerSW.js" "application/javascript" "Service W
 check_content_type "$BASE_URL/site.webmanifest" "application/manifest+json" "Web Manifest (/site.webmanifest)"
 check_content_type "$BASE_URL/favicon.ico" "image/" "Favicon (/favicon.ico)"
 
+# Validate site.webmanifest JSON format
+echo "Validating site.webmanifest JSON format..."
+manifest_content=$(curl -s "$BASE_URL/site.webmanifest")
+if echo "$manifest_content" | jq . > /dev/null 2>&1; then
+  echo "  ✅ site.webmanifest is valid JSON"
+else
+  echo "  ❌ site.webmanifest has invalid JSON format!"
+fi
+echo
+
 echo "=== Verification complete ==="
 echo
 echo "If all Content-Types are correct, your static asset configuration is working properly."
 echo "If any errors were reported, check your middleware and vercel.json configuration."
+echo
+echo "PWA Post-Deployment Checklist:"
+echo "  1. In Chrome DevTools > Application > Service Workers, confirm one active SW"
+echo "  2. Check that static assets don't redirect to /sign-in when accessed directly"
+echo "  3. Verify there are no 404s for critical files in the console"
