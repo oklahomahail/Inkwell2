@@ -40,6 +40,24 @@ class ConnectivityService {
    * Get current connectivity status
    */
   getStatus(): ConnectivityStatus {
+    // Prefer the runtime navigator.onLine value when available so tests that
+    // stub navigator reflect the current environment. Fall back to the
+    // internal `isOnline` state when navigator isn't present (e.g., Node).
+    const currentOnline =
+      typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
+        ? navigator.onLine
+        : this.isOnline;
+
+    // Update lastOnline/lastOffline if runtime value differs from internal
+    if (currentOnline !== this.isOnline) {
+      this.isOnline = currentOnline;
+      if (currentOnline) {
+        this.lastOnline = new Date();
+      } else {
+        this.lastOffline = new Date();
+      }
+    }
+
     return {
       isOnline: this.isOnline,
       lastOnline: this.lastOnline,
@@ -219,48 +237,40 @@ class ConnectivityService {
   // Private methods
 
   private initializeListeners(): void {
-    // Listen for online/offline events
-    window.addEventListener('online', this.handleOnline.bind(this));
-    window.addEventListener('offline', this.handleOffline.bind(this));
-
-    // Listen for connection changes (if supported)
-    if ('connection' in navigator) {
-      (navigator as any).connection.addEventListener(
-        'change',
-        this.handleConnectionChange.bind(this),
-      );
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+      window.addEventListener('online', this.handleOnline);
+      window.addEventListener('offline', this.handleOffline);
     }
-
-    // Initial status
-    this.updateConnectionStatus();
   }
 
-  private handleOnline(): void {
-    console.log('Connection restored');
+  private cleanupListeners(): void {
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+      window.removeEventListener('online', this.handleOnline);
+      window.removeEventListener('offline', this.handleOffline);
+    }
+  }
+
+  private handleOnline = (): void => {
     this.isOnline = true;
     this.lastOnline = new Date();
     this.notifyListeners();
+  };
 
-    // Process queued operations
-    setTimeout(() => this.processQueue(), 1000); // Small delay to ensure connection is stable
-  }
-
-  private handleOffline(): void {
-    console.log('Connection lost');
+  private handleOffline = (): void => {
     this.isOnline = false;
     this.lastOffline = new Date();
     this.notifyListeners();
+  };
+
+  private notifyListeners(): void {
+    const status = this.getStatus();
+    this.listeners.forEach((listener) => listener(status));
   }
 
-  private handleConnectionChange(): void {
-    const wasOnline = this.isOnline;
-    this.updateConnectionStatus();
-
-    if (!wasOnline && this.isOnline) {
-      this.handleOnline();
-    } else if (wasOnline && !this.isOnline) {
-      this.handleOffline();
-    }
+  public teardown(): void {
+    this.cleanupListeners();
+    this.listeners = [];
+    this.processingQueue = false;
   }
 
   private updateConnectionStatus(): void {
@@ -333,17 +343,6 @@ class ConnectivityService {
       }
     } catch (_error) {
       console.error('Failed to save offline queue:', _error);
-    }
-  }
-
-  private notifyListeners(): void {
-    const status = this.getStatus();
-    for (const listener of this.listeners) {
-      try {
-        listener(status);
-      } catch (_error) {
-        console.error('Connectivity listener error:', _error);
-      }
     }
   }
 }
