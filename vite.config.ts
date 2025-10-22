@@ -8,7 +8,11 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vitest/config';
 
 /* Use Vite's import.meta.env in configuration files instead of Node's `process.env` */
-if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+// Check if environment variables exist in a way that won't throw when undefined
+const hasSupabaseUrl = typeof import.meta.env !== 'undefined' && 'VITE_SUPABASE_URL' in import.meta.env;
+const hasSupabaseKey = typeof import.meta.env !== 'undefined' && 'VITE_SUPABASE_ANON_KEY' in import.meta.env;
+
+if (!hasSupabaseUrl || !hasSupabaseKey) {
   console.warn(
     'Warning: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is not set. Authentication will fail at runtime.',
   );
@@ -60,7 +64,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    ...(import.meta.env.VITE_ENABLE_PWA === 'false'
+    ...((typeof import.meta.env !== 'undefined' && import.meta.env.VITE_ENABLE_PWA === 'false')
       ? []
       : [
           VitePWA({
