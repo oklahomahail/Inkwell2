@@ -43,5 +43,51 @@ After successful deployment:
 
 1. Verify that all static assets load correctly (check browser console for 404s)
 2. Test the authentication flow
-3. Consider adding more specific route handling in vercel.json after initial deployment succeeds
-4. For better caching and security headers, add them through the Vercel web interface instead of in vercel.json
+3. Verify that the PWA functionality works properly:
+   - Check for "Add to Home Screen" prompt on mobile
+   - Verify offline functionality
+   - Test app updates via service worker
+4. Verify that client-side routing works (refresh any page and confirm it loads properly)
+5. Test the features that depend on environment variables
+6. Consider adding more specific route handling in vercel.json after initial deployment succeeds
+7. For better caching and security headers, add them through the Vercel web interface instead of in vercel.json
+
+## Post-Deployment Verification Checklist
+
+Use this checklist to ensure the application is deployed correctly:
+
+### Basic Functionality
+
+- [ ] Application loads without errors in console
+- [ ] Static assets (images, CSS, JS) load correctly
+- [ ] Authentication flow works (sign in/sign up/sign out)
+- [ ] Client-side routing works (navigate between pages)
+- [ ] Client-side routing survives page refresh (no 404 errors)
+
+### Feature-specific
+
+- [ ] Project creation and loading works
+- [ ] Writing and editing functionality works
+- [ ] Analytics features work correctly
+- [ ] Export functionality generates correct files
+
+### PWA Features
+
+- [ ] Service worker is registered (check Application tab in DevTools)
+- [ ] "Add to Home Screen" prompt appears on supported devices
+- [ ] Offline functionality works as expected
+- [ ] App updates are detected and applied
+
+### Performance
+
+- [ ] Initial load time is acceptable
+- [ ] Navigation between pages is smooth
+- [ ] No memory leaks during extended use
+
+### Cross-browser Testing
+
+- [ ] Works in Chrome/Edge
+- [ ] Works in Firefox
+- [ ] Works in Safari
+- [ ] Works on iOS Safari
+- [ ] Works on Android Chrome
