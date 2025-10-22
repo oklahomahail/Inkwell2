@@ -1,5 +1,6 @@
 // src/components/Dashboard/EnhancedDashboard.test.tsx
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import EnhancedDashboard from './EnhancedDashboard';
@@ -31,6 +32,11 @@ vi.mock('@/context/AppContext', () => ({
   useAppContext: () => mockContext,
 }));
 
+// Mock the useTourStartupFromUrl hook to avoid Router context requirement
+vi.mock('@/hooks/useTourStartupFromUrl', () => ({
+  useTourStartupFromUrl: vi.fn(),
+}));
+
 describe('EnhancedDashboard Component', () => {
   const mockProject = {
     id: 'test-project',
@@ -45,7 +51,11 @@ describe('EnhancedDashboard Component', () => {
   };
 
   const renderDashboard = () => {
-    return render(<EnhancedDashboard />);
+    return render(
+      <MemoryRouter>
+        <EnhancedDashboard />
+      </MemoryRouter>,
+    );
   };
 
   beforeEach(() => {

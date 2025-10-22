@@ -4,6 +4,9 @@ import { Routes, Route } from 'react-router-dom';
 import { vi, describe, it, beforeEach, expect } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 
+// Import the mock utility (this should be hoisted before ProfileContext is imported)
+import '../../test/utils/mockProfileContext';
+
 const h = vi.hoisted(() => {
   return {
     exchange: vi.fn().mockResolvedValue({ data: { session: {} }, error: null }),
@@ -26,6 +29,8 @@ vi.mock('../../utils/navigate', () => ({ useGo: () => h.navigateSpy }));
 
 import { renderWithRouter } from '../../test/utils/renderWithRouter';
 import AuthCallback from '../AuthCallback';
+
+// Get the mock API to update mock values
 
 // OPTIONAL: if your helper logs "Blocked unsafe redirect"
 const warnSpy = () => vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -58,7 +63,9 @@ describe('AuthCallback', () => {
     renderWithRoutes('/auth/callback');
 
     await waitFor(() =>
-      expect(h.navigateSpy).toHaveBeenCalledWith('/sign-in?error=callback', { replace: true }),
+      expect(h.navigateSpy).toHaveBeenCalledWith('/sign-in?error=callback&reason=auth_failed', {
+        replace: true,
+      }),
     );
   });
 

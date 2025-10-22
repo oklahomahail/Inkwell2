@@ -3,6 +3,9 @@ import { waitFor } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 
+// Import the profile context mock
+import '../../test/utils/mockProfileContext';
+
 const h = vi.hoisted(() => {
   return {
     exchange: vi.fn().mockResolvedValue({
@@ -36,7 +39,9 @@ describe('AuthCallback – missing code', () => {
     renderWithRouter(<AuthCallback />, { initialEntries: ['/auth/callback'] });
 
     await waitFor(() => {
-      expect(h.navigateSpy).toHaveBeenCalledWith('/sign-in?error=callback', { replace: true });
+      expect(h.navigateSpy).toHaveBeenCalledWith('/sign-in?error=callback&reason=auth_failed', {
+        replace: true,
+      });
     });
   });
 });
