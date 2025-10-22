@@ -272,5 +272,98 @@ describe('OfflineStorageManager', () => {
         percentUsed: 0,
       });
     });
+
+    it('should handle browsers without storage API entirely', async () => {
+      // Remove storage property
+      const originalStorage = global.navigator.storage;
+      delete (global.navigator as any).storage;
+
+      const info = await OfflineStorageManager.getStorageInfo();
+
+      // Restore original navigator.storage
+      Object.defineProperty(global.navigator, 'storage', {
+        value: originalStorage,
+        configurable: true,
+      });
+
+      expect(info).toEqual({
+        quota: 0,
+        usage: 0,
+        percentUsed: 0,
+      });
+    });
+  });
+
+  describe('Error handling - edge cases', () => {
+    it('should handle errors when saving a draft', () => {
+      // Mock localStorage to throw an error during setItem
+      mockLocalStorage.setItem.mockImplementationOnce(() => {
+        throw new Error('Mock localStorage error');
+      });
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      OfflineStorageManager.saveDraft('test-project', 'draft content');
+
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to save draft:', expect.any(Error));
+      consoleSpy.mockRestore();
+    });
+
+    it('should handle invalid JSON in drafts', () => {
+      // Setup invalid JSON in localStorage
+      mockLocalStorage.getItem.mockReturnValueOnce('{"invalid json":}');
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const result = OfflineStorageManager.getDraft('test-project');
+
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to get draft:', expect.any(Error));
+      expect(result).toBeNull();
+      consoleSpy.mockRestore();
+    });
+
+    it('should handle invalid JSON in sync queue', () => {
+      // Setup invalid JSON in localStorage
+      mockLocalStorage.getItem.mockReturnValueOnce('{"invalid json":}');
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const result = OfflineStorageManager.getSyncQueue();
+
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to get sync queue:', expect.any(Error));
+      expect(result).toEqual([]);
+      consoleSpy.mockRestore();
+    });
+
+    it('should handle errors when clearing sync queue', () => {
+      // Mock localStorage to throw an error
+      mockLocalStorage.removeItem.mockImplementationOnce(() => {
+        throw new Error('Mock localStorage error');
+      });
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      OfflineStorageManager.clearSyncQueue();
+
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to clear sync queue:', expect.any(Error));
+      consoleSpy.mockRestore();
+    });
+
+    it('should handle quota exceeded error when saving draft', () => {
+      // Mock localStorage to throw a specific quota exceeded error
+      mockLocalStorage.setItem.mockImplementationOnce(() => {
+        const error = new Error('Quota exceeded');
+        error.name = 'QuotaExceededError';
+        throw error;
+      });
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      OfflineStorageManager.saveDraft('test-project', 'large content');
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to save draft:',
+        expect.objectContaining({
+          name: 'QuotaExceededError',
+        }),
+      );
+      consoleSpy.mockRestore();
+    });
   });
 });
