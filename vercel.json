@@ -11,7 +11,21 @@
     { "source": "/api/login", "destination": "/api/login.ts" },
     { "source": "/sign-in", "destination": "/index.html" },
     { "source": "/sign-up", "destination": "/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/registerSW.js", "destination": "/registerSW.js" },
+    { "source": "/sw.js", "destination": "/sw.js" },
+    { "source": "/workbox-(.+)\\.js", "destination": "/workbox-$1.js" },
+    { "source": "/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/(.*\\.js)", "destination": "/$1" },
+    { "source": "/(.*\\.css)", "destination": "/$1" },
+    { "source": "/(.*\\.map)", "destination": "/$1" },
+    {
+      "source": "/(.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.svg|.*\\.ico|.*\\.webp)",
+      "destination": "/$1"
+    },
+    {
+      "source": "/((?!.*\\.(js|css|json|png|jpg|jpeg|svg|ico|webp|map|txt)).*)",
+      "destination": "/index.html"
+    }
   ],
   "redirects": [
     { "source": "/app", "destination": "/", "permanent": true },
