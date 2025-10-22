@@ -1,6 +1,14 @@
 // src/services/connectivityService.ts
 import { quotaAwareStorage } from '../utils/quotaAwareStorage';
 
+declare global {
+  interface Navigator {
+    connection?: {
+      effectiveType?: string;
+    };
+  }
+}
+
 export interface QueuedWrite {
   id: string;
   timestamp: number;
@@ -44,12 +52,8 @@ class ConnectivityService {
    * Get current connectivity status
    */
   getStatus(): ConnectivityStatus {
-    // Compute current online value without mutating internal state to avoid
-    // races with event handlers that also update state.
-    const currentOnline =
-      typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
-        ? navigator.onLine
-        : this.isOnline;
+    // Prioritize internal isOnline state over navigator.onLine
+    const currentOnline = this.isOnline;
 
     return {
       isOnline: currentOnline,
@@ -100,6 +104,9 @@ class ConnectivityService {
     this.processingQueue = true;
     console.log(`Processing ${this.queue.length} queued operations`);
 
+    // Store initial queue length before processing
+    const initialQueueLength = this.queue.length;
+
     const processedItems: string[] = [];
     const failedItems: QueuedWrite[] = [];
 
@@ -140,6 +147,8 @@ class ConnectivityService {
     // Update queue with failed items only
     this.queue = failedItems;
     await this.saveQueue();
+
+    // Always notify listeners after queue processing
     this.notifyListeners();
 
     this.processingQueue = false;
@@ -235,101 +244,115 @@ class ConnectivityService {
     }
   }
 
+  /**
+   * Reset internal state (for testing)
+   */
+  async reset(): Promise<void> {
+    this.stopMonitoring();
+    this.isOnline =
+      typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
+        ? navigator.onLine
+        : true;
+    this.lastOnline = this.isOnline ? new Date() : null;
+    this.lastOffline = this.isOnline ? null : new Date();
+    this.queue = [];
+    this.processingQueue = false;
+    this.listeners = [];
+    this.clearRetryTimer();
+
+    // Re-initialize listeners
+    this.initializeListeners();
+
+    // Clear storage
+    try {
+      await quotaAwareStorage.safeRemoveItem(ConnectivityService.QUEUE_KEY);
+    } catch (e) {
+      console.error('Failed to clear queue during reset', e);
+    }
+
+    // Re-notify with clean state
+    this.notifyListeners();
+  }
+
   // Private methods
 
+  private getConnectionType(): string | undefined {
+    if (typeof navigator !== 'undefined' && navigator.connection) {
+      return navigator.connection.effectiveType || undefined;
+    }
+    return undefined;
+  }
+
   private initializeListeners(): void {
-    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+    console.log('initializeListeners called');
+    if (typeof window !== 'undefined') {
+      console.log('Adding online and offline event listeners');
       window.addEventListener('online', this.handleOnline);
       window.addEventListener('offline', this.handleOffline);
     }
   }
 
-  private cleanupListeners(): void {
-    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+  private removeListeners(): void {
+    if (typeof window !== 'undefined') {
       window.removeEventListener('online', this.handleOnline);
       window.removeEventListener('offline', this.handleOffline);
     }
   }
 
-  private handleOnline = (): void => {
-    this.isOnline = true;
-    this.lastOnline = new Date();
-    this.notifyListeners();
-    // Attempt to process any queued writes when we regain connectivity
-    try {
-      this.processQueue();
-    } catch (_e) {
-      // swallow errors during background processing
-    }
-  };
-
-  private handleOffline = (): void => {
-    this.isOnline = false;
-    this.lastOffline = new Date();
-    this.notifyListeners();
-  };
-
-  private notifyListeners(): void {
-    const status = this.getStatus();
-    this.listeners.forEach((listener) => listener(status));
-  }
-
-  public teardown(): void {
-    this.cleanupListeners();
-    this.listeners = [];
-    this.processingQueue = false;
+  private clearRetryTimer(): void {
     if (this.retryTimer) {
       clearTimeout(this.retryTimer);
       this.retryTimer = null;
     }
   }
 
-  /**
-   * Reset internal state and reinitialize listeners and queue.
-   * Primarily useful in tests to ensure a clean singleton state.
-   */
-  public async reset(): Promise<void> {
-    // Tear down any existing state
-    this.teardown();
-
-    // Reset internal values
-    this.queue = [];
-    this.isOnline =
-      typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
-        ? navigator.onLine
-        : true;
-    this.lastOnline = null;
-    this.lastOffline = null;
-    this.processingQueue = false;
-
-    // Re-initialize
-    this.initializeListeners();
-    await this.loadQueue();
-    this.updateConnectionStatus();
+  private notifyListeners(): void {
+    try {
+      const status = this.getStatus();
+      console.log('Notifying listeners with status:', status);
+      this.listeners.forEach((listener) => listener(status));
+    } catch (error) {
+      console.error('Error notifying listeners:', error);
+    }
   }
 
-  private updateConnectionStatus(): void {
-    const currentOnline =
-      typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
-        ? navigator.onLine
-        : this.isOnline;
-    if (currentOnline !== this.isOnline) {
-      this.isOnline = currentOnline;
-      if (currentOnline) {
-        this.lastOnline = new Date();
-      } else {
-        this.lastOffline = new Date();
+  public stopMonitoring(): void {
+    this.cleanupListeners();
+    this.listeners = [];
+    this.processingQueue = false; // Ensure processingQueue is reset
+  }
+
+  private cleanupListeners(): void {
+    this.removeListeners();
+    this.clearRetryTimer();
+  }
+
+  private handleOnline = (): void => {
+    console.log('handleOnline triggered');
+    this.isOnline = true;
+    this.lastOnline = new Date();
+
+    // Notify listeners of online status first
+    this.notifyListeners();
+
+    // Then process queue (directly without setTimeout)
+    if (this.queue.length > 0) {
+      try {
+        this.processQueue();
+      } catch (_e) {
+        console.error('Error during processQueue in handleOnline:', _e);
       }
     }
-  }
+  };
 
-  private getConnectionType(): string | undefined {
-    if (typeof navigator !== 'undefined' && 'connection' in navigator) {
-      const connection = (navigator as any).connection;
-      return connection.effectiveType || connection.type;
+  private handleOffline = (): void => {
+    console.log('handleOffline triggered');
+    this.isOnline = false; // Ensure isOnline is set before notifying listeners
+    if (!this.lastOffline) {
+      this.lastOffline = new Date();
     }
-    return undefined;
-  }
+    this.notifyListeners();
+  };
 
   private async executeQueuedWrite(item: QueuedWrite): Promise<boolean> {
     try {
@@ -388,6 +411,25 @@ class ConnectivityService {
     return typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
       ? navigator.onLine
       : this.isOnline;
+  }
+
+  private updateConnectionStatus(): void {
+    this.isOnline =
+      typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
+        ? navigator.onLine
+        : true;
+
+    if (this.isOnline) {
+      this.lastOnline = new Date();
+    } else {
+      this.lastOffline = new Date();
+    }
+
+    this.notifyListeners();
+  }
+
+  private get navigatorConnection(): any {
+    return typeof navigator !== 'undefined' && navigator.connection ? navigator.connection : {};
   }
 }
 
