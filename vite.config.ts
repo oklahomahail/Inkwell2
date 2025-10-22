@@ -1,11 +1,14 @@
+/// <reference types="vite/client" />
+
 // vite.config.ts
-import path from 'node:path';
+import { fileURLToPath, URL } from 'node:url';
 
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { defineConfig } from 'vitest/config';
 
-if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY) {
+/* Use Vite's import.meta.env in configuration files instead of Node's `process.env` */
+if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
   console.warn(
     'Warning: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is not set. Authentication will fail at runtime.',
   );
@@ -57,7 +60,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    ...(process.env.VITE_ENABLE_PWA === 'false'
+    ...(import.meta.env.VITE_ENABLE_PWA === 'false'
       ? []
       : [
           VitePWA({
@@ -192,7 +195,7 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
     dedupe: ['react', 'react-dom'],
   },
@@ -205,5 +208,12 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react', 'react-dom'],
     exclude: ['recharts'], // don't prebundle recharts
+  },
+
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    globals: true,
+    css: false,
   },
 });
