@@ -23,12 +23,16 @@ class ConnectivityService {
   private static readonly MAX_RETRIES = 3;
   private static readonly RETRY_DELAY = 1000; // ms
 
-  private isOnline: boolean = navigator.onLine;
+  private isOnline: boolean =
+    typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
+      ? navigator.onLine
+      : true;
   private lastOnline: Date | null = null;
   private lastOffline: Date | null = null;
   private queue: QueuedWrite[] = [];
   private listeners: ((status: ConnectivityStatus) => void)[] = [];
   private processingQueue: boolean = false;
+  private retryTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.initializeListeners();
@@ -40,26 +44,15 @@ class ConnectivityService {
    * Get current connectivity status
    */
   getStatus(): ConnectivityStatus {
-    // Prefer the runtime navigator.onLine value when available so tests that
-    // stub navigator reflect the current environment. Fall back to the
-    // internal `isOnline` state when navigator isn't present (e.g., Node).
+    // Compute current online value without mutating internal state to avoid
+    // races with event handlers that also update state.
     const currentOnline =
       typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
         ? navigator.onLine
         : this.isOnline;
 
-    // Update lastOnline/lastOffline if runtime value differs from internal
-    if (currentOnline !== this.isOnline) {
-      this.isOnline = currentOnline;
-      if (currentOnline) {
-        this.lastOnline = new Date();
-      } else {
-        this.lastOffline = new Date();
-      }
-    }
-
     return {
-      isOnline: this.isOnline,
+      isOnline: currentOnline,
       lastOnline: this.lastOnline,
       lastOffline: this.lastOffline,
       queuedWrites: this.queue.length,
@@ -90,8 +83,8 @@ class ConnectivityService {
 
     console.log(`Queued ${operation} operation for ${key}`, queuedWrite);
 
-    // Try to process immediately if online
-    if (this.isOnline) {
+    // Try to process immediately if online (use runtime navigator when available)
+    if (this.isCurrentlyOnline()) {
       this.processQueue();
     }
   }
@@ -100,7 +93,7 @@ class ConnectivityService {
    * Process queued writes
    */
   async processQueue(): Promise<void> {
-    if (this.processingQueue || !this.isOnline || this.queue.length === 0) {
+    if (this.processingQueue || !this.isCurrentlyOnline() || this.queue.length === 0) {
       return;
     }
 
@@ -157,9 +150,15 @@ class ConnectivityService {
 
     // Schedule retry for failed items
     if (failedItems.length > 0) {
-      setTimeout(
+      // Clear any existing timer before scheduling a new one
+      if (this.retryTimer) {
+        clearTimeout(this.retryTimer);
+        this.retryTimer = null;
+      }
+
+      this.retryTimer = setTimeout(
         () => {
-          if (this.isOnline) {
+          if (this.isCurrentlyOnline()) {
             this.processQueue();
           }
         },
@@ -230,7 +229,9 @@ class ConnectivityService {
       return true;
     } catch {
       // Also check navigator.onLine as fallback
-      return navigator.onLine;
+      return typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
+        ? navigator.onLine
+        : this.isOnline;
     }
   }
 
@@ -254,6 +255,12 @@ class ConnectivityService {
     this.isOnline = true;
     this.lastOnline = new Date();
     this.notifyListeners();
+    // Attempt to process any queued writes when we regain connectivity
+    try {
+      this.processQueue();
+    } catch (_e) {
+      // swallow errors during background processing
+    }
   };
 
   private handleOffline = (): void => {
@@ -271,10 +278,41 @@ class ConnectivityService {
     this.cleanupListeners();
     this.listeners = [];
     this.processingQueue = false;
+    if (this.retryTimer) {
+      clearTimeout(this.retryTimer);
+      this.retryTimer = null;
+    }
+  }
+
+  /**
+   * Reset internal state and reinitialize listeners and queue.
+   * Primarily useful in tests to ensure a clean singleton state.
+   */
+  public async reset(): Promise<void> {
+    // Tear down any existing state
+    this.teardown();
+
+    // Reset internal values
+    this.queue = [];
+    this.isOnline =
+      typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
+        ? navigator.onLine
+        : true;
+    this.lastOnline = null;
+    this.lastOffline = null;
+    this.processingQueue = false;
+
+    // Re-initialize
+    this.initializeListeners();
+    await this.loadQueue();
+    this.updateConnectionStatus();
   }
 
   private updateConnectionStatus(): void {
-    const currentOnline = navigator.onLine;
+    const currentOnline =
+      typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
+        ? navigator.onLine
+        : this.isOnline;
     if (currentOnline !== this.isOnline) {
       this.isOnline = currentOnline;
       if (currentOnline) {
@@ -286,7 +324,7 @@ class ConnectivityService {
   }
 
   private getConnectionType(): string | undefined {
-    if ('connection' in navigator) {
+    if (typeof navigator !== 'undefined' && 'connection' in navigator) {
       const connection = (navigator as any).connection;
       return connection.effectiveType || connection.type;
     }
@@ -344,6 +382,12 @@ class ConnectivityService {
     } catch (_error) {
       console.error('Failed to save offline queue:', _error);
     }
+  }
+
+  private isCurrentlyOnline(): boolean {
+    return typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
+      ? navigator.onLine
+      : this.isOnline;
   }
 }
 
