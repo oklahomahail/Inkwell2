@@ -101,7 +101,7 @@ describe('EditorContext', () => {
   });
 
   it('can insert text when editor is available', () => {
-    const mockEditor = createMockEditor();
+    createMockEditor();
     const { getByTestId } = render(
       <EditorProvider>
         <TestComponent

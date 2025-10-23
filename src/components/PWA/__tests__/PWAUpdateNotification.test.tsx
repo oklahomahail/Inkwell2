@@ -15,7 +15,7 @@ const setNeedsRefresh = (value: boolean) => {
   mockNeedsRefresh = value;
 };
 
-const setIsOfflineReady = (value: boolean) => {
+const _setIsOfflineReady = (value: boolean) => {
   mockIsOfflineReady = value;
 };
 

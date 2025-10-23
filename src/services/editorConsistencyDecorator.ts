@@ -482,7 +482,7 @@ class EditorConsistencyDecorator {
   /**
    * Helper: Check for timeline inconsistencies (basic)
    */
-  private hasTimelineInconsistency(timeReference: string, project: EnhancedProject): boolean {
+  private hasTimelineInconsistency(_timeReference: string, _project: EnhancedProject): boolean {
     // This is a placeholder for more sophisticated timeline checking
     // In a real implementation, this would check against the project's timeline
     return false;

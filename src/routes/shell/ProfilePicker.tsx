@@ -2,7 +2,7 @@
 
 import { Plus, User, Palette } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import {
   getRememberedProfileId,
@@ -32,7 +32,6 @@ const PRESET_COLORS = [
 
 function ProfilePicker() {
   const go = useGo();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { profiles, createProfile, setActiveProfile, isLoading, error, loadProfiles } =
     useProfileContext();

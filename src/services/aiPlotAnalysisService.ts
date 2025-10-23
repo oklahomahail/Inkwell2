@@ -112,7 +112,7 @@ class AIPlotAnalysisService {
    */
   private generateMockAnalysis(
     projectId: string,
-    options: PlotAnalysisOptions,
+    _options: PlotAnalysisOptions,
   ): PlotAnalysisResult {
     const timestamp = new Date();
     const randomId = Math.random().toString(36).substring(2, 9);

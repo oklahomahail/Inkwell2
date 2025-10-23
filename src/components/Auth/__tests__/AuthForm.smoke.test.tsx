@@ -1,20 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 import { AuthForm } from '../AuthForm';
-
-// Minimal stub props
-const baseProps = {
-  mode: 'signin' as const,
-  onSubmitEmailLink: vi.fn(),
-  onSubmitPassword: vi.fn(),
-  onSwitchMode: vi.fn(),
-  busy: false,
-  error: null,
-  redirect: '/dashboard',
-  primaryCtaLabel: 'Sign In',
-};
 
 describe('AuthForm', () => {
   it('renders sign in and switches to sign up', () => {

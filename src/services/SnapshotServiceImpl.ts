@@ -222,7 +222,7 @@ export class SnapshotServiceImpl<T = any> {
   }
 
   /** Read current project state - to be implemented by client. */
-  async readCurrentState(projectId: string): Promise<T> {
+  async readCurrentState(_projectId: string): Promise<T> {
     throw new Error('readCurrentState not implemented');
   }
 

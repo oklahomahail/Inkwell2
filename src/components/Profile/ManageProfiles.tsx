@@ -96,7 +96,6 @@ export default function ManageProfiles({ onProfileSwitch, onProfileDelete }: Man
 
   const formatDate = (date: Date | string): string => {
     try {
-      const dateObj = typeof date === 'string' ? new Date(date) : date;
       return new Intl.DateTimeFormat('en-US', {
         year: 'numeric',
         month: 'short',

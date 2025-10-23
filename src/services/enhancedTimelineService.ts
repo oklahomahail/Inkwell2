@@ -57,8 +57,8 @@ export interface TimelineAnchor {
 class EnhancedTimelineService {
   // Add missing API signatures used by UI
   async detectSceneLinkages(
-    projectId: string,
-    project: any,
+    _projectId: string,
+    _project: any,
   ): Promise<
     Array<{
       sceneId: string;
@@ -68,22 +68,24 @@ class EnhancedTimelineService {
       reasoning: string;
     }>
   > {
+    // TODO: Implement scene linkage detection logic
     return [];
   }
 
   async linkSceneToTimeline(
-    projectId: string,
-    sceneId: string,
-    chapterId: string,
-    eventIds: string[],
-    linkageType: 'manual' | 'auto_detected' | 'ai_suggested' = 'manual',
+    _projectId: string,
+    _sceneId: string,
+    _chapterId: string,
+    _eventIds: string[],
+    _linkageType: 'manual' | 'auto_detected' | 'ai_suggested' = 'manual',
   ): Promise<{ success: boolean; conflicts?: TimelineConflict[] }> {
+    // TODO: Implement actual timeline linkage logic
     return { success: true };
   }
 
   async getTimelineNavigation(
-    projectId: string,
-    currentSceneId: string,
+    _projectId: string,
+    _currentSceneId: string,
   ): Promise<{
     previous?: { sceneId: string; chapterId: string; eventTitle: string; timePosition: number };
     next?: { sceneId: string; chapterId: string; eventTitle: string; timePosition: number };
@@ -94,6 +96,7 @@ class EnhancedTimelineService {
       timePosition: number;
     }>;
   }> {
+    // TODO: Implement timeline navigation logic
     return { siblings: [] };
   }
   private readonly STORAGE_PREFIX = 'enhanced_timeline_';
@@ -101,10 +104,10 @@ class EnhancedTimelineService {
   private readonly LINKAGES_STORAGE_PREFIX = 'scene_linkages_';
 
   async validateTimeline(
-    projectId: string,
-    project?: EnhancedProject,
+    _projectId: string,
+    _project?: EnhancedProject,
   ): Promise<TimelineValidationResult> {
-    // Implementation
+    // TODO: Implement timeline validation logic
     return {
       isValid: true,
       conflicts: [],

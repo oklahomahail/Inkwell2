@@ -48,7 +48,7 @@ function ProfileSwitcher({ className = '' }: ProfileSwitcherProps) {
         return new Date(date).toLocaleDateString();
       }
       return date.toLocaleDateString();
-    } catch (error) {
+    } catch {
       return 'Invalid date';
     }
   };
