@@ -350,7 +350,7 @@ Return an empty array [] if no consistency issues are found. Be thorough but foc
   }
 
   private escapeRegex(str: string): string {
-    return str.replace(/[.*+?^${}|[\]\\]/g, '\\$&');
+    return str.replace(/[.*+?^${}()|\[\]\\]/g, (match) => '\\' + match);
   }
 
   private extractPossibleAliases(name: string): string[] {

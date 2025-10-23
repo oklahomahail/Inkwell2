@@ -120,7 +120,10 @@ class WorkerSearchEngine {
           metadata: {
             wordCount: chapter.totalWordCount,
             status: chapter.status,
-            lastModified: chapter.updatedAt,
+            lastModified:
+              chapter.updatedAt instanceof Date
+                ? chapter.updatedAt
+                : new Date(chapter.updatedAt || Date.now()),
           },
         };
 
@@ -144,7 +147,10 @@ class WorkerSearchEngine {
                 metadata: {
                   wordCount: scene.wordCount || 0,
                   status: scene.status || 'draft',
-                  lastModified: scene.updatedAt || new Date(),
+                  lastModified:
+                    scene.updatedAt instanceof Date
+                      ? scene.updatedAt
+                      : new Date(scene.updatedAt || Date.now()),
                 },
               };
 
