@@ -233,6 +233,24 @@ export default function AuthCallback() {
             console.warn('[AuthCallback] Type-only verification failed:', e);
             // Continue to error case below
           }
+        } else if (url.hash.includes('access_token') && url.hash.includes('refresh_token')) {
+          // Hash tokens case
+          const hashParams = new URLSearchParams(url.hash.slice(1));
+          const access_token = hashParams.get('access_token');
+          const refresh_token = hashParams.get('refresh_token');
+          if (access_token && refresh_token) {
+            console.log('[AuthCallback] Using hash tokens flow');
+            const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+            if (error) throw error;
+            authSuccess = true;
+          }
+        } else {
+          // Fallback to getSession()
+          console.log('[AuthCallback] No explicit tokens found, falling back to getSession()');
+          const { data, error } = await supabase.auth.getSession();
+          if (error) throw error;
+          if (!data.session) throw new Error('No session after auth callback');
+          authSuccess = true;
         }
 
         // If we've successfully authenticated, apply our profile resolution logic
