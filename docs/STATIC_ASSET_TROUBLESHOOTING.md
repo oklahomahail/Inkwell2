@@ -88,11 +88,11 @@ Rewrites should:
 
 ```json
 "rewrites": [
-  { "source": "/assets/(.*)", "destination": "/assets/$1" },
+  { "source": "/assets/:path*", "destination": "/assets/:path*" },
   { "source": "/registerSW.js", "destination": "/registerSW.js" },
-  { "source": "/(.*\\.js)", "destination": "/$1" },
-  { "source": "/(.*\\.css)", "destination": "/$1" },
-  { "source": "/((?!.*\\.(js|css|json|png|jpg)).*)", "destination": "/index.html" }
+  { "source": "/:path*.js", "destination": "/:path*.js" },
+  { "source": "/:path*.css", "destination": "/:path*.css" },
+  { "source": "/:path*", "destination": "/index.html" }
 ]
 ```
 

@@ -33,7 +33,7 @@ We've simplified vercel.json to the minimum required for SPA routing:
 
 ```json
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/:path*", "destination": "/index.html" }]
 }
 ```
 

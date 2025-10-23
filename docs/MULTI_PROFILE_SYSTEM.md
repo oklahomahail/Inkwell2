@@ -230,10 +230,10 @@ APP_ORIGIN=https://inkwell.leadwithnexus.com
 
 ```json
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "rewrites": [{ "source": "/:path*", "destination": "/index.html" }],
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "headers": [
         {
           "key": "X-Frame-Options",
