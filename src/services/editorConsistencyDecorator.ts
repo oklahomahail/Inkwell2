@@ -117,19 +117,19 @@ class EditorConsistencyDecorator {
 
       // Voice consistency checking (medium speed)
       if (options.enableVoiceChecks) {
-        const voiceIssues = await this.analyzeVoiceIssues(plainText, project, scene);
+        const voiceIssues = await this.analyzeVoiceIssues(plainText, project);
         issues.push(...voiceIssues);
       }
 
       // Character consistency checking (slower, AI-powered)
       if (options.enableCharacterChecks) {
-        const characterIssues = await this.analyzeCharacterIssues(plainText, project, scene);
+        const characterIssues = await this.analyzeCharacterIssues(plainText, project);
         issues.push(...characterIssues);
       }
 
       // Timeline consistency checking (slowest, disabled by default)
       if (options.enableTimelineChecks) {
-        const timelineIssues = await this.analyzeTimelineIssues(plainText, project, scene);
+        const timelineIssues = await this.analyzeTimelineIssues(plainText, project);
         issues.push(...timelineIssues);
       }
 
@@ -189,11 +189,7 @@ class EditorConsistencyDecorator {
   /**
    * Analyze voice consistency issues
    */
-  private async analyzeVoiceIssues(
-    text: string,
-    project: EnhancedProject,
-    scene: Scene,
-  ): Promise<EditorIssue[]> {
+  private async analyzeVoiceIssues(text: string, project: EnhancedProject): Promise<EditorIssue[]> {
     const issues: EditorIssue[] = [];
 
     try {
@@ -245,7 +241,6 @@ class EditorConsistencyDecorator {
   private async analyzeCharacterIssues(
     text: string,
     project: EnhancedProject,
-    scene: Scene,
   ): Promise<EditorIssue[]> {
     const issues: EditorIssue[] = [];
 
@@ -299,7 +294,6 @@ class EditorConsistencyDecorator {
   private async analyzeTimelineIssues(
     text: string,
     project: EnhancedProject,
-    scene: Scene,
   ): Promise<EditorIssue[]> {
     const issues: EditorIssue[] = [];
 

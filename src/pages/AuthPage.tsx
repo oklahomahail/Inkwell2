@@ -5,8 +5,6 @@ import AuthFooter from '../components/Auth/AuthFooter';
 import { AuthForm } from '../components/Auth/AuthForm';
 import { AuthFormMode } from '../components/Auth/AuthForm';
 import AuthHeader from '../components/Auth/AuthHeader';
-import { useAuth } from '../context/AuthContext';
-import { useGo } from '../utils/navigate';
 import { normalizeSafeRedirect } from '../utils/safeRedirect';
 
 interface AuthPageProps {
@@ -15,7 +13,6 @@ interface AuthPageProps {
 
 export default function AuthPage({ mode }: AuthPageProps) {
   const [searchParams] = useSearchParams();
-  const go = useGo();
 
   // Add debugging on mount
   useEffect(() => {
@@ -46,9 +43,6 @@ export default function AuthPage({ mode }: AuthPageProps) {
       setNotice('Email confirmed! You can now sign in.');
     }
   }, [searchParams]);
-
-  // Get auth context to access current state
-  const { loading } = useAuth();
 
   // Note: We no longer need to handle session redirect logic here
   // The AnonOnlyRoute component will handle redirects for authenticated users
