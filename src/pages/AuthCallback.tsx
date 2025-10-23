@@ -250,12 +250,12 @@ export default function AuthCallback() {
           const { data, error } = await supabase.auth.getSession();
           if (error) {
             console.error('[AuthCallback] Error during getSession:', error);
-            go(`/sign-in?reason=auth_failed&source=callback`, { replace: true });
+            go(`/sign-in?error=callback&reason=auth_failed`, { replace: true });
             return;
           }
           if (!data.session) {
             console.warn('[AuthCallback] No session found after getSession');
-            go(`/sign-in?reason=auth_failed&source=callback`, { replace: true });
+            go(`/sign-in?error=callback&reason=auth_failed`, { replace: true });
             return;
           }
           authSuccess = true;
