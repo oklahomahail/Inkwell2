@@ -174,6 +174,58 @@ class ConnectivityService {
         ConnectivityService.RETRY_DELAY * Math.min(failedItems[0]?.retryCount || 1, 5),
       );
     }
+  } /**
+   * Wait for queue processing to complete (useful for testing)
+   * @returns Promise that resolves when queue is empty or offline
+   */
+  async waitForQueueProcessing(timeoutMs: number = 1000): Promise<boolean> {
+    console.log(
+      'waitForQueueProcessing called, queue length:',
+      this.queue.length,
+      'processing:',
+      this.processingQueue,
+    );
+
+    // If we're offline or queue is empty, nothing to wait for
+    if (!this.isCurrentlyOnline() || this.queue.length === 0) {
+      console.log('Nothing to wait for - offline or empty queue');
+      return true;
+    }
+
+    // If we're already processing or have items to process, wait for completion
+    return new Promise((resolve) => {
+      const checkInterval = 10; // ms
+      let elapsed = 0;
+
+      const checkComplete = () => {
+        // Check if processing is complete
+        if (this.queue.length === 0) {
+          console.log('Queue is now empty, resolving wait');
+          resolve(true);
+          return;
+        }
+
+        // Check for timeout
+        elapsed += checkInterval;
+        if (elapsed >= timeoutMs) {
+          console.warn('Queue processing wait timed out after', timeoutMs, 'ms');
+          resolve(false);
+          return;
+        }
+
+        // Continue checking
+        setTimeout(checkComplete, checkInterval);
+      };
+
+      // Start checking
+      setTimeout(checkComplete, checkInterval);
+
+      // If not already processing, trigger processing
+      if (!this.processingQueue && this.isCurrentlyOnline() && this.queue.length > 0) {
+        console.log('Starting queue processing');
+        this.processQueue().catch((e) => console.error('Error in processQueue:', e));
+      }
+    });
   }
 
   /**
@@ -433,6 +485,7 @@ class ConnectivityService {
   }
 }
 
-// Export singleton instance
+// Export class and singleton instance
+export { ConnectivityService };
 export const connectivityService = new ConnectivityService();
 export default connectivityService;
