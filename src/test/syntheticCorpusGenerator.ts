@@ -401,7 +401,7 @@ class SyntheticCorpusGenerator {
     let result = pattern;
     for (const [placeholder, replacement] of Object.entries(substitutions)) {
       result = result.replace(
-        new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+        new RegExp(placeholder.replace(/[.*+?^${}|[\]\\]/g, '\\$&'), 'g'),
         replacement,
       );
     }

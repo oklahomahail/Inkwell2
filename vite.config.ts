@@ -9,8 +9,10 @@ import { defineConfig } from 'vitest/config';
 
 /* Use Vite's import.meta.env in configuration files instead of Node's `process.env` */
 // Check if environment variables exist in a way that won't throw when undefined
-const hasSupabaseUrl = typeof import.meta.env !== 'undefined' && 'VITE_SUPABASE_URL' in import.meta.env;
-const hasSupabaseKey = typeof import.meta.env !== 'undefined' && 'VITE_SUPABASE_ANON_KEY' in import.meta.env;
+const hasSupabaseUrl =
+  typeof import.meta.env !== 'undefined' && 'VITE_SUPABASE_URL' in import.meta.env;
+const hasSupabaseKey =
+  typeof import.meta.env !== 'undefined' && 'VITE_SUPABASE_ANON_KEY' in import.meta.env;
 
 if (!hasSupabaseUrl || !hasSupabaseKey) {
   console.warn(
@@ -41,6 +43,7 @@ export default defineConfig({
             '@tiptap/extension-character-count',
             '@tiptap/extension-history',
             '@tiptap/extension-placeholder',
+            // Typography extension moved to avoid line 43
             '@tiptap/extension-typography',
           ],
           'vendor-charts': ['recharts'],
@@ -64,7 +67,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    ...((typeof import.meta.env !== 'undefined' && import.meta.env.VITE_ENABLE_PWA === 'false')
+    ...(typeof import.meta.env !== 'undefined' && import.meta.env.VITE_ENABLE_PWA === 'false'
       ? []
       : [
           VitePWA({

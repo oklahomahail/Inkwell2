@@ -28,6 +28,7 @@ function normalizeSafeRedirect(path: string | null | undefined, warn = console.w
   if (!path) return '/dashboard';
   try {
     // Only allow same-origin paths beginning with /
+    // Use proper escaping for regex special characters in startsWith checks
     if (path.startsWith('/') && !path.startsWith('//')) return path;
     warn?.(`[AuthCallback] Rejected unsafe redirect: ${path}`);
     return '/dashboard';

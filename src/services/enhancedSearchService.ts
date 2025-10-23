@@ -359,7 +359,7 @@ class MainThreadSearchEngine {
     if (!terms.length || !excerpt) return excerpt;
 
     const escaped = Array.from(
-      new Set(terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))),
+      new Set(terms.map((t) => t.replace(/[.*+?^${}|[\]\\]/g, '\\$&'))),
     ).filter(Boolean);
 
     if (!escaped.length) return excerpt;
