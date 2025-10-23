@@ -35,7 +35,7 @@ const targetDir = path.resolve(DIR_ESM, '../src');
 // --- Utilities ---
 function escapeRegExp(str) {
   // Safer regex generation when class names include dashes, etc.
-  return str.replace(/[.*+?^${}|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  return str.replace(/[.*+?^${}()|\[\]\\]/g, (match) => '\\' + match);
 }
 
 function shouldProcessFile(fileName) {

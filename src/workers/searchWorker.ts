@@ -421,7 +421,7 @@ class WorkerSearchEngine {
   }
 
   private escapeRegex(str: string): string {
-    return str.replace(/[.*+?^${}|[\]\\]/g, '\\$&');
+    return str.replace(/[.*+?^${}()|\[\]\\]/g, (match) => '\\' + match);
   }
 
   private getAverageDocumentLength(documents: Map<string, SearchResult>): number {
