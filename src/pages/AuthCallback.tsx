@@ -248,8 +248,16 @@ export default function AuthCallback() {
           // Fallback to getSession()
           console.log('[AuthCallback] No explicit tokens found, falling back to getSession()');
           const { data, error } = await supabase.auth.getSession();
-          if (error) throw error;
-          if (!data.session) throw new Error('No session after auth callback');
+          if (error) {
+            console.error('[AuthCallback] Error during getSession:', error);
+            go(`/sign-in?reason=auth_failed&source=callback`, { replace: true });
+            return;
+          }
+          if (!data.session) {
+            console.warn('[AuthCallback] No session found after getSession');
+            go(`/sign-in?reason=auth_failed&source=callback`, { replace: true });
+            return;
+          }
           authSuccess = true;
         }
 
