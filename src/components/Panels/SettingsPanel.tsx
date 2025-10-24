@@ -2,6 +2,7 @@
 import { Eye, EyeOff, ExternalLink, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import React, { useState, useEffect, type ChangeEvent } from 'react';
 
+import AiSettingsPanel from '@/components/AI/AiSettingsPanel';
 import { PrivacyControls } from '@/components/Privacy/PrivacyControls';
 import BackupControls from '@/components/Settings/BackupControls';
 import SnapshotHistoryDialog from '@/components/Settings/SnapshotHistoryDialog';
@@ -235,10 +236,21 @@ const SettingsPanel: React.FC = () => {
           </p>
         </div>
 
+        {/* Two-Tier AI Integration */}
+        <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
+          <h3 className="text-xl font-semibold text-white mb-4">AI Writing Companion</h3>
+          <p className="text-gray-400 text-sm mb-6">
+            Configure AI features for writing assistance, recommendations, and creative support.
+          </p>
+          <AiSettingsPanel />
+        </div>
+
         {/* Claude AI Configuration */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-white">Claude AI Assistant</h3>
+            <h3 className="text-xl font-semibold text-white">
+              Advanced: Direct Claude Integration
+            </h3>
             <div
               className={`flex items-center space-x-3 px-3 py-2 rounded-lg border ${status.bg} ${status.border}`}
             >

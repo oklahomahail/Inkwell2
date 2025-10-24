@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { CommandPaletteProvider } from './components/CommandPalette/CommandPaletteProvider';
 import { FeatureDiscoveryProvider } from './components/Onboarding/FeatureDiscovery';
 import { ProfileTourProvider } from './components/Onboarding/ProfileTourProvider';
+import { AiSettingsProvider } from './context/AiSettingsContext';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
 import { ChaptersProvider } from './context/ChaptersContext';
@@ -20,25 +21,27 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       <Suspense fallback={null}>
         <FeatureFlagProvider>
           <ToastProvider>
-            <ProfileProvider>
-              <NavProvider>
-                <EditorProvider>
-                  <ChaptersProvider>
-                    <ClaudeProvider>
-                      <TourProvider>
-                        <ProfileTourProvider>
-                          <FeatureDiscoveryProvider>
-                            <AppProvider>
-                              <CommandPaletteProvider>{children}</CommandPaletteProvider>
-                            </AppProvider>
-                          </FeatureDiscoveryProvider>
-                        </ProfileTourProvider>
-                      </TourProvider>
-                    </ClaudeProvider>
-                  </ChaptersProvider>
-                </EditorProvider>
-              </NavProvider>
-            </ProfileProvider>
+            <AiSettingsProvider>
+              <ProfileProvider>
+                <NavProvider>
+                  <EditorProvider>
+                    <ChaptersProvider>
+                      <ClaudeProvider>
+                        <TourProvider>
+                          <ProfileTourProvider>
+                            <FeatureDiscoveryProvider>
+                              <AppProvider>
+                                <CommandPaletteProvider>{children}</CommandPaletteProvider>
+                              </AppProvider>
+                            </FeatureDiscoveryProvider>
+                          </ProfileTourProvider>
+                        </TourProvider>
+                      </ClaudeProvider>
+                    </ChaptersProvider>
+                  </EditorProvider>
+                </NavProvider>
+              </ProfileProvider>
+            </AiSettingsProvider>
           </ToastProvider>
         </FeatureFlagProvider>
       </Suspense>
