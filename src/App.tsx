@@ -11,6 +11,7 @@ import { ExportWizardModal } from './components/ExportWizard/ExportWizardModal';
 import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
 import OnboardingOrchestrator from './components/Onboarding/OnboardingOrchestrator';
+import { TutorialRouter } from './components/Onboarding/TutorialRouter';
 import { PWAInstallButton, PWAUpdateNotification } from './components/PWA';
 import {
   StorageRecoveryBanner,
@@ -24,6 +25,7 @@ import { useAppContext } from './context/AppContext';
 import { useAuth } from './context/AuthContext';
 import { useEditorContext } from './context/EditorContext';
 // Route guards
+// Tutorial Router
 // Pages
 import AuthCallback from './pages/AuthCallback';
 import BrandPage from './pages/Brand';
@@ -175,6 +177,16 @@ function AppShell() {
           element={
             <ProtectedRoute>
               <ProfileAppShell />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Tutorial routes under dashboard */}
+        <Route
+          path="/dashboard/tutorials/*"
+          element={
+            <ProtectedRoute>
+              <TutorialRouter />
             </ProtectedRoute>
           }
         />

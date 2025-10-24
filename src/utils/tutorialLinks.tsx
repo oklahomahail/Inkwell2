@@ -14,7 +14,7 @@ export function useTutorialLinks() {
       console.warn('No active profile - cannot generate tutorial URL');
       return '/dashboard';
     }
-    const baseUrl = `/p/${activeProfile.id}/tutorials/${slug}`;
+    const baseUrl = `/dashboard/tutorials/${slug}`;
     return step !== undefined ? `${baseUrl}/${step}` : baseUrl;
   };
 
@@ -22,7 +22,7 @@ export function useTutorialLinks() {
     if (!activeProfile?.id) {
       return '/dashboard';
     }
-    return `/p/${activeProfile.id}/tutorials`;
+    return `/dashboard/tutorials`;
   };
 
   const redirectToTutorial = (slug: string, step?: number) => {
@@ -50,40 +50,39 @@ export function useTutorialLinks() {
  */
 export const TutorialLinks = {
   /**
-   * Generate tutorial URL with profile ID
+   * Generate tutorial URL (profileId param kept for backwards compatibility but unused)
    */
-  generateUrl: (profileId: string, slug: string, step?: number): string => {
-    const baseUrl = `/p/${profileId}/tutorials/${slug}`;
+  generateUrl: (_profileId: string, slug: string, step?: number): string => {
+    const baseUrl = `/dashboard/tutorials/${slug}`;
     return step !== undefined ? `${baseUrl}/${step}` : baseUrl;
   },
 
   /**
-   * Generate tutorial index URL with profile ID
+   * Generate tutorial index URL (profileId param kept for backwards compatibility but unused)
    */
-  generateIndexUrl: (profileId: string): string => {
-    return `/p/${profileId}/tutorials`;
+  generateIndexUrl: (_profileId: string): string => {
+    return `/dashboard/tutorials`;
   },
 
   /**
-   * Check if URL is a profile-aware tutorial URL
+   * Check if URL is a tutorial URL
    */
   isTutorialUrl: (url: string): boolean => {
-    return /^\/p\/[^/]+\/tutorials/.test(url);
+    return /^\/dashboard\/tutorials/.test(url);
   },
 
   /**
-   * Extract profile ID from tutorial URL
+   * Extract profile ID from tutorial URL (deprecated - returns null)
    */
-  extractProfileId: (url: string): string | null => {
-    const match = url.match(/^\/p\/([^/]+)\/tutorials/);
-    return match?.[1] ?? null;
+  extractProfileId: (_url: string): string | null => {
+    return null; // No longer using profile-based routing
   },
 
   /**
    * Extract tutorial slug from URL
    */
   extractSlug: (url: string): string | null => {
-    const match = url.match(/^\/p\/[^/]+\/tutorials\/([^/]+)/);
+    const match = url.match(/^\/dashboard\/tutorials\/([^/]+)/);
     return match?.[1] ?? null;
   },
 
@@ -91,7 +90,7 @@ export const TutorialLinks = {
    * Extract step number from URL
    */
   extractStep: (url: string): number | null => {
-    const match = url.match(/^\/p\/[^/]+\/tutorials\/[^/]+\/(\d+)/);
+    const match = url.match(/^\/dashboard\/tutorials\/[^/]+\/(\d+)/);
     return match?.[1] ? parseInt(match[1], 10) : null;
   },
 };
