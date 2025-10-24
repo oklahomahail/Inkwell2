@@ -121,6 +121,19 @@
         log("log", "boot probe started");
       })();
     </script>
+
+    <!-- Theme Pre-mount Script - sets light mode default before app loads -->
+    <script>
+      (function () {
+        var KEY = 'inkwell.theme';
+        var saved = localStorage.getItem(KEY);
+        var theme = saved || 'light'; // default to light
+        var html = document.documentElement;
+        if (theme === 'dark') html.classList.add('dark');
+        else html.classList.remove('dark');
+        html.setAttribute('data-theme', theme);
+      })();
+    </script>
   </head>
   <body class="font-sans bg-inkwell-white text-inkwell-navy">
     <div id="root"></div>

@@ -11,10 +11,11 @@ export default function middleware(request: Request) {
   const url = new URL(request.url);
   const { pathname } = url;
 
-  // Skip API routes, Next.js internals, favicon, and any file with an extension
+  // Skip API routes, auth callbacks, Next.js internals, favicon, and any file with an extension
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next/') ||
+    pathname.startsWith('/auth/callback') || // allow auth callback to process
     pathname === '/favicon.ico' ||
     pathname.includes('.') || // any file with an extension (images, fonts, JS, CSS, etc.)
     pathname.startsWith('/assets/') ||

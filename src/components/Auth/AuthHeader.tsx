@@ -19,7 +19,7 @@ export default function AuthHeader({
       <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
 
       {/* Primary brand tagline */}
-      <p className="mt-2 text-base opacity-90">Find your story, weave it well.</p>
+      <p className="mt-2 text-base opacity-90">Find your story. Write it well.</p>
 
       {/* Context subtitle under the tagline */}
       {subtitle && <p className="mt-1 text-sm opacity-80">{subtitle}</p>}

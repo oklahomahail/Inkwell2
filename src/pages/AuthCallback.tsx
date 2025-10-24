@@ -62,6 +62,13 @@ export default function AuthCallback() {
         getParam(url, 'next') || getParam(url, 'redirect') || getParam(url, 'view');
       const rawRedirectTo = normalizeSafeRedirect(redirectParam);
 
+      // Check for tour flag - if present, set flag for auto-start on dashboard
+      const tourParam = getParam(url, 'tour');
+      if (tourParam === '1') {
+        console.log('[AuthCallback] Tour flag detected, will auto-start Spotlight tour');
+        localStorage.setItem('inkwell.spotlight.start', '1');
+      }
+
       // Log the redirect path for debugging
       console.log('[AuthCallback] Raw redirect to:', rawRedirectTo);
 
