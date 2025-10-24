@@ -62,14 +62,14 @@ function ProfileGate({ children }: ProfileGateProps) {
 
   // No profile ID in URL
   if (!profileId) {
-    return <Navigate to="/profiles" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   // Profile doesn't exist
   const profileExists = profiles.some((p) => p.id === profileId);
   if (!profileExists) {
-    console.warn(`Profile ${profileId} not found, redirecting to profile picker`);
-    return <Navigate to="/profiles" replace />;
+    console.warn(`Profile ${profileId} not found, redirecting to dashboard`);
+    return <Navigate to="/dashboard" replace />;
   }
 
   // Profile not yet active

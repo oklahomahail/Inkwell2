@@ -66,10 +66,8 @@ function TutorialPage() {
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">
             Profile Required
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            You need to select a profile to access tutorials.
-          </p>
-          <Navigate to="/profiles" replace />
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Redirecting to dashboard...</p>
+          <Navigate to="/dashboard" replace />
         </div>
       </div>
     );

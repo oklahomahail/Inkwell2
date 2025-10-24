@@ -13,7 +13,7 @@ function ProfileAppShellComponent({ children }: ProfileAppShellProps) {
   const { activeProfile } = useProfile();
 
   if (!profileId || !activeProfile) {
-    return <Navigate to="/profiles" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <div className="profile-shell">{children}</div>;
