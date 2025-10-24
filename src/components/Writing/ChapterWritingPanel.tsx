@@ -18,7 +18,7 @@ export default function ChapterWritingPanel({ projectId }: { projectId: string }
   const { dispatch, getActiveChapter, getChapters } = useChapters();
   const chapter = getActiveChapter();
   const chapters = getChapters(projectId);
-  const [content, setContent] = useChapterDocument(chapter?.id);
+  const { content, setContent, isSaving, lastSavedAt } = useChapterDocument(chapter?.id);
 
   // Load chapters on mount
   useEffect(() => {
@@ -56,6 +56,15 @@ export default function ChapterWritingPanel({ projectId }: { projectId: string }
     );
   };
 
+  // Format last saved time
+  const formatLastSaved = (isoString: string | null): string => {
+    if (!isoString) return '';
+    const minutes = Math.max(1, Math.round((Date.now() - new Date(isoString).getTime()) / 60000));
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.round(minutes / 60);
+    return `${hours} h ago`;
+  };
+
   return (
     <div className="flex h-full">
       <ChapterSidebar projectId={projectId} />
@@ -69,11 +78,32 @@ export default function ChapterWritingPanel({ projectId }: { projectId: string }
               onClearMonolith={() => setContent('')}
             />
           </div>
-          {chapter && (
-            <div className="text-sm text-gray-500">
-              {chapter.wordCount} words · {chapter.status}
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            {/* Autosave indicator */}
+            {chapter && (
+              <div className="text-xs text-gray-500 flex items-center gap-1">
+                {isSaving ? (
+                  <>
+                    <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                    <span>Saving...</span>
+                  </>
+                ) : lastSavedAt ? (
+                  <>
+                    <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full" />
+                    <span>Saved {formatLastSaved(lastSavedAt)}</span>
+                  </>
+                ) : (
+                  <span>—</span>
+                )}
+              </div>
+            )}
+            {/* Word count and status */}
+            {chapter && (
+              <div className="text-sm text-gray-500">
+                {chapter.wordCount} words · {chapter.status}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Chapter Title */}

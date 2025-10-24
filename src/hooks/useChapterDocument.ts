@@ -4,6 +4,8 @@ import { Chapters } from '@/services/chaptersService';
 
 export function useChapterDocument(chapterId?: string) {
   const [content, setContent] = useState<string>('');
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const versionRef = useRef(1);
   const timerRef = useRef<number | null>(null);
 
@@ -16,6 +18,7 @@ export function useChapterDocument(chapterId?: string) {
       if (alive) {
         setContent(chapter.content ?? '');
         versionRef.current = chapter.version ?? 1;
+        setLastSavedAt(chapter.updatedAt ?? null);
       }
     })();
     return () => {
@@ -27,15 +30,26 @@ export function useChapterDocument(chapterId?: string) {
   useEffect(() => {
     if (!chapterId) return;
     const save = async () => {
-      await Chapters.saveDoc({ id: chapterId, content, version: ++versionRef.current });
+      setIsSaving(true);
+      try {
+        await Chapters.saveDoc({ id: chapterId, content, version: ++versionRef.current });
+        setLastSavedAt(new Date().toISOString());
+      } finally {
+        setIsSaving(false);
+      }
     };
     timerRef.current = window.setInterval(save, 10000);
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
       // flush on unmount
-      if (chapterId) Chapters.saveDoc({ id: chapterId, content, version: ++versionRef.current });
+      if (chapterId) {
+        setIsSaving(true);
+        Chapters.saveDoc({ id: chapterId, content, version: ++versionRef.current }).finally(() => {
+          setIsSaving(false);
+        });
+      }
     };
   }, [chapterId, content]);
 
-  return [content, setContent] as const;
+  return { content, setContent, isSaving, lastSavedAt };
 }

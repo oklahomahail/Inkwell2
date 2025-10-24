@@ -25,11 +25,17 @@ function chaptersReducer(state: State, action: Action): State {
       const newById = { ...state.byId };
       chapters.forEach((c) => (newById[c.id] = c));
       const orderedIds = chapters.sort((a, b) => a.index - b.index).map((c) => c.id);
+
+      // Try to restore last active chapter from localStorage
+      const lastActiveId = localStorage.getItem(`lastChapter-${projectId}`);
+      const shouldUseLastActive = lastActiveId && orderedIds.includes(lastActiveId);
+      const activeId = shouldUseLastActive ? lastActiveId : state.activeId || chapters[0]?.id;
+
       return {
         ...state,
         byId: newById,
         byProject: { ...state.byProject, [projectId]: orderedIds },
-        activeId: state.activeId || chapters[0]?.id,
+        activeId,
       };
     }
     case 'ADD_CHAPTER': {
@@ -43,6 +49,10 @@ function chaptersReducer(state: State, action: Action): State {
           newById[id] = { ...newById[id], index: i };
         }
       });
+
+      // Persist new active chapter
+      localStorage.setItem(`lastChapter-${c.projectId}`, c.id);
+
       return {
         ...state,
         byId: newById,
@@ -57,7 +67,17 @@ function chaptersReducer(state: State, action: Action): State {
       };
     }
     case 'SET_ACTIVE': {
-      return { ...state, activeId: action.payload };
+      const { payload: id } = action;
+
+      // Persist active chapter change to localStorage
+      if (id) {
+        const chapter = state.byId[id];
+        if (chapter?.projectId) {
+          localStorage.setItem(`lastChapter-${chapter.projectId}`, id);
+        }
+      }
+
+      return { ...state, activeId: id };
     }
     case 'REORDER': {
       const { projectId, orderedIds } = action.payload;
@@ -78,6 +98,12 @@ function chaptersReducer(state: State, action: Action): State {
       const newById = { ...state.byId };
       delete newById[id];
       const projectChapters = (state.byProject[projectId] ?? []).filter((x) => x !== id);
+
+      // Clear localStorage if we're removing the active chapter
+      if (state.activeId === id) {
+        localStorage.removeItem(`lastChapter-${projectId}`);
+      }
+
       return {
         ...state,
         byId: newById,
