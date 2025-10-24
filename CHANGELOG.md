@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- Brand design system update and CSS build fixes:
+  - Consolidated all brand assets into `/public/assets/brand/`
+  - Implemented new semantic color system with HSL-based CSS variables
+  - Added brand component utility classes (ink-header, ink-sidebar, ink-nav-item, ink-btn)
+  - Updated MainLayout to use new branding system
+  - Fixed CSS build error by using native CSS properties instead of @apply with custom utilities
+  - Updated web manifest, favicons, and Open Graph meta tags
+  - Removed legacy brand asset files from old locations
+
+### Patch Changes
+
+- 76d989d: Added self-healing repository features:
+  - Environment variables normalization with runtime guards
+  - Structured documentation in `/docs` directory
+  - Repository hygiene improvements
+  - CI workflow for automated checks
+  - Release process documentation and changesets setup
+  - Branch protection automation script
+
 ## [Unreleased]
 
 ### Added
