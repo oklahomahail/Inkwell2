@@ -48,6 +48,13 @@ const AnalyticsPanel: React.FC = () => {
     const totalDays = sessions.length;
     const averageWordsPerDay = totalDays > 0 ? Math.round(totalWords / totalDays) : 0;
 
+    // Fallback: If no sessions but document has words, show document stats
+    const docWords = currentProject?.content?.split(' ').length || 0;
+    const showFallback = sessions.length === 0 && docWords > 0;
+    const displayTotalWords = showFallback ? docWords : totalWords;
+    const displayDays = showFallback ? 1 : totalDays;
+    const displayAverage = showFallback ? docWords : averageWordsPerDay;
+
     const sortedSessions = [...sessions].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
@@ -99,7 +106,7 @@ const AnalyticsPanel: React.FC = () => {
               <div className="text-sm text-gray-500 dark:text-gray-400">Total Words</div>
             </div>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {totalWords.toLocaleString()}
+              {displayTotalWords.toLocaleString()}
             </div>
           </div>
 
@@ -110,7 +117,7 @@ const AnalyticsPanel: React.FC = () => {
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">Writing Days</div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{totalDays}</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{displayDays}</div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
@@ -120,9 +127,7 @@ const AnalyticsPanel: React.FC = () => {
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">Daily Average</div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {averageWordsPerDay}
-            </div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{displayAverage}</div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
@@ -133,10 +138,28 @@ const AnalyticsPanel: React.FC = () => {
               <div className="text-sm text-gray-500 dark:text-gray-400">Streak</div>
             </div>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {Math.min(totalDays, 7)} days
+              {Math.min(displayDays, 7)} days
             </div>
           </div>
         </div>
+
+        {/* Fallback data notice */}
+        {showFallback && (
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+            <div className="flex items-center gap-3">
+              <BarChart3 className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+              <div>
+                <div className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
+                  Session Tracking Starting
+                </div>
+                <div className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                  Analytics will track your writing sessions going forward. Keep writing to build
+                  your analytics history!
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Recent Sessions */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">

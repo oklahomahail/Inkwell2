@@ -8,7 +8,7 @@ import {
   Save,
   Download,
 } from 'lucide-react';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 
 import ClaudeToolbar from '@/components/Writing/ClaudeToolbar';
 import ExportDialog from '@/components/Writing/ExportDialog';
@@ -27,6 +27,12 @@ interface WritingPanelProps {
   onChangeText: (_text: string) => void;
   onTextSelect: () => void;
   selectedText: string;
+}
+
+interface WritingSession {
+  date: string;
+  wordCount: number;
+  duration?: number;
 }
 
 const WritingPanel: React.FC<WritingPanelProps> = ({
@@ -50,6 +56,79 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
     data: null,
     title: '',
   });
+
+  // Writing session tracking
+  const sessionStartWordCount = useRef<number>(0);
+  const sessionStarted = useRef<boolean>(false);
+  const sessionStartTime = useRef<Date | null>(null);
+
+  // Session saving logic
+  useEffect(() => {
+    if (!currentProject) return;
+
+    // Debounced save session
+    const saveSession = () => {
+      if (!sessionStarted.current || !currentProject) return;
+
+      const projectId = currentProject.id;
+      const today = new Date().toISOString().split('T')[0] || '';
+      const currentWordCount = currentProject.content?.split(' ').length || 0;
+      const wordsWritten = Math.max(0, currentWordCount - sessionStartWordCount.current);
+
+      if (wordsWritten === 0) return; // Don't save if no words written
+
+      const duration = sessionStartTime.current
+        ? Math.round((new Date().getTime() - sessionStartTime.current.getTime()) / 60000)
+        : 0;
+
+      // Load existing sessions
+      const sessionsKey = `sessions-${projectId}`;
+      const existingSessions: WritingSession[] = JSON.parse(
+        localStorage.getItem(sessionsKey) || '[]',
+      );
+
+      // Find or create today's session
+      const todaySessionIndex = existingSessions.findIndex((s) => s.date === today);
+
+      if (todaySessionIndex >= 0) {
+        // Update existing session
+        const existingSession = existingSessions[todaySessionIndex];
+        if (existingSession) {
+          existingSessions[todaySessionIndex] = {
+            date: today,
+            wordCount: Math.max(existingSession.wordCount, wordsWritten),
+            duration: Math.max(existingSession.duration || 0, duration),
+          };
+        }
+      } else {
+        // Create new session
+        existingSessions.push({
+          date: today,
+          wordCount: wordsWritten,
+          duration,
+        });
+      }
+
+      // Save sessions
+      localStorage.setItem(sessionsKey, JSON.stringify(existingSessions));
+    };
+
+    // Save session periodically (every 10 seconds)
+    const saveInterval = setInterval(saveSession, 10000);
+
+    // Save session on unmount/page unload
+    const handleBeforeUnload = () => {
+      saveSession();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearInterval(saveInterval);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      saveSession(); // Save on unmount
+    };
+  }, [currentProject]);
 
   // Initialize with mock data if no chapter exists
   const initializeChapter = (): Chapter => ({
@@ -189,9 +268,17 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
   const handleContentChange = useCallback(
     (content: string) => {
       if (!currentScene) return;
+
+      // Mark session as started on first content change
+      if (!sessionStarted.current && currentProject) {
+        sessionStarted.current = true;
+        sessionStartTime.current = new Date();
+        sessionStartWordCount.current = currentProject.content?.split(' ').length || 0;
+      }
+
       handleSceneUpdate(currentScene.id, { content });
     },
-    [currentScene, handleSceneUpdate],
+    [currentScene, handleSceneUpdate, currentProject],
   );
 
   const handleWordCountChange = useCallback(

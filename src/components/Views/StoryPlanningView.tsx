@@ -1,6 +1,6 @@
 // src/components/Views/StoryPlanningView.tsx - Enhanced with Story Architect Flow
 import { BookOpen, Users, Map, FileText, BarChart3, Wand2 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 
 import { useToast } from '@/context/toast';
 import { triggerStoryPlanningOpen, triggerWorldBuildingVisited } from '@/utils/tourTriggers';
@@ -10,6 +10,9 @@ import BeatSheetPlanner from '../Planning/BeatSheetPlanner';
 import CharacterManager from '../Planning/CharacterManager';
 import { StoryArchitectFlow } from '../Planning/StoryArchitectFlow';
 import StoryStructureVisualizer from '../Planning/StoryStructureVisualizer';
+
+// Lazy load World Building panel
+const WorldBuildingPanel = lazy(() => import('../Planning/WorldBuilding/WorldBuildingPanel'));
 
 type PlanningTab = 'overview' | 'beats' | 'characters' | 'world' | 'health';
 
@@ -324,18 +327,21 @@ const StoryHealthTab: React.FC = () => {
   );
 };
 
-// World Building Tab (unchanged)
+// World Building Tab
 const WorldBuildingTab: React.FC = () => {
   return (
-    <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
-      <div className="text-center">
-        <Map className="w-12 h-12 mx-auto mb-4 opacity-50" />
-        <h3 className="text-lg font-medium mb-2">World Building</h3>
-        <p className="text-sm">
-          Coming soon - Create locations, cultures, and rules for your story world
-        </p>
-      </div>
-    </div>
+    <Suspense
+      fallback={
+        <div className="h-full flex items-center justify-center">
+          <div className="text-center text-gray-500 dark:text-gray-400">
+            <Map className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
+            <p className="text-sm">Loading World Building...</p>
+          </div>
+        </div>
+      }
+    >
+      <WorldBuildingPanel />
+    </Suspense>
   );
 };
 

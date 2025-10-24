@@ -5,6 +5,7 @@ import { FeatureDiscoveryProvider } from './components/Onboarding/FeatureDiscove
 import { ProfileTourProvider } from './components/Onboarding/ProfileTourProvider';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
+import { ChaptersProvider } from './context/ChaptersContext';
 import { ClaudeProvider } from './context/ClaudeProvider';
 import { EditorProvider } from './context/EditorContext';
 import { NavProvider } from './context/NavContext';
@@ -22,17 +23,19 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
             <ProfileProvider>
               <NavProvider>
                 <EditorProvider>
-                  <ClaudeProvider>
-                    <TourProvider>
-                      <ProfileTourProvider>
-                        <FeatureDiscoveryProvider>
-                          <AppProvider>
-                            <CommandPaletteProvider>{children}</CommandPaletteProvider>
-                          </AppProvider>
-                        </FeatureDiscoveryProvider>
-                      </ProfileTourProvider>
-                    </TourProvider>
-                  </ClaudeProvider>
+                  <ChaptersProvider>
+                    <ClaudeProvider>
+                      <TourProvider>
+                        <ProfileTourProvider>
+                          <FeatureDiscoveryProvider>
+                            <AppProvider>
+                              <CommandPaletteProvider>{children}</CommandPaletteProvider>
+                            </AppProvider>
+                          </FeatureDiscoveryProvider>
+                        </ProfileTourProvider>
+                      </TourProvider>
+                    </ClaudeProvider>
+                  </ChaptersProvider>
                 </EditorProvider>
               </NavProvider>
             </ProfileProvider>

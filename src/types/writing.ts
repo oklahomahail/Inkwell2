@@ -5,7 +5,7 @@
  */
 
 export type SceneStatus = 'draft' | 'in_progress' | 'final' | 'archived' | (string & {});
-export type ChapterStatus = 'draft' | 'final' | 'archived' | (string & {});
+export type ChapterStatus = 'draft' | 'revising' | 'final' | 'archived' | (string & {});
 
 /** Export formats used by ExportDialog and downstream utilities */
 export type ExportFormat = 'markdown' | 'html' | 'pdf' | 'docx' | (string & {});
@@ -65,6 +65,73 @@ export interface Chapter extends BaseEntity {
   summary?: string;
   notes?: string;
   [key: string]: any;
+}
+
+// ========================================
+// Enhanced Chapter Management
+// ========================================
+
+/**
+ * Chapter metadata - lightweight for lists and analytics
+ * Stored separately from content for performance
+ */
+export interface ChapterMeta {
+  id: string;
+  projectId: string;
+  title: string;
+  index: number; // display order (0-based)
+  summary?: string;
+  status: 'draft' | 'revising' | 'final';
+  wordCount: number; // denormalized for fast UI
+  sceneCount?: number; // optional: number of scenes
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Chapter document - heavy content stored separately
+ * Enables fast lists without loading all content
+ */
+export interface ChapterDoc {
+  id: string; // same as ChapterMeta.id
+  content: string; // editor-serialized content (HTML/markdown/JSON)
+  version: number; // for optimistic locking
+  scenes?: Scene[]; // optional embedded scenes
+}
+
+/**
+ * Full chapter with both meta and content
+ * Used when editing/displaying a chapter
+ */
+export interface FullChapter extends ChapterMeta {
+  content: string;
+  version: number;
+  scenes?: Scene[];
+}
+
+/**
+ * Chapter creation input
+ */
+export interface CreateChapterInput {
+  id?: string; // optional: if not provided, service will generate
+  projectId: string;
+  title?: string;
+  summary?: string;
+  content?: string;
+  index?: number; // if not provided, appends to end
+  status?: 'draft' | 'revising' | 'final';
+}
+
+/**
+ * Chapter update input
+ */
+export interface UpdateChapterInput {
+  id: string;
+  title?: string;
+  summary?: string;
+  status?: 'draft' | 'revising' | 'final';
+  tags?: string[];
 }
 
 /** Helpful aliases used around services */

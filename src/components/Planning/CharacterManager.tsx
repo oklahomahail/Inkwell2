@@ -20,13 +20,21 @@ interface Character {
 }
 
 const CharacterManager: React.FC = () => {
-  const { currentProject } = useAppContext();
+  const { currentProject, updateProject } = useAppContext();
   const { showToast } = useToast();
 
+  // Load characters from current project
   const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showNewCharacterForm, setShowNewCharacterForm] = useState(false);
+
+  // Sync characters from project when it changes
+  React.useEffect(() => {
+    if (currentProject?.characters) {
+      setCharacters(currentProject.characters as Character[]);
+    }
+  }, [currentProject?.id]);
 
   // Create new character
   const createCharacter = () => {
@@ -50,19 +58,32 @@ const CharacterManager: React.FC = () => {
 
   // Save character
   const saveCharacter = () => {
-    if (!selectedCharacter) return;
+    if (!selectedCharacter || !currentProject) return;
 
+    let updatedCharacters: Character[];
     if (showNewCharacterForm) {
       // Fire tour trigger on first character added
       if (characters.length === 0) {
         triggerCharactersAdded();
       }
 
-      setCharacters([...characters, selectedCharacter]);
+      updatedCharacters = [...characters, selectedCharacter];
       setShowNewCharacterForm(false);
     } else {
-      setCharacters(characters.map((c) => (c.id === selectedCharacter.id ? selectedCharacter : c)));
+      updatedCharacters = characters.map((c) =>
+        c.id === selectedCharacter.id ? selectedCharacter : c,
+      );
     }
+
+    // Update local state
+    setCharacters(updatedCharacters);
+
+    // Persist to project store
+    updateProject({
+      ...currentProject,
+      characters: updatedCharacters as never[],
+      updatedAt: Date.now(),
+    });
 
     setIsEditing(false);
     showToast(`${selectedCharacter.name || 'Character'} saved`, 'success');
@@ -70,8 +91,21 @@ const CharacterManager: React.FC = () => {
 
   // Delete character
   const deleteCharacter = (characterId: string) => {
+    if (!currentProject) return;
+
     if (confirm('Delete this character? This cannot be undone.')) {
-      setCharacters(characters.filter((c) => c.id !== characterId));
+      const updatedCharacters = characters.filter((c) => c.id !== characterId);
+
+      // Update local state
+      setCharacters(updatedCharacters);
+
+      // Persist to project store
+      updateProject({
+        ...currentProject,
+        characters: updatedCharacters as never[],
+        updatedAt: Date.now(),
+      });
+
       if (selectedCharacter?.id === characterId) {
         setSelectedCharacter(null);
       }
