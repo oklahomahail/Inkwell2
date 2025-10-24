@@ -61,7 +61,7 @@ function _calculateWordCount(text: string): number {
 /* ========= Store Implementation ========= */
 export const useChaptersStore = create<ChaptersStore>()(
   devtools(
-    (set, _get) => ({
+    (_set, _get) => ({
       // Initial State
       chapters: [],
       currentChapterId: null,

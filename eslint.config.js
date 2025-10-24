@@ -23,6 +23,7 @@ export default [
       'verbose/**',
       'playwright-report/**',
       'pnpm-lock.yaml',
+      'src/bench/**', // Migrated from .eslintignore
     ],
   },
 
