@@ -2,14 +2,28 @@
 import { PlusCircle, FileText, Clock, BarChart3, BookOpen, Download } from 'lucide-react';
 import React from 'react';
 
-// Import the context hook directly - make sure there's only one import
 import ExportReadyBadge from '@/components/Badges/ExportReadyBadge';
 import Welcome from '@/components/Dashboard/Welcome';
 import { useAppContext } from '@/context/AppContext';
+import { useChapterCount, useLastEditedChapter } from '@/context/ChaptersContext';
 import { triggerOnProjectCreated } from '@/utils/tourTriggers';
+
+// Helper to format relative time
+const timeAgo = (isoString: string): string => {
+  const minutes = Math.max(1, Math.round((Date.now() - new Date(isoString).getTime()) / 60000));
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  const days = Math.round(hours / 24);
+  return `${days} day${days > 1 ? 's' : ''} ago`;
+};
 
 const DashboardPanel: React.FC = () => {
   const { state, currentProject, addProject, setCurrentProjectId } = useAppContext();
+
+  // Chapter statistics (with safe fallback for undefined projectId)
+  const chapterCount = useChapterCount(currentProject?.id ?? '');
+  const lastEditedChapter = useLastEditedChapter(currentProject?.id ?? '');
 
   const createNewProject = () => {
     const newProject = {
@@ -64,31 +78,59 @@ const DashboardPanel: React.FC = () => {
               }}
             />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="flex items-center gap-3">
               <FileText className="w-5 h-5 text-blue-500" />
               <div>
-                <p className="text-sm text-gray-500">Word Count</p>
-                <p className="font-semibold">{currentProject.content?.split(' ').length || 0}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Word Count</p>
+                <p className="font-semibold dark:text-white">
+                  {currentProject.content?.split(' ').length || 0}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <BookOpen className="w-5 h-5 text-indigo-500" />
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Chapters</p>
+                <p className="font-semibold dark:text-white">{chapterCount}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Clock className="w-5 h-5 text-green-500" />
               <div>
-                <p className="text-sm text-gray-500">Characters</p>
-                <p className="font-semibold">{currentProject.characters?.length || 0}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Characters</p>
+                <p className="font-semibold dark:text-white">
+                  {currentProject.characters?.length || 0}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <BarChart3 className="w-5 h-5 text-purple-500" />
               <div>
-                <p className="text-sm text-gray-500">Last Updated</p>
-                <p className="font-semibold">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Last Updated</p>
+                <p className="font-semibold dark:text-white">
                   {new Date(currentProject.updatedAt).toLocaleDateString()}
                 </p>
               </div>
             </div>
           </div>
+
+          {/* Last Edited Chapter Info */}
+          {lastEditedChapter && (
+            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Last Edited Chapter</p>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    {lastEditedChapter.title}
+                  </p>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {timeAgo(lastEditedChapter.updatedAt)}
+                </div>
+              </div>
+            </div>
+          )}
           <div className="mt-4 flex gap-3">
             <button
               onClick={() => {

@@ -1,9 +1,10 @@
 // src/components/Panels/AnalysisPanel.tsx - Upgraded Version
-import { BarChart3, TrendingUp, Clock, Target } from 'lucide-react';
+import { BarChart3, TrendingUp, Clock, Target, BookOpen, FileText } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import WritingAnalyticsView from '@/components/Analytics/WritingAnalyticsView';
 import { useAppContext } from '@/context/AppContext';
+import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 import { triggerAnalyticsVisited } from '@/utils/tourTriggers';
 
 interface WritingSession {
@@ -14,48 +15,24 @@ interface WritingSession {
 
 const AnalyticsPanel: React.FC = () => {
   const { state, currentProject } = useAppContext();
-  const [sessions, setSessions] = useState<WritingSession[]>([]);
   const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('advanced');
+
+  // Get comprehensive analytics with chapter integration
+  const analytics = useProjectAnalytics(currentProject?.id ?? state.currentProjectId ?? '');
 
   // Fire tour trigger on component mount
   useEffect(() => {
     triggerAnalyticsVisited();
   }, []);
 
-  useEffect(() => {
-    const savedSessions = localStorage.getItem(
-      `sessions-${currentProject?.id ?? state.currentProjectId ?? 'default'}`,
-    );
-    if (savedSessions) {
-      try {
-        const parsed: WritingSession[] = JSON.parse(savedSessions);
-        const cleaned = parsed.filter(
-          (s) => typeof s.date === 'string' && typeof s.wordCount === 'number',
-        );
-        setSessions(cleaned);
-      } catch {
-        setSessions([]);
-      }
-    }
-  }, [currentProject?.id, state.currentProjectId]);
-
   // If we have a current project with enhanced analytics, use the advanced view
   const hasEnhancedAnalytics = currentProject && 'sessions' in currentProject;
 
-  // Simple Analytics View (your existing component, enhanced)
+  // Simple Analytics View (enhanced with chapter integration)
   const SimpleAnalyticsView = () => {
-    const totalWords = sessions.reduce((acc, session) => acc + (session.wordCount || 0), 0);
-    const totalDays = sessions.length;
-    const averageWordsPerDay = totalDays > 0 ? Math.round(totalWords / totalDays) : 0;
+    const { totals, chapters, notice } = analytics;
 
-    // Fallback: If no sessions but document has words, show document stats
-    const docWords = currentProject?.content?.split(' ').length || 0;
-    const showFallback = sessions.length === 0 && docWords > 0;
-    const displayTotalWords = showFallback ? docWords : totalWords;
-    const displayDays = showFallback ? 1 : totalDays;
-    const displayAverage = showFallback ? docWords : averageWordsPerDay;
-
-    const sortedSessions = [...sessions].sort(
+    const sortedSessions = [...analytics.sessions].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
 
@@ -96,6 +73,21 @@ const AnalyticsPanel: React.FC = () => {
           )}
         </div>
 
+        {/* Notice about data source */}
+        {notice && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="flex items-center gap-3">
+              <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <div>
+                <div className="text-sm font-medium text-blue-900 dark:text-blue-100">{notice}</div>
+                <div className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                  Start typing to record writing sessions automatically.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
@@ -106,7 +98,7 @@ const AnalyticsPanel: React.FC = () => {
               <div className="text-sm text-gray-500 dark:text-gray-400">Total Words</div>
             </div>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {displayTotalWords.toLocaleString()}
+              {totals.totalWords.toLocaleString()}
             </div>
           </div>
 
@@ -117,7 +109,9 @@ const AnalyticsPanel: React.FC = () => {
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">Writing Days</div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{displayDays}</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              {totals.daysWithWriting}
+            </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
@@ -127,7 +121,9 @@ const AnalyticsPanel: React.FC = () => {
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">Daily Average</div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{displayAverage}</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              {totals.dailyAvg.toLocaleString()}
+            </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
@@ -138,28 +134,71 @@ const AnalyticsPanel: React.FC = () => {
               <div className="text-sm text-gray-500 dark:text-gray-400">Streak</div>
             </div>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {Math.min(displayDays, 7)} days
+              {totals.streak} day{totals.streak !== 1 ? 's' : ''}
             </div>
           </div>
         </div>
 
-        {/* Fallback data notice */}
-        {showFallback && (
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+        {/* Chapter Stats Section */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Chapter Statistics
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="flex items-center gap-3">
-              <BarChart3 className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+              <div className="p-2 bg-indigo-100 dark:bg-indigo-900 rounded-lg">
+                <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              </div>
               <div>
-                <div className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
-                  Session Tracking Starting
-                </div>
-                <div className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
-                  Analytics will track your writing sessions going forward. Keep writing to build
-                  your analytics history!
+                <div className="text-sm text-gray-500 dark:text-gray-400">Chapters</div>
+                <div className="text-xl font-bold text-gray-900 dark:text-white">
+                  {chapters.chapterCount}
                 </div>
               </div>
             </div>
+
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Manuscript Words</div>
+                <div className="text-xl font-bold text-gray-900 dark:text-white">
+                  {chapters.chapterWords.toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-teal-100 dark:bg-teal-900 rounded-lg">
+                <Target className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Avg Words/Chapter</div>
+                <div className="text-xl font-bold text-gray-900 dark:text-white">
+                  {chapters.avgWordsPerChapter.toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Longest Chapter</div>
+                <div className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[120px]">
+                  {chapters.longestChapter?.title ?? '—'}
+                </div>
+                {chapters.longestChapter && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {chapters.longestChapter.wordCount.toLocaleString()} words
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        )}
+        </div>
 
         {/* Recent Sessions */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
@@ -213,7 +252,7 @@ const AnalyticsPanel: React.FC = () => {
                       <span className="text-sm font-semibold text-gray-900 dark:text-white">
                         {session.wordCount} words
                       </span>
-                      {session.wordCount > averageWordsPerDay && (
+                      {session.wordCount > totals.dailyAvg && totals.dailyAvg > 0 && (
                         <TrendingUp className="w-4 h-4 text-green-500" />
                       )}
                     </div>

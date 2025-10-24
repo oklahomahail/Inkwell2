@@ -126,6 +126,79 @@ export function useChapters() {
   return context;
 }
 
+// ============================================================================
+// PHASE 1: Dashboard & Analytics Integration Selectors
+// ============================================================================
+
+/**
+ * Get all chapters for a project as an array
+ */
+export function useChapterList(projectId: string): ChapterMeta[] {
+  const { getChapters } = useChapters();
+  return getChapters(projectId);
+}
+
+/**
+ * Get chapter count for a project
+ */
+export function useChapterCount(projectId: string): number {
+  const { getChapterCount } = useChapters();
+  return getChapterCount(projectId);
+}
+
+/**
+ * Get the most recently edited chapter for a project
+ */
+export function useLastEditedChapter(projectId: string): ChapterMeta | undefined {
+  const chapters = useChapterList(projectId);
+  if (chapters.length === 0) return undefined;
+
+  return chapters.slice().sort((a, b) => {
+    const dateA = new Date(a.updatedAt).getTime();
+    const dateB = new Date(b.updatedAt).getTime();
+    return dateB - dateA;
+  })[0];
+}
+
+/**
+ * Get comprehensive chapter word count statistics for analytics
+ */
+export function useChapterWordTotals(projectId: string) {
+  const chapters = useChapterList(projectId);
+
+  const total = chapters.reduce((n, c) => n + (c.wordCount || 0), 0);
+  const count = chapters.length;
+  const avg = count > 0 ? Math.round(total / count) : 0;
+  const longest = chapters.reduce((max, c) => (c.wordCount > max.wordCount ? c : max), {
+    id: '',
+    title: '',
+    wordCount: 0,
+  } as ChapterMeta);
+
+  return {
+    total,
+    avg,
+    longest: longest.wordCount > 0 ? longest : undefined,
+    count,
+  };
+}
+
+/**
+ * Get the currently active chapter
+ */
+export function useActiveChapter(): ChapterMeta | undefined {
+  const { getActiveChapter } = useChapters();
+  return getActiveChapter();
+}
+
+/**
+ * Get active chapter ID
+ */
+export function useActiveChapterId(): string | undefined {
+  const { state } = useChapters();
+  return state.activeId;
+}
+
 // Action creators for convenience
 export const chaptersActions = {
   loadForProject: (projectId: string, chapters: ChapterMeta[]) => ({
