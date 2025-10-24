@@ -11,7 +11,6 @@ import './index.css';
 
 // Initialize feature flags system
 import './utils/flags';
-
 // Initialize storage persistence and monitoring
 import { warnIfDifferentOrigin } from './utils/storage/originGuard';
 import { ensurePersistentStorage } from './utils/storage/persistence';

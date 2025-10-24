@@ -37,7 +37,9 @@ export function getOriginInfo(): OriginInfo {
 
   return {
     current,
-    expected: import.meta.env.PROD ? EXPECTED_PROD_ORIGIN : EXPECTED_DEV_ORIGINS[0],
+    expected: import.meta.env.PROD
+      ? EXPECTED_PROD_ORIGIN
+      : (EXPECTED_DEV_ORIGINS[0] ?? 'http://localhost:5173'),
     isProduction,
     isDevelopment,
     isPreview,

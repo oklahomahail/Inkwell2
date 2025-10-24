@@ -89,7 +89,10 @@ export default function AiSettingsPanel() {
                 }`}
                 onClick={() => {
                   setProvider(p);
-                  setModel(PROVIDER_MODELS[p].models[0].id);
+                  const firstModel = PROVIDER_MODELS[p].models[0];
+                  if (firstModel) {
+                    setModel(firstModel.id);
+                  }
                 }}
               >
                 {PROVIDER_MODELS[p].label}
