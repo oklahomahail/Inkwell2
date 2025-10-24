@@ -766,7 +766,7 @@ class SmartSearchService {
   }
 
   private escapeRegExp(string: string): string {
-    return string.replace(/[.*+?^${}|[\]\\]/g, '\\$&'); // $& refers to the matched string
+    return string.replace(/[.*+?^${}()|\[\]\\]/g, (match) => '\\' + match);
   }
 
   private calculateStringSimilarity(str1: string, str2: string): number {
