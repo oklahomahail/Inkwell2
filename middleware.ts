@@ -5,8 +5,8 @@ export const config = {
   // Only apply middleware to HTML document navigations - skip for all static assets
   matcher: [
     // Match all paths except API routes, Next internals, and files with extensions
-    // Non-capturing group wraps the negative lookahead
-    '/(?:(?!api|_next/static|_next/image|favicon.ico|.*\\.).*)',
+    // The trailing .* actually consumes the path after the negative lookahead
+    '/(?:(?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
   ],
 };
 
