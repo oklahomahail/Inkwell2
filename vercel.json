@@ -1,5 +1,10 @@
 {
   "version": 2,
-  "rewrites": [{ "source": "/:path*", "destination": "/" }],
+  "rewrites": [
+    {
+      "source": "/((?!_next/|assets/|brand/|icons/|logo/|.*\\..*).*)",
+      "destination": "/"
+    }
+  ],
   "cleanUrls": true
 }

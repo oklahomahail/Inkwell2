@@ -43,7 +43,16 @@ if (import.meta.env.VITE_SENTRY_DSN) {
   console.log('ℹ️ Sentry monitoring disabled (no VITE_SENTRY_DSN)');
 }
 
-createRoot(document.getElementById('root')!).render(
+// Safety net: ensure root element exists
+const rootEl = document.getElementById('root');
+if (!rootEl) {
+  // If we land on a stray HTML without root, hard-reload to index.html
+  console.error('[BOOT] Root element not found; reloading to index.html');
+  window.location.replace('/');
+  throw new Error('Root element not found; reloading to index.html');
+}
+
+createRoot(rootEl).render(
   <StrictMode>
     <BrowserRouter>
       <AppProviders>
