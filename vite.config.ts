@@ -7,14 +7,13 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vitest/config';
 
-/* Use Vite's import.meta.env in configuration files instead of Node's `process.env` */
-// Check if environment variables exist in a way that won't throw when undefined
-const hasSupabaseUrl =
-  typeof import.meta.env !== 'undefined' && 'VITE_SUPABASE_URL' in import.meta.env;
-const hasSupabaseKey =
-  typeof import.meta.env !== 'undefined' && 'VITE_SUPABASE_ANON_KEY' in import.meta.env;
+/* In vite.config.ts, we use process.env (Node.js) since import.meta.env is not available during build config */
+// Only warn if we're in development mode - in production/CI, env vars are injected at build time
+const isDev = process.env.NODE_ENV === 'development';
+const hasSupabaseUrl = Boolean(process.env.VITE_SUPABASE_URL);
+const hasSupabaseKey = Boolean(process.env.VITE_SUPABASE_ANON_KEY);
 
-if (!hasSupabaseUrl || !hasSupabaseKey) {
+if (isDev && (!hasSupabaseUrl || !hasSupabaseKey)) {
   console.warn(
     'Warning: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is not set. Authentication will fail at runtime.',
   );
