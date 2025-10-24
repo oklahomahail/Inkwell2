@@ -1,34 +1,22 @@
 {
   "name": "Inkwell",
   "short_name": "Inkwell",
-  "description": "Local-first writing platform by Track15.",
+  "description": "Find your story, weave it well.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#FAFAFA",
-  "theme_color": "#13294B",
+  "background_color": "#FFFFFF",
+  "theme_color": "#1B2A41",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/assets/brand/inkwell-logo-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-128x128.png",
-      "sizes": "128x128",
+      "src": "/assets/brand/inkwell-logo-icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }

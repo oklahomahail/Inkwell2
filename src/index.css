@@ -9,12 +9,67 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Brand Component Utilities */
+@layer components {
+  /* Header: thin brand top-border or soft gradient */
+  .ink-header {
+    @apply bg-surface-2 shadow-subtle border-b-subtle border-b;
+
+    background-image: linear-gradient(
+      to right,
+      hsl(var(--ink-50)),
+      white 25%,
+      white 75%,
+      hsl(var(--ink-50))
+    );
+    background-size: 100% 100%;
+  }
+
+  .ink-header--simple {
+    @apply bg-surface-2 border-b-2;
+
+    border-color: hsl(var(--ink-500));
+    background-image: none;
+  }
+
+  /* Sidebar base */
+  .ink-sidebar {
+    @apply bg-surface-2 text-text-2 border-r border-subtle;
+  }
+
+  /* Nav items */
+  .ink-nav-item {
+    @apply flex items-center gap-3 rounded-xl px-3 py-2 text-text-2 hover:bg-ink-50 hover:text-ink-700;
+  }
+
+  .ink-nav-item--active {
+    @apply bg-ink-50 text-ink-700 font-medium;
+  }
+
+  .ink-nav-icon {
+    @apply h-4 w-4 text-ink-600;
+  }
+
+  .ink-nav-icon--active {
+    @apply text-ink-700;
+  }
+
+  /* Primary button aligns with brand */
+  .ink-btn {
+    @apply inline-flex items-center justify-center rounded-lg px-3 py-2 text-white bg-ink-600 hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60;
+  }
+
+  .ink-btn-outline {
+    @apply inline-flex items-center justify-center rounded-lg px-3 py-2 text-ink-700 border border-ink-200 bg-white hover:bg-ink-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60;
+  }
+}
+
 /* Inkwell Brand CSS Variables - Light Theme Only */
 :root {
   --font-serif: 'Source Serif Pro', ui-serif, georgia, serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-  /* Brand Colors */
+  /* Legacy Brand Colors (kept for compatibility) */
   --color-navy: #0c1c3d;
   --color-gold: #d4a537;
   --color-charcoal: #222;
@@ -25,6 +80,51 @@
   --ink-fg-muted: #475569;
   --ink-bg: #fff;
   --ink-paper: #fff;
+
+  /* New Brand Blue Scale (roughly Tailwind blue-600 family) */
+  --ink-50: 214 95% 98%;
+  --ink-100: 213 96% 93%;
+  --ink-200: 214 95% 87%;
+  --ink-300: 213 94% 82%;
+  --ink-400: 217 91% 66%;
+  --ink-500: 221 83% 53%; /* main brand blue */
+  --ink-600: 224 76% 48%;
+  --ink-700: 226 71% 40%;
+  --ink-800: 224 64% 33%;
+  --ink-900: 227 58% 25%;
+
+  /* Feather gold */
+  --gold-400: 43 96% 56%;
+  --gold-500: 41 96% 50%;
+
+  /* Surfaces & text (light mode) */
+  --surface-0: 0 0% 100%;
+  --surface-1: 210 20% 99%;
+  --surface-2: 210 20% 98%;
+  --surface-3: 210 18% 96%;
+  --surface-inverse: 0 0% 10%;
+  --text-1: 222 47% 11%;
+  --text-2: 215 16% 42%;
+  --text-inverse: 0 0% 100%;
+  --border-subtle: 214 15% 90%;
+  --border-strong: 215 20% 84%;
+  --shadow-subtle: 220 14% 96% / 0.6;
+  --ring: 221 83% 53%;
+}
+
+/* Dark mode variables */
+.dark {
+  --surface-0: 225 14% 12%;
+  --surface-1: 225 14% 14%;
+  --surface-2: 225 14% 16%;
+  --surface-3: 225 14% 18%;
+  --surface-inverse: 0 0% 100%;
+  --text-1: 210 20% 98%;
+  --text-2: 214 14% 74%;
+  --text-inverse: 222 47% 11%;
+  --border-subtle: 225 10% 22%;
+  --border-strong: 225 10% 28%;
+  --shadow-subtle: 225 10% 8% / 0.7;
 }
 
 /* Global font fallback and base layout tweaks */
