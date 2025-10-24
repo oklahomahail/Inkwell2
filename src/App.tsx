@@ -18,6 +18,7 @@ import {
   OfflineBanner,
   useStorageRecovery,
 } from './components/Recovery/StorageRecoveryBanner';
+import { StorageBanner } from './components/Storage/StorageBanner';
 import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
 // Context and providers
@@ -27,6 +28,7 @@ import { useEditorContext } from './context/EditorContext';
 // Route guards
 // Tutorial Router
 // Pages
+import { usePrivateModeWarning } from './hooks/usePrivateModeWarning';
 import AuthCallback from './pages/AuthCallback';
 import BrandPage from './pages/Brand';
 import ForgotPassword from './pages/ForgotPassword';
@@ -216,6 +218,9 @@ function ProfileAppShell() {
   // storage recovery
   const { showRecoveryBanner, dismissRecoveryBanner } = useStorageRecovery();
 
+  // Private mode warning - warns before closing if in private mode
+  usePrivateModeWarning(false); // Can be enhanced to track actual unsaved changes
+
   // connectivity
   const [connectivityStatus, setConnectivityStatus] = useState<ConnectivityStatus>({
     isOnline: true,
@@ -275,6 +280,9 @@ function ProfileAppShell() {
         id="tour-viewport-anchor"
         style={{ position: 'fixed', inset: 0, pointerEvents: 'none' }}
       />
+
+      {/* Storage Health Banner - shows warnings about private mode, non-persistent storage, etc */}
+      <StorageBanner />
 
       {/* Storage Recovery Banner */}
       {showRecoveryBanner && <StorageRecoveryBanner onDismiss={dismissRecoveryBanner} />}

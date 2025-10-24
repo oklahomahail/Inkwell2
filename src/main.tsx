@@ -12,6 +12,23 @@ import './index.css';
 // Initialize feature flags system
 import './utils/flags';
 
+// Initialize storage persistence and monitoring
+import { warnIfDifferentOrigin } from './utils/storage/originGuard';
+import { ensurePersistentStorage } from './utils/storage/persistence';
+
+// Request persistent storage and check origin
+ensurePersistentStorage().then((result) => {
+  if (result.persisted) {
+    console.log('✅ [Inkwell] Storage locked in - your data is safe!');
+  } else if (result.supported) {
+    console.warn(
+      '⚠️ [Inkwell] Storage persistence not granted - data may be cleared under storage pressure',
+    );
+  }
+});
+
+warnIfDifferentOrigin();
+
 // Initialize Sentry for error tracking and performance monitoring
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
