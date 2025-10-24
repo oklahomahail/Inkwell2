@@ -37,8 +37,8 @@ export interface StorageHealth {
   warnings: string[];
 }
 
-const DB_NAME = 'inkwell_v1';
-const DB_VERSION = 3;
+export const DB_NAME = 'inkwell_v1';
+export const DB_VERSION = 3;
 const EXPECTED_PROD_ORIGIN = 'https://inkwell.leadwithnexus.com';
 
 /**
