@@ -76,12 +76,9 @@ function ProfilePicker() {
             await syncLastProfileToUserMetadata(profileId);
             await setActiveProfile(profileId);
 
-            // Modify the path to include the profile ID
-            const profilePath = `/p/${profileId}${path}`;
-            console.log(`[ProfilePicker] Auto-resolving to path: ${profilePath}`);
-
-            // Navigate to the resolved path
-            go(profilePath, { replace: true });
+            // Navigate to dashboard (no longer using profile-based paths)
+            console.log(`[ProfilePicker] Auto-resolving to dashboard`);
+            go('/dashboard', { replace: true });
           }
         } catch (error) {
           console.error('[ProfilePicker] Error auto-resolving profile:', error);

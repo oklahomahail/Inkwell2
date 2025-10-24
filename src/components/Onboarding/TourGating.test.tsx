@@ -266,9 +266,9 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       // Mock window.location
       Object.defineProperty(window, 'location', {
         value: {
-          href: 'http://localhost/p/123/writing',
+          href: 'http://localhost/dashboard',
           origin: 'http://localhost',
-          pathname: '/p/123/writing',
+          pathname: '/dashboard',
           search: '',
           hash: '',
         },
@@ -276,7 +276,7 @@ describe('Tour Gating + First-run Flow (A1)', () => {
       });
 
       const TestComponent = () => (
-        <MemoryRouter initialEntries={['/p/123/writing']}>
+        <MemoryRouter initialEntries={['/dashboard']}>
           <ProfileProvider>
             <TourProvider>
               <ProfileTourProvider>

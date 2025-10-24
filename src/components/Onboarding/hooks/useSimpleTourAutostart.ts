@@ -12,7 +12,7 @@ import { hasStartedOnce, markStarted } from '../utils/tourOnce';
 import { isSuppressed } from './tourHookUtils';
 
 // Allowlist of routes where autostart is permitted
-const AUTOSTART_ALLOW = ['/p/:id/writing', '/p/:id/timeline', '/p/:id/analysis', '/p/:id/planning'];
+const AUTOSTART_ALLOW = ['/dashboard'];
 
 function isAutostartAllowed(pathname: string) {
   return AUTOSTART_ALLOW.some((p) => match(p, { decode: decodeURIComponent })(pathname));

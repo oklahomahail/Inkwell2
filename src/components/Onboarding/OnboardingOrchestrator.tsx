@@ -12,7 +12,7 @@ import { shouldShowTourPrompt as gatingShouldShow, setPromptedThisSession } from
 import TourOverlay from './TourOverlay';
 
 // Allowlist for first-time onboarding - keep this very restrictive
-const FIRST_TIME_ALLOWED = ['/p/:id/writing'];
+const FIRST_TIME_ALLOWED = ['/dashboard'];
 
 function isFirstTimeAllowed(pathname: string) {
   return FIRST_TIME_ALLOWED.some((p) => match(p, { decode: decodeURIComponent })(pathname));
