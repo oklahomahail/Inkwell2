@@ -1,9 +1,11 @@
 // src/components/Dashboard/EnhancedDashboard.tsx
-import { PlusCircle, FileText, BarChart3, Target, Zap, Star, ArrowRight } from 'lucide-react';
-import React, { useState } from 'react';
+import { PlusCircle, FileText, BarChart3, Target, Zap, Star, ArrowRight, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 import { InkwellFeather } from '@/components/icons';
 import type { InkwellIconName } from '@/components/icons/InkwellFeather';
+import StatusChip from '@/components/Storage/StatusChip';
+import { StorageHealthWidget } from '@/components/Storage/StorageHealthWidget';
 import { useAppContext, View } from '@/context/AppContext';
 import { useTourStartupFromUrl } from '@/hooks/useTourStartupFromUrl';
 import { triggerOnProjectCreated } from '@/utils/tourTriggers';
@@ -11,9 +13,28 @@ import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 const EnhancedDashboard: React.FC = () => {
   const { state, currentProject, addProject, setCurrentProjectId, dispatch } = useAppContext();
   const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const [storageModalOpen, setStorageModalOpen] = useState(false);
 
   // Check for tour=start in URL and trigger tour if found
   useTourStartupFromUrl();
+
+  // Handle URL parameter and keyboard shortcut for storage modal
+  useEffect(() => {
+    // Check for ?storage=1 in URL
+    if (new URLSearchParams(window.location.search).get('storage') === '1') {
+      setStorageModalOpen(true);
+    }
+
+    // Keyboard shortcut: Cmd/Ctrl + Shift + S
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        setStorageModalOpen((v) => !v);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const createNewProject = async () => {
     setIsCreatingProject(true);
@@ -221,29 +242,69 @@ const EnhancedDashboard: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
-          <button
-            onClick={createNewProject}
-            disabled={isCreatingProject}
-            className="btn btn-primary"
-            data-tour="new-project-button"
-          >
-            {isCreatingProject ? (
-              <>
-                <div className="loading w-4 h-4" />
-                Creating...
-              </>
-            ) : (
-              <>
-                <PlusCircle className="w-4 h-4" />
-                New Project
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-3">
+            <StatusChip onClick={() => setStorageModalOpen(true)} />
+            <button
+              onClick={createNewProject}
+              disabled={isCreatingProject}
+              className="btn btn-primary"
+              data-tour="new-project-button"
+            >
+              {isCreatingProject ? (
+                <>
+                  <div className="loading w-4 h-4" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <PlusCircle className="w-4 h-4" />
+                  New Project
+                </>
+              )}
+            </button>
+          </div>
         </div>
         <p className="text-base text-slate-600 dark:text-slate-400">
           Welcome back! Here's your writing overview and recent activity.
         </p>
       </div>
+
+      {/* Storage Health Modal */}
+      {storageModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setStorageModalOpen(false)}
+          />
+          <div className="relative z-10 w-[680px] max-w-[92vw] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
+                Storage Health
+              </h2>
+              <button
+                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                onClick={() => setStorageModalOpen(false)}
+                aria-label="Close storage health modal"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mb-6 text-sm text-slate-600 dark:text-slate-400">
+              Monitor your browser storage status, persistence, and quota usage. Press{' '}
+              <kbd className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium dark:bg-slate-800">
+                Cmd/Ctrl+Shift+S
+              </kbd>{' '}
+              to toggle this panel.
+            </p>
+
+            <StorageHealthWidget />
+          </div>
+        </div>
+      )}
 
       {/* Current Project Highlight */}
       {currentProject && (

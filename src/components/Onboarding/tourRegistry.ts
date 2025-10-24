@@ -108,6 +108,24 @@ export const INKWELL_SPOTLIGHT_STEPS: TourStep[] = [
     category: 'onboarding',
   },
   {
+    id: 'storage-safety',
+    title: 'A Quick Note About Saving Your Work',
+    content:
+      'Inkwell saves everything automatically in your browser. Private or Incognito windows erase data when closed. For lasting drafts, use a normal window or enable cloud backup in Settings.',
+    placement: 'center',
+    delay: 500,
+    category: 'onboarding',
+    actions: [
+      {
+        label: 'Open in Normal Window',
+        action: 'custom',
+        handler: () => {
+          window.open(window.location.href, '_blank', 'noopener,noreferrer');
+        },
+      },
+    ],
+  },
+  {
     id: 'create-project',
     title: 'Create Your First Project',
     content: 'Click New Project, give it a title, and it will appear right here on your dashboard.',
