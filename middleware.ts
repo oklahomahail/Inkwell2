@@ -4,8 +4,8 @@
 export const config = {
   // Only apply middleware to HTML document navigations - skip for all static assets
   matcher: [
-    // Match all paths that are NOT static assets or API routes
-    '/((?!api|_next|assets|brand|icons|logo|.*\\.(js|json|css|png|jpg|jpeg|svg|ico|webp|webmanifest|map|txt)).*)',
+    // Match all paths that are NOT static assets or API routes (using non-capturing group)
+    '/(?:(?!api|_next|assets|brand|icons|logo|.*\\.(js|json|css|png|jpg|jpeg|svg|ico|webp|webmanifest|map|txt)).*)',
   ],
 };
 
