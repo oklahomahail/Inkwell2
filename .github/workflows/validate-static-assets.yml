@@ -22,10 +22,17 @@ jobs:
       - name: Check static asset content types
         run: |
           echo "Validating static assets at ${{ steps.deployment-url.outputs.url }}"
-          
+
           # Get the main page
           MAIN_PAGE=$(curl -s "${{ steps.deployment-url.outputs.url }}")
-          
+
+          # Check if deployment is protected (behind auth)
+          if echo "$MAIN_PAGE" | grep -q "Authentication Required"; then
+            echo "⚠️  Deployment is protected - skipping validation for preview deployments"
+            echo "This is expected for preview deployments with Vercel Protection enabled"
+            exit 0
+          fi
+
           # Extract a JS asset path
           JS_ASSET=$(echo "$MAIN_PAGE" | grep -o '/assets/[^"]*\.js' | head -1)
           if [ -z "$JS_ASSET" ]; then
