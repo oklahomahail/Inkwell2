@@ -21,7 +21,7 @@ function ProfileSwitcher({ className = '' }: ProfileSwitcherProps) {
   const handleProfileSwitch = async (profile: Profile) => {
     try {
       await setActiveProfile(profile.id);
-      go(`/p/${profile.id}/dashboard`);
+      go('/dashboard');
       setIsOpen(false);
     } catch (error) {
       console.error('Failed to switch profile:', error);

@@ -88,7 +88,7 @@ function TutorialPage() {
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             The tutorial "{slug}" could not be found.
           </p>
-          <Navigate to={`/p/${activeProfile.id}/tutorials`} replace />
+          <Navigate to="/dashboard" replace />
         </div>
       </div>
     );
@@ -199,8 +199,8 @@ function TutorialIndexComponent() {
 
     await (startTour as any)(tourType, tourSteps);
 
-    // Navigate to the tutorial page
-    window.location.href = `/p/${activeProfile?.id}/tutorials/${slug}`;
+    // Navigate to the dashboard (tutorials are now integrated)
+    window.location.href = '/dashboard';
   };
 
   const tutorials = [

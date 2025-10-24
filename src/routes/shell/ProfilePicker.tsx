@@ -99,7 +99,7 @@ function ProfilePicker() {
       await syncLastProfileToUserMetadata(profile.id);
 
       await setActiveProfile(profile.id);
-      go(`/p/${profile.id}/dashboard`);
+      go('/dashboard');
     } catch (error) {
       console.error('Failed to select profile:', error);
       setFormError('Failed to select profile. Please try again.');
@@ -138,11 +138,11 @@ function ProfilePicker() {
       // If create/find succeeded, try to activate. Don't show create error if this fails
       try {
         await setActiveProfile(profile.id);
-        go(`/p/${profile.id}/dashboard`);
+        go('/dashboard');
       } catch (activationError) {
         console.warn('Profile created/found but failed to set active:', activationError);
         // Still navigate - the profile exists, activation can be retried
-        go(`/p/${profile.id}/dashboard`);
+        go('/dashboard');
       }
     } catch (error: any) {
       console.error('Failed to create profile:', error);
@@ -153,7 +153,7 @@ function ProfilePicker() {
         if (existingProfile) {
           try {
             await setActiveProfile(existingProfile.id);
-            go(`/p/${existingProfile.id}/dashboard`);
+            go('/dashboard');
             return;
           } catch (activationError) {
             console.warn('Found existing profile but failed to activate:', activationError);

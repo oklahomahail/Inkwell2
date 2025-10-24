@@ -11,7 +11,6 @@ import { ExportWizardModal } from './components/ExportWizard/ExportWizardModal';
 import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
 import OnboardingOrchestrator from './components/Onboarding/OnboardingOrchestrator';
-import { TutorialRouter } from './components/Onboarding/TutorialRouter';
 import { PWAInstallButton, PWAUpdateNotification } from './components/PWA';
 import {
   StorageRecoveryBanner,
@@ -34,8 +33,6 @@ import SignUp from './pages/SignUpPage';
 import UpdatePassword from './pages/UpdatePassword';
 import AnonOnlyRoute from './routes/AnonOnlyRoute';
 import ProtectedRoute from './routes/ProtectedRoute';
-// Profile routing components
-import { ProfileGate } from './routes/shell/ProfileGate';
 // Services
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
@@ -169,41 +166,25 @@ function AppShell() {
         {/* Legacy login route - redirect to sign-in */}
         <Route path="/login" element={<Navigate to="/sign-in" replace />} />
 
-        {/* Profile-specific routes - protected */}
-        <Route
-          path="/p/:profileId/*"
-          element={
-            <ProtectedRoute>
-              <ProfileGate>
-                <Routes>
-                  {/* Tutorial routes */}
-                  <Route path="tutorials/*" element={<TutorialRouter />} />
-
-                  {/* Brand showcase route */}
-                  <Route path="brand" element={<BrandPage />} />
-
-                  {/* Main app routes */}
-                  <Route path="*" element={<ProfileAppShell />} />
-                </Routes>
-              </ProfileGate>
-            </ProtectedRoute>
-          }
-        />
-
         {/* Root redirect */}
         <Route path="/" element={<RootRedirect />} />
 
-        {/* Dashboard route with proper auth guard */}
+        {/* Dashboard route - main app */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
-              {user ? (
-                <Navigate to={`/p/${user.id}`} replace />
-              ) : (
-                // This fallback should never happen as ProtectedRoute will handle it
-                <div>Error: User is authenticated but no user ID available</div>
-              )}
+              <ProfileAppShell />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Brand showcase route */}
+        <Route
+          path="/brand"
+          element={
+            <ProtectedRoute>
+              <BrandPage />
             </ProtectedRoute>
           }
         />
