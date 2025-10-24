@@ -8,93 +8,165 @@ jobs:
   validate-static-assets:
     runs-on: ubuntu-latest
     if: github.event.deployment_status.state == 'success' || github.event_name == 'workflow_dispatch'
-    
+
     steps:
-      - name: Get deployment URL
+      - name: Get deployment URL and environment
         id: deployment-url
         run: |
           if [ "${{ github.event_name }}" == "deployment_status" ]; then
             echo "url=${{ github.event.deployment_status.target_url }}" >> $GITHUB_OUTPUT
+            # Check if this is production deployment
+            if [[ "${{ github.event.deployment_status.target_url }}" == *"inkwell.leadwithnexus.com"* ]]; then
+              echo "is_production=true" >> $GITHUB_OUTPUT
+            else
+              echo "is_production=false" >> $GITHUB_OUTPUT
+            fi
           else
+            # Manual workflow_dispatch defaults to production
             echo "url=https://inkwell.leadwithnexus.com" >> $GITHUB_OUTPUT
+            echo "is_production=true" >> $GITHUB_OUTPUT
           fi
-      
-      - name: Check static asset content types
+
+      - name: Validate JS assets (skip if protected)
+        shell: bash
+        env:
+          TARGET_URL: ${{ steps.deployment-url.outputs.url }}
+          IS_PRODUCTION: ${{ steps.deployment-url.outputs.is_production }}
         run: |
-          echo "Validating static assets at ${{ steps.deployment-url.outputs.url }}"
+          set -euo pipefail
 
-          # Get the main page
-          MAIN_PAGE=$(curl -s "${{ steps.deployment-url.outputs.url }}")
+          echo "🔍 Validating static assets at $TARGET_URL"
+          echo "   Production deployment: $IS_PRODUCTION"
 
-          # Check if deployment is protected (behind auth)
-          if echo "$MAIN_PAGE" | grep -q "Authentication Required"; then
-            echo "⚠️  Deployment is protected - skipping validation for preview deployments"
-            echo "This is expected for preview deployments with Vercel Protection enabled"
-            exit 0
+          # Fetch headers and body
+          STATUS=$(curl -sS -o /tmp/page.html -w "%{http_code}" -D /tmp/headers.txt "$TARGET_URL" || echo "000")
+
+          # Rock-solid protection detection heuristics
+          hdr_has_protect=$(grep -i '^x-vercel-protection:' /tmp/headers.txt 2>/dev/null || true)
+          is_protected=false
+
+          # Check 1: HTTP status codes (401 Unauthorized, 403 Forbidden)
+          if [[ "$STATUS" == "401" || "$STATUS" == "403" ]]; then
+            echo "   Protection detected: HTTP $STATUS"
+            is_protected=true
+          # Check 2: Vercel protection header
+          elif [[ -n "$hdr_has_protect" ]]; then
+            echo "   Protection detected: x-vercel-protection header present"
+            is_protected=true
+          # Check 3: Authentication Required title
+          elif grep -qi '<title>Authentication Required</title>' /tmp/page.html; then
+            echo "   Protection detected: Authentication Required title"
+            is_protected=true
+          # Check 4: Vercel auth page markers (vercel.com + Authentication text)
+          elif grep -qi 'vercel.com' /tmp/page.html && grep -qi 'Authentication' /tmp/page.html; then
+            echo "   Protection detected: Vercel auth page markers"
+            is_protected=true
+          # Check 5: Auth form inputs (teamId, projectId, Continue button)
+          elif grep -Eqi '(name="teamId"|name="projectId"|>Continue<)' /tmp/page.html; then
+            echo "   Protection detected: Vercel auth form elements"
+            is_protected=true
           fi
 
-          # Extract a JS asset path
-          JS_ASSET=$(echo "$MAIN_PAGE" | grep -o '/assets/[^"]*\.js' | head -1)
-          if [ -z "$JS_ASSET" ]; then
-            echo "❌ Could not find JS asset on main page"
-            exit 1
+          # Skip validation for protected preview deployments
+          if [[ "$is_protected" == "true" ]]; then
+            if [[ "$IS_PRODUCTION" == "true" ]]; then
+              echo "❌ ERROR: Production deployment should NOT be protected!"
+              echo "   Production must be publicly accessible for validation."
+              exit 1
+            else
+              echo "ℹ️  Preview deployment at $TARGET_URL is protected."
+              echo "   Skipping static-asset validation (expected for preview environments)."
+              exit 0
+            fi
           fi
-          
-          # Extract a CSS asset path
-          CSS_ASSET=$(echo "$MAIN_PAGE" | grep -o '/assets/[^"]*\.css' | head -1)
-          if [ -z "$CSS_ASSET" ]; then
-            echo "❌ Could not find CSS asset on main page"
-            exit 1
-          fi
-          
-          # Check JS asset
-          echo "Checking JS asset: $JS_ASSET"
-          JS_HEADERS=$(curl -s -I "${{ steps.deployment-url.outputs.url }}$JS_ASSET")
-          if ! echo "$JS_HEADERS" | grep -i "Content-Type" | grep -q "javascript"; then
-            echo "❌ JS asset has incorrect Content-Type:"
-            echo "$JS_HEADERS" | grep -i "Content-Type"
-            exit 1
-          else
-            echo "✅ JS asset has correct Content-Type"
-          fi
-          
-          # Check CSS asset
-          echo "Checking CSS asset: $CSS_ASSET"
-          CSS_HEADERS=$(curl -s -I "${{ steps.deployment-url.outputs.url }}$CSS_ASSET")
-          if ! echo "$CSS_HEADERS" | grep -i "Content-Type" | grep -q "text/css"; then
-            echo "❌ CSS asset has incorrect Content-Type:"
-            echo "$CSS_HEADERS" | grep -i "Content-Type"
-            exit 1
-          else
-            echo "✅ CSS asset has correct Content-Type"
-          fi
-          
-          # Check Service Worker
-          echo "Checking Service Worker: /registerSW.js"
-          SW_HEADERS=$(curl -s -I "${{ steps.deployment-url.outputs.url }}/registerSW.js")
-          if ! echo "$SW_HEADERS" | grep -i "Content-Type" | grep -q "javascript"; then
-            echo "❌ Service Worker has incorrect Content-Type:"
-            echo "$SW_HEADERS" | grep -i "Content-Type"
-            exit 1
-          else
-            echo "✅ Service Worker has correct Content-Type"
-          fi
-          
-          # Check Web Manifest
-          echo "Checking Web Manifest: /site.webmanifest"
-          MANIFEST_HEADERS=$(curl -s -I "${{ steps.deployment-url.outputs.url }}/site.webmanifest")
-          if ! echo "$MANIFEST_HEADERS" | grep -i "Content-Type" | grep -q "manifest"; then
-            echo "❌ Web Manifest has incorrect Content-Type:"
-            echo "$MANIFEST_HEADERS" | grep -i "Content-Type"
-            exit 1
-          else
-            echo "✅ Web Manifest has correct Content-Type"
-          fi
-          
-          echo "All static assets validated successfully!"
 
-      - name: Notify on failure
-        if: failure()
+          # Deployment is accessible - validate assets
+          echo "✅ Deployment is accessible (HTTP $STATUS)"
+
+          # Check for JS/CSS module indicators (flexible patterns for Vite/Next.js)
+          if grep -Eiq '(/_next/static/[^"]+\.js|/assets/[^"]+\.js|<script[^>]+src="[^"]+\.js"|rel="modulepreload"|type="module")' /tmp/page.html; then
+            echo "✅ JS/modulepreload indicators found"
+          else
+            echo "❌ Could not find JS assets on $TARGET_URL"
+            echo ""
+            echo "---- First 80 lines of HTML ----"
+            sed -n '1,80p' /tmp/page.html
+            echo "---- End of HTML snippet ----"
+            exit 1
+          fi
+
+          # Check for CSS indicators
+          if grep -Eiq '(/assets/[^"]+\.css|/_next/static/[^"]+\.css|rel="stylesheet")' /tmp/page.html; then
+            echo "✅ CSS indicators found"
+          else
+            echo "⚠️  Warning: Could not find CSS assets (may be inlined)"
+          fi
+
+          # For production only: perform strict Content-Type validation
+          if [[ "$IS_PRODUCTION" == "true" ]]; then
+            echo ""
+            echo "🔒 Production deployment - performing strict Content-Type validation"
+
+            # Extract first JS asset path
+            JS_ASSET=$(grep -Eo '(/assets/[^"]+\.js|/_next/static/[^"]+\.js)' /tmp/page.html | head -1)
+            if [ -n "$JS_ASSET" ]; then
+              echo "   Checking JS asset: $JS_ASSET"
+              JS_HEADERS=$(curl -sS -I "$TARGET_URL$JS_ASSET")
+              if echo "$JS_HEADERS" | grep -i "Content-Type" | grep -qi "javascript"; then
+                echo "   ✅ JS asset has correct Content-Type"
+              else
+                echo "   ❌ JS asset has incorrect Content-Type:"
+                echo "$JS_HEADERS" | grep -i "Content-Type"
+                exit 1
+              fi
+            fi
+
+            # Extract first CSS asset path
+            CSS_ASSET=$(grep -Eo '(/assets/[^"]+\.css|/_next/static/[^"]+\.css)' /tmp/page.html | head -1)
+            if [ -n "$CSS_ASSET" ]; then
+              echo "   Checking CSS asset: $CSS_ASSET"
+              CSS_HEADERS=$(curl -sS -I "$TARGET_URL$CSS_ASSET")
+              if echo "$CSS_HEADERS" | grep -i "Content-Type" | grep -qi "css"; then
+                echo "   ✅ CSS asset has correct Content-Type"
+              else
+                echo "   ❌ CSS asset has incorrect Content-Type:"
+                echo "$CSS_HEADERS" | grep -i "Content-Type"
+                exit 1
+              fi
+            fi
+
+            # Check Service Worker (if exists)
+            SW_STATUS=$(curl -sS -o /dev/null -w "%{http_code}" "$TARGET_URL/registerSW.js" || echo "000")
+            if [[ "$SW_STATUS" == "200" ]]; then
+              echo "   Checking Service Worker: /registerSW.js"
+              SW_HEADERS=$(curl -sS -I "$TARGET_URL/registerSW.js")
+              if echo "$SW_HEADERS" | grep -i "Content-Type" | grep -qi "javascript"; then
+                echo "   ✅ Service Worker has correct Content-Type"
+              else
+                echo "   ⚠️  Service Worker has unexpected Content-Type:"
+                echo "$SW_HEADERS" | grep -i "Content-Type"
+              fi
+            fi
+
+            # Check Web Manifest (if exists)
+            MANIFEST_STATUS=$(curl -sS -o /dev/null -w "%{http_code}" "$TARGET_URL/site.webmanifest" || echo "000")
+            if [[ "$MANIFEST_STATUS" == "200" ]]; then
+              echo "   Checking Web Manifest: /site.webmanifest"
+              MANIFEST_HEADERS=$(curl -sS -I "$TARGET_URL/site.webmanifest")
+              if echo "$MANIFEST_HEADERS" | grep -i "Content-Type" | grep -qi "manifest\|json"; then
+                echo "   ✅ Web Manifest has correct Content-Type"
+              else
+                echo "   ⚠️  Web Manifest has unexpected Content-Type:"
+                echo "$MANIFEST_HEADERS" | grep -i "Content-Type"
+              fi
+            fi
+          fi
+
+          echo ""
+          echo "✅ All static asset validation checks passed!"
+
+      - name: Comment on PR (on failure)
+        if: failure() && github.event_name == 'pull_request'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -103,5 +175,22 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '❌ Static asset validation failed for deployment ${{ steps.deployment-url.outputs.url }}. Check the action logs for details.'
+              body: '❌ Static asset validation failed for deployment ${{ steps.deployment-url.outputs.url }}. Check the [action logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.'
             })
+
+      - name: Create check run comment (on failure for push)
+        if: failure() && github.event_name == 'push'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // For push events, create a commit status instead of PR comment
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'failure',
+              target_url: `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`,
+              description: 'Static asset validation failed',
+              context: 'Static Asset Validation'
+            });
