@@ -19,7 +19,7 @@ interface AuthContextType {
  * Validates and normalizes a redirect path to prevent open redirects
  * Only allows same-origin paths starting with /
  * @param path - The path to validate
- * @returns Normalized safe path, or /profiles as fallback
+ * @returns Normalized safe path, or /dashboard as fallback
  */
 function normalizeSafeRedirect(path: string | null | undefined): string {
   if (!path) return '/dashboard';
@@ -149,11 +149,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUpWithPassword = async (email: string, password: string) => {
     console.info('[Auth] Attempting to sign up with email/password');
 
-    // Build the redirect URL for email confirmation
+    // Build the redirect URL for email confirmation with tour flag
     const origin = window.location.origin;
-    const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent('/dashboard')}`;
+    const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent('/dashboard')}&tour=1`;
 
     console.info('[Auth] Using emailRedirectTo:', callbackUrl);
+    console.info('[Auth] Tour auto-start enabled for new signups');
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -166,7 +167,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) {
       console.error('[Auth] Password sign-up failed:', error.message, error);
     } else {
-      console.info('[Auth] Password sign-up successful');
+      console.info(
+        '[Auth] Password sign-up successful - tour will auto-start after email confirmation',
+      );
     }
 
     return { error };

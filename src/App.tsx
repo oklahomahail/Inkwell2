@@ -36,7 +36,6 @@ import AnonOnlyRoute from './routes/AnonOnlyRoute';
 import ProtectedRoute from './routes/ProtectedRoute';
 // Profile routing components
 import { ProfileGate } from './routes/shell/ProfileGate';
-import { ProfilePicker } from './routes/shell/ProfilePicker';
 // Services
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
@@ -169,16 +168,6 @@ function AppShell() {
 
         {/* Legacy login route - redirect to sign-in */}
         <Route path="/login" element={<Navigate to="/sign-in" replace />} />
-
-        {/* Profile picker - protected */}
-        <Route
-          path="/profiles"
-          element={
-            <ProtectedRoute>
-              <ProfilePicker />
-            </ProtectedRoute>
-          }
-        />
 
         {/* Profile-specific routes - protected */}
         <Route

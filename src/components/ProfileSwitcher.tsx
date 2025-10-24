@@ -1,9 +1,8 @@
 // src/components/ProfileSwitcher.tsx - Profile switching component
 
-import { ChevronDown, User, Plus, Settings } from 'lucide-react';
+import { ChevronDown, User } from 'lucide-react';
 import React, { useState } from 'react';
 
-import {} from 'react-router-dom';
 import { useGo } from '@/utils/navigate';
 
 import { useProfileContext } from '../context/ProfileContext';
@@ -28,17 +27,6 @@ function ProfileSwitcher({ className = '' }: ProfileSwitcherProps) {
       console.error('Failed to switch profile:', error);
       // Could show a toast notification here
     }
-  };
-
-  const handleCreateProfile = () => {
-    go('/profiles');
-    setIsOpen(false);
-  };
-
-  const handleManageProfiles = () => {
-    // Could navigate to a profile management page in the future
-    go('/profiles');
-    setIsOpen(false);
   };
 
   // Helper to format dates that might be strings or Date objects
@@ -155,24 +143,7 @@ function ProfileSwitcher({ className = '' }: ProfileSwitcherProps) {
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="border-t border-gray-100 pt-2">
-                <button
-                  onClick={handleCreateProfile}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 transition-colors text-left"
-                >
-                  <Plus size={16} className="text-gray-500" />
-                  <span className="text-sm text-gray-700">Create new profile</span>
-                </button>
-
-                <button
-                  onClick={handleManageProfiles}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 transition-colors text-left"
-                >
-                  <Settings size={16} className="text-gray-500" />
-                  <span className="text-sm text-gray-700">Manage profiles</span>
-                </button>
-              </div>
+              {/* Actions section removed - profiles are auto-managed */}
             </div>
           </div>
         </>
