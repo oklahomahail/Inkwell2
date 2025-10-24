@@ -324,11 +324,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       {!isAuthRoute && (
         <aside
           className={cn(
-            'sidebar',
+            'sidebar ink-sidebar',
             'fixed left-0 top-0 h-full z-40',
             'transition-all duration-300 ease-in-out',
-            'bg-white dark:bg-slate-800',
-            'border-r border-slate-200 dark:border-slate-700',
             'flex flex-col',
             // Desktop behavior
             !isMobile && (sidebarCollapsed ? 'w-16' : 'w-64'),
@@ -342,26 +340,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             <div className="flex items-center justify-between">
               <div className={cn('flex items-center gap-3', sidebarCollapsed && 'justify-center')}>
                 <div className="flex-shrink-0">
-                  {sidebarCollapsed ? (
-                    <Logo
-                      variant="svg-feather-gold"
-                      size={32}
-                      className="transition-all duration-300"
-                    />
-                  ) : (
-                    <Logo
-                      variant="svg-feather-gold"
-                      size={32}
-                      className="transition-all duration-300"
-                    />
-                  )}
+                  <img
+                    src="/assets/brand/inkwell-logo-icon-64.png"
+                    alt="Inkwell"
+                    className="w-8 h-8 transition-all duration-300"
+                  />
                 </div>
                 {!sidebarCollapsed && (
                   <div className="flex flex-col min-w-0 flex-1">
-                    <h1 className="text-heading-sm text-slate-900 dark:text-white font-semibold truncate">
+                    <h1 className="text-heading-sm text-text-1 font-semibold truncate">
                       {BRAND_NAME}
                     </h1>
-                    <p className="text-caption text-slate-500 dark:text-slate-400 truncate">
+                    <p className="text-caption text-text-2 truncate">
                       {currentProject?.name || 'No project'}
                     </p>
                   </div>
@@ -435,17 +425,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                     key={item.id}
                     onClick={() => handleViewChange(item.view)}
                     className={cn(
-                      'nav-item w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all',
+                      'ink-nav-item w-full',
                       'focus-ring',
-                      isActive
-                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white',
+                      isActive && 'ink-nav-item--active',
                       sidebarCollapsed && 'justify-center',
                     )}
                     title={sidebarCollapsed ? `${item.label} (${item.shortcut})` : undefined}
                   >
                     <Icon
-                      className={cn('w-5 h-5', sidebarCollapsed ? 'mx-auto' : 'flex-shrink-0')}
+                      className={cn(
+                        isActive ? 'ink-nav-icon--active' : 'ink-nav-icon',
+                        sidebarCollapsed ? 'mx-auto' : 'flex-shrink-0',
+                      )}
                     />
                     {!sidebarCollapsed && (
                       <>
@@ -463,10 +454,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
           {/* Quick Actions */}
           {!sidebarCollapsed && (
-            <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+            <div className="p-4 border-t border-subtle">
               <div className="space-y-2">
                 <button
-                  className="w-full btn btn-primary btn-sm"
+                  className="w-full ink-btn gap-2"
                   onClick={() => {
                     // TODO: Implement create project
                     console.log('Create new project');
@@ -494,9 +485,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
           {/* Collapsed mode quick actions */}
           {sidebarCollapsed && (
-            <div className="p-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
+            <div className="p-2 border-t border-subtle space-y-2">
               <button
-                className="w-full btn btn-primary btn-sm p-2"
+                className="w-full ink-btn p-2"
                 onClick={() => {
                   // TODO: Implement create project
                   console.log('Create new project');
@@ -531,7 +522,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       >
         {/* Top Bar - only show on non-auth routes */}
         {!isAuthRoute && (
-          <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
+          <header className="sticky top-0 z-30 ink-header backdrop-blur-sm">
             <div className="px-4 md:px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
