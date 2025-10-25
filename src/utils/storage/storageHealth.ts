@@ -6,6 +6,15 @@
 import { formatBytes, getStorageQuota, isStoragePersisted } from './persistence';
 import { isLikelyPrivateMode, isRestrictedStorage } from './privateMode';
 
+/**
+ * Check if IndexedDB is available in the current environment
+ * @returns true if indexedDB is available, false otherwise
+ */
+function hasIDB(): boolean {
+  // Avoid ReferenceError in SSR/tests
+  return typeof globalThis !== 'undefined' && !!(globalThis as any).indexedDB;
+}
+
 export interface StorageHealth {
   // Database info
   dbName: string;
@@ -42,30 +51,72 @@ export const DB_VERSION = 3;
 const EXPECTED_PROD_ORIGIN = 'https://inkwell.leadwithnexus.com';
 
 /**
- * Check if IndexedDB database exists
+ * Check whether an IndexedDB database exists.
+ * Must not throw in non-browser or test environments.
  */
 async function checkDatabaseExists(dbName: string): Promise<boolean> {
-  if (!indexedDB.databases) {
-    // Fallback: try to open and check
-    return new Promise((resolve) => {
-      const req = indexedDB.open(dbName);
-      req.onsuccess = () => {
-        const exists = req.result.objectStoreNames.length > 0;
-        req.result.close();
-        resolve(exists);
-      };
-      req.onerror = () => resolve(false);
-    });
+  if (!hasIDB()) return false;
+
+  const idb: IDBFactory = (globalThis as any).indexedDB;
+
+  // Some browsers (Chromium) expose non-standard indexedDB.databases()
+
+  const maybeDatabases = (idb as any).databases;
+
+  if (typeof maybeDatabases === 'function') {
+    try {
+      const dbs = await maybeDatabases.call(idb);
+      return Array.isArray(dbs) && dbs.some((d: { name?: string }) => d?.name === dbName);
+    } catch {
+      // Fall through to open-probe
+    }
   }
 
-  const databases = await indexedDB.databases();
-  return databases.some((db) => db.name === dbName);
+  // Fallback: try open/close without creating schema
+  return new Promise((resolve) => {
+    let existed = true;
+    // Open without version to avoid upgrade if present
+    const req = idb.open(dbName);
+    req.onupgradeneeded = () => {
+      existed = false;
+    };
+    req.onsuccess = () => {
+      req.result.close();
+      resolve(existed);
+    };
+    req.onerror = () => resolve(false);
+    // Some engines fire onblocked; treat as not existing to be safe in tests
+    req.onblocked = () => resolve(false);
+  });
 }
 
 /**
  * Get comprehensive storage health status
  */
 export async function getStorageHealth(): Promise<StorageHealth> {
+  // Early return when IndexedDB is not available (SSR, tests, etc.)
+  if (!hasIDB()) {
+    return {
+      dbName: DB_NAME,
+      dbVersion: DB_VERSION,
+      dbExists: false,
+      persisted: false,
+      privateMode: false,
+      restricted: false,
+      usage: 0,
+      quota: 0,
+      percentUsed: 0,
+      usageFormatted: '0 B',
+      quotaFormatted: '0 B',
+      origin: typeof window !== 'undefined' ? window.location.origin : 'unknown',
+      isProduction: false,
+      lastChecked: new Date().toISOString(),
+      lastAutosaveAt: undefined,
+      healthy: false,
+      warnings: ['IndexedDB not available in this environment'],
+    };
+  }
+
   const [persisted, privateMode, restricted, quotaInfo, dbExists] = await Promise.all([
     isStoragePersisted(),
     isLikelyPrivateMode(),
@@ -106,7 +157,7 @@ export async function getStorageHealth(): Promise<StorageHealth> {
     warnings.push('Database not yet initialized');
   }
 
-  const origin = window.location.origin;
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'unknown';
   const isProduction = origin === EXPECTED_PROD_ORIGIN;
 
   if (import.meta.env.PROD && !isProduction) {

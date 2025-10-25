@@ -16,15 +16,47 @@ type Props = {
   className?: string;
 };
 
-const ASSET_MAP: Record<LogoVariant, { src: string; aspectRatio: number }> = {
-  'mark-light': { src: '/brand/logos/inkwell-feather-gold.svg', aspectRatio: 1 }, // square - gold feather on white
-  'mark-dark': { src: '/brand/logos/inkwell-feather-navy.svg', aspectRatio: 1 }, // square - gold feather on navy
-  'wordmark-light': { src: '/brand/logos/inkwell-wordmark-navy.svg', aspectRatio: 4 }, // wide - navy text + gold feather on white
-  'wordmark-dark': { src: '/brand/logos/inkwell-wordmark-gold.svg', aspectRatio: 4 }, // wide - gold text + feather on navy
-  'outline-dark': { src: '/brand/6.png', aspectRatio: 1 }, // square - navy outline feather
-  'outline-light': { src: '/brand/5.png', aspectRatio: 4 }, // wide - light on black
-  'svg-feather-gold': { src: '/brand/logos/inkwell-feather-gold.svg', aspectRatio: 1 },
-  'svg-feather-navy': { src: '/brand/logos/inkwell-feather-navy.svg', aspectRatio: 1 },
+const ASSET_MAP: Record<LogoVariant, { src: string; aspectRatio: number; fallback?: string }> = {
+  'mark-light': {
+    src: '/assets/brand/inkwell-logo-icon-variant-a.png',
+    aspectRatio: 1,
+    fallback: '/assets/brand/inkwell-logo-icon-512.png',
+  }, // square - gold feather on white
+  'mark-dark': {
+    src: '/assets/brand/inkwell-logo-icon-variant-b.png',
+    aspectRatio: 1,
+    fallback: '/assets/brand/inkwell-logo-icon-512.png',
+  }, // square - gold feather on navy
+  'wordmark-light': {
+    src: '/assets/brand/inkwell-logo-horizontal.png',
+    aspectRatio: 4,
+    fallback: '/assets/brand/inkwell-logo-full.png',
+  }, // wide - navy text + gold feather on white
+  'wordmark-dark': {
+    src: '/assets/brand/inkwell-logo-full.png',
+    aspectRatio: 4,
+    fallback: '/assets/brand/inkwell-logo-horizontal.png',
+  }, // wide - gold text + feather on navy
+  'outline-dark': {
+    src: '/assets/brand/inkwell-logo-icon-variant-c.png',
+    aspectRatio: 1,
+    fallback: '/assets/brand/inkwell-logo-icon-512.png',
+  }, // square - navy outline feather
+  'outline-light': {
+    src: '/assets/brand/inkwell-logo-icon-variant-d.png',
+    aspectRatio: 4,
+    fallback: '/assets/brand/inkwell-logo-icon-512.png',
+  }, // wide - light on black
+  'svg-feather-gold': {
+    src: '/assets/brand/inkwell-logo-icon-variant-a.png',
+    aspectRatio: 1,
+    fallback: '/assets/brand/inkwell-logo-icon-512.png',
+  },
+  'svg-feather-navy': {
+    src: '/assets/brand/inkwell-logo-icon-variant-b.png',
+    aspectRatio: 1,
+    fallback: '/assets/brand/inkwell-logo-icon-512.png',
+  },
 };
 
 export default function Logo({ variant, size = 48, className }: Props) {
@@ -39,18 +71,20 @@ export default function Logo({ variant, size = 48, className }: Props) {
       height={size}
       className={cn('select-none', className)}
       onError={(e) => {
-        // Try fallback to non-optimized version first
-        if (asset.src.includes('.optimized.')) {
-          e.currentTarget.src = asset.src.replace('.optimized', '');
+        const currentSrc = e.currentTarget.src;
+
+        // Try the defined fallback first
+        if (asset.fallback && !currentSrc.includes(asset.fallback)) {
+          e.currentTarget.src = asset.fallback;
         }
-        // If that fails too, use the alternate color
-        else if (asset.src.includes('gold')) {
-          e.currentTarget.src = '/brand/logos/inkwell-feather-navy.svg';
+        // Last resort: use the main logo icon
+        else if (!currentSrc.includes('inkwell-logo-icon-512.png')) {
+          e.currentTarget.src = '/assets/brand/inkwell-logo-icon-512.png';
         }
-        // Last resort: use text fallback
+        // Prevent infinite error loop
         else {
-          e.currentTarget.onerror = null; // Prevent infinite error loop
-          e.currentTarget.alt = 'Inkwell';
+          e.currentTarget.onerror = null;
+          console.error(`Failed to load logo: ${variant}`, currentSrc);
         }
       }}
     />

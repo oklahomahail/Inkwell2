@@ -4,10 +4,21 @@
  */
 
 /**
+ * Check if IndexedDB is available in the current environment
+ */
+function hasIDB(): boolean {
+  return typeof globalThis !== 'undefined' && !!(globalThis as any).indexedDB;
+}
+
+/**
  * Detect if the browser is likely in private/incognito mode.
  * This uses multiple heuristics as there's no single reliable API.
  */
 export async function isLikelyPrivateMode(): Promise<boolean> {
+  // If IndexedDB is not available, we can't determine private mode
+  if (!hasIDB()) {
+    return false;
+  }
   // Chrome/Edge Incognito allows storage API but with very limited quota
   if (navigator.storage?.estimate) {
     try {
@@ -25,12 +36,14 @@ export async function isLikelyPrivateMode(): Promise<boolean> {
   // Safari Private: IndexedDB throws or has issues
   try {
     const testDbName = 'inkwell_private_probe';
-    const req = indexedDB.open(testDbName);
+    const idb = (globalThis as any).indexedDB;
+    const req = idb.open(testDbName);
 
     await new Promise<void>((resolve, reject) => {
       req.onsuccess = () => {
         req.result.close();
-        indexedDB.deleteDatabase(testDbName);
+        const idb = (globalThis as any).indexedDB;
+        idb.deleteDatabase(testDbName);
         resolve();
       };
       req.onerror = () => reject(req.error);

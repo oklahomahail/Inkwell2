@@ -19,9 +19,11 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import Logo from '@/components/Logo';
+import ProfileMenu from '@/components/ProfileMenu';
 import { BRAND_NAME, ORGANIZATION_NAME } from '@/constants/brand';
 import { ALT_TAGLINE } from '@/constants/branding';
 import { useAppContext, View } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { useCommandPalette } from '@/context/CommandPaletteContext';
 import { cn } from '@/lib/utils';
 import { useFeatureFlag } from '@/utils/flags';
@@ -105,6 +107,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
   // ✅ ALL hooks must be called unconditionally, before any returns
   const { state, dispatch } = useAppContext();
+  const { user, signOut } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(state.theme === 'dark');
   const [isMobile, setIsMobile] = useState(false);
@@ -300,6 +303,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     if (exportButton) {
       exportButton.click();
     }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      window.location.href = '/sign-in';
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  const handleResetPassword = () => {
+    window.location.href = '/auth/forgot-password';
   };
 
   const currentProject = state.projects.find((p) => p.id === state.currentProjectId);
@@ -522,7 +538,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       >
         {/* Top Bar - only show on non-auth routes */}
         {!isAuthRoute && (
-          <header className="sticky top-0 z-30 ink-header backdrop-blur-sm">
+          <header className="bg-white border-b border-ink-500 sticky top-0 z-30 backdrop-blur-sm">
             <div className="px-4 md:px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -631,6 +647,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                       </svg>
                     </button>
                   </div>
+                  {/* User Account Menu */}
+                  <ProfileMenu
+                    user={{
+                      name: user?.user_metadata?.full_name || user?.email?.split('@')[0],
+                      email: user?.email,
+                      avatarUrl: user?.user_metadata?.avatar_url,
+                    }}
+                    onLogout={handleLogout}
+                    onResetPassword={handleResetPassword}
+                  />
                 </div>
               </div>
             </div>

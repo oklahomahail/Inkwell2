@@ -33,7 +33,7 @@ export const Sidebar: React.FC = () => {
     <aside
       data-testid="sidebar"
       className={cn(
-        'flex h-full flex-col border-r bg-white px-2 pb-4 pt-8',
+        'flex h-full flex-col border-r border-subtle bg-surface-2 text-text-2 px-2 pb-4 pt-8',
         sidebarCollapsed ? 'w-14' : 'w-64',
       )}
       data-collapsed={sidebarCollapsed}
@@ -54,8 +54,9 @@ export const Sidebar: React.FC = () => {
                 <button
                   type="button"
                   className={cn(
-                    'group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm',
-                    isActive ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50',
+                    'group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm',
+                    'text-text-2 hover:bg-ink-50 hover:text-ink-700',
+                    isActive ? 'bg-ink-50 text-ink-700 font-medium' : '',
                   )}
                   aria-current={isActive ? 'page' : undefined}
                   onClick={() => handleChangeView(key as View)}
@@ -63,7 +64,7 @@ export const Sidebar: React.FC = () => {
                   <InkwellFeather
                     name={iconName}
                     size={iconName === 'planning' ? 'sm' : 'md'}
-                    className="shrink-0"
+                    className={cn('shrink-0', isActive ? 'text-ink-700' : 'text-ink-600')}
                   />
                   {!sidebarCollapsed && <span>{label}</span>}
                 </button>

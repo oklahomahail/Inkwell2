@@ -9,6 +9,13 @@ import {
   getSchemaVersion,
 } from '../domain/schemaVersion';
 
+/**
+ * Check if IndexedDB is available in the current environment
+ */
+function hasIDB(): boolean {
+  return typeof globalThis !== 'undefined' && !!(globalThis as any).indexedDB;
+}
+
 /* ========= Types ========= */
 export interface StorageOptions {
   useCompression?: boolean;
@@ -34,8 +41,14 @@ class IndexedDBAdapter implements StorageAdapter {
   async init(): Promise<void> {
     if (this.db) return;
 
+    if (!hasIDB()) {
+      throw new Error('IndexedDB is not available in this environment');
+    }
+
+    const idb = (globalThis as any).indexedDB;
+
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, this.version);
+      const request = idb.open(this.dbName, this.version);
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
@@ -180,7 +193,7 @@ class StorageManager {
 
   constructor() {
     // Try IndexedDB first, fall back to localStorage
-    if (typeof window !== 'undefined' && 'indexedDB' in window) {
+    if (hasIDB()) {
       this.adapter = new IndexedDBAdapter();
     } else {
       this.adapter = new LocalStorageAdapter();

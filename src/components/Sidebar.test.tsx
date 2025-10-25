@@ -95,9 +95,10 @@ describe('Sidebar Component', () => {
   it('highlights the active view', () => {
     renderWithProviders({ appView: View.Writing });
     const writingButton = screen.getByRole('button', { name: /writing/i });
-    // Match the actual active classes used in Sidebar
-    expect(writingButton).toHaveClass('bg-indigo-50');
-    expect(writingButton).toHaveClass('text-indigo-600');
+    // Match the actual active classes used in Sidebar (updated to brand colors)
+    expect(writingButton).toHaveClass('bg-ink-50');
+    expect(writingButton).toHaveClass('text-ink-700');
+    expect(writingButton).toHaveClass('font-medium');
   });
 
   it('toggles collapsed state', () => {
