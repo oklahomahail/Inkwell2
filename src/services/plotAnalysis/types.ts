@@ -43,6 +43,7 @@ export interface Scorecard {
 export interface AnalysisResult {
   scorecard: Scorecard;
   insights: Insight[];
+  chapters: ChapterMetrics[]; // For visualization
   notes?: string; // Optional, <=30 words
   timestamp: string;
   projectHash: string; // For cache invalidation

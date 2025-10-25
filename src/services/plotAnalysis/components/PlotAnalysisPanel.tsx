@@ -66,7 +66,8 @@ export function PlotAnalysisPanel({ project, onOpenChapter }: PlotAnalysisPanelP
     const chapterCount = project.chapters?.length ?? 0;
     const totalWords =
       project.chapters?.reduce(
-        (sum, ch) => sum + (ch.content?.split(/\s+/).filter((w) => w.length > 0).length ?? 0),
+        (sum: number, ch: any) =>
+          sum + (ch.content?.split(/\s+/).filter((w: string) => w.length > 0).length ?? 0),
         0,
       ) ?? 0;
 

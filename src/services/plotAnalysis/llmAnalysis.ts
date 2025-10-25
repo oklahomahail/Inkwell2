@@ -1,6 +1,6 @@
 // LLM-enhanced plot analysis
 
-import type { BookMetrics, Insight, Scorecard } from './types';
+import type { BookMetrics, Insight, Scorecard, Grade } from './types';
 
 const SYSTEM_PROMPT = `You are an expert fiction editor specializing in middle-grade mystery pacing and structure.
 Return concise, actionable findings. Do not summarize plot. No fluff.
@@ -58,6 +58,7 @@ interface LLMResponse {
     pacing: number;
     scenePurpose: number;
     coverage: number;
+    overall?: number; // Optional from LLM, will recalculate
     grade: 'A' | 'B' | 'C' | 'D' | 'F';
   };
   insights: Array<{
@@ -167,26 +168,45 @@ export function mergeInsights(ruleInsights: Insight[], llmInsights: Insight[]): 
 /**
  * Merge scorecards (prefer LLM if available, otherwise use rules)
  */
-export function mergeScorecard(ruleScorecard: Scorecard, llmScorecard?: Scorecard): Scorecard {
+export function mergeScorecard(
+  ruleScorecard: Scorecard,
+  llmScorecard?: Partial<Scorecard> & { grade: Grade },
+): Scorecard {
   if (!llmScorecard) return ruleScorecard;
 
   // Use LLM scores if they're reasonable (within 20% of rule scores)
-  const isReasonable = (llm: number, rule: number) => Math.abs(llm - rule) <= 20;
+  const isReasonable = (llm: number | undefined, rule: number) =>
+    llm !== undefined && Math.abs(llm - rule) <= 20;
+
+  const structure =
+    isReasonable(llmScorecard.structure, ruleScorecard.structure) &&
+    llmScorecard.structure !== undefined
+      ? llmScorecard.structure
+      : ruleScorecard.structure;
+  const pacing =
+    isReasonable(llmScorecard.pacing, ruleScorecard.pacing) && llmScorecard.pacing !== undefined
+      ? llmScorecard.pacing
+      : ruleScorecard.pacing;
+  const scenePurpose =
+    isReasonable(llmScorecard.scenePurpose, ruleScorecard.scenePurpose) &&
+    llmScorecard.scenePurpose !== undefined
+      ? llmScorecard.scenePurpose
+      : ruleScorecard.scenePurpose;
+  const coverage =
+    isReasonable(llmScorecard.coverage, ruleScorecard.coverage) &&
+    llmScorecard.coverage !== undefined
+      ? llmScorecard.coverage
+      : ruleScorecard.coverage;
+
+  // Recalculate overall from merged components
+  const overall = Math.round(structure * 0.4 + pacing * 0.3 + scenePurpose * 0.2 + coverage * 0.1);
 
   return {
-    structure: isReasonable(llmScorecard.structure, ruleScorecard.structure)
-      ? llmScorecard.structure
-      : ruleScorecard.structure,
-    pacing: isReasonable(llmScorecard.pacing, ruleScorecard.pacing)
-      ? llmScorecard.pacing
-      : ruleScorecard.pacing,
-    scenePurpose: isReasonable(llmScorecard.scenePurpose, ruleScorecard.scenePurpose)
-      ? llmScorecard.scenePurpose
-      : ruleScorecard.scenePurpose,
-    coverage: isReasonable(llmScorecard.coverage, ruleScorecard.coverage)
-      ? llmScorecard.coverage
-      : ruleScorecard.coverage,
-    overall: ruleScorecard.overall, // Recalculate from components
+    structure,
+    pacing,
+    scenePurpose,
+    coverage,
+    overall,
     grade: llmScorecard.grade || ruleScorecard.grade,
   };
 }

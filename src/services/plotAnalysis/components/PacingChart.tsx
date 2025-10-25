@@ -125,7 +125,7 @@ export function PacingChart({
 
           {/* Average line */}
           <ReferenceLine
-            y={data[0].avg}
+            y={data[0]?.avg}
             stroke="hsl(var(--text-2))"
             strokeOpacity={0.3}
             strokeDasharray="6 6"
@@ -142,13 +142,12 @@ export function PacingChart({
               strokeWidth: 1,
               fill: 'hsl(var(--ink-500))',
             }}
-            activeDot={(p: any) => {
-              const isHi = p?.payload?.highlighted;
-              return {
-                r: isHi ? 6 : 4,
-                fill: isHi ? 'hsl(var(--gold-500))' : 'hsl(var(--ink-600))',
-              };
-            }}
+            activeDot={
+              {
+                r: 4,
+                fill: 'hsl(var(--ink-600))',
+              } as any
+            }
             strokeWidth={2}
             isAnimationActive={false}
             name="Words"

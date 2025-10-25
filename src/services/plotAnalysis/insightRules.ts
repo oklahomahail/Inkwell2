@@ -24,6 +24,8 @@ function checkMidpointPlacement(data: BookMetrics): Insight | null {
   if (midpointIndex === -1) return null;
 
   const actualPct = cumPct[midpointIndex];
+  if (!actualPct) return null;
+
   const [minPct, maxPct] = targets.midpointPct;
 
   if (actualPct < minPct || actualPct > maxPct) {
@@ -47,6 +49,8 @@ function checkOpeningHook(data: BookMetrics): Insight | null {
   if (chapters.length < 3) return null;
 
   const ch1 = chapters[0];
+  if (!ch1) return null;
+
   const conflictVerbs = [
     'struggle',
     'lose',
@@ -61,7 +65,11 @@ function checkOpeningHook(data: BookMetrics): Insight | null {
     (verb) => ch1.summary.toLowerCase().includes(verb) || ch1.tags.includes('conflict'),
   );
 
-  const avgNext = (chapters[1].words + chapters[2].words) / 2;
+  const ch2 = chapters[1];
+  const ch3 = chapters[2];
+  if (!ch2 || !ch3) return null;
+
+  const avgNext = (ch2.words + ch3.words) / 2;
 
   if (!hasConflict && ch1.words < 1200 && avgNext > 1500) {
     return {
@@ -119,19 +127,24 @@ function checkClimaxTiming(data: BookMetrics): Insight | null {
   if (chapters.length < 5) return null;
 
   const cumPct = getCumulativePercentages(chapters, totalWords);
-  const maxWordsIndex = chapters.reduce(
-    (maxI, ch, i) => (ch.words > chapters[maxI].words ? i : maxI),
-    0,
-  );
+  const maxWordsIndex = chapters.reduce((maxI, ch, i) => {
+    const maxChapter = chapters[maxI];
+    if (!maxChapter) return i;
+    return ch.words > maxChapter.words ? i : maxI;
+  }, 0);
 
   const climaxPct = cumPct[maxWordsIndex];
+  if (!climaxPct) return null;
+
   const [minPct, maxPct] = targets.climaxPct;
+  const climaxChapter = chapters[maxWordsIndex];
+  if (!climaxChapter) return null;
 
   if (climaxPct < minPct || climaxPct > maxPct) {
     return {
       id: 'climax-timing',
       severity: 'med',
-      finding: `Highest-intensity chapter (${chapters[maxWordsIndex].title}) lands at ${(climaxPct * 100).toFixed(0)}% (target: ${(minPct * 100).toFixed(0)}-${(maxPct * 100).toFixed(0)}%).`,
+      finding: `Highest-intensity chapter (${climaxChapter.title}) lands at ${(climaxPct * 100).toFixed(0)}% (target: ${(minPct * 100).toFixed(0)}-${(maxPct * 100).toFixed(0)}%).`,
       suggestion: `Shift highest-intensity material to ~85-90% mark or raise stakes in late chapters.`,
       affectedChapters: [maxWordsIndex],
     };
@@ -185,6 +198,8 @@ function checkIdleChapters(data: BookMetrics): Insight | null {
 
   if (idle.length > 0 && idle.length <= 3) {
     const first = idle[0];
+    if (!first) return null;
+
     return {
       id: 'idle-chapters',
       severity: 'med',
@@ -219,7 +234,10 @@ function checkPOVBalance(data: BookMetrics): Insight | null {
   });
 
   if (imbalanced.length > 0) {
-    const [pov, count] = imbalanced[0];
+    const first = imbalanced[0];
+    if (!first) return null;
+
+    const [pov, count] = first;
     const share = ((count / total) * 100).toFixed(0);
     return {
       id: 'pov-balance',
@@ -244,8 +262,12 @@ function checkPacingWhiplash(data: BookMetrics): Insight | null {
   const whiplash: number[] = [];
 
   for (let i = 0; i < chapters.length - 1; i++) {
-    const delta = Math.abs(chapters[i + 1].words - chapters[i].words);
-    const isBridge = chapters[i].tags.includes('bridge') || chapters[i + 1].tags.includes('bridge');
+    const ch1 = chapters[i];
+    const ch2 = chapters[i + 1];
+    if (!ch1 || !ch2) continue;
+
+    const delta = Math.abs(ch2.words - ch1.words);
+    const isBridge = ch1.tags.includes('bridge') || ch2.tags.includes('bridge');
 
     if (delta >= 0.7 * mean && !isBridge) {
       whiplash.push(i);
@@ -254,6 +276,8 @@ function checkPacingWhiplash(data: BookMetrics): Insight | null {
 
   if (whiplash.length > 0) {
     const first = whiplash[0];
+    if (first === undefined) return null;
+
     return {
       id: 'pacing-whiplash',
       severity: 'low',
@@ -278,11 +302,12 @@ function checkLateInciting(data: BookMetrics): Insight | null {
     (ch) => ch.tags.includes('conflict') || ch.tags.includes('inciting'),
   );
 
-  if (firstConflict > 0 && cumPct[firstConflict] > targets.incitingPctMax) {
+  const conflictPct = cumPct[firstConflict];
+  if (firstConflict > 0 && conflictPct && conflictPct > targets.incitingPctMax) {
     return {
       id: 'late-inciting',
       severity: 'med',
-      finding: `First conflict/inciting tag appears at ${(cumPct[firstConflict] * 100).toFixed(0)}% (target: <${(targets.incitingPctMax * 100).toFixed(0)}%).`,
+      finding: `First conflict/inciting tag appears at ${(conflictPct * 100).toFixed(0)}% (target: <${(targets.incitingPctMax * 100).toFixed(0)}%).`,
       suggestion: `Pull the inciting event earlier (by ~1 chapter) or foreshadow the threat in Chapter 1.`,
       affectedChapters: [firstConflict],
     };
@@ -387,10 +412,13 @@ export function computeScorecard(data: BookMetrics, insights: Insight[]): Scorec
   if (beginEnd < 0 || middleEnd < 0) coverageScore = 0;
   else {
     const beginShare = cumPct[beginEnd];
-    const endShare = 1 - cumPct[middleEnd];
+    const middleShare = cumPct[middleEnd];
 
-    if (Math.abs(beginShare - 0.25) > 0.1) coverageScore -= 3;
-    if (Math.abs(endShare - 0.25) > 0.1) coverageScore -= 3;
+    if (beginShare !== undefined && Math.abs(beginShare - 0.25) > 0.1) coverageScore -= 3;
+    if (middleShare !== undefined) {
+      const endShare = 1 - middleShare;
+      if (Math.abs(endShare - 0.25) > 0.1) coverageScore -= 3;
+    }
   }
 
   // Normalize to 0-100 scale

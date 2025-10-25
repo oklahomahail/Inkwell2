@@ -126,6 +126,7 @@ export async function analyzePlot(
   const result: AnalysisResult = {
     scorecard: finalScorecard,
     insights: finalInsights,
+    chapters: data.chapters,
     notes,
     timestamp: new Date().toISOString(),
     projectHash,

@@ -140,19 +140,19 @@ export function prepareChapterMetrics(
 
   // Apply filters
   if (!filters.includeNotes) {
-    chapters = chapters.filter((ch) => ch.status !== 'notes');
+    chapters = chapters.filter((ch: any) => ch.status !== 'notes');
   }
 
   if (!filters.includeDrafts) {
-    chapters = chapters.filter((ch) => ch.status !== 'draft');
+    chapters = chapters.filter((ch: any) => ch.status !== 'draft');
   }
 
   if (filters.excludedChapterIds.length > 0) {
-    chapters = chapters.filter((ch) => !filters.excludedChapterIds.includes(ch.id));
+    chapters = chapters.filter((ch: any) => !filters.excludedChapterIds.includes(ch.id));
   }
 
   // Convert to metrics
-  const metrics: ChapterMetrics[] = chapters.map((ch, index) => {
+  const metrics: ChapterMetrics[] = chapters.map((ch: any, index: number) => {
     const content = ch.content || '';
     const summary = extractSummary(content);
     const cleanSummary = redactPII(summary);
@@ -201,7 +201,7 @@ export function prepareBookMetrics(
  * Compute project hash for cache invalidation
  */
 export function computeProjectHash(project: Project): string {
-  const content = project.chapters?.map((ch) => `${ch.id}:${ch.updatedAt}`).join('|') || '';
+  const content = project.chapters?.map((ch: any) => `${ch.id}:${ch.updatedAt}`).join('|') || '';
 
   // Simple hash (not cryptographic, just for cache busting)
   let hash = 0;

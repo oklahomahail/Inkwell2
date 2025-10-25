@@ -97,7 +97,7 @@ export function ScorecardSummary({ scorecard, onRerun, lastAnalyzedAt }: Scoreca
         <div>
           <h2 className="text-2xl font-bold text-text-1">Plot Analysis</h2>
           <p className="text-sm text-text-2 mt-1">
-            Last analyzed: {formatRelativeTime(lastAnalyzedAt)}
+            Last analyzed: {formatRelativeTime(lastAnalyzedAt ?? null)}
           </p>
         </div>
         <div className="flex items-center gap-4">
