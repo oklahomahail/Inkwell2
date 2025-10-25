@@ -25,6 +25,7 @@ import { ALT_TAGLINE } from '@/constants/branding';
 import { useAppContext, View } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useCommandPalette } from '@/context/CommandPaletteContext';
+import { ExportModal } from '@/features/export/ExportModal';
 import { cn } from '@/lib/utils';
 import { useFeatureFlag } from '@/utils/flags';
 
@@ -116,6 +117,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Command Palette - must be called unconditionally
   const { open: openPalette } = useCommandPalette();
@@ -298,11 +300,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   };
 
   const handleExport = () => {
-    // Trigger the global export button
-    const exportButton = document.getElementById('global-export-trigger');
-    if (exportButton) {
-      exportButton.click();
-    }
+    setIsExportModalOpen(true);
   };
 
   const handleLogout = async () => {
@@ -820,6 +818,31 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
           </div>
         </div>
       )}
+
+      {/* Export Modal */}
+      {isExportModalOpen &&
+        state.currentProjectId &&
+        (() => {
+          const currentProject = state.projects.find((p) => p.id === state.currentProjectId);
+          if (!currentProject) return null;
+
+          return (
+            <ExportModal
+              isOpen={isExportModalOpen}
+              onClose={() => setIsExportModalOpen(false)}
+              projectId={currentProject.id}
+              bookData={{
+                title: currentProject.name,
+                author: undefined,
+                chapters:
+                  currentProject.chapters?.map((ch: any) => ({
+                    title: ch.title || 'Untitled Chapter',
+                    text: ch.content || '',
+                  })) || [],
+              }}
+            />
+          );
+        })()}
     </div>
   );
 };
