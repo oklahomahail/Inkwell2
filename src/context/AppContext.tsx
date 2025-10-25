@@ -19,6 +19,7 @@ export enum View {
   Analysis = 'analysis',
   Planning = 'planning',
   PlotBoards = 'plotboards',
+  Plot = 'plot',
   Settings = 'settings',
   Analytics = 'Analytics', // keeping as-is to avoid breaking callers
 }

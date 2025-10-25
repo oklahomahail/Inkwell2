@@ -19,6 +19,7 @@ export const Sidebar: React.FC = () => {
       { key: View.Writing, label: 'Writing', iconName: 'writing' },
       { key: View.Planning, label: 'Planning', iconName: 'planning' },
       { key: View.Timeline, label: 'Timeline', iconName: 'timeline' },
+      { key: View.Plot, label: 'Plot Analysis', iconName: 'analytics' },
       { key: View.Analytics, label: 'Analytics', iconName: 'analytics' },
       { key: View.Settings, label: 'Settings', iconName: 'settings' },
     ];

@@ -19,6 +19,11 @@ import EnhancedWritingPanel from './Writing/EnhancedWritingPanel';
 // Lazy-load Analysis and Settings panels
 const AnalyticsPanel = lazy(() => import('@/components/Panels/AnalyticsPanel'));
 const SettingsPanel = lazy(() => import('@/components/Panels/SettingsPanel'));
+const PlotAnalysisPanel = lazy(() =>
+  import('@/services/plotAnalysis/components/PlotAnalysisPanel').then((m) => ({
+    default: m.PlotAnalysisPanel,
+  })),
+);
 
 const ViewSwitcher: React.FC = () => {
   const { state, currentProject, updateProject } = useAppContext();
@@ -119,6 +124,32 @@ const ViewSwitcher: React.FC = () => {
       ) : (
         <div className="flex items-center justify-center h-full">
           <p className="text-gray-500">Please select a project to use Plot Boards</p>
+        </div>
+      );
+    case View.Plot:
+      return currentProject ? (
+        <FeatureErrorBoundary featureName="Plot Analysis">
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-500">Loading Plot Analysis...</p>
+              </div>
+            }
+          >
+            <PlotAnalysisPanel
+              project={currentProject}
+              onOpenChapter={(_chapterIndex) => {
+                // Navigate to Writing view - chapter selection would need ChapterContext integration
+                // For now, just switch to writing view
+                // TODO: Implement setActiveChapter(chapterIndex) via ChapterContext
+                window.location.hash = 'writing';
+              }}
+            />
+          </Suspense>
+        </FeatureErrorBoundary>
+      ) : (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500">Please select a project to analyze plot structure</p>
         </div>
       );
     case View.Settings:

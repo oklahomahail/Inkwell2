@@ -75,10 +75,23 @@ interface LLMResponse {
  * Call Claude API for enhanced analysis
  */
 export async function callClaudeAPI(data: BookMetrics): Promise<LLMResponse | null> {
-  const apiKey = localStorage.getItem('claude_api_key');
+  // Try to get API key from claudeService (encrypted storage)
+  let apiKey: string | null = null;
+
+  try {
+    // Import claudeService dynamically to avoid circular dependencies
+    const claudeService = await import('@/services/claudeService').then((m) => m.default);
+    const config = claudeService.getConfig?.();
+    apiKey = config?.apiKey || null;
+  } catch {
+    // Fallback to localStorage if claudeService is not available
+    apiKey = localStorage.getItem('claude_api_key');
+  }
 
   if (!apiKey) {
-    console.warn('No Claude API key found, skipping LLM analysis');
+    console.warn(
+      'No Claude API key found, skipping LLM analysis. Configure your Claude API key in Settings.',
+    );
     return null;
   }
 
