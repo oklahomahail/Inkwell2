@@ -394,6 +394,32 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
             'Inkwell - Local-first Fiction Writing Platform\nVersion 1.0.0\n\nBuilt with React, TypeScript, and Claude AI',
           ),
       },
+
+      // Tour commands
+      {
+        id: 'tour-spotlight',
+        label: 'Tour: Replay Spotlight',
+        description: 'Replay the interactive Spotlight Tour',
+        category: 'settings',
+        shortcut: 'Shift+?',
+        action: () => window.InkwellTour?.start('spotlight', { source: 'command_palette' }),
+      },
+      {
+        id: 'tour-reset',
+        label: 'Tour: Reset Progress',
+        description: 'Reset all tour progress and preferences',
+        category: 'settings',
+        action: () => {
+          if (
+            confirm(
+              'Reset all tour progress? This will allow you to replay all tours from the beginning.',
+            )
+          ) {
+            window.InkwellTour?.reset('spotlight');
+            showToast('Tour progress reset', 'success');
+          }
+        },
+      },
     ];
 
     setState((prev) => ({ ...prev, commands: cmds }));

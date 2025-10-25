@@ -8,8 +8,6 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { AppProviders } from './AppProviders';
 import './index.css';
-
-// Initialize feature flags system
 import './utils/flags';
 // Initialize storage persistence and monitoring
 import { warnIfDifferentOrigin } from './utils/storage/originGuard';

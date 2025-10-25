@@ -40,6 +40,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 // Services
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
+import { useTourRegistration } from './tour/useTourRegistration';
 import { isPublicRoute } from './utils/auth';
 
 // Debug utilities (development only)
@@ -98,6 +99,9 @@ function AppShell() {
   const location = useLocation();
   const { user, loading, signOut } = useAuth();
   const isPublic = isPublicRoute(location.pathname);
+
+  // Register tours on app boot
+  useTourRegistration();
 
   // Show loading spinner while checking auth (prevents content flash)
   if (loading) {

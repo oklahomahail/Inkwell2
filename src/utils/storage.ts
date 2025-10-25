@@ -50,7 +50,7 @@ class IndexedDBAdapter implements StorageAdapter {
     return new Promise((resolve, reject) => {
       const request = idb.open(this.dbName, this.version);
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
         const db = (event.target as IDBOpenDBRequest).result;
         if (!db.objectStoreNames.contains(this.storeName)) {
           db.createObjectStore(this.storeName);

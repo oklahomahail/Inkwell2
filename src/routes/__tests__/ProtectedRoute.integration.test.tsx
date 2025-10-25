@@ -4,14 +4,13 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
+import { useAuth } from '../../context/AuthContext';
 import ProtectedRoute from '../ProtectedRoute';
 
 // Mock the auth context
 vi.mock('../../context/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
-
-import { useAuth } from '../../context/AuthContext';
 
 describe('ProtectedRoute - Integration Tests', () => {
   it('shows loading state while checking authentication', () => {

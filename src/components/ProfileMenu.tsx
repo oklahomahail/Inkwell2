@@ -1,6 +1,6 @@
 // src/components/ProfileMenu.tsx - User account menu for session management
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
-import { ChevronDown, LogOut, KeyRound } from 'lucide-react';
+import { ChevronDown, LogOut, KeyRound, HelpCircle } from 'lucide-react';
 import React from 'react';
 
 import { cn } from '@/lib/utils';
@@ -66,6 +66,23 @@ export default function ProfileMenu({
 
           {/* Menu Items */}
           <div className="py-1">
+            {/* Replay Spotlight Tour */}
+            <MenuItem>
+              {({ focus }) => (
+                <button
+                  onClick={() => window.InkwellTour?.start('spotlight', { source: 'profile_menu' })}
+                  className={cn(
+                    'w-full px-4 py-2 text-left text-sm flex items-center gap-2',
+                    focus ? 'bg-ink-50 text-ink-700' : 'text-text-1',
+                  )}
+                  title="Shift + ?"
+                >
+                  <HelpCircle className="h-4 w-4" />
+                  Replay Spotlight Tour
+                </button>
+              )}
+            </MenuItem>
+
             {onResetPassword && (
               <MenuItem>
                 {({ focus }) => (
