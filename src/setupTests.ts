@@ -20,6 +20,15 @@ if (!window.matchMedia) {
   });
 }
 
+// Add ResizeObserver mock for Headless UI components
+if (!global.ResizeObserver) {
+  global.ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  }));
+}
+
 expect.extend(matchers);
 
 // --- Make JSDOM behave for idle callbacks so timers get cleared ---

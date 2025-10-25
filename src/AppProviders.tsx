@@ -12,7 +12,6 @@ import { EditorProvider } from './context/EditorContext';
 import { NavProvider } from './context/NavContext';
 import { ProfileProvider } from './context/ProfileContext';
 import { ToastProvider } from './context/ToastContext';
-import { TourProvider } from './features/tour/TourContext';
 import { FeatureFlagProvider } from './utils/featureFlags.react';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
@@ -27,15 +26,13 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
                   <EditorProvider>
                     <ChaptersProvider>
                       <ClaudeProvider>
-                        <TourProvider>
-                          <ProfileTourProvider>
-                            <FeatureDiscoveryProvider>
-                              <AppProvider>
-                                <CommandPaletteProvider>{children}</CommandPaletteProvider>
-                              </AppProvider>
-                            </FeatureDiscoveryProvider>
-                          </ProfileTourProvider>
-                        </TourProvider>
+                        <ProfileTourProvider>
+                          <FeatureDiscoveryProvider>
+                            <AppProvider>
+                              <CommandPaletteProvider>{children}</CommandPaletteProvider>
+                            </AppProvider>
+                          </FeatureDiscoveryProvider>
+                        </ProfileTourProvider>
                       </ClaudeProvider>
                     </ChaptersProvider>
                   </EditorProvider>

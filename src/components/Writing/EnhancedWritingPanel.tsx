@@ -127,6 +127,20 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     dispatch({ type: 'SET_VIEW', payload: View.Dashboard });
   };
 
+  // Keyboard shortcut to exit focus mode with Escape
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && focusMode) {
+        event.preventDefault();
+        setFocusMode(false);
+        setShowStats(true);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [focusMode]);
+
   // If no project is selected
   if (!currentProject) {
     return (
