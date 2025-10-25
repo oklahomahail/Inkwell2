@@ -7,6 +7,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useUI } from '@/hooks/useUI';
 import { cn } from '@/lib/utils';
 import { _focusWritingEditor } from '@/utils/focusUtils';
+import { preload } from '@/utils/preload';
 
 export const Sidebar: React.FC = () => {
   const { state, setView } = useAppContext();
@@ -61,6 +62,12 @@ export const Sidebar: React.FC = () => {
                   )}
                   aria-current={isActive ? 'page' : undefined}
                   onClick={() => handleChangeView(key as View)}
+                  onMouseEnter={() => {
+                    // Preload heavy panels on hover
+                    if (key === View.Plot) {
+                      preload(() => import('@/services/plotAnalysis/components/PlotAnalysisPanel'));
+                    }
+                  }}
                 >
                   <InkwellFeather
                     name={iconName}

@@ -1,6 +1,7 @@
 // Insight List - Display actionable insights with filtering
 
 import { AlertCircle, AlertTriangle, Info } from 'lucide-react';
+import React, { useCallback, useMemo } from 'react';
 
 import type { Severity } from '../types';
 import type { InsightListProps, SeverityFilter } from '../types.ui';
@@ -37,9 +38,27 @@ const filterOptions: Array<{ value: SeverityFilter; label: string }> = [
   { value: 'low', label: 'Low' },
 ];
 
-export function InsightList({ insights, filter, onFilterChange, onOpenChapter }: InsightListProps) {
-  const filteredInsights =
-    filter === 'all' ? insights : insights.filter((i) => i.severity === filter);
+function InsightListComponent({
+  insights,
+  filter,
+  onFilterChange,
+  onOpenChapter,
+}: InsightListProps) {
+  // Memoize filtered insights
+  const filteredInsights = useMemo(
+    () => (filter === 'all' ? insights : insights.filter((i) => i.severity === filter)),
+    [insights, filter],
+  );
+
+  // Memoize chapter click handler
+  const handleOpenChapter = useCallback(
+    (chapterIndex: number) => {
+      if (onOpenChapter) {
+        onOpenChapter(chapterIndex);
+      }
+    },
+    [onOpenChapter],
+  );
 
   return (
     <div className="space-y-4">
@@ -101,7 +120,7 @@ export function InsightList({ insights, filter, onFilterChange, onOpenChapter }:
                       {insight.affectedChapters.slice(0, 5).map((chapterIdx) => (
                         <button
                           key={chapterIdx}
-                          onClick={() => onOpenChapter(chapterIdx)}
+                          onClick={() => handleOpenChapter(chapterIdx)}
                           className="px-2 py-1 text-xs rounded bg-ink-50 text-ink-700 hover:bg-ink-100 transition-colors border border-ink-200"
                           aria-label={`Open chapter ${chapterIdx + 1}`}
                         >
@@ -124,3 +143,6 @@ export function InsightList({ insights, filter, onFilterChange, onOpenChapter }:
     </div>
   );
 }
+
+// Export memoized version
+export const InsightList = React.memo(InsightListComponent);

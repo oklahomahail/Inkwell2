@@ -1,6 +1,6 @@
 // Pacing Chart - Line chart showing word count per chapter
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   CartesianGrid,
   Line,
@@ -27,7 +27,7 @@ function rollingAvg(data: number[], window = 3) {
   return out;
 }
 
-export function PacingChart({
+function PacingChartComponent({
   chapters,
   highlightedChapters = [],
   showRollingAvg = true,
@@ -175,3 +175,6 @@ export function PacingChart({
     </div>
   );
 }
+
+// Export memoized version
+export const PacingChart = React.memo(PacingChartComponent);

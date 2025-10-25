@@ -1,6 +1,6 @@
 // Arc Heatmap - Grid showing presence of story beats per chapter
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import type { ChapterMetrics } from '../types';
@@ -26,7 +26,7 @@ function toHeatmapData(chapters: ChapterMetrics[]) {
   });
 }
 
-export function ArcHeatmap({ chapters }: ArcHeatmapProps) {
+function ArcHeatmapComponent({ chapters }: ArcHeatmapProps) {
   const data = useMemo(() => toHeatmapData(chapters ?? []), [chapters]);
 
   if (!data.length) {
@@ -123,3 +123,6 @@ export function ArcHeatmap({ chapters }: ArcHeatmapProps) {
     </div>
   );
 }
+
+// Export memoized version
+export const ArcHeatmap = React.memo(ArcHeatmapComponent);
