@@ -82,6 +82,9 @@ describe('ConnectivityService', () => {
       // Directly invoke handleOnline
       (connectivityService as any).handleOnline();
 
+      // Wait for debounce
+      vi.advanceTimersByTime(100);
+
       expect(mockCallback).toHaveBeenCalledWith(
         expect.objectContaining({
           isOnline: true,
@@ -96,6 +99,9 @@ describe('ConnectivityService', () => {
 
       // Directly invoke handleOffline
       (connectivityService as any).handleOffline();
+
+      // Wait for debounce
+      vi.advanceTimersByTime(100);
 
       expect(mockCallback).toHaveBeenCalledWith(
         expect.objectContaining({

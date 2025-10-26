@@ -87,11 +87,18 @@ describe('ConnectivityService - Comprehensive', () => {
   it('updates status when coming online', () => {
     mockOnlineStatus(false);
     const listener = vi.fn();
+
+    // First trigger offline event to sync the service state
+    simulateNetworkEvent('offline');
+    timers.advance(100);
+
     connectivityService.subscribe(listener);
+    listener.mockClear(); // Clear the initial subscription call
 
     expect(connectivityService.getStatus().isOnline).toBe(false);
 
     // Simulate coming online
+    mockOnlineStatus(true);
     simulateNetworkEvent('online');
 
     timers.advance(100);

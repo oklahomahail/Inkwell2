@@ -71,7 +71,7 @@ export function mockStorage(options: MockStorageOptions = {}) {
     value: {
       estimate: estimateMock,
       persist: vi.fn().mockResolvedValue(true),
-      persisted: vi.fn().mockResolvedValue(false),
+      persisted: vi.fn().mockResolvedValue(true), // Default to persisted to avoid warnings
     },
   });
 
@@ -80,6 +80,46 @@ export function mockStorage(options: MockStorageOptions = {}) {
     Object.defineProperty(window, 'indexedDB', {
       writable: true,
       value: undefined,
+    });
+  } else {
+    // Create a proper IndexedDB mock to avoid private mode detection
+    const mockOpen = vi.fn((dbName: string) => {
+      const fakeRequest: any = {
+        onsuccess: null,
+        onerror: null,
+        onupgradeneeded: null,
+        onblocked: null,
+        result: { close: vi.fn() },
+      };
+
+      // Simulate successful open after a micro-task
+      Promise.resolve().then(() => {
+        if (fakeRequest.onsuccess) fakeRequest.onsuccess();
+      });
+
+      return fakeRequest;
+    });
+
+    const mockDeleteDatabase = vi.fn((dbName: string) => {
+      const fakeRequest: any = {
+        onsuccess: null,
+        onerror: null,
+      };
+
+      // Simulate successful delete
+      Promise.resolve().then(() => {
+        if (fakeRequest.onsuccess) fakeRequest.onsuccess();
+      });
+
+      return fakeRequest;
+    });
+
+    Object.defineProperty(window, 'indexedDB', {
+      writable: true,
+      value: {
+        open: mockOpen,
+        deleteDatabase: mockDeleteDatabase,
+      },
     });
   }
 
@@ -140,13 +180,15 @@ export function resetStorageMocks() {
     },
   });
 
-  // Reset IndexedDB to available state
-  if (typeof window !== 'undefined' && !(window as any).indexedDB) {
-    Object.defineProperty(window, 'indexedDB', {
-      writable: true,
-      value: {}, // Minimal mock that exists
-    });
-  }
+  // Reset IndexedDB to available state with proper mock
+  Object.defineProperty(window, 'indexedDB', {
+    writable: true,
+    value: {
+      open: vi.fn(),
+      deleteDatabase: vi.fn(),
+      databases: undefined, // Not universally supported
+    },
+  });
 }
 
 // ===== ANALYTICS MOCK =====

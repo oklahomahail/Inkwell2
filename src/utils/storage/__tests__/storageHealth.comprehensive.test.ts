@@ -181,24 +181,55 @@ describe('Storage Health - Comprehensive', () => {
   });
 
   it('handles IndexedDB.open errors gracefully', async () => {
-    const mockOpen = vi.fn(() => {
+    // Set up proper storage quota to avoid private mode detection
+    mockStorage({
+      quota: 100 * 1024 * 1024,
+      usage: 10 * 1024 * 1024,
+    });
+
+    const mockOpen = vi.fn((dbName: string) => {
       const fakeRequest: any = {
         onsuccess: null,
         onerror: null,
         onupgradeneeded: null,
         onblocked: null,
+        result: { close: vi.fn() },
       };
 
-      setTimeout(() => {
-        if (fakeRequest.onerror) fakeRequest.onerror();
-      }, 0);
+      // Fail only for the actual database, not the private mode probe
+      if (dbName === 'inkwell_v1') {
+        setTimeout(() => {
+          if (fakeRequest.onerror) fakeRequest.onerror();
+        }, 0);
+      } else {
+        // Success for private mode probe
+        setTimeout(() => {
+          if (fakeRequest.onsuccess) fakeRequest.onsuccess();
+        }, 0);
+      }
+
+      return fakeRequest;
+    });
+
+    const mockDeleteDatabase = vi.fn((dbName: string) => {
+      const fakeRequest: any = {
+        onsuccess: null,
+        onerror: null,
+      };
+
+      Promise.resolve().then(() => {
+        if (fakeRequest.onsuccess) fakeRequest.onsuccess();
+      });
 
       return fakeRequest;
     });
 
     Object.defineProperty(window, 'indexedDB', {
       writable: true,
-      value: { open: mockOpen },
+      value: {
+        open: mockOpen,
+        deleteDatabase: mockDeleteDatabase,
+      },
     });
 
     const health = await getStorageHealth();
@@ -436,6 +467,31 @@ describe('Storage Health - Comprehensive', () => {
       value: {
         estimate: vi.fn().mockResolvedValue({ quota: 100 * 1024 * 1024, usage: 10 * 1024 * 1024 }),
         persisted: vi.fn().mockResolvedValue(false),
+      },
+    });
+
+    // Set up IndexedDB mock to avoid private mode detection
+    const mockOpen = vi.fn((dbName: string) => {
+      const fakeRequest: any = {
+        onsuccess: null,
+        onerror: null,
+        onupgradeneeded: null,
+        onblocked: null,
+        result: { close: vi.fn() },
+      };
+
+      Promise.resolve().then(() => {
+        if (fakeRequest.onsuccess) fakeRequest.onsuccess();
+      });
+
+      return fakeRequest;
+    });
+
+    Object.defineProperty(window, 'indexedDB', {
+      writable: true,
+      value: {
+        open: mockOpen,
+        deleteDatabase: vi.fn(),
       },
     });
 

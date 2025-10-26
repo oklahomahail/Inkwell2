@@ -43,7 +43,10 @@ export async function isLikelyPrivateMode(): Promise<boolean> {
       req.onsuccess = () => {
         req.result.close();
         const idb = (globalThis as any).indexedDB;
-        idb.deleteDatabase(testDbName);
+        // Only try to delete if deleteDatabase exists
+        if (typeof idb.deleteDatabase === 'function') {
+          idb.deleteDatabase(testDbName);
+        }
         resolve();
       };
       req.onerror = () => reject(req.error);

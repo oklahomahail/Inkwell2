@@ -30,6 +30,7 @@ class ConnectivityService {
   private static readonly QUEUE_KEY = 'inkwell_offline_queue';
   private static readonly MAX_RETRIES = 3;
   private static readonly RETRY_DELAY = 1000; // ms
+  private static readonly DEBOUNCE_DELAY = 50; // ms - debounce rapid status changes
 
   private isOnline: boolean =
     typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
@@ -41,6 +42,8 @@ class ConnectivityService {
   private listeners: ((status: ConnectivityStatus) => void)[] = [];
   private processingQueue: boolean = false;
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
+  private notifyTimer: ReturnType<typeof setTimeout> | null = null;
+  private pendingNotification: boolean = false;
 
   constructor() {
     this.initializeListeners();
@@ -381,13 +384,31 @@ class ConnectivityService {
   }
 
   private notifyListeners(): void {
-    try {
+    // Debounce notifications to prevent spam on rapid toggles
+    if (this.notifyTimer) {
+      clearTimeout(this.notifyTimer);
+    }
+
+    this.pendingNotification = true;
+    this.notifyTimer = setTimeout(() => {
+      if (!this.pendingNotification) return;
+
+      this.pendingNotification = false;
+      this.notifyTimer = null;
+
       const status = this.getStatus();
       console.log('Notifying listeners with status:', status);
-      this.listeners.forEach((listener) => listener(status));
-    } catch (error) {
-      console.error('Error notifying listeners:', error);
-    }
+
+      // Call each listener with individual error handling
+      this.listeners.forEach((listener) => {
+        try {
+          listener(status);
+        } catch (error) {
+          console.error('Error in connectivity listener:', error);
+          // Continue with other listeners
+        }
+      });
+    }, ConnectivityService.DEBOUNCE_DELAY);
   }
 
   public stopMonitoring(): void {
@@ -399,33 +420,46 @@ class ConnectivityService {
   private cleanupListeners(): void {
     this.removeListeners();
     this.clearRetryTimer();
+    if (this.notifyTimer) {
+      clearTimeout(this.notifyTimer);
+      this.notifyTimer = null;
+    }
+    this.pendingNotification = false;
   }
 
   private handleOnline = (): void => {
     console.log('handleOnline triggered');
-    this.isOnline = true;
-    this.lastOnline = new Date();
 
-    // Notify listeners of online status first
-    this.notifyListeners();
+    // Only notify if state actually changed
+    if (!this.isOnline) {
+      this.isOnline = true;
+      this.lastOnline = new Date();
 
-    // Then process queue (directly without setTimeout)
-    if (this.queue.length > 0) {
-      try {
-        this.processQueue();
-      } catch (_e) {
-        console.error('Error during processQueue in handleOnline:', _e);
+      // Notify listeners of online status first
+      this.notifyListeners();
+
+      // Then process queue (directly without setTimeout)
+      if (this.queue.length > 0) {
+        try {
+          this.processQueue();
+        } catch (_e) {
+          console.error('Error during processQueue in handleOnline:', _e);
+        }
       }
     }
   };
 
   private handleOffline = (): void => {
     console.log('handleOffline triggered');
-    this.isOnline = false; // Ensure isOnline is set before notifying listeners
-    if (!this.lastOffline) {
-      this.lastOffline = new Date();
+
+    // Only notify if state actually changed
+    if (this.isOnline) {
+      this.isOnline = false; // Ensure isOnline is set before notifying listeners
+      if (!this.lastOffline) {
+        this.lastOffline = new Date();
+      }
+      this.notifyListeners();
     }
-    this.notifyListeners();
   };
 
   private async executeQueuedWrite(item: QueuedWrite): Promise<boolean> {
