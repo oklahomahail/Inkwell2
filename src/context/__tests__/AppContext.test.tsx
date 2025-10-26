@@ -172,10 +172,7 @@ describe('AppContext', () => {
     );
 
     // Should load dark theme from localStorage
-    // Note: This depends on implementation - if init reads localStorage
-    // If not, this test documents current behavior
-    expect(screen.getByTestId('theme')).toHaveTextContent('light');
-    // Update after confirming actual behavior
+    expect(screen.getByTestId('theme')).toHaveTextContent('dark');
   });
 
   it('handles localStorage errors gracefully when persisting theme', async () => {
@@ -563,7 +560,7 @@ describe('AppContext', () => {
       screen.getByText('Save Success').click();
     });
     expect(screen.getByTestId('saving')).toHaveTextContent('idle'); // Should stop saving
-    expect(screen.getByTestId('last-saved')).toContain('2025-01-01');
+    expect(screen.getByTestId('last-saved')).toHaveTextContent(/2025-01-01/i);
 
     // Error
     await act(async () => {

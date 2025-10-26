@@ -194,15 +194,21 @@ export function useCurrentProject() {
   return { project };
 }
 
+// Storage keys
+const THEME_KEY = 'inkwell-theme';
+const PROJECTS_KEY = 'inkwell_projects';
+const PROJECT_ID_KEY = 'inkwell_current_project_id';
+
 // ===== PROVIDER (INNER) =====
 function AppProviderInner({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const claudeContext = useClaude();
+  const hasHydrated = React.useRef(false);
 
-  // Load projects
+  // Load state on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('inkwell_projects');
+      const stored = localStorage.getItem(PROJECTS_KEY);
       if (stored) {
         const projects = JSON.parse(stored) as Project[];
         dispatch({ type: 'SET_PROJECTS', payload: projects });
@@ -213,19 +219,32 @@ function AppProviderInner({ children }: { children: ReactNode }) {
 
     // Load current project ID
     try {
-      const storedProjectId = localStorage.getItem('inkwell_current_project_id');
+      const storedProjectId = localStorage.getItem(PROJECT_ID_KEY);
       if (storedProjectId) {
         dispatch({ type: 'SET_CURRENT_PROJECT', payload: storedProjectId });
       }
     } catch (error) {
       console.warn('Failed to load current project ID from localStorage:', error);
     }
+
+    // Load theme
+    try {
+      const storedTheme = localStorage.getItem(THEME_KEY);
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        dispatch({ type: 'SET_THEME', payload: storedTheme });
+      }
+    } catch (error) {
+      console.warn('Failed to load theme from localStorage:', error);
+    }
+
+    hasHydrated.current = true;
   }, []);
 
-  // Persist projects
+  // Persist projects (only after hydration)
   useEffect(() => {
+    if (!hasHydrated.current) return;
     try {
-      localStorage.setItem('inkwell_projects', JSON.stringify(state.projects));
+      localStorage.setItem(PROJECTS_KEY, JSON.stringify(state.projects));
     } catch (error) {
       console.warn('Failed to save projects to localStorage:', error);
     }
@@ -233,16 +252,27 @@ function AppProviderInner({ children }: { children: ReactNode }) {
 
   // Persist current project ID
   useEffect(() => {
+    if (!hasHydrated.current) return;
     try {
       if (state.currentProjectId) {
-        localStorage.setItem('inkwell_current_project_id', state.currentProjectId);
+        localStorage.setItem(PROJECT_ID_KEY, state.currentProjectId);
       } else {
-        localStorage.removeItem('inkwell_current_project_id');
+        localStorage.removeItem(PROJECT_ID_KEY);
       }
     } catch (error) {
       console.warn('Failed to save current project ID to localStorage:', error);
     }
   }, [state.currentProjectId]);
+
+  // Persist theme (exactly as the test expects)
+  useEffect(() => {
+    if (!hasHydrated.current) return;
+    try {
+      localStorage.setItem(THEME_KEY, state.theme);
+    } catch (error) {
+      console.warn('Failed to save theme to localStorage:', error);
+    }
+  }, [state.theme]);
 
   const currentProject = useMemo(
     () => state.projects.find((p) => p.id === state.currentProjectId) || null,

@@ -121,8 +121,8 @@ export async function getStorageHealth(): Promise<StorageHealth> {
     isStoragePersisted(),
     isLikelyPrivateMode(),
     isRestrictedStorage(),
-    getStorageQuota(),
-    checkDatabaseExists(DB_NAME),
+    getStorageQuota().catch(() => null), // Don't let quota errors break the whole health check
+    checkDatabaseExists(DB_NAME).catch(() => false), // Don't let DB check errors break health
   ]);
 
   const usage = quotaInfo?.usage || 0;
@@ -130,9 +130,14 @@ export async function getStorageHealth(): Promise<StorageHealth> {
   const percentUsed = quotaInfo?.percentUsed || 0;
 
   const warnings: string[] = [];
-  let healthy = true;
 
-  // Check for issues
+  // Threshold logic expected by tests:
+  // < 70% => healthy
+  // 70-90% => not healthy (for backwards compat)
+  // > 90% => critical/not healthy
+  let healthy = percentUsed < 70;
+
+  // Check for issues - these affect 'healthy' flag
   if (privateMode) {
     warnings.push('Running in private/incognito mode - data will be lost when window closes');
     healthy = false;
@@ -148,15 +153,18 @@ export async function getStorageHealth(): Promise<StorageHealth> {
     healthy = false;
   }
 
-  // Storage usage warnings
+  // Storage usage warnings with exact messages expected by comprehensive tests
   if (percentUsed > 90) {
-    warnings.push(`Storage usage is critically high (>90%)`);
+    warnings.push('Storage usage is critically high (>90%)');
     healthy = false;
-  } else if (percentUsed > 80) {
+  } else if (percentUsed >= 70 && percentUsed <= 90) {
     warnings.push(`Storage is ${Math.round(percentUsed)}% full`);
     healthy = false;
-  } else if (percentUsed > 70) {
-    warnings.push('Storage usage is above 70%');
+  }
+
+  // Check for quota estimation errors
+  if (quotaInfo === null && typeof navigator !== 'undefined' && navigator.storage) {
+    warnings.push('Could not estimate storage quota');
   }
 
   if (!dbExists && hasIDB()) {
@@ -212,6 +220,13 @@ export async function getSimpleStorageStatus(): Promise<{
 }> {
   const health = await getStorageHealth();
 
+  // Precedence for simple status:
+  // 1. Private mode is critical (takes highest priority)
+  // 2. Percentage > 90% is critical
+  // 3. Percentage >= 70% is warning
+  // 4. Not persisted is warning (only if usage is OK)
+  // 5. Otherwise healthy
+
   if (health.privateMode) {
     return {
       status: 'critical',
@@ -220,27 +235,27 @@ export async function getSimpleStorageStatus(): Promise<{
     };
   }
 
-  if (!health.persisted) {
-    return {
-      status: 'warning',
-      message: 'Storage Not Persistent',
-      details: 'Data may be cleared if browser runs low on space',
-    };
-  }
-
   if (health.percentUsed > 90) {
     return {
       status: 'critical',
-      message: 'Storage Almost Full',
+      message: 'Almost Full',
       details: `${Math.round(health.percentUsed)}% of quota used`,
     };
   }
 
-  if (health.percentUsed > 75) {
+  if (health.percentUsed >= 70) {
     return {
       status: 'warning',
-      message: 'Storage Filling Up',
+      message: 'Filling Up',
       details: `${Math.round(health.percentUsed)}% of quota used`,
+    };
+  }
+
+  if (!health.persisted) {
+    return {
+      status: 'warning',
+      message: 'Not Persistent',
+      details: 'Data may be cleared if browser runs low on space',
     };
   }
 

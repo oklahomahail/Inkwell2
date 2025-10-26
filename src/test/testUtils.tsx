@@ -107,16 +107,46 @@ export function mockStorage(options: MockStorageOptions = {}) {
 export function resetStorageMocks() {
   vi.restoreAllMocks();
 
-  // Reset to working defaults
+  // Reset navigator.storage to working defaults
   Object.defineProperty(navigator, 'storage', {
     writable: true,
     value: {
       estimate: vi.fn().mockResolvedValue({
-        quota: 50 * 1024 * 1024,
+        quota: 100 * 1024 * 1024, // Use 100MB to avoid private mode detection
         usage: 0,
       }),
+      persist: vi.fn().mockResolvedValue(true),
+      persisted: vi.fn().mockResolvedValue(false),
     },
   });
+
+  // Reset localStorage to working state
+  const localStorageMock: Record<string, string> = {};
+  Object.defineProperty(window, 'localStorage', {
+    writable: true,
+    value: {
+      getItem: vi.fn((key: string) => localStorageMock[key] || null),
+      setItem: vi.fn((key: string, value: string) => {
+        localStorageMock[key] = value;
+      }),
+      removeItem: vi.fn((key: string) => {
+        delete localStorageMock[key];
+      }),
+      clear: vi.fn(() => {
+        Object.keys(localStorageMock).forEach((key) => delete localStorageMock[key]);
+      }),
+      length: 0,
+      key: vi.fn(),
+    },
+  });
+
+  // Reset IndexedDB to available state
+  if (typeof window !== 'undefined' && !(window as any).indexedDB) {
+    Object.defineProperty(window, 'indexedDB', {
+      writable: true,
+      value: {}, // Minimal mock that exists
+    });
+  }
 }
 
 // ===== ANALYTICS MOCK =====

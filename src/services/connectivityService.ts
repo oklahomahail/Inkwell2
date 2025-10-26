@@ -65,6 +65,28 @@ class ConnectivityService {
   }
 
   /**
+   * Subscribe to connectivity status changes
+   * @param callback Function to call when status changes
+   * @returns Unsubscribe function
+   */
+  subscribe(callback: (status: ConnectivityStatus) => void): () => void {
+    if (typeof callback !== 'function') {
+      console.error('Invalid callback provided to onStatusChange');
+      return () => {};
+    }
+
+    this.listeners.push(callback);
+
+    // Return unsubscribe function
+    return () => {
+      const index = this.listeners.indexOf(callback);
+      if (index > -1) {
+        this.listeners.splice(index, 1);
+      }
+    };
+  }
+
+  /**
    * Queue a write operation for when online
    */
   async queueWrite(
