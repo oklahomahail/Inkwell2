@@ -2,6 +2,8 @@
 import { X, Keyboard } from 'lucide-react';
 import React from 'react';
 
+import { useAutostartSpotlight } from '@/hooks/useAutostartSpotlight';
+
 interface ShortcutsModalProps {
   onClose: () => void;
 }
@@ -39,6 +41,13 @@ const shortcuts = [
 ];
 
 export function ShortcutsModal({ onClose }: ShortcutsModalProps) {
+  const { restartTour } = useAutostartSpotlight();
+
+  const handleStartTour = () => {
+    onClose(); // Close the modal first
+    setTimeout(() => restartTour(), 300); // Small delay for smooth transition
+  };
+
   return (
     <div className="fixed inset-0 z-50" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40" />
@@ -90,9 +99,17 @@ export function ShortcutsModal({ onClose }: ShortcutsModalProps) {
 
           {/* Footer */}
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-            <p className="text-xs text-[color:var(--ink-fg-muted)] text-center">
-              Press <kbd className="bg-white px-1 py-0.5 rounded text-xs">ESC</kbd> to close
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-[color:var(--ink-fg-muted)]">
+                Press <kbd className="bg-white px-1 py-0.5 rounded text-xs">ESC</kbd> to close
+              </p>
+              <button
+                onClick={handleStartTour}
+                className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+              >
+                Start Tour
+              </button>
+            </div>
           </div>
         </div>
       </div>

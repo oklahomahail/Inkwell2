@@ -34,6 +34,7 @@ export const Sidebar: React.FC = () => {
   return (
     <aside
       data-testid="sidebar"
+      data-tour-id="sidebar"
       className={cn(
         'flex h-full flex-col border-r border-subtle bg-surface-2 text-text-2 px-2 pb-4 pt-8',
         sidebarCollapsed ? 'w-14' : 'w-64',
@@ -55,6 +56,7 @@ export const Sidebar: React.FC = () => {
               <li key={key}>
                 <button
                   type="button"
+                  data-tour-id={`nav-${label.toLowerCase().replace(/\s+/g, '-')}`}
                   className={cn(
                     'group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm',
                     'text-text-2 hover:bg-ink-50 hover:text-ink-700',

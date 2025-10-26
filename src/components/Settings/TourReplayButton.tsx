@@ -6,24 +6,24 @@
 
 import React, { useState } from 'react';
 
-import { useInkwellSpotlightTour } from '../Onboarding/useInkwellSpotlightTour';
+import { useAutostartSpotlight } from '@/hooks/useAutostartSpotlight';
 
 export function TourReplayButton() {
-  const { startSpotlightTour, resetSpotlightTour, hasCompletedBefore } = useInkwellSpotlightTour();
+  const { restartTour } = useAutostartSpotlight();
   const [isResetting, setIsResetting] = useState(false);
+
+  // Check if user has completed tour before (from localStorage)
+  const hasCompletedBefore = localStorage.getItem('inkwell:tour:completed') === 'true';
 
   const handleReplay = async () => {
     setIsResetting(true);
 
     try {
-      // Reset tour state
-      resetSpotlightTour();
-
       // Small delay for visual feedback
       await new Promise((resolve) => setTimeout(resolve, 300));
 
       // Start the tour
-      await startSpotlightTour();
+      restartTour();
     } catch (error) {
       console.error('[TourReplay] Failed to restart tour:', error);
     } finally {

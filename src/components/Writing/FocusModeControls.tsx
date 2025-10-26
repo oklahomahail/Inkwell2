@@ -24,6 +24,7 @@ export const FocusModeControls: React.FC<FocusModeControlsProps> = ({
         onClick={enableFocusMode}
         className="focus-control-btn primary"
         title="Enter Focus Mode (F11)"
+        data-tour-id="focus-toggle"
       >
         <Focus className="w-4 h-4" />
         Focus Mode

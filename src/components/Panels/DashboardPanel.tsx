@@ -6,6 +6,7 @@ import ExportReadyBadge from '@/components/Badges/ExportReadyBadge';
 import Welcome from '@/components/Dashboard/Welcome';
 import { useAppContext } from '@/context/AppContext';
 import { useChapterCount, useLastEditedChapter } from '@/context/ChaptersContext';
+import { useAutostartSpotlight } from '@/hooks/useAutostartSpotlight';
 import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 
 // Helper to format relative time
@@ -20,6 +21,9 @@ const timeAgo = (isoString: string): string => {
 
 const DashboardPanel: React.FC = () => {
   const { state, currentProject, addProject, setCurrentProjectId } = useAppContext();
+
+  // Auto-start Spotlight Tour for first-time users
+  useAutostartSpotlight();
 
   // Chapter statistics (with safe fallback for undefined projectId)
   const chapterCount = useChapterCount(currentProject?.id ?? '');

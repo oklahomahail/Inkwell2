@@ -115,7 +115,10 @@ export default function Topbar({
   };
 
   return (
-    <header className="Topbar flex items-center justify-between h-12 px-4 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur">
+    <header
+      data-tour-id="topbar"
+      className="Topbar flex items-center justify-between h-12 px-4 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur"
+    >
       {/* Left: project name */}
       <div className="text-sm font-medium truncate" title={effectiveName}>
         {effectiveName}
@@ -141,6 +144,7 @@ export default function Topbar({
           className="topbar-icon"
           aria-label="Keyboard shortcuts"
           title="Keyboard shortcuts (⌘K)"
+          data-tour-id="help-tour-button"
         >
           ⌘
         </button>
