@@ -156,6 +156,13 @@ class FeatureFlagService {
       enabled: false,
       category: 'experimental',
     },
+    {
+      key: 'free_preview',
+      name: 'Free Preview Mode',
+      description: 'Enable read-only demo mode for unauthenticated users',
+      enabled: import.meta.env.VITE_ENABLE_FREE_PREVIEW === 'true',
+      category: 'ui',
+    },
   ];
 
   constructor() {

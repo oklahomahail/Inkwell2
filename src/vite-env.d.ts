@@ -24,3 +24,21 @@ declare global {
     gtag?: (command: string, eventName: string, params?: Record<string, any>) => void;
   }
 }
+
+// Environment variables
+interface ImportMetaEnv {
+  readonly VITE_ENABLE_FREE_PREVIEW?: string;
+  readonly VITE_SUPABASE_URL: string;
+  readonly VITE_SUPABASE_ANON_KEY: string;
+  readonly VITE_BASE_URL: string;
+  readonly VITE_SENTRY_DSN?: string;
+  readonly VITE_APP_TITLE?: string;
+  readonly VITE_APP_VERSION?: string;
+  readonly VITE_AI_MOCK_MODE?: string;
+  readonly VITE_DEBUG_ENABLED?: string;
+  readonly NODE_ENV: 'development' | 'production' | 'test';
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
