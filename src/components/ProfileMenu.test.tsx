@@ -1,16 +1,23 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+import { startDefaultTour } from '@/tour/tourEntry';
+
 import ProfileMenu from './ProfileMenu';
+
+// Mock the tour modules
+vi.mock('@/tour/tourEntry', () => ({
+  startDefaultTour: vi.fn(),
+}));
+
+vi.mock('@/tour/featureTours', () => ({
+  launchAIToolsTour: vi.fn(),
+  launchExportTour: vi.fn(),
+}));
 
 describe('ProfileMenu', () => {
   beforeEach(() => {
-    // Mock window.InkwellTour
-    window.InkwellTour = {
-      start: vi.fn(),
-      reset: vi.fn(),
-      isAvailable: vi.fn(() => true),
-    };
+    vi.clearAllMocks();
   });
 
   describe('User Display', () => {
@@ -101,9 +108,7 @@ describe('ProfileMenu', () => {
       const tourButton = screen.getByText('Replay Spotlight Tour');
       fireEvent.click(tourButton);
 
-      expect(window.InkwellTour?.start).toHaveBeenCalledWith('spotlight', {
-        source: 'profile_menu',
-      });
+      expect(startDefaultTour).toHaveBeenCalled();
     });
 
     it('shows Reset Password button when onResetPassword is provided', () => {
