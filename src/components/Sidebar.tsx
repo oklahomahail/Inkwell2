@@ -1,4 +1,5 @@
 // File: src/components/Sidebar.tsx
+import { PlusCircle } from 'lucide-react';
 import React, { useMemo } from 'react';
 
 import { InkwellFeather } from '@/components/icons';
@@ -8,9 +9,10 @@ import { useUI } from '@/hooks/useUI';
 import { cn } from '@/lib/utils';
 import { _focusWritingEditor } from '@/utils/focusUtils';
 import { preload } from '@/utils/preload';
+import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 
 export const Sidebar: React.FC = () => {
-  const { state, setView } = useAppContext();
+  const { state, setView, addProject, setCurrentProjectId } = useAppContext();
   const { view } = state;
   const { sidebarCollapsed, toggleSidebar } = useUI();
 
@@ -29,6 +31,23 @@ export const Sidebar: React.FC = () => {
   const handleChangeView = (view: View) => {
     setView(view);
     if (view === View.Writing) _focusWritingEditor();
+  };
+
+  const handleCreateProject = () => {
+    const newProject = {
+      id: `project-${Date.now()}`,
+      name: `New Story ${state.projects.length + 1}`,
+      description: 'A new fiction project',
+      content: '',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    addProject({ ...newProject, chapters: [], characters: [], beatSheet: [] });
+    setCurrentProjectId(newProject.id);
+    setView(View.Dashboard);
+
+    // Fire tour trigger for project creation
+    triggerOnProjectCreated(newProject.id);
   };
 
   return (
@@ -83,6 +102,20 @@ export const Sidebar: React.FC = () => {
           })}
         </ul>
       </nav>
+
+      {/* New Project Button */}
+      {!sidebarCollapsed && (
+        <div className="mt-auto pt-4 border-t border-subtle">
+          <button
+            onClick={handleCreateProject}
+            data-tour-id="sidebar-new-project"
+            className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-text-2 hover:bg-ink-50 hover:text-ink-700"
+          >
+            <PlusCircle className="w-5 h-5 shrink-0" />
+            <span>New Project</span>
+          </button>
+        </div>
+      )}
     </aside>
   );
 };

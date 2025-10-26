@@ -160,6 +160,7 @@ const DashboardPanel: React.FC = () => {
           </p>
           <button
             onClick={createNewProject}
+            data-testid="create-first-project"
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mx-auto"
           >
             <PlusCircle className="w-5 h-5" />

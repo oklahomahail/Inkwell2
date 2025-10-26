@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 
-import { startDefaultTourFromSettings } from '@/tour/tourEntry';
+import { startDefaultTour } from '@/tour/tourEntry';
 
 export function TourReplayButton() {
   const [isResetting, setIsResetting] = useState(false);
@@ -22,7 +22,7 @@ export function TourReplayButton() {
       await new Promise((resolve) => setTimeout(resolve, 300));
 
       // Start the tour
-      startDefaultTourFromSettings();
+      startDefaultTour();
     } catch (error) {
       console.error('[TourReplay] Failed to restart tour:', error);
     } finally {

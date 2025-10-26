@@ -77,11 +77,8 @@ export default function Topbar({
   const renderSaveStatus = () => {
     if (autoSave.isSaving) {
       return (
-        <div
-          className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400"
-          aria-live="polite"
-        >
-          <div className="w-3 h-3 border border-blue-600 dark:border-blue-400 border-t-transparent rounded-full animate-spin" />
+        <div className="flex items-center gap-1 text-xs text-white/90" aria-live="polite">
+          <div className="w-3 h-3 border border-white/90 border-t-transparent rounded-full animate-spin" />
           <span>Saving…</span>
         </div>
       );
@@ -89,11 +86,7 @@ export default function Topbar({
 
     if (autoSave.error) {
       return (
-        <div
-          className="text-xs text-red-600 dark:text-red-400"
-          title={autoSave.error}
-          aria-live="polite"
-        >
+        <div className="text-xs text-red-300" title={autoSave.error} aria-live="polite">
           Save failed
         </div>
       );
@@ -102,7 +95,7 @@ export default function Topbar({
     if (autoSave.lastSaved) {
       return (
         <div
-          className="text-xs text-green-600 dark:text-green-400"
+          className="text-xs text-[#CDAA47]"
           title={`Saved at ${formatTime(autoSave.lastSaved)}`}
           aria-live="polite"
         >
@@ -111,29 +104,32 @@ export default function Topbar({
       );
     }
 
-    return <div className="text-xs text-slate-600 dark:text-slate-400">Ready</div>;
+    return <div className="text-xs text-white/70">Ready</div>;
   };
 
   return (
     <header
       data-tour-id="topbar"
-      className="Topbar flex items-center justify-between h-12 px-4 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur"
+      className="Topbar sticky top-0 z-40 flex items-center justify-between h-14 px-4 border-b border-[#1C3A63] bg-[#0F2D52]/95 backdrop-blur text-white"
     >
       {/* Left: project name */}
-      <div className="text-sm font-medium truncate" title={effectiveName}>
+      <div className="text-sm font-medium truncate text-white" title={effectiveName}>
         {effectiveName}
       </div>
 
       {/* Right: status pill, user account, buttons */}
       <div className="flex items-center gap-2">
         {/* Status Pill */}
-        <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full">
-          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          <span className="text-xs text-slate-600 dark:text-slate-300">{renderSaveStatus()}</span>
+        <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full">
+          <div className="w-2 h-2 bg-[#CDAA47] rounded-full"></div>
+          <span className="text-xs text-white/90">{renderSaveStatus()}</span>
         </div>
 
         {/* Account Button */}
-        <button onClick={() => setOpenAccount(true)} className="topbar-btn">
+        <button
+          onClick={() => setOpenAccount(true)}
+          className="topbar-btn text-white hover:bg-white/10 px-3 py-1 rounded-md transition-colors"
+        >
           <Avatar initials="D" />
           <span>Dave Hail</span>
         </button>
@@ -141,7 +137,7 @@ export default function Topbar({
         {/* Keyboard shortcuts */}
         <button
           onClick={() => setOpenShortcuts(true)}
-          className="topbar-icon"
+          className="topbar-icon text-white hover:bg-white/10 p-2 rounded-md transition-colors"
           aria-label="Keyboard shortcuts"
           title="Keyboard shortcuts (⌘K)"
           data-tour-id="help-tour-button"
@@ -152,7 +148,7 @@ export default function Topbar({
         {/* Command Palette */}
         <button
           onClick={openPalette}
-          className="topbar-icon"
+          className="topbar-icon text-white hover:bg-white/10 p-2 rounded-md transition-colors"
           aria-label="Command Palette"
           title="Command Palette (⌘K)"
         >
@@ -162,7 +158,7 @@ export default function Topbar({
         {/* Notifications */}
         <button
           onClick={() => setOpenNotifications(true)}
-          className="topbar-icon"
+          className="topbar-icon text-white hover:bg-white/10 p-2 rounded-md transition-colors"
           aria-label="Notifications"
           title="Notifications"
         >
