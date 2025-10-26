@@ -6,10 +6,13 @@
 
 import React, { useState } from 'react';
 
-import { startDefaultTour } from '@/tour/tourEntry';
+import { CORE_TOUR_STEPS } from '@/components/Onboarding/tourRegistry';
+import { useTour } from '@/components/Onboarding/useTour';
+import { startTourSafely, getSafeTourSteps } from '@/components/Onboarding/utils/tourSafety';
 
 export function TourReplayButton() {
   const [isResetting, setIsResetting] = useState(false);
+  const { startTour } = useTour();
 
   // Check if user has completed tour before (from localStorage)
   const hasCompletedBefore = localStorage.getItem('inkwell:tour:completed') === 'true';
@@ -21,8 +24,9 @@ export function TourReplayButton() {
       // Small delay for visual feedback
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Start the tour
-      startDefaultTour();
+      // Start the Spotlight Tour safely
+      const safeTourSteps = getSafeTourSteps(CORE_TOUR_STEPS);
+      await startTourSafely(safeTourSteps, startTour);
     } catch (error) {
       console.error('[TourReplay] Failed to restart tour:', error);
     } finally {

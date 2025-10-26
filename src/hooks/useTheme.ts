@@ -7,7 +7,8 @@ export function useTheme() {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window === 'undefined') return 'light';
     const saved = localStorage.getItem(KEY) as Theme | null;
-    return saved ?? 'light'; // default to light
+    // Explicitly check for 'dark', otherwise use 'light'
+    return saved === 'dark' ? 'dark' : 'light';
   });
 
   const apply = useCallback((t: Theme) => {

@@ -140,6 +140,13 @@ class FeatureFlagService {
       enabled: true,
       category: 'ui',
     },
+    {
+      key: 'tour_simpleTour',
+      name: 'Spotlight Tour',
+      description: 'Modern cinematic onboarding tour experience',
+      enabled: true,
+      category: 'ui',
+    },
 
     // Experimental Features
     {
