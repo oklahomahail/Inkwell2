@@ -1,6 +1,16 @@
 # Inkwell User Guide
 
-**Welcome to Inkwell** — where you'll find your story and write it well. Our professional-grade platform combines focused writing tools with intelligent AI assistance to help bring your stories to life.
+| **Welcome to Inkwell** — where you'll find your story and write it well. Our professiona | Shortcut                | Action                                                                                                  |
+| ---------------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| **⌘K** (Mac) / **Ctrl+K** (PC)                                                           | Open Command Palette    |
+| **⌘1**                                                                                   | Switch to Dashboard     |
+| **⌘2**                                                                                   | Switch to Writing       |
+| **⌘3**                                                                                   | Switch to Timeline      |
+| **⌘4**                                                                                   | Switch to Analysis      |
+| **⌘\\**                                                                                  | Toggle Sidebar          |
+| **F11**                                                                                  | Enter Focus Mode        |
+| **Esc**                                                                                  | Exit Focus Mode         |
+| **?**                                                                                    | Show keyboard shortcuts | tform combines focused writing tools with intelligent AI assistance to help bring your stories to life. |
 
 ---
 
@@ -462,6 +472,72 @@ Access via **Settings** → **Project Settings**:
 - Try reproducing the issue in incognito mode
 - Check browser console for error messages
 - Export your work as backup
+
+### Settings Panel Fails to Load
+
+**Symptom**: Clicking Settings shows blank page or error
+
+**Causes**:
+
+- Router/anchor guard issue
+- Invalid route state
+- Browser extension conflict
+
+**Solutions**:
+
+1. Refresh the page (Cmd+R / Ctrl+R)
+2. Clear browser cache and cookies
+3. Disable browser extensions temporarily
+4. Try incognito/private browsing mode
+5. Check browser console for error messages
+
+#### MutationObserver Errors
+
+**Symptom**: Console shows "MutationObserver.observe... parameter 1 is not a Node"
+
+**Cause**: DOM element not yet mounted when observer initializes
+
+**Solution**: This is usually harmless and auto-recovers. If persistent:
+
+1. Refresh the page
+2. Clear browser cache
+3. Update to latest browser version
+
+#### Complete Storage Reset (Last Resort)
+
+**Warning**: This will delete ALL local data. Export your work first!
+
+**Steps to completely reset Inkwell**:
+
+1. **Export all projects** via Dashboard → Export
+2. **Open browser DevTools** (F12 or Cmd+Option+I)
+3. **Go to Application/Storage tab**
+4. **Clear all data**:
+   ```javascript
+   // In browser console:
+   localStorage.clear();
+   sessionStorage.clear();
+   indexedDB.databases().then((dbs) => {
+     dbs.forEach((db) => indexedDB.deleteDatabase(db.name));
+   });
+   ```
+5. **Clear cookies** for localhost/your domain
+6. **Hard refresh** (Cmd+Shift+R / Ctrl+Shift+F5)
+7. **Sign in again** and verify auth works
+8. **Import projects** from your exports
+
+#### Authentication Issues
+
+**Symptom**: Can't sign in, stuck at auth callback, or session expires immediately
+
+**Solutions**:
+
+1. Check Supabase project status (dashboard.supabase.com)
+2. Verify environment variables are correct
+3. Check callback URLs in Supabase dashboard match your app URL
+4. Clear browser storage (see above)
+5. Try different browser or incognito mode
+6. Check SMTP settings if password reset fails
 
 ---
 

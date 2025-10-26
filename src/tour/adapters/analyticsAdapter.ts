@@ -5,6 +5,8 @@
  * Wraps the analytics service with tour-specific event tracking.
  */
 
+import { analyticsService } from '@/services/analyticsService';
+
 type Payload = Record<string, unknown>;
 
 /**
@@ -12,14 +14,8 @@ type Payload = Record<string, unknown>;
  */
 function track(event: string, payload: Payload): void {
   try {
-    // TODO: Replace with actual analytics service once available
-    // import { analyticsService } from '@/services/analyticsService';
-    // analyticsService.track(event, payload);
-
-    // Temporary: log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[TourAnalytics]', event, payload);
-    }
+    // Use the real analytics service
+    analyticsService.track(event as any, payload);
   } catch (error) {
     // Analytics should never break the tour flow
     console.warn('[TourAnalytics] Failed to track event:', event, error);

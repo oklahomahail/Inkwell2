@@ -18,7 +18,18 @@ Inkwell is an offline‑first writing platform for serious authors. The focus is
 
 ## Completed (since v0.4.0)
 
-### Enhanced Timeline Integration – **October 2025**
+### Spotlight Tour Phase 2 – **October 25, 2025** ✅
+
+- **Interactive Guided Tours** with SpotlightOverlay UI component
+- **Auto-start Integration** for first-time users on dashboard
+- **Feature-Specific Tours** for AI tools and Export features
+- **Analytics Integration** via analyticsService adapter
+- **Help Menu Launchers** for replaying tours
+- **6-step Default Tour** covering all major UI areas
+- **Accessibility Features** with keyboard navigation and ARIA support
+- **Comprehensive Documentation** in `/docs/TOUR_QUICK_REFERENCE.md`
+
+### Enhanced Timeline Integration – **October 2025** ✅
 
 - **Enhanced Timeline Service** (`enhancedTimelineService.ts`) – Comprehensive conflict detection and validation system
 - **5 Types of Conflict Detection**:
@@ -72,6 +83,25 @@ Inkwell is an offline‑first writing platform for serious authors. The focus is
 - **Advanced Focus Mode** – deeper distraction‑reduction and context scoping for long writing sessions
 - **Quality of life** – incremental editor ergonomics, prompt presets, and export polish
 - **Reliability** – background save hardening and defensive guards around long operations
+
+### Documentation & UX Hardening – **Current Sprint**
+
+**Documentation Updates**:
+
+- ✅ Removed all Clerk references, updated to Supabase-only
+- ✅ Added Spotlight Tour integration guide
+- ✅ Clarified theme default (light mode primary)
+- ✅ Documented Focus Mode exit (Esc key)
+- ✅ Enhanced troubleshooting with Settings/MutationObserver fixes
+- ✅ Added testing guide for Vitest + IndexedDB
+
+**Quick Wins (UI)**:
+
+- ⏳ Add visible "Exit Focus Mode" button
+- ⏳ Improve Settings panel routing guards
+- ⏳ Add data-tour-id attributes for feature tours
+
+---
 
 ## Phase 3+ – Future Roadmap
 

@@ -1,9 +1,11 @@
 // src/components/ProfileMenu.tsx - User account menu for session management
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
-import { ChevronDown, LogOut, KeyRound, HelpCircle } from 'lucide-react';
+import { ChevronDown, LogOut, KeyRound, HelpCircle, Sparkles, FileDown } from 'lucide-react';
 import React from 'react';
 
 import { cn } from '@/lib/utils';
+import { launchAIToolsTour, launchExportTour } from '@/tour/featureTours';
+import { startDefaultTour } from '@/tour/tourEntry';
 
 interface ProfileMenuProps {
   user?: {
@@ -70,7 +72,7 @@ export default function ProfileMenu({
             <MenuItem>
               {({ focus }) => (
                 <button
-                  onClick={() => window.InkwellTour?.start('spotlight', { source: 'profile_menu' })}
+                  onClick={startDefaultTour}
                   className={cn(
                     'w-full px-4 py-2 text-left text-sm flex items-center gap-2',
                     focus ? 'bg-ink-50 text-ink-700' : 'text-text-1',
@@ -79,6 +81,38 @@ export default function ProfileMenu({
                 >
                   <HelpCircle className="h-4 w-4" />
                   Replay Spotlight Tour
+                </button>
+              )}
+            </MenuItem>
+
+            {/* AI Tools Tour */}
+            <MenuItem>
+              {({ focus }) => (
+                <button
+                  onClick={() => launchAIToolsTour(false)}
+                  className={cn(
+                    'w-full px-4 py-2 text-left text-sm flex items-center gap-2',
+                    focus ? 'bg-ink-50 text-ink-700' : 'text-text-1',
+                  )}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Learn AI Features
+                </button>
+              )}
+            </MenuItem>
+
+            {/* Export Tour */}
+            <MenuItem>
+              {({ focus }) => (
+                <button
+                  onClick={() => launchExportTour(false)}
+                  className={cn(
+                    'w-full px-4 py-2 text-left text-sm flex items-center gap-2',
+                    focus ? 'bg-ink-50 text-ink-700' : 'text-text-1',
+                  )}
+                >
+                  <FileDown className="h-4 w-4" />
+                  Learn Export Features
                 </button>
               )}
             </MenuItem>

@@ -4,8 +4,38 @@
  * Convenience functions for starting tours from various parts of the app.
  */
 
-import { DEFAULT_TOUR_ID, defaultTourConfig } from './configs/defaultTour';
-import { isTourDone } from './persistence';
+import { DEFAULT_TOUR_ID, defaultTourConfig, defaultTourSteps } from './configs/defaultTour';
+import { isTourDone, markTourDone } from './persistence';
+import { tourService } from './TourService';
+
+import type { TourConfig as ServiceTourConfig } from './TourTypes';
+import type { TourStep } from './types';
+
+/**
+ * Convert tour steps to the format expected by TourService
+ */
+function convertToServiceConfig(
+  tourId: string,
+  steps: TourStep[],
+  version?: number,
+): ServiceTourConfig {
+  return {
+    id: tourId,
+    steps: steps.map((step) => ({
+      target: step.selectors[0] || `[data-tour-id="${step.id}"]`, // Fallback to data-tour-id
+      title: step.title,
+      content: step.body,
+      placement: step.placement || 'bottom',
+      beforeShow: step.beforeNavigate,
+      onNext: step.onAdvance,
+    })),
+    showProgress: true,
+    allowSkip: true,
+    onComplete: () => {
+      markTourDone(tourId);
+    },
+  };
+}
 
 /**
  * Start the default onboarding tour
@@ -18,13 +48,12 @@ import { isTourDone } from './persistence';
  * ```
  */
 export function startDefaultTour(): void {
-  // TODO: Integrate with TourService once available
-  // import { TourService } from './TourService';
-  // TourService.start(defaultTourConfig);
-
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[TourEntry] Starting default tour:', defaultTourConfig);
-  }
+  const serviceConfig = convertToServiceConfig(
+    DEFAULT_TOUR_ID,
+    defaultTourSteps,
+    defaultTourConfig.version,
+  );
+  tourService.start(serviceConfig);
 }
 
 /**
@@ -63,7 +92,7 @@ export function shouldAutoStartTour(): boolean {
  */
 export function startTourById(
   tourId: string,
-  steps: any[], // Replace with TourStep[] when types are imported
+  steps: TourStep[],
   options?: {
     version?: number;
     skipIfCompleted?: boolean;
@@ -77,10 +106,6 @@ export function startTourById(
     return;
   }
 
-  // TODO: Integrate with TourService
-  // TourService.start({ id: tourId, steps, version });
-
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[TourEntry] Starting tour:', { tourId, steps, version });
-  }
+  const serviceConfig = convertToServiceConfig(tourId, steps, version);
+  tourService.start(serviceConfig);
 }

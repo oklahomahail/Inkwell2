@@ -3,6 +3,8 @@
  * Manages tour state and lifecycle
  */
 
+import { tourAnalytics } from './adapters/analyticsAdapter';
+
 import type { TourConfig, TourState } from './TourTypes';
 
 class TourService {
@@ -64,8 +66,12 @@ class TourService {
 
     this.notify();
 
-    // Track tour start
-    this.trackEvent('tour_started', { tour_id: config.id });
+    // Track tour start using the analytics adapter
+    tourAnalytics.started(config.id, {
+      totalSteps: config.steps.length,
+      showProgress: config.showProgress,
+      allowSkip: config.allowSkip,
+    });
   }
 
   /**
@@ -91,12 +97,8 @@ class TourService {
     this.state.currentStep++;
     this.notify();
 
-    // Track step progress
-    this.trackEvent('tour_step_completed', {
-      tour_id: this.state.tourId,
-      step_index: this.state.currentStep - 1,
-      step_title: currentStep?.title,
-    });
+    // Track step progress using analytics adapter
+    tourAnalytics.stepViewed(this.state.tourId!, this.state.currentStep, currentStep?.title);
   }
 
   /**
@@ -115,9 +117,8 @@ class TourService {
   skip(): void {
     if (!this.state.isRunning) return;
 
-    this.trackEvent('tour_skipped', {
-      tour_id: this.state.tourId,
-      step_index: this.state.currentStep,
+    tourAnalytics.skipped(this.state.tourId!, this.state.currentStep, {
+      totalSteps: this.state.totalSteps,
     });
 
     if (this.config?.onSkip) {
@@ -133,8 +134,8 @@ class TourService {
   private complete(): void {
     if (!this.state.isRunning) return;
 
-    this.trackEvent('tour_completed', {
-      tour_id: this.state.tourId,
+    tourAnalytics.completed(this.state.tourId!, {
+      totalSteps: this.state.totalSteps,
     });
 
     if (this.config?.onComplete) {
@@ -156,19 +157,6 @@ class TourService {
     };
     this.config = null;
     this.notify();
-  }
-
-  /**
-   * Track analytics event
-   */
-  private trackEvent(eventName: string, params?: Record<string, any>): void {
-    try {
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', eventName, params);
-      }
-    } catch (error) {
-      console.warn('[TourService] Failed to track event:', error);
-    }
   }
 }
 

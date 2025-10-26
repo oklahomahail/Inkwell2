@@ -27,9 +27,21 @@ cp .env.example .env
 2. Fill in the required environment variables in `.env`:
 
 ```
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
 VITE_BASE_URL=http://localhost:5173
 ```
+
+### Supabase Configuration
+
+To use authentication features:
+
+1. Create a project at [Supabase](https://supabase.com)
+2. Go to Project Settings → API
+3. Copy your project URL and anon key
+4. Add redirect URLs in Authentication → URL Configuration:
+   - `http://localhost:5173/auth/callback`
+   - `http://localhost:5173` (site URL)
 
 > Note: For development, you can use mock AI mode by setting `VITE_AI_MOCK_MODE=true` to avoid needing real AI API keys.
 

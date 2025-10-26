@@ -524,6 +524,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
       {/* Main Content */}
       <main
+        data-tour-id="dashboard"
         className={cn(
           'main-content flex-1 flex flex-col',
           'min-h-screen transition-all duration-300',

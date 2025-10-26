@@ -45,7 +45,8 @@ If you encounter issues with authentication:
 - Timeline conflict checker
 - Theme & motif tracker
 - Offline-first (IndexedDB), instant startup
-- Dark mode, keyboard shortcuts, command palette
+- Light theme by default with optional dark mode
+- Keyboard shortcuts and command palette
 - Claude/OpenAI assistant panel (generate or critique)
 - Export/import project data
 
@@ -197,9 +198,17 @@ MIT
   - **UI mode toggle** - seamless switching between Beginner and Pro interfaces
 - **🎓 Profile-Aware Tutorial System** — Complete tutorial isolation per profile:
   - **Deep-linkable tutorials** with URLs like `/p/profile-id/tutorials/getting-started/2`
-  - **Per-profile progress tracking** — each workspace has its own tutorial state
-  - **Legacy migration** — existing tutorial progress automatically migrated to first profile
-  - **Shareable tutorial links** — send colleagues to specific tutorial steps with profile context
+  - **Completion tracking** with progress bars and step verification
+  - **Checklist-based progress** mirroring Profile-Aware Tutorials storage patterns
+- **✨ Spotlight Tour System (Phase 2)** — Interactive guided product tours:
+  - **SpotlightOverlay UI** with keyboard navigation (←/→ arrows, Esc to close)
+  - **6-step default tour** covering Dashboard, Navigation, Quick Actions, Storage, Focus Mode, and Help
+  - **Auto-start for first-time users** on dashboard with smart persistence
+  - **Feature-specific tours** for AI tools (5 steps) and Export wizard (6 steps)
+  - **Analytics integration** tracking tour starts, step views, completions, and drop-offs
+  - **Accessibility features** with focus trapping, ARIA announcements, and keyboard-only navigation
+  - **Help menu integration** for replaying tours and launching feature-specific guides
+  - **Responsive positioning** with auto-placement and viewport edge detection
 - **🎪 Enhanced First-Run Experience** — Smart welcome modal with user choice (Start tour, Remind later, Never show)
 - **📋 Layered Tour System** — 60-90 second core tour plus contextual mini-tours for each panel
 - **💡 Interactive Completion Checklist** — Track mastery of 7 key features with progress celebration
@@ -243,7 +252,8 @@ pnpm install
 # Set up environment
 cp .env.example .env
 # Fill in required variables in .env:
-# VITE_CLERK_PUBLISHABLE_KEY=
+# VITE_SUPABASE_URL=
+# VITE_SUPABASE_ANON_KEY=
 # VITE_BASE_URL=
 
 # Start development server
