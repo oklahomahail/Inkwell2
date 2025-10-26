@@ -18,6 +18,7 @@ import {
   OfflineBanner,
   useStorageRecovery,
 } from './components/Recovery/StorageRecoveryBanner';
+import { PreviewGuard } from './components/RouteGuards/PreviewGuard';
 import { StorageBanner } from './components/Storage/StorageBanner';
 import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
@@ -28,6 +29,9 @@ import { useEditorContext } from './context/EditorContext';
 // Route guards
 // Tutorial Router
 // Pages
+import PreviewDashboard from './features/preview/PreviewDashboard';
+import PreviewLandingPage from './features/preview/PreviewLandingPage';
+import PreviewWriter from './features/preview/PreviewWriter';
 import { usePrivateModeWarning } from './hooks/usePrivateModeWarning';
 import AuthCallback from './pages/AuthCallback';
 import BrandPage from './pages/Brand';
@@ -171,8 +175,35 @@ function AppShell() {
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/update-password" element={<UpdatePassword />} />
 
-        {/* Legacy login route - redirect to sign-in */}
+        {/* Legacy routes - redirects */}
         <Route path="/login" element={<Navigate to="/sign-in" replace />} />
+        <Route path="/signup" element={<Navigate to="/sign-up" replace />} />
+
+        {/* Preview mode routes - for unauthenticated users */}
+        <Route
+          path="/preview"
+          element={
+            <PreviewGuard>
+              <PreviewLandingPage />
+            </PreviewGuard>
+          }
+        />
+        <Route
+          path="/preview/write"
+          element={
+            <PreviewGuard>
+              <PreviewWriter />
+            </PreviewGuard>
+          }
+        />
+        <Route
+          path="/preview/dashboard"
+          element={
+            <PreviewGuard>
+              <PreviewDashboard />
+            </PreviewGuard>
+          }
+        />
 
         {/* Root redirect */}
         <Route path="/" element={<RootRedirect />} />

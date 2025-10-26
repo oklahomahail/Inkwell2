@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+import { trackPreviewSignedUp } from '@/features/preview/analytics';
 import { supabase } from '@/lib/supabaseClient';
 import { triggerDashboardView } from '@/utils/tourTriggers';
 
@@ -76,6 +77,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Fire dashboard view trigger on successful sign-in
       if (event === 'SIGNED_IN' && session?.user) {
         triggerDashboardView();
+
+        // Check if user signed up from preview mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromPreview = urlParams.get('from') === 'preview';
+        if (fromPreview) {
+          trackPreviewSignedUp('preview');
+        }
       }
 
       // Handle password recovery flow
