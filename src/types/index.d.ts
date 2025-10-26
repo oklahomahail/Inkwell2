@@ -12,5 +12,6 @@ declare global {
     // Add any global window augmentations here
     debugSearch?: any;
     __PROFILE_TOUR_DEBUG__?: boolean;
+    gtag?: (command: string, eventName: string, params?: Record<string, any>) => void;
   }
 }

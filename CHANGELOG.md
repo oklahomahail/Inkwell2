@@ -1,5 +1,48 @@
 # Changelog
 
+## 1.3.0 - PDF Export (Public Beta)
+
+### Added
+
+- **PDF Export Feature** with two professional templates
+  - **Manuscript Standard**: Complete manuscript export with professional formatting
+    - Serif body font (Georgia, Times New Roman, 12pt)
+    - 1.15 line spacing, 1-inch margins, A4 page size
+    - Headers with title/author, footers with page numbers
+    - Chapter titles start new pages with orphan/widow control
+  - **Analysis Summary**: One-page plot analysis report
+    - Letter-graded scorecard (Structure, Pacing, Scene Purpose, Coverage)
+    - Top 5 insights with severity indicators
+    - Pacing chart and arc heatmap visualizations
+    - Color-coded grade badges (A-F scale)
+- **Export API**: Serverless PDF generation endpoint (`/api/export/pdf`)
+  - Puppeteer-core + @sparticuz/chromium for Vercel deployment
+  - 10MB HTML payload limit with security controls
+  - 30-second timeout, 1GB memory allocation
+- **Keyboard Shortcut**: `Cmd+E` to open export modal
+- **Telemetry**: Export events tracking (started/succeeded/failed with duration and file size)
+- **E2E Tests**: API endpoint validation with fixture HTML
+
+### Technical
+
+- Print CSS optimization with @page rules and proper page break controls
+- Template renderers with HTML escaping and sanitization
+- SVG to data URL utilities for chart embedding
+- Vercel function configuration in vercel.json
+
+### Documentation
+
+- Comprehensive export feature guide at `docs/features/export.md`
+- Template descriptions, use cases, and troubleshooting
+- API reference and examples
+
+### Limitations
+
+- PDF only (no DOCX support yet)
+- Analysis export requires Plot Analysis to be run first
+- System fonts only, fixed margins
+- Single-page analysis summaries
+
 ## 1.1.0
 
 ### Minor Changes

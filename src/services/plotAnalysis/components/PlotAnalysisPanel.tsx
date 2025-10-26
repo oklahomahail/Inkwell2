@@ -1,9 +1,10 @@
 // Plot Analysis Panel - Main component with tabs
 
 import { Loader2, AlertTriangle } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 import type { Project } from '@/context/AppContext';
+import { storeCapturedCharts, batchCaptureSVGs } from '@/export/utils/svgCapture';
 
 import { usePlotAnalysis } from '../hooks/usePlotAnalysis';
 
@@ -31,6 +32,35 @@ export function PlotAnalysisPanel({ project, onOpenChapter }: PlotAnalysisPanelP
     if (!result) return [];
     return result.insights.filter((i) => i.severity === 'high').flatMap((i) => i.affectedChapters);
   }, [result]);
+
+  // Capture SVG charts after they render for PDF export
+  useEffect(() => {
+    if (!result || status !== 'ready') return;
+
+    // Wait for charts to fully render
+    const timer = setTimeout(() => {
+      try {
+        // Define selectors for plot analysis charts
+        // These match the Recharts ResponsiveContainer SVG outputs
+        const charts = batchCaptureSVGs([
+          'div[aria-label="Pacing by chapter"] svg', // PacingChart
+          'div[aria-label="Arc presence heatmap"] svg', // ArcHeatmap
+        ]);
+
+        // Store captured charts in localStorage for export
+        storeCapturedCharts(project.id, {
+          pacing: charts['div[aria-label="Pacing by chapter"] svg'] || null,
+          arcs: charts['div[aria-label="Arc presence heatmap"] svg'] || null,
+        });
+
+        console.log('Plot analysis charts captured for export');
+      } catch (error) {
+        console.warn('Failed to capture plot analysis charts:', error);
+      }
+    }, 500); // Allow time for animations to complete
+
+    return () => clearTimeout(timer);
+  }, [result, status, project.id]);
 
   // Loading state
   if (status === 'loading') {
