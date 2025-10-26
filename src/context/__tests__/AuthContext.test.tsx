@@ -11,6 +11,33 @@ import { act } from 'react';
 import { useState } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+// Create mock supabase client before imports
+const mockSupabase = {
+  auth: {
+    getSession: vi.fn(),
+    onAuthStateChange: vi.fn(),
+    signOut: vi.fn(),
+    signInWithOtp: vi.fn(),
+    signInWithPassword: vi.fn(),
+    signUp: vi.fn(),
+  },
+};
+
+// Mock the supabase client module
+vi.mock('@/lib/supabaseClient', () => ({
+  supabase: mockSupabase,
+}));
+
+// Mock tour triggers
+vi.mock('@/utils/tourTriggers', () => ({
+  triggerDashboardView: vi.fn(),
+}));
+
+// Mock preview analytics
+vi.mock('@/features/preview/analytics', () => ({
+  trackPreviewSignedUp: vi.fn(),
+}));
+
 import { createMockSession } from '../../test/testUtils';
 import { AuthProvider, useAuth } from '../AuthContext';
 
@@ -42,29 +69,10 @@ function TestComponent() {
 }
 
 describe('AuthContext', () => {
-  let mockSupabase: any;
   let authStateListeners: Map<string, Function>;
 
   beforeEach(() => {
     authStateListeners = new Map();
-
-    // Get or create the mock from global setup
-    mockSupabase = (globalThis as any).__mockSupabase;
-
-    // If not available from setup, create it
-    if (!mockSupabase) {
-      mockSupabase = {
-        auth: {
-          getSession: vi.fn(),
-          onAuthStateChange: vi.fn(),
-          signOut: vi.fn(),
-          signInWithOtp: vi.fn(),
-          signInWithPassword: vi.fn(),
-          signUp: vi.fn(),
-        },
-      };
-      (globalThis as any).__mockSupabase = mockSupabase;
-    }
 
     // Reset all mocks to default happy paths
     mockSupabase.auth.getSession.mockResolvedValue({

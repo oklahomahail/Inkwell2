@@ -1,5 +1,18 @@
 import { renderHook } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
+import { vi, it, expect } from 'vitest';
+
+// Mock ClaudeProvider before importing AppContext
+vi.mock('./ClaudeProvider', () => ({
+  useClaude: () => ({
+    isAvailable: false,
+    isStreaming: false,
+    generateText: vi.fn(),
+    streamText: vi.fn(),
+    cancelStream: vi.fn(),
+  }),
+  ClaudeProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 import { AppProvider, useAppContext, View } from './AppContext';
 

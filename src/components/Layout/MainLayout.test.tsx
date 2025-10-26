@@ -60,7 +60,7 @@ describe('MainLayout', () => {
     expect(logoElements.length).toBeGreaterThan(0);
     expect(logoElements[0]).toBeInTheDocument();
 
-    expect(screen.getByTestId('mock-profile-switcher')).toBeInTheDocument();
+    // ProfileSwitcher removed - now single-user system
     expect(screen.getByText('Test Content')).toBeInTheDocument();
   });
 

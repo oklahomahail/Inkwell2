@@ -148,12 +148,18 @@ export async function getStorageHealth(): Promise<StorageHealth> {
     healthy = false;
   }
 
-  if (percentUsed > 80) {
+  // Storage usage warnings
+  if (percentUsed > 90) {
+    warnings.push(`Storage usage is critically high (>90%)`);
+    healthy = false;
+  } else if (percentUsed > 80) {
     warnings.push(`Storage is ${Math.round(percentUsed)}% full`);
     healthy = false;
+  } else if (percentUsed > 70) {
+    warnings.push('Storage usage is above 70%');
   }
 
-  if (!dbExists) {
+  if (!dbExists && hasIDB()) {
     warnings.push('Database not yet initialized');
   }
 

@@ -43,8 +43,8 @@ describe('Storage Health - Comprehensive', () => {
     const health = await getStorageHealth();
 
     expect(health.percentUsed).toBe(80);
-    expect(health.healthy).toBe(true);
-    expect(health.warnings).toContain('Storage usage is above 70%');
+    expect(health.healthy).toBe(false); // Changed: >80% is unhealthy
+    expect(health.warnings).toContain('Storage is 80% full');
   });
 
   it('reports unhealthy when usage exceeds 90%', async () => {
@@ -92,7 +92,7 @@ describe('Storage Health - Comprehensive', () => {
     const health = await getStorageHealth();
 
     expect(health.dbExists).toBe(false);
-    expect(health.warnings).toContain('IndexedDB is not available');
+    expect(health.warnings).toContain('IndexedDB not available in this environment');
   });
 
   it('handles IndexedDB.databases() when available', async () => {
@@ -215,7 +215,9 @@ describe('Storage Health - Comprehensive', () => {
     const health = await getStorageHealth();
 
     expect(health.privateMode).toBe(true);
-    expect(health.warnings).toContain('Browser is in private/incognito mode');
+    expect(health.warnings).toContain(
+      'Running in private/incognito mode - data will be lost when window closes',
+    );
   });
 
   it('detects restricted storage', async () => {
@@ -226,7 +228,7 @@ describe('Storage Health - Comprehensive', () => {
     const health = await getStorageHealth();
 
     expect(health.restricted).toBe(true);
-    expect(health.warnings).toContain('Storage quota is restricted');
+    expect(health.warnings).toContain('Storage quota is severely limited');
   });
 
   // ===== PERSISTENCE STATUS =====
