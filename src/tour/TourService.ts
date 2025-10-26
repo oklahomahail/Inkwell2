@@ -50,9 +50,13 @@ class TourService {
   /**
    * Start a tour with the given configuration
    */
-  async start(config: TourConfig): Promise<void> {
-    if (this.state.isRunning) {
+  async start(config: TourConfig, opts?: { forceRestart?: boolean }): Promise<void> {
+    if (this.state.isRunning && !opts?.forceRestart) {
       console.warn('[TourService] Tour already running, stopping current tour');
+      return;
+    }
+
+    if (this.state.isRunning) {
       this.stop();
     }
 

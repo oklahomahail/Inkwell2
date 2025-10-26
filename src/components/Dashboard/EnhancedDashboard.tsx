@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 
 import { InkwellFeather } from '@/components/icons';
 import type { InkwellIconName } from '@/components/icons/InkwellFeather';
+import NewProjectDialog from '@/components/Projects/NewProjectDialog';
 import StatusChip from '@/components/Storage/StatusChip';
 import { StorageHealthWidget } from '@/components/Storage/StorageHealthWidget';
 import { useAppContext, View } from '@/context/AppContext';
@@ -13,6 +14,7 @@ import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 const EnhancedDashboard: React.FC = () => {
   const { state, currentProject, addProject, setCurrentProjectId, dispatch } = useAppContext();
   const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
   const [storageModalOpen, setStorageModalOpen] = useState(false);
 
   // Check for tour=start in URL and trigger tour if found
@@ -35,6 +37,10 @@ const EnhancedDashboard: React.FC = () => {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+
+  const openNewProjectDialog = () => {
+    setNewProjectDialogOpen(true);
+  };
 
   const createNewProject = async () => {
     setIsCreatingProject(true);
@@ -95,7 +101,7 @@ const EnhancedDashboard: React.FC = () => {
       description: 'Start a fresh writing project with templates and structure',
       icon: PlusCircle,
       color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-      action: createNewProject,
+      action: () => setNewProjectDialogOpen(true),
     },
     {
       id: 'continue-writing',
@@ -179,22 +185,9 @@ const EnhancedDashboard: React.FC = () => {
                 </p>
               </div>
             </div>
-            <button
-              onClick={createNewProject}
-              disabled={isCreatingProject}
-              className="btn btn-primary btn-lg"
-            >
-              {isCreatingProject ? (
-                <>
-                  <div className="loading w-5 h-5" />
-                  Creating Project...
-                </>
-              ) : (
-                <>
-                  <PlusCircle className="w-5 h-5" />
-                  Create Your First Project
-                </>
-              )}
+            <button onClick={openNewProjectDialog} className="btn btn-primary btn-lg">
+              <PlusCircle className="w-5 h-5" />
+              Create Your First Project
             </button>
           </div>
 
@@ -245,22 +238,12 @@ const EnhancedDashboard: React.FC = () => {
           <div className="flex items-center gap-3">
             <StatusChip onClick={() => setStorageModalOpen(true)} />
             <button
-              onClick={createNewProject}
-              disabled={isCreatingProject}
+              onClick={openNewProjectDialog}
               className="btn btn-primary"
               data-tour="new-project-button"
             >
-              {isCreatingProject ? (
-                <>
-                  <div className="loading w-4 h-4" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <PlusCircle className="w-4 h-4" />
-                  New Project
-                </>
-              )}
+              <PlusCircle className="w-4 h-4" />
+              New Project
             </button>
           </div>
         </div>
@@ -502,6 +485,9 @@ const EnhancedDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* New Project Dialog */}
+      <NewProjectDialog open={newProjectDialogOpen} onOpenChange={setNewProjectDialogOpen} />
     </div>
   );
 };

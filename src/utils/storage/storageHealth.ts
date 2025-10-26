@@ -15,6 +15,16 @@ function hasIDB(): boolean {
   return typeof globalThis !== 'undefined' && !!(globalThis as any).indexedDB;
 }
 
+/**
+ * Get storage usage severity based on percentage used
+ */
+export function getUsageSeverity(percent: number): 'ok' | 'warn' | 'high' | 'critical' {
+  if (percent < 70) return 'ok'; // green
+  if (percent < 85) return 'warn'; // yellow
+  if (percent < 95) return 'high'; // orange
+  return 'critical'; // red
+}
+
 export interface StorageHealth {
   // Database info
   dbName: string;

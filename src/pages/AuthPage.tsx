@@ -80,25 +80,31 @@ export default function AuthPage({ mode }: AuthPageProps) {
       <div className="w-full max-w-md">
         <div className="flex justify-center">
           <img
-            src="/brand/inkwell-lockup-dark.svg"
+            src="/assets/brand/inkwell-lockup-dark.svg"
             alt="Inkwell"
             className="h-16 w-auto"
             onError={(e) => {
-              console.error('Logo failed to load, falling back to wordmark');
-              // First try the logo path
-              (e.currentTarget as HTMLImageElement).src = '/brand/logos/inkwell-wordmark-gold.svg';
-              // Add a second fallback in case the logo also fails
-              (e.currentTarget as HTMLImageElement).onerror = () => {
-                console.error('Fallback logo also failed, using text wordmark');
-                // Replace the img with a text wordmark as final fallback
-                const parent = e.currentTarget.parentElement;
-                if (parent) {
-                  const wordmark = document.createElement('h1');
-                  wordmark.textContent = 'Inkwell';
-                  wordmark.className = 'text-3xl font-serif font-bold text-[#D4A537]';
-                  parent.replaceChild(wordmark, e.currentTarget);
-                }
-              };
+              const img = e.currentTarget as HTMLImageElement | null;
+              if (!img) return;
+
+              // Stop loops
+              img.onerror = null;
+
+              // Try fallback src if not already tried
+              if (img.dataset.fallbackApplied !== '1') {
+                img.dataset.fallbackApplied = '1';
+                img.src = '/assets/brand/inkwell-wordmark.svg';
+                return;
+              }
+
+              // Final text fallback when both images fail
+              const parent = img.parentElement;
+              if (parent) {
+                parent.innerHTML = `<span class="text-3xl font-serif font-bold text-[#D4A537]">Inkwell</span>`;
+              } else {
+                // As absolute fallback, hide the broken image
+                img.style.display = 'none';
+              }
             }}
           />
         </div>

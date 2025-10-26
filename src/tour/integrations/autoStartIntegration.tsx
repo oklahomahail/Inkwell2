@@ -29,6 +29,12 @@ export function AutoStartTourIntegration() {
       return;
     }
 
+    // Skip auto-start on certain routes
+    const skipAutoStartRoutes = new Set(['/settings', '/auth']);
+    if (skipAutoStartRoutes.has(location.pathname)) {
+      return;
+    }
+
     // Only auto-start on the dashboard
     if (location.pathname !== '/dashboard') {
       return;

@@ -109,3 +109,21 @@ export function startTourById(
   const serviceConfig = convertToServiceConfig(tourId, steps, version);
   tourService.start(serviceConfig);
 }
+
+/**
+ * Start the default tour from Settings with forced restart
+ * This ensures the tour starts even if something is mid-run
+ */
+export function startDefaultTourFromSettings(): void {
+  // Stop if something is weirdly mid-run
+  if (tourService.isRunning()) {
+    tourService.stop();
+  }
+
+  const serviceConfig = convertToServiceConfig(
+    DEFAULT_TOUR_ID,
+    defaultTourSteps,
+    defaultTourConfig.version,
+  );
+  tourService.start(serviceConfig, { forceRestart: true });
+}

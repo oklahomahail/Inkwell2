@@ -1,124 +1,27 @@
 {
-  "name": "Inkwell – Where Writing Flows",
+  "name": "Inkwell",
   "short_name": "Inkwell",
-  "description": "A comprehensive writing platform for authors, writers, and storytellers. Organize your projects, track progress, and bring your stories to life.",
-  "start_url": "/",
+  "description": "A comprehensive writing platform for authors, writers, and storytellers",
+  "icons": [
+    { 
+      "src": "/assets/brand/inkwell-logo-icon-192.png", 
+      "sizes": "192x192", 
+      "type": "image/png", 
+      "purpose": "any maskable" 
+    },
+    { 
+      "src": "/assets/brand/inkwell-logo-icon-512.png", 
+      "sizes": "512x512", 
+      "type": "image/png" 
+    }
+  ],
+  "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#d4af37",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
   "orientation": "portrait-primary",
   "categories": ["productivity", "business", "lifestyle"],
   "lang": "en-US",
   "dir": "ltr",
-  "scope": "/",
-  "icons": [
-    {
-      "src": "/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "New Project",
-      "short_name": "New",
-      "description": "Create a new writing project",
-      "url": "/?action=new-project",
-      "icons": [
-        {
-          "src": "/icons/shortcut-new.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Recent Projects",
-      "short_name": "Recent",
-      "description": "Open recent writing projects",
-      "url": "/?view=dashboard",
-      "icons": [
-        {
-          "src": "/icons/shortcut-recent.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Quick Write",
-      "short_name": "Write",
-      "description": "Start writing immediately",
-      "url": "/?view=writing",
-      "icons": [
-        {
-          "src": "/icons/shortcut-write.png",
-          "sizes": "192x192"
-        }
-      ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/desktop-writing.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Writing interface on desktop"
-    },
-    {
-      "src": "/screenshots/mobile-dashboard.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Project dashboard on mobile"
-    }
-  ],
-  "features": [
-    "background-sync",
-    "offline-storage",
-    "local-fonts"
-  ],
-  "prefer_related_applications": false
+  "scope": "/"
 }

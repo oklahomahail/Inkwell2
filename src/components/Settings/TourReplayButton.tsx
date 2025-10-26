@@ -6,10 +6,9 @@
 
 import React, { useState } from 'react';
 
-import { useAutostartSpotlight } from '@/hooks/useAutostartSpotlight';
+import { startDefaultTourFromSettings } from '@/tour/tourEntry';
 
 export function TourReplayButton() {
-  const { restartTour } = useAutostartSpotlight();
   const [isResetting, setIsResetting] = useState(false);
 
   // Check if user has completed tour before (from localStorage)
@@ -23,7 +22,7 @@ export function TourReplayButton() {
       await new Promise((resolve) => setTimeout(resolve, 300));
 
       // Start the tour
-      restartTour();
+      startDefaultTourFromSettings();
     } catch (error) {
       console.error('[TourReplay] Failed to restart tour:', error);
     } finally {
