@@ -19,6 +19,9 @@ export default defineConfig({
       'src/services/**/*.{test,spec}.ts',
       'src/components/**/*.{test,spec}.tsx',
       'src/pages/**/*.{test,spec}.tsx',
+      'src/export/**/*.{test,spec}.ts',
+      'src/tour/**/*.{test,spec}.ts',
+      'src/features/**/*.{test,spec}.tsx',
     ],
     coverage: {
       enabled: true,
