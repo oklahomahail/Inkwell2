@@ -6,6 +6,17 @@
       "destination": "/"
     }
   ],
+  "headers": [
+    {
+      "source": "/assets/brand/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
   "cleanUrls": true,
   "functions": {
     "api/export/pdf.ts": {

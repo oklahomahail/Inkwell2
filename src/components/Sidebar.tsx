@@ -1,6 +1,6 @@
 // File: src/components/Sidebar.tsx
 import { PlusCircle } from 'lucide-react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 
 import { InkwellFeather } from '@/components/icons';
 import { View } from '@/context/AppContext';
@@ -15,6 +15,7 @@ export const Sidebar: React.FC = () => {
   const { state, setView, addProject, setCurrentProjectId } = useAppContext();
   const { view } = state;
   const { sidebarCollapsed, toggleSidebar } = useUI();
+  const createProjectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const navLinks = useMemo(() => {
     return [
@@ -33,7 +34,16 @@ export const Sidebar: React.FC = () => {
     if (view === View.Writing) _focusWritingEditor();
   };
 
-  const handleCreateProject = () => {
+  const handleCreateProject = useCallback(() => {
+    // Debounce to prevent double creates on rapid clicks
+    if (createProjectTimeoutRef.current) {
+      return;
+    }
+
+    createProjectTimeoutRef.current = setTimeout(() => {
+      createProjectTimeoutRef.current = null;
+    }, 1000);
+
     const newProject = {
       id: `project-${Date.now()}`,
       name: `New Story ${state.projects.length + 1}`,
@@ -48,7 +58,7 @@ export const Sidebar: React.FC = () => {
 
     // Fire tour trigger for project creation
     triggerOnProjectCreated(newProject.id);
-  };
+  }, [state.projects.length, addProject, setCurrentProjectId, setView]);
 
   return (
     <aside

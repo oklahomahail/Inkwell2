@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const KEY = 'inkwell.theme';
+const KEY = 'inkwell:theme';
 type Theme = 'light' | 'dark';
 
 export function useTheme() {

@@ -166,3 +166,8 @@ class TourService {
 
 // Export singleton instance
 export const tourService = new TourService();
+
+// Expose TourService globally in development for debugging
+if (import.meta.env.DEV) {
+  (window as typeof window & { inkwellTour?: TourService }).inkwellTour = tourService;
+}
