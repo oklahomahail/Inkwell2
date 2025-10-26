@@ -1,5 +1,7 @@
 # Onboarding System
 
+> **Note:** As of January 2025, Inkwell uses a **single-user model**. Tour state is tracked per authenticated user (not per profile).
+
 The onboarding system in Inkwell provides guided tours to help users discover and understand application features. It supports multiple tour types, progress persistence, and various trigger mechanisms.
 
 ## Architecture
@@ -258,16 +260,16 @@ The system emits the following analytics events:
 
 1. `tour_started`
    - `tourType`: Type of tour
-   - `profileId`: User's profile ID
+   - `userId`: User's ID
    - `totalSteps`: Number of steps in tour
 
 2. `tour_step`
    - `tourType`: Type of tour
-   - `profileId`: User's profile ID
+   - `userId`: User's ID
    - `stepIndex`: Current step number
    - `totalSteps`: Total steps in tour
 
 3. `tour_complete`
    - `tourType`: Type of tour
-   - `profileId`: User's profile ID
+   - `userId`: User's ID
    - `totalSteps`: Number of steps completed

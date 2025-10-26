@@ -20,11 +20,10 @@ _(1-3 sentences describing the issue)_
 - **Expected**:
 - **Actual**:
 
-## 🔐 Profile Context
+## 🔐 User Context
 
-- **Profile mode**: Local _(Link mode not yet available)_
-- **Route URL**: `/p/{profileId}/...` _(or `/profiles` if no profile)_
-- **Profile switching involved**: Yes/No
+- **Authentication status**: Signed in _(all features require authentication)_
+- **Route URL**: `/dashboard`, `/writing/...`, etc.
 - **Data migration involved**: Yes/No _(for users with existing Inkwell data)_
 
 ## 📋 Console/Network Errors
@@ -44,8 +43,7 @@ Paste console errors here
 
 ## 📊 Additional Context
 
-- **Profile switching test**: Did you test switching between profiles?
-- **Data isolation test**: Are projects correctly isolated between profiles?
+- **Data migration involved**: Yes/No _(for users with legacy profile-based data)_
 - **Page refresh test**: Does the issue persist after page refresh?
 - **Incognito test**: Does the issue happen in incognito/private browsing?
 

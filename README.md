@@ -12,17 +12,19 @@ Inkwell helps writers plan, draft, and revise with structure. It blends creative
 
 ## Authentication
 
-Inkwell supports the following authentication methods:
+Inkwell is a single-user application with authentication through Supabase:
 
 - Email/Password authentication
 - Magic link authentication (passwordless email)
 
-Authentication is handled through Supabase, with the following flows:
+Authentication flows supported:
 
 - Sign in (email/password or magic link)
 - Sign up (with email verification)
 - Password reset
 - Account recovery
+
+Each user has a single workspace with all their projects, chapters, characters, and settings.
 
 ### Authentication Troubleshooting
 
@@ -84,14 +86,16 @@ See [/docs/ops/01-deploy.md](/docs/ops/01-deploy.md) and [/docs/ops/03-secrets.m
 
 Client-side React + Vite, local storage via IndexedDB, auth via Supabase, feature-flagged analytics, and optional AI integrations.
 
+Single-user model: each authenticated user has one workspace with all their data stored locally in IndexedDB.
+
 ```
 React (Vite)
  ├─ UI (Tailwind)
  ├─ State (Context + hooks)
- ├─ Storage (IndexedDB)
+ ├─ Storage (IndexedDB - user-scoped)
  ├─ Features (chapters, characters, clues, timeline)
  ├─ AI (Claude/OpenAI adapter)
-└─ Auth (Supabase)
+└─ Auth (Supabase - single user)
 ```
 
 ## Project Tree

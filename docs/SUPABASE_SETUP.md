@@ -58,9 +58,9 @@ Example magic link template:
 3. Add **Redirect URLs** (one per line):
 
    ```
-   http://localhost:5173/profiles
-   https://inkwell.leadwithnexus.com/profiles
-   https://*.vercel.app/profiles
+   http://localhost:5173/dashboard
+   https://inkwell.leadwithnexus.com/dashboard
+   https://*.vercel.app/dashboard
    ```
 
    The wildcard `*.vercel.app` allows all Vercel preview deployments to work.
@@ -178,7 +178,7 @@ create trigger on_profile_updated
 2. Navigate to `http://localhost:5173`
 3. Try signing in with your email
 4. Check your email for the magic link
-5. Click the link - you should be redirected to `/profiles` and authenticated
+5. Click the link - you should be redirected to `/dashboard` and authenticated
 
 ### Common Issues
 
@@ -190,7 +190,7 @@ create trigger on_profile_updated
 
 **Redirect not working?**
 
-- Verify `/profiles` is in your Redirect URLs list
+- Verify `/dashboard` is in your Redirect URLs list
 - Check browser console for errors
 - Ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set correctly
 
@@ -216,15 +216,15 @@ create trigger on_profile_updated
    - Visit `https://inkwell.leadwithnexus.com`
    - Sign in with your email
    - Verify magic link works
-   - Check that you're redirected to `/profiles`
+   - Check that you're redirected to `/dashboard`
 
 ## Step 9: QA Checklist
 
 Run through this checklist to ensure everything works:
 
-- [ ] Fresh browser → Sign in → lands on `/profiles` authenticated
+- [ ] Fresh browser → Sign in → lands on `/dashboard` authenticated
 - [ ] Hard refresh (Cmd+Shift+R) → still authenticated
-- [ ] Open new tab on `/profiles` → authenticated without flicker
+- [ ] Open new tab on `/dashboard` → authenticated without flicker
 - [ ] Sign out → redirect to `/sign-in`
 - [ ] Try signing in with invalid email → see error message
 - [ ] Request magic link twice in 30s → see rate limit message
@@ -357,7 +357,7 @@ const signInWithGoogle = async () => {
   await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/profiles`,
+      redirectTo: `${window.location.origin}/dashboard`,
     },
   });
 };

@@ -1,6 +1,12 @@
 # Tour System
 
-The tour system provides an accessible, configurable way to guide users through the application's features. It consists of a spotlight overlay that highlights specific UI elements and a step card that provides contextual information and navigation controls.
+The tour system provides an accessible, configurable way to guide users through the application's features. It consists of a spotlight overlay that highlights specific UI elements and a step // Storage keys are user-aware:
+export const STORAGE_KEYS = {
+TUTORIAL_SEEN: (userId: string, tourName: TourName) =>
+`inkwell.tutorial.${userId}.${tourName}.seen`,
+TUTORIAL_STEP: (userId: string, tourName: TourName) =>
+`inkwell.tutorial.${userId}.${tourName}.step`,
+};at provides contextual information and navigation controls.
 
 ## Components
 
@@ -215,7 +221,7 @@ const STORAGE_KEYS = {
 
 This new structure provides:
 
-- Profile-specific tour state
+- User-specific tour state
 - Better type safety
 - Centralized state management
 - React 19 double-effect protection

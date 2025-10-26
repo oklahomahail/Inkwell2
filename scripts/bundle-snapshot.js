@@ -31,7 +31,6 @@ const CRITICAL_MODULES = [
   'pwaService', 
   'tutorialStorage',
   'TourProvider',
-  'ProfileTourProvider'
 ];
 
 async function ensureSnapshotsDir() {

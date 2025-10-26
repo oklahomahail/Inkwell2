@@ -4,6 +4,35 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Removed - Multi-Profile Workspace System
+
+**Breaking Change:** Inkwell has been simplified to a single-user model. The multi-profile workspace system has been completely removed.
+
+**What Changed:**
+
+- Removed all profile-related contexts, providers, components, and hooks
+- Simplified authentication to direct user access (no profile layer)
+- Migrated from profile-based routes (`/p/{profileId}/*`) to direct routes (`/dashboard`, `/writing`, etc.)
+- Updated storage keys from `inkwell:profile:{id}:*` to `inkwell:user:*`
+- Removed ProfileContext, ProfileProvider, ProfileMenu, ProfileSwitcher, ProfilePicker, ProfileGate
+- All tests updated to use user context instead of profile context
+
+**Migration Handled Automatically:**
+
+- ✅ Legacy storage keys automatically migrated on first app load
+- ✅ Old profile-based URLs redirect to new routes
+- ✅ User data preserved during migration
+- ✅ No manual user action required
+
+**Benefits:**
+
+- Simpler codebase (~2,000 lines removed)
+- Clearer data ownership model
+- Reduced complexity and maintenance burden
+- Better performance (no profile switching overhead)
+
+For technical details, see [PROFILE_REMOVAL_COMPLETE.md](./PROFILE_REMOVAL_COMPLETE.md)
+
 ### Added - Spotlight Tour UI (Phase 2 - Integration Complete)
 
 - **Core UI Components** for guided product tours

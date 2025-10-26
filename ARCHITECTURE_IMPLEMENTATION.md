@@ -1,5 +1,7 @@
 # Inkwell Architecture Implementation Summary
 
+> **Note:** As of January 2025, Inkwell uses a **single-user model**. The multi-profile workspace system has been removed in favor of a simpler one-user-one-workspace architecture. See [PROFILE_REMOVAL_COMPLETE.md](./PROFILE_REMOVAL_COMPLETE.md) for details.
+
 ## 🎯 Mission Accomplished
 
 We have successfully implemented the foundational architecture refactoring for Inkwell, establishing a robust, scalable foundation that transforms the codebase from a React Context-based approach to a modern Zustand-powered architecture with comprehensive utilities.

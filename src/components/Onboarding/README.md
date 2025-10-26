@@ -193,7 +193,7 @@ function Dashboard() {
 - **Fallback Handling**: Graceful degradation when elements missing
 - **Empty State Support**: Works before content is loaded
 - **Exponential Backoff**: Retries element detection intelligently
-- **Profile Awareness**: Tour state tracked per user profile
+- **User Awareness**: Tour state tracked per authenticated user
 - **React 19 Ready**: Protected against double-effect triggers
 - **Portal-Based**: Reliable z-index handling via portals
 
