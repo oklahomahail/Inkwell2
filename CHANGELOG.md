@@ -1,5 +1,74 @@
 # Changelog
 
+All notable changes to this project are documented here.
+
+## [Unreleased]
+
+### Added - Spotlight Tour UI (Phase 2 - Integration Complete)
+
+- **Core UI Components** for guided product tours
+  - **SpotlightOverlay**: Main orchestrator with keyboard navigation and accessibility
+  - **SpotlightMask**: SVG-based dark overlay with spotlight cutout and focus ring
+  - **SpotlightTooltip**: Positioned tooltip card with step content, progress, and navigation
+  - **useSpotlightUI**: React hook for tour state subscription and target resolution
+- **Geometry & Positioning Utilities**
+  - `geometry.ts`: Viewport helpers, anchor rect computation, RAF throttling
+  - `positioning.ts`: Auto-placement algorithm for optimal tooltip positioning
+  - `portal.tsx`: React portal for z-index isolation
+  - `a11y.ts`: Focus trap, focus restoration, ARIA live announcements
+- **Integration Adapters**
+  - **analyticsAdapter.ts**: Analytics event tracking for tour lifecycle
+  - **routerAdapter.ts**: Route-based navigation and anchor refresh
+  - **tourLifecycleIntegration.tsx**: Connects events to analytics and persistence
+- **Configuration & Persistence**
+  - **defaultTour.ts**: Pre-configured onboarding tour with 6 steps
+  - **persistence.ts**: localStorage-based completion tracking
+  - **tourEntry.ts**: Convenience functions (`startDefaultTour()`, `shouldAutoStartTour()`)
+- **Keyboard Navigation**: Arrow keys (←/→) for step navigation, Escape to close
+- **Accessibility Features**
+  - Focus trap constrains tab navigation to tour overlay
+  - Screen reader announcements for step changes via ARIA live regions
+  - Keyboard-accessible navigation buttons
+  - `role="dialog"` and `aria-modal="true"` for proper semantics
+- **Analytics Integration**
+  - `tour_started`: Track tour initiation
+  - `tour_step_viewed`: Track step views with placement and target resolution
+  - `tour_completed`: Track successful tour completion
+  - `tour_skipped`: Track early exits with drop-off point
+- **Comprehensive Documentation**
+  - `docs/features/tour.md`: Feature guide with usage, customization, and troubleshooting
+  - `docs/architecture/spotlight-tour-architecture.md`: System design, data flow, and integration points
+  - `docs/ops/telemetry.md`: Analytics events, metrics, and privacy considerations
+  - `docs/product/first-run-experience.md`: Onboarding flow design and optimization
+  - `docs/integration/spotlight-tour-integration.md`: Step-by-step integration guide
+
+### Integration Ready
+
+- ✅ Analytics adapter with event tracking
+- ✅ Router adapter for route-based steps
+- ✅ Persistence layer for completion tracking
+- ✅ Default tour configuration
+- ✅ Lifecycle integration component
+- ✅ Entry point functions for triggering tours
+
+### Next Steps
+
+- Mount `SpotlightOverlay` in app root
+- Mount `TourLifecycleIntegration` in app root
+- Call `useTourRouterAdapter()` in app component
+- Add `data-tour-id` attributes to UI elements
+- Connect help menu to `startDefaultTour()`
+
+### Technical
+
+- Resilient target resolution with fallback selectors
+- Responsive tooltip positioning with viewport edge detection
+- Dark mode support via Tailwind CSS design tokens
+- Performance optimized with RAF-throttled viewport updates
+- Memoized anchor rect calculations to minimize re-renders
+- Safe analytics tracking (errors don't break tour flow)
+- localStorage persistence with graceful fallback
+
 ## 1.3.0 - PDF Export (Public Beta)
 
 ### Added
@@ -845,7 +914,7 @@ All notable changes to this project are documented here.
   - Interactive navigation to problematic events and scenes
   - Overall timeline health dashboard
 
-- **Scene Linkage Suggestions** (`SceneLinkageSuggestions.tsx`)
+- **Scene Linkage Suggestions** (`SceneLinkageSuggestions.ts`)
   - AI-powered scene linkage recommendations
   - Confidence scoring with detailed reasoning
   - Accept/dismiss functionality for suggestions

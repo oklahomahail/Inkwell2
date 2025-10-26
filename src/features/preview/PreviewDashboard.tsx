@@ -9,8 +9,9 @@ import React, { useEffect } from 'react';
 import { useGo } from '@/utils/navigate';
 
 import { trackPreviewOpened, trackPreviewCTA } from './analytics';
+import { getDemoProjectStats } from './demoData';
 import PreviewBanner from './PreviewBanner';
-import { getDemoProjectStats, useDemoStore } from './useDemoStore';
+import { useDemoStore } from './useDemoStore';
 
 export function PreviewDashboard() {
   const { project } = useDemoStore();
