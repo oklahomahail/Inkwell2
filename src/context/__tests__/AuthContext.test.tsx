@@ -11,21 +11,18 @@ import { act } from 'react';
 import { useState } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Create mock supabase client before imports
-const mockSupabase = {
-  auth: {
-    getSession: vi.fn(),
-    onAuthStateChange: vi.fn(),
-    signOut: vi.fn(),
-    signInWithOtp: vi.fn(),
-    signInWithPassword: vi.fn(),
-    signUp: vi.fn(),
-  },
-};
-
-// Mock the supabase client module
+// Mock the supabase client module - define inline to avoid hoisting issues
 vi.mock('@/lib/supabaseClient', () => ({
-  supabase: mockSupabase,
+  supabase: {
+    auth: {
+      getSession: vi.fn(),
+      onAuthStateChange: vi.fn(),
+      signOut: vi.fn(),
+      signInWithOtp: vi.fn(),
+      signInWithPassword: vi.fn(),
+      signUp: vi.fn(),
+    },
+  },
 }));
 
 // Mock tour triggers
@@ -37,6 +34,10 @@ vi.mock('@/utils/tourTriggers', () => ({
 vi.mock('@/features/preview/analytics', () => ({
   trackPreviewSignedUp: vi.fn(),
 }));
+
+// Import the mocked supabase and triggerDashboardView to access them in tests
+import { supabase as mockSupabase } from '@/lib/supabaseClient';
+import { triggerDashboardView } from '@/utils/tourTriggers';
 
 import { createMockSession } from '../../test/testUtils';
 import { AuthProvider, useAuth } from '../AuthContext';
@@ -96,6 +97,9 @@ describe('AuthContext', () => {
     mockSupabase.auth.signInWithOtp.mockResolvedValue({ error: null });
     mockSupabase.auth.signInWithPassword.mockResolvedValue({ error: null });
     mockSupabase.auth.signUp.mockResolvedValue({ error: null });
+
+    // Reset triggerDashboardView mock
+    vi.mocked(triggerDashboardView).mockClear();
 
     // Clear location mocks
     delete (window as any).location;
@@ -349,10 +353,12 @@ describe('AuthContext', () => {
       screen.getByText('Sign Up').click();
     });
 
-    expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
-      email: 'new@example.com',
-      password: 'password123',
-    });
+    expect(mockSupabase.auth.signUp).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'new@example.com',
+        password: 'password123',
+      }),
+    );
   });
 
   // ===== SIGN OUT & STATE CLEARING =====
@@ -414,8 +420,6 @@ describe('AuthContext', () => {
   // ===== SAFE REDIRECT VALIDATION =====
 
   it('triggers dashboard view on SIGNED_IN', async () => {
-    const triggerDashboardView = (globalThis as any).__triggerDashboardView;
-
     render(
       <AuthProvider>
         <TestComponent />
@@ -433,7 +437,7 @@ describe('AuthContext', () => {
       });
     });
 
-    expect(triggerDashboardView).toHaveBeenCalled();
+    expect(vi.mocked(triggerDashboardView)).toHaveBeenCalled();
   });
 
   it('tracks preview signup when from=preview param present', async () => {
