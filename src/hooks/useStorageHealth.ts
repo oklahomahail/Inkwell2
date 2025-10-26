@@ -12,17 +12,25 @@ export function useStorageHealth() {
 
   useEffect(() => {
     let stop: (() => void) | undefined;
+    let mounted = true;
 
     (async () => {
       // Get initial health report
       const initial = await getStorageHealth();
-      setReport(initial);
+      if (mounted) {
+        setReport(initial);
+      }
 
       // Watch for changes
-      stop = watchStorageHealth((next) => setReport(next));
+      stop = watchStorageHealth((next) => {
+        if (mounted) {
+          setReport(next);
+        }
+      });
     })();
 
     return () => {
+      mounted = false;
       if (stop) stop();
     };
   }, []);
