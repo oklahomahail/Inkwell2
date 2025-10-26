@@ -22,6 +22,7 @@ export default defineConfig({
       'src/export/**/*.{test,spec}.ts',
       'src/tour/**/*.{test,spec}.ts',
       'src/features/**/*.{test,spec}.tsx',
+      'src/context/**/*.{test,spec}.tsx',
     ],
     coverage: {
       enabled: true,

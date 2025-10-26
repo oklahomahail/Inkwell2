@@ -19,7 +19,6 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import Logo from '@/components/Logo';
-import ProfileMenu from '@/components/ProfileMenu';
 import { BRAND_NAME, ORGANIZATION_NAME } from '@/constants/brand';
 import { ALT_TAGLINE } from '@/constants/branding';
 import { useAppContext, View } from '@/context/AppContext';
@@ -29,7 +28,6 @@ import { ExportModal } from '@/features/export/ExportModal';
 import { cn } from '@/lib/utils';
 import { useFeatureFlag } from '@/utils/flags';
 
-import { ProfileSwitcher } from '../ProfileSwitcher';
 import { PWAOfflineIndicator } from '../PWA';
 
 // Define auth routes that should not show the header/topbar
@@ -566,7 +564,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
                 <div className="flex items-center gap-3">
                   <PWAOfflineIndicator variant="badge" />
-                  <ProfileSwitcher />
+                  {/* User info display */}
+                  {user && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                      <div className="text-sm">
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
+                          {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {user?.email}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <button
                       onClick={openPalette}
@@ -646,16 +656,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                       </svg>
                     </button>
                   </div>
-                  {/* User Account Menu */}
-                  <ProfileMenu
-                    user={{
-                      name: user?.user_metadata?.full_name || user?.email?.split('@')[0],
-                      email: user?.email,
-                      avatarUrl: user?.user_metadata?.avatar_url,
-                    }}
-                    onLogout={handleLogout}
-                    onResetPassword={handleResetPassword}
-                  />
+                  {/* Logout button */}
+                  <button
+                    onClick={handleLogout}
+                    className="btn btn-ghost btn-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                    aria-label="Sign out"
+                    title="Sign out"
+                  >
+                    Sign out
+                  </button>
                 </div>
               </div>
             </div>

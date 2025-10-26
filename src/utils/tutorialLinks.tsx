@@ -1,17 +1,17 @@
 // src/utils/tutorialLinks.tsx
 import React from 'react';
 
-import { useProfile } from '../context/ProfileContext';
+import { useAuth } from '../context/AuthContext';
 
 /**
- * Generate profile-aware tutorial links
+ * Generate user-aware tutorial links
  */
 export function useTutorialLinks() {
-  const { active: activeProfile } = useProfile();
+  const { user } = useAuth();
 
   const generateTutorialUrl = (slug: string, step?: number): string => {
-    if (!activeProfile?.id) {
-      console.warn('No active profile - cannot generate tutorial URL');
+    if (!user?.id) {
+      console.warn('No active user - cannot generate tutorial URL');
       return '/dashboard';
     }
     const baseUrl = `/dashboard/tutorials/${slug}`;
@@ -19,7 +19,7 @@ export function useTutorialLinks() {
   };
 
   const generateTutorialIndexUrl = (): string => {
-    if (!activeProfile?.id) {
+    if (!user?.id) {
       return '/dashboard';
     }
     return `/dashboard/tutorials`;
@@ -40,8 +40,8 @@ export function useTutorialLinks() {
     generateTutorialIndexUrl,
     redirectToTutorial,
     redirectToTutorialIndex,
-    hasActiveProfile: !!activeProfile?.id,
-    activeProfileId: activeProfile?.id,
+    hasActiveUser: !!user?.id,
+    activeUserId: user?.id,
   };
 }
 
@@ -102,10 +102,10 @@ export function withTutorialGuard<T extends object>(
   Component: React.ComponentType<T>,
 ): React.ComponentType<T> {
   return function TutorialGuardWrapper(props: T) {
-    const { hasActiveProfile } = useTutorialLinks();
+    const { hasActiveUser } = useTutorialLinks();
 
-    if (!hasActiveProfile) {
-      // Redirect to dashboard if no active profile
+    if (!hasActiveUser) {
+      // Redirect to dashboard if no active user
       window.location.href = '/dashboard';
       return null;
     }
@@ -132,13 +132,13 @@ export function TutorialButton({
   children,
   onClick,
 }: TutorialButtonProps) {
-  const { generateTutorialUrl, hasActiveProfile, redirectToTutorial } = useTutorialLinks();
+  const { generateTutorialUrl, hasActiveUser, redirectToTutorial } = useTutorialLinks();
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
 
-    if (!hasActiveProfile) {
-      console.warn('No active profile - redirecting to dashboard');
+    if (!hasActiveUser) {
+      console.warn('No active user - redirecting to dashboard');
       window.location.href = '/dashboard';
       return;
     }
@@ -150,7 +150,7 @@ export function TutorialButton({
     redirectToTutorial(slug, step);
   };
 
-  const href = hasActiveProfile ? generateTutorialUrl(slug, step) : '/dashboard';
+  const href = hasActiveUser ? generateTutorialUrl(slug, step) : '/dashboard';
 
   return (
     <a
@@ -175,9 +175,9 @@ interface TutorialLinkProps {
 }
 
 export function TutorialLink({ slug, step, className = '', children }: TutorialLinkProps) {
-  const { generateTutorialUrl, hasActiveProfile } = useTutorialLinks();
+  const { generateTutorialUrl, hasActiveUser } = useTutorialLinks();
 
-  const href = hasActiveProfile ? generateTutorialUrl(slug, step) : '/dashboard';
+  const href = hasActiveUser ? generateTutorialUrl(slug, step) : '/dashboard';
 
   return (
     <a

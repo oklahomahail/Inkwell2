@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { useTour } from './ProfileTourProvider';
+import { useTour } from './useTour';
 
 interface ChecklistItemConfig {
   key: string;

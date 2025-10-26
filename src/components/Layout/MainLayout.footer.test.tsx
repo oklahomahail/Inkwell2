@@ -11,9 +11,8 @@ vi.mock('@/components/Logo', () => ({
   default: () => <div data-testid="mock-logo">Logo</div>,
 }));
 
-vi.mock('@/components/ProfileSwitcher', () => ({
-  ProfileSwitcher: () => <div data-testid="mock-profile-switcher">ProfileSwitcher</div>,
-}));
+// Mock ProfileSwitcher component - removed in single-user refactor
+// (component no longer exists)
 
 vi.mock('@/context/CommandPaletteContext', () => ({
   useCommandPalette: () => ({

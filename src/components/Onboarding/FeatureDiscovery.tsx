@@ -2,7 +2,7 @@
 import { Lightbulb, X, Sparkles } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 
-import { useTour } from './ProfileTourProvider';
+import { useTour } from './useTour';
 
 interface FeatureHint {
   id: string;

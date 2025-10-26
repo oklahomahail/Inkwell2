@@ -1,7 +1,7 @@
 // src/hooks/useTourManager.ts
 import { useCallback, useRef } from 'react';
 
-import { useProfile } from '../context/ProfileContext';
+import { useAuth } from '../context/AuthContext';
 import { createTourStorage, TourName, TourProgress } from '../services/simpleTourStorage';
 import { waitForElement } from '../utils/domUtils';
 
@@ -19,8 +19,8 @@ interface TourStep {
 }
 
 export function useTourManager() {
-  const { activeProfileId } = useProfile();
-  const storage = createTourStorage(activeProfileId);
+  const { user } = useAuth();
+  const storage = createTourStorage(user?.id || null);
   const startedRef = useRef<Record<TourName, boolean>>({
     simple: false,
     spotlight: false,

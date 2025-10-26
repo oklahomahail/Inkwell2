@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { useProfile } from '../context/ProfileContext';
+import { useAuth } from '../context/AuthContext';
 import { useMaybeDB, defineStores } from '../data/dbFactory';
 
 export interface TutorialProgress {
@@ -41,70 +41,70 @@ export interface CompletionChecklist {
  * Hook for managing tutorial progress, preferences, and checklist data.
  */
 export function useTutorialStorage() {
-  const { active: activeProfile } = useProfile();
+  const { user } = useAuth();
   const db = useMaybeDB();
   const stores = defineStores(db);
 
-  const isProfileActive = Boolean(activeProfile?.id && db);
+  const isUserActive = Boolean(user?.id && db);
 
   const getProgress = useCallback(
     async (_slug: string): Promise<TutorialProgress | null> => {
-      if (!isProfileActive) return null;
+      if (!isUserActive) return null;
       // TODO: implement IndexedDB get logic
       return null;
     },
-    [isProfileActive],
+    [isUserActive],
   );
 
   const setProgress = useCallback(
     async (_slug: string, _progress: TutorialProgress['progress']) => {
-      if (!isProfileActive) return;
+      if (!isUserActive) return;
       // TODO: implement IndexedDB put logic
     },
-    [isProfileActive],
+    [isUserActive],
   );
 
   const clearProgress = useCallback(
     async (_slug?: string) => {
-      if (!isProfileActive) return;
+      if (!isUserActive) return;
       // TODO: implement clear logic for one or all progress entries
     },
-    [isProfileActive],
+    [isUserActive],
   );
 
   const getPreferences = useCallback(async (): Promise<TutorialPreferences | null> => {
-    if (!isProfileActive) return null;
+    if (!isUserActive) return null;
     // TODO: implement get preferences logic
     return null;
-  }, [isProfileActive]);
+  }, [isUserActive]);
 
   const setPreferences = useCallback(
     async (_preferences: TutorialPreferences) => {
-      if (!isProfileActive) return;
+      if (!isUserActive) return;
       // TODO: implement save preferences logic
     },
-    [isProfileActive],
+    [isUserActive],
   );
 
   const getChecklist = useCallback(async (): Promise<CompletionChecklist | null> => {
-    if (!isProfileActive) return null;
+    if (!isUserActive) return null;
     // TODO: implement get checklist logic
     return null;
-  }, [isProfileActive]);
+  }, [isUserActive]);
 
   const setChecklist = useCallback(
     async (_checklist: CompletionChecklist) => {
-      if (!isProfileActive) return;
+      if (!isUserActive) return;
       // TODO: implement save checklist logic
     },
-    [isProfileActive],
+    [isUserActive],
   );
 
   const getAllProgress = useCallback(async (): Promise<TutorialProgress[]> => {
-    if (!isProfileActive) return [];
+    if (!isUserActive) return [];
     // TODO: implement get all progress logic
     return [];
-  }, [isProfileActive]);
+  }, [isUserActive]);
 
   /**
    * Reset a tour's progress so it can be relaunched from step 0.
@@ -117,7 +117,7 @@ export function useTutorialStorage() {
       _totalSteps?: number,
       _tourType: TutorialProgress['progress']['tourType'] = 'full-onboarding',
     ) => {
-      if (!isProfileActive) return;
+      if (!isUserActive) return;
       const existing = await getProgress(slug);
       const now = Date.now();
       const currentTotal = _totalSteps ?? existing?.progress.totalSteps ?? 4;
@@ -137,7 +137,7 @@ export function useTutorialStorage() {
       };
       await setProgress(slug, payload.progress);
     },
-    [db, activeProfile?.id, getProgress, setProgress, isProfileActive],
+    [db, user?.id, getProgress, setProgress, isUserActive],
   );
 
   return {
@@ -158,9 +158,9 @@ export function useTutorialStorage() {
     getChecklist,
     setChecklist,
 
-    // Profile context
-    profileId: activeProfile?.id || null,
-    isProfileActive,
+    // User context
+    userId: user?.id || null,
+    isUserActive,
   };
 }
 

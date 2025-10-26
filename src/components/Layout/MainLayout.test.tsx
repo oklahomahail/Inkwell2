@@ -1,6 +1,7 @@
 // src/components/Layout/MainLayout.test.tsx
 import { screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import '@testing-library/jest-dom/vitest';
 
 import { renderApp } from '../../../test/utils';
 
@@ -11,9 +12,8 @@ vi.mock('@/components/Logo', () => ({
   default: () => <div data-testid="mock-logo">Logo</div>,
 }));
 
-vi.mock('@/components/ProfileSwitcher', () => ({
-  ProfileSwitcher: () => <div data-testid="mock-profile-switcher">ProfileSwitcher</div>,
-}));
+// Mock ProfileSwitcher component - removed in single-user refactor
+// (component no longer exists)
 
 vi.mock('@/components/PWA', () => ({
   PWAOfflineIndicator: () => <div>PWAOfflineIndicator</div>,

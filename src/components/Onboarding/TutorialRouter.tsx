@@ -2,22 +2,22 @@
 import React from 'react';
 import { Routes, Route, useParams, Navigate } from 'react-router-dom';
 
-import { useProfile } from '../../context/ProfileContext';
+import { useAuth } from '../../context/AuthContext';
 
-import { useTour } from './ProfileTourProvider';
 import TourOverlay from './TourOverlay';
 import { TOUR_MAP } from './tourRegistry';
+import { useTour } from './useTour';
 
 /**
  * Tutorial page component that handles displaying tutorials with deep links
  */
 function TutorialPage() {
   const { slug, step } = useParams<{ slug: string; step?: string }>();
-  const { active: activeProfile } = useProfile();
+  const { user } = useAuth();
   const { startTour, setTourSteps, goToStep, tourState } = useTour() as any;
 
   React.useEffect(() => {
-    if (!slug || !activeProfile?.id) return;
+    if (!slug || !user?.id) return;
 
     // Find the tutorial steps by slug
     const tourSteps = TOUR_MAP[slug as keyof typeof TOUR_MAP];
@@ -57,14 +57,14 @@ function TutorialPage() {
         goToStep(stepNumber);
       }
     }
-  }, [slug, step, activeProfile?.id, startTour, setTourSteps, goToStep, tourState.isActive]);
+  }, [slug, step, user?.id, startTour, setTourSteps, goToStep, tourState?.isActive]);
 
-  if (!activeProfile?.id) {
+  if (!user?.id) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">
-            Profile Required
+            Authentication Required
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-4">Redirecting to dashboard...</p>
           <Navigate to="/dashboard" replace />
@@ -173,7 +173,7 @@ function TutorialPage() {
  * Tutorial index page showing available tutorials
  */
 function TutorialIndexComponent() {
-  const { active: activeProfile } = useProfile();
+  const { user } = useAuth();
   const { startTour, setTourSteps, preferences } = useTour() as any;
 
   const handleStartTutorial = async (slug: string) => {
@@ -258,7 +258,7 @@ function TutorialIndexComponent() {
               Interactive guides to help you master your writing workspace
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-500">
-              Profile: <span className="font-medium">{activeProfile?.name}</span>
+              User: <span className="font-medium">{user?.email}</span>
             </p>
           </div>
 

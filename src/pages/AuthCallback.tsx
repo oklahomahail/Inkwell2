@@ -1,13 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 
-import { useProfileContext } from '@/context/ProfileContext';
-import {
-  getRememberedProfileId,
-  rememberProfileId,
-  syncLastProfileToUserMetadata,
-} from '@/lib/profileMemory';
-import { resolvePostAuthRoute } from '@/lib/resolvePostAuth';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { shouldStartTourForUser } from '@/lib/tourEligibility';
 import { useGo } from '@/utils/navigate';
@@ -41,7 +35,7 @@ export default function AuthCallback() {
   const go = useGo(); // Single navigation source
   const loc = useLocation();
   const [_searchParams] = useSearchParams();
-  const { profiles, loadProfiles } = useProfileContext();
+  const { user } = useAuth();
 
   useEffect(() => {
     let mounted = true;
@@ -269,35 +263,19 @@ export default function AuthCallback() {
           authSuccess = true;
         }
 
-        // If we've successfully authenticated, apply our profile resolution logic
+        // If we've successfully authenticated, apply our navigation logic
         if (authSuccess && mounted) {
           try {
-            // 1. Get the user's profiles
-            await loadProfiles();
-
-            // 2. Check tour eligibility
+            // 1. Check tour eligibility
             const {
               data: { user },
             } = await supabase.auth.getUser();
             const shouldStartTour = await shouldStartTourForUser(user?.id || '');
 
-            // 3. Get remembered profile ID
-            const rememberedProfileId = getRememberedProfileId();
-
-            // 4. Resolve the destination based on profiles and tour eligibility
-            const { path, profileId } = resolvePostAuthRoute(profiles, rememberedProfileId, {
-              shouldStartTour,
-            });
-
-            // 5. If a profile was resolved, remember it
-            if (profileId) {
-              rememberProfileId(profileId);
-              await syncLastProfileToUserMetadata(profileId);
-            }
-
-            // 6. Navigate to the resolved path
-            console.log('[AuthCallback] Resolved path:', path);
-            go(path, { replace: true });
+            // 2. Navigate to dashboard (or start tour if eligible)
+            const destination = shouldStartTour ? '/dashboard?tour=1' : rawRedirectTo;
+            console.log('[AuthCallback] Resolved path:', destination);
+            go(destination, { replace: true });
             return;
           } catch (resolveError) {
             console.error('[AuthCallback] Error resolving post-auth route:', resolveError);
@@ -330,7 +308,7 @@ export default function AuthCallback() {
     return () => {
       mounted = false;
     };
-  }, [go, loc.pathname, loc.search, loc.hash, profiles, loadProfiles]);
+  }, [go, loc.pathname, loc.search, loc.hash, user]);
 
   // Utility function for troubleshooting: can be called from DevTools to clear service workers
   // that might interfere with auth routes

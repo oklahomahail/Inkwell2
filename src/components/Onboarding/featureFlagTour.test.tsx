@@ -2,17 +2,16 @@ import { render, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-import { featureManager, FeatureName } from '@/utils/FeatureFlagManager';
+import { featureFlagService } from '@/services/featureFlagService';
 
 import { useSimpleTourAutostart } from './hooks/useSimpleTourAutostart';
 import { useSpotlightAutostart } from './hooks/useSpotlightAutostart';
-import { TestTourWrapper } from './testUtils';
-import { makeMockStorage } from './testUtils';
-import { useTour } from './TourProvider';
+import { TestTourWrapper, makeMockStorage } from './testUtils';
+import { useTour } from './useTour';
 
-// Mock feature manager
-vi.mock('@/utils/FeatureFlagManager', () => ({
-  featureManager: {
+// Mock feature flag service
+vi.mock('@/services/featureFlagService', () => ({
+  featureFlagService: {
     isEnabled: vi.fn(),
   },
 }));
@@ -36,13 +35,31 @@ vi.mock('./TourProvider', () => ({
   }),
 }));
 
-// Mock profile components consumed by TestTourWrapper
-vi.mock('../profile/ProfileContext', () => ({
-  ProfileProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+// Mock profile components - removed in single-user refactor
+// (no longer needed)
 
-vi.mock('./ProfileTourProvider', () => ({
-  ProfileTourProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+vi.mock('./useTour', () => ({
+  useTour: () => ({
+    prefs: null,
+    hydrated: false,
+    isFirstTimeUser: false,
+    isActive: false,
+    startTour: vi.fn(),
+    completeTour: vi.fn(),
+    tourState: null,
+    setTourSteps: vi.fn(),
+    goToStep: vi.fn(),
+    preferences: null,
+    setNeverShowAgain: vi.fn(),
+    setRemindMeLater: vi.fn(),
+    logAnalytics: vi.fn(),
+    checklist: [],
+    getChecklistProgress: () => ({ completed: 0, total: 0 }),
+    canShowContextualTour: () => false,
+    completedTours: [],
+    neverShowAgain: false,
+    remindMeLater: false,
+  }),
 }));
 
 const mockSessionStorage = makeMockStorage();
@@ -52,7 +69,7 @@ describe('Tour Feature Flag Integration', () => {
     vi.resetAllMocks();
     mockSessionStorage.clear();
     // Default state - both flags off
-    (featureManager.isEnabled as any).mockImplementation((_flag: FeatureName) => false);
+    (featureFlagService.isEnabled as any).mockImplementation((_flag: string) => false);
     Object.defineProperty(window, 'sessionStorage', { value: mockSessionStorage });
   });
 
@@ -63,8 +80,8 @@ describe('Tour Feature Flag Integration', () => {
   describe('Quick Tour', () => {
     it('can run when onboarding is enabled', async () => {
       // Enable onboarding flag
-      (featureManager.isEnabled as any).mockImplementation(
-        (flag: FeatureName) => flag === 'onboarding',
+      (featureFlagService.isEnabled as any).mockImplementation(
+        (flag: string) => flag === 'onboarding',
       );
 
       // Create test component
@@ -88,7 +105,7 @@ describe('Tour Feature Flag Integration', () => {
 
     it('never runs when onboarding is disabled', async () => {
       // Disable onboarding flag
-      (featureManager.isEnabled as any).mockImplementation(() => false);
+      (featureFlagService.isEnabled as any).mockImplementation(() => false);
 
       // Create test component
       const TestComponent = () => {
@@ -112,13 +129,13 @@ describe('Tour Feature Flag Integration', () => {
   describe('Feature Discovery', () => {
     it('can run when feature-discovery and onboarding are enabled', async () => {
       // Enable both flags
-      (featureManager.isEnabled as any).mockImplementation(
-        (flag: FeatureName) => flag === 'onboarding' || flag === 'feature-discovery',
+      (featureFlagService.isEnabled as any).mockImplementation(
+        (flag: string) => flag === 'onboarding' || flag === 'feature-discovery',
       );
 
       // Create test component
       const TestComponent = () => {
-        useSpotlightAutostart();
+        useSpotlightAutostart(['.test-selector']);
         return <div data-testid="feature-discovery">Test</div>;
       };
 
@@ -136,13 +153,13 @@ describe('Tour Feature Flag Integration', () => {
 
     it('never runs when feature-discovery is disabled', async () => {
       // Enable onboarding but disable feature-discovery
-      (featureManager.isEnabled as any).mockImplementation(
-        (flag: FeatureName) => flag === 'onboarding',
+      (featureFlagService.isEnabled as any).mockImplementation(
+        (flag: string) => flag === 'onboarding',
       );
 
       // Create test component
       const TestComponent = () => {
-        useSpotlightAutostart();
+        useSpotlightAutostart(['.test-selector']);
         return <div data-testid="feature-discovery">Test</div>;
       };
 
@@ -160,13 +177,13 @@ describe('Tour Feature Flag Integration', () => {
 
     it('never runs when onboarding is disabled', async () => {
       // Disable onboarding but enable feature-discovery
-      (featureManager.isEnabled as any).mockImplementation(
-        (flag: FeatureName) => flag === 'feature-discovery',
+      (featureFlagService.isEnabled as any).mockImplementation(
+        (flag: string) => flag === 'feature-discovery',
       );
 
       // Create test component
       const TestComponent = () => {
-        useSpotlightAutostart();
+        useSpotlightAutostart(['.test-selector']);
         return <div data-testid="feature-discovery">Test</div>;
       };
 

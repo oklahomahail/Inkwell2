@@ -1,14 +1,15 @@
 // src/hooks/useTourStateHydration.ts
 import { useEffect } from 'react';
 
-import { useProfile } from '../context/ProfileContext';
+import { useAuth } from '../context/AuthContext';
 import { createTourStorage } from '../services/simpleTourStorage';
 
 /**
  * Hook to handle tour state hydration when profiles change
  */
 export function useTourStateHydration() {
-  const { activeProfileId: profileId } = useProfile();
+  const { user } = useAuth();
+  const profileId = user?.id;
 
   useEffect(() => {
     if (!profileId) return;

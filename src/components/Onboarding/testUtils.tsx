@@ -1,19 +1,14 @@
 import React from 'react';
 import { vi } from 'vitest';
 
-import { ProfileProvider } from '@/context/ProfileContext';
-
-import { ProfileTourProvider } from './ProfileTourProvider';
-import { TourProvider } from './TourProvider';
-
 /**
- * Mock storage implementation for tests
+ * Mock storage implementation for testing
  */
-export const makeMockStorage = () => {
-  const store: Record<string, string> = {};
+export function makeMockStorage() {
+  let store: Record<string, string> = {};
+
   return {
-    store,
-    getItem: vi.fn((key: string) => store[key] ?? null),
+    getItem: vi.fn((key: string) => store[key] || null),
     setItem: vi.fn((key: string, value: string) => {
       store[key] = value;
     }),
@@ -21,26 +16,18 @@ export const makeMockStorage = () => {
       delete store[key];
     }),
     clear: vi.fn(() => {
-      Object.keys(store).forEach((key) => delete store[key]);
+      store = {};
     }),
+    key: vi.fn((index: number) => Object.keys(store)[index] || null),
+    get length() {
+      return Object.keys(store).length;
+    },
   };
-};
-
-/**
- * Test component wrapper
- */
-interface TestTourWrapperProps {
-  children: React.ReactNode;
-  onTourStart?: () => void;
 }
 
-export const TestTourWrapper: React.FC<TestTourWrapperProps> = ({
-  children,
-  onTourStart: _onTourStart,
-}) => (
-  <ProfileProvider>
-    <ProfileTourProvider>
-      <TourProvider>{children}</TourProvider>
-    </ProfileTourProvider>
-  </ProfileProvider>
-);
+/**
+ * Test wrapper that provides tour context
+ */
+export function TestTourWrapper({ children }: { children: React.ReactNode }) {
+  return <div data-testid="tour-wrapper">{children}</div>;
+}

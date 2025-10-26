@@ -7,8 +7,8 @@ import { InkwellFeather } from '@/components/icons';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 import { featureFlagService } from '@/services/featureFlagService';
 
-import { useTour } from './ProfileTourProvider';
 import { CORE_TOUR_STEPS } from './tourRegistry';
+import { useTour } from './useTour';
 import { startTourSafely, getSafeTourSteps } from './utils/tourSafety';
 
 interface WelcomeModalProps {
