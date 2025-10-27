@@ -4,8 +4,8 @@
  */
 
 export interface SpotlightStep {
-  /** Stable selector for the target element */
-  target: string;
+  /** Stable selector for the target element - can be a string or a function that returns an element */
+  target: string | (() => Element | null);
   /** Title of the step */
   title: string;
   /** Description/content of the step */

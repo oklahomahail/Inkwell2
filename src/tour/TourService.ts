@@ -18,6 +18,13 @@ class TourService {
   private config: TourConfig | null = null;
   private listeners: Set<(state: TourState) => void> = new Set();
 
+  constructor() {
+    // Listen for route changes to refresh anchors
+    if (typeof window !== 'undefined') {
+      window.addEventListener('tour:refresh', this.refreshAnchors.bind(this));
+    }
+  }
+
   /**
    * Subscribe to tour state changes
    */
@@ -161,6 +168,21 @@ class TourService {
     };
     this.config = null;
     this.notify();
+  }
+
+  /**
+   * Refresh tour anchors after route changes or DOM updates
+   * This re-resolves all step targets to ensure they're still valid
+   */
+  refreshAnchors(): void {
+    if (!this.state.isRunning || !this.config) return;
+
+    // Notify listeners so they can re-render with new anchor positions
+    this.notify();
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[TourService] Refreshing tour anchors for step', this.state.currentStep);
+    }
   }
 }
 

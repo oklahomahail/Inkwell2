@@ -6,6 +6,22 @@
  * - Smooth fade transitions for backdrop and popover
  */
 
+/* ============================================================================
+   Z-INDEX MANAGEMENT
+   ============================================================================
+   Ensure tour portal renders above sticky headers and other fixed elements.
+*/
+#inkwell-tour-portal {
+  position: relative;
+  z-index: 60;
+}
+
+/* Ensure sticky headers stay below tour overlay */
+header.sticky,
+.sticky-header {
+  z-index: 50;
+}
+
 @keyframes inkwell-pulse {
   0% {
     transform: scale(1);

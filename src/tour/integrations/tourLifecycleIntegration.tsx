@@ -6,6 +6,12 @@
  */
 
 import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+
+import { isTourDone } from '../persistence';
+import { startDefaultTour } from '../tourEntry';
+
+const FIRST_RUN_KEY = 'inkwell:firstRunShown';
 
 /**
  * Integrates tour lifecycle events with analytics and persistence.
@@ -13,6 +19,7 @@ import { useEffect } from 'react';
  * This component subscribes to TourService events and:
  * - Tracks analytics events (started, step_viewed, completed, skipped)
  * - Persists completion state to localStorage
+ * - Auto-starts the tour on first visit to dashboard
  * - Handles cleanup on unmount
  *
  * Mount once in your app root:
@@ -28,51 +35,26 @@ import { useEffect } from 'react';
  * ```
  */
 export function TourLifecycleIntegration(): null {
+  const { pathname } = useLocation();
+
   useEffect(() => {
-    // TODO: Integrate with TourService when event system is available
-    // Example implementation:
-    /*
-    const unsubscribe = TourService.subscribe((event) => {
-      const state = TourService.getState();
-      const tourId = state?.tourId ?? 'unknown';
-      const stepIndex = state?.currentStep ?? 0;
+    // Only consider auto-start on the dashboard, never on /settings or auth routes
+    const onDashboard = pathname === '/dashboard';
+    const alreadyShown = localStorage.getItem(FIRST_RUN_KEY) === '1';
+    const done = isTourDone('DEFAULT_TOUR_ID');
 
-      switch (event.type) {
-        case 'start':
-          tourAnalytics.started(tourId);
-          break;
-        
-        case 'step':
-          tourAnalytics.stepViewed(tourId, stepIndex, event.stepId);
-          break;
-        
-        case 'complete':
-          tourAnalytics.completed(tourId);
-          markTourDone(tourId);
-          break;
-        
-        case 'skip':
-          tourAnalytics.skipped(tourId, stepIndex);
-          // Optionally mark as done even if skipped
-          // markTourDone(tourId);
-          break;
-      }
-    });
-
-    return () => unsubscribe();
-    */
-
-    // Placeholder for now
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[TourLifecycleIntegration] Mounted and ready for TourService events');
+    if (onDashboard && !alreadyShown && !done) {
+      // Small delay so anchors exist (post-layout)
+      // Use requestAnimationFrame + setTimeout to ensure elements are rendered
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          console.log('[TourLifecycle] Auto-starting tour for first-time user');
+          startDefaultTour();
+          localStorage.setItem(FIRST_RUN_KEY, '1');
+        }, 200);
+      });
     }
-
-    return () => {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[TourLifecycleIntegration] Unmounted');
-      }
-    };
-  }, []);
+  }, [pathname]);
 
   return null;
 }

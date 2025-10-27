@@ -1,4 +1,23 @@
 // src/main.tsx - Clean entry point using centralized Providers
+
+// ============================================================================
+// 1) HARD DEFAULT TO LIGHT THEME (BEFORE REACT MOUNTS)
+// ============================================================================
+// This prevents any dark mode flash before React hydrates.
+// We force light mode as the true default unless explicitly saved as dark.
+const STORAGE_KEY = 'inkwell:theme';
+const root = document.documentElement;
+try {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  const theme = saved ?? 'light'; // Default to light if nothing saved
+  root.dataset.theme = theme; // e.g. [data-theme="light"]
+  root.classList.toggle('dark', theme === 'dark'); // Toggle .dark class
+} catch {
+  // localStorage unavailable (private mode, etc.)
+  root.dataset.theme = 'light';
+  root.classList.remove('dark');
+}
+
 import * as Sentry from '@sentry/react';
 import React from 'react';
 import { StrictMode } from 'react';

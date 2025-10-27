@@ -9,6 +9,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================================
+   THEME BASE COLORS - PREVENT FLASH
+   ============================================================================
+   Ensure base colors come from [data-theme] without waiting on JS.
+   Light is the default theme, dark requires explicit opt-in.
+*/
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root.dark,
+[data-theme='dark'] {
+  color-scheme: dark;
+}
+
 /* Inkwell Brand CSS Variables - Light Theme Only */
 @layer base {
   :root {

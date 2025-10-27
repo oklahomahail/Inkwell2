@@ -26,10 +26,11 @@ export function useTourRouterAdapter(): void {
   useEffect(() => {
     // Give the new route a tick to render before measuring elements
     const rafId = requestAnimationFrame(() => {
-      // TODO: Call TourService.refreshAnchors() when that method is available
-      // For now, this is a placeholder for the integration point
+      // Dispatch a custom event to notify tour system to re-resolve anchors
+      window.dispatchEvent(new Event('tour:refresh'));
+
       if (process.env.NODE_ENV === 'development') {
-        console.log('[TourRouter] Route changed, would refresh anchors:', location.pathname);
+        console.log('[TourRouter] Route changed, refreshing tour anchors:', location.pathname);
       }
     });
 
