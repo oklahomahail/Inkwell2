@@ -6,6 +6,76 @@ import { normalizeSafeRedirect } from '@/utils/safeRedirect';
 
 export type AuthFormMode = 'signin' | 'signup';
 
+/**
+ * Maps raw Supabase error messages to user-friendly descriptions
+ */
+function getAuthErrorMessage(
+  rawMessage: string,
+  mode: AuthFormMode,
+  tab: 'password' | 'magic',
+): string {
+  const lower = rawMessage.toLowerCase();
+
+  // Invalid credentials
+  if (lower.includes('invalid') && (lower.includes('credentials') || lower.includes('login'))) {
+    return 'The email or password you entered is incorrect. Please try again.';
+  }
+
+  // User not found
+  if (lower.includes('user') && lower.includes('not found')) {
+    return mode === 'signin'
+      ? "We couldn't find an account with that email. Please check your email or sign up."
+      : 'Unable to create account. Please try again.';
+  }
+
+  // Email already registered
+  if (lower.includes('already') && lower.includes('registered')) {
+    return 'An account with this email already exists. Try signing in instead.';
+  }
+
+  // Invalid email format
+  if (lower.includes('invalid') && lower.includes('email')) {
+    return 'Please enter a valid email address (e.g., you@example.com).';
+  }
+
+  // Password too weak
+  if (lower.includes('password') && (lower.includes('weak') || lower.includes('strength'))) {
+    return 'Please choose a stronger password with at least 8 characters, including letters and numbers.';
+  }
+
+  // Rate limiting
+  if (lower.includes('rate limit') || lower.includes('too many')) {
+    return 'Too many attempts. Please wait a few minutes before trying again.';
+  }
+
+  // Email sending issues
+  if (lower.includes('email') && (lower.includes('send') || lower.includes('deliver'))) {
+    return 'Unable to send email. Please check your email address and try again.';
+  }
+
+  // Network issues
+  if (lower.includes('network') || lower.includes('connection') || lower.includes('timeout')) {
+    return 'Connection issue. Please check your internet connection and try again.';
+  }
+
+  // Magic link specific
+  if (tab === 'magic' && lower.includes('otp')) {
+    return 'Unable to send magic link. Please try again or use email & password sign in.';
+  }
+
+  // Signup specific - email confirmation
+  if (mode === 'signup' && lower.includes('confirm')) {
+    return 'Please check your email to confirm your account before signing in.';
+  }
+
+  // Generic fallback with more helpful context
+  if (rawMessage) {
+    return `Authentication error: ${rawMessage}. Please try again or contact support if the issue persists.`;
+  }
+
+  return 'Something went wrong. Please try again or contact support if the issue persists.';
+}
+
 export function AuthForm({
   mode,
   redirect,
@@ -106,7 +176,9 @@ export function AuthForm({
         await handleSignIn();
       }
     } catch (e: any) {
-      setErr(e?.message || 'Something went wrong.');
+      // Map Supabase errors to user-friendly messages
+      const errorMessage = getAuthErrorMessage(e?.message || '', mode, activeTab);
+      setErr(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -28,6 +28,15 @@ export default defineConfig({
     sourcemap: true, // Enable source maps for better debugging in production
     chunkSizeWarningLimit: 2000, // Completely suppress chunk warnings (largest chunk ~472kB)
     target: 'es2020', // Ensure consistent target
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        // Drop console.log, console.debug, console.trace in production
+        drop_console: ['log', 'debug', 'trace'],
+        // Keep console.warn and console.error
+        pure_funcs: [],
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: {

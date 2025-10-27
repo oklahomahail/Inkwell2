@@ -64,6 +64,9 @@ export default [
     },
 
     rules: {
+      // Console hygiene: warn about console usage in production code
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+
       // TS hygiene
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': [

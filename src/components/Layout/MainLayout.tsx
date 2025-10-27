@@ -562,11 +562,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                   )}
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <PWAOfflineIndicator variant="badge" />
-                  {/* User info display */}
+                <div className="flex items-center gap-2 md:gap-3">
+                  {/* PWA indicator - hide on small mobile screens */}
+                  <div className="hidden sm:block">
+                    <PWAOfflineIndicator variant="badge" className="shrink-0" />
+                  </div>
+                  {/* User info display - more compact on mobile */}
                   {user && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg">
                       <div className="text-sm">
                         <div className="font-medium text-gray-900 dark:text-gray-100">
                           {user?.user_metadata?.full_name || user?.email?.split('@')[0]}

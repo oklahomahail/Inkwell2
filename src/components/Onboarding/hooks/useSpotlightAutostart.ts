@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { safeObserve } from '../../../utils/safeObserve';
+import { safeObserve } from '../../../utils/dom/safeObserver';
 
 import { startTour, isTourRunning } from './TourController';
 import { getTourProgress, resetProgress, markTourLaunched } from './useTutorialStorage';
@@ -54,7 +54,9 @@ function whenTargetsReady(selectors: string[], timeoutMs = 8000): Promise<boolea
       });
 
       // Use safeObserve utility to prevent crashes
-      if (!safeObserve(node, observer, { childList: true, subtree: true })) {
+      const observed = safeObserve(observer, node, { childList: true, subtree: true });
+
+      if (!observed) {
         // If observation fails, use timeout fallback
         setTimeout(() => finalize(targetsExist(selectors)), 100);
         return;

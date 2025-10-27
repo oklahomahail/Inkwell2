@@ -1,7 +1,7 @@
 // File: src/components/Onboarding/selectorMap.ts
 // Map of selectors for the onboarding components
 
-import { safeObserve } from '@/utils/safeObserve';
+import { safeObserve } from '@/utils/dom/safeObserver';
 
 export const SPOTLIGHT_SELECTORS = {
   // Sidebar sections
@@ -151,12 +151,12 @@ export function waitForTarget(
       });
 
       // Use safeObserve utility to prevent crashes
-      if (
-        !safeObserve(node, observer, {
-          childList: true,
-          subtree: true,
-        })
-      ) {
+      const observed = safeObserve(observer, node, {
+        childList: true,
+        subtree: true,
+      });
+
+      if (!observed) {
         setTimeout(() => resolve(null), 100); // Fallback
         return;
       }

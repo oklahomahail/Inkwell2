@@ -2,7 +2,9 @@
 // File: src/tour/targets.ts
 // Robust target resolution with MutationObserver and fallbacks
 
-import { safeObserve } from '../utils/safeObserve';
+import { safeObserve } from '../utils/dom/safeObserver';
+
+import { TourPlacement } from './types';
 
 /**
  * Resolves a target element by trying multiple selectors with retry logic
@@ -46,14 +48,14 @@ export async function resolveTarget(
       });
 
       // Use safeObserve utility to prevent crashes
-      if (
-        !safeObserve(node, observer, {
-          childList: true,
-          subtree: true,
-          attributes: true,
-          attributeFilter: ['class', 'style', 'data-tour'],
-        })
-      ) {
+      const observed = safeObserve(observer, node, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-tour'],
+      });
+
+      if (!observed) {
         // If observation fails, use timeout fallback
         setTimeout(() => resolve(tryFind()), 100);
         return;
@@ -121,14 +123,14 @@ export function findTargetWithRetry(
       });
 
       // Use safeObserve utility to prevent crashes
-      if (
-        !safeObserve(node, observer, {
-          childList: true,
-          subtree: true,
-          attributes: true,
-          attributeFilter: ['class', 'style', 'data-tour'],
-        })
-      ) {
+      const observed = safeObserve(observer, node, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-tour'],
+      });
+
+      if (!observed) {
         // If observation fails, use timeout fallback
         setTimeout(() => resolve(tryFind()), 100);
         return;
@@ -145,9 +147,6 @@ export function findTargetWithRetry(
     }, timeout);
   });
 }
-
-// Import should be at the top of the file
-import { TourPlacement } from './types';
 
 /**
  * Heuristic to choose a placement that fits in the viewport.

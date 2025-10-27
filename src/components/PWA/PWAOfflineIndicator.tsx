@@ -67,7 +67,7 @@ export const PWAOfflineIndicator: React.FC<PWAOfflineIndicatorProps> = ({
   // Badge variant - minimal indicator
   if (variant === 'badge') {
     return (
-      <div className={`inline-flex items-center gap-1 ${className}`}>
+      <div className={`inline-flex items-center gap-1 shrink-0 ${className}`}>
         {isOffline ? (
           <div className="flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
             <WifiOff className="w-3 h-3" />
