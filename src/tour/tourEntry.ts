@@ -5,7 +5,7 @@
  */
 
 import { DEFAULT_TOUR_ID, defaultTourConfig, defaultTourSteps } from './configs/defaultTour';
-import { isTourDone, markTourDone } from './persistence';
+import { isTourDone, markTourDone, resetTour } from './persistence';
 import { tourService } from './TourService';
 
 import type { TourConfig as ServiceTourConfig } from './TourTypes';
@@ -48,12 +48,21 @@ function convertToServiceConfig(
  * ```
  */
 export function startDefaultTour(): void {
+  // Reset tour completion status to allow restart
+  resetTour(DEFAULT_TOUR_ID);
+
   const serviceConfig = convertToServiceConfig(
     DEFAULT_TOUR_ID,
     defaultTourSteps,
     defaultTourConfig.version,
   );
   tourService.start(serviceConfig);
+}
+
+// Debug helper for manual testing
+if (typeof window !== 'undefined') {
+  // @ts-expect-error - debug utility
+  window.inkwellStartTour = startDefaultTour;
 }
 
 /**

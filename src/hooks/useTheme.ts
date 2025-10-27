@@ -1,15 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const KEY = 'inkwell:theme';
+const KEY = 'inkwell.theme';
 type Theme = 'light' | 'dark';
 
+/**
+ * Get the initial theme from the DOM (already set by inline script in index.html)
+ */
+function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return 'light';
+  const root = document.documentElement;
+  if (root.classList.contains('dark')) return 'dark';
+  return 'light';
+}
+
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return 'light';
-    const saved = localStorage.getItem(KEY) as Theme | null;
-    // Explicitly check for 'dark', otherwise use 'light'
-    return saved === 'dark' ? 'dark' : 'light';
-  });
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
 
   const apply = useCallback((t: Theme) => {
     const html = document.documentElement;
@@ -23,14 +28,10 @@ export function useTheme() {
   }, []);
 
   useEffect(() => {
-    // Ensure we start with light mode unless explicitly set to dark
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(KEY);
-      const initial = saved === 'dark' ? 'dark' : 'light';
-      apply(initial);
-      if (initial !== theme) {
-        setThemeState(initial);
-      }
+    // On first mount, read from DOM rather than fighting the inline script
+    const initial = getInitialTheme();
+    if (initial !== theme) {
+      setThemeState(initial);
     }
   }, []); // Run once on mount
 

@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { InkwellFeather } from '@/components/icons';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 import { featureFlagService } from '@/services/featureFlagService';
+import { startDefaultTour } from '@/tour/tourEntry';
 
 import { CORE_TOUR_STEPS } from './tourRegistry';
 import { useTour } from './useTour';
@@ -56,13 +57,26 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
     // 5. Start tour safely on next frame so modal is fully unmounted
     requestAnimationFrame(async () => {
       try {
-        const safeTourSteps = getSafeTourSteps(CORE_TOUR_STEPS);
-        await startTourSafely(safeTourSteps, startTour);
-      } catch (error) {
-        // Fallback to the original method if safe start fails
+        const safeTourSteps = getSafeTourSteps(CORE_TOUR_STEPS?.length ? CORE_TOUR_STEPS : []);
+        if (safeTourSteps.length > 0) {
+          await startTourSafely(safeTourSteps, startTour);
+        } else {
+          // Fallback to default tour if no steps
+          startDefaultTour();
+        }
 
+        // Watchdog: if no overlay after 400ms, hard-start the default tour
+        setTimeout(() => {
+          const overlay = document.querySelector('[data-spotlight-overlay],[data-tour-overlay]');
+          if (!overlay) {
+            console.warn('Tour watchdog: overlay not detected, starting default tour directly');
+            startDefaultTour();
+          }
+        }, 400);
+      } catch (error) {
         console.error('Failed to start tour:', error);
-        onStartTour('core-onboarding');
+        // Fallback to the original method if safe start fails
+        startDefaultTour();
       }
     });
   };

@@ -1,5 +1,7 @@
-import { BookOpen, Video, MessageSquare, Sparkles } from 'lucide-react';
+import { BookOpen, Video, MessageSquare, Sparkles, RotateCw } from 'lucide-react';
 import React from 'react';
+
+import { startDefaultTour } from '@/tour/tourEntry';
 
 import { startTour } from '../Onboarding/tour-core/TourController';
 import { Button } from '../ui/Button';
@@ -15,9 +17,18 @@ export function HelpMenu({ className }: HelpMenuProps) {
     startTour('spotlight', profileId, { force: true });
   };
 
+  const handleRestartTour = () => {
+    // Start the default onboarding tour (resets completion state)
+    startDefaultTour();
+  };
+
   return (
     <div className={className}>
       <div className="flex flex-col space-y-2">
+        <Button variant="ghost" size="sm" className="justify-start" onClick={handleRestartTour}>
+          <RotateCw className="w-4 h-4 mr-2" />
+          Restart Tour
+        </Button>
         <Button variant="ghost" size="sm" className="justify-start" onClick={startSpotlightTour}>
           <Sparkles className="w-4 h-4 mr-2" />
           Feature Tour

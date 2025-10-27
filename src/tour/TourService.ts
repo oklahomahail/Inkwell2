@@ -17,12 +17,27 @@ class TourService {
 
   private config: TourConfig | null = null;
   private listeners: Set<(state: TourState) => void> = new Set();
+  private options: { skipMissingAnchors?: boolean; spotlightPadding?: number } = {};
 
   constructor() {
     // Listen for route changes to refresh anchors
     if (typeof window !== 'undefined') {
       window.addEventListener('tour:refresh', this.refreshAnchors.bind(this));
     }
+  }
+
+  /**
+   * Configure tour service options
+   */
+  configure(opts: { skipMissingAnchors?: boolean; spotlightPadding?: number }): void {
+    this.options = { ...this.options, ...opts };
+  }
+
+  /**
+   * Get current configuration options
+   */
+  getOptions() {
+    return { ...this.options };
   }
 
   /**

@@ -31,6 +31,7 @@ function waitForAll(selectors: string[], timeout = 3000): Promise<void> {
  * @param steps Tour steps to validate and run
  * @param startTourCallback Function to call to start the tour
  * @param timeout Maximum time to wait for elements (default 4000ms)
+ * @returns Promise<boolean> indicating success
  */
 export async function startTourSafely(
   steps: TourStep[],
@@ -39,8 +40,12 @@ export async function startTourSafely(
     steps?: TourStep[],
   ) => void,
   timeout = 4000,
-): Promise<void> {
+): Promise<boolean> {
   try {
+    // Configure tour service to skip missing anchors instead of aborting
+    const { tourService } = await import('@/tour/TourService');
+    tourService.configure({ skipMissingAnchors: true, spotlightPadding: 12 });
+
     // Extract concrete selectors that need to exist
     const mustExist = steps
       .map((step) => step.target)
@@ -56,15 +61,17 @@ export async function startTourSafely(
 
     // Elements are ready, start the tour
     startTourCallback('full-onboarding', steps);
+    return true;
   } catch (error) {
     console.warn('Failed to start tour safely:', error);
     // Fallback: try to start tour anyway with original elements
     // This ensures tour doesn't completely fail
     try {
       startTourCallback('full-onboarding', steps);
+      return true;
     } catch (fallbackError) {
       console.error('Tour startup failed completely:', fallbackError);
-      throw new Error('Tour initialization failed');
+      return false;
     }
   }
 }
