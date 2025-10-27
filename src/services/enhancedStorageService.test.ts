@@ -38,12 +38,15 @@ describe('EnhancedStorageService', () => {
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
+    vi.restoreAllMocks(); // Restore all spies before each test
     vi.useFakeTimers();
+    // Reset connectivity service to online by default
     (connectivityService.getStatus as any).mockReturnValue({ isOnline: true });
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks(); // Restore all spies after each test
   });
 
   afterEach(() => {
@@ -65,33 +68,36 @@ describe('EnhancedStorageService', () => {
     expect(loaded.updatedAt).toBeGreaterThanOrEqual(loaded.createdAt);
   });
 
-  it('throws on quota exceeded', () => {
+  it('throws on quota exceeded', async () => {
+    // Use real timers for this test since we need async promises to settle
+    vi.useRealTimers();
+
     const mockQuotaError = new Error('Quota exceeded');
     mockQuotaError.name = 'QuotaExceededError';
 
-    // Mock localStorage before any service calls
-    const mockStorage = {
-      getItem: vi.fn(),
-      setItem: vi.fn(() => {
-        throw mockQuotaError;
-      }),
-      removeItem: vi.fn(),
-      clear: vi.fn(),
-      key: vi.fn(),
-      length: 0,
-    };
+    // Verify error setup
+    expect(mockQuotaError instanceof Error).toBe(true);
+    expect(mockQuotaError.name.includes('Quota')).toBe(true);
 
-    // Replace localStorage
-    const originalStorage = window.localStorage;
-    Object.defineProperty(window, 'localStorage', { value: mockStorage });
+    // Mock queueWrite to return a resolved promise
+    (connectivityService.queueWrite as any).mockResolvedValue(undefined);
 
-    try {
-      EnhancedStorageService.saveProject(mockProject);
-      expect(connectivityService.queueWrite).toHaveBeenCalled();
-    } finally {
-      // Restore original localStorage
-      Object.defineProperty(window, 'localStorage', { value: originalStorage });
-    }
+    // Spy on setItem to throw quota error
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+    setItemSpy.mockImplementation(() => {
+      throw mockQuotaError;
+    });
+
+    // saveProject catches the error, so we need to check the behavior
+    EnhancedStorageService.saveProject(mockProject);
+
+    // Wait for the promise microtask queue to flush
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    expect(connectivityService.queueWrite).toHaveBeenCalled();
+
+    // Restore fake timers for other tests
+    vi.useFakeTimers();
   });
 
   it('recovers from corrupt JSON data', () => {
