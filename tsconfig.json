@@ -45,6 +45,6 @@
     }
   },
   "include": ["src/types/shims.d.ts", "src/**/*"],
-  "exclude": ["src/test/**", "**/__tests__/**", "**/*.test.*", "src/bench/**"],
+  "exclude": ["src/test/**", "**/__tests__/**", "**/*.test.*", "src/bench/**", "**/_archive/**"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

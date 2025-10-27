@@ -34,6 +34,7 @@ import PreviewDashboard from './features/preview/PreviewDashboard';
 import PreviewLandingPage from './features/preview/PreviewLandingPage';
 import PreviewWriter from './features/preview/PreviewWriter';
 import { usePrivateModeWarning } from './hooks/usePrivateModeWarning';
+import { OnboardingOrchestrator } from './onboarding/OnboardingOrchestrator';
 import AuthCallback from './pages/AuthCallback';
 import BrandPage from './pages/Brand';
 import ForgotPassword from './pages/ForgotPassword';

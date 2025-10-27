@@ -3,9 +3,9 @@ import { useEffect } from 'react';
 import React from 'react';
 
 import { OnboardingOrchestrator } from '../../onboarding/OnboardingOrchestrator';
-import { TourProvider } from '../Onboarding/_archive/TourProvider';
 import { useSimpleTourAutostart } from '../Onboarding/hooks/useSimpleTourAutostart';
 import { useSpotlightAutostart } from '../Onboarding/hooks/useSpotlightAutostart';
+import { TourProvider } from '../Onboarding/TourProvider';
 
 import '../Onboarding/styles/overlay.css';
 import { cn } from '@/utils/cn';

@@ -35,12 +35,12 @@ export function OnboardingUI() {
   useEffect(() => {
     // Only check on allowed routes
     if (!FIRST_TIME_ALLOWED_ROUTES.includes(location.pathname)) {
-      return;
+      return undefined;
     }
 
     // Check if tour is already completed
     if (isTourDone('spotlight')) {
-      return;
+      return undefined;
     }
 
     // Check gate conditions
@@ -61,6 +61,7 @@ export function OnboardingUI() {
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [location.pathname, shouldShowModal]);
 
   // Listen for tour completion events
