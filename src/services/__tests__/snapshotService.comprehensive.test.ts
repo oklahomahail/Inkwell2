@@ -63,7 +63,7 @@ describe('SnapshotService', () => {
 
     it('stores snapshot in localStorage', async () => {
       const project = createMockProject();
-      const metadata = await service.createSnapshot(project);
+      const metadata = await snapshotService.createSnapshot(project);
 
       const snapshotKey = `inkwell_snapshot_${metadata.id}`;
       const stored = localStorage.getItem(snapshotKey);
@@ -75,7 +75,7 @@ describe('SnapshotService', () => {
 
     it('accepts custom description', async () => {
       const project = createMockProject();
-      const metadata = await service.createSnapshot(project, {
+      const metadata = await snapshotService.createSnapshot(project, {
         description: 'Custom snapshot description',
       });
 
@@ -84,7 +84,7 @@ describe('SnapshotService', () => {
 
     it('marks automatic snapshots correctly', async () => {
       const project = createMockProject();
-      const metadata = await service.createSnapshot(project, {
+      const metadata = await snapshotService.createSnapshot(project, {
         isAutomatic: true,
       });
 
@@ -94,7 +94,7 @@ describe('SnapshotService', () => {
 
     it('adds custom tags to snapshot', async () => {
       const project = createMockProject();
-      const metadata = await service.createSnapshot(project, {
+      const metadata = await snapshotService.createSnapshot(project, {
         tags: ['milestone', 'draft-complete'],
       });
 
@@ -103,7 +103,7 @@ describe('SnapshotService', () => {
 
     it('updates snapshot index', async () => {
       const project = createMockProject();
-      await service.createSnapshot(project);
+      await snapshotService.createSnapshot(project);
 
       const index = JSON.parse(localStorage.getItem('inkwell_snapshot_index') || '[]');
       expect(index.length).toBe(1);
@@ -112,7 +112,7 @@ describe('SnapshotService', () => {
 
   describe('getSnapshots', () => {
     it('returns empty array for project with no snapshots', async () => {
-      const snapshots = await service.getSnapshots('nonexistent-project');
+      const snapshots = await snapshotService.getSnapshots('nonexistent-project');
       expect(snapshots).toEqual([]);
     });
 
@@ -120,11 +120,11 @@ describe('SnapshotService', () => {
       const project1 = createMockProject({ id: 'proj-1' });
       const project2 = createMockProject({ id: 'proj-2' });
 
-      await service.createSnapshot(project1);
-      await service.createSnapshot(project1);
-      await service.createSnapshot(project2);
+      await snapshotService.createSnapshot(project1);
+      await snapshotService.createSnapshot(project1);
+      await snapshotService.createSnapshot(project2);
 
-      const snapshots = await service.getSnapshots('proj-1');
+      const snapshots = await snapshotService.getSnapshots('proj-1');
       expect(snapshots.length).toBe(2);
       expect(snapshots.every((s) => s.projectId === 'proj-1')).toBe(true);
     });
@@ -134,13 +134,13 @@ describe('SnapshotService', () => {
 
       vi.useFakeTimers();
 
-      await service.createSnapshot(project);
+      await snapshotService.createSnapshot(project);
       vi.advanceTimersByTime(1000);
-      await service.createSnapshot(project);
+      await snapshotService.createSnapshot(project);
       vi.advanceTimersByTime(1000);
-      await service.createSnapshot(project);
+      await snapshotService.createSnapshot(project);
 
-      const snapshots = await service.getSnapshots(project.id);
+      const snapshots = await snapshotService.getSnapshots(project.id);
       expect(new Date(snapshots[0].timestamp).getTime()).toBeGreaterThan(
         new Date(snapshots[1].timestamp).getTime(),
       );
@@ -152,30 +152,30 @@ describe('SnapshotService', () => {
   describe('restoreSnapshot', () => {
     it('restores project from snapshot', async () => {
       const originalProject = createMockProject({ name: 'Original' });
-      const metadata = await service.createSnapshot(originalProject);
+      const metadata = await snapshotService.createSnapshot(originalProject);
 
-      const restored = await service.restoreSnapshot(metadata.id);
+      const restored = await snapshotService.restoreSnapshot(metadata.id);
       expect(restored.name).toBe('Original');
       expect(restored.id).toBe(originalProject.id);
     });
 
     it('throws error for missing snapshot', async () => {
-      await expect(service.restoreSnapshot('nonexistent-id')).rejects.toThrow('not found');
+      await expect(snapshotService.restoreSnapshot('nonexistent-id')).rejects.toThrow('not found');
     });
 
     it('verifies checksum when available', async () => {
       const project = createMockProject();
-      const metadata = await service.createSnapshot(project);
+      const metadata = await snapshotService.createSnapshot(project);
 
       // Snapshot should restore successfully with valid checksum
-      const restored = await service.restoreSnapshot(metadata.id);
+      const restored = await snapshotService.restoreSnapshot(metadata.id);
       expect(restored).toBeDefined();
     });
 
     it('logs warning on checksum mismatch', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const project = createMockProject();
-      const metadata = await service.createSnapshot(project);
+      const metadata = await snapshotService.createSnapshot(project);
 
       // Corrupt the snapshot data
       const snapshotKey = `inkwell_snapshot_${metadata.id}`;
@@ -183,7 +183,7 @@ describe('SnapshotService', () => {
       snapshotData.project.name = 'Corrupted';
       localStorage.setItem(snapshotKey, JSON.stringify(snapshotData));
 
-      await service.restoreSnapshot(metadata.id);
+      await snapshotService.restoreSnapshot(metadata.id);
 
       // Should log warning but still return data
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Checksum mismatch'));
@@ -195,9 +195,9 @@ describe('SnapshotService', () => {
   describe('deleteSnapshot', () => {
     it('removes snapshot from storage', async () => {
       const project = createMockProject();
-      const metadata = await service.createSnapshot(project);
+      const metadata = await snapshotService.createSnapshot(project);
 
-      await service.deleteSnapshot(metadata.id);
+      await snapshotService.deleteSnapshot(metadata.id);
 
       const snapshotKey = `inkwell_snapshot_${metadata.id}`;
       expect(localStorage.getItem(snapshotKey)).toBeNull();
@@ -205,9 +205,9 @@ describe('SnapshotService', () => {
 
     it('removes snapshot from index', async () => {
       const project = createMockProject();
-      const metadata = await service.createSnapshot(project);
+      const metadata = await snapshotService.createSnapshot(project);
 
-      await service.deleteSnapshot(metadata.id);
+      await snapshotService.deleteSnapshot(metadata.id);
 
       const index = JSON.parse(localStorage.getItem('inkwell_snapshot_index') || '[]');
       expect(index.find((s: any) => s.id === metadata.id)).toBeUndefined();
@@ -215,7 +215,7 @@ describe('SnapshotService', () => {
 
     it('handles deletion of nonexistent snapshot gracefully', async () => {
       // Should not throw
-      await expect(service.deleteSnapshot('nonexistent')).resolves.toBeUndefined();
+      await expect(snapshotService.deleteSnapshot('nonexistent')).resolves.toBeUndefined();
     });
   });
 
@@ -225,12 +225,12 @@ describe('SnapshotService', () => {
 
       // Create more than MAX_SNAPSHOTS (15)
       for (let i = 0; i < 18; i++) {
-        await service.createSnapshot(project, {
+        await snapshotService.createSnapshot(project, {
           description: `Snapshot ${i}`,
         });
       }
 
-      const snapshots = await service.getSnapshots(project.id);
+      const snapshots = await snapshotService.getSnapshots(project.id);
       expect(snapshots.length).toBeLessThanOrEqual(15);
     });
 
@@ -239,14 +239,14 @@ describe('SnapshotService', () => {
       const project2 = createMockProject({ id: 'proj-2' });
 
       for (let i = 0; i < 10; i++) {
-        await service.createSnapshot(project1);
+        await snapshotService.createSnapshot(project1);
       }
       for (let i = 0; i < 10; i++) {
-        await service.createSnapshot(project2);
+        await snapshotService.createSnapshot(project2);
       }
 
-      const snapshots1 = await service.getSnapshots('proj-1');
-      const snapshots2 = await service.getSnapshots('proj-2');
+      const snapshots1 = await snapshotService.getSnapshots('proj-1');
+      const snapshots2 = await snapshotService.getSnapshots('proj-2');
 
       expect(snapshots1.length).toBeGreaterThan(0);
       expect(snapshots2.length).toBeGreaterThan(0);
@@ -257,7 +257,7 @@ describe('SnapshotService', () => {
     it('starts auto-snapshot timer', () => {
       const project = createMockProject();
 
-      service.startAutoSnapshots(project);
+      snapshotService.startAutoSnapshots(project);
 
       // Timer should be set
       expect(service['autoSnapshotTimer']).toBeDefined();
@@ -266,8 +266,8 @@ describe('SnapshotService', () => {
     it('stops auto-snapshot timer', () => {
       const project = createMockProject();
 
-      service.startAutoSnapshots(project);
-      service.stopAutoSnapshots();
+      snapshotService.startAutoSnapshots(project);
+      snapshotService.stopAutoSnapshots();
 
       expect(service['autoSnapshotTimer']).toBeNull();
     });
@@ -276,10 +276,10 @@ describe('SnapshotService', () => {
       const project1 = createMockProject({ id: 'proj-1' });
       const project2 = createMockProject({ id: 'proj-2' });
 
-      service.startAutoSnapshots(project1);
+      snapshotService.startAutoSnapshots(project1);
       const firstTimer = service['autoSnapshotTimer'];
 
-      service.startAutoSnapshots(project2);
+      snapshotService.startAutoSnapshots(project2);
       const secondTimer = service['autoSnapshotTimer'];
 
       expect(firstTimer).not.toBe(secondTimer);
@@ -289,16 +289,16 @@ describe('SnapshotService', () => {
       vi.useFakeTimers();
       const project = createMockProject();
 
-      service.startAutoSnapshots(project);
+      snapshotService.startAutoSnapshots(project);
 
       // Fast-forward time
       vi.advanceTimersByTime(10 * 60 * 1000); // 10 minutes
       await vi.runAllTimersAsync();
 
-      const snapshots = await service.getSnapshots(project.id);
+      const snapshots = await snapshotService.getSnapshots(project.id);
       expect(snapshots.length).toBeGreaterThan(0);
 
-      service.stopAutoSnapshots();
+      snapshotService.stopAutoSnapshots();
       vi.useRealTimers();
     });
   });
@@ -307,10 +307,10 @@ describe('SnapshotService', () => {
     it('calculates total storage size', async () => {
       const project = createMockProject();
 
-      await service.createSnapshot(project);
-      await service.createSnapshot(project);
+      await snapshotService.createSnapshot(project);
+      await snapshotService.createSnapshot(project);
 
-      const usage = service.getSnapshotStorageUsage();
+      const usage = snapshotService.getSnapshotStorageUsage();
 
       expect(usage.snapshotCount).toBe(2);
       expect(usage.totalSize).toBeGreaterThan(0);
@@ -318,7 +318,7 @@ describe('SnapshotService', () => {
     });
 
     it('returns zero when no snapshots exist', () => {
-      const usage = service.getSnapshotStorageUsage();
+      const usage = snapshotService.getSnapshotStorageUsage();
 
       expect(usage.snapshotCount).toBe(0);
       expect(usage.totalSize).toBe(0);
@@ -327,9 +327,9 @@ describe('SnapshotService', () => {
 
     it('includes size for each snapshot', async () => {
       const project = createMockProject();
-      await service.createSnapshot(project);
+      await snapshotService.createSnapshot(project);
 
-      const usage = service.getSnapshotStorageUsage();
+      const usage = snapshotService.getSnapshotStorageUsage();
 
       expect(usage.details[0].id).toBeDefined();
       expect(usage.details[0].size).toBeGreaterThan(0);
@@ -342,25 +342,25 @@ describe('SnapshotService', () => {
 
       // Create 10 snapshots
       for (let i = 0; i < 10; i++) {
-        await service.createSnapshot(project);
+        await snapshotService.createSnapshot(project);
       }
 
       // Keep only 5
-      const deletedCount = await service.emergencyCleanup(project.id, 5);
+      const deletedCount = await snapshotService.emergencyCleanup(project.id, 5);
 
       expect(deletedCount).toBe(5);
 
-      const remaining = await service.getSnapshots(project.id);
+      const remaining = await snapshotService.getSnapshots(project.id);
       expect(remaining.length).toBe(5);
     });
 
     it('returns 0 when no cleanup needed', async () => {
       const project = createMockProject();
 
-      await service.createSnapshot(project);
-      await service.createSnapshot(project);
+      await snapshotService.createSnapshot(project);
+      await snapshotService.createSnapshot(project);
 
-      const deletedCount = await service.emergencyCleanup(project.id, 5);
+      const deletedCount = await snapshotService.emergencyCleanup(project.id, 5);
 
       expect(deletedCount).toBe(0);
     });
@@ -369,12 +369,12 @@ describe('SnapshotService', () => {
       const project = createMockProject();
 
       for (let i = 0; i < 8; i++) {
-        await service.createSnapshot(project);
+        await snapshotService.createSnapshot(project);
       }
 
-      await service.emergencyCleanup(project.id);
+      await snapshotService.emergencyCleanup(project.id);
 
-      const remaining = await service.getSnapshots(project.id);
+      const remaining = await snapshotService.getSnapshots(project.id);
       expect(remaining.length).toBe(5);
     });
   });
@@ -389,7 +389,7 @@ describe('SnapshotService', () => {
 
       const project = createMockProject();
 
-      await expect(service.createSnapshot(project)).rejects.toThrow('invalid project');
+      await expect(snapshotService.createSnapshot(project)).rejects.toThrow('invalid project');
     });
 
     it('handles localStorage quota exceeded', async () => {
@@ -403,7 +403,7 @@ describe('SnapshotService', () => {
         throw error;
       });
 
-      await expect(service.createSnapshot(project)).rejects.toThrow();
+      await expect(snapshotService.createSnapshot(project)).rejects.toThrow();
 
       Storage.prototype.setItem = originalSetItem;
     });
@@ -420,7 +420,7 @@ describe('SnapshotService', () => {
       const project = createMockProject();
 
       try {
-        await service.createSnapshot(project);
+        await snapshotService.createSnapshot(project);
       } catch {
         // Expected to throw
       }
@@ -432,7 +432,7 @@ describe('SnapshotService', () => {
     it('handles corrupted snapshot index gracefully', async () => {
       localStorage.setItem('inkwell_snapshot_index', 'not valid json');
 
-      const snapshots = await service.getSnapshots('any-project');
+      const snapshots = await snapshotService.getSnapshots('any-project');
       expect(snapshots).toEqual([]);
     });
   });
@@ -441,8 +441,8 @@ describe('SnapshotService', () => {
     it('generates consistent checksum for same data', async () => {
       const project = createMockProject();
 
-      const snapshot1 = await service.createSnapshot(project);
-      const snapshot2 = await service.createSnapshot(project);
+      const snapshot1 = await snapshotService.createSnapshot(project);
+      const snapshot2 = await snapshotService.createSnapshot(project);
 
       expect(snapshot1.checksum).toBe(snapshot2.checksum);
     });
@@ -451,8 +451,8 @@ describe('SnapshotService', () => {
       const project1 = createMockProject({ name: 'Project 1' });
       const project2 = createMockProject({ name: 'Project 2' });
 
-      const snapshot1 = await service.createSnapshot(project1);
-      const snapshot2 = await service.createSnapshot(project2);
+      const snapshot1 = await snapshotService.createSnapshot(project1);
+      const snapshot2 = await snapshotService.createSnapshot(project2);
 
       expect(snapshot1.checksum).not.toBe(snapshot2.checksum);
     });

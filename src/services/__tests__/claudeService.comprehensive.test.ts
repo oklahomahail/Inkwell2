@@ -10,7 +10,7 @@ vi.mock('crypto-js', () => ({
   },
 }));
 
-import ClaudeService from '../claudeService';
+import claudeService from '../claudeService';
 
 function mockFetch(response: Response) {
   global.fetch = vi.fn().mockResolvedValue(response);
@@ -25,7 +25,6 @@ function jsonResponse(body: unknown, init: ResponseInit = { status: 200 }) {
 }
 
 describe('ClaudeService', () => {
-  let service: ClaudeService;
   let fetchMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
@@ -35,9 +34,6 @@ describe('ClaudeService', () => {
     // Reset fetch mock
     fetchMock = vi.fn();
     global.fetch = fetchMock;
-
-    // Create fresh service instance
-    service = new ClaudeService();
   });
 
   afterEach(() => {
@@ -46,24 +42,24 @@ describe('ClaudeService', () => {
 
   describe('Initialization', () => {
     it('initializes with default config', () => {
-      expect(service.isConfigured()).toBe(false);
+      expect(claudeService.isConfigured()).toBe(false);
     });
 
     it('accepts valid API key', () => {
-      service.initialize('sk-ant-api03-test-key-12345');
-      expect(service.isConfigured()).toBe(true);
+      claudeService.initialize('sk-ant-api03-test-key-12345');
+      expect(claudeService.isConfigured()).toBe(true);
     });
 
     it('rejects invalid API key format', () => {
-      expect(() => service.initialize('invalid-key')).toThrow('Invalid API key format');
+      expect(() => claudeService.initialize('invalid-key')).toThrow('Invalid API key format');
     });
 
     it('rejects empty API key', () => {
-      expect(() => service.initialize('')).toThrow('Invalid API key format');
+      expect(() => claudeService.initialize('')).toThrow('Invalid API key format');
     });
 
     it('persists API key to localStorage', () => {
-      service.initialize('sk-ant-api03-test-key');
+      claudeService.initialize('sk-ant-api03-test-key');
       // Key should be stored encrypted
       const stored = localStorage.getItem('claude_api_key_encrypted');
       expect(stored).toBeTruthy();
@@ -73,25 +69,25 @@ describe('ClaudeService', () => {
   describe('Status Change Listeners', () => {
     it('notifies listeners when API key is set', () => {
       const listener = vi.fn();
-      service.addStatusChangeListener(listener);
+      claudeService.addStatusChangeListener(listener);
 
-      service.initialize('sk-ant-api03-test-key');
+      claudeService.initialize('sk-ant-api03-test-key');
       expect(listener).toHaveBeenCalledTimes(1);
     });
 
     it('allows removing listeners', () => {
       const listener = vi.fn();
-      service.addStatusChangeListener(listener);
-      service.removeStatusChangeListener(listener);
+      claudeService.addStatusChangeListener(listener);
+      claudeService.removeStatusChangeListener(listener);
 
-      service.initialize('sk-ant-api03-test-key');
+      claudeService.initialize('sk-ant-api03-test-key');
       expect(listener).not.toHaveBeenCalled();
     });
   });
 
   describe('sendMessage - Happy Path', () => {
     beforeEach(() => {
-      service.initialize('sk-ant-api03-valid-key');
+      claudeService.initialize('sk-ant-api03-valid-key');
     });
 
     it('sends a message and returns parsed response', async () => {
@@ -102,7 +98,7 @@ describe('ClaudeService', () => {
         }),
       );
 
-      const result = await service.sendMessage('Say hello');
+      const result = await claudeService.sendMessage('Say hello');
 
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(result.text).toBe('Hello from Claude!');
@@ -120,7 +116,7 @@ describe('ClaudeService', () => {
         }),
       );
 
-      await service.sendMessage('Follow up', {
+      await claudeService.sendMessage('Follow up', {
         conversationHistory: [
           { id: '1', role: 'user', content: 'Previous', timestamp: new Date() },
           { id: '2', role: 'assistant', content: 'Reply', timestamp: new Date() },
@@ -138,7 +134,7 @@ describe('ClaudeService', () => {
         }),
       );
 
-      await service.sendMessage('Analyze this', {
+      await claudeService.sendMessage('Analyze this', {
         selectedText: 'Once upon a time...',
       });
 
@@ -153,7 +149,7 @@ describe('ClaudeService', () => {
         }),
       );
 
-      await service.sendMessage('Generate outline', {
+      await claudeService.sendMessage('Generate outline', {
         maxTokens: 8000,
       });
 
@@ -164,7 +160,7 @@ describe('ClaudeService', () => {
 
   describe('Error Handling', () => {
     beforeEach(() => {
-      service.initialize('sk-ant-api03-valid-key');
+      claudeService.initialize('sk-ant-api03-valid-key');
     });
 
     it('throws auth error when not configured', async () => {
@@ -176,8 +172,12 @@ describe('ClaudeService', () => {
     });
 
     it('throws error on empty message', async () => {
-      await expect(service.sendMessage('')).rejects.toThrow('Message content cannot be empty');
-      await expect(service.sendMessage('   ')).rejects.toThrow('Message content cannot be empty');
+      await expect(claudeService.sendMessage('')).rejects.toThrow(
+        'Message content cannot be empty',
+      );
+      await expect(claudeService.sendMessage('   ')).rejects.toThrow(
+        'Message content cannot be empty',
+      );
     });
 
     it('handles API error responses with details', async () => {
@@ -193,7 +193,7 @@ describe('ClaudeService', () => {
         ),
       );
 
-      await expect(service.sendMessage('test')).rejects.toThrow();
+      await expect(claudeService.sendMessage('test')).rejects.toThrow();
     });
 
     it('handles rate limit errors', async () => {
@@ -209,13 +209,13 @@ describe('ClaudeService', () => {
         ),
       );
 
-      await expect(service.sendMessage('test')).rejects.toThrow();
+      await expect(claudeService.sendMessage('test')).rejects.toThrow();
     });
 
     it('handles network errors gracefully', async () => {
       fetchMock.mockRejectedValue(new Error('Network failure'));
 
-      await expect(service.sendMessage('test')).rejects.toThrow('Network error');
+      await expect(claudeService.sendMessage('test')).rejects.toThrow('Network error');
     });
 
     it('handles invalid response format', async () => {
@@ -225,7 +225,7 @@ describe('ClaudeService', () => {
         }),
       );
 
-      await expect(service.sendMessage('test')).rejects.toThrow('Invalid response format');
+      await expect(claudeService.sendMessage('test')).rejects.toThrow('Invalid response format');
     });
 
     it('handles malformed JSON response', async () => {
@@ -236,13 +236,13 @@ describe('ClaudeService', () => {
         }),
       );
 
-      await expect(service.sendMessage('test')).rejects.toThrow();
+      await expect(claudeService.sendMessage('test')).rejects.toThrow();
     });
   });
 
   describe('Rate Limiting', () => {
     beforeEach(() => {
-      service.initialize('sk-ant-api03-valid-key');
+      claudeService.initialize('sk-ant-api03-valid-key');
     });
 
     it('prevents rapid successive calls', async () => {
@@ -253,7 +253,7 @@ describe('ClaudeService', () => {
       );
 
       // First call should succeed
-      await service.sendMessage('First');
+      await claudeService.sendMessage('First');
 
       // Simulate rate limit being hit
       // This depends on your implementation - adjust as needed
@@ -263,7 +263,7 @@ describe('ClaudeService', () => {
 
   describe('Convenience Methods', () => {
     beforeEach(() => {
-      service.initialize('sk-ant-api03-valid-key');
+      claudeService.initialize('sk-ant-api03-valid-key');
       fetchMock.mockResolvedValue(
         jsonResponse({
           content: [{ type: 'text', text: 'Generated text' }],
@@ -272,7 +272,7 @@ describe('ClaudeService', () => {
     });
 
     it('continueText wraps prompt correctly', async () => {
-      await service.continueText('Once upon a time');
+      await claudeService.continueText('Once upon a time');
 
       const requestBody = JSON.parse(fetchMock.mock.calls[0][1].body);
       expect(JSON.stringify(requestBody.messages)).toContain('continue this text');
@@ -280,37 +280,37 @@ describe('ClaudeService', () => {
     });
 
     it('improveText wraps prompt correctly', async () => {
-      await service.improveText('Some text to improve');
+      await claudeService.improveText('Some text to improve');
 
       const requestBody = JSON.parse(fetchMock.mock.calls[0][1].body);
       expect(JSON.stringify(requestBody.messages)).toContain('improve');
     });
 
     it('analyzeWritingStyle wraps prompt correctly', async () => {
-      await service.analyzeWritingStyle('Sample writing');
+      await claudeService.analyzeWritingStyle('Sample writing');
 
       const requestBody = JSON.parse(fetchMock.mock.calls[0][1].body);
       expect(JSON.stringify(requestBody.messages)).toContain('analyze the writing style');
     });
 
     it('generatePlotIdeas works with and without context', async () => {
-      await service.generatePlotIdeas();
+      await claudeService.generatePlotIdeas();
       expect(fetchMock).toHaveBeenCalledTimes(1);
 
-      await service.generatePlotIdeas('Fantasy setting');
+      await claudeService.generatePlotIdeas('Fantasy setting');
       expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 
     it('analyzeCharacter works with and without context', async () => {
-      await service.analyzeCharacter('John Doe');
+      await claudeService.analyzeCharacter('John Doe');
       expect(fetchMock).toHaveBeenCalledTimes(1);
 
-      await service.analyzeCharacter('Jane Smith', 'Detective story');
+      await claudeService.analyzeCharacter('Jane Smith', 'Detective story');
       expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 
     it('generateStoryOutline uses higher token limit', async () => {
-      await service.generateStoryOutline('Epic fantasy saga');
+      await claudeService.generateStoryOutline('Epic fantasy saga');
 
       const requestBody = JSON.parse(fetchMock.mock.calls[0][1].body);
       expect(requestBody.max_tokens).toBeGreaterThanOrEqual(4000);
@@ -344,7 +344,7 @@ describe('ClaudeService', () => {
 
   describe('Request Headers', () => {
     beforeEach(() => {
-      service.initialize('sk-ant-api03-valid-key');
+      claudeService.initialize('sk-ant-api03-valid-key');
       fetchMock.mockResolvedValue(
         jsonResponse({
           content: [{ type: 'text', text: 'Response' }],
@@ -353,7 +353,7 @@ describe('ClaudeService', () => {
     });
 
     it('includes correct Anthropic headers', async () => {
-      await service.sendMessage('test');
+      await claudeService.sendMessage('test');
 
       const headers = fetchMock.mock.calls[0][1].headers;
       expect(headers['anthropic-api-key']).toBe('sk-ant-api03-valid-key');
@@ -362,7 +362,7 @@ describe('ClaudeService', () => {
     });
 
     it('sends POST request to correct endpoint', async () => {
-      await service.sendMessage('test');
+      await claudeService.sendMessage('test');
 
       expect(fetchMock.mock.calls[0][0]).toBe('https://api.anthropic.com/v1/messages');
       expect(fetchMock.mock.calls[0][1].method).toBe('POST');
@@ -371,7 +371,7 @@ describe('ClaudeService', () => {
 
   describe('Response Parsing', () => {
     beforeEach(() => {
-      service.initialize('sk-ant-api03-valid-key');
+      claudeService.initialize('sk-ant-api03-valid-key');
     });
 
     it('handles response with usage data', async () => {
@@ -385,7 +385,7 @@ describe('ClaudeService', () => {
         }),
       );
 
-      const result = await service.sendMessage('test');
+      const result = await claudeService.sendMessage('test');
       expect(result.usage).toEqual({
         inputTokens: 100,
         outputTokens: 50,
@@ -399,7 +399,7 @@ describe('ClaudeService', () => {
         }),
       );
 
-      const result = await service.sendMessage('test');
+      const result = await claudeService.sendMessage('test');
       expect(result.usage).toBeUndefined();
     });
 
@@ -410,7 +410,7 @@ describe('ClaudeService', () => {
         }),
       );
 
-      const result = await service.sendMessage('test');
+      const result = await claudeService.sendMessage('test');
       expect(result.trim()).toBe('Response with spaces');
     });
   });
