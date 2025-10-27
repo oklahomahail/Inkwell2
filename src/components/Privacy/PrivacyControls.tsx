@@ -131,7 +131,10 @@ export const PrivacyControls: React.FC<PrivacyControlsProps> = ({
         </div>
 
         {/* Privacy Policy Summary */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div
+          data-tour-id="privacy-hint"
+          className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
+        >
           <div className="flex items-start gap-3">
             <Info className="w-5 h-5 text-blue-600 mt-0.5" />
             <div>

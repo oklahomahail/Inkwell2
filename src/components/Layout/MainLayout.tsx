@@ -626,6 +626,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                     {/* Export Button */}
                     {currentProject && (
                       <button
+                        data-tour-id="export-open"
                         onClick={handleExport}
                         className="btn btn-ghost btn-sm"
                         aria-label="Export (⌘E)"

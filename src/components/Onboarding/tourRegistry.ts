@@ -1,5 +1,12 @@
 // Central place for tour IDs and their steps
-export type TourId = 'profile-tour' | 'feature-tour' | 'welcome-tour' | 'inkwell-spotlight';
+export type TourId =
+  | 'profile-tour'
+  | 'feature-tour'
+  | 'welcome-tour'
+  | 'inkwell-spotlight'
+  | 'core'
+  | 'ai-tools'
+  | 'export';
 
 export interface TourStepAction {
   label: string;
@@ -30,6 +37,29 @@ export interface TourStep {
 }
 
 export type TourDefinition = TourStep[];
+
+// Import new tour variants
+import { defaultTourConfig } from '@/tour/configs/defaultTour';
+import { aiToolsTour } from '@/tour/variants/aiToolsTour';
+import { exportTour } from '@/tour/variants/exportTour';
+
+/**
+ * Central registry for all tour configurations
+ */
+export const TOUR_REGISTRY = {
+  core: defaultTourConfig,
+  'ai-tools': aiToolsTour,
+  export: exportTour,
+} as const;
+
+export type TourKey = keyof typeof TOUR_REGISTRY;
+
+/**
+ * Get a tour configuration by key
+ */
+export function getTourConfig(key: TourKey) {
+  return TOUR_REGISTRY[key];
+}
 
 // Core tour steps for different panels
 export const CORE_TOUR_STEPS: TourStep[] = [
@@ -290,4 +320,8 @@ export const TOUR_MAP: Record<TourId, TourDefinition> = {
       category: 'onboarding',
     },
   ],
+  // New tour variants - use placeholder for now to satisfy type
+  core: CORE_TOUR_STEPS,
+  'ai-tools': CORE_TOUR_STEPS,
+  export: CORE_TOUR_STEPS,
 };

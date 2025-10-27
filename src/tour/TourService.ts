@@ -18,6 +18,8 @@ class TourService {
   private config: TourConfig | null = null;
   private listeners: Set<(state: TourState) => void> = new Set();
   private options: { skipMissingAnchors?: boolean; spotlightPadding?: number } = {};
+  private escListener?: (e: KeyboardEvent) => void;
+  private startTime?: number;
 
   constructor() {
     // Listen for route changes to refresh anchors
@@ -90,6 +92,16 @@ class TourService {
       tourId: config.id,
     };
 
+    // Set up ESC key listener
+    this.startTime = Date.now();
+    this.escListener = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        this.skip();
+      }
+    };
+    window.addEventListener('keydown', this.escListener, { passive: false });
+
     this.notify();
 
     // Track tour start using the analytics adapter
@@ -151,7 +163,7 @@ class TourService {
       this.config.onSkip();
     }
 
-    this.stop();
+    this.teardown();
   }
 
   /**
@@ -160,14 +172,29 @@ class TourService {
   private complete(): void {
     if (!this.state.isRunning) return;
 
+    const durationMs = this.startTime ? Date.now() - this.startTime : 0;
+
     tourAnalytics.completed(this.state.tourId!, {
       totalSteps: this.state.totalSteps,
+      durationMs,
     });
 
     if (this.config?.onComplete) {
       this.config.onComplete();
     }
 
+    this.teardown();
+  }
+
+  /**
+   * Teardown tour listeners and cleanup
+   */
+  private teardown(): void {
+    if (this.escListener) {
+      window.removeEventListener('keydown', this.escListener);
+      this.escListener = undefined;
+    }
+    this.startTime = undefined;
     this.stop();
   }
 

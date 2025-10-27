@@ -136,6 +136,31 @@ export default function SpotlightTooltip({
     }
   }, []);
 
+  // Tab trap within tooltip
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'Tab') return;
+
+    const card = cardRef.current;
+    if (!card) return;
+
+    const focusables = card.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+    );
+
+    if (!focusables || focusables.length === 0) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last?.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first?.focus();
+    }
+  };
+
   const stepId = `tour-step-${step.id}`;
   const describedById = `${stepId}-desc`;
 
@@ -146,6 +171,7 @@ export default function SpotlightTooltip({
       aria-modal="true"
       aria-labelledby={stepId}
       aria-describedby={describedById}
+      onKeyDown={handleKeyDown}
       className="fixed z-[9999] max-w-sm rounded-2xl border bg-white text-gray-900 shadow-xl outline-none dark:bg-neutral-900 dark:text-neutral-50 dark:border-neutral-700 pointer-events-auto"
       style={{ left: coords.left, top: coords.top }}
     >
@@ -179,7 +205,7 @@ export default function SpotlightTooltip({
             {index > 0 && (
               <button
                 type="button"
-                className="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:border-neutral-700"
+                className="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:border-neutral-700 dark:focus:ring-blue-500"
                 onClick={onPrev}
                 aria-label="Previous"
               >
@@ -188,7 +214,7 @@ export default function SpotlightTooltip({
             )}
             <button
               type="button"
-              className="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:border-neutral-700"
+              className="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:border-neutral-700 dark:focus:ring-blue-500"
               onClick={onSkip}
               aria-label="Skip tour"
             >
@@ -199,7 +225,7 @@ export default function SpotlightTooltip({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:border-neutral-700"
+              className="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:border-neutral-700 dark:focus:ring-blue-500"
               onClick={onClose}
               aria-label="Close tour"
             >
@@ -208,7 +234,7 @@ export default function SpotlightTooltip({
             <button
               type="button"
               data-primary
-              className="px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-400"
+              className="px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-blue-500"
               onClick={onNext}
               aria-label="Next"
             >

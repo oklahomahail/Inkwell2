@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 
 import WritingAnalyticsView from '@/components/Analytics/WritingAnalyticsView';
 import { useAppContext } from '@/context/AppContext';
+import TourCompletionCard from '@/features/analytics/components/TourCompletionCard';
 import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 import { triggerAnalyticsVisited } from '@/utils/tourTriggers';
 
@@ -137,6 +138,9 @@ const AnalyticsPanel: React.FC = () => {
               {totals.streak} day{totals.streak !== 1 ? 's' : ''}
             </div>
           </div>
+
+          {/* Tour Completion Card */}
+          <TourCompletionCard />
         </div>
 
         {/* Chapter Stats Section */}

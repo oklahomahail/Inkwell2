@@ -104,7 +104,7 @@ export default function AiSettingsPanel() {
         {/* Model Selection */}
         <div className="mt-4">
           <label className="text-sm font-medium text-inkwell-text">Model</label>
-          <div className="mt-2 grid grid-cols-2 gap-2">
+          <div data-tour-id="model-selector" className="mt-2 grid grid-cols-2 gap-2">
             {currentOptions.models.map((m) => (
               <button
                 key={m.id}

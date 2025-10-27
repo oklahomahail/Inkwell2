@@ -615,7 +615,10 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
 
           {/* AI Toolbar Panel */}
           {showAIPanel && !isFocusMode && (
-            <div className="w-96 border-l border-gray-200 bg-white overflow-y-auto">
+            <div
+              data-tour-id="assistant-panel"
+              className="w-96 border-l border-gray-200 bg-white overflow-y-auto"
+            >
               <div className="p-4">
                 <ClaudeToolbar
                   selectedText={selectedText}

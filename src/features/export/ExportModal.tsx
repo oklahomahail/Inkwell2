@@ -138,6 +138,7 @@ export function ExportModal({ isOpen, onClose, projectId, bookData, analysis }: 
               value="manuscript"
               checked={template === 'manuscript'}
               onChange={() => setTemplate('manuscript')}
+              data-tour-id="export-template"
             />
             <span>Manuscript Standard</span>
           </label>
@@ -166,6 +167,7 @@ export function ExportModal({ isOpen, onClose, projectId, bookData, analysis }: 
             Cancel
           </button>
           <button
+            data-tour-id="export-run"
             className="rounded-md bg-black px-3 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black"
             onClick={handleExport}
             disabled={downloading}

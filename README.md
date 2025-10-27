@@ -51,6 +51,12 @@ If you encounter issues with authentication:
 - Keyboard shortcuts and command palette
 - Claude/OpenAI assistant panel (generate or critique)
 - Export/import project data
+- **Interactive Product Tours** - Guided walkthroughs for onboarding and feature discovery
+  - Core tour (Dashboard, Sidebar, Topbar navigation)
+  - AI Tools tour (Model selector, Assistant panel, Privacy)
+  - Export tour (Export button, Template selection, PDF generation)
+  - Full accessibility support (keyboard navigation, screen readers, ARIA)
+  - Tour completion analytics tracking
 
 ## Quick Start
 
