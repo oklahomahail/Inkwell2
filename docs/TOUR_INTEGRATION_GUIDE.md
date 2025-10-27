@@ -398,3 +398,68 @@ See the test files for comprehensive usage examples:
 
 - `src/components/Onboarding/__tests__/InkwellTourOverlay.test.tsx`
 - `src/components/Onboarding/__tests__/tourTriggers.test.ts`
+
+## Latest Updates (v1.3.2)
+
+### New Data Tour ID Attributes
+
+The following `data-tour-id` attributes have been added for enhanced tour targeting:
+
+#### Export Workflow
+
+- `export-button` - Main export button in the UI
+- `export-template-selector` - Export template dropdown
+- `export-run-button` - Export execution button
+
+#### AI Features
+
+- `ai-model-selector` - AI model selection dropdown
+- `claude-assistant` - AI assistant panel
+- `privacy-hint` - Privacy controls hint/tooltip
+
+#### Usage Example
+
+```tsx
+// In ExportModal.tsx
+<button data-tour-id="export-button">Export</button>
+<Select data-tour-id="export-template-selector">...</Select>
+<button data-tour-id="export-run-button">Run Export</button>
+
+// In AiSettingsPanel.tsx
+<Select data-tour-id="ai-model-selector">...</Select>
+
+// In PrivacyControls.tsx
+<div data-tour-id="privacy-hint">...</div>
+```
+
+### Analytics Dashboard Integration
+
+The `TourCompletionCard` widget has been integrated into the Analytics dashboard:
+
+```tsx
+// src/components/Panels/AnalyticsPanel.tsx
+import TourCompletionCard from '@/features/analytics/components/TourCompletionCard';
+
+function AnalyticsPanel() {
+  return (
+    <div>
+      {/* ...other analytics widgets... */}
+      <TourCompletionCard />
+    </div>
+  );
+}
+```
+
+**Metrics Displayed:**
+
+- Tour completion rate
+- Average completion time
+- Tours started vs completed
+- Last 5000 events tracked
+
+**Analytics Events:**
+
+- `tour_started` - When tour begins
+- `tour_step_viewed` - Each step viewed
+- `tour_completed` - Tour finished successfully
+- `tour_skipped` - Tour abandoned

@@ -281,6 +281,7 @@ For detailed documentation, see the `/docs` directory:
 - **Authentication**: [docs/ops/02-auth.md](docs/ops/02-auth.md)
 - **Release Process**: [docs/dev/release.md](docs/dev/release.md)
 - **Product Roadmap**: [docs/product/roadmap.md](docs/product/roadmap.md)
+- **Tour System**: [docs/TOUR_INDEX.md](docs/TOUR_INDEX.md) ⭐ **NEW**
 
 ### Authentication Setup (Supabase)
 

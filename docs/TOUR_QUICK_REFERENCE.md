@@ -89,13 +89,19 @@ const unsubscribe = tourService.subscribe((state) => {
 
 ### Feature Tours (Optional)
 
-- `[data-tour-id="claude-assistant"]` - AI assistant
+#### AI & Export Features
+
+- `[data-tour-id="claude-assistant"]` - AI assistant panel
+- `[data-tour-id="ai-model-selector"]` - AI model selection dropdown
+- `[data-tour-id="privacy-hint"]` - Privacy controls hint
+- `[data-tour-id="export-button"]` - Export trigger button
+- `[data-tour-id="export-template-selector"]` - Export template picker
+- `[data-tour-id="export-run-button"]` - Export execution button
+
+#### Analysis & Insights
+
 - `[data-tour-id="plot-analysis"]` - Plot analysis
 - `[data-tour-id="character-analytics"]` - Character insights
-- `[data-tour-id="export-button"]` - Export trigger
-- `[data-tour-id="export-format-selector"]` - Format picker
-- `[data-tour-id="export-style-selector"]` - Style picker
-- `[data-tour-id="export-proofread-toggle"]` - Proofread option
 
 ## Analytics Events
 
