@@ -7,8 +7,8 @@ export interface BrandTheme {
 }
 
 const defaultTheme: BrandTheme = {
-  navy: '#0C5C3D',
-  gold: '#D4A537',
+  navy: '#13294B',
+  gold: '#D4AF37',
   mode: 'light',
 };
 

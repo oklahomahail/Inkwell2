@@ -4,7 +4,7 @@ Version: 2.0 - **Blue & Gold Brand Update**
 Status: Active  
 Last Updated: October 2025
 
-> **🎨 Brand Update:** Inkwell has transitioned from the previous color palette to a sophisticated blue and gold system. The new navy blue (#0A2F4E) serves as the primary brand color with warm gold (#D4A537) accents, creating a more professional and accessible visual identity.
+> **🎨 Brand Update:** Inkwell has transitioned from the previous color palette to a sophisticated blue and gold system. The new navy blue (#13294B) serves as the primary brand color with warm gold (#D4AF37) accents, creating a more professional and accessible visual identity.
 
 ---
 
@@ -65,9 +65,9 @@ Inkwell uses a dual-tagline system that speaks to both creative inspiration and 
 
 | Token                | Hex       | Usage                                     |
 | -------------------- | --------- | ----------------------------------------- |
-| `--inkwell-navy`     | `#0A2F4E` | **Primary brand navy** - buttons, headers |
-| `--inkwell-gold`     | `#D4A537` | **Warm gold accent** - highlights, CTAs   |
-| `--inkwell-charcoal` | `#22E22E` | **Rich charcoal** - body text, neutrals   |
+| `--inkwell-navy`     | `#13294B` | **Primary brand navy** - buttons, headers |
+| `--inkwell-gold`     | `#D4AF37` | **Warm gold accent** - highlights, CTAs   |
+| `--inkwell-charcoal` | `#2C3242` | **Rich charcoal** - body text, neutrals   |
 
 ### Extended Navy Scale
 
@@ -77,19 +77,19 @@ Inkwell uses a dual-tagline system that speaks to both creative inspiration and 
 | `--inkwell-navy-100` | `#e2e8f0` | Card backgrounds, subtle sections   |
 | `--inkwell-navy-200` | `#cbd5e1` | Borders, inactive states            |
 | `--inkwell-navy-500` | `#334155` | Secondary text on light backgrounds |
-| `--inkwell-navy-600` | `#0A2F4E` | Primary brand color                 |
-| `--inkwell-navy-700` | `#1e293b` | Hover states, darker accents        |
-| `--inkwell-navy-800` | `#0f172a` | Dark theme backgrounds              |
-| `--inkwell-navy-900` | `#020617` | Darkest navy, high contrast text    |
+| `--inkwell-navy-600` | `#13294B` | Primary brand color                 |
+| `--inkwell-navy-700` | `#0e1e38` | Hover states, darker accents        |
+| `--inkwell-navy-800` | `#0a1525` | Dark theme backgrounds              |
+| `--inkwell-navy-900` | `#050b12` | Darkest navy, high contrast text    |
 
 ### Extended Gold Scale
 
 | Token                | Hex       | Usage                       |
 | -------------------- | --------- | --------------------------- |
-| `--inkwell-gold-50`  | `#fef7e0` | Light gold backgrounds      |
-| `--inkwell-gold-100` | `#fde68a` | Subtle gold accents         |
-| `--inkwell-gold-500` | `#D4A537` | Primary gold                |
-| `--inkwell-gold-700` | `#92750f` | Deep gold for text on light |
+| `--inkwell-gold-50`  | `#fef9e7` | Light gold backgrounds      |
+| `--inkwell-gold-100` | `#fcf0c3` | Subtle gold accents         |
+| `--inkwell-gold-500` | `#D4AF37` | Primary gold                |
+| `--inkwell-gold-700` | `#8c6b12` | Deep gold for text on light |
 
 ### Legacy Colors (Maintained)
 
@@ -113,23 +113,25 @@ theme: {
     colors: {
       // New Inkwell Brand Colors (2024)
       inkwell: {
-        navy: '#0A2F4E',    // Primary brand navy
-        gold: '#D4A537',    // Warm gold accent
-        charcoal: '#22E22E', // Rich charcoal neutral
+        navy: '#13294B',    // Primary brand navy
+        gold: '#D4AF37',    // Warm gold accent
+        charcoal: '#2C3242', // Rich charcoal neutral
+        white: '#FAFAFA',   // Soft white
         // Extended navy scale
         'navy-50': '#f1f5f9',
         'navy-100': '#e2e8f0',
         'navy-200': '#cbd5e1',
         'navy-500': '#334155',
-        'navy-600': '#0A2F4E', // Primary
-        'navy-700': '#1e293b',
-        'navy-800': '#0f172a',
-        'navy-900': '#020617',
+        'navy-600': '#13294B', // Primary
+        'navy-700': '#0e1e38',
+        'navy-800': '#0a1525',
+        'navy-900': '#050b12',
         // Extended gold scale
-        'gold-50': '#fef7e0',
-        'gold-100': '#fde68a',
-        'gold-500': '#D4A537', // Primary
-        'gold-700': '#92750f',
+        'gold-50': '#fef9e7',
+        'gold-100': '#fcf0c3',
+        'gold-500': '#D4AF37', // Primary
+        'gold-600': '#b38d22',
+        'gold-700': '#8c6b12',
       },
       // Legacy colors (maintained for compatibility)
       ink: {

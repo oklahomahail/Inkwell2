@@ -1,7 +1,7 @@
 import { render, act, renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { TourProvider, useTour } from './TourProvider';
+import { TourProvider, useTour } from './_archive/TourProvider';
 
 // Mock the analytics service
 vi.mock('../../services/analyticsService', () => ({

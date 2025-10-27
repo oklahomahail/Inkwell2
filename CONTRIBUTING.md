@@ -119,9 +119,9 @@ For major refactoring or cleanup work:
 
 - Use Tailwind CSS classes
 - Follow the brand system:
-  - Deep Navy: `#0C5C3D`
-  - Warm Gold: `#D4A537`
-  - Charcoal: `#22E22E`
+  - Deep Navy: `#13294B`
+  - Warm Gold: `#D4AF37`
+  - Charcoal: `#2C3242`
 - Use existing design tokens and components
 
 ### Git Workflow

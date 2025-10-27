@@ -128,7 +128,7 @@
     <!-- Theme Pre-mount Script - sets light mode default before app loads -->
     <script>
       (function () {
-        var KEY = 'inkwell.theme';
+        var KEY = 'inkwell:theme';
         var saved = localStorage.getItem(KEY);
         var theme = saved || 'light'; // default to light
         var html = document.documentElement;

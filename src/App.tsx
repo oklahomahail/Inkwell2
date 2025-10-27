@@ -10,8 +10,7 @@ import { AppErrorBoundary } from './components/ErrorBoundary';
 import { ExportWizardModal } from './components/ExportWizard/ExportWizardModal';
 import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
-import OnboardingOrchestrator from './components/Onboarding/OnboardingOrchestrator';
-import { TutorialRouter } from './components/Onboarding/TutorialRouter';
+import { OnboardingUI } from './components/Onboarding/OnboardingUI';
 import { PWAInstallButton, PWAUpdateNotification } from './components/PWA';
 import {
   StorageRecoveryBanner,
@@ -45,7 +44,6 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
 import { useTourRouterAdapter } from './tour/adapters/routerAdapter';
-import { AutoStartTourIntegration } from './tour/integrations/autoStartIntegration';
 import { TourLifecycleIntegration } from './tour/integrations/tourLifecycleIntegration';
 import { SpotlightOverlay } from './tour/ui';
 import { useTourRegistration } from './tour/useTourRegistration';
@@ -146,11 +144,11 @@ function AppShell() {
       {/* Tour lifecycle integration - wires analytics and persistence */}
       <TourLifecycleIntegration />
 
-      {/* Auto-start tour for first-time users */}
-      <AutoStartTourIntegration />
-
       {/* Spotlight overlay for tour UI */}
       <SpotlightOverlay />
+
+      {/* New unified onboarding UI (welcome modal, checklist, contextual hints) */}
+      <OnboardingUI />
 
       <header className="flex justify-between items-center p-4 border-b">
         <div className="flex items-center gap-4">
@@ -231,16 +229,6 @@ function AppShell() {
           element={
             <ProtectedRoute>
               <ProfileAppShell />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Tutorial routes under dashboard */}
-        <Route
-          path="/dashboard/tutorials/*"
-          element={
-            <ProtectedRoute>
-              <TutorialRouter />
             </ProtectedRoute>
           }
         />

@@ -4,11 +4,11 @@ import { MAIN_TAGLINE, ALT_TAGLINE } from './branding';
 export const TAGLINE_PRIMARY = MAIN_TAGLINE;
 export const TAGLINE_SECONDARY = ALT_TAGLINE;
 
-// Brand colors
+// Brand colors (aligned with tailwind.config.js)
 export const BRAND_COLORS = {
-  DEEP_NAVY: '#0C5C3D',
-  WARM_GOLD: '#D4A537',
-  CHARCOAL: '#22E22E',
+  DEEP_NAVY: '#13294B',
+  WARM_GOLD: '#D4AF37',
+  CHARCOAL: '#2C3242',
 } as const;
 
 // Legacy exports (for backward compatibility)

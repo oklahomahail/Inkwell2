@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 
-import InkwellTourOverlay from '../InkwellTourOverlay';
+import InkwellTourOverlay from '../_archive/InkwellTourOverlay';
 
 describe('InkwellTourOverlay', () => {
   const defaultProps = {

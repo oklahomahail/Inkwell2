@@ -46,6 +46,7 @@ export interface UseTourReturn {
   completedTours: string[];
   neverShowAgain: boolean;
   remindMeLater: boolean;
+  updateChecklist?: (key: string) => void;
 }
 
 /**
@@ -60,7 +61,7 @@ export function useTour(): UseTourReturn {
     isActive: false,
     startTour: () => {},
     completeTour: () => {},
-    tourState: null,
+    tourState: { active: false, currentStep: 0, steps: [] },
     setTourSteps: () => {},
     goToStep: () => {},
     preferences: null,
@@ -73,5 +74,15 @@ export function useTour(): UseTourReturn {
     completedTours: [],
     neverShowAgain: false,
     remindMeLater: false,
+    updateChecklist,
   };
+}
+
+// Export stub for ONBOARDING_STEPS for backward compatibility
+export const ONBOARDING_STEPS: TourStep[] = [];
+
+// Add updateChecklist stub
+export function updateChecklist(_key: string) {
+  // Stub - checklist updates now handled by CompletionChecklistNew
+  console.warn('updateChecklist is deprecated - use CompletionChecklistNew state instead');
 }
