@@ -1,6 +1,8 @@
 // src/context/NavContext.tsx
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
+import { log } from '@/utils/logger';
+
 export interface NavigationState {
   currentView: 'dashboard' | 'writing' | 'timeline' | 'analysis' | 'settings';
   currentProjectId: string | null;
@@ -72,7 +74,7 @@ export function NavProvider({ children, initialState = {} }: NavProviderProps) {
         }));
       }
     } catch (error) {
-      console.warn('NavContext: Error loading navigation state:', error);
+      log.warn('NavContext: Error loading navigation state:', error);
     }
   }, []);
 
@@ -81,7 +83,7 @@ export function NavProvider({ children, initialState = {} }: NavProviderProps) {
     try {
       localStorage.setItem('inkwell-navigation-state', JSON.stringify(state));
     } catch (error) {
-      console.warn('NavContext: Error saving navigation state:', error);
+      log.warn('NavContext: Error saving navigation state:', error);
     }
   }, [state]);
 
@@ -137,7 +139,7 @@ export function NavProvider({ children, initialState = {} }: NavProviderProps) {
     (projectId: string, chapterId: string) => {
       // Validate that the chapter exists (basic safety check)
       if (!chapterId || !projectId) {
-        console.warn('NavContext: Invalid chapter navigation parameters');
+        log.warn('NavContext: Invalid chapter navigation parameters');
         return;
       }
 
@@ -157,7 +159,7 @@ export function NavProvider({ children, initialState = {} }: NavProviderProps) {
     (projectId: string, chapterId: string, sceneId: string) => {
       // Validate parameters
       if (!sceneId || !chapterId || !projectId) {
-        console.warn('NavContext: Invalid scene navigation parameters');
+        log.warn('NavContext: Invalid scene navigation parameters');
         return;
       }
 
@@ -217,9 +219,7 @@ export function useNavigation(): NavContextValue {
       // Keep the throw in dev to catch mistakes early
       throw new Error('useNavigation must be used within a NavProvider');
     } else {
-      console.warn(
-        '[navigation] useNavigation used without NavProvider. Returning loading fallback.',
-      );
+      log.warn('[navigation] useNavigation used without NavProvider. Returning loading fallback.');
       return {
         currentView: 'dashboard',
         currentProjectId: null,
@@ -227,26 +227,26 @@ export function useNavigation(): NavContextValue {
         currentSceneId: null,
         focusMode: false,
         navigateToView: (view) => {
-          console.warn(`[navigation] Navigation attempted without provider: ${view}`);
+          log.warn(`[navigation] Navigation attempted without provider: ${view}`);
         },
         navigateToProject: (projectId) => {
-          console.warn(`[navigation] Project navigation attempted without provider: ${projectId}`);
+          log.warn(`[navigation] Project navigation attempted without provider: ${projectId}`);
         },
         navigateToChapter: (projectId, chapterId) => {
-          console.warn(
+          log.warn(
             `[navigation] Chapter navigation attempted without provider: ${projectId}/${chapterId}`,
           );
         },
         navigateToScene: (projectId, chapterId, sceneId) => {
-          console.warn(
+          log.warn(
             `[navigation] Scene navigation attempted without provider: ${projectId}/${chapterId}/${sceneId}`,
           );
         },
         toggleFocusMode: () => {
-          console.warn('[navigation] Focus mode toggle attempted without provider');
+          log.warn('[navigation] Focus mode toggle attempted without provider');
         },
         goBack: () => {
-          console.warn('[navigation] Back navigation attempted without provider');
+          log.warn('[navigation] Back navigation attempted without provider');
         },
         canGoBack: false,
       };
@@ -276,11 +276,11 @@ export const NavigationHelpers = {
       // TODO: Add validation logic here
       // const scene = await storageService.getScene(projectId, chapterId, sceneId);
       // if (!scene) {
-      //   console.warn(`Scene ${sceneId} not found, falling back to chapter`);
+      //   log.warn(`Scene ${sceneId} not found, falling back to chapter`);
       //   navigation.navigateToChapter(projectId, chapterId);
       // }
     } catch (error) {
-      console.warn('Failed to navigate to scene, falling back:', error);
+      log.warn('Failed to navigate to scene, falling back:', error);
       navigation.navigateToChapter(projectId, chapterId);
     }
   },
@@ -299,7 +299,7 @@ export const NavigationHelpers = {
       // TODO: Add validation logic here
       // const chapter = await storageService.getChapter(projectId, chapterId);
       // if (!chapter) {
-      //   console.warn(`Chapter ${chapterId} not found, falling back to first chapter`);
+      //   log.warn(`Chapter ${chapterId} not found, falling back to first chapter`);
       //   const chapters = await storageService.getChapters(projectId);
       //   if (chapters.length > 0) {
       //     navigation.navigateToChapter(projectId, chapters[0].id);
@@ -308,7 +308,7 @@ export const NavigationHelpers = {
       //   }
       // }
     } catch (error) {
-      console.warn('Failed to navigate to chapter, falling back:', error);
+      log.warn('Failed to navigate to chapter, falling back:', error);
       navigation.navigateToView('writing');
     }
   },
@@ -338,7 +338,7 @@ export const NavigationHelpers = {
         }
       }
     } catch (error) {
-      console.warn('Failed to handle deep link:', error);
+      log.warn('Failed to handle deep link:', error);
     }
   },
 };

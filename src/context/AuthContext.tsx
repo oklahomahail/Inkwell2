@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 import { trackPreviewSignedUp } from '@/features/preview/analytics';
 import { supabase } from '@/lib/supabaseClient';
+import { log } from '@/utils/logger';
 import { triggerDashboardView } from '@/utils/tourTriggers';
 
 import type { User, AuthError } from '@supabase/supabase-js';
@@ -30,13 +31,13 @@ function normalizeSafeRedirect(path: string | null | undefined): string {
 
   // Reject anything that looks like an absolute URL
   if (path.includes('://') || path.startsWith('//')) {
-    console.warn('[Auth] Rejected absolute URL redirect:', path);
+    log.warn('[Auth] Rejected absolute URL redirect:', path);
     return '/dashboard';
   }
 
   // Validate against safe path pattern
   if (!safePathPattern.test(path)) {
-    console.warn('[Auth] Rejected invalid redirect path:', path);
+    log.warn('[Auth] Rejected invalid redirect path:', path);
     return '/dashboard';
   }
 
@@ -47,7 +48,11 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   loading: true,
-  signOut: async () => {},
+  signOut: async () => {
+    if (import.meta.env.DEV) {
+      log.warn('[AuthContext] signOut called on default value (outside provider).');
+    }
+  },
   signInWithEmail: async () => ({ error: null }),
   signInWithPassword: async () => ({ error: null }),
   signUpWithPassword: async () => ({ error: null }),
@@ -129,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     if (error) {
-      console.error('[Auth] Sign-in failed:', error.message);
+      log.error('[Auth] Sign-in failed:', error.message);
     } else {
       console.info('[Auth] Magic link sent successfully! Check your email.');
     }
@@ -146,7 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     if (error) {
-      console.error('[Auth] Password sign-in failed:', error.message);
+      log.error('[Auth] Password sign-in failed:', error.message);
     } else {
       console.info('[Auth] Password sign-in successful');
     }
@@ -173,7 +178,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     if (error) {
-      console.error('[Auth] Password sign-up failed:', error.message, error);
+      log.error('[Auth] Password sign-up failed:', error.message, error);
     } else {
       console.info(
         '[Auth] Password sign-up successful - tour will auto-start after email confirmation',

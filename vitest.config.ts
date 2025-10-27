@@ -12,7 +12,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true, // enables test/expect/vi globals
-    setupFiles: ['./test/setupIndexedDB.ts', './src/setupTests.ts'],
+    setupFiles: ['./test/setupIndexedDB.ts', './src/setupTests.ts', './vitest.setup.ts'],
     // Phase C: add headless component tests progressively
     include: [
       'src/utils/**/*.{test,spec}.ts',

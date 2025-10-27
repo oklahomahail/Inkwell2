@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
+import { log } from '@/utils/logger';
+
 // UI + panels
 import ClaudeAssistant from './components/ClaudeAssistant';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
@@ -293,7 +295,7 @@ function ProfileAppShell() {
           console.log('Startup maintenance completed:', result.actions);
         }
       } catch (error) {
-        console.warn('Startup maintenance failed:', error);
+        log.warn('Startup maintenance failed:', error);
       }
     };
 
@@ -463,7 +465,7 @@ function StorageDebugPanel() {
       const storageStats = await enhancedStorageService.getStorageStats();
       setStats(storageStats);
     } catch (error) {
-      console.error('Failed to get storage stats:', error);
+      log.error('Failed to get storage stats:', error);
     }
   };
 
@@ -537,7 +539,7 @@ function StorageDebugPanel() {
                     // Reload the page
                     window.location.reload();
                   } catch (error) {
-                    console.error('Failed to reset:', error);
+                    log.error('Failed to reset:', error);
                     alert('Reset failed. Check console for details.');
                   }
                 }
