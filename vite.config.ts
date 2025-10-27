@@ -136,10 +136,11 @@ export default defineConfig({
                 },
               ],
               // Ensure core application assets are precached - update revision to force new SW installation
+              // NOTE: manifest.json is already included by Workbox via globPatterns, so we don't add it here
+              // to avoid "add-to-cache-list-conflicting-entries" error
               additionalManifestEntries: [
-                { url: '/', revision: `v2025-10-21.1-${Date.now().toString()}` },
-                { url: '/site.webmanifest', revision: `v2025-10-21.1-${Date.now().toString()}` },
-                { url: '/manifest.json', revision: `v2025-10-21.1-${Date.now().toString()}` },
+                { url: '/', revision: `v2025-10-27.1-${Date.now().toString()}` },
+                { url: '/site.webmanifest', revision: `v2025-10-27.1-${Date.now().toString()}` },
               ],
             },
             includeAssets: [

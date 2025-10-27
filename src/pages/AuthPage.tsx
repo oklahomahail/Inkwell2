@@ -133,7 +133,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
                 ? 'Welcome back, pick up where you left off.'
                 : 'Start crafting your stories today.'
             }
-            logoSrc="/brand/inkwell-lockup-horizontal.svg"
+            logoSrc="/assets/brand/inkwell-lockup-horizontal.svg"
             className="text-inkwell-gold mb-6"
           />
 

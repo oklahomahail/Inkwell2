@@ -85,13 +85,13 @@ export default function UpdatePassword() {
       <div className="w-full max-w-md">
         <div className="flex justify-center">
           <img
-            src="/brand/inkwell-lockup-dark.svg"
+            src="/assets/brand/inkwell-lockup-dark.svg"
             alt="Inkwell"
             className="h-16 w-auto"
             onError={(e) => {
               console.error('Logo failed to load, falling back to wordmark');
               // First try the logo path
-              (e.currentTarget as HTMLImageElement).src = '/brand/logos/inkwell-wordmark-gold.svg';
+              (e.currentTarget as HTMLImageElement).src = '/assets/brand/inkwell-wordmark.svg';
               // Add a second fallback in case the logo also fails
               (e.currentTarget as HTMLImageElement).onerror = () => {
                 console.error('Fallback logo also failed, using text wordmark');
