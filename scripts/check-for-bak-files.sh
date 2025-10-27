@@ -12,8 +12,8 @@ echo "🔍 Checking for .bak files and backup directories..."
 
 # Check for .bak files in staged files (if in git context)
 if git rev-parse --git-dir > /dev/null 2>&1; then
-    # Get staged files
-    bak_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.bak$|\.bak[0-9]$|backup|backups/' || true)
+    # Get staged files - only match .bak extensions and backup directories, not files named backup.ts
+    bak_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.bak$|\.bak[0-9]$|/backup/|/backups/|\.backup\.' || true)
 else
     # If not in git context, check all files
     bak_files=$(find . -type f \( -name "*.bak" -o -name "*.bak[0-9]" \) -not -path "./node_modules/*" -not -path "./dist/*" || true)
