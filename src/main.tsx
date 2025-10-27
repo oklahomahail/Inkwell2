@@ -34,6 +34,11 @@ import './utils/flags';
 import { warnIfDifferentOrigin } from './utils/storage/originGuard';
 import { ensurePersistentStorage } from './utils/storage/persistence';
 
+// Initialize tour development tools in development mode
+if (import.meta.env.DEV) {
+  import('./dev/index');
+}
+
 // Initialize global error handlers first
 initGlobalErrorHandlers();
 

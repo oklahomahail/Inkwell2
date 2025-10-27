@@ -5,6 +5,7 @@ import { getTourConfig } from '@/components/Onboarding/tourRegistry';
 import { resetTour } from '@/tour/persistence';
 import { startDefaultTour } from '@/tour/tourEntry';
 import { tourService } from '@/tour/TourService';
+import { getLastTourUsed, setLastTourUsed, type TourVariant } from '@/tour/tourStorage';
 
 import { startTour } from '../Onboarding/tour-core/TourController';
 import { Button } from '../ui/Button';
@@ -20,25 +21,62 @@ function startTourByKey(key: 'core' | 'ai-tools' | 'export') {
   const cfg = getTourConfig(key);
   // Reset tour state to allow replay
   resetTour(cfg.id);
+  // Track this as the last used tour
+  setLastTourUsed(key);
   // Start the tour - cast to correct type since registry uses different TourConfig
   tourService.start(cfg as any, { forceRestart: true });
 }
 
 export function HelpMenu({ className }: HelpMenuProps) {
   const profileId = 'default'; // Use simple default profile ID
+  const lastTourUsed = getLastTourUsed();
 
   const startSpotlightTour = () => {
     startTour('spotlight', profileId, { force: true });
   };
 
+  const handleRestartLastTour = () => {
+    if (lastTourUsed) {
+      startTourByKey(lastTourUsed);
+    } else {
+      // Fallback to default tour
+      handleRestartTour();
+    }
+  };
+
   const handleRestartTour = () => {
     // Start the default onboarding tour (resets completion state)
+    setLastTourUsed('core');
     startDefaultTour();
+  };
+
+  // Get button label for last tour
+  const getLastTourLabel = (): string => {
+    if (!lastTourUsed) return 'Restart Core Tour';
+
+    const labels: Record<TourVariant, string> = {
+      core: 'Restart Core Tour',
+      'ai-tools': 'Restart AI Tools Tour',
+      export: 'Restart Export Tour',
+    };
+
+    return labels[lastTourUsed];
   };
 
   return (
     <div className={className}>
       <div className="flex flex-col space-y-2">
+        {lastTourUsed && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="justify-start font-semibold"
+            onClick={handleRestartLastTour}
+          >
+            <RotateCw className="w-4 h-4 mr-2" />
+            {getLastTourLabel()}
+          </Button>
+        )}
         <Button variant="ghost" size="sm" className="justify-start" onClick={handleRestartTour}>
           <RotateCw className="w-4 h-4 mr-2" />
           Restart Core Tour
@@ -51,7 +89,10 @@ export function HelpMenu({ className }: HelpMenuProps) {
           variant="ghost"
           size="sm"
           className="justify-start"
-          onClick={() => startTourByKey('ai-tools')}
+          onClick={() => {
+            setLastTourUsed('ai-tools');
+            startTourByKey('ai-tools');
+          }}
         >
           <Wand2 className="w-4 h-4 mr-2" />
           AI Tools Tour
@@ -60,7 +101,10 @@ export function HelpMenu({ className }: HelpMenuProps) {
           variant="ghost"
           size="sm"
           className="justify-start"
-          onClick={() => startTourByKey('export')}
+          onClick={() => {
+            setLastTourUsed('export');
+            startTourByKey('export');
+          }}
         >
           <FileDown className="w-4 h-4 mr-2" />
           Export Tour

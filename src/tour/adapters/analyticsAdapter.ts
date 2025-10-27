@@ -6,6 +6,7 @@
  */
 
 import { analyticsService } from '@/services/analyticsService';
+import { devLog } from '@/utils/devLog';
 
 type Payload = Record<string, unknown>;
 
@@ -20,7 +21,8 @@ export type TourEvent =
       duration_ms?: number;
       ts: number;
     }
-  | { type: 'tour_skipped'; tour_id: string; step_id?: string; index?: number; ts: number };
+  | { type: 'tour_skipped'; tour_id: string; step_id?: string; index?: number; ts: number }
+  | { type: 'tour_error'; tour_id?: string; message: string; ts: number; metadata?: Payload };
 
 /**
  * Safe track wrapper that prevents analytics errors from breaking tours
@@ -129,6 +131,33 @@ export const tourAnalytics = {
       step_index: stepIndex,
       timestamp: Date.now(),
       ...metadata,
+    });
+  },
+
+  /**
+   * Log tour errors for remote debugging
+   * Breadcrumb logging to help diagnose production issues
+   */
+  logTourError(message: string, meta?: Record<string, unknown>): void {
+    const event: TourEvent = {
+      type: 'tour_error',
+      tour_id: meta?.tourId as string | undefined,
+      message,
+      ts: Date.now(),
+      metadata: meta,
+    };
+
+    // Log to console in development
+    devLog('tour_error', { message, ...meta, ts: Date.now() });
+
+    // Persist for analytics
+    persistEvent(event);
+
+    // Track via analytics service
+    track('tour_error', {
+      message,
+      timestamp: Date.now(),
+      ...meta,
     });
   },
 };

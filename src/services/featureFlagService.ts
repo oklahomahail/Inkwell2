@@ -147,6 +147,20 @@ class FeatureFlagService {
       enabled: true,
       category: 'ui',
     },
+    {
+      key: 'tour_aiTools',
+      name: 'AI Tools Tour',
+      description: 'Interactive tour for AI writing features',
+      enabled: true,
+      category: 'ui',
+    },
+    {
+      key: 'tour_export',
+      name: 'Export Tour',
+      description: 'Step-by-step export workflow tour',
+      enabled: true,
+      category: 'ui',
+    },
 
     // Experimental Features
     {
