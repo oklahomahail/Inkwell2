@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import connectivityService from '../connectivityService';
 import { enhancedStorageService } from '../enhancedStorageService';
@@ -36,6 +36,16 @@ describe('EnhancedStorageService', () => {
       return true;
     });
 
+    vi.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    // Clean up the service and wait for any pending operations
+    try {
+      enhancedStorageService.cleanup();
+    } catch {}
+    // Wait for any pending microtasks to complete
+    await new Promise((resolve) => setTimeout(resolve, 0));
     vi.clearAllMocks();
   });
 

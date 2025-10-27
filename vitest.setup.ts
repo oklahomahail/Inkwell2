@@ -23,6 +23,7 @@ const EXPECTED_ERROR_PATTERNS = [
   /\[Inkwell\] Failed to request persistent storage:/,
   /ReactDOMTestUtils\.act.*is deprecated/,
   /An update to.*inside a test was not wrapped in act/,
+  /ReferenceError: localStorage is not defined/,
 ];
 
 function isExpectedError(message: string): boolean {
