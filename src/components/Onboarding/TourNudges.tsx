@@ -1,6 +1,6 @@
 // src/components/Onboarding/TourNudges.tsx
 import { ArrowRight, Clock, X, BookOpen, Users, BarChart3 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { TOUR_MAP } from './tourRegistry';
 import { useTour } from './useTour';
@@ -266,46 +266,49 @@ export const TourNudgeManager: React.FC<TourNudgeManagerProps> = ({ onStartTour 
   }, [activeNudge, nudgeQueue, dismissedNudges, canShowContextualTour, logAnalytics]);
 
   // Function to trigger a nudge (called by other components)
-  const triggerNudge = (action: string, conditions: Record<string, any> = {}) => {
-    const matchingNudges = TOUR_NUDGES.filter((nudge) => {
-      if (nudge.trigger.action !== action) return false;
-      if (dismissedNudges.includes(nudge.id)) return false;
-      if (!canShowContextualTour(nudge.tourType)) return false;
+  const triggerNudge = useCallback(
+    (action: string, conditions: Record<string, any> = {}) => {
+      const matchingNudges = TOUR_NUDGES.filter((nudge) => {
+        if (nudge.trigger.action !== action) return false;
+        if (dismissedNudges.includes(nudge.id)) return false;
+        if (!canShowContextualTour(nudge.tourType)) return false;
 
-      // Check trigger conditions
-      if (nudge.trigger.conditions) {
-        for (const [key, expectedValue] of Object.entries(nudge.trigger.conditions)) {
-          const actualValue = conditions[key];
+        // Check trigger conditions
+        if (nudge.trigger.conditions) {
+          for (const [key, expectedValue] of Object.entries(nudge.trigger.conditions)) {
+            const actualValue = conditions[key];
 
-          if (typeof expectedValue === 'object' && expectedValue.min !== undefined) {
-            if (actualValue < expectedValue.min) return false;
-          } else if (typeof expectedValue === 'object' && expectedValue.max !== undefined) {
-            if (actualValue > expectedValue.max) return false;
-          } else if (actualValue !== expectedValue) {
-            return false;
+            if (typeof expectedValue === 'object' && expectedValue.min !== undefined) {
+              if (actualValue < expectedValue.min) return false;
+            } else if (typeof expectedValue === 'object' && expectedValue.max !== undefined) {
+              if (actualValue > expectedValue.max) return false;
+            } else if (actualValue !== expectedValue) {
+              return false;
+            }
           }
         }
+
+        return true;
+      });
+
+      if (matchingNudges.length > 0) {
+        // Sort by priority and add to queue
+        const sortedNudges = matchingNudges.sort((a, b) => {
+          const priorityOrder = { high: 3, medium: 2, low: 1 };
+          return priorityOrder[b.priority] - priorityOrder[a.priority];
+        });
+
+        // Add delays and queue nudges
+        sortedNudges.forEach((nudge, index) => {
+          const delay = (nudge.trigger.delay || 0) + index * 500; // Stagger multiple nudges
+          setTimeout(() => {
+            setNudgeQueue((prev) => [...prev, nudge]);
+          }, delay);
+        });
       }
-
-      return true;
-    });
-
-    if (matchingNudges.length > 0) {
-      // Sort by priority and add to queue
-      const sortedNudges = matchingNudges.sort((a, b) => {
-        const priorityOrder = { high: 3, medium: 2, low: 1 };
-        return priorityOrder[b.priority] - priorityOrder[a.priority];
-      });
-
-      // Add delays and queue nudges
-      sortedNudges.forEach((nudge, index) => {
-        const delay = (nudge.trigger.delay || 0) + index * 500; // Stagger multiple nudges
-        setTimeout(() => {
-          setNudgeQueue((prev) => [...prev, nudge]);
-        }, delay);
-      });
-    }
-  };
+    },
+    [dismissedNudges, canShowContextualTour],
+  );
 
   const handleStartTour = (tourType: string) => {
     if (activeNudge) {
@@ -335,7 +338,7 @@ export const TourNudgeManager: React.FC<TourNudgeManagerProps> = ({ onStartTour 
     return () => {
       delete (window as any).__inkwellTriggerNudge;
     };
-  }, []);
+  }, [triggerNudge]); // Include triggerNudge to keep window reference fresh
 
   if (!activeNudge) return null;
 

@@ -15,7 +15,7 @@ import {
   Plus,
   Kanban,
 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import Logo from '@/components/Logo';
@@ -160,9 +160,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     const checkMobile = () => {
       const isMobileSize = window.innerWidth < 768;
       setIsMobile(isMobileSize);
-      // Auto-collapse on mobile
-      if (isMobileSize && !sidebarCollapsed) {
-        setSidebarCollapsed(true);
+      // Auto-collapse on mobile - use functional state update to avoid stale closure
+      if (isMobileSize) {
+        setSidebarCollapsed((prev) => (isMobileSize ? true : prev));
       }
     };
 
@@ -216,12 +216,40 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         mediaQuery.removeListener(handleMediaChange);
       }
     };
-  }, []);
+  }, [dispatch]); // dispatch is stable from useReducer but good to include
 
   // Apply dark mode to document
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
+
+  // Header action handlers (Command Palette now uses CommandPaletteProvider via Cmd+K)
+  const handleViewChange = useCallback(
+    (view: View) => {
+      dispatch({ type: 'SET_VIEW', payload: view });
+    },
+    [dispatch],
+  );
+
+  const handleOpenSearch = useCallback(() => {
+    setIsSearchModalOpen(true);
+  }, []);
+
+  const handleOpenNotifications = useCallback(() => {
+    setIsNotificationsOpen(true);
+  }, []);
+
+  const handleOpenSettings = useCallback(() => {
+    handleViewChange(View.Settings);
+  }, [handleViewChange]);
+
+  const handleOpenHelp = useCallback(() => {
+    setIsHelpModalOpen(true);
+  }, []);
+
+  const handleExport = useCallback(() => {
+    setIsExportModalOpen(true);
+  }, []);
 
   // Keyboard shortcuts for header actions - only register if not on auth route
   useEffect(() => {
@@ -258,11 +286,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
     document.addEventListener('keydown', handleKeydown);
     return () => document.removeEventListener('keydown', handleKeydown);
-  }, [isAuthRoute, openPalette]);
-
-  const handleViewChange = (view: View) => {
-    dispatch({ type: 'SET_VIEW', payload: view });
-  };
+  }, [
+    isAuthRoute,
+    openPalette,
+    handleOpenSearch,
+    handleOpenSettings,
+    handleOpenHelp,
+    handleExport,
+  ]);
 
   const toggleSidebar = () => {
     const newCollapsed = !sidebarCollapsed;
@@ -277,28 +308,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     dispatch({ type: 'SET_THEME', payload: newDarkMode ? 'dark' : 'light' });
     // Apply theme class
     document.documentElement.classList.toggle('dark', newDarkMode);
-  };
-
-  // Header action handlers (Command Palette now uses CommandPaletteProvider via Cmd+K)
-
-  const handleOpenSearch = () => {
-    setIsSearchModalOpen(true);
-  };
-
-  const handleOpenNotifications = () => {
-    setIsNotificationsOpen(true);
-  };
-
-  const handleOpenSettings = () => {
-    handleViewChange(View.Settings);
-  };
-
-  const handleOpenHelp = () => {
-    setIsHelpModalOpen(true);
-  };
-
-  const handleExport = () => {
-    setIsExportModalOpen(true);
   };
 
   const handleLogout = async () => {

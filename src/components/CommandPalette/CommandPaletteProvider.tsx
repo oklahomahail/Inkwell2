@@ -65,7 +65,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.error(e);
       showToast('Failed to create chapter', 'error');
     }
-  }, [currentProject, storageService, showToast, setView]);
+  }, [currentProject, showToast, setView]); // storageService is a stable import, not needed in deps
 
   const createNewScene = useCallback(async () => {
     if (!currentProject) {
@@ -101,7 +101,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.error(e);
       showToast('Failed to create scene', 'error');
     }
-  }, [currentProject, showToast, createNewChapter, storageService, setView]);
+  }, [currentProject, showToast, createNewChapter, setView]); // storageService is stable
 
   const showWordCount = useCallback(async () => {
     if (!currentProject) return showToast('No project selected', 'error');
@@ -123,7 +123,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.error(e);
       showToast('Failed to calculate word count', 'error');
     }
-  }, [currentProject, showToast, storageService]);
+  }, [currentProject, showToast]); // storageService is stable
 
   const openExportDialog = useCallback(() => {
     if (!currentProject) return showToast('No project selected', 'error');
@@ -144,7 +144,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.error(e);
       showToast('Export failed', 'error');
     }
-  }, [currentProject, showToast, exportService]);
+  }, [currentProject, showToast]); // exportService is stable
 
   const quickExportPDF = useCallback(async () => {
     if (!currentProject) return showToast('No project selected', 'error');
@@ -158,7 +158,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.error(e);
       showToast('Export failed', 'error');
     }
-  }, [currentProject, showToast, exportService]);
+  }, [currentProject, showToast]); // exportService is stable
 
   const backupProject = useCallback(async () => {
     if (!currentProject) return showToast('No project selected', 'error');
@@ -184,7 +184,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.error(e);
       showToast('Failed to create backup', 'error');
     }
-  }, [currentProject, showToast, storageService]);
+  }, [currentProject, showToast]); // storageService is stable
 
   // Build commands when deps change
   useEffect(() => {

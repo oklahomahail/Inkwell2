@@ -1,6 +1,6 @@
 // src/components/timeline/TimelineNavigation.tsx - Timeline Navigation
 import { ArrowLeft, ArrowRight, Compass, Clock, Eye } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { enhancedTimelineService } from '@/services/enhancedTimelineService';
 
@@ -26,13 +26,7 @@ const TimelineNavigation: React.FC<TimelineNavigationProps> = ({
   const [navigationInfo, setNavigationInfo] = useState<NavigationInfo | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (projectId && currentSceneId) {
-      loadNavigationInfo();
-    }
-  }, [projectId, currentSceneId]);
-
-  const loadNavigationInfo = async () => {
+  const loadNavigationInfo = useCallback(async () => {
     if (!currentSceneId) return;
 
     setIsLoading(true);
@@ -47,7 +41,13 @@ const TimelineNavigation: React.FC<TimelineNavigationProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [projectId, currentSceneId]);
+
+  useEffect(() => {
+    if (projectId && currentSceneId) {
+      loadNavigationInfo();
+    }
+  }, [projectId, currentSceneId, loadNavigationInfo]);
 
   const formatTimePosition = (position: number) => {
     // You might want to format this based on your timeline's time format

@@ -1,6 +1,6 @@
 // src/components/timeline/SceneLinkageSuggestions.tsx - Scene Linkage Suggestions
 import { Link2, CheckCircle, XCircle, Clock, MapPin, Users } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { enhancedTimelineService } from '@/services/enhancedTimelineService';
 import { timelineService } from '@/services/timelineService';
@@ -36,14 +36,7 @@ const SceneLinkageSuggestions: React.FC<SceneLinkageSuggestionsProps> = ({
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(new Set());
   const [processingLinks, setProcessingLinks] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    if (projectId && project) {
-      loadSuggestions();
-      loadTimelineItems();
-    }
-  }, [projectId, project]);
-
-  const loadSuggestions = async () => {
+  const loadSuggestions = useCallback(async () => {
     setIsLoading(true);
     try {
       const detectedSuggestions = await enhancedTimelineService.detectSceneLinkages(
@@ -56,16 +49,23 @@ const SceneLinkageSuggestions: React.FC<SceneLinkageSuggestionsProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [projectId, project]);
 
-  const loadTimelineItems = async () => {
+  const loadTimelineItems = useCallback(async () => {
     try {
       const items = await timelineService.getProjectTimeline(projectId);
       setTimelineItems(items);
     } catch (error) {
       console.error('Failed to load timeline items:', error);
     }
-  };
+  }, [projectId]);
+
+  useEffect(() => {
+    if (projectId && project) {
+      loadSuggestions();
+      loadTimelineItems();
+    }
+  }, [projectId, project, loadSuggestions, loadTimelineItems]);
 
   const handleAcceptLinkage = async (suggestion: LinkageSuggestion) => {
     const linkageKey = `${suggestion.sceneId}_${suggestion.suggestedEvents.join('_')}`;

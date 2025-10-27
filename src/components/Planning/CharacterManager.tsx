@@ -34,7 +34,7 @@ const CharacterManager: React.FC = () => {
     if (currentProject?.characters) {
       setCharacters(currentProject.characters as Character[]);
     }
-  }, [currentProject?.id]);
+  }, [currentProject?.id, currentProject?.characters]);
 
   // Create new character
   const createCharacter = () => {

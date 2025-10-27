@@ -1,6 +1,6 @@
 // src/components/timeline/TimelineValidationPanel.tsx - Timeline Validation UI
 import { AlertTriangle, CheckCircle, Clock, Users, MapPin, Eye, Zap } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import {
   enhancedTimelineService,
@@ -61,13 +61,7 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
   const [showWarnings, setShowWarnings] = useState(true);
   const [showSuggestions, setShowSuggestions] = useState(true);
 
-  useEffect(() => {
-    if (projectId) {
-      validateTimeline();
-    }
-  }, [projectId, project]);
-
-  const validateTimeline = async () => {
+  const validateTimeline = useCallback(async () => {
     setIsValidating(true);
     try {
       const result = await enhancedTimelineService.validateTimeline(projectId, project);
@@ -77,7 +71,13 @@ const TimelineValidationPanel: React.FC<TimelineValidationPanelProps> = ({
     } finally {
       setIsValidating(false);
     }
-  };
+  }, [projectId, project]);
+
+  useEffect(() => {
+    if (projectId) {
+      validateTimeline();
+    }
+  }, [projectId, project, validateTimeline]);
 
   const handleAutoFix = async (conflict: TimelineConflict) => {
     if (onAutoFix) {

@@ -136,7 +136,7 @@ const TimelinePanel: React.FC = () => {
         showToast('Failed to navigate to scene', 'error');
       }
     },
-    [currentProject, navigateToScene],
+    [currentProject, navigateToScene, showToast],
   );
 
   // Navigate to chapter from timeline event
@@ -156,7 +156,7 @@ const TimelinePanel: React.FC = () => {
         showToast('Failed to navigate to chapter', 'error');
       }
     },
-    [currentProject, navigateToChapter],
+    [currentProject, navigateToChapter, showToast],
   );
 
   // Refresh timeline from project data
@@ -184,7 +184,7 @@ const TimelinePanel: React.FC = () => {
       showToast('Failed to refresh timeline', 'error');
       setState((prev) => ({ ...prev, loading: false }));
     }
-  }, [currentProject]);
+  }, [currentProject, showToast]);
 
   // Tab switching handler
   const handleTabChange = useCallback((tab: TimelineTab) => {

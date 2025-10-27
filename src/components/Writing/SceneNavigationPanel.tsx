@@ -184,7 +184,7 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
     };
 
     loadChapters();
-  }, [currentProject]);
+  }, [currentProject, showToast]);
 
   // Status indicators
   const getStatusIcon = (status: SceneStatus) => {

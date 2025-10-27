@@ -216,7 +216,7 @@ export default function EnhancedAIWritingToolbar({
         setIsAnalyzing(false);
       }
     },
-    [selectedText, sceneTitle],
+    [selectedText, sceneTitle, showToast],
   );
 
   const handleEmotionEnhancement = useCallback(
@@ -243,7 +243,7 @@ export default function EnhancedAIWritingToolbar({
         setIsAnalyzing(false);
       }
     },
-    [selectedText, sceneTitle],
+    [selectedText, sceneTitle, showToast],
   );
 
   const handleDialogueOptimization = useCallback(async () => {
@@ -268,7 +268,7 @@ export default function EnhancedAIWritingToolbar({
     } finally {
       setIsAnalyzing(false);
     }
-  }, [selectedText, projectContext]);
+  }, [selectedText, projectContext, showToast]);
 
   const handlePacingAnalysis = useCallback(async () => {
     if (!currentContent || !claudeService.isConfigured()) {
@@ -297,7 +297,7 @@ export default function EnhancedAIWritingToolbar({
     } finally {
       setIsAnalyzing(false);
     }
-  }, [currentContent, sceneTitle]);
+  }, [currentContent, sceneTitle, showToast]);
 
   const handleApplyGeneration = useCallback(
     (replaceSelection = false) => {
@@ -307,7 +307,7 @@ export default function EnhancedAIWritingToolbar({
       setGeneratedContent('');
       showToast('Content applied to editor', 'success');
     },
-    [onInsertText, generatedContent],
+    [onInsertText, generatedContent, showToast],
   );
 
   const renderToneAdjustmentPanel = () => (
