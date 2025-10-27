@@ -94,7 +94,7 @@ class SnapshotService {
       const index = this.getSnapshotIndex();
       return index
         .filter((snapshot) => snapshot.projectId === projectId)
-        .sort((a, _b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     } catch (error) {
       console.error('Failed to get snapshots:', error);
       return [];
