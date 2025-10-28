@@ -1,6 +1,7 @@
 // @ts-nocheck
 // src/services/enhancedSearchService.ts
 // Enhanced search service that prefers a Web Worker and cleanly falls back to main thread
+import devLog from "src/utils/devLogger";
 
 import type { Chapter } from '@/types/writing';
 
@@ -162,7 +163,7 @@ class MainThreadSearchEngine {
         queries: metrics.queries,
       });
 
-      console.log(
+      devLog.debug(
         `MainThread: Search index built for project ${projectId}: ${totalDocuments} documents in ${indexTime}ms`,
       );
     } catch (error) {
@@ -418,7 +419,7 @@ class EnhancedSearchService {
       this.workerAvailable =
         typeof window !== 'undefined' && typeof Worker !== 'undefined' && !!searchWorkerService;
 
-      console.log(
+      devLog.debug(
         this.workerAvailable
           ? 'EnhancedSearchService: Web Worker support detected'
           : 'EnhancedSearchService: Web Worker not available, using main thread fallback',
@@ -552,7 +553,7 @@ class EnhancedSearchService {
   setWorkerPreference(useWorker: boolean): void {
     this.useWorker = useWorker;
 
-    console.log(`EnhancedSearchService: Worker preference set to ${useWorker}`);
+    devLog.debug(`EnhancedSearchService: Worker preference set to ${useWorker}`);
   }
 
   getWorkerStatus(): { available: boolean; enabled: boolean; status?: unknown } {
@@ -595,17 +596,17 @@ if (typeof window !== 'undefined') {
     enableWorker: () => enhancedSearchService.setWorkerPreference(true),
     disableWorker: () => enhancedSearchService.setWorkerPreference(false),
     testSearch: async (query: string, projectId: string) => {
-      console.log('Testing search:', query);
+      devLog.debug('Testing search:', query);
       const start =
         typeof performance !== 'undefined' && 'now' in performance ? performance.now() : Date.now();
       const results = await enhancedSearchService.search(query, { projectId });
       const end =
         typeof performance !== 'undefined' && 'now' in performance ? performance.now() : Date.now();
 
-      console.log(`Results: ${results.length} in ${(end - start).toFixed(1)}ms`);
+      devLog.debug(`Results: ${results.length} in ${(end - start).toFixed(1)}ms`);
       return results;
     },
   };
 
-  console.log('Search debugging tools available at window.debugSearch');
+  devLog.debug('Search debugging tools available at window.debugSearch');
 }

@@ -1,12 +1,14 @@
 import { useState, useCallback } from 'react';
 
+import devLog from "src/utils/devLogger";
+
 import { useCommands } from './useCommands';
 
 export function useCommandPalette(selectedText?: string) {
   const [isOpen, setIsOpen] = useState(false);
 
   const commands = useCommands(selectedText, (commandId) => {
-    console.log(`Executed command: ${commandId}`);
+    devLog.debug(`Executed command: ${commandId}`);
   });
 
   const open = useCallback(() => setIsOpen(true), []);

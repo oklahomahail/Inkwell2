@@ -1,6 +1,8 @@
 import React, { useCallback, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
+import devLog from "src/utils/devLogger";
+
 import { supabase } from '@/lib/supabaseClient';
 import { normalizeSafeRedirect } from '@/utils/safeRedirect';
 
@@ -23,7 +25,7 @@ export default function ForgotPassword() {
         setSubmitting(true);
         setError(null);
 
-        console.log('[ForgotPassword] Sending password reset email');
+        devLog.debug('[ForgotPassword] Sending password reset email');
 
         // Create the reset URL with the redirect parameter preserved
         const resetUrl = `${window.location.origin}/auth/update-password?redirect=${encodeURIComponent(redirect)}`;

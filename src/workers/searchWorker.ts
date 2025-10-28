@@ -5,6 +5,7 @@
 // Allow TS to understand the worker global
 export {}; // keep this a module
 declare const self: DedicatedWorkerGlobalScope;
+import devLog from "src/utils/devLogger";
 
 import type { EnhancedProject } from '../types/project';
 import type { Chapter } from '../types/writing';
@@ -99,7 +100,7 @@ class WorkerSearchEngine {
     const startTime = performance.now();
     const { projectId, project, chapters } = message;
 
-    console.log(`Worker: Building index for project ${projectId}`);
+    devLog.debug(`Worker: Building index for project ${projectId}`);
 
     try {
       const index = new Map<string, IndexEntry>();
@@ -198,7 +199,7 @@ class WorkerSearchEngine {
       };
       this.stats.set(projectId, stats);
 
-      console.log(
+      devLog.debug(
         `Worker: Index built for ${projectId}: ${totalDocuments} documents in ${buildTime.toFixed(1)}ms`,
       );
 

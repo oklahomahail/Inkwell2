@@ -2,8 +2,10 @@
 // File: src/utils/trace.ts
 // Observability and tracing system for Inkwell
 // Dev-only logger for store actions and component render timings
-
 import React from 'react';
+
+import devLog from "src/utils/devLogger";
+
 
 import { featureFlags } from './flags';
 
@@ -61,7 +63,7 @@ class TraceLogger {
         false;
 
       if (this.isEnabled) {
-        console.log('📊 Trace logging enabled');
+        devLog.debug('📊 Trace logging enabled');
       }
     } catch {
       this.isEnabled = false;
@@ -110,7 +112,7 @@ class TraceLogger {
         event.metadata,
       );
     } else if (event.duration && event.duration > 16.67) {
-      console.log(
+      devLog.debug(
         `⚡ ${event.type}: ${event.name} took ${event.duration.toFixed(2)}ms`,
         event.metadata,
       );
@@ -143,7 +145,7 @@ class TraceLogger {
     };
     this.events.push(event);
 
-    console.log(
+    devLog.debug(
       `${{ debug: '🐛', info: '📝', warn: '⚠️', error: '❌' }[level]} ${type}: ${name}`,
       metadata,
     );
@@ -189,7 +191,7 @@ class TraceLogger {
     this.performanceMetrics.clear();
     this.activeTraces.clear();
 
-    console.log('🧹 Trace data cleared');
+    devLog.debug('🧹 Trace data cleared');
   }
 
   export(): string {
@@ -404,5 +406,5 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
       trace.log(name, type as any, level as any, metadata as any),
   };
 
-  console.log('📊 Trace utilities available at window.__inkwellTrace');
+  devLog.debug('📊 Trace utilities available at window.__inkwellTrace');
 }

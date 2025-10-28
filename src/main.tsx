@@ -6,6 +6,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
+import devLog from "@/utils/devLogger";
+
 import App from './App';
 import { AppProviders } from './AppProviders';
 import { initGlobalErrorHandlers } from './boot/globalErrors';
@@ -27,7 +29,7 @@ initGlobalErrorHandlers();
 // Request persistent storage and check origin
 ensurePersistentStorage().then((result) => {
   if (result.persisted) {
-    console.log('✅ [Inkwell] Storage locked in - your data is safe!');
+    devLog.debug('✅ [Inkwell] Storage locked in - your data is safe!');
   } else if (result.supported) {
     console.warn(
       '⚠️ [Inkwell] Storage persistence not granted - data may be cleared under storage pressure',
@@ -63,9 +65,9 @@ if (import.meta.env.VITE_SENTRY_DSN) {
       return event;
     },
   });
-  console.log('🔍 Sentry monitoring initialized for', import.meta.env.MODE);
+  devLog.debug('🔍 Sentry monitoring initialized for', import.meta.env.MODE);
 } else if (import.meta.env.DEV) {
-  console.log('ℹ️ Sentry monitoring disabled (no VITE_SENTRY_DSN)');
+  devLog.debug('ℹ️ Sentry monitoring disabled (no VITE_SENTRY_DSN)');
 }
 
 // Safety net: wait for root element to be available before mounting

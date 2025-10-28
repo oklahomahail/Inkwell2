@@ -1,4 +1,5 @@
+import devLog from "@/utils/devLogger";
 // @ts-nocheck
-console.log('Starting search performance baseline...');
-console.log('Baseline test runner - implement baseline logic here');
+devLog.debug('Starting search performance baseline...');
+devLog.debug('Baseline test runner - implement baseline logic here');
 process.exit(0);

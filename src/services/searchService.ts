@@ -1,5 +1,7 @@
 // @ts-nocheck
 // src/services/searchService.ts
+import devLog from "src/utils/devLogger";
+
 import type { Scene } from '@/types/writing';
 
 import { storageService } from './storageService';
@@ -59,7 +61,7 @@ class SearchService {
       return; // Already initialized
     }
 
-    console.log(`Initializing search index for project ${projectId}`);
+    devLog.debug(`Initializing search index for project ${projectId}`);
 
     const startTime = Date.now();
     const index = new Map<string, IndexEntry>();
@@ -154,7 +156,7 @@ class SearchService {
         averageLatency: 0,
       });
 
-      console.log(
+      devLog.debug(
         `Search index built for project ${projectId}: ${totalDocuments} documents in ${indexTime}ms`,
       );
     } catch (error) {
@@ -260,7 +262,7 @@ class SearchService {
         this.performanceMetrics.reduce((sum, metric) => sum + metric, 0) /
         this.performanceMetrics.length;
 
-      console.log(`Search completed: "${query}" -> ${results.length} results in ${latency}ms`);
+      devLog.debug(`Search completed: "${query}" -> ${results.length} results in ${latency}ms`);
 
       return results;
     } catch (error) {
@@ -307,7 +309,7 @@ class SearchService {
       });
     }
 
-    console.log(`Updated document ${documentId} in search index`);
+    devLog.debug(`Updated document ${documentId} in search index`);
   }
 
   // Get search statistics

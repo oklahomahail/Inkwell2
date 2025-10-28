@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 // src/utils/activityLogger.ts - Fixed with proper exports
 interface ActivityLog {
   id: string;
@@ -55,7 +56,7 @@ class ActivityLogger {
 
     // Also log to console in development
     if (import.meta.env?.DEV) {
-      console.log(`[${category.toUpperCase()}] ${message}`);
+      devLog.debug(`[${category.toUpperCase()}] ${message}`);
     }
   }
 

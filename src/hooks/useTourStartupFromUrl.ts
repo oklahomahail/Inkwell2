@@ -2,6 +2,8 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import devLog from "src/utils/devLogger";
+
 import { triggerDashboardView } from '@/utils/tourTriggers';
 
 /**
@@ -21,9 +23,9 @@ export function useTourStartupFromUrl(): void {
       // Clear the localStorage flag if it was set
       if (shouldStartTourFromFlag) {
         localStorage.removeItem('inkwell.spotlight.start');
-        console.log('[Tour] Starting tour from localStorage flag (post-signup)');
+        devLog.debug('[Tour] Starting tour from localStorage flag (post-signup)');
       } else {
-        console.log('[Tour] Starting tour from URL parameter');
+        devLog.debug('[Tour] Starting tour from URL parameter');
       }
 
       // Small delay to ensure components are mounted

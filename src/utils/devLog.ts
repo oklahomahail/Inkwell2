@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 /**
  * Development-only logging utilities
  * Automatically stripped in production builds
@@ -10,7 +11,7 @@ const isDev = !import.meta.env.PROD;
  */
 export const devLog = (...args: unknown[]) => {
   if (isDev) {
-    console.log(...args);
+    devLog.debug(...args);
   }
 };
 

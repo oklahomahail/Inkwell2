@@ -1,6 +1,8 @@
 // src/services/claudeService.ts - FIXED VERSION
 import CryptoJS from 'crypto-js';
 
+import devLog from "src/utils/devLogger";
+
 const MESSAGE_LIMIT = 50;
 const API_KEY_STORAGE = 'claude_api_key_encrypted';
 const ENCRYPTION_KEY = 'inkwell_claude_key';
@@ -138,7 +140,7 @@ Context: You have access to the user's current project and any selected text. Al
         messages,
       };
 
-      console.log('🚀 Sending request to Claude API...', {
+      devLog.debug('🚀 Sending request to Claude API...', {
         model: requestBody.model,
         maxTokens: requestBody.max_tokens,
         messageCount: messages.length,
@@ -162,7 +164,7 @@ Context: You have access to the user's current project and any selected text. Al
       const data = await response.json();
       this.updateRateLimit();
 
-      console.log('✅ Received response from Claude API', {
+      devLog.debug('✅ Received response from Claude API', {
         contentLength: data.content?.[0]?.text?.length || 0,
         usage: data.usage,
       });
@@ -200,7 +202,7 @@ Context: You have access to the user's current project and any selected text. Al
 
   // 🆕 Story Architect specific method
   async generateStoryOutline(prompt: string): Promise<string> {
-    console.log('🎯 Story Architect: Generating outline with Claude API');
+    devLog.debug('🎯 Story Architect: Generating outline with Claude API');
 
     const response = await this.sendMessage(prompt, {
       maxTokens: 4000, // Higher token limit for story generation

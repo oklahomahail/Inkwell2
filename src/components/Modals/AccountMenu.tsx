@@ -2,13 +2,15 @@
 import { User, Settings, LogOut, Crown } from 'lucide-react';
 import React from 'react';
 
+import devLog from "src/utils/devLogger";
+
 interface AccountMenuProps {
   onClose: () => void;
 }
 
 export function AccountMenu({ onClose }: AccountMenuProps) {
   const handleAction = (action: string) => {
-    console.log(`Account action: ${action}`);
+    devLog.debug(`Account action: ${action}`);
     onClose();
   };
 

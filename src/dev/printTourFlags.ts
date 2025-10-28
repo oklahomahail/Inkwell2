@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 /**
  * Tour Flags DevTools Helper
  * Quick visibility into tour feature flags during canary rollout
@@ -20,7 +21,7 @@ export function printTourFlags(): void {
     ['tour:kill', read('tour:kill')],
   ];
 
-  console.log('\n🎯 Tour Feature Flags Status\n');
+  devLog.debug('\n🎯 Tour Feature Flags Status\n');
   console.table(
     rows.map(([flag, value]) => ({
       flag,
@@ -33,7 +34,7 @@ export function printTourFlags(): void {
   try {
     const mainFlags = JSON.parse(localStorage.getItem('inkwell_feature_flags') || '{}');
     if (mainFlags.flags) {
-      console.log('\n📋 Main Feature Flags:\n');
+      devLog.debug('\n📋 Main Feature Flags:\n');
       console.table(
         Object.entries(mainFlags.flags)
           .filter(([key]) => key.startsWith('tour_'))
@@ -57,49 +58,49 @@ export const tourFlagHelpers = {
     localStorage.removeItem('ff:tour_simpleTour');
     localStorage.removeItem('ff:tour_export');
     localStorage.removeItem('ff:tour_aiTools');
-    console.log('✅ All tour flags enabled (using defaults)');
+    devLog.debug('✅ All tour flags enabled (using defaults)');
     printTourFlags();
   },
 
   disableAll(): void {
     localStorage.setItem('tour:kill', '1');
-    console.log('❌ All tours disabled via kill switch');
+    devLog.debug('❌ All tours disabled via kill switch');
     printTourFlags();
   },
 
   enableCore(): void {
     localStorage.removeItem('ff:tour_simpleTour');
-    console.log('✅ Core tour enabled');
+    devLog.debug('✅ Core tour enabled');
     printTourFlags();
   },
 
   disableCore(): void {
     localStorage.setItem('ff:tour_simpleTour', 'off');
-    console.log('❌ Core tour disabled');
+    devLog.debug('❌ Core tour disabled');
     printTourFlags();
   },
 
   enableExport(): void {
     localStorage.removeItem('ff:tour_export');
-    console.log('✅ Export tour enabled');
+    devLog.debug('✅ Export tour enabled');
     printTourFlags();
   },
 
   disableExport(): void {
     localStorage.setItem('ff:tour_export', 'off');
-    console.log('❌ Export tour disabled');
+    devLog.debug('❌ Export tour disabled');
     printTourFlags();
   },
 
   enableAITools(): void {
     localStorage.removeItem('ff:tour_aiTools');
-    console.log('✅ AI Tools tour enabled');
+    devLog.debug('✅ AI Tools tour enabled');
     printTourFlags();
   },
 
   disableAITools(): void {
     localStorage.setItem('ff:tour_aiTools', 'off');
-    console.log('❌ AI Tools tour disabled');
+    devLog.debug('❌ AI Tools tour disabled');
     printTourFlags();
   },
 
@@ -109,7 +110,7 @@ export const tourFlagHelpers = {
     localStorage.removeItem('ff:tour_export');
     localStorage.removeItem('ff:tour_aiTools');
     localStorage.removeItem('inkwell_feature_flags');
-    console.log('🔄 All tour flags reset to defaults');
+    devLog.debug('🔄 All tour flags reset to defaults');
     printTourFlags();
   },
 };
@@ -121,5 +122,5 @@ if (import.meta.env.DEV) {
     ...tourFlagHelpers,
   };
 
-  console.log('💡 Tour flag helpers available: window.tourFlags');
+  devLog.debug('💡 Tour flag helpers available: window.tourFlags');
 }

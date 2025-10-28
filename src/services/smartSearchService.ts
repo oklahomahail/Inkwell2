@@ -1,5 +1,7 @@
 // @ts-nocheck
 // src/services/smartSearchService.ts
+import devLog from "src/utils/devLogger";
+
 import type { EnhancedProject } from '@/types/project';
 import type { Chapter } from '@/types/writing';
 
@@ -824,17 +826,17 @@ class SmartSearchService {
 
   // Navigation methods (to be implemented based on your routing)
   private navigateToEdit(result: SearchResult): void {
-    console.log('Navigate to edit:', result.id);
+    devLog.debug('Navigate to edit:', result.id);
     // Implement navigation to edit view
   }
 
   private navigateToView(result: SearchResult): void {
-    console.log('Navigate to view:', result.id);
+    devLog.debug('Navigate to view:', result.id);
     // Implement navigation to view
   }
 
   private navigateToCharacter(result: SearchResult): void {
-    console.log('Navigate to character:', result.id);
+    devLog.debug('Navigate to character:', result.id);
     // Implement navigation to character profile
   }
 

@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 
+import devLog from "@/utils/devLogger";
+
 import AuthPage from './AuthPage';
 
 /**
@@ -9,7 +11,7 @@ import AuthPage from './AuthPage';
 export default function SignIn() {
   useEffect(() => {
     // Add debugging to help diagnose rendering issues
-    console.log('[SignInPage] Rendering SignIn component');
+    devLog.debug('[SignInPage] Rendering SignIn component');
 
     // Report rendering status to the window for debugging
     if (typeof window !== 'undefined') {

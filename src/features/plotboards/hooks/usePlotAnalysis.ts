@@ -1,5 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
+import devLog from "src/utils/devLogger";
+
 import aiService from '../../../services/aiPlotAnalysisService';
 import { analyticsService } from '../../../services/analyticsService';
 import { featureFlags } from '../../../utils/flags';
@@ -40,7 +42,7 @@ export function usePlotAnalysis(profileId: string, projectId: string) {
         structure: 'three_act' as const, // Default structure
       };
 
-      console.log('Running plot analysis for', scenes.length, 'scenes');
+      devLog.debug('Running plot analysis for', scenes.length, 'scenes');
       const service: any = (aiService as any) || {};
       const result = service.analyzeBoard
         ? await service.analyzeBoard(input)
@@ -56,7 +58,7 @@ export function usePlotAnalysis(profileId: string, projectId: string) {
         issuesFound: result.issues.length,
       });
 
-      console.log('Plot analysis complete:', result);
+      devLog.debug('Plot analysis complete:', result);
     } catch (error) {
       console.error('Plot analysis failed:', error);
 

@@ -1,4 +1,6 @@
 // src/services/featureFlagService.ts
+import devLog from "src/utils/devLogger";
+
 import { analyticsService } from './analyticsService';
 
 export interface FeatureFlag {
@@ -280,7 +282,7 @@ class FeatureFlagService {
     };
 
     this.setEnvironmentOverrides(demoOverrides);
-    console.log('🎭 Demo mode enabled with mock AI responses');
+    devLog.debug('🎭 Demo mode enabled with mock AI responses');
 
     analyticsService.track('demo_mode_enabled', {
       overrides: Object.keys(demoOverrides),
@@ -301,7 +303,7 @@ class FeatureFlagService {
     this.saveConfig();
     this.notifyListeners();
 
-    console.log('🎭 Demo mode disabled');
+    devLog.debug('🎭 Demo mode disabled');
     analyticsService.track('demo_mode_disabled', {
       previousFlags: Object.keys(this.config.flags).filter((key) => this.config.flags[key]),
       reason: 'user_action',

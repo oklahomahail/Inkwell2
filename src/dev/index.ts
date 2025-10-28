@@ -4,6 +4,7 @@
  *
  * Import this in main.tsx or App.tsx during development
  */
+import devLog from "src/utils/devLogger";
 
 import { printTourFlags, tourFlagHelpers } from './printTourFlags';
 import {
@@ -35,24 +36,24 @@ export function initTourDevTools(): void {
   };
 
   // Print welcome message
-  console.log(
+  devLog.debug(
     '\n%c🎯 Tour Development Tools Loaded',
     'color: #10b981; font-weight: bold; font-size: 14px;',
   );
-  console.log('%cAvailable commands:', 'color: #6366f1; font-weight: bold;');
-  console.log('  %cwindow.tourFlags.print()', 'color: #8b5cf6');
-  console.log('  %cwindow.tourFlags.enableAll()', 'color: #8b5cf6');
-  console.log('  %cwindow.tourFlags.disableAll()', 'color: #8b5cf6');
-  console.log('  %cwindow.tourFlags.enableExport()', 'color: #8b5cf6');
-  console.log('  %cwindow.tourFlags.disableExport()', 'color: #8b5cf6');
-  console.log('  %cwindow.tourAnalytics.print()', 'color: #ec4899');
-  console.log('  %cwindow.tourAnalytics.downloadCSV()', 'color: #ec4899');
-  console.log('  %cwindow.tourAnalytics.downloadSummary()', 'color: #ec4899');
-  console.log(
+  devLog.debug('%cAvailable commands:', 'color: #6366f1; font-weight: bold;');
+  devLog.debug('  %cwindow.tourFlags.print()', 'color: #8b5cf6');
+  devLog.debug('  %cwindow.tourFlags.enableAll()', 'color: #8b5cf6');
+  devLog.debug('  %cwindow.tourFlags.disableAll()', 'color: #8b5cf6');
+  devLog.debug('  %cwindow.tourFlags.enableExport()', 'color: #8b5cf6');
+  devLog.debug('  %cwindow.tourFlags.disableExport()', 'color: #8b5cf6');
+  devLog.debug('  %cwindow.tourAnalytics.print()', 'color: #ec4899');
+  devLog.debug('  %cwindow.tourAnalytics.downloadCSV()', 'color: #ec4899');
+  devLog.debug('  %cwindow.tourAnalytics.downloadSummary()', 'color: #ec4899');
+  devLog.debug(
     '\n%cFor full documentation, see: docs/TOUR_POST_DEPLOY_GUARDRAILS.md',
     'color: #64748b; font-style: italic;',
   );
-  console.log('');
+  devLog.debug('');
 }
 
 // Auto-initialize in development

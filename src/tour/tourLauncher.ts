@@ -1,4 +1,5 @@
 // src/tour/tourLauncher.ts - Centralized tour launcher (single source of truth)
+import devLog from "src/utils/devLogger";
 
 import analyticsService from '@/services/analyticsService';
 
@@ -55,7 +56,7 @@ export function registerTours(controllers: Record<TourId, TourController>) {
         }
       }
 
-      console.log(`[TourLauncher] Starting tour: ${id}`, opts);
+      devLog.debug(`[TourLauncher] Starting tour: ${id}`, opts);
       controller.start(opts);
     },
 
@@ -66,7 +67,7 @@ export function registerTours(controllers: Record<TourId, TourController>) {
         return;
       }
 
-      console.log(`[TourLauncher] Resetting tour: ${id}`);
+      devLog.debug(`[TourLauncher] Resetting tour: ${id}`);
       controller.reset();
 
       // Track analytics
@@ -82,7 +83,7 @@ export function registerTours(controllers: Record<TourId, TourController>) {
     },
   };
 
-  console.log('[TourLauncher] Tours registered:', Object.keys(controllers));
+  devLog.debug('[TourLauncher] Tours registered:', Object.keys(controllers));
 }
 
 /**
@@ -130,7 +131,7 @@ export function bindTourShortcut() {
     }
   });
 
-  console.log('[TourLauncher] Keyboard shortcut bound: Shift + ?');
+  devLog.debug('[TourLauncher] Keyboard shortcut bound: Shift + ?');
 }
 
 /**
@@ -145,7 +146,7 @@ export function handleTourDeepLink() {
   const restart = params.get('restart') === '1';
 
   if (tourId && isTourAvailable(tourId)) {
-    console.log(`[TourLauncher] Launching tour from URL: ${tourId}`);
+    devLog.debug(`[TourLauncher] Launching tour from URL: ${tourId}`);
 
     // Small delay to ensure app is fully loaded
     setTimeout(() => {

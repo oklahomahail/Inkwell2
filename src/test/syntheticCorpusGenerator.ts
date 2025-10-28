@@ -1,5 +1,6 @@
 // @ts-nocheck
 // src/test/syntheticCorpusGenerator.ts
+import devLog from "src/utils/devLogger";
 import type { Scene, Chapter } from '@/types/writing';
 import type { EnhancedProject, Character, ProjectChapter, ProjectScene } from '@/types/project';
 
@@ -183,7 +184,7 @@ class SyntheticCorpusGenerator {
 
   generate(): GeneratedCorpus {
     const startTime = Date.now();
-    console.log('Generating synthetic corpus...');
+    devLog.debug('Generating synthetic corpus...');
 
     // Generate characters first
     const characters = this.generateCharacters();
@@ -198,7 +199,7 @@ class SyntheticCorpusGenerator {
     const stats = this.calculateStats(chapters);
 
     const generationTime = Date.now() - startTime;
-    console.log(`Corpus generated in ${generationTime}ms:`, stats);
+    devLog.debug(`Corpus generated in ${generationTime}ms:`, stats);
 
     return { project, chapters, characters, stats };
   }

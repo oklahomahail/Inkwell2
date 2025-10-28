@@ -8,6 +8,8 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import devLog from "src/utils/devLogger";
+
 /**
  * Re-resolve spotlight anchors whenever the route changes.
  * This ensures tour targets are found after navigation.
@@ -30,7 +32,7 @@ export function useTourRouterAdapter(): void {
       window.dispatchEvent(new Event('tour:refresh'));
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('[TourRouter] Route changed, refreshing tour anchors:', location.pathname);
+        devLog.debug('[TourRouter] Route changed, refreshing tour anchors:', location.pathname);
       }
     });
 

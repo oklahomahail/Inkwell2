@@ -8,6 +8,8 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import devLog from "src/utils/devLogger";
+
 import { isTourDone } from '../persistence';
 import { startDefaultTour } from '../tourEntry';
 
@@ -48,7 +50,7 @@ export function TourLifecycleIntegration(): null {
       // Use requestAnimationFrame + setTimeout to ensure elements are rendered
       requestAnimationFrame(() => {
         setTimeout(() => {
-          console.log('[TourLifecycle] Auto-starting tour for first-time user');
+          devLog.debug('[TourLifecycle] Auto-starting tour for first-time user');
           startDefaultTour();
           localStorage.setItem(FIRST_RUN_KEY, '1');
         }, 200);

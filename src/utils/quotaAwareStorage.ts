@@ -1,4 +1,6 @@
 // src/utils/quotaAwareStorage.ts
+import devLog from "src/utils/devLogger";
+
 import { snapshotService } from '../services/snapshotService';
 
 export interface StorageQuotaInfo {
@@ -217,7 +219,7 @@ class QuotaAwareStorage {
         actions.unshift('Cleared temporary data');
       }
 
-      console.log(`Emergency cleanup freed approximately ${freedBytes} bytes`);
+      devLog.debug(`Emergency cleanup freed approximately ${freedBytes} bytes`);
       return { freedBytes, actions };
     } catch (error) {
       // Always include primary error message at the top

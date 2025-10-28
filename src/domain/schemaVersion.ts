@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 // Schema versioning and migration system
 // This handles data model evolution and backward compatibility
 
@@ -30,7 +31,7 @@ export async function _runMigrations(data: any, fromVersion: number): Promise<an
   let currentData = data;
   let currentVersion = fromVersion;
 
-  console.log(`🔄 Running migrations from version ${fromVersion} to ${CURRENT_SCHEMA_VERSION}`);
+  devLog.debug(`🔄 Running migrations from version ${fromVersion} to ${CURRENT_SCHEMA_VERSION}`);
 
   // Apply migrations sequentially
   while (currentVersion < CURRENT_SCHEMA_VERSION) {
@@ -41,14 +42,14 @@ export async function _runMigrations(data: any, fromVersion: number): Promise<an
       throw new Error(`Migration to version ${nextVersion} not found`);
     }
 
-    console.log(`📦 Applying migration to version ${nextVersion}`);
+    devLog.debug(`📦 Applying migration to version ${nextVersion}`);
     currentData = await migration(currentData);
     currentVersion = nextVersion;
   }
 
   // Update the schema version in the data
   currentData.schemaVersion = CURRENT_SCHEMA_VERSION;
-  console.log(`✅ Migration completed to version ${CURRENT_SCHEMA_VERSION}`);
+  devLog.debug(`✅ Migration completed to version ${CURRENT_SCHEMA_VERSION}`);
 
   return currentData;
 }

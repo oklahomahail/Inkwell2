@@ -1,26 +1,27 @@
 // @ts-nocheck
+import devLog from "src/utils/devLogger";
 import { _generateSyntheticCorpus as generateSyntheticCorpus } from './syntheticCorpusGenerator';
 async function _debugBenchmark() {
   try {
-    console.log('Step 1: Testing corpus generation...');
+    devLog.debug('Step 1: Testing corpus generation...');
     const corpus = generateSyntheticCorpus({
       targetWordCount: 150000,
       chapterCount: 50,
       sceneCount: 900,
       characterCount: 20,
     });
-    console.log('Corpus generated successfully:', {
+    devLog.debug('Corpus generated successfully:', {
       words: corpus.stats.totalWords,
       scenes: corpus.stats.totalScenes,
       chapters: corpus.stats.totalChapters,
     });
-    console.log('Step 2: Testing storage service import...');
+    devLog.debug('Step 2: Testing storage service import...');
     const { storageService } = await import('@/services/storageService');
-    console.log('Storage service imported successfully');
-    console.log('Step 3: Testing search service import...');
+    devLog.debug('Storage service imported successfully');
+    devLog.debug('Step 3: Testing search service import...');
     const { searchService } = await import('@/services/searchService');
-    console.log('Search service imported successfully');
-    console.log('All imports successful - issue is likely in the benchmark execution');
+    devLog.debug('Search service imported successfully');
+    devLog.debug('All imports successful - issue is likely in the benchmark execution');
   } catch (error: unknown) {
     console.error('Debug benchmark failed at:', error);
     if (error instanceof Error) {

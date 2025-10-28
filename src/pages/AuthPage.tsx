@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import devLog from "src/utils/devLogger";
+
 import AuthFooter from '../components/Auth/AuthFooter';
 import { AuthForm } from '../components/Auth/AuthForm';
 import { AuthFormMode } from '../components/Auth/AuthForm';
@@ -15,7 +17,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
 
   // Add debugging on mount
   useEffect(() => {
-    console.log('[AuthPage] Rendering AuthPage component', { mode });
+    devLog.debug('[AuthPage] Rendering AuthPage component', { mode });
 
     // Report rendering status to the window for debugging
     if (typeof window !== 'undefined') {

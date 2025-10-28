@@ -1,4 +1,5 @@
 // Main plot analysis orchestrator
+import devLog from "src/utils/devLogger";
 
 import type { Project } from '@/context/AppContext';
 
@@ -83,7 +84,7 @@ export async function analyzePlot(
   if (!forceRefresh) {
     const cached = getCachedAnalysis(projectHash);
     if (cached) {
-      console.log('Using cached analysis');
+      devLog.debug('Using cached analysis');
       return cached;
     }
   }
@@ -102,7 +103,7 @@ export async function analyzePlot(
   // Enhance with LLM if enabled
   if (useLLM) {
     try {
-      console.log('Calling Claude API for enhanced analysis...');
+      devLog.debug('Calling Claude API for enhanced analysis...');
       const llmResult = await callClaudeAPI(data);
 
       if (llmResult) {

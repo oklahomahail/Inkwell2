@@ -1,5 +1,7 @@
 import React from 'react';
 
+import devLog from "src/utils/devLogger";
+
 import { analyticsService } from '../../../../services/analyticsService';
 
 import type { AnalysisIssue } from '../../../../types/plotAnalysis';
@@ -109,7 +111,7 @@ function _IssuesList({ issues }: IssuesListProps) {
     analyticsService.trackPlotIssueResolved(issue.id, issue.type);
 
     // In a real implementation, you might update the store or mark the issue as resolved
-    console.log('Issue marked as resolved:', issue.id);
+    devLog.debug('Issue marked as resolved:', issue.id);
   };
 
   if (issues.length === 0) {

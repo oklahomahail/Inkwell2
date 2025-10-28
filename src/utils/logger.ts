@@ -1,10 +1,11 @@
+import devLog from "src/utils/devLogger";
 const isProd = import.meta.env.PROD;
 
 export const log = {
   info: (...a: unknown[]) => {
     if (!isProd) {
-      // eslint-disable-next-line no-console
-      console.log(...a);
+       
+      devLog.debug(...a);
     }
   },
   warn: (...a: unknown[]) => {

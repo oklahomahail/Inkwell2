@@ -3,6 +3,8 @@
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 
+import devLog from "src/utils/devLogger";
+
 import type { Project } from '@/context/AppContext';
 import { storeCapturedCharts, batchCaptureSVGs } from '@/export/utils/svgCapture';
 
@@ -53,7 +55,7 @@ export function PlotAnalysisPanel({ project, onOpenChapter }: PlotAnalysisPanelP
           arcs: charts['div[aria-label="Arc presence heatmap"] svg'] || null,
         });
 
-        console.log('Plot analysis charts captured for export');
+        devLog.debug('Plot analysis charts captured for export');
       } catch (error) {
         console.warn('Failed to capture plot analysis charts:', error);
       }

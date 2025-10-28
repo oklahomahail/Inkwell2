@@ -1,4 +1,6 @@
 // src/services/connectivityService.ts
+import devLog from "src/utils/devLogger";
+
 import { quotaAwareStorage } from '../utils/quotaAwareStorage';
 
 declare global {
@@ -110,7 +112,7 @@ class ConnectivityService {
     await this.saveQueue();
     this.notifyListeners();
 
-    console.log(`Queued ${operation} operation for ${key}`, queuedWrite);
+    devLog.debug(`Queued ${operation} operation for ${key}`, queuedWrite);
 
     // Try to process immediately if online (use runtime navigator when available)
     if (this.isCurrentlyOnline()) {
@@ -127,7 +129,7 @@ class ConnectivityService {
     }
 
     this.processingQueue = true;
-    console.log(`Processing ${this.queue.length} queued operations`);
+    devLog.debug(`Processing ${this.queue.length} queued operations`);
 
     // Store initial queue length before processing
     const initialQueueLength = this.queue.length;
@@ -140,7 +142,7 @@ class ConnectivityService {
         const success = await this.executeQueuedWrite(item);
         if (success) {
           processedItems.push(item.id);
-          console.log(`Successfully processed queued ${item.operation} for ${item.key}`);
+          devLog.debug(`Successfully processed queued ${item.operation} for ${item.key}`);
         } else {
           item.retryCount++;
           if (item.retryCount >= ConnectivityService.MAX_RETRIES) {
@@ -179,7 +181,7 @@ class ConnectivityService {
     this.processingQueue = false;
 
     if (processedItems.length > 0) {
-      console.log(`Processed ${processedItems.length} queued operations successfully`);
+      devLog.debug(`Processed ${processedItems.length} queued operations successfully`);
     }
 
     // Schedule retry for failed items
@@ -204,7 +206,7 @@ class ConnectivityService {
    * @returns Promise that resolves when queue is empty or offline
    */
   async waitForQueueProcessing(timeoutMs: number = 1000): Promise<boolean> {
-    console.log(
+    devLog.debug(
       'waitForQueueProcessing called, queue length:',
       this.queue.length,
       'processing:',
@@ -213,7 +215,7 @@ class ConnectivityService {
 
     // If we're offline or queue is empty, nothing to wait for
     if (!this.isCurrentlyOnline() || this.queue.length === 0) {
-      console.log('Nothing to wait for - offline or empty queue');
+      devLog.debug('Nothing to wait for - offline or empty queue');
       return true;
     }
 
@@ -225,7 +227,7 @@ class ConnectivityService {
       const checkComplete = () => {
         // Check if processing is complete
         if (this.queue.length === 0) {
-          console.log('Queue is now empty, resolving wait');
+          devLog.debug('Queue is now empty, resolving wait');
           resolve(true);
           return;
         }
@@ -247,7 +249,7 @@ class ConnectivityService {
 
       // If not already processing, trigger processing
       if (!this.processingQueue && this.isCurrentlyOnline() && this.queue.length > 0) {
-        console.log('Starting queue processing');
+        devLog.debug('Starting queue processing');
         this.processQueue().catch((e) => console.error('Error in processQueue:', e));
       }
     });
@@ -260,7 +262,7 @@ class ConnectivityService {
     this.queue = [];
     await this.saveQueue();
     this.notifyListeners();
-    console.log('Offline queue cleared');
+    devLog.debug('Offline queue cleared');
   }
 
   /**
@@ -361,9 +363,9 @@ class ConnectivityService {
   }
 
   private initializeListeners(): void {
-    console.log('initializeListeners called');
+    devLog.debug('initializeListeners called');
     if (typeof window !== 'undefined') {
-      console.log('Adding online and offline event listeners');
+      devLog.debug('Adding online and offline event listeners');
       window.addEventListener('online', this.handleOnline);
       window.addEventListener('offline', this.handleOffline);
     }
@@ -397,7 +399,7 @@ class ConnectivityService {
       this.notifyTimer = null;
 
       const status = this.getStatus();
-      console.log('Notifying listeners with status:', status);
+      devLog.debug('Notifying listeners with status:', status);
 
       // Call each listener with individual error handling
       this.listeners.forEach((listener) => {
@@ -428,7 +430,7 @@ class ConnectivityService {
   }
 
   private handleOnline = (): void => {
-    console.log('handleOnline triggered');
+    devLog.debug('handleOnline triggered');
 
     // Only notify if state actually changed
     if (!this.isOnline) {
@@ -450,7 +452,7 @@ class ConnectivityService {
   };
 
   private handleOffline = (): void => {
-    console.log('handleOffline triggered');
+    devLog.debug('handleOffline triggered');
 
     // Only notify if state actually changed
     if (this.isOnline) {
@@ -493,7 +495,7 @@ class ConnectivityService {
       const result = quotaAwareStorage.safeGetItem(ConnectivityService.QUEUE_KEY);
       if (result.success && result.data) {
         this.queue = JSON.parse(result.data);
-        console.log(`Loaded ${this.queue.length} queued operations from storage`);
+        devLog.debug(`Loaded ${this.queue.length} queued operations from storage`);
       }
     } catch (_error) {
       console.error('Failed to load offline queue:', _error);

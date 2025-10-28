@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
+import devLog from "src/utils/devLogger";
+
 import SceneLinkageSuggestions from '@/components/timeline/SceneLinkageSuggestions';
 import TimelineNavigation from '@/components/timeline/TimelineNavigation';
 import TimelineValidationPanel from '@/components/timeline/TimelineValidationPanel';
@@ -217,7 +219,7 @@ const TimelinePanel: React.FC = () => {
     async (conflictId: string) => {
       showToast('Auto-fix functionality will be implemented soon', 'info');
       // Implementation would go here
-      console.log('Auto-fixing conflict:', conflictId);
+      devLog.debug('Auto-fixing conflict:', conflictId);
     },
     [showToast],
   );

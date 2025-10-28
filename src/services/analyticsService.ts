@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 // Privacy-first analytics service for Inkwell
 // Collects minimal, anonymized data to improve user experience
 
@@ -468,7 +469,7 @@ class AnalyticsService {
     // Check for Do Not Track
     if (navigator.doNotTrack === '1') {
       this.isEnabled = false;
-      console.log('Analytics disabled due to Do Not Track preference');
+      devLog.debug('Analytics disabled due to Do Not Track preference');
     }
   }
 
@@ -528,7 +529,7 @@ class AnalyticsService {
 
     // Log in development for debugging
     if (import.meta.env.DEV) {
-      console.log(`[Analytics] ${eventName}:`, event);
+      devLog.debug(`[Analytics] ${eventName}:`, event);
     }
 
     // Batch send events
@@ -552,7 +553,7 @@ class AnalyticsService {
 
     // Log legacy analytics for debugging
     if (import.meta.env.DEV) {
-      console.log('Legacy analytics event: tour_started', { tourType, entryPoint });
+      devLog.debug('Legacy analytics event: tour_started', { tourType, entryPoint });
     }
 
     this.track('tour_started', { tourType, entryPoint });
@@ -735,7 +736,7 @@ class AnalyticsService {
 
     // In development, just log the events
     if (import.meta.env.DEV) {
-      console.log('[Analytics] Flushing events:', this.eventQueue);
+      devLog.debug('[Analytics] Flushing events:', this.eventQueue);
     }
 
     // In production, you would send these to your analytics service
@@ -842,7 +843,7 @@ function _trackEvent(event: string, data?: Record<string, unknown>) {
 }
 
 function _initializeAnalytics() {
-  console.log('Analytics initialized');
+  devLog.debug('Analytics initialized');
 }
 
 function _getAnalyticsData(): AnalyticsData[] {

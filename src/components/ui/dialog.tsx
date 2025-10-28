@@ -5,7 +5,7 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
 };
 export const Dialog: React.FC<Props> = ({
   open,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   onOpenChange,
   children,
   ...rest

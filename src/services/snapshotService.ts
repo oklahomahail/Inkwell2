@@ -1,5 +1,7 @@
 // @ts-nocheck
 // src/services/snapshotService.ts
+import devLog from "src/utils/devLogger";
+
 import {
   Project,
   SnapshotMetadata,
@@ -76,7 +78,7 @@ class SnapshotService {
       // Clean up old snapshots
       await this.cleanupOldSnapshots(project.id);
 
-      console.log(`Snapshot created: ${snapshotId}`, metadata);
+      devLog.debug(`Snapshot created: ${snapshotId}`, metadata);
       return metadata;
     } catch (error) {
       console.error('Failed to create snapshot:', error);
@@ -135,7 +137,7 @@ class SnapshotService {
         }
       }
 
-      console.log(`Snapshot restored: ${snapshotId}`);
+      devLog.debug(`Snapshot restored: ${snapshotId}`);
       return projectValidation.data;
     } catch (error) {
       console.error('Failed to restore snapshot:', error);
@@ -158,7 +160,7 @@ class SnapshotService {
       const updatedIndex = index.filter((snapshot) => snapshot.id !== snapshotId);
       localStorage.setItem(SnapshotService.SNAPSHOT_INDEX_KEY, JSON.stringify(updatedIndex));
 
-      console.log(`Snapshot deleted: ${snapshotId}`);
+      devLog.debug(`Snapshot deleted: ${snapshotId}`);
     } catch (error) {
       console.error('Failed to delete snapshot:', error);
       throw new Error(
@@ -191,7 +193,7 @@ class SnapshotService {
       }
     }, SnapshotService.AUTO_SNAPSHOT_INTERVAL) as any;
 
-    console.log('Auto-snapshots started');
+    devLog.debug('Auto-snapshots started');
   }
   /**
    * Stop automatic snapshot creation
@@ -200,7 +202,7 @@ class SnapshotService {
     if (this.autoSnapshotTimer) {
       clearInterval(this.autoSnapshotTimer);
       this.autoSnapshotTimer = null;
-      console.log('Auto-snapshots stopped');
+      devLog.debug('Auto-snapshots stopped');
     }
   }
 
@@ -246,7 +248,7 @@ class SnapshotService {
         await this.deleteSnapshot(snapshot.id);
       }
 
-      console.log(`Emergency cleanup: removed ${toDelete.length} snapshots`);
+      devLog.debug(`Emergency cleanup: removed ${toDelete.length} snapshots`);
       return toDelete.length;
     } catch (error) {
       console.error('Emergency cleanup failed:', error);
@@ -290,7 +292,7 @@ class SnapshotService {
         for (const snapshot of toDelete) {
           await this.deleteSnapshot(snapshot.id);
         }
-        console.log(`Cleaned up ${toDelete.length} old auto-snapshots`);
+        devLog.debug(`Cleaned up ${toDelete.length} old auto-snapshots`);
       }
     } catch (error) {
       console.error('Failed to cleanup old snapshots:', error);

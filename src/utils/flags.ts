@@ -4,6 +4,8 @@
  */
 
 // Import dependencies first
+import devLog from "src/utils/devLogger";
+
 import { FeatureFlagManager } from './FeatureFlagManager';
 
 // Create singleton instance
@@ -41,5 +43,5 @@ if (
     export: () => featureFlags.exportAsURL(),
   };
 
-  console.log('🚩 Feature flags available at window.__inkwellFlags');
+  devLog.debug('🚩 Feature flags available at window.__inkwellFlags');
 }

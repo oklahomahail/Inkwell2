@@ -1,3 +1,4 @@
+import devLog from "@/utils/devLogger";
 /**
  * Global error handlers for unhandled errors and promise rejections
  * In dev: logs to console
@@ -29,6 +30,6 @@ export function initGlobalErrorHandlers() {
   });
 
   if (!isProd) {
-    console.log('✅ Global error handlers initialized');
+    devLog.debug('✅ Global error handlers initialized');
   }
 }

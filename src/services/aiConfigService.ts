@@ -1,6 +1,8 @@
 // src/services/aiConfigService.ts
 import CryptoJS from 'crypto-js';
 
+import devLog from "src/utils/devLogger";
+
 import { aiRetryService } from './aiRetryService';
 import { analyticsService } from './analyticsService';
 import { featureFlagService } from './featureFlagService';
@@ -98,7 +100,7 @@ Context: You have access to the user's current project and any selected text. Al
    */
   async initialize(apiKey: string, provider: string = 'claude'): Promise<ValidationResult> {
     try {
-      console.log(`🔧 Initializing AI configuration for provider: ${provider}`);
+      devLog.debug(`🔧 Initializing AI configuration for provider: ${provider}`);
 
       const validationResult = await this.validateConfiguration(apiKey, provider);
 
@@ -128,7 +130,7 @@ Context: You have access to the user's current project and any selected text. Al
           model: this.config.model,
         });
 
-        console.log('✅ AI configuration initialized successfully');
+        devLog.debug('✅ AI configuration initialized successfully');
       } else {
         this.config = null;
         await this.clearConfiguration();
@@ -520,7 +522,7 @@ Context: You have access to the user's current project and any selected text. Al
 
       // Validate configuration is still current
       if (this.config && this.isConfigurationStale()) {
-        console.log('AI configuration is stale, clearing...');
+        devLog.debug('AI configuration is stale, clearing...');
         this.config = null;
       }
     } catch (error) {
@@ -535,7 +537,7 @@ Context: You have access to the user's current project and any selected text. Al
       const legacyConfig = localStorage.getItem('claude_config');
 
       if (legacyKey && legacyConfig) {
-        console.log('🔄 Migrating legacy Claude configuration...');
+        devLog.debug('🔄 Migrating legacy Claude configuration...');
 
         const decryptedKey = CryptoJS.AES.decrypt(legacyKey, 'inkwell_claude_key');
         const apiKey = decryptedKey.toString(CryptoJS.enc.Utf8);
@@ -560,7 +562,7 @@ Context: You have access to the user's current project and any selected text. Al
           localStorage.removeItem('claude_api_key_encrypted');
           localStorage.removeItem('claude_config');
 
-          console.log('✅ Legacy configuration migrated successfully');
+          devLog.debug('✅ Legacy configuration migrated successfully');
         }
       }
     } catch (error) {

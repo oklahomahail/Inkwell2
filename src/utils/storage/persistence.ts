@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 /**
  * Storage Persistence Utilities
  * Ensures browser storage persists across sessions and won't be automatically cleared
@@ -33,7 +34,7 @@ export async function ensurePersistentStorage(): Promise<StoragePersistenceResul
     const persisted = await navigator.storage.persisted();
     if (persisted) {
       result.persisted = true;
-      console.log('[Inkwell] Storage is already persistent');
+      devLog.debug('[Inkwell] Storage is already persistent');
       return result;
     }
 
@@ -43,7 +44,7 @@ export async function ensurePersistentStorage(): Promise<StoragePersistenceResul
     result.persisted = granted;
 
     if (granted) {
-      console.log('[Inkwell] ✅ Storage persistence granted - your data is safe!');
+      devLog.debug('[Inkwell] ✅ Storage persistence granted - your data is safe!');
     } else {
       console.warn(
         '[Inkwell] ⚠️ Storage persistence not granted - data may be cleared if storage pressure occurs',

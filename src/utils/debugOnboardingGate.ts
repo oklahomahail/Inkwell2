@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 // src/utils/debugOnboardingGate.ts
 // Debug utility to test the onboarding gate system in development
 
@@ -43,7 +44,7 @@ export const debugOnboardingGate = {
 
     localStorage.setItem(LS_KEYS.gate, JSON.stringify({ status: 'pending' }));
     sessionStorage.removeItem(LS_KEYS.sessionTour);
-    console.log('🔄 Onboarding gate reset to pending');
+    devLog.debug('🔄 Onboarding gate reset to pending');
   },
 
   /**
@@ -54,7 +55,7 @@ export const debugOnboardingGate = {
 
     localStorage.setItem(LS_KEYS.gate, JSON.stringify({ status: 'dismissed' }));
     sessionStorage.removeItem(LS_KEYS.sessionTour);
-    console.log('❌ Onboarding gate dismissed');
+    devLog.debug('❌ Onboarding gate dismissed');
   },
 
   /**
@@ -65,7 +66,7 @@ export const debugOnboardingGate = {
 
     localStorage.setItem(LS_KEYS.gate, JSON.stringify({ status: 'completed' }));
     sessionStorage.removeItem(LS_KEYS.sessionTour);
-    console.log('✅ Onboarding gate marked as completed');
+    devLog.debug('✅ Onboarding gate marked as completed');
   },
 
   /**
@@ -76,10 +77,10 @@ export const debugOnboardingGate = {
 
     if (active) {
       sessionStorage.setItem(LS_KEYS.sessionTour, '1');
-      console.log('🎯 Tour active: true');
+      devLog.debug('🎯 Tour active: true');
     } else {
       sessionStorage.removeItem(LS_KEYS.sessionTour);
-      console.log('🎯 Tour active: false');
+      devLog.debug('🎯 Tour active: false');
     }
   },
 
@@ -97,7 +98,7 @@ export const debugOnboardingGate = {
         snoozeUntil,
       }),
     );
-    console.log(`😴 Gate snoozed for ${minutes} minute(s)`);
+    devLog.debug(`😴 Gate snoozed for ${minutes} minute(s)`);
   },
 
   /**
@@ -107,12 +108,12 @@ export const debugOnboardingGate = {
     if (!import.meta.env.DEV) return;
 
     const status = this.getStatus();
-    console.log('🚪 Onboarding Gate Status:', status);
+    devLog.debug('🚪 Onboarding Gate Status:', status);
   },
 };
 
 // Expose to window in development
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   (window as any).debugOnboardingGate = debugOnboardingGate;
-  console.log('🔧 Debug utilities available: window.debugOnboardingGate');
+  devLog.debug('🔧 Debug utilities available: window.debugOnboardingGate');
 }

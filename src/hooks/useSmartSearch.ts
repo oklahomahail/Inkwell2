@@ -1,6 +1,8 @@
 // src/hooks/useSmartSearch.ts
 import { useState, useCallback, useEffect } from 'react';
 
+import devLog from "src/utils/devLogger";
+
 import { useAppContext } from '@/context/AppContext';
 
 import { SmartSearchResult } from '../services/smartSearchService';
@@ -38,7 +40,7 @@ export const useSmartSearch = (_options: UseSmartSearchOptions = {}) => {
         onNavigate(result);
       } else {
         // Default navigation behavior
-        console.log('Navigate to:', result);
+        devLog.debug('Navigate to:', result);
 
         // You can implement default navigation logic here
         // For example, routing to different views based on result type

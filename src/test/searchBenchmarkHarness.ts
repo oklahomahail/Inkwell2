@@ -1,5 +1,6 @@
 // @ts-nocheck
 // src/test/searchBenchmarkHarness.ts
+import devLog from "src/utils/devLogger";
 import {
   generateSyntheticCorpus,
   type GeneratedCorpus,
@@ -150,20 +151,20 @@ class SearchBenchmarkHarness {
 
   async runBenchmark(config: BenchmarkConfig): Promise<BenchmarkResult> {
     const startTime = Date.now();
-    console.log('Starting search performance benchmark...');
+    devLog.debug('Starting search performance benchmark...');
 
     // Measure initial memory
     const memoryBefore = this.measureMemoryUsage();
 
     // Generate corpus
-    console.log('Generating synthetic corpus...');
+    devLog.debug('Generating synthetic corpus...');
     const corpusStartTime = Date.now();
     this.corpus = generateSyntheticCorpus(config.corpusSettings);
     const corpusTime = Date.now() - corpusStartTime;
-    console.log(`Corpus generated in ${corpusTime}ms:`, this.corpus.stats);
+    devLog.debug(`Corpus generated in ${corpusTime}ms:`, this.corpus.stats);
 
     // Initialize search service with corpus
-    console.log('Initializing search index...');
+    devLog.debug('Initializing search index...');
     const indexStartTime = Date.now();
     await searchService.initializeProject(this.corpus.project.id);
     const indexTime = Date.now() - indexStartTime;
@@ -172,10 +173,10 @@ class SearchBenchmarkHarness {
     const indexStats = searchService.getStats(this.corpus.project.id);
     const indexSize = indexStats?.indexSize || 0;
 
-    console.log(`Search index built in ${indexTime}ms (${(indexSize / 1024 / 1024).toFixed(2)}MB)`);
+    devLog.debug(`Search index built in ${indexTime}ms (${(indexSize / 1024 / 1024).toFixed(2)}MB)`);
 
     // Generate queries
-    console.log('Generating benchmark queries...');
+    devLog.debug('Generating benchmark queries...');
     const allQueries = this.generateQueries(config);
     const warmupQueries = allQueries.slice(0, config.warmupQueries);
     const benchmarkQueries = allQueries.slice(
@@ -184,7 +185,7 @@ class SearchBenchmarkHarness {
     );
 
     // Warmup phase
-    console.log(`Running ${warmupQueries.length} warmup queries...`);
+    devLog.debug(`Running ${warmupQueries.length} warmup queries...`);
     for (const { query } of warmupQueries) {
       try {
         await searchService.search(query, {
@@ -197,7 +198,7 @@ class SearchBenchmarkHarness {
     }
 
     // Benchmark phase
-    console.log(`Running ${benchmarkQueries.length} benchmark queries...`);
+    devLog.debug(`Running ${benchmarkQueries.length} benchmark queries...`);
     const results: Array<{
       query: string;
       type: QueryType;
@@ -224,7 +225,7 @@ class SearchBenchmarkHarness {
         });
 
         if (config.logResults) {
-          console.log(
+          devLog.debug(
             `"${query}" (${type}): ${(queryEnd - queryStart).toFixed(1)}ms, ${searchResults.length} results`,
           );
         }
@@ -253,22 +254,22 @@ class SearchBenchmarkHarness {
       memoryAfter,
     });
     const text = makeCorpus(150_000);
-    console.log('words:', approxWordCount(text)); // ~150000
+    devLog.debug('words:', approxWordCount(text)); // ~150000
 
     const totalTime = Date.now() - startTime;
-    console.log(`Benchmark completed in ${totalTime}ms`);
-    console.log(`Results: ${benchmarkResult.passed ? 'PASS' : 'FAIL'}`);
-    console.log(
+    devLog.debug(`Benchmark completed in ${totalTime}ms`);
+    devLog.debug(`Results: ${benchmarkResult.passed ? 'PASS' : 'FAIL'}`);
+    devLog.debug(
       `P50: ${benchmarkResult.queryPerformance.p50.toFixed(1)}ms (target: ${config.targetMetrics.p50MaxMs}ms)`,
     );
-    console.log(
+    devLog.debug(
       `P95: ${benchmarkResult.queryPerformance.p95.toFixed(1)}ms (target: ${config.targetMetrics.p95MaxMs}ms)`,
     );
 
     if (!benchmarkResult.passed) {
-      console.log('Suggestions for improvement:');
+      devLog.debug('Suggestions for improvement:');
       benchmarkResult.suggestions.forEach((suggestion) => {
-        console.log(`  - ${suggestion}`);
+        devLog.debug(`  - ${suggestion}`);
       });
     }
 

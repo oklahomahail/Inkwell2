@@ -64,14 +64,19 @@ export default [
     },
 
     rules: {
-      // Console hygiene: warn about console usage in production code
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      // 🚫 Block console.* except warn/error (devLog handles debug/info)
+      'no-console': ['error', { allow: ['warn', 'error'] }],
 
       // TS hygiene
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        { 
+          argsIgnorePattern: '^_', 
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          ignoreRestSiblings: true
+        },
       ],
 
       // Auto-remove unused imports; keep TS rule for vars/args
@@ -149,10 +154,11 @@ export default [
     },
   },
 
-  // Relax rules for archived/bench/test code
+  // Relax rules for archived/bench/test/scripts code
   {
-    files: ['archive/**', 'src/bench/**', 'src/test/**'],
+    files: ['archive/**', 'src/bench/**', 'src/test/**', 'scripts/**', '**/*.{spec,test}.{ts,tsx,js,jsx}'],
     rules: {
+      'no-console': 'off', // test output ok
       'import/order': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       'unused-imports/no-unused-imports': 'off',

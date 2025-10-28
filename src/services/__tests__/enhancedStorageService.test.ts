@@ -1,3 +1,4 @@
+import devLog from "@/utils/devLogger";
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import connectivityService from '../connectivityService';
@@ -30,7 +31,7 @@ describe('EnhancedStorageService', () => {
     vi.spyOn(window, 'dispatchEvent').mockImplementation((event) => {
       if (event.type === 'online' || event.type === 'offline') {
         connectivityService.onStatusChange((status) => {
-          console.log('Status changed:', status);
+          devLog.debug('Status changed:', status);
         });
       }
       return true;

@@ -1,13 +1,15 @@
 // src/hooks/useTourManager.ts
 import { useCallback, useRef } from 'react';
 
+import devLog from "src/utils/devLogger";
+
 import { useAuth } from '../context/AuthContext';
 import { createTourStorage, TourName, TourProgress } from '../services/simpleTourStorage';
 import { waitForElement } from '../utils/domUtils';
 
 // Stub function for spotlight tour UI - should be implemented by tour overlay component
 function showSpotlight(element: HTMLElement, content: React.ReactNode): Promise<void> {
-  console.log('Spotlight tour step:', element, content);
+  devLog.debug('Spotlight tour step:', element, content);
   // In a real implementation, this would show a spotlight overlay
   // and resolve when the user clicks next or dismisses
   return Promise.resolve();

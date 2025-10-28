@@ -2,6 +2,8 @@
 import { X, Bell, Check, AlertCircle, Info } from 'lucide-react';
 import React from 'react';
 
+import devLog from "src/utils/devLogger";
+
 import type { Notification } from '@/types/notifications';
 
 interface NotificationsModalProps {
@@ -57,11 +59,11 @@ const getTimeString = (date: Date): string => {
 
 export function NotificationsModal({ onClose }: NotificationsModalProps) {
   const handleMarkAllRead = () => {
-    console.log('Mark all notifications as read');
+    devLog.debug('Mark all notifications as read');
   };
 
   const handleNotificationClick = (id: string) => {
-    console.log(`Clicked notification: ${id}`);
+    devLog.debug(`Clicked notification: ${id}`);
   };
 
   return (

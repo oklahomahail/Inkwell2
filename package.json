@@ -26,8 +26,13 @@
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "lint:css": "stylelint \"**/*.css\"",
     "lint:css:fix": "stylelint \"**/*.css\" --fix",
-    "lint:ci": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=25",
+    "lint:ci": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",
     "lint:strict": "eslint . --max-warnings=0",
+    "lint:json": "eslint 'src/**/*.{ts,tsx}' -f json -o eslint-report.json",
+    "fix:logs": "jscodeshift -t scripts/codemods/console-to-devlog.js 'src/**/*.{ts,tsx,js,jsx}'",
+    "fix:logs:regex": "node scripts/replace-console-logs.mjs",
+    "fix:unused": "node scripts/prefix-unused-from-eslint.mjs eslint-report.json",
+    "fix:auto": "pnpm fix:logs:regex && pnpm lint:json && pnpm fix:unused && eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
     "format": "prettier --write .",
     "prepare": "git rev-parse --is-inside-work-tree >/dev/null 2>&1 && husky install || echo 'skip husky on CI'",
     "tailwind:replace": "node scripts/tailwind-text-replacer.mjs",
@@ -67,8 +72,9 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
+      "eslint --fix --max-warnings=0",
+      "prettier --write",
+      "bash -c 'tsc --noEmit'"
     ],
     "*.css": [
       "stylelint --fix",
@@ -149,11 +155,13 @@
     "glob": "^11.0.3",
     "globals": "^16.3.0",
     "history": "^5.3.0",
-    "husky": "^8.0.0",
+    "husky": "^8.0.3",
+    "jscodeshift": "^17.3.0",
     "jsdom": "^26.1.0",
     "knip": "^5.63.0",
-    "lint-staged": "^15.2.0",
+    "lint-staged": "^15.5.2",
     "madge": "^8.0.0",
+    "magic-string": "^0.30.21",
     "postcss": "^8.4.35",
     "prettier": "^3.6.2",
     "stylelint": "^16.10.0",

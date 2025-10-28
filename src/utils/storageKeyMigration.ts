@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 /**
  * Migration utility to convert old profile-based localStorage keys to user-based keys
  * Run once at application boot to ensure smooth transition from multi-profile to single-user
@@ -11,7 +12,7 @@ export function migrateStorageKeys(): void {
     return;
   }
 
-  console.log('[Storage Migration] Starting profile → user key migration...');
+  devLog.debug('[Storage Migration] Starting profile → user key migration...');
 
   let migratedCount = 0;
   let removedCount = 0;
@@ -30,7 +31,7 @@ export function migrateStorageKeys(): void {
         // Copy to new user-based key
         localStorage.setItem(newKey, value);
         migratedCount++;
-        console.log(`[Storage Migration] ${key} → ${newKey}`);
+        devLog.debug(`[Storage Migration] ${key} → ${newKey}`);
       }
 
       // Remove old key
@@ -49,7 +50,7 @@ export function migrateStorageKeys(): void {
       if (value) {
         localStorage.setItem(newKey, value);
         migratedCount++;
-        console.log(`[Storage Migration] ${key} → ${newKey}`);
+        devLog.debug(`[Storage Migration] ${key} → ${newKey}`);
       }
 
       localStorage.removeItem(key);
@@ -60,7 +61,7 @@ export function migrateStorageKeys(): void {
   // Mark migration as complete
   localStorage.setItem(MIGRATION_KEY, new Date().toISOString());
 
-  console.log(
+  devLog.debug(
     `[Storage Migration] Complete: ${migratedCount} keys migrated, ${removedCount} old keys removed`,
   );
 }

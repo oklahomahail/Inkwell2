@@ -2,6 +2,8 @@ import { clsx } from 'clsx';
 import { Bell } from 'lucide-react';
 import { useState } from 'react';
 
+import devLog from "src/utils/devLogger";
+
 import type { Notification } from '@/types/notifications';
 
 import { NotificationsPanel } from './NotificationsPanel';
@@ -36,15 +38,15 @@ export default function TopbarBell({ className = '' }: TopbarBellProps) {
 
   // Handlers
   const handleMarkAsRead = (id: string) => {
-    console.log('Mark as read:', id);
+    devLog.debug('Mark as read:', id);
   };
 
   const handleMarkAllAsRead = () => {
-    console.log('Mark all as read');
+    devLog.debug('Mark all as read');
   };
 
   const handleNotificationClick = (notification: Notification) => {
-    console.log('Clicked notification:', notification);
+    devLog.debug('Clicked notification:', notification);
   };
   const [open, setOpen] = useState(false);
 

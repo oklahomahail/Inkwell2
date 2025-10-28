@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 // src/lib/guardSupabaseEnv.ts
 
 /**
@@ -23,7 +24,7 @@ export function guardSupabaseEnv(): void {
   if (url.includes('localhost') || url.includes('127.0.0.1')) {
     console.warn('⚠ Supabase running with local URL (expected for local development)');
   } else if (url.includes('supabase.co')) {
-    console.log('✓ Supabase running with valid project URL');
+    devLog.debug('✓ Supabase running with valid project URL');
   } else {
     console.warn(
       `⚠ Unexpected Supabase URL format: ${url.slice(0, 20)}... (expected https://*.supabase.co)`,

@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 // PWA Service for managing offline functionality and app updates
 
 // Type for the PWA register hook from vite-plugin-pwa
@@ -68,7 +69,7 @@ export class PWAService {
   // Install the PWA
   async installPWA(): Promise<boolean> {
     if (!this.deferredPrompt) {
-      console.log('PWA install prompt not available');
+      devLog.debug('PWA install prompt not available');
       return false;
     }
 
@@ -77,11 +78,11 @@ export class PWAService {
       const choiceResult = await this.deferredPrompt.userChoice;
 
       if (choiceResult.outcome === 'accepted') {
-        console.log('PWA install accepted');
+        devLog.debug('PWA install accepted');
         this.deferredPrompt = null;
         return true;
       } else {
-        console.log('PWA install dismissed');
+        devLog.debug('PWA install dismissed');
         return false;
       }
     } catch (error) {
@@ -174,7 +175,7 @@ export function usePWA() {
     ...defaultState,
     updateApp: (forceReload?: boolean) => {
       if (process.env.NODE_ENV === 'production') {
-        console.log('Update app called', forceReload ? 'with force reload' : '');
+        devLog.debug('Update app called', forceReload ? 'with force reload' : '');
       }
     },
     installApp: () => {

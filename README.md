@@ -2,7 +2,12 @@
 
 > A focused, local-first writing studio for long-form fiction.
 
-[Docs](/docs/dev/setup.md) · [Roadmap](/docs/product/roadmap.md) · [Changelog](./CHANGELOG.md)
+[![CI](https://github.com/davehail/inkwell/actions/workflows/ci.yml/badge.svg)](https://github.com/davehail/inkwell/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4?logo=prettier)](https://prettier.io/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+[Docs](/docs/dev/setup.md) · [Roadmap](/docs/product/roadmap.md) · [Changelog](./CHANGELOG.md) · [Workflow Guide](/docs/engineering/linting-and-ci-playbook.md)
 
 ---
 
@@ -240,11 +245,11 @@ MIT
 
 ## Tech Stack
 
-**Frontend:** React 18, TypeScript, TailwindCSS, Vite  
-**Editor:** TipTap v3 with custom extensions  
-**AI Integration:** Claude API with secure key management  
-**Storage:** IndexedDB with localStorage fallbacks  
-**Charts:** Recharts for analytics visualization  
+**Frontend:** React 18, TypeScript, TailwindCSS, Vite
+**Editor:** TipTap v3 with custom extensions
+**AI Integration:** Claude API with secure key management
+**Storage:** IndexedDB with localStorage fallbacks
+**Charts:** Recharts for analytics visualization
 **Deployment:** Vercel with CI/CD pipeline
 
 ---
@@ -776,45 +781,45 @@ MIT License © 2025 Inkwell Authors
 
 ### For Writers & Users
 
-📚 **[User Guide](USER_GUIDE.md)** - Complete guide for writers using Inkwell  
+📚 **[User Guide](USER_GUIDE.md)** - Complete guide for writers using Inkwell
 🚀 **[Getting Started](README.md#getting-started-for-contributors)** - Quick setup and first-time user workflow
 
 ### For Developers
 
-🏗️ **[Architecture Overview](README.md#system-architecture-overview)** - System design and component relationships  
-🤖 **[AI Services](docs/dev/ai-services.md)** - Claude integration, retry logic, and mock services  
-💾 **[Storage System](docs/dev/storage.md)** - Profile isolation, IndexedDB, and backup strategies  
-🎓 **[Onboarding & Tours](docs/dev/onboarding.md)** - Tutorial system, first draft path, and analytics  
-🧪 **[Testing Guide](docs/TESTING_GUIDE.md)** - Comprehensive testing patterns, setup, and best practices (✅ 72.31% coverage)  
+🏗️ **[Architecture Overview](README.md#system-architecture-overview)** - System design and component relationships
+🤖 **[AI Services](docs/dev/ai-services.md)** - Claude integration, retry logic, and mock services
+💾 **[Storage System](docs/dev/storage.md)** - Profile isolation, IndexedDB, and backup strategies
+🎓 **[Onboarding & Tours](docs/dev/onboarding.md)** - Tutorial system, first draft path, and analytics
+🧪 **[Testing Guide](docs/TESTING_GUIDE.md)** - Comprehensive testing patterns, setup, and best practices (✅ 72.31% coverage)
 📊 **[Test Coverage Summary](docs/test-coverage-summary.md)** - Module-by-module coverage breakdown and improvements
 
 ### Feature Documentation
 
-🔐 **[Multi-Profile System](docs/MULTI_PROFILE_SYSTEM.md)** - Complete multi-user workspace isolation  
-🎓 **[Beginner Mode Integration](docs/BEGINNER_MODE_INTEGRATION.md)** - 15-minute onboarding system  
-🎨 **[Plot Boards](docs/PLOT_BOARDS.md)** - Kanban-style story organization with collaboration  
-🎯 **[Enhanced Onboarding](src/components/Onboarding/README.md)** - 8-layer onboarding system  
-📂 **[Project Management](src/components/ProjectManagement/README.md)** - Project organization and search  
-⚡ **[Performance Guardrails](docs/PERFORMANCE_GUARDRAILS.md)** - Optimization for large projects
+🔐 **[Multi-Profile System](docs/MULTI_PROFILE_SYSTEM.md)** - Complete multi-user workspace isolation
+🎓 **[Beginner Mode Integration](docs/BEGINNER_MODE_INTEGRATION.md)** - 15-minute onboarding system
+🎨 **[Plot Boards](docs/PLOT_BOARDS.md)** - Kanban-style story organization with collaboration
+🎯 **[Enhanced Onboarding](src/components/Onboarding/README.md)** - 8-layer onboarding system
+📂 **[Project Management](src/components/ProjectManagement/README.md)** - Project organization and search
+⚡ **[Performance Guardrails](docs/PERFORMANCE_GuARDRAILS.md)** - Optimization for large projects
 
 ### Brand & Design
 
-🩶 **[Brand Guide](docs/BRANDING_GUIDE.md)** - Complete visual identity system  
-🎨 **[Brand Colors](docs/COLORS.md)** - Blue & gold color system with accessibility  
-🏷️ **[Brand Assets](public/brand/README.md)** - Logo, color, and asset directory  
+🩶 **[Brand Guide](docs/BRANDING_GUIDE.md)** - Complete visual identity system
+🎨 **[Brand Colors](docs/COLORS.md)** - Blue & gold color system with accessibility
+🏷️ **[Brand Assets](public/brand/README.md)** - Logo, color, and asset directory
 🎆 **[Brand Update Summary](docs/BRAND_UPDATE_SUMMARY.md)** - Implementation guide
 
 ### Deployment & Operations
 
-🚀 **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions  
-🔧 **[ESLint Migration](docs/ESLINT_MIGRATION.md)** - Technical migration details  
-📊 **[Trace System](docs/TRACE_SYSTEM.md)** - Performance monitoring and debugging  
+🚀 **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
+🔧 **[ESLint Migration](docs/ESLINT_MIGRATION.md)** - Technical migration details
+📊 **[Trace System](docs/TRACE_SYSTEM.md)** - Performance monitoring and debugging
 🤖 **[AI Services (Legacy)](docs/AI_SERVICES.md)** - Original AI documentation
 
 ---
 
 ## Links
 
-**Live Demo:** https://vercel.com/dave-hails-projects-c68e1a61/inkwell2  
-**Repository:** https://github.com/oklahomahail/Inkwell2  
+**Live Demo:** https://vercel.com/dave-hails-projects-c68e1a61/inkwell2
+**Repository:** https://github.com/oklahomahail/Inkwell2
 **Issues:** https://github.com/oklahomahail/Inkwell2/issues

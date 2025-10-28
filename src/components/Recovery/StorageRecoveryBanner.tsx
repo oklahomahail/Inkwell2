@@ -2,6 +2,8 @@
 import { AlertTriangle, Download, Trash2, RefreshCw, X } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
+import devLog from "src/utils/devLogger";
+
 import { useToast } from '@/context/toast';
 
 import { exportService } from '../../services/exportService';
@@ -47,7 +49,7 @@ export const StorageRecoveryBanner: React.FC<StorageRecoveryBannerProps> = ({ on
       showToast(`Cleanup complete! Freed ${(result.freedBytes / 1024).toFixed(1)}KB`, 'success');
 
       if (result.actions.length > 0) {
-        console.log('Cleanup actions performed:', result.actions);
+        devLog.debug('Cleanup actions performed:', result.actions);
       }
 
       // Refresh quota info

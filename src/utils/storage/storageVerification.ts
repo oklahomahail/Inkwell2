@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 // src/utils/storage/storageVerification.ts - Storage verification utilities for debugging and testing
 
 /**
@@ -44,7 +45,7 @@ export async function checkPersistence(): Promise<boolean> {
   }
 
   const persisted = await navigator.storage.persisted();
-  console.log(`[Storage] Persistence status: ${persisted ? '✅ GRANTED' : '❌ NOT GRANTED'}`);
+  devLog.debug(`[Storage] Persistence status: ${persisted ? '✅ GRANTED' : '❌ NOT GRANTED'}`);
   return persisted;
 }
 
@@ -58,7 +59,7 @@ export async function requestPersistence(): Promise<boolean> {
   }
 
   const granted = await navigator.storage.persist();
-  console.log(`[Storage] Persistence request: ${granted ? '✅ GRANTED' : '❌ DENIED'}`);
+  devLog.debug(`[Storage] Persistence request: ${granted ? '✅ GRANTED' : '❌ DENIED'}`);
   return granted;
 }
 
@@ -76,10 +77,10 @@ export async function checkQuota(): Promise<{ quota: number; usage: number; perc
   const usage = estimate.usage || 0;
   const percent = quota > 0 ? (usage / quota) * 100 : 0;
 
-  console.log('[Storage] Quota info:');
-  console.log(`  Used: ${formatBytes(usage)}`);
-  console.log(`  Total: ${formatBytes(quota)}`);
-  console.log(`  Percent: ${percent.toFixed(2)}%`);
+  devLog.debug('[Storage] Quota info:');
+  devLog.debug(`  Used: ${formatBytes(usage)}`);
+  devLog.debug(`  Total: ${formatBytes(quota)}`);
+  devLog.debug(`  Percent: ${percent.toFixed(2)}%`);
 
   return { quota, usage, percent };
 }
@@ -96,7 +97,7 @@ export async function listDatabases(): Promise<string[]> {
   const dbs = await indexedDB.databases();
   const names = dbs.map((db) => db.name || 'unnamed');
 
-  console.log('[Storage] Databases found:', names);
+  devLog.debug('[Storage] Databases found:', names);
   return names;
 }
 
@@ -115,7 +116,7 @@ export async function inspectDatabase(dbName: string): Promise<DatabaseInfo | nu
         stores: Array.from(db.objectStoreNames),
       };
 
-      console.log(`[Storage] Database "${dbName}":`, info);
+      devLog.debug(`[Storage] Database "${dbName}":`, info);
       db.close();
       resolve(info);
     };
@@ -163,9 +164,9 @@ export async function listStoreContents(
           count++;
           cursor.continue();
         } else {
-          console.log(`[Storage] Store "${storeName}" contains ${count} items`);
+          devLog.debug(`[Storage] Store "${storeName}" contains ${count} items`);
           if (count > 0) {
-            console.log('First item:', items[0]);
+            devLog.debug('First item:', items[0]);
           }
           db.close();
           resolve({ storeName, count, items });
@@ -196,17 +197,17 @@ export function clearAuthToken(): void {
   );
 
   if (authKeys.length === 0) {
-    console.log('[Auth] No Supabase auth tokens found');
+    devLog.debug('[Auth] No Supabase auth tokens found');
     return;
   }
 
   authKeys.forEach((key) => {
     localStorage.removeItem(key);
-    console.log(`[Auth] Removed: ${key}`);
+    devLog.debug(`[Auth] Removed: ${key}`);
   });
 
-  console.log('[Auth] ✅ Auth tokens cleared. Refresh page to re-authenticate.');
-  console.log('[Auth] Your IndexedDB data should still be intact.');
+  devLog.debug('[Auth] ✅ Auth tokens cleared. Refresh page to re-authenticate.');
+  devLog.debug('[Auth] Your IndexedDB data should still be intact.');
 }
 
 /**
@@ -220,7 +221,7 @@ export async function checkAll(): Promise<StorageInfo> {
   const databases = await listDatabases();
   const origin = window.location.origin;
 
-  console.log('[Storage] Origin:', origin);
+  devLog.debug('[Storage] Origin:', origin);
 
   const info: StorageInfo = {
     persisted,
@@ -264,7 +265,7 @@ if (typeof window !== 'undefined') {
     checkAll,
   };
 
-  console.log(
+  devLog.debug(
     '[Storage] Debug utilities available at window.storageDebug',
     '\nExamples:',
     '\n  await storageDebug.checkAll()',

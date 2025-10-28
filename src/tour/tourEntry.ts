@@ -3,6 +3,7 @@
  *
  * Convenience functions for starting tours from various parts of the app.
  */
+import devLog from "src/utils/devLogger";
 
 import { DEFAULT_TOUR_ID, defaultTourConfig, defaultTourSteps } from './configs/defaultTour';
 import { isTourDone, markTourDone, resetTour } from './persistence';
@@ -111,7 +112,7 @@ export function startTourById(
 
   // Check if tour was already completed
   if (skipIfCompleted && isTourDone(tourId)) {
-    console.log(`[TourEntry] Tour "${tourId}" already completed, skipping`);
+    devLog.debug(`[TourEntry] Tour "${tourId}" already completed, skipping`);
     return;
   }
 

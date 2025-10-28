@@ -1,3 +1,4 @@
+import devLog from "@/utils/devLogger";
 // src/components/Layout/MainLayout.test.tsx
 import { screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -92,7 +93,7 @@ describe('MainLayout', () => {
     // Skip this test until plot boards implementation is completed
     // The test is currently failing because the plot-boards-panel element doesn't exist
     // This might need component mocking if the plot boards panel is imported
-    console.log('Test skipped: Plot boards panel test needs update');
+    devLog.debug('Test skipped: Plot boards panel test needs update');
     expect(true).toBe(true);
   });
 

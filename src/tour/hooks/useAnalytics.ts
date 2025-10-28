@@ -1,7 +1,9 @@
 // File: src/tour/hooks/useAnalytics.ts
 // Analytics hook for tracking tour usage
-
 import { useCallback } from 'react';
+
+import devLog from "src/utils/devLogger";
+
 
 type TrackingEvent = {
   eventName: string;
@@ -23,7 +25,7 @@ export function useAnalytics() {
 
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Tour Analytics]', { eventName, properties });
+      devLog.debug('[Tour Analytics]', { eventName, properties });
     }
   }, []);
 

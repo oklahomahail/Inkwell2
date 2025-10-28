@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 
+import devLog from "src/utils/devLogger";
+
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { shouldStartTourForUser } from '@/lib/tourEligibility';
@@ -41,7 +43,7 @@ export default function AuthCallback() {
     let mounted = true;
 
     // For test debugging
-    console.log('[AuthCallback] Effect running - processing authentication');
+    devLog.debug('[AuthCallback] Effect running - processing authentication');
 
     (async () => {
       // For environment detection
@@ -59,12 +61,12 @@ export default function AuthCallback() {
       // Check for tour flag - if present, set flag for auto-start on dashboard
       const tourParam = getParam(url, 'tour');
       if (tourParam === '1') {
-        console.log('[AuthCallback] Tour flag detected, will auto-start Spotlight tour');
+        devLog.debug('[AuthCallback] Tour flag detected, will auto-start Spotlight tour');
         localStorage.setItem('inkwell.spotlight.start', '1');
       }
 
       // Log the redirect path for debugging
-      console.log('[AuthCallback] Raw redirect to:', rawRedirectTo);
+      devLog.debug('[AuthCallback] Raw redirect to:', rawRedirectTo);
 
       // Supabase can return either:
       // 1) ?code=...   (new GoTrue flow)
@@ -75,20 +77,20 @@ export default function AuthCallback() {
       const type = getParam(url, 'type'); // 'signup' / 'recovery' / 'email_change'
 
       // Enhanced debug info for troubleshooting
-      console.log('[AuthCallback] href', window.location.href);
-      console.log('[AuthCallback] url object', {
+      devLog.debug('[AuthCallback] href', window.location.href);
+      devLog.debug('[AuthCallback] url object', {
         pathname: url.pathname,
         search: url.search,
         hash: url.hash,
         fullParams: Object.fromEntries(url.searchParams.entries()),
       });
-      console.log('[AuthCallback] code?', getParam(url, 'code'));
-      console.log('[AuthCallback] token_hash?', getParam(url, 'token_hash'));
-      console.log('[AuthCallback] type?', getParam(url, 'type'));
-      console.log('[AuthCallback] view?', getParam(url, 'view'));
+      devLog.debug('[AuthCallback] code?', getParam(url, 'code'));
+      devLog.debug('[AuthCallback] token_hash?', getParam(url, 'token_hash'));
+      devLog.debug('[AuthCallback] type?', getParam(url, 'type'));
+      devLog.debug('[AuthCallback] view?', getParam(url, 'view'));
 
-      if (code) console.log('[AuthCallback] Using code flow');
-      if (tokenHash) console.log('[AuthCallback] Using token_hash flow');
+      if (code) devLog.debug('[AuthCallback] Using code flow');
+      if (tokenHash) devLog.debug('[AuthCallback] Using token_hash flow');
 
       try {
         // For tests only - direct simulation of success/failure cases
@@ -128,7 +130,7 @@ export default function AuthCallback() {
         } else if (tokenHash) {
           // Legacy/verify-OTP flow
           const verifyType = type === 'recovery' || type === 'email_change' ? type : 'signup';
-          console.log(
+          devLog.debug(
             `[AuthCallback] Using verifyOtp with type="${verifyType}", token_hash=present`,
           );
           const { data, error } = await supabase.auth.verifyOtp({
@@ -149,16 +151,16 @@ export default function AuthCallback() {
           // Handle special case - check for existing session
           // This is a special case we're seeing in production where only a type parameter is present
           // This can happen with newer Supabase versions where the auth flow has changed
-          console.log(`[AuthCallback] Trying type-only verification with type=${type}`);
+          devLog.debug(`[AuthCallback] Trying type-only verification with type=${type}`);
 
           try {
             // First check if we already have a valid session - this is the most common case
             // when a token-based auth completed but redirected without code/token_hash
-            console.log('[AuthCallback] Checking for existing session as primary strategy');
+            devLog.debug('[AuthCallback] Checking for existing session as primary strategy');
             const { data: sessionData } = await supabase.auth.getSession();
 
             if (sessionData?.session) {
-              console.log(
+              devLog.debug(
                 '[AuthCallback] Found existing session in type-only flow, proceeding to redirect',
               );
 
@@ -167,19 +169,19 @@ export default function AuthCallback() {
               // For signup type with no token/hash, we should NOT attempt OTP verification
               // as it will always fail with a 400 error
               if (type === 'signup') {
-                console.log(
+                devLog.debug(
                   '[AuthCallback] Signup confirmation detected, skipping OTP verification',
                 );
 
                 // Check for existing session one more time before sending to sign-in
                 // This helps when the hash fragment might have been stripped but the session cookie exists
-                console.log(
+                devLog.debug(
                   '[AuthCallback] Double-checking for existing session before redirecting',
                 );
                 const { data: finalSessionCheck } = await supabase.auth.getSession();
 
                 if (finalSessionCheck?.session) {
-                  console.log(
+                  devLog.debug(
                     '[AuthCallback] Found existing session on second check, proceeding to dashboard',
                   );
                   authSuccess = true;
@@ -192,14 +194,14 @@ export default function AuthCallback() {
                 }
               } else if (type === 'recovery' && !tokenHash) {
                 // For recovery without token, redirect to forgot-password
-                console.log(
+                devLog.debug(
                   '[AuthCallback] Recovery without token detected, redirecting to forgot-password',
                 );
                 go('/auth/forgot-password', { replace: true });
                 return;
               } else {
                 // For other types, try the fallback OTP verification
-                console.log('[AuthCallback] No session found, trying OTP verification as fallback');
+                devLog.debug('[AuthCallback] No session found, trying OTP verification as fallback');
                 const verifyType = type === 'recovery' || type === 'email_change' ? type : 'signup';
 
                 // Only attempt OTP verification if we have a token_hash from the URL
@@ -210,21 +212,21 @@ export default function AuthCallback() {
                   });
 
                   if (!error && data?.session) {
-                    console.log('[AuthCallback] Type-only OTP verification successful');
+                    devLog.debug('[AuthCallback] Type-only OTP verification successful');
                     authSuccess = true;
                   }
                 } else {
-                  console.log('[AuthCallback] Skipping OTP verification due to missing token_hash');
+                  devLog.debug('[AuthCallback] Skipping OTP verification due to missing token_hash');
                 }
               }
             }
 
             // Last chance - try refreshing the session
-            console.log('[AuthCallback] Trying session refresh as last resort');
+            devLog.debug('[AuthCallback] Trying session refresh as last resort');
             const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
 
             if (!refreshError && refreshData?.session) {
-              console.log('[AuthCallback] Session refresh successful');
+              devLog.debug('[AuthCallback] Session refresh successful');
               authSuccess = true;
             }
 
@@ -241,14 +243,14 @@ export default function AuthCallback() {
           const access_token = hashParams.get('access_token');
           const refresh_token = hashParams.get('refresh_token');
           if (access_token && refresh_token) {
-            console.log('[AuthCallback] Using hash tokens flow');
+            devLog.debug('[AuthCallback] Using hash tokens flow');
             const { error } = await supabase.auth.setSession({ access_token, refresh_token });
             if (error) throw error;
             authSuccess = true;
           }
         } else {
           // Fallback to getSession()
-          console.log('[AuthCallback] No explicit tokens found, falling back to getSession()');
+          devLog.debug('[AuthCallback] No explicit tokens found, falling back to getSession()');
           const { data, error } = await supabase.auth.getSession();
           if (error) {
             console.error('[AuthCallback] Error during getSession:', error);
@@ -274,7 +276,7 @@ export default function AuthCallback() {
 
             // 2. Navigate to dashboard (or start tour if eligible)
             const destination = shouldStartTour ? '/dashboard?tour=1' : rawRedirectTo;
-            console.log('[AuthCallback] Resolved path:', destination);
+            devLog.debug('[AuthCallback] Resolved path:', destination);
             go(destination, { replace: true });
             return;
           } catch (resolveError) {
@@ -317,9 +319,9 @@ export default function AuthCallback() {
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         for (const registration of registrations) {
           registration.unregister();
-          console.log('[AuthCallback] Unregistered service worker:', registration.scope);
+          devLog.debug('[AuthCallback] Unregistered service worker:', registration.scope);
         }
-        console.log('[AuthCallback] All service workers cleared');
+        devLog.debug('[AuthCallback] All service workers cleared');
         return registrations.length;
       });
     }

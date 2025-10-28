@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+import devLog from "src/utils/devLogger";
+
 import { trackPreviewSignedUp } from '@/features/preview/analytics';
 import { supabase } from '@/lib/supabaseClient';
 import { log } from '@/utils/logger';
@@ -93,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Handle password recovery flow
       if (event === 'PASSWORD_RECOVERY') {
-        console.log('[Auth] Password recovery event detected');
+        devLog.debug('[Auth] Password recovery event detected');
         // Redirect to password update page
         window.location.href = '/auth/update-password';
       }

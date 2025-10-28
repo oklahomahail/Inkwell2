@@ -2,6 +2,8 @@
 import { ArrowLeft, ArrowRight, Compass, Clock, Eye } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 
+import devLog from "src/utils/devLogger";
+
 import { enhancedTimelineService } from '@/services/enhancedTimelineService';
 
 interface TimelineNavigationProps {
@@ -250,7 +252,7 @@ const TimelineNavigation: React.FC<TimelineNavigationProps> = ({
             onClick={() => {
               // This would navigate to a timeline overview/map view
               // Implementation depends on your timeline view component
-              console.log('Navigate to timeline overview');
+              devLog.debug('Navigate to timeline overview');
             }}
             className="px-3 py-2 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition-colors"
           >

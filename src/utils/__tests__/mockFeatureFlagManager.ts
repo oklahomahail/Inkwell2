@@ -1,3 +1,5 @@
+import devLog from "src/utils/devLogger";
+
 import { FeatureFlagCategory, FeatureFlagConfig, FeatureFlagState } from '../../types/featureFlags';
 
 // Constants - this is the source of truth for test data
@@ -150,7 +152,7 @@ export class MockFeatureFlagManager {
     );
 
     if (flag.requiresReload) {
-      console.log(`⚠️ Feature ${flag.name} requires page reload to take effect`);
+      devLog.debug(`⚠️ Feature ${flag.name} requires page reload to take effect`);
     }
   }
 

@@ -1,5 +1,7 @@
 // @ts-nocheck
 // src/services/storyArchitectService.ts - UPDATED WITH REAL API
+import devLog from "src/utils/devLogger";
+
 import claudeService from './claudeService';
 
 import type { Character, EnhancedProject } from '../types/project';
@@ -276,7 +278,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
 
   async generateOutline(premise: StoryPremise): Promise<GeneratedOutline> {
     try {
-      console.log(
+      devLog.debug(
         '🎯 Story Architect: Generating outline with real Claude API for:',
         premise.title,
       );
@@ -296,7 +298,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
         throw new Error('Empty response from AI service');
       }
 
-      console.log('✅ Story Architect: Received response from Claude API');
+      devLog.debug('✅ Story Architect: Received response from Claude API');
 
       // Parse the JSON response with better error handling
       let cleanResponse = claudeResponse.trim();
@@ -318,15 +320,15 @@ Your entire response must be valid JSON only. Do not include any text outside th
         parsedOutline = JSON.parse(cleanResponse);
       } catch (parseError) {
         console.error('JSON Parse Error:', parseError);
-        console.log('Raw response:', claudeResponse);
-        console.log('Cleaned response:', cleanResponse);
+        devLog.debug('Raw response:', claudeResponse);
+        devLog.debug('Cleaned response:', cleanResponse);
 
         // Try to extract JSON from the response if it's embedded in text
         const jsonMatch = cleanResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           try {
             parsedOutline = JSON.parse(jsonMatch[0]);
-            console.log('🔧 Successfully extracted JSON from response');
+            devLog.debug('🔧 Successfully extracted JSON from response');
           } catch {
             throw new Error('Could not parse JSON from Claude response. Please try again.');
           }
@@ -350,8 +352,8 @@ Your entire response must be valid JSON only. Do not include any text outside th
         throw new Error('No characters generated. Please try again.');
       }
 
-      console.log('🎉 Story Architect: Successfully generated story outline');
-      console.log(
+      devLog.debug('🎉 Story Architect: Successfully generated story outline');
+      devLog.debug(
         `Generated ${parsedOutline.chapters.length} chapters with ${parsedOutline.characters.length} characters`,
       );
 
@@ -375,7 +377,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
         }
         if (error.message.includes('JSON') || error.message.includes('parse')) {
           // For JSON errors, fall back to mock generation so users aren't stuck
-          console.log('⚠️ JSON parsing failed, falling back to mock generation');
+          devLog.debug('⚠️ JSON parsing failed, falling back to mock generation');
           return this.generateMockOutline(premise);
         }
       }
@@ -387,7 +389,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
   }
 
   private generateMockOutline(premise: StoryPremise): GeneratedOutline {
-    console.log('🔄 Using fallback mock generation for:', premise.title);
+    devLog.debug('🔄 Using fallback mock generation for:', premise.title);
 
     const mockOutline: GeneratedOutline = {
       title: premise.title,

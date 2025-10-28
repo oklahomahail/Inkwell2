@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 // src/utils/storage/persistenceE2E.ts - E2E persistence verification helpers
 
 /**
@@ -97,19 +98,19 @@ export async function createTestData(): Promise<TestDataResult> {
 
     db.close();
 
-    console.log('✅ [E2E] Test data created:', {
+    devLog.debug('✅ [E2E] Test data created:', {
       project: projectData.name,
       chapter: chapterData.name,
       timestamp: TEST_TIMESTAMP,
     });
 
-    console.log('📋 [E2E] Next steps:');
-    console.log('  1. Refresh the page (Cmd/Ctrl + Shift + R)');
-    console.log('  2. Run: await persistenceE2E.verifyTestData()');
-    console.log('  OR');
-    console.log('  1. Run: persistenceE2E.simulateReauth()');
-    console.log('  2. Refresh and sign back in');
-    console.log('  3. Run: await persistenceE2E.verifyTestData()');
+    devLog.debug('📋 [E2E] Next steps:');
+    devLog.debug('  1. Refresh the page (Cmd/Ctrl + Shift + R)');
+    devLog.debug('  2. Run: await persistenceE2E.verifyTestData()');
+    devLog.debug('  OR');
+    devLog.debug('  1. Run: persistenceE2E.simulateReauth()');
+    devLog.debug('  2. Refresh and sign back in');
+    devLog.debug('  3. Run: await persistenceE2E.verifyTestData()');
 
     return {
       success: true,
@@ -156,15 +157,15 @@ export async function verifyTestData(): Promise<TestDataResult> {
     db.close();
 
     if (testProject && testChapter) {
-      console.log('✅ [E2E] PERSISTENCE VERIFIED - Test data survived!');
-      console.log('  Project:', testProject);
-      console.log('  Chapter:', testChapter);
+      devLog.debug('✅ [E2E] PERSISTENCE VERIFIED - Test data survived!');
+      devLog.debug('  Project:', testProject);
+      devLog.debug('  Chapter:', testChapter);
 
       const ageMs = Date.now() - testProject.metadata.testTimestamp;
       const ageSec = Math.floor(ageMs / 1000);
       const ageMin = Math.floor(ageSec / 60);
 
-      console.log(`  Age: ${ageMin > 0 ? `${ageMin} minutes` : `${ageSec} seconds`}`);
+      devLog.debug(`  Age: ${ageMin > 0 ? `${ageMin} minutes` : `${ageSec} seconds`}`);
 
       return {
         success: true,
@@ -176,9 +177,9 @@ export async function verifyTestData(): Promise<TestDataResult> {
         },
       };
     } else {
-      console.log('❌ [E2E] PERSISTENCE FAILED - Test data not found');
-      console.log('  Projects found:', projects.length);
-      console.log('  Chapters found:', chapters.length);
+      devLog.debug('❌ [E2E] PERSISTENCE FAILED - Test data not found');
+      devLog.debug('  Projects found:', projects.length);
+      devLog.debug('  Chapters found:', chapters.length);
 
       return {
         success: false,
@@ -253,7 +254,7 @@ export async function cleanupTestData(): Promise<TestDataResult> {
 
     db.close();
 
-    console.log(`✅ [E2E] Cleaned up ${deleted} test items`);
+    devLog.debug(`✅ [E2E] Cleaned up ${deleted} test items`);
 
     return {
       success: true,
@@ -279,22 +280,22 @@ export function simulateReauth(): void {
   );
 
   if (authKeys.length === 0) {
-    console.log('⚠️ [E2E] No Supabase auth tokens found');
+    devLog.debug('⚠️ [E2E] No Supabase auth tokens found');
     return;
   }
 
   authKeys.forEach((key) => {
     localStorage.removeItem(key);
-    console.log(`🔑 [E2E] Removed auth token: ${key}`);
+    devLog.debug(`🔑 [E2E] Removed auth token: ${key}`);
   });
 
-  console.log('✅ [E2E] Auth tokens cleared');
-  console.log('📋 [E2E] Next steps:');
-  console.log('  1. Refresh the page');
-  console.log('  2. Sign back in');
-  console.log('  3. Run: await persistenceE2E.verifyTestData()');
-  console.log('');
-  console.log('💡 Your IndexedDB data should still be intact!');
+  devLog.debug('✅ [E2E] Auth tokens cleared');
+  devLog.debug('📋 [E2E] Next steps:');
+  devLog.debug('  1. Refresh the page');
+  devLog.debug('  2. Sign back in');
+  devLog.debug('  3. Run: await persistenceE2E.verifyTestData()');
+  devLog.debug('');
+  devLog.debug('💡 Your IndexedDB data should still be intact!');
 }
 
 /**
@@ -304,14 +305,14 @@ export async function runFullTest(): Promise<void> {
   console.group('🧪 [E2E] Running Full Persistence Test');
 
   // Step 1: Check current state
-  console.log('Step 1: Checking initial storage health...');
+  devLog.debug('Step 1: Checking initial storage health...');
   const health = await getStorageHealth();
-  console.log('  Persisted:', health.persisted ? '✅' : '❌');
-  console.log('  Private Mode:', health.privateMode ? '⚠️ YES' : '✅ NO');
-  console.log('  Usage:', health.usageFormatted, '/', health.quotaFormatted);
+  devLog.debug('  Persisted:', health.persisted ? '✅' : '❌');
+  devLog.debug('  Private Mode:', health.privateMode ? '⚠️ YES' : '✅ NO');
+  devLog.debug('  Usage:', health.usageFormatted, '/', health.quotaFormatted);
 
   // Step 2: Create test data
-  console.log('\nStep 2: Creating test data...');
+  devLog.debug('\nStep 2: Creating test data...');
   const createResult = await createTestData();
   if (!createResult.success) {
     console.error('❌ Test failed at creation step');
@@ -320,7 +321,7 @@ export async function runFullTest(): Promise<void> {
   }
 
   // Step 3: Immediate verification
-  console.log('\nStep 3: Immediate verification...');
+  devLog.debug('\nStep 3: Immediate verification...');
   const verifyResult = await verifyTestData();
   if (!verifyResult.success) {
     console.error('❌ Test failed - data not found immediately after creation');
@@ -328,14 +329,14 @@ export async function runFullTest(): Promise<void> {
     return;
   }
 
-  console.log('\n✅ Test setup complete!');
-  console.log('\n📋 Manual steps required:');
-  console.log('  1. Refresh this page (Cmd/Ctrl + Shift + R)');
-  console.log('  2. Run: await persistenceE2E.verifyTestData()');
-  console.log('  3. Run: persistenceE2E.simulateReauth()');
-  console.log('  4. Refresh and sign back in');
-  console.log('  5. Run: await persistenceE2E.verifyTestData()');
-  console.log('  6. Run: await persistenceE2E.cleanupTestData()');
+  devLog.debug('\n✅ Test setup complete!');
+  devLog.debug('\n📋 Manual steps required:');
+  devLog.debug('  1. Refresh this page (Cmd/Ctrl + Shift + R)');
+  devLog.debug('  2. Run: await persistenceE2E.verifyTestData()');
+  devLog.debug('  3. Run: persistenceE2E.simulateReauth()');
+  devLog.debug('  4. Refresh and sign back in');
+  devLog.debug('  5. Run: await persistenceE2E.verifyTestData()');
+  devLog.debug('  6. Run: await persistenceE2E.cleanupTestData()');
 
   console.groupEnd();
 }
@@ -412,7 +413,7 @@ export const persistenceE2E = {
 // Global window access
 if (typeof window !== 'undefined') {
   (window as any).persistenceE2E = persistenceE2E;
-  console.log(
+  devLog.debug(
     '[E2E] Persistence testing utilities available at window.persistenceE2E',
     '\nQuick start:',
     '\n  await persistenceE2E.runFullTest()',

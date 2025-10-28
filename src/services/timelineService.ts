@@ -1,5 +1,7 @@
 // @ts-nocheck
 // src/services/timelineService.ts
+import devLog from "src/utils/devLogger";
+
 import type { EnhancedProject } from '@/types/project';
 import type { TimelineItem, TimelineRange } from '@/types/timeline';
 
@@ -435,7 +437,7 @@ class TimelineService {
       if (typeof window !== 'undefined' && (window as any).analyticsService) {
         (window as any).analyticsService.track(eventName, data);
       } else {
-        console.log(`Analytics: ${eventName}`, data);
+        devLog.debug(`Analytics: ${eventName}`, data);
       }
     } catch (error) {
       console.debug('Analytics tracking failed:', error);

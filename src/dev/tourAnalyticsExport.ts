@@ -6,6 +6,7 @@
  *   import { downloadTourCSV } from '@/dev/tourAnalyticsExport';
  *   downloadTourCSV();
  */
+import devLog from "src/utils/devLogger";
 
 import type { TourEvent } from '@/tour/adapters/analyticsAdapter';
 
@@ -47,7 +48,7 @@ export function downloadTourCSV(): void {
     a.click();
     URL.revokeObjectURL(url);
 
-    console.log(`✅ Downloaded ${events.length} tour events to CSV`);
+    devLog.debug(`✅ Downloaded ${events.length} tour events to CSV`);
   } catch (error) {
     console.error('❌ Failed to download tour CSV:', error);
   }
@@ -100,7 +101,7 @@ export function downloadTourSummaryJSON(): void {
     a.click();
     URL.revokeObjectURL(url);
 
-    console.log('✅ Downloaded tour summary statistics');
+    devLog.debug('✅ Downloaded tour summary statistics');
     console.table(summary.byTour);
   } catch (error) {
     console.error('❌ Failed to download tour summary:', error);
@@ -114,8 +115,8 @@ export function printTourAnalytics(): void {
   try {
     const events: TourEvent[] = JSON.parse(localStorage.getItem('analytics.tour.events') || '[]');
 
-    console.log('\n📊 Tour Analytics Summary\n');
-    console.log(`Total Events: ${events.length}`);
+    devLog.debug('\n📊 Tour Analytics Summary\n');
+    devLog.debug(`Total Events: ${events.length}`);
 
     // By type
     const byType: Record<string, number> = {};
@@ -123,7 +124,7 @@ export function printTourAnalytics(): void {
       byType[e.type] = (byType[e.type] || 0) + 1;
     });
 
-    console.log('\n📈 Events by Type:');
+    devLog.debug('\n📈 Events by Type:');
     console.table(Object.entries(byType).map(([type, count]) => ({ type, count })));
 
     // By tour
@@ -149,12 +150,12 @@ export function printTourAnalytics(): void {
       }
     });
 
-    console.log('\n🎯 Completion Rates by Tour:');
+    devLog.debug('\n🎯 Completion Rates by Tour:');
     console.table(byTour);
 
     // Recent events
     const recent = events.slice(-10);
-    console.log('\n🕐 Recent Events (last 10):');
+    devLog.debug('\n🕐 Recent Events (last 10):');
     console.table(
       recent.map((e) => ({
         type: e.type,
@@ -175,5 +176,5 @@ if (import.meta.env.DEV) {
     print: printTourAnalytics,
   };
 
-  console.log('💡 Tour analytics helpers available: window.tourAnalytics');
+  devLog.debug('💡 Tour analytics helpers available: window.tourAnalytics');
 }

@@ -1,5 +1,6 @@
 // Backup utilities for project snapshots with integrity checks
 // Handles project export/import, validation, and recovery operations
+import devLog from "src/utils/devLogger";
 
 import { CURRENT_SCHEMA_VERSION, createVersionedData } from '../domain/schemaVersion';
 import {
@@ -135,7 +136,7 @@ export async function createProjectBackup(
       },
     };
 
-    console.log(
+    devLog.debug(
       `📦 Created backup for project "${project.name}" with ${manifest.itemCounts.scenes} scenes`,
     );
 
@@ -339,7 +340,7 @@ export async function restoreProjectBackup(
       () => storage.put(`project:${projectId}:settings`, repairedProject.settings),
     ]);
 
-    console.log(`✅ Restored project "${repairedProject.name}" with ID: ${projectId}`);
+    devLog.debug(`✅ Restored project "${repairedProject.name}" with ID: ${projectId}`);
     return projectId;
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'code' in error) {
@@ -394,7 +395,7 @@ async function repairProjectData(project: Project): Promise<Project> {
       repaired.chapters?.reduce((total, chapter) => total + (chapter.totalWordCount || 0), 0) || 0,
   };
 
-  console.log('🔧 Applied data repairs to project');
+  devLog.debug('🔧 Applied data repairs to project');
   return repaired;
 }
 

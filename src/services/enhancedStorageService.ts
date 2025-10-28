@@ -1,5 +1,6 @@
 // @ts-nocheck
 // src/services/enhancedStorageService.ts
+import devLog from "src/utils/devLogger";
 
 import { EnhancedProject } from '@/types/project';
 
@@ -192,7 +193,7 @@ export class EnhancedStorageService {
       // Create snapshot if significant changes
       await this.maybeCreateSnapshotAsync(updatedProject);
 
-      console.log(`Project saved safely: ${updatedProject.name || updatedProject.id}`);
+      devLog.debug(`Project saved safely: ${updatedProject.name || updatedProject.id}`);
       return { success: true };
     } catch (error) {
       const errorMessage = `Failed to save project safely: ${error instanceof Error ? error.message : 'Unknown error'}`;
@@ -232,7 +233,7 @@ export class EnhancedStorageService {
       if (result.success) {
         // Delete related data
         this.deleteProjectData(projectId);
-        console.log(`Project deleted safely: ${projectId}`);
+        devLog.debug(`Project deleted safely: ${projectId}`);
       }
 
       return result;
@@ -338,7 +339,7 @@ export class EnhancedStorageService {
   static setAutoSnapshotEnabled(enabled: boolean): void {
     this.autoSnapshotEnabled = enabled;
     localStorage.setItem(this.AUTO_SNAPSHOT_KEY, enabled.toString());
-    console.log(`Auto-snapshots ${enabled ? 'enabled' : 'disabled'}`);
+    devLog.debug(`Auto-snapshots ${enabled ? 'enabled' : 'disabled'}`);
   }
 
   /**
@@ -414,7 +415,7 @@ export class EnhancedStorageService {
     if (!result.success && result.error) {
       // If quota error, try emergency cleanup
       if (result.error.type === 'quota') {
-        console.log('Quota exceeded, attempting emergency cleanup...');
+        devLog.debug('Quota exceeded, attempting emergency cleanup...');
         const cleanup = await quotaAwareStorage.emergencyCleanup();
         if (cleanup.freedBytes > 0) {
           // Retry after cleanup
@@ -567,7 +568,7 @@ export class EnhancedStorageService {
         try {
           if (status?.isOnline) {
             if (status.queuedWrites > 0) {
-              console.log('Processing queued storage operations...');
+              devLog.debug('Processing queued storage operations...');
             }
           }
         } catch (error) {

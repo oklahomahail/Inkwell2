@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 // AI Plot Analysis Service
 // Provides intelligent story analysis capabilities with mock mode for development
 
@@ -97,7 +98,7 @@ class AIPlotAnalysisService {
     projectId: string,
     options: PlotAnalysisOptions = {},
   ): Promise<PlotAnalysisResult> {
-    console.log(`Analyzing project ${projectId} with options:`, options);
+    devLog.debug(`Analyzing project ${projectId} with options:`, options);
 
     if (this.MOCK_MODE || options.mockMode) {
       return this.generateMockAnalysis(projectId, options);
@@ -238,7 +239,7 @@ class AIPlotAnalysisService {
    */
   async getAnalysisHistory(projectId: string): Promise<PlotAnalysisResult[]> {
     // TODO: Implement storage/retrieval
-    console.log(`Getting analysis history for project ${projectId}`);
+    devLog.debug(`Getting analysis history for project ${projectId}`);
     return [];
   }
 
@@ -247,7 +248,7 @@ class AIPlotAnalysisService {
    */
   async saveAnalysis(analysis: PlotAnalysisResult): Promise<void> {
     // TODO: Implement storage
-    console.log('Saving analysis:', analysis.id);
+    devLog.debug('Saving analysis:', analysis.id);
   }
 
   /**

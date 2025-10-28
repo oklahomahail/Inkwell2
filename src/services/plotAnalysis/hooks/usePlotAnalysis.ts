@@ -1,6 +1,8 @@
 // React hook for managing plot analysis state and execution
-
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import devLog from "src/utils/devLogger";
+
 
 import type { Project } from '@/context/AppContext';
 
@@ -117,7 +119,7 @@ export function usePlotAnalysis({ project, initialFilters }: UsePlotAnalysisOpti
       setLastAnalyzedAt(Date.now());
       setStatus('ready');
 
-      console.log(`Analysis completed in ${Math.round(performance.now() - started)}ms`);
+      devLog.debug(`Analysis completed in ${Math.round(performance.now() - started)}ms`);
     } catch (e: any) {
       if (ctl.signal.aborted) return;
 

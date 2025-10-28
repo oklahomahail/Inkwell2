@@ -1,3 +1,4 @@
+import devLog from "src/utils/devLogger";
 /**
  * Origin Guard Utilities
  * Detects when app is running on unexpected origins (preview URLs, etc.)
@@ -60,7 +61,7 @@ export function warnIfDifferentOrigin(): void {
   }
 
   if (import.meta.env.DEV) {
-    console.log('[Inkwell Origin Info]', {
+    devLog.debug('[Inkwell Origin Info]', {
       current: info.current,
       expected: info.expected,
       isProduction: info.isProduction,

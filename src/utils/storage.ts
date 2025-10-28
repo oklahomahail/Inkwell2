@@ -1,5 +1,6 @@
 // Comprehensive storage abstraction layer for Inkwell
 // Provides IndexedDB helpers, JSON snapshots, and streaming export capabilities
+import devLog from "src/utils/devLogger";
 
 import {
   createVersionedData,
@@ -215,7 +216,7 @@ class StorageManager {
         validateSchemaVersion(version);
 
         if (options.autoMigrate !== false && needsMigration(data)) {
-          console.log(`🔄 Auto-migrating data for key: ${key}`);
+          devLog.debug(`🔄 Auto-migrating data for key: ${key}`);
           const migrated = await runMigrations(data, version);
           await this.adapter.put(key, migrated); // Save migrated data
           return migrated as T;

@@ -1,3 +1,5 @@
+import devLog from "src/utils/devLogger";
+
 import { FeatureFlagCategory, FeatureFlagState } from '../types/featureFlags';
 
 import { FEATURE_FLAGS } from './featureFlags.config';
@@ -90,7 +92,7 @@ export class FeatureFlagManager {
     this.cache.set(flagKey, enabled);
 
     if (flag.requiresReload) {
-      console.log(`⚠️ Feature ${flag.name} requires page reload to take effect`);
+      devLog.debug(`⚠️ Feature ${flag.name} requires page reload to take effect`);
     }
   }
 

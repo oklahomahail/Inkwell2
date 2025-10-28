@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
+import devLog from "src/utils/devLogger";
+
 import { supabase } from '@/lib/supabaseClient';
 import { useGo } from '@/utils/navigate';
 import { normalizeSafeRedirect } from '@/utils/safeRedirect';
@@ -52,7 +54,7 @@ export default function UpdatePassword() {
         setSubmitting(true);
         setError(null);
 
-        console.log('[UpdatePassword] Updating password');
+        devLog.debug('[UpdatePassword] Updating password');
 
         const { error } = await supabase.auth.updateUser({
           password,
@@ -60,7 +62,7 @@ export default function UpdatePassword() {
 
         if (error) throw error;
 
-        console.log('[UpdatePassword] Password updated successfully');
+        devLog.debug('[UpdatePassword] Password updated successfully');
         setSuccess(true);
 
         // Auto-redirect after a short delay

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
+import devLog from "src/utils/devLogger";
+
 import { log } from '@/utils/logger';
 
 // UI + panels
@@ -82,7 +84,7 @@ function RootRedirect() {
   useEffect(() => {
     if (!loading && !hasInitiatedRedirect) {
       setHasInitiatedRedirect(true);
-      console.log(
+      devLog.debug(
         '[RootRedirect] Auth loaded, user state:',
         user ? 'authenticated' : 'unauthenticated',
       );
@@ -120,7 +122,7 @@ function AppShell() {
   // Show loading spinner while checking auth (prevents content flash)
   if (loading) {
     // Log loading state for debugging
-    console.log('[App] Auth loading state active, showing loading spinner');
+    devLog.debug('[App] Auth loading state active, showing loading spinner');
 
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -297,7 +299,7 @@ function ProfileAppShell() {
       try {
         const result = await enhancedStorageService.performMaintenance();
         if (result.actions.length > 0) {
-          console.log('Startup maintenance completed:', result.actions);
+          devLog.debug('Startup maintenance completed:', result.actions);
         }
       } catch (error) {
         log.warn('Startup maintenance failed:', error);
@@ -508,7 +510,7 @@ function StorageDebugPanel() {
             <button
               onClick={async () => {
                 const result = await enhancedStorageService.performMaintenance();
-                console.log('Manual maintenance:', result);
+                devLog.debug('Manual maintenance:', result);
                 refreshStats();
               }}
               className="w-full mt-2 px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"

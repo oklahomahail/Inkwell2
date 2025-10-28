@@ -1,12 +1,13 @@
 // @ts-nocheck
+import devLog from "src/utils/devLogger";
 import { SearchBenchmarkHarness } from './searchBenchmarkHarness';
 
 async function _simpleBenchmark() {
   try {
-    console.log('Creating benchmark harness...');
+    devLog.debug('Creating benchmark harness...');
     const harness = new SearchBenchmarkHarness();
 
-    console.log('Starting benchmark with explicit logging...');
+    devLog.debug('Starting benchmark with explicit logging...');
     const result = await harness.runBenchmark({
       warmupQueries: 5, // Reduced for testing
       benchmarkQueries: 10, // Reduced for testing
@@ -25,11 +26,11 @@ async function _simpleBenchmark() {
       logResults: true, // Enable detailed logging
     });
 
-    console.log('\n=== BENCHMARK COMPLETED ===');
-    console.log(`Status: ${result.passed ? 'PASS' : 'FAIL'}`);
-    console.log(`Corpus: ${result.corpus.totalWords} words, ${result.corpus.totalScenes} scenes`);
-    console.log(`P50: ${result.queryPerformance.p50.toFixed(1)}ms`);
-    console.log(`P95: ${result.queryPerformance.p95.toFixed(1)}ms`);
+    devLog.debug('\n=== BENCHMARK COMPLETED ===');
+    devLog.debug(`Status: ${result.passed ? 'PASS' : 'FAIL'}`);
+    devLog.debug(`Corpus: ${result.corpus.totalWords} words, ${result.corpus.totalScenes} scenes`);
+    devLog.debug(`P50: ${result.queryPerformance.p50.toFixed(1)}ms`);
+    devLog.debug(`P95: ${result.queryPerformance.p95.toFixed(1)}ms`);
   } catch (error: unknown) {
     console.error('Benchmark failed:', error);
     if (error instanceof Error) {

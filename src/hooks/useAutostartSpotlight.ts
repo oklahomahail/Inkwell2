@@ -2,8 +2,10 @@
  * Auto-start Spotlight Tour Hook
  * Manages first-run detection and tour auto-start
  */
-
 import { useEffect, useState } from 'react';
+
+import devLog from "src/utils/devLogger";
+
 
 import { getSpotlightSteps } from '@/tour/getSpotlightSteps';
 import { tourService } from '@/tour/TourService';
@@ -64,11 +66,11 @@ export function useAutostartSpotlight() {
         allowSkip: true,
         onComplete: () => {
           markTourCompleted();
-          console.log('[useAutostartSpotlight] Tour completed');
+          devLog.debug('[useAutostartSpotlight] Tour completed');
         },
         onSkip: () => {
           markTourCompleted();
-          console.log('[useAutostartSpotlight] Tour skipped');
+          devLog.debug('[useAutostartSpotlight] Tour skipped');
         },
       });
 
@@ -90,10 +92,10 @@ export function useAutostartSpotlight() {
       showProgress: true,
       allowSkip: true,
       onComplete: () => {
-        console.log('[useAutostartSpotlight] Manual tour completed');
+        devLog.debug('[useAutostartSpotlight] Manual tour completed');
       },
       onSkip: () => {
-        console.log('[useAutostartSpotlight] Manual tour skipped');
+        devLog.debug('[useAutostartSpotlight] Manual tour skipped');
       },
     });
   };

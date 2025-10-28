@@ -1,4 +1,5 @@
 // exportController.ts - Orchestrates the full export pipeline
+import devLog from "src/utils/devLogger";
 
 import {
   ExportJob,
@@ -22,7 +23,7 @@ const analytics: AnalyticsService = {
   track: (event: string, data: unknown) => {
     // Replace with your real analytics service
 
-    console.log(`Analytics: ${event}`, data);
+    devLog.debug(`Analytics: ${event}`, data);
   },
 };
 

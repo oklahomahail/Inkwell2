@@ -1,4 +1,6 @@
 // src/services/aiRetryService.ts
+import devLog from "src/utils/devLogger";
+
 import { analyticsService } from './analyticsService';
 
 interface RetryConfig {
@@ -80,7 +82,7 @@ class AIRetryService {
       }
       // Transition to HALF_OPEN to test service
       this.circuitState = CircuitState.HALF_OPEN;
-      console.log('🔄 Circuit breaker: Transitioning to HALF_OPEN state');
+      devLog.debug('🔄 Circuit breaker: Transitioning to HALF_OPEN state');
     }
 
     let lastError: Error = new Error('Unknown error');
@@ -97,7 +99,7 @@ class AIRetryService {
 
         if (this.circuitState === CircuitState.HALF_OPEN) {
           this.circuitState = CircuitState.CLOSED;
-          console.log('✅ Circuit breaker: Service recovered, state is now CLOSED');
+          devLog.debug('✅ Circuit breaker: Service recovered, state is now CLOSED');
         }
 
         // Track successful retry if this wasn't the first attempt
@@ -137,13 +139,13 @@ class AIRetryService {
 
         // Don't retry certain error types
         if (!this.isRetryableError(lastError)) {
-          console.log(`Non-retryable error for ${context}:`, lastError.message);
+          devLog.debug(`Non-retryable error for ${context}:`, lastError.message);
           break;
         }
 
         // Calculate delay with exponential backoff and jitter
         const delay = this.calculateDelay(attempt);
-        console.log(`Retry attempt ${attempt + 1} for ${context} in ${delay}ms`);
+        devLog.debug(`Retry attempt ${attempt + 1} for ${context} in ${delay}ms`);
 
         await this.sleep(delay);
       }
@@ -196,7 +198,7 @@ class AIRetryService {
   resetCircuit(): void {
     this.circuitState = CircuitState.CLOSED;
     this.stats.failureCount = 0;
-    console.log('🔄 Circuit breaker manually reset to CLOSED state');
+    devLog.debug('🔄 Circuit breaker manually reset to CLOSED state');
 
     analyticsService.track('ai_circuit_breaker_manual_reset', {
       previousFailureCount: this.stats.failureCount,

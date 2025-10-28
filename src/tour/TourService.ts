@@ -2,6 +2,7 @@
  * Tour Service
  * Manages tour state and lifecycle
  */
+import devLog from "src/utils/devLogger";
 
 import { tourAnalytics } from './adapters/analyticsAdapter';
 
@@ -223,7 +224,7 @@ class TourService {
     this.notify();
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('[TourService] Refreshing tour anchors for step', this.state.currentStep);
+      devLog.debug('[TourService] Refreshing tour anchors for step', this.state.currentStep);
     }
   }
 }
