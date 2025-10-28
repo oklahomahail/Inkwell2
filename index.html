@@ -13,7 +13,30 @@
     <link rel="apple-touch-icon" href="/assets/brand/inkwell-logo-icon-180.png">
     <link rel="manifest" href="/site.webmanifest">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1B2A41" />
+    
+    <!-- Theme initialization - zero-dependency, no-flash, respects user choice -->
+    <script>
+      (function() {
+        try {
+          var persisted = localStorage.getItem('inkwell-theme'); // "dark" | "light" | null
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var wantDark = persisted ? persisted === 'dark' : prefersDark === true ? true : false;
+          if (wantDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark'); // ensures light by default
+          }
+        } catch(_) {
+          // localStorage unavailable - default to light
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
+    
+    <!-- Theme meta tags -->
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0b1323" media="(prefers-color-scheme: dark)">
     <meta name="msapplication-TileColor" content="#D4AF37" />
     
     <!-- SEO Meta Tags -->
@@ -131,33 +154,6 @@
           log("error", "unhandledrejection", { reason: String(e.reason || "") });
         });
         log("log", "boot probe started");
-      })();
-    </script>
-
-    <!-- Theme Pre-mount Script - sets light mode default before app loads -->
-    <script>
-      (function () {
-        try {
-          var KEY = 'inkwell:theme'; // Match the key used in main.tsx
-          var stored = localStorage.getItem(KEY);
-          var theme = stored || 'light'; // Default to light if nothing saved
-          var root = document.documentElement;
-          
-          // Set data-theme attribute for any CSS that uses it
-          root.dataset.theme = theme;
-          
-          // Tailwind uses the 'dark' class, so only toggle that
-          // Don't add 'light' class - light mode is the default (no class needed)
-          if (theme === 'dark') {
-            root.classList.add('dark');
-          } else {
-            root.classList.remove('dark');
-          }
-        } catch (_) {
-          // localStorage unavailable (private mode, etc.)
-          document.documentElement.dataset.theme = 'light';
-          document.documentElement.classList.remove('dark');
-        }
       })();
     </script>
   </head>

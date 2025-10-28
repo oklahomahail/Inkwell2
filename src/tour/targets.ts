@@ -2,7 +2,7 @@
 // File: src/tour/targets.ts
 // Robust target resolution with MutationObserver and fallbacks
 
-import { safeObserve } from '../utils/dom/safeObserver';
+import { safeObserve, safeDisconnect } from '../utils/dom/safeObserver';
 
 import { TourPlacement } from './types';
 
@@ -42,7 +42,7 @@ export async function resolveTarget(
       observer = new MutationObserver(() => {
         const element = tryFind();
         if (element) {
-          if (observer) observer.disconnect();
+          safeDisconnect(observer);
           resolve(element);
         }
       });
@@ -67,7 +67,7 @@ export async function resolveTarget(
 
     // Set timeout to avoid hanging
     setTimeout(() => {
-      if (observer) observer.disconnect();
+      safeDisconnect(observer);
       resolve(tryFind()); // One final try before giving up
     }, timeout);
   });
@@ -124,7 +124,7 @@ export function findTargetWithRetry(
       observer = new MutationObserver(() => {
         const element = tryFind();
         if (element) {
-          if (observer) observer.disconnect();
+          safeDisconnect(observer);
           resolve(element);
         }
       });
@@ -149,7 +149,7 @@ export function findTargetWithRetry(
 
     // Set timeout to avoid hanging
     setTimeout(() => {
-      if (observer) observer.disconnect();
+      safeDisconnect(observer);
       resolve(tryFind()); // One final try before giving up
     }, timeout);
   });

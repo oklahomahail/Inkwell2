@@ -1,26 +1,42 @@
 /**
- * Enhanced safe wrapper for MutationObserver.observe()
- * Prevents crashes from invalid targets with retry mechanism
- * Prevents: "Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'"
+ * One safe Observer API everywhere - prevents "not a Node" errors forever
+ * Routes all observers through one guard to banish crashes
  */
 
+/**
+ * Safe wrapper for MutationObserver.observe()
+ * Prevents crashes from invalid targets (null, undefined, or non-Node)
+ * @returns true if observation started successfully, false otherwise
+ */
 export function safeObserve(
   observer: MutationObserver,
-  target: Element | null,
-  opts: MutationObserverInit,
+  target: Node | null | undefined,
+  options: MutationObserverInit,
 ): boolean {
   if (!target || !(target instanceof Node)) {
     return false;
   }
 
   try {
-    observer.observe(target, opts);
+    observer.observe(target, options);
     return true;
   } catch (error) {
     if (!import.meta.env.PROD) {
       console.warn('[safeObserve] Failed to observe target:', error);
     }
     return false;
+  }
+}
+
+/**
+ * Safe disconnect for observers
+ * Never throws, even if observer is null/undefined
+ */
+export function safeDisconnect(observer: MutationObserver | null | undefined): void {
+  try {
+    observer?.disconnect();
+  } catch (error) {
+    // Silently ignore disconnect errors
   }
 }
 

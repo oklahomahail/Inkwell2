@@ -1,12 +1,11 @@
 /**
- * Auto-Start Tour Integration
+ * Auto-Start Tour Integration (Hardened)
  *
- * Handles automatic tour launching for first-time users.
+ * Handles automatic tour launching for first-time users with robust DOM readiness checks.
  * Only triggers after onboarding is complete and user is on dashboard.
  */
 
-import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useSpotlightAutostart } from '@/components/Onboarding/hooks/useSpotlightAutostartHardened';
 
 import { shouldAutoStartTour, startDefaultTour } from '../tourEntry';
 
@@ -18,43 +17,27 @@ import { shouldAutoStartTour, startDefaultTour } from '../tourEntry';
  * - On the dashboard route
  * - If the tour hasn't been completed before
  * - Once per session
+ * - After all required DOM anchors are ready
+ *
+ * Uses the hardened useSpotlightAutostart hook to prevent race conditions.
  */
 export function AutoStartTourIntegration() {
-  const location = useLocation();
-  const hasAttemptedAutoStart = useRef(false);
+  // These selectors should match the first few steps of the default tour
+  // Adjust based on your tour configuration
+  const tourAnchors = [
+    '[data-spotlight="inbox"]',
+    '[data-spotlight="new-story"]',
+    '[data-tour="editor-toggle"]',
+  ];
 
-  useEffect(() => {
-    // Only auto-start once per session
-    if (hasAttemptedAutoStart.current) {
-      return;
-    }
-
-    // Skip auto-start on certain routes
-    const skipAutoStartRoutes = new Set(['/settings', '/auth']);
-    if (skipAutoStartRoutes.has(location.pathname)) {
-      return;
-    }
-
-    // Only auto-start on the dashboard
-    if (location.pathname !== '/dashboard') {
-      return;
-    }
-
-    // Check if the tour should auto-start
-    if (!shouldAutoStartTour()) {
-      hasAttemptedAutoStart.current = true;
-      return;
-    }
-
-    // Add a small delay to ensure the page is fully loaded
-    const timeoutId = setTimeout(() => {
-      console.log('[AutoStartTour] Launching default tour for first-time user');
-      startDefaultTour();
-      hasAttemptedAutoStart.current = true;
-    }, 1000); // 1 second delay to let the dashboard settle
-
-    return () => clearTimeout(timeoutId);
-  }, [location.pathname]);
+  // Use hardened autostart hook
+  useSpotlightAutostart(tourAnchors, {
+    tourId: 'default-tour',
+    onStartTour: startDefaultTour,
+    shouldStart: shouldAutoStartTour,
+    excludedPaths: ['/settings', '/auth'],
+    dashboardPath: '/dashboard',
+  });
 
   // This is a logic-only component, no UI
   return null;

@@ -8,6 +8,8 @@
 
 import { describe, it, expect } from 'vitest';
 
+import { anchorsReady, waitForAnchors } from '../anchors';
+
 /**
  * Helper to check if an HTML string contains a tour anchor
  */
@@ -108,6 +110,75 @@ describe('Tour Anchor Format', () => {
 
     invalidIds.forEach((id) => {
       expect(id).not.toMatch(/^[a-z]+(-[a-z]+)*$/);
+    });
+  });
+});
+
+/**
+ * Test to ensure tour anchor readiness functions work as expected
+ */
+describe('Tour Anchor Readiness', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  describe('anchorsReady', () => {
+    it('returns true when all selectors are present', () => {
+      document.body.innerHTML = `
+        <div id="anchor-1"></div>
+        <div id="anchor-2"></div>
+      `;
+
+      const result = anchorsReady(['#anchor-1', '#anchor-2']);
+      expect(result).toBe(true);
+    });
+
+    it('returns false when any selector is missing', () => {
+      document.body.innerHTML = `
+        <div id="anchor-1"></div>
+      `;
+
+      const result = anchorsReady(['#anchor-1', '#anchor-2']);
+      expect(result).toBe(false);
+    });
+
+    it('returns true for empty selector array', () => {
+      const result = anchorsReady([]);
+      expect(result).toBe(true);
+    });
+
+    it('handles invalid selectors gracefully', () => {
+      const result = anchorsReady(['[invalid selector']);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('waitForAnchors', () => {
+    it('resolves immediately when anchors are present', async () => {
+      document.body.innerHTML = `
+        <div id="anchor-1"></div>
+        <div id="anchor-2"></div>
+      `;
+
+      const result = await waitForAnchors(['#anchor-1', '#anchor-2'], { timeout: 100 });
+      expect(result).toBe(true);
+    });
+
+    it('resolves when anchors are added after delay', async () => {
+      setTimeout(() => {
+        document.body.innerHTML = `
+          <div id="anchor-1"></div>
+          <div id="anchor-2"></div>
+        `;
+      }, 10);
+
+      const result = await waitForAnchors(['#anchor-1', '#anchor-2'], { timeout: 200 });
+      expect(result).toBe(true);
+    });
+
+    it('resolves false after timeout if anchors never appear', async () => {
+      const result = await waitForAnchors(['#missing-anchor'], { timeout: 100 });
+      expect(result).toBe(false);
     });
   });
 });
