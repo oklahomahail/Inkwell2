@@ -1,5 +1,6 @@
 // src/utils/exportUtils.ts - NEW FILE
 import { type Scene, type Chapter } from '@/types/writing';
+import devLog from "@/utils/devLog";
 
 export type ExportFormat = 'markdown' | 'txt' | 'docx' | 'html';
 
@@ -313,7 +314,7 @@ export function _performExport(
 
     _downloadFile(result.content, result.filename, mimeType);
   } catch (error) {
-    console.error('Export failed:', error);
+    devLog.error('Export failed:', error);
     throw new Error('Export failed. Please try again.');
   }
 }

@@ -296,7 +296,7 @@ export async function restoreProjectBackup(
   }
 
   if (validation.warnings.length > 0) {
-    console.warn('⚠️ Backup has warnings:', validation.warnings);
+    devLog.warn('⚠️ Backup has warnings:', validation.warnings);
   }
 
   try {

@@ -2,12 +2,19 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import devLog from "@/utils/devLog";
+import devLog from "@/utils/devLog";
+import devLog from "@/utils/devLog";
+import devLog from "@/utils/devLog";
+
 import { analyticsService } from '../../services/analyticsService';
 import { useTutorialStorage } from '../../services/tutorialStorage';
 
 import { loadTourPreset } from './presetLoaderHelper';
 
+
 import type { TourType } from './steps/Step.types';
+
 
 type Props = {
   tourType?: TourType;
@@ -77,7 +84,7 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
   // Log tour start on first mount
   useEffect(() => {
     if (import.meta.env.DEV) {
-      console.info('[tour-overlay] tour starting', {
+      devLog.debug('[tour-overlay] tour starting', {
         tourType,
         profileId,
         storage: !!storage,
@@ -85,7 +92,7 @@ export default function TourOverlay({ tourType = 'full-onboarding', onClose, per
     }
     try {
       if (import.meta.env.DEV) {
-        console.info('[tour-overlay] starting tour:', {
+        devLog.debug('[tour-overlay] starting tour:', {
           tourType,
           profileId,
           storage: !!storage,

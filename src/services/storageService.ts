@@ -3,6 +3,7 @@
 import { CHAPTER_STATUS } from '@/consts/writing';
 import { EnhancedProject, WritingSession } from '@/types/project';
 import { type Scene, type Chapter as WritingChapter } from '@/types/writing';
+import devLog from "@/utils/devLog";
 
 export class EnhancedStorageService {
   private static PROJECTS_KEY = 'inkwell_enhanced_projects';
@@ -19,7 +20,7 @@ export class EnhancedStorageService {
       else projects.push(updated);
       localStorage.setItem(this.PROJECTS_KEY, JSON.stringify(projects));
     } catch (error) {
-      console.error('Failed to save project:', error);
+      devLog.error('Failed to save project:', error);
     }
   }
 
@@ -28,7 +29,7 @@ export class EnhancedStorageService {
       const projects = this.loadAllProjects();
       return projects.find((p) => p.id === projectId) || null;
     } catch (error) {
-      console.error('Failed to load project:', error);
+      devLog.error('Failed to load project:', error);
       return null;
     }
   }
@@ -38,7 +39,7 @@ export class EnhancedStorageService {
       const stored = localStorage.getItem(this.PROJECTS_KEY);
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.error('Failed to load projects:', error);
+      devLog.error('Failed to load projects:', error);
       return [];
     }
   }
@@ -76,7 +77,7 @@ export class EnhancedStorageService {
     try {
       localStorage.setItem(this.writingChaptersKey(projectId), JSON.stringify(chapters));
     } catch (error) {
-      console.error('Failed to save writing chapters:', error);
+      devLog.error('Failed to save writing chapters:', error);
     }
   }
 
@@ -85,7 +86,7 @@ export class EnhancedStorageService {
       const raw = localStorage.getItem(this.writingChaptersKey(projectId));
       return raw ? (JSON.parse(raw) as WritingChapter[]) : [];
     } catch (error) {
-      console.error('Failed to load writing chapters:', error);
+      devLog.error('Failed to load writing chapters:', error);
       return [];
     }
   }

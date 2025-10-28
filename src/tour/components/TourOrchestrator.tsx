@@ -4,6 +4,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 
+import devLog from "@/utils/devLog";
+
 import { useAnalytics } from '../hooks/useAnalytics';
 import { useRouter } from '../hooks/useRouter';
 import { useTourStorage } from '../hooks/useTourStorage';
@@ -59,7 +61,7 @@ export function TourOrchestrator({
 
     const attemptToFindTarget = () => {
       if (attempts >= maxAttempts) {
-        console.warn(`Could not find tour target: ${step.target}`);
+        devLog.warn(`Could not find tour target: ${step.target}`);
         return;
       }
 

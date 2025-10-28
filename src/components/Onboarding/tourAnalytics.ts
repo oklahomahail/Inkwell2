@@ -1,4 +1,5 @@
 /**
+import devLog from "@/utils/devLog";
  * Tour Analytics Tracking Utilities
  *
  * Provides consistent, telemetry-friendly event tracking for the Inkwell Spotlight Tour.
@@ -69,7 +70,7 @@ export function trackTourEvent(event: TourEvent, payload: TourEventPayload) {
   // Respect DNT
   if (isDNTEnabled()) {
     if (import.meta.env.DEV) {
-      console.info('[tour-analytics] DNT enabled, skipping event:', event);
+      devLog.debug('[tour-analytics] DNT enabled, skipping event:', event);
     }
     return;
   }
@@ -82,7 +83,7 @@ export function trackTourEvent(event: TourEvent, payload: TourEventPayload) {
 
   // Log in dev
   if (import.meta.env.DEV || isDevEnvironment()) {
-    console.info('[tour-analytics]', event, enrichedPayload);
+    devLog.debug('[tour-analytics]', event, enrichedPayload);
   }
 
   // Dispatch custom event for external listeners
@@ -95,7 +96,7 @@ export function trackTourEvent(event: TourEvent, payload: TourEventPayload) {
   } catch (error) {
     // Silent fail - analytics should never break the app
     if (import.meta.env.DEV) {
-      console.error('[tour-analytics] Failed to dispatch event:', error);
+      devLog.error('[tour-analytics] Failed to dispatch event:', error);
     }
   }
 

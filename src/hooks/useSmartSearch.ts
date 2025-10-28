@@ -1,9 +1,9 @@
 // src/hooks/useSmartSearch.ts
 import { useState, useCallback, useEffect } from 'react';
 
+import { useAppContext } from '@/context/AppContext';
 import devLog from "@/utils/devLog";
 
-import { useAppContext } from '@/context/AppContext';
 
 import { SmartSearchResult } from '../services/smartSearchService';
 

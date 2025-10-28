@@ -1,6 +1,7 @@
 // @ts-nocheck
 import type { TimelineItem } from '@/types/timeline';
 import type { Scene, Character } from '@/types/writing';
+import devLog from "@/utils/devLog";
 
 import { getCharacterBible } from './projectContextService';
 import { storageService } from './storageService';
@@ -44,7 +45,7 @@ class TimelineConflictService {
 
       return out.sort((a, b) => b.confidence - a.confidence);
     } catch (err) {
-      console.error('Failed to analyze project conflicts:', err);
+      devLog.error('Failed to analyze project conflicts:', err);
       return [];
     }
   }
@@ -62,7 +63,7 @@ class TimelineConflictService {
       }
       return out;
     } catch (err) {
-      console.error('Failed to check scene conflicts:', err);
+      devLog.error('Failed to check scene conflicts:', err);
       return [];
     }
   }
@@ -84,7 +85,7 @@ class TimelineConflictService {
     try {
       return storageService.loadScenes(projectId) || [];
     } catch (err) {
-      console.error('Failed to load scenes:', err);
+      devLog.error('Failed to load scenes:', err);
       return [];
     }
   }
@@ -94,7 +95,7 @@ class TimelineConflictService {
       const events = await timelineService.getProjectTimeline(projectId);
       return events.map((e) => ({ ...e }));
     } catch (err) {
-      console.error('Failed to load events:', err);
+      devLog.error('Failed to load events:', err);
       return [];
     }
   }
@@ -109,7 +110,7 @@ class TimelineConflictService {
         updatedAt: new Date(),
       }));
     } catch (err) {
-      console.error('Failed to load characters:', err);
+      devLog.error('Failed to load characters:', err);
       return [];
     }
   }

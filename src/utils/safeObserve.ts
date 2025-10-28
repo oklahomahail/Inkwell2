@@ -1,3 +1,4 @@
+import devLog from '@/utils/devLog';
 /**
  * Safe wrapper for MutationObserver.observe() that prevents crashes from invalid targets
  * Prevents the common error: "Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'"
@@ -12,7 +13,7 @@ export function safeObserve(
 
   // Type guard - blocks null, undefined, window object, numbers, etc.
   if (!target || !(target instanceof Node)) {
-    console.warn('[MO] Invalid observe target (not a DOM Node):', target);
+    devLog.warn('[MO] Invalid observe target (not a DOM Node):', target);
     return false;
   }
 
@@ -20,7 +21,7 @@ export function safeObserve(
     obs.observe(target, options);
     return true;
   } catch (e) {
-    console.warn('[MO] Error observing target:', target, e);
+    devLog.warn('[MO] Error observing target:', target, e);
     return false;
   }
 }

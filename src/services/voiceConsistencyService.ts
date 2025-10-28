@@ -1,3 +1,4 @@
+import devLog from '@/utils/devLog';
 // src/services/voiceConsistencyService.ts
 // Service for analyzing character voice consistency
 
@@ -277,7 +278,7 @@ class VoiceConsistencyService {
 
       return { deviationScore, suggestions };
     } catch (error) {
-      console.error('Voice analysis failed:', error);
+      devLog.error('Voice analysis failed:', error);
       return { deviationScore: 0, suggestions: [] };
     }
   }
@@ -304,7 +305,7 @@ class VoiceConsistencyService {
       const speakerGroups = this.groupDialogueBySpeaker(dialogueLines, text);
 
       // Analyze each group against known fingerprints
-      for (const [speakerId, lines] of speakerGroups.entries()) {
+      for (const [_speakerId, lines] of speakerGroups.entries()) {
         const combinedText = lines.map((line) => line.text).join(' ');
 
         if (combinedText.length < minDialogueLength) continue;
@@ -344,7 +345,7 @@ class VoiceConsistencyService {
         }
       }
     } catch (error) {
-      console.error('Voice consistency analysis failed:', error);
+      devLog.error('Voice consistency analysis failed:', error);
     }
 
     return warnings;
@@ -361,13 +362,13 @@ class VoiceConsistencyService {
 
     dialogueLines.forEach((line, index) => {
       // Try to identify the speaker from context
-      const speakerId = this.identifySpeaker(line, fullText, index);
+      const _speakerId = this.identifySpeaker(line, fullText, index);
 
-      if (!groups.has(speakerId)) {
-        groups.set(speakerId, []);
+      if (!groups.has(_speakerId)) {
+        groups.set(_speakerId, []);
       }
 
-      groups.get(speakerId)!.push(line);
+      groups.get(_speakerId)!.push(line);
     });
 
     return groups;
@@ -537,14 +538,14 @@ class VoiceConsistencyService {
     // Syntactic patterns
     const textLower = text.toLowerCase();
 
-    const contractionPatterns = /\b\w+'\w+\b/g; // don't, can't, etc.
+    const contractionPatterns = /\w+'\w+/g; // don't, can't, etc.
     const contractionsCount = (textLower.match(contractionPatterns) || []).length;
 
     const formalPatterns =
-      /\b(perhaps|however|nonetheless|furthermore|moreover|therefore|consequently)\b/g;
+      /(perhaps|however|nonetheless|furthermore|moreover|therefore|consequently)/g;
     const formalCount = (textLower.match(formalPatterns) || []).length;
 
-    const casualPatterns = /\b(gonna|wanna|gotta|yeah|yep|nah|kinda|sorta)\b/g;
+    const casualPatterns = /(gonna|wanna|gotta|yeah|yep|nah|kinda|sorta)/g;
     const casualCount = (textLower.match(casualPatterns) || []).length;
 
     return {
@@ -765,7 +766,7 @@ class VoiceConsistencyService {
         }
       }
     } catch (error) {
-      console.warn('Failed to load voice fingerprints:', error);
+      devLog.warn('Failed to load voice fingerprints:', error);
     }
   }
 
@@ -783,7 +784,7 @@ class VoiceConsistencyService {
 
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
-      console.error('Failed to save voice fingerprints:', error);
+      devLog.error('Failed to save voice fingerprints:', error);
     }
   }
 }

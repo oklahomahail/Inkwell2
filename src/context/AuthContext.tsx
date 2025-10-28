@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-import devLog from "@/utils/devLog";
 
 import { trackPreviewSignedUp } from '@/features/preview/analytics';
 import { supabase } from '@/lib/supabaseClient';
+import devLog from "@/utils/devLog";
 import { log } from '@/utils/logger';
 import { triggerDashboardView } from '@/utils/tourTriggers';
 
@@ -119,13 +119,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // This ensures emailRedirectTo always targets /auth/callback
     const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent(finalRedirect)}`;
 
-    console.info('[Auth] Sending magic link with:');
-    console.info('  - Final redirect destination:', finalRedirect);
-    console.info('  - Callback URL (emailRedirectTo):', callbackUrl);
-    console.info('  - Origin:', origin);
-    console.info('⚠️  IMPORTANT: This callback URL must be whitelisted in Supabase Dashboard!');
-    console.info('  - Go to: Supabase → Authentication → URL Configuration → Redirect URLs');
-    console.info(`  - Add: ${callbackUrl.split('?')[0]}`);
+    devLog.debug('[Auth] Sending magic link with:');
+    devLog.debug('  - Final redirect destination:', finalRedirect);
+    devLog.debug('  - Callback URL (emailRedirectTo):', callbackUrl);
+    devLog.debug('  - Origin:', origin);
+    devLog.debug('⚠️  IMPORTANT: This callback URL must be whitelisted in Supabase Dashboard!');
+    devLog.debug('  - Go to: Supabase → Authentication → URL Configuration → Redirect URLs');
+    devLog.debug(`  - Add: ${callbackUrl.split('?')[0]}`);
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -138,14 +138,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) {
       log.error('[Auth] Sign-in failed:', error.message);
     } else {
-      console.info('[Auth] Magic link sent successfully! Check your email.');
+      devLog.debug('[Auth] Magic link sent successfully! Check your email.');
     }
 
     return { error };
   };
 
   const signInWithPassword = async (email: string, password: string) => {
-    console.info('[Auth] Attempting to sign in with email/password');
+    devLog.debug('[Auth] Attempting to sign in with email/password');
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -155,21 +155,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) {
       log.error('[Auth] Password sign-in failed:', error.message);
     } else {
-      console.info('[Auth] Password sign-in successful');
+      devLog.debug('[Auth] Password sign-in successful');
     }
 
     return { error };
   };
 
   const signUpWithPassword = async (email: string, password: string) => {
-    console.info('[Auth] Attempting to sign up with email/password');
+    devLog.debug('[Auth] Attempting to sign up with email/password');
 
     // Build the redirect URL for email confirmation with tour flag
     const origin = window.location.origin;
     const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent('/dashboard')}&tour=1`;
 
-    console.info('[Auth] Using emailRedirectTo:', callbackUrl);
-    console.info('[Auth] Tour auto-start enabled for new signups');
+    devLog.debug('[Auth] Using emailRedirectTo:', callbackUrl);
+    devLog.debug('[Auth] Tour auto-start enabled for new signups');
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -182,7 +182,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) {
       log.error('[Auth] Password sign-up failed:', error.message, error);
     } else {
-      console.info(
+      devLog.debug(
         '[Auth] Password sign-up successful - tour will auto-start after email confirmation',
       );
     }

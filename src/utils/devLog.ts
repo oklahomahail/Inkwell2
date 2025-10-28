@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Development-only logging utilities
  * Automatically stripped in production builds
@@ -26,7 +27,7 @@ const devLog = {
   },
   log: (...args: unknown[]) => {
     if (isDev) {
-      console.log(...args);
+      devLog.debug(...args);
     }
   },
   trace: (...args: unknown[]) => {

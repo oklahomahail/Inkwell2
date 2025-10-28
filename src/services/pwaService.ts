@@ -86,7 +86,7 @@ export class PWAService {
         return false;
       }
     } catch (error) {
-      console.error('Error installing PWA:', error);
+      devLog.error('Error installing PWA:', error);
       return false;
     }
   }
@@ -205,7 +205,7 @@ export class OfflineStorageManager {
       };
       localStorage.setItem(draftKey, JSON.stringify(draft));
     } catch (error) {
-      console.error('Failed to save draft:', error);
+      devLog.error('Failed to save draft:', error);
     }
   }
 
@@ -216,7 +216,7 @@ export class OfflineStorageManager {
       const draftJson = localStorage.getItem(draftKey);
       return draftJson ? JSON.parse(draftJson) : null;
     } catch (error) {
-      console.error('Failed to get draft:', error);
+      devLog.error('Failed to get draft:', error);
       return null;
     }
   }
@@ -227,7 +227,7 @@ export class OfflineStorageManager {
       const draftKey = `${this.DRAFT_PREFIX}${projectId}`;
       localStorage.removeItem(draftKey);
     } catch (error) {
-      console.error('Failed to remove draft:', error);
+      devLog.error('Failed to remove draft:', error);
     }
   }
 
@@ -243,7 +243,7 @@ export class OfflineStorageManager {
       queue.push(operation);
       localStorage.setItem(this.SYNC_QUEUE_KEY, JSON.stringify(queue));
     } catch (error) {
-      console.error('Failed to add to sync queue:', error);
+      devLog.error('Failed to add to sync queue:', error);
     }
   }
 
@@ -258,7 +258,7 @@ export class OfflineStorageManager {
       const queueJson = localStorage.getItem(this.SYNC_QUEUE_KEY);
       return queueJson ? JSON.parse(queueJson) : [];
     } catch (error) {
-      console.error('Failed to get sync queue:', error);
+      devLog.error('Failed to get sync queue:', error);
       return [];
     }
   }
@@ -268,7 +268,7 @@ export class OfflineStorageManager {
     try {
       localStorage.removeItem(this.SYNC_QUEUE_KEY);
     } catch (error) {
-      console.error('Failed to clear sync queue:', error);
+      devLog.error('Failed to clear sync queue:', error);
     }
   }
 
@@ -287,7 +287,7 @@ export class OfflineStorageManager {
 
         return { quota, usage, percentUsed };
       } catch (error) {
-        console.error('Failed to get storage info:', error);
+        devLog.error('Failed to get storage info:', error);
       }
     }
 

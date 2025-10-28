@@ -2,9 +2,9 @@
 import { ArrowLeft, ArrowRight, Compass, Clock, Eye } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 
+import { enhancedTimelineService } from '@/services/enhancedTimelineService';
 import devLog from "@/utils/devLog";
 
-import { enhancedTimelineService } from '@/services/enhancedTimelineService';
 
 interface TimelineNavigationProps {
   projectId: string;

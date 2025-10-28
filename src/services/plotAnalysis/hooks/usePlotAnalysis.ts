@@ -1,10 +1,10 @@
 // React hook for managing plot analysis state and execution
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import type { Project } from '@/context/AppContext';
 import devLog from "@/utils/devLog";
 
 
-import type { Project } from '@/context/AppContext';
 
 import { computeProjectHash } from '../dataPrep';
 import { analyzePlot } from '../plotAnalysisService';

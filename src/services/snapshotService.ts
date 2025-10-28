@@ -81,7 +81,7 @@ class SnapshotService {
       devLog.debug(`Snapshot created: ${snapshotId}`, metadata);
       return metadata;
     } catch (error) {
-      console.error('Failed to create snapshot:', error);
+      devLog.error('Failed to create snapshot:', error);
       throw new Error(
         `Snapshot creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -98,7 +98,7 @@ class SnapshotService {
         .filter((snapshot) => snapshot.projectId === projectId)
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     } catch (error) {
-      console.error('Failed to get snapshots:', error);
+      devLog.error('Failed to get snapshots:', error);
       return [];
     }
   }
@@ -133,14 +133,14 @@ class SnapshotService {
       if (snapshotData.metadata.checksum) {
         const currentChecksum = await this.calculateChecksum(snapshotData.project);
         if (currentChecksum !== snapshotData.metadata.checksum) {
-          console.warn(`Checksum mismatch for snapshot ${snapshotId}. Data may be corrupted.`);
+          devLog.warn(`Checksum mismatch for snapshot ${snapshotId}. Data may be corrupted.`);
         }
       }
 
       devLog.debug(`Snapshot restored: ${snapshotId}`);
       return projectValidation.data;
     } catch (error) {
-      console.error('Failed to restore snapshot:', error);
+      devLog.error('Failed to restore snapshot:', error);
       throw new Error(
         `Snapshot restore failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -162,7 +162,7 @@ class SnapshotService {
 
       devLog.debug(`Snapshot deleted: ${snapshotId}`);
     } catch (error) {
-      console.error('Failed to delete snapshot:', error);
+      devLog.error('Failed to delete snapshot:', error);
       throw new Error(
         `Snapshot deletion failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -189,7 +189,7 @@ class SnapshotService {
           this.lastSnapshotTime = now;
         }
       } catch (error) {
-        console.error('Auto-snapshot failed:', error);
+        devLog.error('Auto-snapshot failed:', error);
       }
     }, SnapshotService.AUTO_SNAPSHOT_INTERVAL) as any;
 
@@ -231,7 +231,7 @@ class SnapshotService {
 
       return { totalSize, snapshotCount: index.length, details };
     } catch (error) {
-      console.error('Failed to calculate snapshot storage usage:', error);
+      devLog.error('Failed to calculate snapshot storage usage:', error);
       return { totalSize: 0, snapshotCount: 0, details: [] };
     }
   }
@@ -251,7 +251,7 @@ class SnapshotService {
       devLog.debug(`Emergency cleanup: removed ${toDelete.length} snapshots`);
       return toDelete.length;
     } catch (error) {
-      console.error('Emergency cleanup failed:', error);
+      devLog.error('Emergency cleanup failed:', error);
       return 0;
     }
   }
@@ -266,7 +266,7 @@ class SnapshotService {
       const index = JSON.parse(indexStr);
       return Array.isArray(index) ? index : [];
     } catch (error) {
-      console.error('Failed to load snapshot index:', error);
+      devLog.error('Failed to load snapshot index:', error);
       return [];
     }
   }
@@ -277,7 +277,7 @@ class SnapshotService {
       index.push(metadata);
       localStorage.setItem(SnapshotService.SNAPSHOT_INDEX_KEY, JSON.stringify(index));
     } catch (error) {
-      console.error('Failed to update snapshot index:', error);
+      devLog.error('Failed to update snapshot index:', error);
       throw error;
     }
   }
@@ -295,7 +295,7 @@ class SnapshotService {
         devLog.debug(`Cleaned up ${toDelete.length} old auto-snapshots`);
       }
     } catch (error) {
-      console.error('Failed to cleanup old snapshots:', error);
+      devLog.error('Failed to cleanup old snapshots:', error);
     }
   }
 
@@ -311,7 +311,7 @@ class SnapshotService {
       }
       return hash.toString(16);
     } catch (error) {
-      console.error('Failed to calculate checksum:', error);
+      devLog.error('Failed to calculate checksum:', error);
       return '';
     }
   }

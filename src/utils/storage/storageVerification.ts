@@ -40,7 +40,7 @@ export interface StoreContents {
  */
 export async function checkPersistence(): Promise<boolean> {
   if (!navigator.storage || !navigator.storage.persisted) {
-    console.warn('[Storage] navigator.storage.persisted() not available');
+    devLog.warn('[Storage] navigator.storage.persisted() not available');
     return false;
   }
 
@@ -54,7 +54,7 @@ export async function checkPersistence(): Promise<boolean> {
  */
 export async function requestPersistence(): Promise<boolean> {
   if (!navigator.storage || !navigator.storage.persist) {
-    console.warn('[Storage] navigator.storage.persist() not available');
+    devLog.warn('[Storage] navigator.storage.persist() not available');
     return false;
   }
 
@@ -68,7 +68,7 @@ export async function requestPersistence(): Promise<boolean> {
  */
 export async function checkQuota(): Promise<{ quota: number; usage: number; percent: number }> {
   if (!navigator.storage || !navigator.storage.estimate) {
-    console.warn('[Storage] navigator.storage.estimate() not available');
+    devLog.warn('[Storage] navigator.storage.estimate() not available');
     return { quota: 0, usage: 0, percent: 0 };
   }
 
@@ -90,7 +90,7 @@ export async function checkQuota(): Promise<{ quota: number; usage: number; perc
  */
 export async function listDatabases(): Promise<string[]> {
   if (!('databases' in indexedDB)) {
-    console.warn('[Storage] indexedDB.databases() not supported in this browser');
+    devLog.warn('[Storage] indexedDB.databases() not supported in this browser');
     return [];
   }
 
@@ -122,7 +122,7 @@ export async function inspectDatabase(dbName: string): Promise<DatabaseInfo | nu
     };
 
     request.onerror = () => {
-      console.error(`[Storage] Failed to open database "${dbName}":`, request.error);
+      devLog.error(`[Storage] Failed to open database "${dbName}":`, request.error);
       resolve(null);
     };
   });
@@ -143,7 +143,7 @@ export async function listStoreContents(
       const db = request.result;
 
       if (!db.objectStoreNames.contains(storeName)) {
-        console.error(`[Storage] Store "${storeName}" not found in database "${dbName}"`);
+        devLog.error(`[Storage] Store "${storeName}" not found in database "${dbName}"`);
         db.close();
         resolve({ storeName, count: 0, items: [] });
         return;
@@ -174,14 +174,14 @@ export async function listStoreContents(
       };
 
       cursorRequest.onerror = () => {
-        console.error(`[Storage] Failed to read store "${storeName}":`, cursorRequest.error);
+        devLog.error(`[Storage] Failed to read store "${storeName}":`, cursorRequest.error);
         db.close();
         reject(cursorRequest.error);
       };
     };
 
     request.onerror = () => {
-      console.error(`[Storage] Failed to open database "${dbName}":`, request.error);
+      devLog.error(`[Storage] Failed to open database "${dbName}":`, request.error);
       reject(request.error);
     };
   });

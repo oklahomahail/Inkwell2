@@ -1,3 +1,4 @@
+import devLog from '@/utils/devLog';
 /**
  * Tour Feature Flags Configuration
  * Controls which tour variants are enabled in production
@@ -37,7 +38,7 @@ export function getTourFlags(): TourFeatureFlags {
       return { ...DEFAULT_TOUR_FLAGS, ...parsed };
     }
   } catch (error) {
-    console.warn('[TourFlags] Failed to load flags from storage:', error);
+    devLog.warn('[TourFlags] Failed to load flags from storage:', error);
   }
   return { ...DEFAULT_TOUR_FLAGS };
 }
@@ -54,7 +55,7 @@ export function setTourFlags(flags: Partial<TourFeatureFlags>): void {
     // Notify listeners
     window.dispatchEvent(new CustomEvent('tour:flags-changed', { detail: updated }));
   } catch (error) {
-    console.warn('[TourFlags] Failed to save flags to storage:', error);
+    devLog.warn('[TourFlags] Failed to save flags to storage:', error);
   }
 }
 
@@ -74,7 +75,7 @@ export function resetTourFlags(): void {
     localStorage.removeItem(TOUR_FLAGS_KEY);
     window.dispatchEvent(new CustomEvent('tour:flags-changed', { detail: DEFAULT_TOUR_FLAGS }));
   } catch (error) {
-    console.warn('[TourFlags] Failed to reset flags:', error);
+    devLog.warn('[TourFlags] Failed to reset flags:', error);
   }
 }
 

@@ -2,9 +2,9 @@
 import { X, Bell, Check, AlertCircle, Info } from 'lucide-react';
 import React from 'react';
 
+import type { Notification } from '@/types/notifications';
 import devLog from "@/utils/devLog";
 
-import type { Notification } from '@/types/notifications';
 
 interface NotificationsModalProps {
   onClose: () => void;

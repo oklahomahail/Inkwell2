@@ -1,6 +1,7 @@
 // @ts-nocheck
 // src/services/tourStorage.ts
 import type { TourStep } from '@/types/tour';
+import devLog from "@/utils/devLog";
 
 export interface TourProgress {
   currentStep: number;
@@ -36,7 +37,7 @@ export class LocalTourStorage implements TourStorage {
         lastUpdate: new Date(parsed.lastUpdate),
       };
     } catch (error) {
-      console.warn('Failed to load tour progress:', error);
+      devLog.warn('Failed to load tour progress:', error);
       return null;
     }
   }
@@ -51,7 +52,7 @@ export class LocalTourStorage implements TourStorage {
         }),
       );
     } catch (error) {
-      console.warn('Failed to save tour progress:', error);
+      devLog.warn('Failed to save tour progress:', error);
       throw error;
     }
   }
@@ -61,7 +62,7 @@ export class LocalTourStorage implements TourStorage {
       const stored = localStorage.getItem(this.COMPLETED_TOURS_KEY);
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.warn('Failed to load completed tours:', error);
+      devLog.warn('Failed to load completed tours:', error);
       return [];
     }
   }
@@ -74,7 +75,7 @@ export class LocalTourStorage implements TourStorage {
         localStorage.setItem(this.COMPLETED_TOURS_KEY, JSON.stringify(completed));
       }
     } catch (error) {
-      console.warn('Failed to mark tour as completed:', error);
+      devLog.warn('Failed to mark tour as completed:', error);
       throw error;
     }
   }
@@ -91,7 +92,7 @@ export class LocalTourStorage implements TourStorage {
         localStorage.removeItem(this.COMPLETED_TOURS_KEY);
       }
     } catch (error) {
-      console.warn('Failed to clear tour progress:', error);
+      devLog.warn('Failed to clear tour progress:', error);
       throw error;
     }
   }

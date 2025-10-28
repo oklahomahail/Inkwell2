@@ -1,4 +1,6 @@
 // Storage key compatibility layer for migration to new key format
+import devLog from "@/utils/devLog";
+
 import { getLocalStorage } from './storageAccess';
 
 // Project storage keys
@@ -20,7 +22,7 @@ export function readProjectsFromStorage(ls: Storage = getLocalStorage()) {
   try {
     return JSON.parse(raw);
   } catch (e) {
-    console.error('Failed to parse projects from localStorage:', e);
+    devLog.error('Failed to parse projects from localStorage:', e);
     return [];
   }
 }
@@ -31,7 +33,7 @@ export function writeProjectsToStorage(projects: any[], ls: Storage = getLocalSt
     ls.setItem(PROJECTS_KEY_V2, serialized);
     ls.setItem(PROJECTS_KEY_V1, serialized); // keep legacy key for tests/back-compat
   } catch (e) {
-    console.error('Failed to save projects to storage:', e);
+    devLog.error('Failed to save projects to storage:', e);
   }
 }
 
@@ -49,7 +51,7 @@ export function writeCurrentProjectId(id: string | null, ls: Storage = getLocalS
       ls.setItem(CURRENT_ID_KEY_V1, id);
     }
   } catch (e) {
-    console.error('Failed to save current project ID to storage:', e);
+    devLog.error('Failed to save current project ID to storage:', e);
   }
 }
 
@@ -60,7 +62,7 @@ export function readProfilesFromStorage(ls: Storage = getLocalStorage()) {
   try {
     return JSON.parse(raw);
   } catch (e) {
-    console.error('Failed to load profiles from storage:', e);
+    devLog.error('Failed to load profiles from storage:', e);
     return [];
   }
 }
@@ -71,7 +73,7 @@ export function writeProfilesToStorage(profiles: any[], ls: Storage = getLocalSt
     ls.setItem(PROFILES_KEY_V2, s);
     ls.setItem(PROFILES_KEY_V1, s);
   } catch (e) {
-    console.error('Failed to save profiles to storage:', e);
+    devLog.error('Failed to save profiles to storage:', e);
   }
 }
 
@@ -89,6 +91,6 @@ export function writeActiveProfileId(id: string | null, ls: Storage = getLocalSt
       ls.setItem(ACTIVE_PROFILE_KEY_V1, id);
     }
   } catch (e) {
-    console.error('Failed to save active profile ID to storage:', e);
+    devLog.error('Failed to save active profile ID to storage:', e);
   }
 }

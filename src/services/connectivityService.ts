@@ -76,7 +76,7 @@ class ConnectivityService {
    */
   subscribe(callback: (status: ConnectivityStatus) => void): () => void {
     if (typeof callback !== 'function') {
-      console.error('Invalid callback provided to onStatusChange');
+      devLog.error('Invalid callback provided to onStatusChange');
       return () => {};
     }
 
@@ -132,7 +132,7 @@ class ConnectivityService {
     devLog.debug(`Processing ${this.queue.length} queued operations`);
 
     // Store initial queue length before processing
-    const initialQueueLength = this.queue.length;
+    const _initialQueueLength = this.queue.length;
 
     const processedItems: string[] = [];
     const failedItems: QueuedWrite[] = [];
@@ -146,19 +146,19 @@ class ConnectivityService {
         } else {
           item.retryCount++;
           if (item.retryCount >= ConnectivityService.MAX_RETRIES) {
-            console.error(
+            devLog.error(
               `Failed to process ${item.operation} for ${item.key} after ${item.retryCount} retries`,
             );
             processedItems.push(item.id); // Remove from queue
           } else {
             failedItems.push(item);
-            console.warn(
+            devLog.warn(
               `Retry ${item.retryCount}/${ConnectivityService.MAX_RETRIES} for ${item.operation} on ${item.key}`,
             );
           }
         }
       } catch (_error) {
-        console.error(`Error processing queued ${item.operation} for ${item.key}:`, _error);
+        devLog.error(`Error processing queued ${item.operation} for ${item.key}:`, _error);
         item.retryCount++;
         if (item.retryCount < ConnectivityService.MAX_RETRIES) {
           failedItems.push(item);
@@ -235,7 +235,7 @@ class ConnectivityService {
         // Check for timeout
         elapsed += checkInterval;
         if (elapsed >= timeoutMs) {
-          console.warn('Queue processing wait timed out after', timeoutMs, 'ms');
+          devLog.warn('Queue processing wait timed out after', timeoutMs, 'ms');
           resolve(false);
           return;
         }
@@ -250,7 +250,7 @@ class ConnectivityService {
       // If not already processing, trigger processing
       if (!this.processingQueue && this.isCurrentlyOnline() && this.queue.length > 0) {
         devLog.debug('Starting queue processing');
-        this.processQueue().catch((e) => console.error('Error in processQueue:', e));
+        this.processQueue().catch((e) => devLog.error('Error in processQueue:', e));
       }
     });
   }
@@ -277,7 +277,7 @@ class ConnectivityService {
    */
   onStatusChange(callback: (status: ConnectivityStatus) => void): () => void {
     if (typeof callback !== 'function') {
-      console.error('Invalid callback provided to onStatusChange');
+      devLog.error('Invalid callback provided to onStatusChange');
       return () => {};
     }
 
@@ -287,7 +287,7 @@ class ConnectivityService {
     try {
       callback(this.getStatus());
     } catch (_error) {
-      console.error('Error in status change callback:', _error);
+      devLog.error('Error in status change callback:', _error);
       // Remove the callback if it errors on first call
       const index = this.listeners.indexOf(callback);
       if (index > -1) {
@@ -346,7 +346,7 @@ class ConnectivityService {
     try {
       await quotaAwareStorage.safeRemoveItem(ConnectivityService.QUEUE_KEY);
     } catch (e) {
-      console.error('Failed to clear queue during reset', e);
+      devLog.error('Failed to clear queue during reset', e);
     }
 
     // Re-notify with clean state
@@ -406,7 +406,7 @@ class ConnectivityService {
         try {
           listener(status);
         } catch (error) {
-          console.error('Error in connectivity listener:', error);
+          devLog.error('Error in connectivity listener:', error);
           // Continue with other listeners
         }
       });
@@ -445,7 +445,7 @@ class ConnectivityService {
         try {
           this.processQueue();
         } catch (_e) {
-          console.error('Error during processQueue in handleOnline:', _e);
+          devLog.error('Error during processQueue in handleOnline:', _e);
         }
       }
     }
@@ -481,11 +481,11 @@ class ConnectivityService {
         }
 
         default:
-          console.error(`Unknown queued operation: ${item.operation}`);
+          devLog.error(`Unknown queued operation: ${item.operation}`);
           return false;
       }
     } catch (_error) {
-      console.error(`Failed to execute queued ${item.operation} for ${item.key}:`, _error);
+      devLog.error(`Failed to execute queued ${item.operation} for ${item.key}:`, _error);
       return false;
     }
   }
@@ -498,7 +498,7 @@ class ConnectivityService {
         devLog.debug(`Loaded ${this.queue.length} queued operations from storage`);
       }
     } catch (_error) {
-      console.error('Failed to load offline queue:', _error);
+      devLog.error('Failed to load offline queue:', _error);
       this.queue = [];
     }
   }
@@ -510,10 +510,10 @@ class ConnectivityService {
         JSON.stringify(this.queue),
       );
       if (!result.success) {
-        console.error('Failed to save offline queue:', result.error);
+        devLog.error('Failed to save offline queue:', result.error);
       }
     } catch (_error) {
-      console.error('Failed to save offline queue:', _error);
+      devLog.error('Failed to save offline queue:', _error);
     }
   }
 

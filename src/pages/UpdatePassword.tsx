@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
-import devLog from "@/utils/devLog";
-
 import { supabase } from '@/lib/supabaseClient';
+import devLog from "@/utils/devLog";
 import { useGo } from '@/utils/navigate';
 import { normalizeSafeRedirect } from '@/utils/safeRedirect';
 
@@ -70,7 +69,7 @@ export default function UpdatePassword() {
           go(redirect, { replace: true });
         }, 1500);
       } catch (err) {
-        console.error('[UpdatePassword] Error updating password:', err);
+        devLog.error('[UpdatePassword] Error updating password:', err);
         setError(err instanceof Error ? err.message : 'Failed to update password');
       } finally {
         setSubmitting(false);
@@ -91,12 +90,12 @@ export default function UpdatePassword() {
             alt="Inkwell"
             className="h-16 w-auto"
             onError={(e) => {
-              console.error('Logo failed to load, falling back to wordmark');
+              devLog.error('Logo failed to load, falling back to wordmark');
               // First try the logo path
               (e.currentTarget as HTMLImageElement).src = '/assets/brand/inkwell-wordmark.svg';
               // Add a second fallback in case the logo also fails
               (e.currentTarget as HTMLImageElement).onerror = () => {
-                console.error('Fallback logo also failed, using text wordmark');
+                devLog.error('Fallback logo also failed, using text wordmark');
                 // Replace the img with a text wordmark as final fallback
                 const parent = e.currentTarget.parentElement;
                 if (parent) {

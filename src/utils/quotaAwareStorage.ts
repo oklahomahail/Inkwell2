@@ -144,7 +144,7 @@ class QuotaAwareStorage {
         return this.estimateQuotaFromLocalStorage();
       }
     } catch (error) {
-      console.error('Failed to get quota info:', error);
+      devLog.error('Failed to get quota info:', error);
       return this.estimateQuotaFromLocalStorage();
     }
   }
@@ -224,7 +224,7 @@ class QuotaAwareStorage {
     } catch (error) {
       // Always include primary error message at the top
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error('Emergency cleanup failed:', errorMessage);
+      devLog.error('Emergency cleanup failed:', errorMessage);
       return {
         freedBytes: 0,
         actions: ['Emergency cleanup failed', `Emergency cleanup error: ${errorMessage}`],
@@ -245,7 +245,7 @@ class QuotaAwareStorage {
    */
   onQuotaUpdate(callback: (info: StorageQuotaInfo) => void): () => void {
     if (typeof callback !== 'function') {
-      console.warn('Invalid quota listener provided');
+      devLog.warn('Invalid quota listener provided');
       return () => {};
     }
     this.quotaListeners.push(callback);
@@ -262,7 +262,7 @@ class QuotaAwareStorage {
    */
   onStorageError(callback: (error: StorageError) => void): () => void {
     if (typeof callback !== 'function') {
-      console.warn('Invalid error listener provided');
+      devLog.warn('Invalid error listener provided');
       return () => {};
     }
     this.errorListeners.push(callback);
@@ -363,7 +363,7 @@ class QuotaAwareStorage {
         isCritical: percentUsed >= QuotaAwareStorage.QUOTA_CRITICAL_THRESHOLD,
       };
     } catch (error) {
-      console.error('Failed to estimate quota from localStorage:', error);
+      devLog.error('Failed to estimate quota from localStorage:', error);
       return {
         usage: 0,
         quota: 5 * 1024 * 1024,
@@ -383,7 +383,7 @@ class QuotaAwareStorage {
       const projects = JSON.parse(projectsData);
       return projects.map((p: any) => p.id);
     } catch (error) {
-      console.error('Failed to get project IDs:', error);
+      devLog.error('Failed to get project IDs:', error);
       return [];
     }
   }
@@ -415,7 +415,7 @@ class QuotaAwareStorage {
       try {
         await Promise.resolve(listener(info));
       } catch (error) {
-        console.error('Listener error:', error);
+        devLog.error('Listener error:', error);
       }
     }
   }
@@ -425,7 +425,7 @@ class QuotaAwareStorage {
       try {
         await Promise.resolve(listener(error));
       } catch (listenerError) {
-        console.error('Listener error:', listenerError);
+        devLog.error('Listener error:', listenerError);
       }
     }
   }

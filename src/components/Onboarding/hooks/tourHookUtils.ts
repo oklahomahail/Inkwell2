@@ -18,13 +18,13 @@ export function waitForAnchor(selector: string, timeoutMs = 3000): Promise<Eleme
       const el = document.querySelector(selector);
       if (el) {
         if (import.meta.env.DEV) {
-          console.info('[spotlight] anchor found?', true, { selector });
+          devLog.debug('[spotlight] anchor found?', true, { selector });
         }
         return resolve(el);
       }
       if (performance.now() - start > timeoutMs) {
         if (import.meta.env.DEV) {
-          console.info('[spotlight] anchor timeout after', timeoutMs, 'ms');
+          devLog.debug('[spotlight] anchor timeout after', timeoutMs, 'ms');
         }
         return resolve(null);
       }

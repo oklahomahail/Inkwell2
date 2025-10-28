@@ -1,8 +1,8 @@
 // @ts-nocheck
 // src/services/searchService.ts
+import type { Scene } from '@/types/writing';
 import devLog from "@/utils/devLog";
 
-import type { Scene } from '@/types/writing';
 
 import { storageService } from './storageService';
 
@@ -160,7 +160,7 @@ class SearchService {
         `Search index built for project ${projectId}: ${totalDocuments} documents in ${indexTime}ms`,
       );
     } catch (error) {
-      console.error(`Failed to initialize search for project ${projectId}:`, error);
+      devLog.error(`Failed to initialize search for project ${projectId}:`, error);
       throw error;
     }
   }
@@ -266,7 +266,7 @@ class SearchService {
 
       return results;
     } catch (error) {
-      console.error('Search failed:', error);
+      devLog.error('Search failed:', error);
       return [];
     }
   }
@@ -284,7 +284,7 @@ class SearchService {
     const documents = this.documents.get(projectId);
 
     if (!index || !documents) {
-      console.warn(`No index found for project ${projectId}`);
+      devLog.warn(`No index found for project ${projectId}`);
       return;
     }
 

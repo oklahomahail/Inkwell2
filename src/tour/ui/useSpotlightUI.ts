@@ -1,5 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 
+import devLog from "@/utils/devLog";
+import devLog from "@/utils/devLog";
+
 import { getSpotlightSteps } from '../getSpotlightSteps';
 import { tourService } from '../TourService';
 
@@ -48,7 +51,7 @@ export function useSpotlightUI() {
     }
 
     if (!target) {
-      console.warn(
+      devLog.warn(
         `[SpotlightTour] Target element not found for selectors: ${currentStep.selectors.join(', ')}`,
       );
       setAnchorRect(null);
@@ -88,13 +91,13 @@ export function useSpotlightUI() {
       try {
         sessionStorage.removeItem('inkwell:tour:crash-shield');
       } catch (error) {
-        console.warn('[useSpotlightUI] Failed to clear crash shield state:', error);
+        devLog.warn('[useSpotlightUI] Failed to clear crash shield state:', error);
       }
 
       const spotlightSteps = getSpotlightSteps();
 
       if (spotlightSteps.length === 0) {
-        console.warn('[useSpotlightUI] No spotlight steps available');
+        devLog.warn('[useSpotlightUI] No spotlight steps available');
         return;
       }
 

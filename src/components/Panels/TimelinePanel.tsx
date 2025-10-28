@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
-import devLog from "@/utils/devLog";
 
 import SceneLinkageSuggestions from '@/components/timeline/SceneLinkageSuggestions';
 import TimelineNavigation from '@/components/timeline/TimelineNavigation';
@@ -27,6 +26,7 @@ import { timelineService } from '@/services/timelineService';
 import type { EnhancedProject } from '@/types/project';
 import type { TimelineItem } from '@/types/timeline';
 import { logActivity } from '@/utils/activityLogger';
+import devLog from "@/utils/devLog";
 import { triggerTimelineVisited } from '@/utils/tourTriggers';
 
 type TimelineTab = 'events' | 'validation' | 'linkages' | 'navigation';

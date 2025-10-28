@@ -27,7 +27,7 @@ class ActivityLogger {
         }));
       }
     } catch (error) {
-      console.warn('Failed to load activity logs:', error);
+      devLog.warn('Failed to load activity logs:', error);
       this.logs = [];
     }
   }
@@ -39,7 +39,7 @@ class ActivityLogger {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(recentLogs));
       this.logs = recentLogs;
     } catch (error) {
-      console.warn('Failed to save activity logs:', error);
+      devLog.warn('Failed to save activity logs:', error);
     }
   }
 

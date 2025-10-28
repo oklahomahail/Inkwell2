@@ -1,9 +1,9 @@
 // @ts-nocheck
 // src/services/enhancedSearchService.ts
 // Enhanced search service that prefers a Web Worker and cleanly falls back to main thread
+import type { Chapter } from '@/types/writing';
 import devLog from "@/utils/devLog";
 
-import type { Chapter } from '@/types/writing';
 
 import { searchWorkerService } from './searchWorkerService';
 import { storageService } from './storageService';
@@ -167,7 +167,7 @@ class MainThreadSearchEngine {
         `MainThread: Search index built for project ${projectId}: ${totalDocuments} documents in ${indexTime}ms`,
       );
     } catch (error) {
-      console.error(`MainThread: Failed to initialize search for project ${projectId}:`, error);
+      devLog.error(`MainThread: Failed to initialize search for project ${projectId}:`, error);
       throw error;
     }
   }
@@ -260,7 +260,7 @@ class MainThreadSearchEngine {
 
       return results;
     } catch (error) {
-      console.error('MainThread: Search failed:', error);
+      devLog.error('MainThread: Search failed:', error);
       return [];
     }
   }
@@ -425,7 +425,7 @@ class EnhancedSearchService {
           : 'EnhancedSearchService: Web Worker not available, using main thread fallback',
       );
     } catch (error) {
-      console.warn('EnhancedSearchService: Worker availability check failed:', error);
+      devLog.warn('EnhancedSearchService: Worker availability check failed:', error);
       this.workerAvailable = false;
     }
   }
@@ -440,13 +440,13 @@ class EnhancedSearchService {
 
         const result = await searchWorkerService.initializeProject(projectId, project, chapters);
         if (!result?.success) {
-          console.warn(
+          devLog.warn(
             'EnhancedSearchService: Worker initialization failed, falling back to main thread',
           );
           await this.fallbackEngine.initializeProject(projectId);
         }
       } catch (error) {
-        console.warn('EnhancedSearchService: Worker failed, falling back to main thread:', error);
+        devLog.warn('EnhancedSearchService: Worker failed, falling back to main thread:', error);
         await this.fallbackEngine.initializeProject(projectId);
       }
     } else {
@@ -462,7 +462,7 @@ class EnhancedSearchService {
           return await searchWorkerService.search(options.projectId, query, options);
         }
       } catch (error) {
-        console.warn('EnhancedSearchService: Worker search failed, falling back:', error);
+        devLog.warn('EnhancedSearchService: Worker search failed, falling back:', error);
       }
     }
     return this.fallbackEngine.search(query, options);
@@ -484,7 +484,7 @@ class EnhancedSearchService {
         );
         if (success) return;
       } catch (error) {
-        console.warn('EnhancedSearchService: Worker document update failed:', error);
+        devLog.warn('EnhancedSearchService: Worker document update failed:', error);
       }
     }
     // Fallback: update the main-thread index immediately

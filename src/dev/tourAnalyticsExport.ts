@@ -6,9 +6,9 @@
  *   import { downloadTourCSV } from '@/dev/tourAnalyticsExport';
  *   downloadTourCSV();
  */
+import type { TourEvent } from '@/tour/adapters/analyticsAdapter';
 import devLog from "@/utils/devLog";
 
-import type { TourEvent } from '@/tour/adapters/analyticsAdapter';
 
 /**
  * Download all tour analytics events as CSV

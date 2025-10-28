@@ -546,7 +546,7 @@ class AnalyticsService {
     // Create hash for deduplication
     const hash = `${tourType}|${entryPoint}|${this.sessionId}`;
     if (hash === this.lastTourStartHash) {
-      console.debug('[Analytics] Deduping duplicate tour_started event:', { tourType, entryPoint });
+      devLog.debug('[Analytics] Deduping duplicate tour_started event:', { tourType, entryPoint });
       return; // Skip duplicate events
     }
     this.lastTourStartHash = hash;
@@ -707,7 +707,7 @@ class AnalyticsService {
 
       localStorage.setItem(storageKey, JSON.stringify(recentEvents));
     } catch (error) {
-      console.warn('Failed to store analytics event locally:', error);
+      devLog.warn('Failed to store analytics event locally:', error);
     }
   }
 
@@ -726,7 +726,7 @@ class AnalyticsService {
         }
       });
     } catch (error) {
-      console.warn('Failed to cleanup old analytics data:', error);
+      devLog.warn('Failed to cleanup old analytics data:', error);
     }
   }
 

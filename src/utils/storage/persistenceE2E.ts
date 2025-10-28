@@ -118,7 +118,7 @@ export async function createTestData(): Promise<TestDataResult> {
       details: { projectData, chapterData },
     };
   } catch (error) {
-    console.error('❌ [E2E] Failed to create test data:', error);
+    devLog.error('❌ [E2E] Failed to create test data:', error);
     return {
       success: false,
       message: 'Error creating test data',
@@ -193,7 +193,7 @@ export async function verifyTestData(): Promise<TestDataResult> {
       };
     }
   } catch (error) {
-    console.error('❌ [E2E] Error verifying test data:', error);
+    devLog.error('❌ [E2E] Error verifying test data:', error);
     return {
       success: false,
       message: 'Error checking for test data',
@@ -261,7 +261,7 @@ export async function cleanupTestData(): Promise<TestDataResult> {
       message: `Deleted ${deleted} test items`,
     };
   } catch (error) {
-    console.error('❌ [E2E] Error cleaning up test data:', error);
+    devLog.error('❌ [E2E] Error cleaning up test data:', error);
     return {
       success: false,
       message: 'Error cleaning up test data',
@@ -315,7 +315,7 @@ export async function runFullTest(): Promise<void> {
   devLog.debug('\nStep 2: Creating test data...');
   const createResult = await createTestData();
   if (!createResult.success) {
-    console.error('❌ Test failed at creation step');
+    devLog.error('❌ Test failed at creation step');
     console.groupEnd();
     return;
   }
@@ -324,7 +324,7 @@ export async function runFullTest(): Promise<void> {
   devLog.debug('\nStep 3: Immediate verification...');
   const verifyResult = await verifyTestData();
   if (!verifyResult.success) {
-    console.error('❌ Test failed - data not found immediately after creation');
+    devLog.error('❌ Test failed - data not found immediately after creation');
     console.groupEnd();
     return;
   }
@@ -349,7 +349,7 @@ async function openDatabase(dbName: string): Promise<IDBDatabase | null> {
 
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => {
-      console.error('[E2E] Failed to open database:', request.error);
+      devLog.error('[E2E] Failed to open database:', request.error);
       resolve(null);
     };
   });

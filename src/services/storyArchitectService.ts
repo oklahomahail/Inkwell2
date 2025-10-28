@@ -319,7 +319,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
       try {
         parsedOutline = JSON.parse(cleanResponse);
       } catch (parseError) {
-        console.error('JSON Parse Error:', parseError);
+        devLog.error('JSON Parse Error:', parseError);
         devLog.debug('Raw response:', claudeResponse);
         devLog.debug('Cleaned response:', cleanResponse);
 
@@ -339,7 +339,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
 
       // Validate the structure
       if (!parsedOutline.title || !parsedOutline.chapters || !parsedOutline.characters) {
-        console.warn('Invalid outline structure:', parsedOutline);
+        devLog.warn('Invalid outline structure:', parsedOutline);
         throw new Error('Invalid outline structure received from AI. Please try again.');
       }
 
@@ -362,7 +362,7 @@ Your entire response must be valid JSON only. Do not include any text outside th
 
       return parsedOutline;
     } catch (error) {
-      console.error('❌ Story Architect API Error:', error);
+      devLog.error('❌ Story Architect API Error:', error);
 
       // Provide helpful error messages based on error type
       if (error instanceof Error) {

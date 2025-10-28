@@ -7,6 +7,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import devLog from "@/utils/devLog";
+
 import { useTour } from './TourProvider';
 import { INKWELL_SPOTLIGHT_STEPS } from './tourRegistry';
 
@@ -42,12 +44,12 @@ export function useInkwellSpotlightTour() {
       await startTour('full-onboarding', INKWELL_SPOTLIGHT_STEPS);
 
       // Log start event
-      console.info('[Tour] Inkwell Spotlight Tour started', {
+      devLog.debug('[Tour] Inkwell Spotlight Tour started', {
         timestamp: new Date().toISOString(),
         stepCount: INKWELL_SPOTLIGHT_STEPS.length,
       });
     } catch (error) {
-      console.error('[Tour] Failed to start Spotlight Tour:', error);
+      devLog.error('[Tour] Failed to start Spotlight Tour:', error);
     }
   }, [startTour]);
 
@@ -67,7 +69,7 @@ export function useInkwellSpotlightTour() {
     setHasCompletedBefore(false);
     setHasSkipped(false);
 
-    console.info('[Tour] Inkwell Spotlight Tour reset');
+    devLog.debug('[Tour] Inkwell Spotlight Tour reset');
   }, [resetTour]);
 
   /**
@@ -78,7 +80,7 @@ export function useInkwellSpotlightTour() {
     setHasCompletedBefore(true);
     completeTour();
 
-    console.info('[Tour] Inkwell Spotlight Tour marked as completed');
+    devLog.debug('[Tour] Inkwell Spotlight Tour marked as completed');
   }, [completeTour]);
 
   /**
@@ -88,7 +90,7 @@ export function useInkwellSpotlightTour() {
     localStorage.setItem(SKIP_KEY, 'true');
     setHasSkipped(true);
 
-    console.info('[Tour] Inkwell Spotlight Tour skipped by user');
+    devLog.debug('[Tour] Inkwell Spotlight Tour skipped by user');
   }, []);
 
   /**

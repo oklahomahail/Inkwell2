@@ -187,7 +187,7 @@ Context: You have access to the user's current project and any selected text. Al
           : undefined,
       };
     } catch (error) {
-      console.error('❌ Claude API Error:', error);
+      devLog.error('❌ Claude API Error:', error);
 
       if ((error as Error)?.name === 'ClaudeError') {
         throw error;
@@ -264,7 +264,7 @@ Context: You have access to the user's current project and any selected text. Al
       messages.push(message);
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(messages));
     } catch (e) {
-      console.warn('Failed to save Claude messages:', e);
+      devLog.warn('Failed to save Claude messages:', e);
     }
     this.notifyListeners();
   }
@@ -278,7 +278,7 @@ Context: You have access to the user's current project and any selected text. Al
         ? parsed.map((msg) => ({ ...msg, timestamp: new Date(msg.timestamp) }))
         : [];
     } catch (e) {
-      console.warn('Failed to load Claude messages:', e);
+      devLog.warn('Failed to load Claude messages:', e);
       return [];
     }
   }
@@ -287,7 +287,7 @@ Context: You have access to the user's current project and any selected text. Al
     try {
       localStorage.removeItem(this.STORAGE_KEY);
     } catch (e) {
-      console.warn('Failed to clear messages:', e);
+      devLog.warn('Failed to clear messages:', e);
     }
     this.notifyListeners();
   }
@@ -306,7 +306,7 @@ Context: You have access to the user's current project and any selected text. Al
       const encrypted = CryptoJS.AES.encrypt(apiKey, ENCRYPTION_KEY).toString();
       localStorage.setItem(API_KEY_STORAGE, encrypted);
     } catch (e) {
-      console.warn('Failed to save API key:', e);
+      devLog.warn('Failed to save API key:', e);
     }
   }
 
@@ -317,7 +317,7 @@ Context: You have access to the user's current project and any selected text. Al
       const decrypted = CryptoJS.AES.decrypt(encrypted, ENCRYPTION_KEY);
       return decrypted.toString(CryptoJS.enc.Utf8);
     } catch (e) {
-      console.warn('Failed to load API key:', e);
+      devLog.warn('Failed to load API key:', e);
       return undefined;
     }
   }
@@ -327,7 +327,7 @@ Context: You have access to the user's current project and any selected text. Al
       const { apiKey: _apiKey, ...rest } = this.config;
       localStorage.setItem('claude_config', JSON.stringify(rest));
     } catch (e) {
-      console.warn('Failed to save config:', e);
+      devLog.warn('Failed to save config:', e);
     }
   }
 
@@ -342,7 +342,7 @@ Context: You have access to the user's current project and any selected text. Al
         this.config.apiKey = this.loadApiKey();
       }
     } catch (e) {
-      console.warn('Failed to load config:', e);
+      devLog.warn('Failed to load config:', e);
     }
   }
 
@@ -451,7 +451,7 @@ Context: You have access to the user's current project and any selected text. Al
 
       localStorage.setItem(this.RATE_LIMIT_KEY, JSON.stringify(data));
     } catch (e) {
-      console.warn('Failed to update rate limit:', e);
+      devLog.warn('Failed to update rate limit:', e);
     }
   }
 

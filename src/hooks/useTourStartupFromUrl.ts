@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import devLog from "@/utils/devLog";
-
 import { triggerDashboardView } from '@/utils/tourTriggers';
 
 /**

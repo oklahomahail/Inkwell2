@@ -1,9 +1,8 @@
 import React, { useCallback, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
-import devLog from "@/utils/devLog";
-
 import { supabase } from '@/lib/supabaseClient';
+import devLog from "@/utils/devLog";
 import { normalizeSafeRedirect } from '@/utils/safeRedirect';
 
 export default function ForgotPassword() {
@@ -39,7 +38,7 @@ export default function ForgotPassword() {
         // Always show success even if the email doesn't exist for security reasons
         setSuccess(true);
       } catch (err) {
-        console.error('[ForgotPassword] Error:', err);
+        devLog.error('[ForgotPassword] Error:', err);
         setError(err instanceof Error ? err.message : 'Failed to send reset email');
       } finally {
         setSubmitting(false);
@@ -60,12 +59,12 @@ export default function ForgotPassword() {
             alt="Inkwell"
             className="h-16 w-auto"
             onError={(e) => {
-              console.error('Logo failed to load, falling back to wordmark');
+              devLog.error('Logo failed to load, falling back to wordmark');
               // First try the logo path
               (e.currentTarget as HTMLImageElement).src = '/assets/brand/inkwell-wordmark.svg';
               // Add a second fallback in case the logo also fails
               (e.currentTarget as HTMLImageElement).onerror = () => {
-                console.error('Fallback logo also failed, using text wordmark');
+                devLog.error('Fallback logo also failed, using text wordmark');
                 // Replace the img with a text wordmark as final fallback
                 const parent = e.currentTarget.parentElement;
                 if (parent) {

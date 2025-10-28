@@ -14,6 +14,7 @@ import { Navigate } from 'react-router-dom';
 
 import { useAuth } from '@/context/AuthContext';
 import { isPreviewModeEnabled } from '@/features/preview/isPreviewRoute';
+import devLog from "@/utils/devLog";
 
 export interface PreviewGuardProps {
   children: React.ReactNode;
@@ -30,13 +31,13 @@ export function PreviewGuard({ children }: PreviewGuardProps) {
 
   // If feature flag is off, redirect to signup
   if (!isPreviewEnabled) {
-    console.info('[PreviewGuard] Feature flag disabled, redirecting to signup');
+    devLog.debug('[PreviewGuard] Feature flag disabled, redirecting to signup');
     return <Navigate to="/signup" replace />;
   }
 
   // If user is authenticated, redirect to dashboard
   if (user) {
-    console.info('[PreviewGuard] User authenticated, redirecting to dashboard');
+    devLog.debug('[PreviewGuard] User authenticated, redirecting to dashboard');
     return <Navigate to="/dashboard" replace />;
   }
 

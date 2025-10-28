@@ -220,7 +220,7 @@ class FeatureFlagService {
   setEnabled(flagKey: string, enabled: boolean): void {
     const flag = this.getFlag(flagKey);
     if (!flag) {
-      console.warn(`Unknown feature flag: ${flagKey}`);
+      devLog.warn(`Unknown feature flag: ${flagKey}`);
       return;
     }
 
@@ -420,7 +420,7 @@ class FeatureFlagService {
         ...parsed,
       };
     } catch (error) {
-      console.warn('Failed to load feature flag config:', error);
+      devLog.warn('Failed to load feature flag config:', error);
       return this.getDefaultConfig();
     }
   }
@@ -429,7 +429,7 @@ class FeatureFlagService {
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.config));
     } catch (error) {
-      console.warn('Failed to save feature flag config:', error);
+      devLog.warn('Failed to save feature flag config:', error);
     }
   }
 
@@ -457,7 +457,7 @@ class FeatureFlagService {
       try {
         callback(currentFlags);
       } catch (error) {
-        console.error('Feature flag listener error:', error);
+        devLog.error('Feature flag listener error:', error);
       }
     });
   }

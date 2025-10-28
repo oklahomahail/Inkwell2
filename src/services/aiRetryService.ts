@@ -26,7 +26,7 @@ enum CircuitState {
 interface RequestAttempt {
   timestamp: number;
   success: boolean;
-  error?: string;
+  _error?: string;
   retryCount: number;
 }
 
@@ -76,25 +76,25 @@ class AIRetryService {
     // Check circuit breaker first
     if (this.circuitState === CircuitState.OPEN) {
       if (!this.shouldAttemptReset()) {
-        const error = new Error(`Circuit breaker is OPEN. Service unavailable for ${context}.`);
-        this.recordAttempt(false, error.message, 0);
-        throw error;
+        const _error = new Error(`Circuit breaker is OPEN. Service unavailable for ${context}.`);
+        this.recordAttempt(false, _error.message, 0);
+        throw _error;
       }
       // Transition to HALF_OPEN to test service
       this.circuitState = CircuitState.HALF_OPEN;
       devLog.debug('🔄 Circuit breaker: Transitioning to HALF_OPEN state');
     }
 
-    let lastError: Error = new Error('Unknown error');
+    let lastError: Error = new Error('Unknown _error');
 
     for (let attempt = 0; attempt <= this.retryConfig.maxRetries; attempt++) {
       try {
         const startTime = Date.now();
         const result = await operation();
-        const duration = Date.now() - startTime;
+        const _duration = Date.now() - startTime;
 
         // Success - update circuit breaker
-        this.recordSuccess(duration);
+        this.recordSuccess(_duration);
         this.recordAttempt(true, undefined, attempt);
 
         if (this.circuitState === CircuitState.HALF_OPEN) {
@@ -107,13 +107,13 @@ class AIRetryService {
           analyticsService.track('ai_request_retry_success', {
             context,
             attempts: attempt + 1,
-            duration,
+            _duration,
           });
         }
 
         return result;
-      } catch (error) {
-        lastError = error as Error;
+      } catch (_error) {
+        lastError = _error as Error;
         const _duration = Date.now();
 
         // Record failure
@@ -123,7 +123,7 @@ class AIRetryService {
         // Check if we should break the circuit
         if (this.shouldOpenCircuit()) {
           this.circuitState = CircuitState.OPEN;
-          console.warn('⚠️ Circuit breaker: Opening circuit due to repeated failures');
+          devLog.warn('⚠️ Circuit breaker: Opening circuit due to repeated failures');
 
           analyticsService.track('ai_circuit_breaker_opened', {
             context,
@@ -137,9 +137,9 @@ class AIRetryService {
           break;
         }
 
-        // Don't retry certain error types
+        // Don't retry certain _error types
         if (!this.isRetryableError(lastError)) {
-          devLog.debug(`Non-retryable error for ${context}:`, lastError.message);
+          devLog.debug(`Non-retryable _error for ${context}:`, lastError.message);
           break;
         }
 
@@ -159,7 +159,7 @@ class AIRetryService {
     });
 
     throw new Error(
-      `Request failed after ${this.retryConfig.maxRetries + 1} attempts. Last error: ${lastError.message}`,
+      `Request failed after ${this.retryConfig.maxRetries + 1} attempts. Last _error: ${lastError.message}`,
     );
   }
 
@@ -226,7 +226,7 @@ class AIRetryService {
    */
   getFailureAnalysis(): {
     recentFailureRate: number;
-    commonErrors: Array<{ error: string; count: number }>;
+    commonErrors: Array<{ _error: string; count: number }>;
     averageResponseTime: number;
   } {
     const recentAttempts = this.getRecentAttempts();
@@ -237,8 +237,8 @@ class AIRetryService {
     // Group errors by message
     const errorCounts = failures.reduce(
       (acc, attempt) => {
-        if (attempt.error) {
-          acc[attempt.error] = (acc[attempt.error] || 0) + 1;
+        if (attempt._error) {
+          acc[attempt._error] = (acc[attempt._error] || 0) + 1;
         }
         return acc;
       },
@@ -246,7 +246,7 @@ class AIRetryService {
     );
 
     const commonErrors = Object.entries(errorCounts)
-      .map(([error, count]) => ({ error, count }))
+      .map(([_error, count]) => ({ _error, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
@@ -278,7 +278,7 @@ class AIRetryService {
     };
   }
 
-  private recordSuccess(duration: number): void {
+  private recordSuccess(_duration: number): void {
     this.stats.successCount++;
     this.stats.lastSuccessTime = Date.now();
     this.stats.totalRequests++;
@@ -289,17 +289,17 @@ class AIRetryService {
     }
   }
 
-  private recordFailure(error: string): void {
+  private recordFailure(_error: string): void {
     this.stats.failureCount++;
     this.stats.lastFailureTime = Date.now();
     this.stats.totalRequests++;
   }
 
-  private recordAttempt(success: boolean, error?: string, retryCount: number = 0): void {
+  private recordAttempt(success: boolean, _error?: string, retryCount: number = 0): void {
     const attempt: RequestAttempt = {
       timestamp: Date.now(),
       success,
-      error,
+      _error,
       retryCount,
     };
 
@@ -338,8 +338,8 @@ class AIRetryService {
     return Math.min(delayWithJitter, this.retryConfig.maxDelayMs);
   }
 
-  private isRetryableError(error: Error): boolean {
-    const message = error.message.toLowerCase();
+  private isRetryableError(_error: Error): boolean {
+    const message = _error.message.toLowerCase();
 
     // Don't retry authentication errors
     if (
@@ -361,7 +361,7 @@ class AIRetryService {
       message.includes('timeout') ||
       message.includes('rate limit') ||
       message.includes('service unavailable') ||
-      message.includes('internal server error') ||
+      message.includes('internal server _error') ||
       message.includes('502') ||
       message.includes('503') ||
       message.includes('504')

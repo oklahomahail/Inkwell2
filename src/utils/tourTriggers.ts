@@ -1,3 +1,4 @@
+import devLog from '@/utils/devLog';
 /**
  * Tour Trigger Event Utilities
  *
@@ -12,7 +13,7 @@
  *     // ... create project logic
  *     const success = triggerOnProjectCreated();
  *     if (!success) {
- *       console.log('Event was debounced or failed to dispatch');
+ *       devLog.debug('Event was debounced or failed to dispatch');
  *     }
  *   }
  */
@@ -59,7 +60,7 @@ export function dispatchTourTrigger<T extends TourTriggerEvent>(
   // SSR safety check
   if (typeof window === 'undefined') {
     if (import.meta.env.DEV) {
-      console.warn(`[tour-triggers] Skipping "${eventName}" - window is undefined (SSR context)`);
+      devLog.warn(`[tour-triggers] Skipping "${eventName}" - window is undefined (SSR context)`);
     }
     return false;
   }
@@ -70,7 +71,7 @@ export function dispatchTourTrigger<T extends TourTriggerEvent>(
   // Debounce: skip if triggered recently
   if (now - lastTrigger < DEBOUNCE_MS) {
     if (import.meta.env.DEV) {
-      console.debug(
+      devLog.debug(
         `[tour-triggers] Debounced duplicate "${eventName}" (${now - lastTrigger}ms since last)`,
       );
     }
@@ -89,12 +90,12 @@ export function dispatchTourTrigger<T extends TourTriggerEvent>(
     );
 
     if (import.meta.env.DEV) {
-      console.info(`[tour-triggers] Dispatched "${eventName}"`, payload);
+      devLog.debug(`[tour-triggers] Dispatched "${eventName}"`, payload);
     }
     return true;
   } catch (error) {
     if (import.meta.env.DEV) {
-      console.error(`[tour-triggers] Failed to dispatch "${eventName}":`, error);
+      devLog.error(`[tour-triggers] Failed to dispatch "${eventName}":`, error);
     }
     return false;
   }

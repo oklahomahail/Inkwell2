@@ -1,6 +1,8 @@
 // src/context/EditorContext.tsx
 import React, { createContext, useContext, useRef, type ReactNode } from 'react';
 
+import devLog from "@/utils/devLog";
+
 import type { Editor } from '@tiptap/react';
 
 interface EditorContextValue {
@@ -29,7 +31,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const insertText = (text: string) => {
     const editor = currentEditorRef.current;
     if (!editor) {
-      console.warn('No active editor available for text insertion');
+      devLog.warn('No active editor available for text insertion');
       return;
     }
 

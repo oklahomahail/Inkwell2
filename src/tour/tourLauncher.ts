@@ -1,7 +1,7 @@
 // src/tour/tourLauncher.ts - Centralized tour launcher (single source of truth)
+import analyticsService from '@/services/analyticsService';
 import devLog from "@/utils/devLog";
 
-import analyticsService from '@/services/analyticsService';
 
 // Only one tour: Spotlight (the cinematic walkthrough)
 export type TourId = 'spotlight';

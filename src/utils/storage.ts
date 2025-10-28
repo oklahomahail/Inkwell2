@@ -154,7 +154,7 @@ class LocalStorageAdapter implements StorageAdapter {
       const stored = localStorage.getItem(key);
       return stored ? JSON.parse(stored) : null;
     } catch (err) {
-      console.warn('LocalStorage get failed:', err);
+      devLog.warn('LocalStorage get failed:', err);
       return null;
     }
   }
@@ -163,7 +163,7 @@ class LocalStorageAdapter implements StorageAdapter {
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch (err) {
-      console.warn('LocalStorage put failed:', err);
+      devLog.warn('LocalStorage put failed:', err);
       throw err;
     }
   }
@@ -225,7 +225,7 @@ class StorageManager {
 
       return data;
     } catch (err) {
-      console.error(`Storage get failed for key ${key}:`, err);
+      devLog.error(`Storage get failed for key ${key}:`, err);
       throw err;
     }
   }
@@ -244,7 +244,7 @@ class StorageManager {
 
       await this.adapter.put(key, dataToStore);
     } catch (err) {
-      console.error(`Storage put failed for key ${key}:`, err);
+      devLog.error(`Storage put failed for key ${key}:`, err);
       throw err;
     }
   }

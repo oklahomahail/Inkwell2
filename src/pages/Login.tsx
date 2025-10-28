@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+
 import Logo from '@/components/Logo';
 import { useAuth } from '@/context/AuthContext';
+import devLog from "@/utils/devLog";
+import devLog from "@/utils/devLog";
 
 const RATE_LIMIT_SECONDS = 30;
 
@@ -68,7 +71,7 @@ export default function Login() {
         setLoading(false);
 
         // Log auth error for telemetry
-        console.warn('[Auth] Sign-in error:', {
+        devLog.warn('[Auth] Sign-in error:', {
           email,
           error: signInError.message,
           timestamp: new Date().toISOString(),
@@ -82,7 +85,7 @@ export default function Login() {
         setCountdown(RATE_LIMIT_SECONDS);
 
         // Log success for telemetry
-        console.info('[Auth] Magic link sent:', {
+        devLog.debug('[Auth] Magic link sent:', {
           email,
           timestamp: new Date().toISOString(),
         });
@@ -93,7 +96,7 @@ export default function Login() {
       setLoading(false);
 
       // Log network error for telemetry
-      console.error('[Auth] Network error:', {
+      devLog.error('[Auth] Network error:', {
         email,
         error: errorMessage,
         timestamp: new Date().toISOString(),

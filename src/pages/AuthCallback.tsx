@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 
-import devLog from "@/utils/devLog";
 
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { shouldStartTourForUser } from '@/lib/tourEligibility';
+import devLog from "@/utils/devLog";
 import { useGo } from '@/utils/navigate';
 
 function getParam(url: URL, key: string): string | null {
@@ -234,7 +234,7 @@ export default function AuthCallback() {
               `Type-only verification failed: ${refreshError?.message || 'Unknown reason'}`,
             );
           } catch (e) {
-            console.warn('[AuthCallback] Type-only verification failed:', e);
+            devLog.warn('[AuthCallback] Type-only verification failed:', e);
             // Continue to error case below
           }
         } else if (url.hash.includes('access_token') && url.hash.includes('refresh_token')) {
@@ -253,12 +253,12 @@ export default function AuthCallback() {
           devLog.debug('[AuthCallback] No explicit tokens found, falling back to getSession()');
           const { data, error } = await supabase.auth.getSession();
           if (error) {
-            console.error('[AuthCallback] Error during getSession:', error);
+            devLog.error('[AuthCallback] Error during getSession:', error);
             go(`/sign-in?error=callback&reason=auth_failed`, { replace: true });
             return;
           }
           if (!data.session) {
-            console.warn('[AuthCallback] No session found after getSession');
+            devLog.warn('[AuthCallback] No session found after getSession');
             go(`/sign-in?error=callback&reason=auth_failed`, { replace: true });
             return;
           }
@@ -280,7 +280,7 @@ export default function AuthCallback() {
             go(destination, { replace: true });
             return;
           } catch (resolveError) {
-            console.error('[AuthCallback] Error resolving post-auth route:', resolveError);
+            devLog.error('[AuthCallback] Error resolving post-auth route:', resolveError);
             // Fall back to the original redirect on error
             go(rawRedirectTo, { replace: true });
             return;
@@ -295,7 +295,7 @@ export default function AuthCallback() {
         // Avoid loops: push a single error and stop.
         // Include a sentinel param (_once=1) to prevent automatic retries
         const reason = encodeURIComponent(String(err?.message ?? 'auth_failed').slice(0, 200));
-        console.error('[AuthCallback] Error processing authentication:', err);
+        devLog.error('[AuthCallback] Error processing authentication:', err);
 
         // In test environment, keep the simple error format to match test expectations
         if (isTest) {

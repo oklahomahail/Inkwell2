@@ -134,12 +134,12 @@ Context: You have access to the user's current project and any selected text. Al
       } else {
         this.config = null;
         await this.clearConfiguration();
-        console.warn('❌ AI configuration validation failed:', validationResult.error);
+        devLog.warn('❌ AI configuration validation failed:', validationResult.error);
       }
 
       return validationResult;
     } catch (error) {
-      console.error('AI configuration initialization failed:', error);
+      devLog.error('AI configuration initialization failed:', error);
       return {
         isValid: false,
         error: `Configuration failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -242,7 +242,7 @@ Context: You have access to the user's current project and any selected text. Al
       }
       if (updates.maxTokens > provider.maxTokens) {
         updates.maxTokens = provider.maxTokens;
-        console.warn(`Token limit capped at ${provider.maxTokens} for ${provider.name}`);
+        devLog.warn(`Token limit capped at ${provider.maxTokens} for ${provider.name}`);
       }
     }
 
@@ -297,7 +297,7 @@ Context: You have access to the user's current project and any selected text. Al
       localStorage.removeItem('claude_api_key_encrypted');
       localStorage.removeItem('claude_config');
     } catch (error) {
-      console.warn('Failed to clear AI configuration storage:', error);
+      devLog.warn('Failed to clear AI configuration storage:', error);
     }
 
     this.notifyListeners();
@@ -402,7 +402,7 @@ Context: You have access to the user's current project and any selected text. Al
         results.recommendations.push('Mock mode available for demos and development');
       }
     } catch (error) {
-      console.warn('Mock mode test failed:', error);
+      devLog.warn('Mock mode test failed:', error);
     }
 
     // Test real API if configured
@@ -417,7 +417,7 @@ Context: You have access to the user's current project and any selected text. Al
         results.realAPI = true;
         results.recommendations.push('Real API connectivity confirmed');
       } catch (error) {
-        console.warn('Real API test failed:', error);
+        devLog.warn('Real API test failed:', error);
         results.recommendations.push('Real API currently unavailable - consider using mock mode');
       }
     } else {
@@ -491,7 +491,7 @@ Context: You have access to the user's current project and any selected text. Al
         }),
       );
     } catch (error) {
-      console.error('Failed to save AI configuration:', error);
+      devLog.error('Failed to save AI configuration:', error);
       throw new Error('Failed to save configuration securely');
     }
   }
@@ -526,7 +526,7 @@ Context: You have access to the user's current project and any selected text. Al
         this.config = null;
       }
     } catch (error) {
-      console.warn('Failed to load AI configuration:', error);
+      devLog.warn('Failed to load AI configuration:', error);
       this.config = null;
     }
   }
@@ -566,7 +566,7 @@ Context: You have access to the user's current project and any selected text. Al
         }
       }
     } catch (error) {
-      console.warn('Failed to migrate legacy configuration:', error);
+      devLog.warn('Failed to migrate legacy configuration:', error);
     }
   }
 
@@ -581,7 +581,7 @@ Context: You have access to the user's current project and any selected text. Al
       try {
         cb(this.config);
       } catch (error) {
-        console.error('AI configuration listener error:', error);
+        devLog.error('AI configuration listener error:', error);
       }
     });
   }

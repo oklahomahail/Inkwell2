@@ -1,4 +1,5 @@
 // src/utils/textAnalysis.ts
+import devLog from "@/utils/devLog";
 import type { PhraseAnalysisRequest, PhraseAnalysisResponse } from '@/workers/phraseWorker';
 
 export interface TextStats {
@@ -51,7 +52,7 @@ class PhraseAnalysisService {
         type: 'module',
       });
     } catch (error) {
-      console.warn('Failed to initialize phrase analysis worker:', error);
+      devLog.warn('Failed to initialize phrase analysis worker:', error);
     }
   }
 
@@ -65,7 +66,7 @@ class PhraseAnalysisService {
     }
 
     const hygieneSettings = this.getSettings(projectId);
-    const finalSettings = { ...hygieneSettings, ...settings };
+    const _finalSettings = { ...hygieneSettings, ...settings };
 
     const request: PhraseAnalysisRequest = {
       text,
@@ -109,7 +110,7 @@ class PhraseAnalysisService {
         return { ...DEFAULT_PHRASE_HYGIENE_SETTINGS, ...JSON.parse(stored) };
       }
     } catch (error) {
-      console.warn('Failed to load phrase hygiene settings:', error);
+      devLog.warn('Failed to load phrase hygiene settings:', error);
     }
     return { ...DEFAULT_PHRASE_HYGIENE_SETTINGS };
   }
@@ -121,7 +122,7 @@ class PhraseAnalysisService {
       const updatedSettings = { ...currentSettings, ...settings };
       localStorage.setItem(storageKey, JSON.stringify(updatedSettings));
     } catch (error) {
-      console.error('Failed to save phrase hygiene settings:', error);
+      devLog.error('Failed to save phrase hygiene settings:', error);
     }
   }
 

@@ -1,8 +1,8 @@
 // @ts-nocheck
 // src/services/enhancedStorageService.ts
+import { EnhancedProject } from '@/types/project';
 import devLog from "@/utils/devLog";
 
-import { EnhancedProject } from '@/types/project';
 
 import { quotaAwareStorage } from '../utils/quotaAwareStorage';
 import { validateProject } from '../validation/projectSchema';
@@ -69,7 +69,7 @@ export class EnhancedStorageService {
       // Create snapshot if needed (enhanced functionality)
       this.maybeCreateSnapshot(updatedProject);
     } catch (error) {
-      console.error('Failed to save project:', error);
+      devLog.error('Failed to save project:', error);
     }
   }
 
@@ -78,7 +78,7 @@ export class EnhancedStorageService {
       const projects = this.loadAllProjects();
       return projects.find((p) => p.id === projectId) || null;
     } catch (error) {
-      console.error('Failed to load project:', error);
+      devLog.error('Failed to load project:', error);
       return null;
     }
   }
@@ -91,7 +91,7 @@ export class EnhancedStorageService {
       }
       return JSON.parse(result.data);
     } catch (error) {
-      console.error('Failed to load projects:', error);
+      devLog.error('Failed to load projects:', error);
       return [];
     }
   }
@@ -140,7 +140,7 @@ export class EnhancedStorageService {
       if (this.isSchemaCompatible(project)) {
         const validation = validateProject(project as any);
         if (!validation.success) {
-          console.warn(`Project validation warning for ${project.id}:`, validation.error);
+          devLog.warn(`Project validation warning for ${project.id}:`, validation.error);
         }
       }
 
@@ -170,11 +170,11 @@ export class EnhancedStorageService {
       if (!online) {
         try {
           await connectivityService.queueWrite('save', this.PROJECTS_KEY, JSON.stringify(projects));
-          console.info('Save queued (offline):', updatedProject.id);
+          devLog.debug('Save queued (offline):', updatedProject.id);
           return { success: true, message: 'queued' };
         } catch (e) {
           const msg = 'Failed to queue save while offline';
-          console.error(msg, e);
+          devLog.error(msg, e);
           return { success: false, error: e instanceof Error ? e : undefined, message: msg };
         }
       }
@@ -197,7 +197,7 @@ export class EnhancedStorageService {
       return { success: true };
     } catch (error) {
       const errorMessage = `Failed to save project safely: ${error instanceof Error ? error.message : 'Unknown error'}`;
-      console.error(errorMessage, error);
+      devLog.error(errorMessage, error);
       return {
         success: false,
         error: error instanceof Error ? error : undefined,
@@ -221,7 +221,7 @@ export class EnhancedStorageService {
             tags: ['deletion-backup'],
           });
         } catch (error) {
-          console.warn('Failed to create deletion backup:', error);
+          devLog.warn('Failed to create deletion backup:', error);
         }
       }
 
@@ -239,7 +239,7 @@ export class EnhancedStorageService {
       return result;
     } catch (error) {
       const errorMessage = `Failed to delete project safely: ${error instanceof Error ? error.message : 'Unknown error'}`;
-      console.error(errorMessage, error);
+      devLog.error(errorMessage, error);
       return { success: false, error: errorMessage };
     }
   }
@@ -277,7 +277,7 @@ export class EnhancedStorageService {
         writingSessions,
       };
     } catch (error) {
-      console.error('Failed to get storage stats:', error);
+      devLog.error('Failed to get storage stats:', error);
       return {
         totalProjects: 0,
         totalWordCount: 0,
@@ -321,7 +321,7 @@ export class EnhancedStorageService {
 
       return { success: true, actions };
     } catch (error) {
-      console.error('Maintenance failed:', error);
+      devLog.error('Maintenance failed:', error);
       return {
         success: false,
         actions: [
@@ -360,7 +360,7 @@ export class EnhancedStorageService {
         .sort((a, _b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
         .slice(0, limit);
     } catch (error) {
-      console.error('Failed to get recent writing sessions:', error);
+      devLog.error('Failed to get recent writing sessions:', error);
       return [];
     }
   }
@@ -443,7 +443,7 @@ export class EnhancedStorageService {
     try {
       localStorage.setItem(key, data);
     } catch (error) {
-      console.error(`Failed to save ${key}:`, error);
+      devLog.error(`Failed to save ${key}:`, error);
 
       // Queue for later if offline or quota issues
       if (
@@ -485,7 +485,7 @@ export class EnhancedStorageService {
       });
       this.lastAutoSnapshot = Date.now();
     } catch (error) {
-      console.warn('Failed to create auto-snapshot:', error);
+      devLog.warn('Failed to create auto-snapshot:', error);
     }
   }
 
@@ -514,7 +514,7 @@ export class EnhancedStorageService {
         try {
           localStorage.removeItem(key);
         } catch (error) {
-          console.warn(`Failed to remove ${key}:`, error);
+          devLog.warn(`Failed to remove ${key}:`, error);
         }
       }
     }
@@ -542,7 +542,7 @@ export class EnhancedStorageService {
 
       return cleanedCount;
     } catch (error) {
-      console.error('Failed to cleanup orphaned sessions:', error);
+      devLog.error('Failed to cleanup orphaned sessions:', error);
       return 0;
     }
   }
@@ -558,7 +558,7 @@ export class EnhancedStorageService {
    */
   public static init(): () => void {
     if (this._initialized) {
-      console.warn('EnhancedStorageService already initialized');
+      devLog.warn('EnhancedStorageService already initialized');
       return () => {};
     }
 
@@ -572,7 +572,7 @@ export class EnhancedStorageService {
             }
           }
         } catch (error) {
-          console.error('Error in connectivity status handler:', error);
+          devLog.error('Error in connectivity status handler:', error);
         }
       });
 
@@ -581,7 +581,7 @@ export class EnhancedStorageService {
       return unsubscribe;
     } catch (error) {
       const msg = 'Failed to initialize connectivity monitoring';
-      console.error(msg, error);
+      devLog.error(msg, error);
       throw new Error(msg, { cause: error });
     }
   }
@@ -595,7 +595,7 @@ export class EnhancedStorageService {
       this._initialized = false;
       this._cleanup = undefined;
     } catch (error) {
-      console.error('Error during storage service cleanup:', error);
+      devLog.error('Error during storage service cleanup:', error);
     }
   }
 }

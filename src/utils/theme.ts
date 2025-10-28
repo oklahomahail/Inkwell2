@@ -1,3 +1,4 @@
+import devLog from '@/utils/devLog';
 /**
  * Theme utilities - single source of truth for theme management
  * Matches the inline script in index.html for consistency
@@ -17,7 +18,7 @@ export function setTheme(theme: Theme): void {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   } catch (error) {
     // localStorage unavailable (private mode)
-    console.warn('[Theme] Failed to persist theme:', error);
+    devLog.warn('[Theme] Failed to persist theme:', error);
     // Still apply the class change
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }

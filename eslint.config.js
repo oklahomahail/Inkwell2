@@ -164,4 +164,40 @@ export default [
       'unused-imports/no-unused-imports': 'off',
     },
   },
+
+  // Allow console in dev-only scripts and tools
+  {
+    files: ['src/dev/**/*.{ts,tsx,js,jsx}'],
+    rules: {
+      'no-console': 'off', // dev tools can use console for debugging
+    },
+  },
+
+  // Allow console in logging internals
+  {
+    files: ['src/utils/devLog.ts', 'src/utils/devLogger.ts'],
+    rules: {
+      'no-console': 'off', // these files implement logging, need console
+    },
+  },
+
+  // Allow console in archived onboarding prototypes (temporary)
+  {
+    files: ['src/components/Onboarding/_archive/**/*.{ts,tsx}'],
+    rules: {
+      'no-console': 'off', // legacy code, will be removed
+      'react-hooks/exhaustive-deps': 'off',
+    },
+  },
+
+  // Allow console in storage verification/testing utils
+  {
+    files: [
+      'src/utils/storage/persistenceE2E.ts',
+      'src/utils/storage/storageVerification.ts'
+    ],
+    rules: {
+      'no-console': 'off', // diagnostic/testing utilities
+    },
+  },
 ];

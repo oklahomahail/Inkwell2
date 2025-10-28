@@ -5,6 +5,7 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import type { EnhancedProject } from '@/types/project';
 import type { Scene, Chapter } from '@/types/writing';
 import { debounce } from '@/utils/debounce';
+import devLog from "@/utils/devLog";
 import { phraseAnalysisService } from '@/utils/textAnalysis';
 
 import { voiceConsistencyService } from './voiceConsistencyService';
@@ -135,7 +136,7 @@ class EditorConsistencyDecorator {
 
       this.updateIssues(issues);
     } catch (error) {
-      console.error('Real-time consistency analysis failed:', error);
+      devLog.error('Real-time consistency analysis failed:', error);
       // Silently continue - don't interrupt the user's writing flow
     }
   }
@@ -180,7 +181,7 @@ class EditorConsistencyDecorator {
         }
       });
     } catch (error) {
-      console.error('Phrase analysis failed:', error);
+      devLog.error('Phrase analysis failed:', error);
     }
 
     return issues;
@@ -229,7 +230,7 @@ class EditorConsistencyDecorator {
         }
       }
     } catch (error) {
-      console.error('Voice analysis failed:', error);
+      devLog.error('Voice analysis failed:', error);
     }
 
     return issues;
@@ -282,7 +283,7 @@ class EditorConsistencyDecorator {
         }
       }
     } catch (error) {
-      console.error('Character analysis failed:', error);
+      devLog.error('Character analysis failed:', error);
     }
 
     return issues;
@@ -319,7 +320,7 @@ class EditorConsistencyDecorator {
         }
       }
     } catch (error) {
-      console.error('Timeline analysis failed:', error);
+      devLog.error('Timeline analysis failed:', error);
     }
 
     return issues;
@@ -512,7 +513,7 @@ class EditorConsistencyDecorator {
       try {
         callback(this.currentIssues);
       } catch (error) {
-        console.error('Error notifying consistency analysis listener:', error);
+        devLog.error('Error notifying consistency analysis listener:', error);
       }
     });
   }
@@ -555,7 +556,7 @@ class EditorConsistencyDecorator {
 
         decorations.push(decoration);
       } catch (error) {
-        console.error('Error creating decoration for issue:', issue.id, error);
+        devLog.error('Error creating decoration for issue:', issue.id, error);
       }
     }
 

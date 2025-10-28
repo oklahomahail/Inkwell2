@@ -1,7 +1,7 @@
 // Main plot analysis orchestrator
+import type { Project } from '@/context/AppContext';
 import devLog from "@/utils/devLog";
 
-import type { Project } from '@/context/AppContext';
 
 import { prepareBookMetrics, computeProjectHash } from './dataPrep';
 import { generateInsights, computeScorecard } from './insightRules';

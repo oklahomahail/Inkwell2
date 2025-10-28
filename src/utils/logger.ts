@@ -10,13 +10,13 @@ export const log = {
   },
   warn: (...a: unknown[]) => {
     if (!isProd) {
-      console.warn(...a);
+      devLog.warn(...a);
     }
   },
   error: (...a: unknown[]) => {
     // Keep visible in prod
 
-    console.error(...a);
+    devLog.error(...a);
   },
 };
 

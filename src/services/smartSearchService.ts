@@ -1,9 +1,9 @@
 // @ts-nocheck
 // src/services/smartSearchService.ts
-import devLog from "@/utils/devLog";
 
 import type { EnhancedProject } from '@/types/project';
 import type { Chapter } from '@/types/writing';
+import devLog from "@/utils/devLog";
 
 import claudeService from './claudeService';
 import { enhancedSearchService, SearchResult, SearchOptions } from './enhancedSearchService';
@@ -199,7 +199,7 @@ class SmartSearchService {
         hasMore: smartResults.length > finalResults.length,
       };
     } catch (error) {
-      console.error('Smart search failed:', error);
+      devLog.error('Smart search failed:', error);
 
       // Fallback to basic search
       const fallbackResults = await enhancedSearchService.search(query, options);
@@ -241,7 +241,7 @@ class SmartSearchService {
       // Re-rank results based on semantic similarity
       return this.applySemantic排名(baseResults, query, semanticAnalysis, options);
     } catch (error) {
-      console.error('Semantic search failed:', error);
+      devLog.error('Semantic search failed:', error);
       return [];
     }
   }
@@ -278,7 +278,7 @@ class SmartSearchService {
       // Sort by relevance and limit
       return suggestions.sort((a, b) => b.score - a.score).slice(0, options.maxSuggestions || 8);
     } catch (error) {
-      console.error('Failed to generate suggestions:', error);
+      devLog.error('Failed to generate suggestions:', error);
       return [];
     }
   }
@@ -686,7 +686,7 @@ class SmartSearchService {
         preview: 'Related concept',
       }));
     } catch (error) {
-      console.error('Failed to generate semantic suggestions:', error);
+      devLog.error('Failed to generate semantic suggestions:', error);
       return [];
     }
   }
@@ -910,7 +910,7 @@ Format your response as JSON.`;
         this.searchHistory = JSON.parse(stored);
       }
     } catch (error) {
-      console.error('Failed to load search history:', error);
+      devLog.error('Failed to load search history:', error);
     }
   }
 
@@ -921,7 +921,7 @@ Format your response as JSON.`;
         JSON.stringify(this.searchHistory),
       );
     } catch (error) {
-      console.error('Failed to save search history:', error);
+      devLog.error('Failed to save search history:', error);
     }
   }
 

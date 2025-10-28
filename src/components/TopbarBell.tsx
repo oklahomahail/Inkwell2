@@ -2,9 +2,9 @@ import { clsx } from 'clsx';
 import { Bell } from 'lucide-react';
 import { useState } from 'react';
 
+import type { Notification } from '@/types/notifications';
 import devLog from "@/utils/devLog";
 
-import type { Notification } from '@/types/notifications';
 
 import { NotificationsPanel } from './NotificationsPanel';
 

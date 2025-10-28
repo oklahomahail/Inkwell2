@@ -1,9 +1,15 @@
 import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
+import devLog from "@/utils/devLog";
+import devLog from "@/utils/devLog";
+import devLog from "@/utils/devLog";
+import devLog from "@/utils/devLog";
+
 import analyticsService from '../../services/analyticsService';
 
 import * as tourGatingMod from './tourGating';
 import { hasPromptedThisSession } from './tourGating';
+
 
 // Re-export the tour map for backwards compatibility
 export {
@@ -26,6 +32,7 @@ const CHECKLIST_KEY = 'inkwell-completion-checklist';
 
 // ===== Types
 import { type TourStep as BaseTourStep } from './tourRegistry';
+
 
 export interface TourStep extends BaseTourStep {
   action?: 'click' | 'hover' | 'none';
@@ -123,7 +130,7 @@ const _cleanupTourParams = () => {
   if (url.searchParams.has('tour')) {
     url.searchParams.delete('tour');
     history.replaceState({}, '', url.toString());
-    if (import.meta.env.DEV) console.info('[tour] cleaned up tour params');
+    if (import.meta.env.DEV) devLog.debug('[tour] cleaned up tour params');
   }
 };
 
@@ -197,7 +204,7 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       analyticsService.trackEvent(event, payload);
       analyticsService.track?.(event, payload);
-      if (import.meta.env.DEV) console.info('[tour.analytics]', event, payload);
+      if (import.meta.env.DEV) devLog.debug('[tour.analytics]', event, payload);
     } catch {}
   };
 
@@ -206,7 +213,7 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (url.searchParams.has('tour')) {
       url.searchParams.delete('tour');
       history.replaceState({}, '', url.toString());
-      if (import.meta.env.DEV) console.info('[tour] cleaned up tour params');
+      if (import.meta.env.DEV) devLog.debug('[tour] cleaned up tour params');
     }
   };
 
@@ -215,28 +222,28 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const suppressedRoute = sessionStorage.getItem('inkwell:tour:suppress');
     if (suppressedRoute) {
       if (import.meta.env.DEV)
-        console.info('[tour] start blocked by suppression:', suppressedRoute);
+        devLog.debug('[tour] start blocked by suppression:', suppressedRoute);
       return;
     }
 
     // Extra check for profile routes
     const currentPath = window.location.pathname.toLowerCase();
     if (currentPath === '/profile' || currentPath.startsWith('/profiles')) {
-      if (import.meta.env.DEV) console.info('[tour] start blocked by profile route:', currentPath);
+      if (import.meta.env.DEV) devLog.debug('[tour] start blocked by profile route:', currentPath);
       return;
     }
-    if (import.meta.env.DEV) console.info('[tour] startTour', { type, steps: steps?.length ?? 0 });
+    if (import.meta.env.DEV) devLog.debug('[tour] startTour', { type, steps: steps?.length ?? 0 });
 
     // Global quick-tour kill switch
     if (QUICK_TOUR_DISABLED && isQuickTour(type)) {
-      if (import.meta.env.DEV) console.info('[tour] quick tour disabled globally, ignoring');
+      if (import.meta.env.DEV) devLog.debug('[tour] quick tour disabled globally, ignoring');
       cleanupTourParams();
       return;
     }
 
     // Route suppression (skip in tests)
     if (!import.meta.env.TEST && isSuppressed()) {
-      if (import.meta.env.DEV) console.info('[tour] suppressed by route');
+      if (import.meta.env.DEV) devLog.debug('[tour] suppressed by route');
       cleanupTourParams();
       return;
     }
@@ -246,7 +253,7 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (!import.meta.env.TEST) {
         console.warn('Tour already active, ignoring duplicate start request');
       }
-      if (import.meta.env.DEV) console.info('[tour] already starting/active, skip');
+      if (import.meta.env.DEV) devLog.debug('[tour] already starting/active, skip');
       return;
     }
 
@@ -266,7 +273,7 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = `${type}:${Date.now()}`;
       if (startToken) {
         if (import.meta.env.DEV) {
-          console.info('[tour] start blocked by token:', {
+          devLog.debug('[tour] start blocked by token:', {
             existing: startToken,
             attempted: token,
           });

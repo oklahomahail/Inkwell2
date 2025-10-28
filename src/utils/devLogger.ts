@@ -4,12 +4,12 @@ const isDev = typeof process !== 'undefined' && process.env.NODE_ENV !== 'produc
 
 export const devLog = {
   debug: (...args: Args) => {
-    if (isDev) console.debug(...args);
+    if (isDev) devLog.debug(...args);
   },
   warn: (...args: Args) => {
-    if (isDev) console.warn(...args);
+    if (isDev) devLog.warn(...args);
   },
-  error: (...args: Args) => console.error(...args), // errors always surface
+  error: (...args: Args) => devLog.error(...args), // errors always surface
 };
 
 export default devLog;

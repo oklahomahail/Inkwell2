@@ -71,7 +71,7 @@ export class FeatureFlagManager {
 
     const flag = FEATURE_FLAGS[flagKey];
     if (!flag) {
-      console.warn(`Unknown feature flag: ${flagKey}`);
+      devLog.warn(`Unknown feature flag: ${flagKey}`);
       return false;
     }
 
@@ -83,7 +83,7 @@ export class FeatureFlagManager {
   setEnabled(flagKey: string, enabled: boolean): void {
     const flag = FEATURE_FLAGS[flagKey];
     if (!flag) {
-      console.warn(`Unknown feature flag: ${flagKey}`);
+      devLog.warn(`Unknown feature flag: ${flagKey}`);
       return;
     }
 
@@ -99,7 +99,7 @@ export class FeatureFlagManager {
   reset(flagKey: string): void {
     const flag = FEATURE_FLAGS[flagKey];
     if (!flag) {
-      console.warn(`Unknown feature flag: ${flagKey}`);
+      devLog.warn(`Unknown feature flag: ${flagKey}`);
       return;
     }
 

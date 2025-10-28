@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import devLog from '@/utils/devLog';
-
 import { log } from '@/utils/logger';
 
 // UI + panels

@@ -1,4 +1,5 @@
 /**
+import devLog from "@/utils/devLog";
  * Tour Persistence Utilities
  *
  * Provides version-aware storage for tour progress with forward compatibility.
@@ -68,7 +69,7 @@ export function loadTourState(tour: string): TourState {
     // Version migration: reset progress if version changed
     if (!isVersionCurrent(version)) {
       if (import.meta.env.DEV) {
-        console.info(
+        devLog.debug(
           `[tour-persistence] Version changed (${version} → ${TOUR_VERSION}), resetting progress for "${tour}"`,
         );
       }
@@ -99,7 +100,7 @@ export function loadTourState(tour: string): TourState {
     };
   } catch (error) {
     if (import.meta.env.DEV) {
-      console.error('[tour-persistence] Failed to load tour state:', error);
+      devLog.error('[tour-persistence] Failed to load tour state:', error);
     }
     return {
       completed: false,
@@ -128,11 +129,11 @@ export function saveTourProgress(tour: string, currentStep: number) {
     localStorage.setItem(getStorageKey(tour, 'version'), TOUR_VERSION);
 
     if (import.meta.env.DEV) {
-      console.info(`[tour-persistence] Saved progress for "${tour}":`, progress);
+      devLog.debug(`[tour-persistence] Saved progress for "${tour}":`, progress);
     }
   } catch (error) {
     if (import.meta.env.DEV) {
-      console.error('[tour-persistence] Failed to save progress:', error);
+      devLog.error('[tour-persistence] Failed to save progress:', error);
     }
   }
 }
@@ -157,11 +158,11 @@ export function markTourCompleted(tour: string) {
     localStorage.setItem(getStorageKey(tour, 'version'), TOUR_VERSION);
 
     if (import.meta.env.DEV) {
-      console.info(`[tour-persistence] Marked "${tour}" as completed`);
+      devLog.debug(`[tour-persistence] Marked "${tour}" as completed`);
     }
   } catch (error) {
     if (import.meta.env.DEV) {
-      console.error('[tour-persistence] Failed to mark completed:', error);
+      devLog.error('[tour-persistence] Failed to mark completed:', error);
     }
   }
 }
@@ -177,11 +178,11 @@ export function markTourSkipped(tour: string) {
     localStorage.setItem(getStorageKey(tour, 'version'), TOUR_VERSION);
 
     if (import.meta.env.DEV) {
-      console.info(`[tour-persistence] Marked "${tour}" as skipped`);
+      devLog.debug(`[tour-persistence] Marked "${tour}" as skipped`);
     }
   } catch (error) {
     if (import.meta.env.DEV) {
-      console.error('[tour-persistence] Failed to mark skipped:', error);
+      devLog.error('[tour-persistence] Failed to mark skipped:', error);
     }
   }
 }
@@ -199,11 +200,11 @@ export function resetTourState(tour: string) {
     localStorage.setItem(getStorageKey(tour, 'version'), TOUR_VERSION);
 
     if (import.meta.env.DEV) {
-      console.info(`[tour-persistence] Reset state for "${tour}"`);
+      devLog.debug(`[tour-persistence] Reset state for "${tour}"`);
     }
   } catch (error) {
     if (import.meta.env.DEV) {
-      console.error('[tour-persistence] Failed to reset tour state:', error);
+      devLog.error('[tour-persistence] Failed to reset tour state:', error);
     }
   }
 }
@@ -234,7 +235,7 @@ export function safeAutoStart(startTour: () => void, isFirstLogin: boolean, tour
   // Don't auto-start if completed or skipped
   if (state.completed || state.skipped) {
     if (import.meta.env.DEV) {
-      console.info(
+      devLog.debug(
         `[tour-persistence] Skipping auto-start for "${tour}" (completed=${state.completed}, skipped=${state.skipped})`,
       );
     }
@@ -245,7 +246,7 @@ export function safeAutoStart(startTour: () => void, isFirstLogin: boolean, tour
   queueMicrotask(() => {
     if (_autoStartToken) {
       if (import.meta.env.DEV) {
-        console.debug('[tour-persistence] Auto-start already triggered, skipping');
+        devLog.debug('[tour-persistence] Auto-start already triggered, skipping');
       }
       return;
     }

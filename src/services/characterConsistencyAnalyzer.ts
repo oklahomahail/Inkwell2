@@ -3,6 +3,7 @@
 
 import type { EnhancedProject } from '@/types/project';
 import type { Scene, Chapter } from '@/types/writing';
+import devLog from "@/utils/devLog";
 
 import claudeService from './claudeService';
 
@@ -115,7 +116,7 @@ class CharacterConsistencyAnalyzer {
       this.cache.set(cacheKey, { result, timestamp: Date.now() });
       return result;
     } catch (error) {
-      console.error('Character consistency analysis failed:', error);
+      devLog.error('Character consistency analysis failed:', error);
 
       // Return empty result on error to not interrupt writing flow
       return {
@@ -277,13 +278,13 @@ Return an empty array [] if no consistency issues are found. Be thorough but foc
       // Extract JSON array from response
       const jsonMatch = response.match(/\[[\s\S]*\]/);
       if (!jsonMatch) {
-        console.warn('No JSON found in character analysis response');
+        devLog.warn('No JSON found in character analysis response');
         return [];
       }
 
       const parsed = JSON.parse(jsonMatch[0]);
       if (!Array.isArray(parsed)) {
-        console.warn('Parsed character analysis response is not an array');
+        devLog.warn('Parsed character analysis response is not an array');
         return [];
       }
 
@@ -327,7 +328,7 @@ Return an empty array [] if no consistency issues are found. Be thorough but foc
 
       return issues;
     } catch (error) {
-      console.error('Failed to parse character analysis response:', error);
+      devLog.error('Failed to parse character analysis response:', error);
       return [];
     }
   }

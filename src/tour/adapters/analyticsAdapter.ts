@@ -33,7 +33,7 @@ function track(event: string, payload: Payload): void {
     analyticsService.track(event as any, payload);
   } catch (error) {
     // Analytics should never break the tour flow
-    console.warn('[TourAnalytics] Failed to track event:', event, error);
+    devLog.warn('[TourAnalytics] Failed to track event:', event, error);
   }
 }
 
@@ -49,7 +49,7 @@ function persistEvent(event: TourEvent): void {
     localStorage.setItem(key, JSON.stringify(prev.slice(-5000)));
   } catch (error) {
     // Silent fail - don't break tour flow
-    console.warn('[TourAnalytics] Failed to persist event:', error);
+    devLog.warn('[TourAnalytics] Failed to persist event:', error);
   }
 }
 

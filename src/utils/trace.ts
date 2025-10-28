@@ -107,7 +107,7 @@ class TraceLogger {
 
     // Lightweight console hints for slow ops
     if (event.duration && event.duration > 100) {
-      console.warn(
+      devLog.warn(
         `🐌 Slow ${event.type}: ${event.name} took ${event.duration.toFixed(2)}ms`,
         event.metadata,
       );

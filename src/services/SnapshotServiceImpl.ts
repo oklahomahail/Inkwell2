@@ -1,6 +1,7 @@
 // @ts-nocheck
 /** IMPORTANT: This is the real implementation. Tests mock via ../snapshotService */
 
+import devLog from "@/utils/devLog";
 import quotaAwareStorage from '@/utils/quotaAwareStorage';
 
 export interface SnapshotMeta {
@@ -194,7 +195,7 @@ export class SnapshotServiceImpl<T = any> {
       await quotaAwareStorage.safeSetItem(INDEX_KEY, JSON.stringify(idx));
       return true;
     } catch (err) {
-      console.error('Failed to update snapshot index', err);
+      devLog.error('Failed to update snapshot index', err);
       return false;
     }
   }
@@ -365,7 +366,7 @@ export class SnapshotServiceImpl<T = any> {
 
       const res = await quotaAwareStorage.safeSetItem(INDEX_KEY, JSON.stringify(idx));
       if (!res.success) {
-        console.error('Failed to persist snapshot index', res.error);
+        devLog.error('Failed to persist snapshot index', res.error);
         return {
           ok: false as const,
           error: new Error(res.error?.message ?? 'Failed to persist index'),

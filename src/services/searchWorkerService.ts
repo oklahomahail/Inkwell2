@@ -2,9 +2,10 @@
 // Search worker service
 import type { EnhancedProject } from '@/types/project';
 import type { Chapter } from '@/types/writing';
+import devLog from "@/utils/devLog";
 
 // For compatibility with older TypeScript
-declare var WorkerGlobalScope: any;
+declare var _WorkerGlobalScope: any;
 
 export interface SearchOptions {
   types?: Array<'scene' | 'chapter' | 'character' | 'plot'>;
@@ -165,7 +166,7 @@ export class SearchWorkerService {
       });
 
       this.worker.addEventListener('error', (e) => {
-        console.error('Search worker error:', e);
+        devLog.error('Search worker error:', e);
         // Reject all pending operations
         for (const [reqId, op] of this.pending) {
           clearTimeout(op.timeout);
@@ -181,7 +182,7 @@ export class SearchWorkerService {
       this.ready = true;
       this.initialized = true;
     } catch (error) {
-      console.error('Failed to initialize search worker:', error);
+      devLog.error('Failed to initialize search worker:', error);
       throw error;
     }
   }

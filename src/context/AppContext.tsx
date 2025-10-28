@@ -8,6 +8,8 @@ import React, {
   type ReactNode,
 } from 'react';
 
+import devLog from "@/utils/devLog";
+
 import { useClaude } from './ClaudeProvider';
 
 // ===== ENUMS & TYPES =====
@@ -214,7 +216,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         dispatch({ type: 'SET_PROJECTS', payload: projects });
       }
     } catch (error) {
-      console.warn('Failed to parse projects from localStorage:', error);
+      devLog.warn('Failed to parse projects from localStorage:', error);
     }
 
     // Load current project ID
@@ -224,7 +226,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         dispatch({ type: 'SET_CURRENT_PROJECT', payload: storedProjectId });
       }
     } catch (error) {
-      console.warn('Failed to load current project ID from localStorage:', error);
+      devLog.warn('Failed to load current project ID from localStorage:', error);
     }
 
     // Load theme
@@ -234,7 +236,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         dispatch({ type: 'SET_THEME', payload: storedTheme });
       }
     } catch (error) {
-      console.warn('Failed to load theme from localStorage:', error);
+      devLog.warn('Failed to load theme from localStorage:', error);
     }
 
     hasHydrated.current = true;
@@ -246,7 +248,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(PROJECTS_KEY, JSON.stringify(state.projects));
     } catch (error) {
-      console.warn('Failed to save projects to localStorage:', error);
+      devLog.warn('Failed to save projects to localStorage:', error);
     }
   }, [state.projects]);
 
@@ -260,7 +262,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         localStorage.removeItem(PROJECT_ID_KEY);
       }
     } catch (error) {
-      console.warn('Failed to save current project ID to localStorage:', error);
+      devLog.warn('Failed to save current project ID to localStorage:', error);
     }
   }, [state.currentProjectId]);
 
@@ -270,7 +272,7 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(THEME_KEY, state.theme);
     } catch (error) {
-      console.warn('Failed to save theme to localStorage:', error);
+      devLog.warn('Failed to save theme to localStorage:', error);
     }
   }, [state.theme]);
 

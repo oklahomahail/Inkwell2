@@ -1,6 +1,9 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
+import devLog from "@/utils/devLog";
+import devLog from "@/utils/devLog";
+
 const PORTAL_ID = 'spotlight-root';
 
 export function ensurePortalRoot(): HTMLElement {
@@ -43,7 +46,7 @@ export function SpotlightPortal({ children }: { children: React.ReactNode }) {
     const root = ensurePortalRoot();
     return createPortal(children, root);
   } catch (error) {
-    console.warn('[SpotlightPortal] Failed to create portal:', error);
+    devLog.warn('[SpotlightPortal] Failed to create portal:', error);
     return null;
   }
 }

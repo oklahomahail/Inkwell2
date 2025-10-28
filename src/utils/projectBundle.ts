@@ -3,6 +3,8 @@
 
 import JSZip from 'jszip';
 
+import devLog from "@/utils/devLog";
+
 import { ProjectBundle, ProjectManifest } from '../domain/types';
 
 import { createProjectBackup, validateProjectBundle, restoreProjectBackup } from './backup';
@@ -411,13 +413,13 @@ export async function listAvailableProjects(): Promise<
           });
         }
       } catch (error) {
-        console.warn(`Failed to load metadata for project ${projectId}:`, error);
+        devLog.warn(`Failed to load metadata for project ${projectId}:`, error);
       }
     }
 
     return projects.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
   } catch (error) {
-    console.error('Failed to list projects:', error);
+    devLog.error('Failed to list projects:', error);
     return [];
   }
 }

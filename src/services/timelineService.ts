@@ -1,9 +1,9 @@
 // @ts-nocheck
 // src/services/timelineService.ts
-import devLog from "@/utils/devLog";
 
 import type { EnhancedProject } from '@/types/project';
 import type { TimelineItem, TimelineRange } from '@/types/timeline';
+import devLog from "@/utils/devLog";
 
 import type { GeneratedOutline } from './storyArchitectService';
 
@@ -63,7 +63,7 @@ class TimelineService {
         updatedAt: new Date(item.updatedAt),
       }));
     } catch (error) {
-      console.error('Failed to load timeline:', error);
+      devLog.error('Failed to load timeline:', error);
       return [];
     }
   }
@@ -80,7 +80,7 @@ class TimelineService {
         timestamp: Date.now(),
       });
     } catch (error) {
-      console.error('Failed to save timeline:', error);
+      devLog.error('Failed to save timeline:', error);
       throw error;
     }
   }
@@ -386,7 +386,7 @@ class TimelineService {
         timestamp: Date.now(),
       });
     } catch (error) {
-      console.error('Failed to delete timeline:', error);
+      devLog.error('Failed to delete timeline:', error);
       throw error;
     }
   }
@@ -404,7 +404,7 @@ class TimelineService {
       const backupKey = `${this.getStorageKey(projectId)}_backup`;
       localStorage.setItem(backupKey, JSON.stringify(backup));
     } catch (error) {
-      console.error('Timeline backup failed:', error);
+      devLog.error('Timeline backup failed:', error);
     }
   }
 
@@ -426,7 +426,7 @@ class TimelineService {
       await this.saveProjectTimeline(projectId, items);
       return true;
     } catch (error) {
-      console.error('Timeline restore failed:', error);
+      devLog.error('Timeline restore failed:', error);
       return false;
     }
   }
@@ -440,7 +440,7 @@ class TimelineService {
         devLog.debug(`Analytics: ${eventName}`, data);
       }
     } catch (error) {
-      console.debug('Analytics tracking failed:', error);
+      devLog.debug('Analytics tracking failed:', error);
     }
   }
 

@@ -4,11 +4,11 @@
  */
 import { useEffect, useState } from 'react';
 
-import devLog from "@/utils/devLog";
 
 
 import { getSpotlightSteps } from '@/tour/getSpotlightSteps';
 import { tourService } from '@/tour/TourService';
+import devLog from "@/utils/devLog";
 
 const TOUR_COMPLETED_KEY = 'inkwell:tour:completed';
 const TOUR_ID = 'onboarding-v2';
