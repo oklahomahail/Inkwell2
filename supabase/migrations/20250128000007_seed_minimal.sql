@@ -3,17 +3,25 @@
 
 -- Note: This migration is optional and can be run manually when needed
 -- It creates a demo project for the authenticated user
+-- Skip when run as migration (auth.uid() is null during migration)
 
--- Create a demo project for testing
-insert into public.projects (id, owner_id, title, summary)
-values (
-  gen_random_uuid(), 
-  auth.uid(), 
-  'Demo Project - QA', 
-  'Seeded project for testing Supabase integration and RLS policies'
-)
-on conflict (id) do nothing
-returning id, title, owner_id;
+-- Create a demo project for testing (only if user is authenticated)
+do $$
+begin
+  if auth.uid() is not null then
+    insert into public.projects (id, owner_id, title, summary)
+    values (
+      gen_random_uuid(), 
+      auth.uid(), 
+      'Demo Project - QA', 
+      'Seeded project for testing Supabase integration and RLS policies'
+    )
+    on conflict (id) do nothing;
+    raise notice 'Demo project created for user %', auth.uid();
+  else
+    raise notice 'Skipping demo data - no authenticated user (run manually in SQL Editor)';
+  end if;
+end $$;
 
 -- Optional: Create a demo chapter
 insert into public.chapters (id, project_id, index_in_project, title, body)

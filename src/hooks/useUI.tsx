@@ -32,10 +32,10 @@ export function UIProvider({
   children: ReactNode;
   initialCollapsed?: boolean;
 }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(initialCollapsed);
-  const [newProjectDialogOpen, setNewProjectDialogOpen] = useState<boolean>(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(initialCollapsed);
+  const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
 
-  const value = useMemo<UIContextValue>(
+  const value = useMemo(
     () => ({
       sidebarCollapsed,
       toggleSidebar: () => setSidebarCollapsed((c) => !c),
