@@ -1,4 +1,4 @@
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 // AI Plot Analysis Service
 // Provides intelligent story analysis capabilities with mock mode for development
 

@@ -1,7 +1,7 @@
 // src/services/claudeService.ts - FIXED VERSION
 import CryptoJS from 'crypto-js';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 const MESSAGE_LIMIT = 50;
 const API_KEY_STORAGE = 'claude_api_key_encrypted';

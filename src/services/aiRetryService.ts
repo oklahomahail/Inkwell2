@@ -1,5 +1,5 @@
 // src/services/aiRetryService.ts
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { analyticsService } from './analyticsService';
 

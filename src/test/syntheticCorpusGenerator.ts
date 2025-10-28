@@ -1,6 +1,6 @@
 // @ts-nocheck
 // src/test/syntheticCorpusGenerator.ts
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 import type { Scene, Chapter } from '@/types/writing';
 import type { EnhancedProject, Character, ProjectChapter, ProjectScene } from '@/types/project';
 

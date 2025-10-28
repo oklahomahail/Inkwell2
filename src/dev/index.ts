@@ -4,7 +4,7 @@
  *
  * Import this in main.tsx or App.tsx during development
  */
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { printTourFlags, tourFlagHelpers } from './printTourFlags';
 import {

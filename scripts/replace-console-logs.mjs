@@ -8,7 +8,7 @@ const EXCLUDE_DIRS = new Set(['node_modules', 'dist', 'build', 'scripts', '__moc
 const EXCLUDE_FILE_RE = /\.(test|spec)\.(t|j)sx?$/;
 
 const FILE_RE = /\.[tj]sx?$/;
-const IMPORT_RE = /from\s+["']src\/utils\/devLogger["'];?/;
+const IMPORT_RE = /from\s+["']src\/utils\/devLog["'];?/;
 const HAS_CONSOLE_LOG_RE = /(^|[^A-Za-z0-9_])console\.log\s*\(/;
 const LINE_COMMENT_RE = /^\s*\/\//;
 
@@ -28,7 +28,7 @@ function walk(dir, files = []) {
 function injectImport(code) {
   if (IMPORT_RE.test(code)) return code;
   const firstImportIdx = code.search(/^\s*import\s/m);
-  const imp = `import devLog from "src/utils/devLogger";\n`;
+  const imp = `import devLog from "src/utils/devLog";\n`;
   if (firstImportIdx === -1) return imp + code;
   return code.slice(0, firstImportIdx) + imp + code.slice(firstImportIdx);
 }

@@ -1,6 +1,6 @@
 // @ts-nocheck
 // src/test/searchBenchmarkHarness.ts
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 import {
   generateSyntheticCorpus,
   type GeneratedCorpus,

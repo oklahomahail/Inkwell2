@@ -1,4 +1,4 @@
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 /**
  * Origin Guard Utilities
  * Detects when app is running on unexpected origins (preview URLs, etc.)

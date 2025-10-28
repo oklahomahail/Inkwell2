@@ -1,4 +1,4 @@
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 /**
  * Tour Flags DevTools Helper
  * Quick visibility into tour feature flags during canary rollout

@@ -15,7 +15,7 @@ import { resetTour } from '@/tour/persistence';
 import { startDefaultTour } from '@/tour/tourEntry';
 import { tourService } from '@/tour/TourService';
 import { getLastTourUsed, setLastTourUsed, type TourVariant } from '@/tour/tourStorage';
-import { devLog } from '@/utils/devLog';
+import devLog from '@/utils/devLog';
 
 import { startTour } from '../Onboarding/tour-core/TourController';
 import { Button } from '../ui/Button';
@@ -46,7 +46,7 @@ export function HelpMenu({ className }: HelpMenuProps) {
   };
 
   const handleManualTourStart = () => {
-    devLog('[HelpMenu] Manual tour recovery triggered');
+    devLog.debug('[HelpMenu] Manual tour recovery triggered');
     // Force restart the spotlight tour, clearing any stuck state
     try {
       // Reset all tour state
@@ -58,7 +58,7 @@ export function HelpMenu({ className }: HelpMenuProps) {
         startTour('spotlight', profileId, { force: true });
       }, 100);
 
-      devLog('[HelpMenu] Manual tour recovery completed');
+      devLog.debug('[HelpMenu] Manual tour recovery completed');
     } catch (error) {
       console.error('[HelpMenu] Manual tour recovery failed:', error);
     }

@@ -1,7 +1,7 @@
 // src/hooks/useTourManager.ts
 import { useCallback, useRef } from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { useAuth } from '../context/AuthContext';
 import { createTourStorage, TourName, TourProgress } from '../services/simpleTourStorage';

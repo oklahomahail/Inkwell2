@@ -4,7 +4,7 @@
 // Dev-only logger for store actions and component render timings
 import React from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 
 import { featureFlags } from './flags';

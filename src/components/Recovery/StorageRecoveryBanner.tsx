@@ -2,7 +2,7 @@
 import { AlertTriangle, Download, Trash2, RefreshCw, X } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { useToast } from '@/context/toast';
 

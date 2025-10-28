@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { waitForAnchors } from '../../../tour/anchors';
-import { devLog } from '../../../utils/devLog';
+import devLog from '../../../utils/devLog';
 
 const DASHBOARD_PATH = '/';
 const EXCLUDED_PATHS = ['/profiles'];
@@ -92,7 +92,7 @@ export function useSpotlightAutostart(stepSelectors: string[], options?: Autosta
 
         if (!ready) {
           // Log failure for observability
-          devLog('[Tour] Autostart failed - anchors not ready', {
+          devLog.debug('[Tour] Autostart failed - anchors not ready', {
             tourId,
             selectors: stepSelectors,
             path: loc.pathname,
@@ -104,7 +104,7 @@ export function useSpotlightAutostart(stepSelectors: string[], options?: Autosta
             retryCount.current++;
             timeoutId = window.setTimeout(attemptStart, RETRY_DELAY * retryCount.current);
           } else {
-            devLog('[Tour] Autostart abandoned after max retries', { tourId });
+            devLog.debug('[Tour] Autostart abandoned after max retries', { tourId });
           }
           return;
         }
@@ -112,9 +112,9 @@ export function useSpotlightAutostart(stepSelectors: string[], options?: Autosta
         // Anchors ready - start tour
         try {
           onStartTour(tourId);
-          devLog('[Tour] Autostart successful', { tourId, path: loc.pathname });
+          devLog.debug('[Tour] Autostart successful', { tourId, path: loc.pathname });
         } catch (error) {
-          devLog('[Tour] Failed to start tour', {
+          devLog.debug('[Tour] Failed to start tour', {
             tourId,
             error: error instanceof Error ? error.message : String(error),
             selectors: stepSelectors,
@@ -122,7 +122,7 @@ export function useSpotlightAutostart(stepSelectors: string[], options?: Autosta
           });
         }
       } catch (error) {
-        devLog('[Tour] Autostart error', {
+        devLog.debug('[Tour] Autostart error', {
           tourId,
           error: error instanceof Error ? error.message : String(error),
         });

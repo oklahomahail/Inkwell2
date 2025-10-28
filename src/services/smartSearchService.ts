@@ -1,6 +1,6 @@
 // @ts-nocheck
 // src/services/smartSearchService.ts
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import type { EnhancedProject } from '@/types/project';
 import type { Chapter } from '@/types/writing';

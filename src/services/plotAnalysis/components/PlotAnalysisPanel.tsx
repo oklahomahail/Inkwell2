@@ -3,7 +3,7 @@
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import type { Project } from '@/context/AppContext';
 import { storeCapturedCharts, batchCaptureSVGs } from '@/export/utils/svgCapture';

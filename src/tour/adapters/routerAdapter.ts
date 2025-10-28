@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 /**
  * Re-resolve spotlight anchors whenever the route changes.

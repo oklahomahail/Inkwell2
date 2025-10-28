@@ -1,5 +1,5 @@
 // src/tour/tourLauncher.ts - Centralized tour launcher (single source of truth)
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import analyticsService from '@/services/analyticsService';
 

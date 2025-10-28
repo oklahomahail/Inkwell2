@@ -1,6 +1,6 @@
 // @ts-nocheck
 // src/services/enhancedStorageService.ts
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { EnhancedProject } from '@/types/project';
 

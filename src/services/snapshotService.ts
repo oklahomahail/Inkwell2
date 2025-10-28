@@ -1,6 +1,6 @@
 // @ts-nocheck
 // src/services/snapshotService.ts
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import {
   Project,

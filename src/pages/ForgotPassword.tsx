@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { supabase } from '@/lib/supabaseClient';
 import { normalizeSafeRedirect } from '@/utils/safeRedirect';

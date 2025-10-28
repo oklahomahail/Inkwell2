@@ -1,4 +1,4 @@
-import devLog from "@/utils/devLogger";
+import devLog from "@/utils/devLog";
 // src/components/Layout/MainLayout.test.tsx
 import { screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';

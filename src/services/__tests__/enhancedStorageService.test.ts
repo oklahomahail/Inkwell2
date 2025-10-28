@@ -1,4 +1,4 @@
-import devLog from "@/utils/devLogger";
+import devLog from "@/utils/devLog";
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import connectivityService from '../connectivityService';

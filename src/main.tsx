@@ -6,7 +6,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
-import devLog from "@/utils/devLogger";
+import devLog from '@/utils/devLog';
 
 import App from './App';
 import { AppProviders } from './AppProviders';

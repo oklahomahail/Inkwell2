@@ -4,7 +4,7 @@
  */
 
 // Import dependencies first
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { FeatureFlagManager } from './FeatureFlagManager';
 

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 import { SearchBenchmarkHarness } from './searchBenchmarkHarness';
 
 async function _simpleBenchmark() {

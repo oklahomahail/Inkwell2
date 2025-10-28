@@ -1,4 +1,4 @@
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 // src/utils/activityLogger.ts - Fixed with proper exports
 interface ActivityLog {
   id: string;

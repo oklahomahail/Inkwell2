@@ -1,7 +1,7 @@
 // @ts-nocheck
 // src/services/enhancedSearchService.ts
 // Enhanced search service that prefers a Web Worker and cleanly falls back to main thread
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import type { Chapter } from '@/types/writing';
 

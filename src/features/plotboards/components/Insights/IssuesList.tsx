@@ -1,6 +1,6 @@
 import React from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { analyticsService } from '../../../../services/analyticsService';
 

@@ -1,4 +1,4 @@
-import devLog from "@/utils/devLogger";
+import devLog from "@/utils/devLog";
 /**
  * Global error handlers for unhandled errors and promise rejections
  * In dev: logs to console

@@ -1,6 +1,6 @@
 // Backup utilities for project snapshots with integrity checks
 // Handles project export/import, validation, and recovery operations
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { CURRENT_SCHEMA_VERSION, createVersionedData } from '../domain/schemaVersion';
 import {

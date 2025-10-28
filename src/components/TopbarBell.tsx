@@ -2,7 +2,7 @@ import { clsx } from 'clsx';
 import { Bell } from 'lucide-react';
 import { useState } from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import type { Notification } from '@/types/notifications';
 

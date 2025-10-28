@@ -2,7 +2,7 @@
 import { ArrowLeft, ArrowRight, Compass, Clock, Eye } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { enhancedTimelineService } from '@/services/enhancedTimelineService';
 

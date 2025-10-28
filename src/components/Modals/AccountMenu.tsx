@@ -2,7 +2,7 @@
 import { User, Settings, LogOut, Crown } from 'lucide-react';
 import React from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 interface AccountMenuProps {
   onClose: () => void;

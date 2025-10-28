@@ -1,4 +1,4 @@
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 const isProd = import.meta.env.PROD;
 
 export const log = {

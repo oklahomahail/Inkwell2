@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import devLog from "@/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import AuthPage from './AuthPage';
 

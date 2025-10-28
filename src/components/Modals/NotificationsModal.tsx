@@ -2,7 +2,7 @@
 import { X, Bell, Check, AlertCircle, Info } from 'lucide-react';
 import React from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import type { Notification } from '@/types/notifications';
 

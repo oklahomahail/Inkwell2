@@ -1,4 +1,4 @@
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { FeatureFlagCategory, FeatureFlagConfig, FeatureFlagState } from '../../types/featureFlags';
 

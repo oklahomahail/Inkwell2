@@ -1,4 +1,4 @@
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 // src/utils/storage/storageVerification.ts - Storage verification utilities for debugging and testing
 
 /**

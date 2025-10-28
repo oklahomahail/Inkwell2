@@ -1,6 +1,6 @@
 // @ts-nocheck
 // src/services/searchService.ts
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import type { Scene } from '@/types/writing';
 

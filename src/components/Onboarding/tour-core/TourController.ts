@@ -1,4 +1,4 @@
-import { devLog, devWarn, devError } from '@/utils/devLog';
+import devLog, { devWarn, devError } from '@/utils/devLog';
 
 export type StartOptions = { force?: boolean };
 
@@ -89,7 +89,7 @@ function recordRestartAttempt(tourId: TourId): void {
     timestamp: Date.now(),
     tourId,
   });
-  devLog(
+  devLog.debug(
     `[TourController] 📝 Restart attempt recorded for "${tourId}" (${state.restartAttempts.length} total in window)`,
   );
 }
@@ -117,7 +117,7 @@ export async function startTour(
   profileId?: string,
   opts?: StartOptions,
 ): Promise<boolean> {
-  devLog(
+  devLog.debug(
     `[TourController] 🎬 startTour called: id="${id}", profileId="${profileId}", force=${opts?.force}`,
   );
 
@@ -134,7 +134,7 @@ export async function startTour(
   }
 
   if (state.running && state.id === id && !opts?.force) {
-    devLog(`[TourController] ℹ️ Tour "${id}" already running, skipping start`);
+    devLog.debug(`[TourController] ℹ️ Tour "${id}" already running, skipping start`);
     return false;
   }
 
@@ -147,7 +147,7 @@ export async function startTour(
   bus.__inkwell = bus.__inkwell || {};
   bus.__inkwell.tour = { running: true, id };
 
-  devLog(`[TourController] ✅ Tour "${id}" started successfully`);
+  devLog.debug(`[TourController] ✅ Tour "${id}" started successfully`);
   dispatch<TourStartDetail>('tour:start', { id });
   return true;
 }
@@ -155,7 +155,7 @@ export async function startTour(
 /** Programmatic stop; overlay can also dispatch this on Done. */
 export function stopTour(reason: TourStopDetail['reason'] = 'program') {
   if (!bus || !state.running) {
-    devLog('[TourController] ℹ️ stopTour called but no tour running');
+    devLog.debug('[TourController] ℹ️ stopTour called but no tour running');
     return;
   }
   const id = state.id as TourId;
@@ -163,20 +163,20 @@ export function stopTour(reason: TourStopDetail['reason'] = 'program') {
   state.id = undefined;
   bus.__inkwell = bus.__inkwell || {};
   bus.__inkwell.tour = { running: false };
-  devLog(`[TourController] ⏹️ Tour "${id}" stopped (reason: ${reason})`);
+  devLog.debug(`[TourController] ⏹️ Tour "${id}" stopped (reason: ${reason})`);
   dispatch<TourStopDetail>('tour:stop', { id, reason });
 }
 
 /** Optional helpers your overlay can call to broadcast progress */
 export function emitTourStep(stepId: string, index: number) {
   if (!bus || !state.running || !state.id) return;
-  devLog(`[TourController] 👣 Step progress: "${stepId}" (${index + 1})`);
+  devLog.debug(`[TourController] 👣 Step progress: "${stepId}" (${index + 1})`);
   dispatch<TourStepDetail>('tour:step', { id: state.id, stepId, index });
 }
 export function emitTourComplete() {
   if (!bus || !state.running || !state.id) return;
   const id = state.id;
-  devLog(`[TourController] 🎉 Tour "${id}" completed`);
+  devLog.debug(`[TourController] 🎉 Tour "${id}" completed`);
   stopTour('program');
   dispatch<TourCompleteDetail>('tour:complete', { id });
 }

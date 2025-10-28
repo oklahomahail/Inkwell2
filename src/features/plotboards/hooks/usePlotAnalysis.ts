@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import aiService from '../../../services/aiPlotAnalysisService';
 import { analyticsService } from '../../../services/analyticsService';

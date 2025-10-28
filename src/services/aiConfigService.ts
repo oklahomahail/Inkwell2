@@ -1,7 +1,7 @@
 // src/services/aiConfigService.ts
 import CryptoJS from 'crypto-js';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { aiRetryService } from './aiRetryService';
 import { analyticsService } from './analyticsService';

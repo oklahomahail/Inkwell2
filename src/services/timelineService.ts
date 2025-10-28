@@ -1,6 +1,6 @@
 // @ts-nocheck
 // src/services/timelineService.ts
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import type { EnhancedProject } from '@/types/project';
 import type { TimelineItem, TimelineRange } from '@/types/timeline';

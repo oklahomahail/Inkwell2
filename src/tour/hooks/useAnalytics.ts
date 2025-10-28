@@ -2,7 +2,7 @@
 // Analytics hook for tracking tour usage
 import { useCallback } from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 
 type TrackingEvent = {

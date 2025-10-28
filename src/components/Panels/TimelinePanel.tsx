@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import SceneLinkageSuggestions from '@/components/timeline/SceneLinkageSuggestions';
 import TimelineNavigation from '@/components/timeline/TimelineNavigation';

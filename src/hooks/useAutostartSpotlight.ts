@@ -4,7 +4,7 @@
  */
 import { useEffect, useState } from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 
 import { getSpotlightSteps } from '@/tour/getSpotlightSteps';

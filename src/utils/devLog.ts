@@ -1,4 +1,3 @@
-import devLog from "src/utils/devLogger";
 /**
  * Development-only logging utilities
  * Automatically stripped in production builds
@@ -7,13 +6,41 @@ import devLog from "src/utils/devLogger";
 const isDev = !import.meta.env.PROD;
 
 /**
- * Log to console only in development mode
+ * Development logging object with methods for different log levels
  */
-export const devLog = (...args: unknown[]) => {
-  if (isDev) {
-    devLog.debug(...args);
-  }
+const devLog = {
+  debug: (...args: unknown[]) => {
+    if (isDev) {
+      console.debug(...args);
+    }
+  },
+  warn: (...args: unknown[]) => {
+    if (isDev) {
+      console.warn(...args);
+    }
+  },
+  error: (...args: unknown[]) => {
+    console.error(...args);
+    // In production, you might want to send to telemetry
+    // if (import.meta.env.PROD) { sendToTelemetry(...args); }
+  },
+  log: (...args: unknown[]) => {
+    if (isDev) {
+      console.log(...args);
+    }
+  },
+  trace: (...args: unknown[]) => {
+    if (isDev) {
+      console.trace(...args);
+    }
+  },
 };
+
+// Default export for convenient usage
+export default devLog;
+
+// Named exports for backwards compatibility
+export const { debug, warn, error, log, trace } = devLog;
 
 /**
  * Warn to console only in development mode

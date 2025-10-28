@@ -1,5 +1,5 @@
 // @ts-nocheck
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 import { _generateSyntheticCorpus as generateSyntheticCorpus } from './syntheticCorpusGenerator';
 
 import { searchService } from '@/services/searchService';

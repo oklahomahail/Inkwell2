@@ -1,5 +1,5 @@
 // src/utils/quotaAwareStorage.ts
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { snapshotService } from '../services/snapshotService';
 

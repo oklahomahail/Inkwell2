@@ -2,7 +2,7 @@
  * Tour Service
  * Manages tour state and lifecycle
  */
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { tourAnalytics } from './adapters/analyticsAdapter';
 

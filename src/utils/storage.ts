@@ -1,6 +1,6 @@
 // Comprehensive storage abstraction layer for Inkwell
 // Provides IndexedDB helpers, JSON snapshots, and streaming export capabilities
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import {
   createVersionedData,

@@ -1,5 +1,5 @@
 // src/services/connectivityService.ts
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { quotaAwareStorage } from '../utils/quotaAwareStorage';
 

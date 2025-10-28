@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { trackPreviewSignedUp } from '@/features/preview/analytics';
 import { supabase } from '@/lib/supabaseClient';

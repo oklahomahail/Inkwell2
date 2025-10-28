@@ -1,4 +1,4 @@
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 // Privacy-first analytics service for Inkwell
 // Collects minimal, anonymized data to improve user experience
 

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import devLog from "@/utils/devLogger";
+import devLog from "@/utils/devLog";
 // src/tour/useTourRegistration.ts - Hook to register tours on app boot
 
 

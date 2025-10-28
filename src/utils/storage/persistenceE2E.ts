@@ -1,4 +1,4 @@
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 // src/utils/storage/persistenceE2E.ts - E2E persistence verification helpers
 
 /**

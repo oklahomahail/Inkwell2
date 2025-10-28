@@ -1,6 +1,6 @@
 // @ts-nocheck
 // src/services/storyArchitectService.ts - UPDATED WITH REAL API
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import claudeService from './claudeService';
 

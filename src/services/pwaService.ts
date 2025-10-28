@@ -1,4 +1,4 @@
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 // PWA Service for managing offline functionality and app updates
 
 // Type for the PWA register hook from vite-plugin-pwa

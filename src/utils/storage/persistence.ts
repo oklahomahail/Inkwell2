@@ -1,4 +1,4 @@
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 /**
  * Storage Persistence Utilities
  * Ensures browser storage persists across sessions and won't be automatically cleared

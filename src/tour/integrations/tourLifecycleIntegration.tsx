@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import { isTourDone } from '../persistence';
 import { startDefaultTour } from '../tourEntry';

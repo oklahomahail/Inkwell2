@@ -1,4 +1,4 @@
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 // Schema versioning and migration system
 // This handles data model evolution and backward compatibility
 

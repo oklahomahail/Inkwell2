@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import AuthFooter from '../components/Auth/AuthFooter';
 import { AuthForm } from '../components/Auth/AuthForm';

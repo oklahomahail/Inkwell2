@@ -6,7 +6,7 @@
  */
 
 import { analyticsService } from '@/services/analyticsService';
-import { devLog } from '@/utils/devLog';
+import devLog from '@/utils/devLog';
 
 type Payload = Record<string, unknown>;
 
@@ -148,7 +148,7 @@ export const tourAnalytics = {
     };
 
     // Log to console in development
-    devLog('tour_error', { message, ...meta, ts: Date.now() });
+    devLog.error('tour_error', { message, ...meta, ts: Date.now() });
 
     // Persist for analytics
     persistEvent(event);

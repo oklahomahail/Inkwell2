@@ -1,5 +1,5 @@
 // Main plot analysis orchestrator
-import devLog from "src/utils/devLogger";
+import devLog from "@/utils/devLog";
 
 import type { Project } from '@/context/AppContext';
 
