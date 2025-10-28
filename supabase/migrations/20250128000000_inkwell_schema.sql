@@ -104,73 +104,91 @@ returns boolean language sql stable as $$
 $$;
 
 -- Policies: Projects
-create policy if not exists "projects_read" on public.projects
+drop policy if exists "projects_read" on public.projects;
+create policy "projects_read" on public.projects
 for select using (
   owner_id = auth.uid() or exists(
     select 1 from public.project_members m where m.project_id = projects.id and m.user_id = auth.uid()
   )
 );
 
-create policy if not exists "projects_insert" on public.projects
+drop policy if exists "projects_insert" on public.projects;
+create policy "projects_insert" on public.projects
 for insert with check ( owner_id = auth.uid() );
 
-create policy if not exists "projects_update" on public.projects
+drop policy if exists "projects_update" on public.projects;
+create policy "projects_update" on public.projects
 for update using ( owner_id = auth.uid() );
 
 -- Policies: Profiles
-create policy if not exists "profiles_read" on public.profiles
+drop policy if exists "profiles_read" on public.profiles;
+create policy "profiles_read" on public.profiles
 for select using ( user_id = auth.uid() );
 
-create policy if not exists "profiles_update" on public.profiles
+drop policy if exists "profiles_update" on public.profiles;
+create policy "profiles_update" on public.profiles
 for update using ( user_id = auth.uid() );
 
-create policy if not exists "profiles_insert" on public.profiles
+drop policy if exists "profiles_insert" on public.profiles;
+create policy "profiles_insert" on public.profiles
 for insert with check ( user_id = auth.uid() );
 
 -- Policies: Members
-create policy if not exists "members_read" on public.project_members
+drop policy if exists "members_read" on public.project_members;
+create policy "members_read" on public.project_members
 for select using (
   user_id = auth.uid() or exists(
     select 1 from public.projects p where p.id = project_members.project_id and p.owner_id = auth.uid()
   )
 );
 
-create policy if not exists "members_insert" on public.project_members
+drop policy if exists "members_insert" on public.project_members;
+create policy "members_insert" on public.project_members
 for insert with check ( user_id = auth.uid() );
 
-create policy if not exists "members_delete" on public.project_members
+drop policy if exists "members_delete" on public.project_members;
+create policy "members_delete" on public.project_members
 for delete using (
   exists(select 1 from public.projects p where p.id = project_members.project_id and p.owner_id = auth.uid())
 );
 
 -- Policies: Chapters
-create policy if not exists "chapters_read" on public.chapters
+drop policy if exists "chapters_read" on public.chapters;
+create policy "chapters_read" on public.chapters
 for select using ( public.can_access_project(project_id) );
 
-create policy if not exists "chapters_insert" on public.chapters
+drop policy if exists "chapters_insert" on public.chapters;
+create policy "chapters_insert" on public.chapters
 for insert with check ( public.can_access_project(project_id) );
 
-create policy if not exists "chapters_update" on public.chapters
+drop policy if exists "chapters_update" on public.chapters;
+create policy "chapters_update" on public.chapters
 for update using ( public.can_access_project(project_id) );
 
 -- Policies: Characters
-create policy if not exists "characters_read" on public.characters
+drop policy if exists "characters_read" on public.characters;
+create policy "characters_read" on public.characters
 for select using ( public.can_access_project(project_id) );
 
-create policy if not exists "characters_insert" on public.characters
+drop policy if exists "characters_insert" on public.characters;
+create policy "characters_insert" on public.characters
 for insert with check ( public.can_access_project(project_id) );
 
-create policy if not exists "characters_update" on public.characters
+drop policy if exists "characters_update" on public.characters;
+create policy "characters_update" on public.characters
 for update using ( public.can_access_project(project_id) );
 
 -- Policies: Notes
-create policy if not exists "notes_read" on public.notes
+drop policy if exists "notes_read" on public.notes;
+create policy "notes_read" on public.notes
 for select using ( public.can_access_project(project_id) );
 
-create policy if not exists "notes_insert" on public.notes
+drop policy if exists "notes_insert" on public.notes;
+create policy "notes_insert" on public.notes
 for insert with check ( public.can_access_project(project_id) );
 
-create policy if not exists "notes_update" on public.notes
+drop policy if exists "notes_update" on public.notes;
+create policy "notes_update" on public.notes
 for update using ( public.can_access_project(project_id) );
 
 -- Trigger: auto-create profiles on user signup
