@@ -1,11 +1,24 @@
 # Inkwell Technical Roadmap & Implementation Plan
 
-## 🎯 Current State Assessment (October 2024)
+## 🎯 Current State Assessment (October 2025)
 
 ### **✅ Completed Core Systems**
 
+- **v0.5.0 Supabase Integration (October 2025)**: Production-ready cloud sync
+  - Local-first architecture with IndexedDB + Supabase dual persistence
+  - Conflict detection & sync queue with retry logic
+  - Row-Level Security (RLS) policies for data isolation
+  - Server-controlled timestamps via database triggers
+  - 8 core migrations with comprehensive test coverage
+  - Cloud sync UI with real-time status badges
+  - Complete documentation and developer tooling
 - **AI Story Architect**: Complete multi-step flow with Claude API integration
 - **Visual Timeline**: Multi-POV lanes with drag-and-drop functionality
+- **Enhanced Timeline Integration (October 2025)**: Comprehensive conflict detection
+  - 5 types of conflict validation (time overlap, character presence, location, POV, chronological)
+  - Scene-timeline linkage with intelligent auto-detection
+  - Timeline navigation and health scoring (0-100)
+  - Timeline validation panel with auto-fix capabilities
 - **🚀 3B Publishing & Professional Exports**: Complete publication-ready export system
   - Multi-step Export Wizard with guided workflow
   - PDF, DOCX, EPUB engines with professional formatting
@@ -25,15 +38,16 @@
 
 ### **📊 Technical Metrics**
 
-- **Codebase**: 53,500+ lines across 215+ files
+- **Codebase**: 55,000+ lines across 220+ files
 - **Build Time**: ~3 seconds for production builds
 - **Bundle Size**: ~470KB main bundle (optimized)
 - **Performance**: Handles 100k+ word manuscripts smoothly
-- **Test Coverage**: Core services and components covered
+- **Test Coverage**: 71% overall (708 tests passing)
+- **Database**: 8 migrations, full RLS coverage
 
 ---
 
-## 🗓️ Phase 3: Publication-Ready Features (October - December 2024)
+## 🗓️ Phase 3: Publication-Ready Features (October - December 2025)
 
 ### **Priority 1: Consistency Guardian Completion** (2-3 weeks)
 
@@ -164,7 +178,118 @@
 
 ---
 
-## 🚀 Phase 4: Market Entry & Growth (Q1-Q2 2025)
+## 🌐 v0.6.0: Realtime + Collaboration (Q1 2026)
+
+### **Priority 1: Supabase Realtime Integration** (3-4 weeks)
+
+**Goal**: Enable real-time collaboration and live presence
+
+**Technical Implementation**:
+
+- Integrate Supabase Realtime subscriptions
+- Implement presence tracking across sessions
+- Add cursor position syncing for collaborators
+- Create real-time update notifications
+- Build conflict resolution for simultaneous edits
+
+**Files to Create/Modify**:
+
+- `src/services/realtimeService.ts`
+- `src/services/presenceService.ts`
+- `src/hooks/useRealtimeSubscription.ts`
+- `src/components/Collaboration/PresenceIndicator.tsx`
+- `src/components/Collaboration/CursorOverlay.tsx`
+
+**Success Criteria**:
+
+- Live presence indicators for active users
+- Real-time cursor position visibility
+- Sub-100ms update latency
+- Robust conflict resolution
+- Graceful offline/online transitions
+
+### **Priority 2: User Profiles & Sharing** (2-3 weeks)
+
+**Goal**: Enable author profiles and project sharing
+
+**Technical Implementation**:
+
+- Create public author profile pages
+- Implement project sharing permissions (view/edit)
+- Add invitation system for collaborators
+- Build shared project dashboard
+- Implement activity feed for shared projects
+
+**Files to Create**:
+
+- `src/pages/Profile.tsx`
+- `src/components/Sharing/ShareDialog.tsx`
+- `src/components/Sharing/CollaboratorManager.tsx`
+- `src/services/sharingService.ts`
+- New migration: `20260115000000_sharing_system.sql`
+
+**Success Criteria**:
+
+- Public author profiles with portfolio
+- Granular sharing permissions
+- Real-time collaboration status
+- Activity tracking and notifications
+
+### **Priority 3: Push Notifications** (1-2 weeks)
+
+**Goal**: Implement notification system via Supabase Functions
+
+**Technical Implementation**:
+
+- Create Supabase Edge Function for notifications
+- Implement push notification service
+- Add notification preferences UI
+- Build in-app notification center
+- Integrate with collaboration events
+
+**Files to Create**:
+
+- `supabase/functions/send-notification/index.ts`
+- `src/services/notificationService.ts`
+- `src/components/Notifications/NotificationCenter.tsx`
+- `src/hooks/useNotifications.ts`
+
+**Success Criteria**:
+
+- Real-time push notifications
+- Customizable notification preferences
+- In-app notification history
+- Desktop notification support
+
+### **Priority 4: PWA Enhancement** (1-2 weeks)
+
+**Goal**: Full Progressive Web App capabilities
+
+**Technical Implementation**:
+
+- Enhanced offline analytics tracking
+- Background sync for queued operations
+- App install prompts and badges
+- Offline page caching strategies
+- Service worker optimization
+
+**Files to Modify**:
+
+- `public/sw.js` - Enhanced service worker
+- `src/services/pwaService.ts`
+- `src/hooks/usePWAInstall.ts`
+- `manifest.json` - Enhanced capabilities
+
+**Success Criteria**:
+
+- Installable PWA experience
+- Full offline functionality
+- Background sync capabilities
+- Update notifications
+
+---
+
+## 🚀 Phase 4: Market Entry & Growth (Q2-Q3 2026)
 
 ### **Quarter 1 Goals**
 

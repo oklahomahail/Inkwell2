@@ -18,6 +18,19 @@ Inkwell is an offline‑first writing platform for serious authors. The focus is
 
 ## Completed (since v0.4.0)
 
+### v0.5.0 – Supabase Integration Complete – **October 28, 2025** ✅
+
+- **Local-First Architecture** – IndexedDB + Supabase dual persistence with optional cloud sync
+- **Conflict Detection & Sync Queue** – Intelligent conflict resolution with last-write-wins strategy
+- **Cloud Sync UI** – Real-time sync status badges and cloud sync toggle control
+- **Row-Level Security (RLS)** – Postgres RLS policies enforcing user data isolation
+- **Server-Controlled Timestamps** – `updated_at` managed by database triggers for consistency
+- **8 Core Migrations** – Fully tested migration suite with profiles, roles, and bulk operations
+- **Comprehensive Documentation** – Complete setup guides, migration references, and quickstart docs
+- **Developer Scripts** – Health checks, migration tools, and testing utilities
+
+> **Why this matters**: Establishes production-ready cloud sync foundation enabling collaboration features, real-time updates, and data portability while maintaining local-first reliability.
+
 ### Spotlight Tour Phase 2 – **October 25, 2025** ✅
 
 - **Interactive Guided Tours** with SpotlightOverlay UI component
@@ -105,7 +118,17 @@ Inkwell is an offline‑first writing platform for serious authors. The focus is
 
 ## Phase 3+ – Future Roadmap
 
-- **Phase 3** – Advanced AI Integration (Claude API, plot hole detection, style analysis)
+### v0.6.0 – Realtime + Collaboration (Planned)
+
+- **Supabase Realtime** – Live presence, cursor sync, and collaborative editing
+- **User Profiles** – Public author profiles and project sharing capabilities
+- **Shared Projects** – Multi-user collaboration with conflict resolution
+- **Push Notifications** – Supabase Functions for notification delivery
+- **PWA Integration** – Progressive Web App capabilities with offline analytics
+- **Realtime Sync** – Live updates across devices and collaborators
+
+---- **Phase 3** – Advanced AI Integration (Claude API, plot hole detection, style analysis)
+
 - **Phase 4** – Collaboration Features (multi-user editing, comments, version control)
 - **Phase 5** – Publishing & Export (professional formatting, EPUB, platform integration)
 - **Phase 6** – Advanced Analytics (writing patterns, productivity insights, story metrics)
