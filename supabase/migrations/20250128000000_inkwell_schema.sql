@@ -5,10 +5,14 @@
 -- Extensions
 create extension if not exists pgcrypto;  -- for gen_random_uuid()
 
--- 1) Profiles
+-- 1) Profiles (note: uses 'id' column to match existing schema from earlier migration)
 create table if not exists public.profiles (
-  user_id uuid primary key references auth.users(id) on delete cascade,
+  id uuid primary key references auth.users(id) on delete cascade,
+  email text,
   display_name text,
+  avatar_url text,
+  timezone text,
+  onboarding_completed boolean default false,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -123,15 +127,15 @@ for update using ( owner_id = auth.uid() );
 -- Policies: Profiles
 drop policy if exists "profiles_read" on public.profiles;
 create policy "profiles_read" on public.profiles
-for select using ( user_id = auth.uid() );
+for select using ( id = auth.uid() );
 
 drop policy if exists "profiles_update" on public.profiles;
 create policy "profiles_update" on public.profiles
-for update using ( user_id = auth.uid() );
+for update using ( id = auth.uid() );
 
 drop policy if exists "profiles_insert" on public.profiles;
 create policy "profiles_insert" on public.profiles
-for insert with check ( user_id = auth.uid() );
+for insert with check ( id = auth.uid() );
 
 -- Policies: Members
 drop policy if exists "members_read" on public.project_members;
