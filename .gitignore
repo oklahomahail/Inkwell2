@@ -81,8 +81,8 @@ inkwell-src-*.zip
 # Bundle analysis snapshots (keep baseline, ignore current)
 .bundle-snapshots/current.json
 
-.env*
-reports/*.clean.txt
+# Supabase
+supabase/.temp/
 
 .env*
 reports/*.clean.txt

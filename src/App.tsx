@@ -42,6 +42,7 @@ import SignIn from './pages/SignInPage';
 import SignUp from './pages/SignUpPage';
 import UpdatePassword from './pages/UpdatePassword';
 import AnonOnlyRoute from './routes/AnonOnlyRoute';
+import SupabaseHealth from './routes/Health';
 import ProtectedRoute from './routes/ProtectedRoute';
 // Services
 import { connectivityService } from './services/connectivityService';
@@ -169,6 +170,9 @@ function AppShell() {
       <Routes>
         {/* Health check route */}
         <Route path="/health" element={<HealthCheck />} />
+
+        {/* Supabase integration health check */}
+        <Route path="/health/supabase" element={<SupabaseHealth />} />
 
         {/* Auth callback route - handles magic link code exchange and password reset flow */}
         <Route path="/auth/callback" element={<AuthCallback />} />

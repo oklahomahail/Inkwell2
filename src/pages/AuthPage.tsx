@@ -4,7 +4,6 @@ import { useSearchParams } from 'react-router-dom';
 import AuthFooter from '../components/Auth/AuthFooter';
 import { AuthForm } from '../components/Auth/AuthForm';
 import { AuthFormMode } from '../components/Auth/AuthForm';
-import AuthHeader from '../components/Auth/AuthHeader';
 import { normalizeSafeRedirect } from '../utils/safeRedirect';
 
 interface AuthPageProps {
@@ -126,17 +125,6 @@ export default function AuthPage({ mode }: AuthPageProps) {
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
           }}
         >
-          <AuthHeader
-            title={mode === 'signin' ? 'Sign in to Inkwell' : 'Create your Inkwell account'}
-            subtitle={
-              mode === 'signin'
-                ? 'Welcome back, pick up where you left off.'
-                : 'Start crafting your stories today.'
-            }
-            logoSrc="/assets/brand/inkwell-lockup-horizontal.svg"
-            className="text-inkwell-gold mb-6"
-          />
-
           {notice && (
             <div
               className="mb-6 p-4 rounded-md flex items-center"
