@@ -85,16 +85,26 @@
       
       window.inkwellBootProbe.log('Boot probe initialized');
       
-      // Check for critical resources
-      try {
-        window.inkwellBootProbe.log('DOM ready state', document.readyState);
-        if (!document.getElementById('root')) {
-          window.inkwellBootProbe.error('Root element not found');
-        } else {
-          window.inkwellBootProbe.log('Root element found');
+      // Check for critical resources after DOM is ready
+      // Note: This runs in <head>, so #root won't exist yet - check after DOMContentLoaded
+      function checkRootElement() {
+        try {
+          window.inkwellBootProbe.log('DOM ready state', document.readyState);
+          if (!document.getElementById('root')) {
+            window.inkwellBootProbe.error('Root element not found');
+          } else {
+            window.inkwellBootProbe.log('Root element found');
+          }
+        } catch (e) {
+          window.inkwellBootProbe.error('Error during DOM check', e);
         }
-      } catch (e) {
-        window.inkwellBootProbe.error('Error during DOM check', e);
+      }
+      
+      // Check immediately if DOM is already loaded, otherwise wait
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkRootElement);
+      } else {
+        checkRootElement();
       }
     </script>
     
@@ -130,13 +140,23 @@
         try {
           var KEY = 'inkwell:theme'; // Match the key used in main.tsx
           var stored = localStorage.getItem(KEY);
-          var theme = stored || 'light';
+          var theme = stored || 'light'; // Default to light if nothing saved
           var root = document.documentElement;
-          root.classList.remove('light', 'dark');
-          root.classList.add(theme);
+          
+          // Set data-theme attribute for any CSS that uses it
           root.dataset.theme = theme;
+          
+          // Tailwind uses the 'dark' class, so only toggle that
+          // Don't add 'light' class - light mode is the default (no class needed)
+          if (theme === 'dark') {
+            root.classList.add('dark');
+          } else {
+            root.classList.remove('dark');
+          }
         } catch (_) {
-          document.documentElement.classList.add('light');
+          // localStorage unavailable (private mode, etc.)
+          document.documentElement.dataset.theme = 'light';
+          document.documentElement.classList.remove('dark');
         }
       })();
     </script>

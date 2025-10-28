@@ -111,6 +111,13 @@ export function findTargetWithRetry(
     // Get the node to observe (default to document.body)
     const node = rootNode instanceof Document ? rootNode.body : rootNode;
 
+    // Guard: if node is null (e.g., document.body not ready), use timeout fallback
+    if (!node) {
+      console.warn('findTargetWithRetry: rootNode.body is not available, using timeout fallback');
+      setTimeout(() => resolve(tryFind()), 100);
+      return;
+    }
+
     // Create observer and use our safe observe utility
     let observer: MutationObserver | null = null;
     try {

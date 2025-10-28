@@ -45,6 +45,13 @@ function whenTargetsReady(selectors: string[], timeoutMs = 8000): Promise<boolea
     // Get the root node to observe
     const node = document.documentElement;
 
+    // Guard: ensure node exists before creating observer
+    if (!node) {
+      console.warn('waitForTargets: document.documentElement is not available');
+      finalize(false);
+      return;
+    }
+
     // Create observer with safer approach
     let observer: MutationObserver | null = null;
     try {
