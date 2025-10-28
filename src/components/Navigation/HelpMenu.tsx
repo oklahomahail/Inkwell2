@@ -1,4 +1,13 @@
-import { BookOpen, Video, MessageSquare, Sparkles, RotateCw, Wand2, FileDown } from 'lucide-react';
+import {
+  BookOpen,
+  Video,
+  MessageSquare,
+  Sparkles,
+  RotateCw,
+  Wand2,
+  FileDown,
+  PlayCircle,
+} from 'lucide-react';
 import React from 'react';
 
 import { getTourConfig } from '@/components/Onboarding/tourRegistry';
@@ -6,6 +15,7 @@ import { resetTour } from '@/tour/persistence';
 import { startDefaultTour } from '@/tour/tourEntry';
 import { tourService } from '@/tour/TourService';
 import { getLastTourUsed, setLastTourUsed, type TourVariant } from '@/tour/tourStorage';
+import { devLog } from '@/utils/devLog';
 
 import { startTour } from '../Onboarding/tour-core/TourController';
 import { Button } from '../ui/Button';
@@ -33,6 +43,25 @@ export function HelpMenu({ className }: HelpMenuProps) {
 
   const startSpotlightTour = () => {
     startTour('spotlight', profileId, { force: true });
+  };
+
+  const handleManualTourStart = () => {
+    devLog('[HelpMenu] Manual tour recovery triggered');
+    // Force restart the spotlight tour, clearing any stuck state
+    try {
+      // Reset all tour state
+      resetTour('spotlight');
+      localStorage.removeItem('tour:spotlight:progress');
+
+      // Force start with clean slate
+      setTimeout(() => {
+        startTour('spotlight', profileId, { force: true });
+      }, 100);
+
+      devLog('[HelpMenu] Manual tour recovery completed');
+    } catch (error) {
+      console.error('[HelpMenu] Manual tour recovery failed:', error);
+    }
   };
 
   const handleRestartLastTour = () => {
@@ -66,6 +95,17 @@ export function HelpMenu({ className }: HelpMenuProps) {
   return (
     <div className={className}>
       <div className="flex flex-col space-y-2">
+        {/* Manual Recovery Button - Always visible for quick tour fixes */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="justify-start text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-950"
+          onClick={handleManualTourStart}
+          title="Force start the tour if it's stuck or not appearing"
+        >
+          <PlayCircle className="w-4 h-4 mr-2" />
+          Start Tour
+        </Button>
         {lastTourUsed && (
           <Button
             variant="ghost"
