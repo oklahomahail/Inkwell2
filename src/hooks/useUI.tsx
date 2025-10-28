@@ -1,5 +1,6 @@
-// File: src/hooks/useUI.ts
 import React, { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+
+/** UI Context with sidebar state */
 
 export interface UIContextValue {
   sidebarCollapsed: boolean;
@@ -19,6 +20,7 @@ const defaultValue: UIContextValue = {
 
 export const UIContext = createContext<UIContextValue>(defaultValue);
 
+/** Internal hook (pre-existing name) */
 export function useUI(): UIContextValue {
   return useContext(UIContext);
 }
@@ -46,3 +48,5 @@ export function UIProvider({
 
   return <UIContext.Provider value={value}>{children}</UIContext.Provider>;
 }
+
+export default useUI;

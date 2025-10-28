@@ -9,6 +9,7 @@ import { AppProvider } from '../src/context/AppContext';
 import { AuthProvider } from '../src/context/AuthContext';
 import { ClaudeProvider } from '../src/context/ClaudeProvider';
 import { ToastProvider } from '../src/context/ToastContext';
+import { UIProvider } from '../src/hooks/useUI';
 
 // Import the flags directly with relative path to avoid path resolution issues
 import { useFeatureFlag } from '../src/utils/flags';
@@ -44,7 +45,9 @@ export function renderApp(
         <AppProvider>
           <AuthProvider>
             <ToastProvider>
-              <CommandPaletteProvider>{children}</CommandPaletteProvider>
+              <UIProvider>
+                <CommandPaletteProvider>{children}</CommandPaletteProvider>
+              </UIProvider>
             </ToastProvider>
           </AuthProvider>
         </AppProvider>

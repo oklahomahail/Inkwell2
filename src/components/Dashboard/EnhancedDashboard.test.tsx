@@ -3,6 +3,8 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
+import { UIProvider } from '../../hooks/useUI';
+
 import EnhancedDashboard from './EnhancedDashboard';
 
 // Mock the InkwellFeather component
@@ -53,7 +55,9 @@ describe('EnhancedDashboard Component', () => {
   const renderDashboard = () => {
     return render(
       <MemoryRouter>
-        <EnhancedDashboard />
+        <UIProvider>
+          <EnhancedDashboard />
+        </UIProvider>
       </MemoryRouter>,
     );
   };
