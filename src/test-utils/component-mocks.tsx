@@ -68,6 +68,9 @@ export const MockAppProvider: React.FC<{
 const defaultUI: UIContextValue = {
   sidebarCollapsed: false,
   toggleSidebar: vi.fn(),
+  newProjectDialogOpen: false,
+  openNewProjectDialog: vi.fn(),
+  closeNewProjectDialog: vi.fn(),
 };
 
 export const MockUIProvider: React.FC<{
