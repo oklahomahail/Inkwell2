@@ -17,6 +17,7 @@ drop policy if exists "chapters_write" on public.chapters;
 create policy "chapters_write" on public.chapters
 for insert with check ( public.can_write_project(project_id) );
 
+drop policy if exists "chapters_update" on public.chapters;
 create policy "chapters_update" on public.chapters
 for update using ( public.can_write_project(project_id) );
 
@@ -25,6 +26,7 @@ drop policy if exists "characters_write" on public.characters;
 create policy "characters_write" on public.characters
 for insert with check ( public.can_write_project(project_id) );
 
+drop policy if exists "characters_update" on public.characters;
 create policy "characters_update" on public.characters
 for update using ( public.can_write_project(project_id) );
 
@@ -33,6 +35,7 @@ drop policy if exists "notes_write" on public.notes;
 create policy "notes_write" on public.notes
 for insert with check ( public.can_write_project(project_id) );
 
+drop policy if exists "notes_update" on public.notes;
 create policy "notes_update" on public.notes
 for update using ( public.can_write_project(project_id) );
 
