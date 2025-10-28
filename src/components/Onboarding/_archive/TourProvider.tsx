@@ -1,12 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 import devLog from "@/utils/devLog";
-import devLog from "@/utils/devLog";
-import devLog from "@/utils/devLog";
-import devLog from "@/utils/devLog";
 
 import analyticsService from '../../services/analyticsService';
-
 import * as tourGatingMod from './tourGating';
 import { hasPromptedThisSession } from './tourGating';
 

@@ -18,7 +18,7 @@ import type { TourStep } from './types';
 function convertToServiceConfig(
   tourId: string,
   steps: TourStep[],
-  version?: number,
+  _version?: number,
 ): ServiceTourConfig {
   return {
     id: tourId,

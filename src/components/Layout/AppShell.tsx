@@ -2,13 +2,14 @@
 import { useEffect } from 'react';
 import React from 'react';
 
+import { cn } from '@/utils/cn';
+
 import { OnboardingOrchestrator } from '../../onboarding/OnboardingOrchestrator';
 import { useSimpleTourAutostart } from '../Onboarding/hooks/useSimpleTourAutostart';
 import { useSpotlightAutostart } from '../Onboarding/hooks/useSpotlightAutostart';
 import { TourProvider } from '../Onboarding/TourProvider';
 
 import '../Onboarding/styles/overlay.css';
-import { cn } from '@/utils/cn';
 
 interface AppShellProps {
   children: React.ReactNode;

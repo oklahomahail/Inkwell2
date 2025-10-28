@@ -11,11 +11,11 @@ export default [
   // Global ignores (still included in the tree, just not linted)
   {
     ignores: [
-      'node_modules/**', 
-      'build/**', 
-      'dist/**', 
-      'src/test/**', 
-      'bench/**', 
+      'node_modules/**',
+      'build/**',
+      'dist/**',
+      'src/test/**',
+      'bench/**',
       'dev/**',
       '.vercel/**',
       'dev-dist/**',
@@ -24,6 +24,8 @@ export default [
       'playwright-report/**',
       'pnpm-lock.yaml',
       'src/bench/**', // Migrated from .eslintignore
+      'scripts/**', // All scripts (including .mjs)
+      '.audit/**', // Audit tools
     ],
   },
 
@@ -71,11 +73,11 @@ export default [
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',
-        { 
-          argsIgnorePattern: '^_', 
+        {
+          argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
           caughtErrorsIgnorePattern: '^_',
-          ignoreRestSiblings: true
+          ignoreRestSiblings: true,
         },
       ],
 
@@ -109,28 +111,34 @@ export default [
         'error',
         {
           selector: 'ImportExpression[source.value=/analyticsService/]',
-          message: 'Dynamic import of analyticsService is not allowed. Use static imports to prevent TDZ errors.',
+          message:
+            'Dynamic import of analyticsService is not allowed. Use static imports to prevent TDZ errors.',
         },
         {
           selector: 'ImportExpression[source.value=/pwaService/]',
-          message: 'Dynamic import of pwaService is not allowed. Use static imports to prevent TDZ errors.',
+          message:
+            'Dynamic import of pwaService is not allowed. Use static imports to prevent TDZ errors.',
         },
         {
           selector: 'ImportExpression[source.value=/tutorialStorage/]',
-          message: 'Dynamic import of tutorialStorage is not allowed. Use static imports to prevent TDZ errors.',
+          message:
+            'Dynamic import of tutorialStorage is not allowed. Use static imports to prevent TDZ errors.',
         },
       ],
-      
+
       // Navigation hooks safety: prevent mixing useNavigate and useGo in the same file
       'no-restricted-imports': [
         'error',
         {
-          paths: [{
-            name: 'react-router-dom',
-            importNames: ['useNavigate'],
-            message: 'Please use "useGo" from "@/utils/navigate" instead of direct useNavigate to maintain consistency and testability.'
-          }]
-        }
+          paths: [
+            {
+              name: 'react-router-dom',
+              importNames: ['useNavigate'],
+              message:
+                'Please use "useGo" from "@/utils/navigate" instead of direct useNavigate to maintain consistency and testability.',
+            },
+          ],
+        },
       ],
 
       // Prevent typical loops and keep layers clean:
@@ -156,7 +164,15 @@ export default [
 
   // Relax rules for archived/bench/test/scripts code
   {
-    files: ['archive/**', 'src/bench/**', 'src/test/**', 'scripts/**', '**/*.{spec,test}.{ts,tsx,js,jsx}'],
+    files: [
+      'archive/**',
+      'src/bench/**',
+      'src/test/**',
+      'scripts/**',
+      '.audit/**',
+      '**/_archive/**',
+      '**/*.{spec,test}.{ts,tsx,js,jsx}',
+    ],
     rules: {
       'no-console': 'off', // test output ok
       'import/order': 'off',
@@ -192,10 +208,7 @@ export default [
 
   // Allow console in storage verification/testing utils
   {
-    files: [
-      'src/utils/storage/persistenceE2E.ts',
-      'src/utils/storage/storageVerification.ts'
-    ],
+    files: ['src/utils/storage/persistenceE2E.ts', 'src/utils/storage/storageVerification.ts'],
     rules: {
       'no-console': 'off', // diagnostic/testing utilities
     },

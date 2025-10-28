@@ -9,9 +9,8 @@ import { AppProvider } from '../src/context/AppContext';
 import { AuthProvider } from '../src/context/AuthContext';
 import { ClaudeProvider } from '../src/context/ClaudeProvider';
 import { ToastProvider } from '../src/context/ToastContext';
-import { UIProvider } from '../src/hooks/useUI';
-
 // Import the flags directly with relative path to avoid path resolution issues
+import { UIProvider } from '../src/hooks/useUI';
 import { useFeatureFlag } from '../src/utils/flags';
 
 type Options = {
@@ -30,7 +29,7 @@ vi.mock('../src/utils/flags', () => ({
 
 export function renderApp(
   ui: React.ReactElement,
-  { route = '/', flags = {}, initialState, wrapper }: Options = {},
+  { route = '/', flags = {}, initialState: _initialState, wrapper }: Options = {},
 ) {
   // Set feature flag mock implementations based on provided flags
   if (Object.keys(flags).length > 0) {

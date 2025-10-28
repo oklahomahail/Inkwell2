@@ -64,10 +64,10 @@ export function getDropOffAnalysis(tourId: string): DropOffPoint[] {
   const events = getTourEvents();
 
   // Get all step views for this tour
-  const stepViews = events.filter((e) => e.type === 'tour_step_viewed' && e.tour_id === tourId);
+  const _stepViews = events.filter((e) => e.type === 'tour_step_viewed' && e.tour_id === tourId);
 
   // Get all completions for this tour
-  const completions = events.filter((e) => e.type === 'tour_completed' && e.tour_id === tourId);
+  const _completions = events.filter((e) => e.type === 'tour_completed' && e.tour_id === tourId);
 
   // Get all skips for this tour
   const skips = events.filter((e) => e.type === 'tour_skipped' && e.tour_id === tourId);
