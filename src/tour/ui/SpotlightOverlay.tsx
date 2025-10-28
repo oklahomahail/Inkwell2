@@ -86,6 +86,7 @@ export default function SpotlightOverlay() {
     return () => window.removeEventListener('keydown', onKey);
   }, [isActive, next, prev, close, index]);
 
+  // Early return if tour is not active - this prevents rendering any overlay elements
   if (!isActive || !currentStep || !portalRef.current || !anchorRect) return null;
 
   const overlay = (
@@ -95,6 +96,7 @@ export default function SpotlightOverlay() {
       aria-label="Product tour"
       className="fixed inset-0 z-[10000]"
       style={{ pointerEvents: 'none' }}
+      data-tour-active="true"
     >
       <SpotlightMask anchorRect={anchorRect} padding={12} radius={14} opacity={0.5} />
       <SpotlightTooltip

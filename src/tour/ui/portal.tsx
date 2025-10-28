@@ -22,6 +22,10 @@ export function ensurePortalRoot(): HTMLElement {
     });
     document.body.appendChild(root);
   }
+
+  // Always ensure pointer-events is none on the root - children can override
+  root.style.pointerEvents = 'none';
+
   return root;
 }
 

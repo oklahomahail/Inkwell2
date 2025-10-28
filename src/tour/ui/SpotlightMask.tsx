@@ -29,7 +29,7 @@ export default function SpotlightMask({
       onClick={onClickBackdrop}
     >
       <svg
-        className="w-full h-full pointer-events-auto"
+        className="w-full h-full pointer-events-none"
         viewBox={`0 0 ${window.innerWidth} ${window.innerHeight}`}
         preserveAspectRatio="none"
       >

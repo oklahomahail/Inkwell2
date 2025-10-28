@@ -7,7 +7,7 @@ import Welcome from '@/components/Dashboard/Welcome';
 import { useAppContext } from '@/context/AppContext';
 import { useChapterCount, useLastEditedChapter } from '@/context/ChaptersContext';
 import { useAutostartSpotlight } from '@/hooks/useAutostartSpotlight';
-import { triggerOnProjectCreated } from '@/utils/tourTriggers';
+import { useUI } from '@/hooks/useUI';
 
 // Helper to format relative time
 const timeAgo = (isoString: string): string => {
@@ -20,7 +20,8 @@ const timeAgo = (isoString: string): string => {
 };
 
 const DashboardPanel: React.FC = () => {
-  const { state, currentProject, addProject, setCurrentProjectId } = useAppContext();
+  const { state, currentProject, setCurrentProjectId } = useAppContext();
+  const { openNewProjectDialog } = useUI();
 
   // Auto-start Spotlight Tour for first-time users
   useAutostartSpotlight();
@@ -29,33 +30,17 @@ const DashboardPanel: React.FC = () => {
   const chapterCount = useChapterCount(currentProject?.id ?? '');
   const lastEditedChapter = useLastEditedChapter(currentProject?.id ?? '');
 
-  const createNewProject = () => {
-    const newProject = {
-      id: `project-${Date.now()}`,
-      name: `New Story ${state.projects.length + 1}`,
-      description: 'A new fiction project',
-      content: '',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-    addProject({ ...newProject, chapters: [], characters: [], beatSheet: [] });
-    setCurrentProjectId(newProject.id);
-
-    // Fire tour trigger for project creation
-    triggerOnProjectCreated(newProject.id);
-  };
-
   return (
     <div className="space-y-8">
       {/* Branded welcome section */}
-      <Welcome onCreateProject={createNewProject} hasProjects={state.projects.length > 0} />
+      <Welcome onCreateProject={openNewProjectDialog} hasProjects={state.projects.length > 0} />
 
       {/* Quick action header */}
       {state.projects.length > 0 && (
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Projects</h2>
           <button
-            onClick={createNewProject}
+            onClick={openNewProjectDialog}
             data-tour="create-project-btn"
             className="flex items-center gap-2 px-4 py-2 bg-inkwell-navy text-white rounded-lg hover:bg-inkwell-navy-700 transition-colors"
           >
@@ -159,7 +144,7 @@ const DashboardPanel: React.FC = () => {
             Create or select a project to start writing
           </p>
           <button
-            onClick={createNewProject}
+            onClick={openNewProjectDialog}
             data-testid="create-first-project"
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mx-auto"
           >

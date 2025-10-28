@@ -19,12 +19,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import Logo from '@/components/Logo';
+import NewProjectDialog from '@/components/Projects/NewProjectDialog';
 import { BRAND_NAME, ORGANIZATION_NAME } from '@/constants/brand';
 import { ALT_TAGLINE } from '@/constants/branding';
 import { useAppContext, View } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useCommandPalette } from '@/context/CommandPaletteContext';
 import { ExportModal } from '@/features/export/ExportModal';
+import { useUI } from '@/hooks/useUI';
 import { cn } from '@/lib/utils';
 import { useFeatureFlag } from '@/utils/flags';
 
@@ -107,6 +109,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   // ✅ ALL hooks must be called unconditionally, before any returns
   const { state, dispatch } = useAppContext();
   const { user, signOut } = useAuth();
+  const { newProjectDialogOpen, closeNewProjectDialog } = useUI();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(state.theme === 'dark');
   const [isMobile, setIsMobile] = useState(false);
@@ -876,6 +879,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             />
           );
         })()}
+
+      {/* New Project Dialog */}
+      <NewProjectDialog
+        open={newProjectDialogOpen}
+        onOpenChange={(open) => !open && closeNewProjectDialog()}
+      />
     </div>
   );
 };

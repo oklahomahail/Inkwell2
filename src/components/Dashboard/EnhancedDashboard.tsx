@@ -4,16 +4,16 @@ import React, { useState, useEffect } from 'react';
 
 import { InkwellFeather } from '@/components/icons';
 import type { InkwellIconName } from '@/components/icons/InkwellFeather';
-import NewProjectDialog from '@/components/Projects/NewProjectDialog';
 import StatusChip from '@/components/Storage/StatusChip';
 import { StorageHealthWidget } from '@/components/Storage/StorageHealthWidget';
 import { useAppContext, View } from '@/context/AppContext';
 import { useTourStartupFromUrl } from '@/hooks/useTourStartupFromUrl';
+import { useUI } from '@/hooks/useUI';
 import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 
 const EnhancedDashboard: React.FC = () => {
   const { state, currentProject, addProject, setCurrentProjectId, dispatch } = useAppContext();
-  const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
+  const { newProjectDialogOpen, openNewProjectDialog, closeNewProjectDialog } = useUI();
   const [storageModalOpen, setStorageModalOpen] = useState(false);
 
   // Check for tour=start in URL and trigger tour if found
@@ -36,10 +36,6 @@ const EnhancedDashboard: React.FC = () => {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
-
-  const openNewProjectDialog = () => {
-    setNewProjectDialogOpen(true);
-  };
 
   const _createNewProject = async () => {
     try {
@@ -98,7 +94,7 @@ const EnhancedDashboard: React.FC = () => {
       description: 'Start a fresh writing project with templates and structure',
       icon: PlusCircle,
       color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-      action: () => setNewProjectDialogOpen(true),
+      action: () => openNewProjectDialog(),
     },
     {
       id: 'continue-writing',
@@ -490,9 +486,6 @@ const EnhancedDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* New Project Dialog */}
-      <NewProjectDialog open={newProjectDialogOpen} onOpenChange={setNewProjectDialogOpen} />
     </div>
   );
 };

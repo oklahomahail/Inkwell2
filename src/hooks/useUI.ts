@@ -5,6 +5,9 @@ import { createContext, useContext } from 'react';
 export type UIContextValue = {
   sidebarCollapsed: boolean;
   toggleSidebar: () => void;
+  newProjectDialogOpen: boolean;
+  openNewProjectDialog: () => void;
+  closeNewProjectDialog: () => void;
 };
 
 export const UIContext = createContext<UIContextValue | undefined>(undefined);

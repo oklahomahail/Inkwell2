@@ -694,6 +694,15 @@ main[data-tour-id='dashboard'] {
   z-index: 10000 !important;
 }
 
+/* Defensive: Ensure inactive tour elements never block clicks */
+.tour-overlay[aria-hidden='true'],
+.tour-backdrop[aria-hidden='true'],
+[data-inkwell-spotlight-root]:empty,
+#spotlight-root:empty {
+  pointer-events: none !important;
+  display: none !important;
+}
+
 /* ============================================================================
    END TOUR FIXES
    ============================================================================ */

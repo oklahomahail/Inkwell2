@@ -9,12 +9,11 @@ import { useUI } from '@/hooks/useUI';
 import { cn } from '@/lib/utils';
 import { _focusWritingEditor } from '@/utils/focusUtils';
 import { preload } from '@/utils/preload';
-import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 
 export const Sidebar: React.FC = () => {
-  const { state, setView, addProject, setCurrentProjectId } = useAppContext();
+  const { state, setView } = useAppContext();
   const { view } = state;
-  const { sidebarCollapsed, toggleSidebar } = useUI();
+  const { sidebarCollapsed, toggleSidebar, openNewProjectDialog } = useUI();
   const createProjectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const navLinks = useMemo(() => {
@@ -44,21 +43,9 @@ export const Sidebar: React.FC = () => {
       createProjectTimeoutRef.current = null;
     }, 1000);
 
-    const newProject = {
-      id: `project-${Date.now()}`,
-      name: `New Story ${state.projects.length + 1}`,
-      description: 'A new fiction project',
-      content: '',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-    addProject({ ...newProject, chapters: [], characters: [], beatSheet: [] });
-    setCurrentProjectId(newProject.id);
-    setView(View.Dashboard);
-
-    // Fire tour trigger for project creation
-    triggerOnProjectCreated(newProject.id);
-  }, [state.projects.length, addProject, setCurrentProjectId, setView]);
+    // Open the new project dialog instead of creating directly
+    openNewProjectDialog();
+  }, [openNewProjectDialog]);
 
   return (
     <aside
