@@ -52,7 +52,7 @@ export default function SpotlightOverlay() {
   useEffect(() => {
     if (!isActive || !currentStep) return;
     announceLive(`Step ${index + 1} of ${total}. ${currentStep.title}`);
-  }, [isActive, index, total, currentStep?.title]);
+  }, [isActive, index, total, currentStep]);
 
   // Global keyboard navigation
   useEffect(() => {
@@ -93,7 +93,8 @@ export default function SpotlightOverlay() {
       role="dialog"
       aria-modal="true"
       aria-label="Product tour"
-      className="fixed inset-0 z-[9999]"
+      className="fixed inset-0 z-[10000]"
+      style={{ pointerEvents: 'none' }}
     >
       <SpotlightMask anchorRect={anchorRect} padding={12} radius={14} opacity={0.5} />
       <SpotlightTooltip

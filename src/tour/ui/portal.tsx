@@ -17,8 +17,8 @@ export function ensurePortalRoot(): HTMLElement {
     Object.assign(root.style, {
       position: 'fixed',
       inset: '0',
-      zIndex: '9999',
-      pointerEvents: 'none',
+      zIndex: '10000', // Higher than modals (50) and topbar (30)
+      pointerEvents: 'none', // Let clicks through the container
     });
     document.body.appendChild(root);
   }

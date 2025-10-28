@@ -89,8 +89,13 @@ export function OnboardingUI() {
       console.warn('Failed to track tour start analytics:', error);
     }
 
-    // Start spotlight tour with the new system
-    startTour('spotlight', { source: 'welcome' });
+    // Delay to ensure modal is fully closed
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        // Start spotlight tour with the new system
+        startTour('spotlight', { source: 'welcome', restart: true });
+      }, 100);
+    });
   };
 
   const handleOpenChecklist = () => {

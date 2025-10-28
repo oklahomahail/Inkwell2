@@ -24,12 +24,12 @@ export default function SpotlightMask({
   // The mask uses even-odd fill rule. First path is the full-screen rect, second is the rounded "hole".
   return (
     <div
-      className="fixed inset-0 z-[9998] pointer-events-auto"
+      className="fixed inset-0 z-[9998] pointer-events-none"
       aria-hidden="true"
       onClick={onClickBackdrop}
     >
       <svg
-        className="w-full h-full"
+        className="w-full h-full pointer-events-auto"
         viewBox={`0 0 ${window.innerWidth} ${window.innerHeight}`}
         preserveAspectRatio="none"
       >

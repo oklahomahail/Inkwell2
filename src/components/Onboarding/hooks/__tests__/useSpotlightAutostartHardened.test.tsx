@@ -6,7 +6,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import * as anchorsModule from '../../../../tour/anchors';
@@ -42,9 +42,9 @@ describe('useSpotlightAutostartHardened', () => {
     vi.unstubAllGlobals();
   });
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <BrowserRouter>{children}</BrowserRouter>
-  );
+  function wrapper({ children }: { children: React.ReactNode }) {
+    return <MemoryRouter>{children}</MemoryRouter>;
+  }
 
   it('should not start tour when no selectors provided', async () => {
     renderHook(() => useSpotlightAutostart([], { onStartTour: mockOnStartTour }), { wrapper });

@@ -5,6 +5,9 @@
 
 import { tourAnalytics } from './adapters/analyticsAdapter';
 
+// DEVELOPMENT: Set to false to disable crash shield during testing
+const CRASH_SHIELD_ENABLED = import.meta.env.PROD; // Only enabled in production
+
 interface CrashShieldState {
   failureCount: number;
   lastFailureTime: number;
@@ -123,6 +126,11 @@ function showFallbackToast(): void {
  * Check if shield should prevent tour from starting
  */
 export function shouldBlockTour(): boolean {
+  // Disable crash shield in development
+  if (!CRASH_SHIELD_ENABLED) {
+    return false;
+  }
+
   const state = getState();
   const now = Date.now();
 

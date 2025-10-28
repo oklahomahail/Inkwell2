@@ -110,7 +110,7 @@ export default function Topbar({
   return (
     <header
       data-tour-id="topbar"
-      className="Topbar sticky top-0 z-40 flex items-center justify-between h-14 px-4 border-b border-[#1C3A63] bg-[#0F2D52]/95 backdrop-blur text-white"
+      className="Topbar sticky top-0 z-30 flex items-center justify-between h-14 px-4 border-b border-[#1C3A63] bg-[#0F2D52]/95 backdrop-blur text-white"
     >
       {/* Left: project name */}
       <div className="text-sm font-medium truncate text-white" title={effectiveName}>

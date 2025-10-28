@@ -319,7 +319,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     }
   };
 
-  const handleResetPassword = () => {
+  const _handleResetPassword = () => {
     window.location.href = '/auth/forgot-password';
   };
 
@@ -357,57 +357,68 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
           aria-hidden={isMobile && sidebarCollapsed}
         >
           {/* Sidebar Header */}
-          <div className="sidebar-header p-4 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center justify-between">
-              <div className={cn('flex items-center gap-3', sidebarCollapsed && 'justify-center')}>
-                <div className="flex-shrink-0">
-                  <img
-                    src="/assets/brand/inkwell-logo-icon-64.png"
-                    alt="Inkwell"
-                    className="w-8 h-8 transition-all duration-300"
-                  />
-                </div>
-                {!sidebarCollapsed && (
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <h1 className="text-heading-sm text-text-1 font-semibold truncate">
-                      {BRAND_NAME}
-                    </h1>
-                    <p className="text-caption text-text-2 truncate">
-                      {currentProject?.name || 'No project'}
-                    </p>
-                  </div>
-                )}
-              </div>
-              <button
-                onClick={toggleSidebar}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    toggleSidebar();
-                  }
-                }}
-                className={cn(
-                  'btn-ghost btn-sm',
-                  'w-8 h-8 p-0 flex-shrink-0',
-                  'flex items-center justify-center',
-                  'hover:bg-slate-100 dark:hover:bg-slate-700',
-                  'transition-all duration-200',
-                  'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800',
-                  'rounded-md',
-                  sidebarCollapsed ? 'ml-auto' : 'ml-2',
-                )}
-                aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                aria-expanded={!sidebarCollapsed}
-                tabIndex={0}
-              >
-                <Menu
-                  className={cn(
-                    'w-4 h-4 transition-transform duration-200',
-                    sidebarCollapsed && 'rotate-180',
-                  )}
+          <div
+            className={cn(
+              'sidebar-header p-4 border-b border-slate-200 dark:border-slate-700',
+              'flex items-center transition-all duration-300',
+              sidebarCollapsed ? 'flex-col gap-2 justify-center' : 'flex-row justify-between',
+            )}
+          >
+            {/* Logo section */}
+            <div
+              className={cn(
+                'flex items-center',
+                sidebarCollapsed ? 'flex-col gap-0' : 'flex-row gap-3',
+              )}
+            >
+              <div className="flex-shrink-0">
+                <img
+                  src="/assets/brand/inkwell-logo-icon-64.png"
+                  alt="Inkwell"
+                  className="w-8 h-8 transition-all duration-300"
                 />
-              </button>
+              </div>
+              {!sidebarCollapsed && (
+                <div className="flex flex-col min-w-0 flex-1">
+                  <h1 className="text-heading-sm text-text-1 font-semibold truncate">
+                    {BRAND_NAME}
+                  </h1>
+                  <p className="text-caption text-text-2 truncate">
+                    {currentProject?.name || 'No project'}
+                  </p>
+                </div>
+              )}
             </div>
+
+            {/* Hamburger toggle button - fixed size, no absolute positioning */}
+            <button
+              onClick={toggleSidebar}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  toggleSidebar();
+                }
+              }}
+              className={cn(
+                'btn-ghost btn-sm',
+                'w-9 h-9 p-0 flex-shrink-0',
+                'flex items-center justify-center',
+                'hover:bg-slate-100 dark:hover:bg-slate-700',
+                'transition-all duration-200',
+                'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800',
+                'rounded-md',
+              )}
+              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              aria-expanded={!sidebarCollapsed}
+              tabIndex={0}
+            >
+              <Menu
+                className={cn(
+                  'w-4 h-4 transition-transform duration-200',
+                  sidebarCollapsed && 'rotate-180',
+                )}
+              />
+            </button>
           </div>
 
           {/* Search/Command Palette */}
@@ -481,7 +492,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                   className="w-full ink-btn gap-2"
                   onClick={() => {
                     // TODO: Implement create project
-                    console.log('Create new project');
                   }}
                 >
                   <Plus className="w-4 h-4" />
@@ -511,7 +521,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                 className="w-full ink-btn p-2"
                 onClick={() => {
                   // TODO: Implement create project
-                  console.log('Create new project');
                 }}
                 title="New Project"
               >
@@ -533,9 +542,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       <main
         data-tour-id="dashboard"
         className={cn(
-          'main-content flex-1 flex flex-col',
+          'main-content flex-1 flex flex-col relative',
           'min-h-screen transition-all duration-300',
           'bg-slate-50 dark:bg-slate-900',
+          'z-40', // Above decorative layers, below tour (10000)
           // Desktop spacing
           !isMobile && (sidebarCollapsed ? 'ml-16' : 'ml-64'),
           // Mobile - no margin (sidebar overlays)
@@ -544,7 +554,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       >
         {/* Top Bar - only show on non-auth routes */}
         {!isAuthRoute && (
-          <header className="bg-white border-b border-ink-500 sticky top-0 z-30 backdrop-blur-sm">
+          <header className="Topbar bg-white border-b border-ink-500 sticky top-0 z-30 backdrop-blur-sm">
             <div className="px-4 md:px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">

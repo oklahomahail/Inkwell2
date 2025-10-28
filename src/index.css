@@ -622,21 +622,78 @@ h6 {
   background-size: 100% 200%;
 }
 
-/* Responsive Design */
-@media (width <= 640px) {
-  .analytics-view {
-    @apply p-4 space-y-6;
-  }
+/* ============================================================================
+   TOUR SYSTEM CRITICAL FIXES
+   ============================================================================
+   Ensures tour overlay renders properly and buttons remain clickable
+*/
 
-  .analytics-metrics {
-    @apply grid-cols-1;
-  }
-
-  .analytics-charts {
-    @apply grid-cols-1;
-  }
-
-  .chapter-progress-grid {
-    @apply grid-cols-1;
-  }
+/* Ensure root and main containers don't clip the tour */
+#root,
+.AppShell,
+main {
+  overflow: visible !important;
 }
+
+/* Tour portal and overlay must be on top of everything */
+#spotlight-root,
+.tour-portal,
+.tour-overlay,
+.tour-popover,
+[data-inkwell-spotlight-root] {
+  position: fixed !important;
+  z-index: 10000 !important;
+  pointer-events: none !important;
+}
+
+/* Tour content should be interactive */
+.tour-overlay > *,
+.tour-popover > * {
+  pointer-events: auto !important;
+}
+
+/* Header should not block the page */
+.Topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30 !important;
+}
+
+/* Remove any pseudo overlays from topbar */
+.Topbar::before,
+.Topbar::after {
+  content: none !important;
+}
+
+/* Main content pane should be above decorative layers */
+.MainPane,
+.main-content,
+main[role='main'],
+main[data-tour-id='dashboard'] {
+  position: relative;
+  z-index: 40 !important;
+}
+
+/* Decorative gradients and dormant backdrops never intercept clicks */
+.branding-gradient,
+.backdrop:not(.open),
+.tour-backdrop:not(.open),
+.overlay-gradient {
+  pointer-events: none !important;
+}
+
+/* Ensure modals are below tour but above content */
+[role='dialog']:not(.tour-overlay),
+.modal-backdrop {
+  z-index: 50 !important;
+}
+
+/* Tour-specific elements always on top */
+[role='dialog'].tour-overlay,
+[aria-label='Product tour'] {
+  z-index: 10000 !important;
+}
+
+/* ============================================================================
+   END TOUR FIXES
+   ============================================================================ */

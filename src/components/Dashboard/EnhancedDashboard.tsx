@@ -13,7 +13,6 @@ import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 
 const EnhancedDashboard: React.FC = () => {
   const { state, currentProject, addProject, setCurrentProjectId, dispatch } = useAppContext();
-  const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
   const [storageModalOpen, setStorageModalOpen] = useState(false);
 
@@ -42,9 +41,7 @@ const EnhancedDashboard: React.FC = () => {
     setNewProjectDialogOpen(true);
   };
 
-  const createNewProject = async () => {
-    setIsCreatingProject(true);
-
+  const _createNewProject = async () => {
     try {
       const newProject = {
         id: `project-${Date.now()}`,
@@ -65,8 +62,8 @@ const EnhancedDashboard: React.FC = () => {
       setTimeout(() => {
         dispatch({ type: 'SET_VIEW', payload: View.Writing });
       }, 500);
-    } finally {
-      setIsCreatingProject(false);
+    } catch (error) {
+      console.error('Failed to create project:', error);
     }
   };
 
@@ -185,7 +182,13 @@ const EnhancedDashboard: React.FC = () => {
                 </p>
               </div>
             </div>
-            <button onClick={openNewProjectDialog} className="btn btn-primary btn-lg">
+            <button
+              onClick={openNewProjectDialog}
+              className="btn btn-primary btn-lg"
+              type="button"
+              data-test="create-first-project"
+              data-tour-id="create-project-button"
+            >
               <PlusCircle className="w-5 h-5" />
               Create Your First Project
             </button>
@@ -240,7 +243,9 @@ const EnhancedDashboard: React.FC = () => {
             <button
               onClick={openNewProjectDialog}
               className="btn btn-primary"
-              data-tour="new-project-button"
+              type="button"
+              data-test="new-project"
+              data-tour-id="new-project-button"
             >
               <PlusCircle className="w-4 h-4" />
               New Project
