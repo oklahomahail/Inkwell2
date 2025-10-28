@@ -10,19 +10,31 @@
  */
 export function safeObserve(
   observer: MutationObserver,
-  target: Node | null | undefined,
+  target: unknown,
   options: MutationObserverInit,
 ): boolean {
-  if (!target || !(target instanceof Node)) {
+  // SSR guard
+  if (typeof window === 'undefined' || typeof Node === 'undefined') {
+    return false;
+  }
+
+  // Node check that survives SSR and weird browsers
+  const isNode = target instanceof Node;
+
+  if (!isNode) {
+    if (!import.meta.env.PROD) {
+      // eslint-disable-next-line no-console
+      console.debug('[safeObserve] skipped, non-Node:', target);
+    }
     return false;
   }
 
   try {
-    observer.observe(target, options);
+    observer.observe(target as Node, options);
     return true;
-  } catch (error) {
+  } catch (_error) {
     if (!import.meta.env.PROD) {
-      console.warn('[safeObserve] Failed to observe target:', error);
+      console.warn('[safeObserve] observe failed:', _error);
     }
     return false;
   }
@@ -35,7 +47,7 @@ export function safeObserve(
 export function safeDisconnect(observer: MutationObserver | null | undefined): void {
   try {
     observer?.disconnect();
-  } catch (error) {
+  } catch {
     // Silently ignore disconnect errors
   }
 }
@@ -61,4 +73,38 @@ export function safeObserveWithRetry(
   }
 
   return ok;
+}
+
+/**
+ * Wait for an element to appear in the DOM
+ * Returns null if element doesn't appear within timeout
+ */
+export async function waitForElement(selector: string, timeout = 2000): Promise<Element | null> {
+  // SSR guard
+  if (typeof window === 'undefined') return null;
+
+  const start = performance.now();
+  let el: Element | null = document.querySelector(selector);
+
+  while (!el && performance.now() - start < timeout) {
+    await new Promise((r) => requestAnimationFrame(r));
+    el = document.querySelector(selector);
+  }
+
+  return el;
+}
+
+/**
+ * Get a safe target for portal/modal observation
+ * Falls back to document.body if preferred target doesn't exist
+ */
+export function getPortalTarget(preferredId?: string): Node | null {
+  if (typeof window === 'undefined') return null;
+
+  if (preferredId) {
+    const preferred = document.getElementById(preferredId);
+    if (preferred) return preferred;
+  }
+
+  return document.body || null;
 }

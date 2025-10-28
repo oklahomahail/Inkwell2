@@ -42,9 +42,9 @@ describe('useSpotlightAutostartHardened', () => {
     vi.unstubAllGlobals();
   });
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => {
-    return <BrowserRouter>{children}</BrowserRouter>;
-  };
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <BrowserRouter>{children}</BrowserRouter>
+  );
 
   it('should not start tour when no selectors provided', async () => {
     renderHook(() => useSpotlightAutostart([], { onStartTour: mockOnStartTour }), { wrapper });

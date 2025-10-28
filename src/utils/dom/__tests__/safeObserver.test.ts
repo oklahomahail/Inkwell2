@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { safeDisconnect, safeObserve } from '../safeObserver';
+import { safeDisconnect, safeObserve, waitForElement, getPortalTarget } from '../safeObserver';
 
 describe('safeObserver', () => {
   beforeEach(() => {
@@ -23,11 +23,23 @@ describe('safeObserver', () => {
     expect(result).toBe(false);
   });
 
-  it('returns false for non-Node target', () => {
+  it('returns false for non-Node target (string)', () => {
     const observer = new MutationObserver(() => {});
-    // @ts-expect-error - testing invalid input
     const result = safeObserve(observer, 'not a node', { childList: true });
     expect(result).toBe(false);
+  });
+
+  it('returns false for non-Node target (window)', () => {
+    const observer = new MutationObserver(() => {});
+    const result = safeObserve(observer, window, { childList: true });
+    expect(result).toBe(false);
+  });
+
+  it('returns true for document (which IS a Node)', () => {
+    const observer = new MutationObserver(() => {});
+    // document is actually a Node, so this should succeed
+    const result = safeObserve(observer, document, { childList: true });
+    expect(result).toBe(true);
   });
 
   it('returns true for valid target', () => {
@@ -74,5 +86,61 @@ describe('safeObserver', () => {
         resolve(undefined);
       }, 50);
     });
+  });
+});
+
+describe('waitForElement', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('returns element if it already exists', async () => {
+    document.body.innerHTML = '<div id="existing"></div>';
+    const result = await waitForElement('#existing', 1000);
+    expect(result).toBeTruthy();
+    expect(result?.id).toBe('existing');
+  });
+
+  it('returns null if element does not appear within timeout', async () => {
+    const result = await waitForElement('#nonexistent', 100);
+    expect(result).toBeNull();
+  });
+
+  it('waits for element to appear', async () => {
+    // Add element after a delay
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.id = 'delayed';
+      document.body.appendChild(el);
+    }, 50);
+
+    const result = await waitForElement('#delayed', 200);
+    expect(result).toBeTruthy();
+    expect(result?.id).toBe('delayed');
+  });
+});
+
+describe('getPortalTarget', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('returns document.body when no preferredId is provided', () => {
+    const result = getPortalTarget();
+    expect(result).toBe(document.body);
+  });
+
+  it('returns preferred element when it exists', () => {
+    const portal = document.createElement('div');
+    portal.id = 'my-portal';
+    document.body.appendChild(portal);
+
+    const result = getPortalTarget('my-portal');
+    expect(result).toBe(portal);
+  });
+
+  it('falls back to document.body when preferred element does not exist', () => {
+    const result = getPortalTarget('nonexistent-portal');
+    expect(result).toBe(document.body);
   });
 });
