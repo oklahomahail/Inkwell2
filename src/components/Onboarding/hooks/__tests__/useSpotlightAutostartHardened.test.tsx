@@ -19,7 +19,12 @@ vi.mock('../../../../tour/anchors', () => ({
 
 // Mock devLog
 vi.mock('../../../../utils/devLog', () => ({
-  devLog: vi.fn(),
+  default: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 describe('useSpotlightAutostartHardened', () => {
