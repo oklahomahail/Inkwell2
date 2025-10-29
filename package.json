@@ -74,6 +74,7 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix",
+      "eslint --config eslint.config.hooks.js",
       "prettier --write",
       "bash -c 'tsc --noEmit'"
     ],

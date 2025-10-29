@@ -74,13 +74,16 @@ pnpm dev
 ## Scripts
 
 ```bash
-pnpm dev        # start app
-pnpm test       # unit tests
-pnpm typecheck  # TS
-pnpm lint       # eslint
-pnpm build      # production build
+pnpm dev         # start app
+pnpm test        # unit tests
+pnpm typecheck   # TS
+pnpm lint        # eslint
+pnpm lint:hooks  # React hooks linting (strict)
+pnpm build       # production build
 pnpm tree:update # regenerate file tree in README
 ```
+
+For React Hooks development guidelines, see [HOOKS_QUICK_REF.md](./HOOKS_QUICK_REF.md) and [REACT_HOOKS_FIX_SUMMARY.md](./REACT_HOOKS_FIX_SUMMARY.md).
 
 ## Configuration
 
