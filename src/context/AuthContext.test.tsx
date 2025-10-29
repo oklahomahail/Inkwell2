@@ -1,4 +1,5 @@
 import { render, screen, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
@@ -35,11 +36,11 @@ vi.mock('@/utils/tourTriggers', () => ({
   triggerDashboardView: vi.fn(),
 }));
 
-// Get mocked modules - using any to avoid TS resolution issues in test files
-
-const mockSupabase = vi.mocked(require('@/lib/supabaseClient').supabase) as any;
-
-const mockTourTriggers = vi.mocked(require('@/utils/tourTriggers')) as any;
+// Get access to mocked modules
+// @ts-expect-error - Importing mocked module for test access
+import { supabase as mockSupabase } from '@/lib/supabaseClient';
+// @ts-expect-error - Importing mocked module for test access
+import * as mockTourTriggers from '@/utils/tourTriggers';
 
 // Create a test component to access auth context
 const TestComponent = () => {
