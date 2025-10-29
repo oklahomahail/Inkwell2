@@ -863,6 +863,15 @@ const SettingsPanel: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Inkwell Spotlight Tour */}
+        <section className="mt-8" data-spotlight-id="settings.tour">
+          <h3 className="font-medium text-slate-100 mb-2">Inkwell Spotlight Tour</h3>
+          <p className="text-slate-400 text-sm mb-3">
+            Start the guided tour to learn about Inkwell's core features.
+          </p>
+          <button data-spotlight-id="settings.startTour">Start Tour</button>
+        </section>
       </div>
     </div>
   );

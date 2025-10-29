@@ -111,6 +111,7 @@ export default function Topbar({
     <header
       data-tour-id="topbar"
       className="Topbar sticky top-0 z-30 flex items-center justify-between h-14 px-4 border-b border-[#1C3A63] bg-[#0F2D52]/95 backdrop-blur text-white"
+      data-spotlight-id="topbar.container"
     >
       {/* Left: project name */}
       <div className="text-sm font-medium truncate text-white" title={effectiveName}>
@@ -141,6 +142,7 @@ export default function Topbar({
           aria-label="Keyboard shortcuts"
           title="Keyboard shortcuts (⌘K)"
           data-tour-id="help-tour-button"
+          data-spotlight-id="topbar.commandPalette"
         >
           ⌘
         </button>
@@ -151,6 +153,7 @@ export default function Topbar({
           className="topbar-icon text-white hover:bg-white/10 p-2 rounded-md transition-colors"
           aria-label="Command Palette"
           title="Command Palette (⌘K)"
+          data-spotlight-id="topbar.commandPalette"
         >
           🔍
         </button>
@@ -161,6 +164,7 @@ export default function Topbar({
           className="topbar-icon text-white hover:bg-white/10 p-2 rounded-md transition-colors"
           aria-label="Notifications"
           title="Notifications"
+          data-spotlight-id="topbar.notifications"
         >
           🔔
         </button>
