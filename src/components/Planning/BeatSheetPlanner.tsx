@@ -138,7 +138,7 @@ const BeatSheetPlanner: React.FC = () => {
       // Try to load existing beat sheet from storage
       // For now, we'll start fresh
     }
-  }, [currentProject]);
+  }, [currentProject, currentBeatSheet]);
 
   // Update beat content
   const updateBeat = (beatId: string, updates: Partial<Beat>) => {

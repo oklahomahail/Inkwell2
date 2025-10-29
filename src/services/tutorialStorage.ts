@@ -137,7 +137,7 @@ export function useTutorialStorage() {
       };
       await setProgress(slug, payload.progress);
     },
-    [db, user?.id, getProgress, setProgress, isUserActive],
+    [getProgress, setProgress, isUserActive],
   );
 
   return {

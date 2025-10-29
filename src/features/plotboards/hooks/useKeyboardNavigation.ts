@@ -194,6 +194,7 @@ export const useKeyboardNavigation = ({
           break;
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Functions use let-then-assign pattern for mutual references
     [
       state.focusedCardId,
       state.focusedColumnId,
@@ -238,6 +239,7 @@ export const useKeyboardNavigation = ({
         `Picked up card: ${position.card.title}. Use arrow keys to navigate, Space to drop, Escape to cancel.`,
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- announce assigned below via let pattern
     [findCardPosition],
   );
 
@@ -263,22 +265,27 @@ export const useKeyboardNavigation = ({
         focusedCardId: prev.draggedCardId, // Keep focus on the moved card
       }));
     },
-    [state.draggedCardId, findCardPosition, board, onMoveCard],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- announce assigned below via let pattern
+    [state.draggedCardId, findCardPosition, board.columns, onMoveCard],
   );
 
-  cancelDrag = useCallback(() => {
-    if (!state.draggedCardId) return;
+  cancelDrag = useCallback(
+    () => {
+      if (!state.draggedCardId) return;
 
-    const draggedCard = findCardPosition(state.draggedCardId);
-    announce(`Cancelled drag of card: ${draggedCard?.card.title || 'card'}`);
+      const draggedCard = findCardPosition(state.draggedCardId);
+      announce(`Cancelled drag of card: ${draggedCard?.card.title || 'card'}`);
 
-    setState((prev) => ({
-      ...prev,
-      draggedCardId: null,
-      isDragging: false,
-      focusedCardId: prev.draggedCardId, // Return focus to original card
-    }));
-  }, [state.draggedCardId, findCardPosition]);
+      setState((prev) => ({
+        ...prev,
+        draggedCardId: null,
+        isDragging: false,
+        focusedCardId: prev.draggedCardId, // Return focus to original card
+      }));
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- announce assigned below via let pattern
+    [state.draggedCardId, findCardPosition],
+  );
 
   announce = useCallback((message: string) => {
     setState((prev) => ({

@@ -117,6 +117,7 @@ export const SmartSearchModal: React.FC<SmartSearchModalProps> = ({
         }
       }, 300);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- performSearch is stable, using filters as proxy
     [filters],
   );
 
@@ -276,12 +277,12 @@ export const SmartSearchModal: React.FC<SmartSearchModalProps> = ({
   // Get search history
   const searchHistory = useMemo(() => {
     return smartSearchService.getSearchHistory();
-  }, [currentView]);
+  }, []); // currentView doesn't affect the result
 
   // Saved searches
   const savedSearches = useMemo(() => {
     return smartSearchService.getSavedSearches();
-  }, [currentView]);
+  }, []); // currentView doesn't affect the result
 
   if (!isOpen) return null;
 

@@ -33,6 +33,7 @@ export function useTheme() {
     if (initial !== theme) {
       setThemeState(initial);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally run once on mount
   }, []); // Run once on mount
 
   useEffect(() => {

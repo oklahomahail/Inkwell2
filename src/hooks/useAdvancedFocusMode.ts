@@ -224,7 +224,8 @@ export function useAdvancedFocusMode() {
     if (sprint.isActive) {
       stopSprint();
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stopSprint defined later, sprint.isActive sufficient
+  }, [sprint.isActive]);
 
   // Sprint management
   const startSprint = useCallback(

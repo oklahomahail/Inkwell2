@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
-
 import SceneLinkageSuggestions from '@/components/timeline/SceneLinkageSuggestions';
 import TimelineNavigation from '@/components/timeline/TimelineNavigation';
 import TimelineValidationPanel from '@/components/timeline/TimelineValidationPanel';
@@ -26,7 +25,7 @@ import { timelineService } from '@/services/timelineService';
 import type { EnhancedProject } from '@/types/project';
 import type { TimelineItem } from '@/types/timeline';
 import { logActivity } from '@/utils/activityLogger';
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 import { triggerTimelineVisited } from '@/utils/tourTriggers';
 
 type TimelineTab = 'events' | 'validation' | 'linkages' | 'navigation';
@@ -97,7 +96,7 @@ const TimelinePanel: React.FC = () => {
     };
 
     loadTimeline();
-  }, [currentProject]);
+  }, [currentProject, showToast]);
 
   // Filter events based on current filter state
   const filteredEvents = useMemo(() => {
@@ -110,7 +109,7 @@ const TimelinePanel: React.FC = () => {
         return false;
       return true;
     });
-  }, [state.events, state.filters]);
+  }, [state]);
 
   // Update filtered events when filters or events change
   useEffect(() => {

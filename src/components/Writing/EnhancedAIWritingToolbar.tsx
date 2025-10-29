@@ -146,25 +146,6 @@ export default function EnhancedAIWritingToolbar({
     },
   ];
 
-  // Real-time analysis effect
-  useEffect(() => {
-    if (isRealTimeMode && currentContent) {
-      if (realTimeAnalysisRef.current) {
-        clearTimeout(realTimeAnalysisRef.current);
-      }
-
-      realTimeAnalysisRef.current = setTimeout(() => {
-        performRealTimeAnalysis(currentContent);
-      }, 2000); // Debounce for 2 seconds
-    }
-
-    return () => {
-      if (realTimeAnalysisRef.current) {
-        clearTimeout(realTimeAnalysisRef.current);
-      }
-    };
-  }, [currentContent, isRealTimeMode]);
-
   const performRealTimeAnalysis = useCallback(
     async (text: string) => {
       if (!claudeService.isConfigured() || !text.trim()) return;
@@ -190,6 +171,25 @@ export default function EnhancedAIWritingToolbar({
     },
     [sceneTitle, projectContext, activeCategory],
   );
+
+  // Real-time analysis effect
+  useEffect(() => {
+    if (isRealTimeMode && currentContent) {
+      if (realTimeAnalysisRef.current) {
+        clearTimeout(realTimeAnalysisRef.current);
+      }
+
+      realTimeAnalysisRef.current = setTimeout(() => {
+        performRealTimeAnalysis(currentContent);
+      }, 2000); // Debounce for 2 seconds
+    }
+
+    return () => {
+      if (realTimeAnalysisRef.current) {
+        clearTimeout(realTimeAnalysisRef.current);
+      }
+    };
+  }, [currentContent, isRealTimeMode, performRealTimeAnalysis]);
 
   const handleToneAdjustment = useCallback(
     async (targetTone: string) => {

@@ -24,6 +24,7 @@
     "build:strict": "VITE_ENABLE_PWA=false tsc --noEmit && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "lint:hooks": "eslint \"src/**/*.{ts,tsx}\" --config eslint.config.hooks.js",
     "lint:css": "stylelint \"**/*.css\"",
     "lint:css:fix": "stylelint \"**/*.css\" --fix",
     "lint:ci": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",

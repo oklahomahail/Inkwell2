@@ -28,5 +28,5 @@ export function useTourStateHydration() {
     if (!spotlightProgress.seen && spotlightProgress.step > 0) {
       storage.resetTour('spotlight');
     }
-  }, []);
+  }, [profileId]);
 }

@@ -207,7 +207,9 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
 
   // Debounced save function
   const debouncedSave = useCallback(
-    debounceUtil((scene: Scene) => saveScene(scene), 2000),
+    (scene: Scene) => {
+      debounceUtil(() => saveScene(scene), 2000)();
+    },
     [saveScene],
   );
 

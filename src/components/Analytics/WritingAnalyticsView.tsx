@@ -21,8 +21,12 @@ export default function WritingAnalyticsView() {
 
   // Read from a defensively-typed object so we don't rely on Project having `sessions`
   const proj: any = currentProject ?? {};
-  const sessions: Session[] = Array.isArray(proj.sessions) ? (proj.sessions as Session[]) : [];
   const projectName: string = typeof proj.name === 'string' ? proj.name : 'Project';
+
+  // Stabilize sessions to prevent downstream useMemo hooks from re-computing unnecessarily
+  const sessions: Session[] = useMemo(() => {
+    return Array.isArray(proj.sessions) ? (proj.sessions as Session[]) : [];
+  }, [proj.sessions]);
 
   // Daily trend rows for primary chart
   const trendRows = useMemo(() => {

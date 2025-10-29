@@ -74,5 +74,5 @@ export function useSimpleTourAutostart(profileId?: string) {
       localStorage.setItem('tourProgress.simple.lastAutostartAt', String(Date.now()));
       debugTour('autostart:started', { tour: 'simple', route: location.pathname });
     });
-  }, [location, isReady, effectiveProfileId]);
+  }, [location, isReady, effectiveProfileId, localData.completed, localData.dismissed]);
 }
