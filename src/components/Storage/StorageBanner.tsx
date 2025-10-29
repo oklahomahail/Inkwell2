@@ -113,7 +113,7 @@ export function StorageBanner() {
   return (
     <div
       data-tour-id="storage-banner"
-      className={`mb-4 rounded-lg border ${borderColor} ${bgColor} p-4 shadow-sm`}
+      className={`fixed top-0 left-0 right-0 z-50 border-b ${borderColor} ${bgColor} p-4 shadow-md`}
       role="alert"
       aria-live="polite"
     >
