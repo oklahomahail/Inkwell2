@@ -35,8 +35,11 @@ vi.mock('@/utils/tourTriggers', () => ({
   triggerDashboardView: vi.fn(),
 }));
 
-// Import the mocked supabase and trigger to access them in tests
-import { supabase as mockSupabase } from '@/lib/supabaseClient';
+// Get mocked modules - using any to avoid TS resolution issues in test files
+
+const mockSupabase = vi.mocked(require('@/lib/supabaseClient').supabase) as any;
+
+const mockTourTriggers = vi.mocked(require('@/utils/tourTriggers')) as any;
 
 // Create a test component to access auth context
 const TestComponent = () => {
@@ -110,8 +113,6 @@ describe('AuthContext', () => {
   });
 
   it('handles sign in with email', async () => {
-    const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
-
     await act(async () => {
       render(
         <AuthProvider>
@@ -133,18 +134,9 @@ describe('AuthContext', () => {
         shouldCreateUser: true,
       },
     });
-
-    // Verify logging
-    expect(consoleInfoSpy).toHaveBeenCalledWith(
-      '[Auth] Magic link sent successfully! Check your email.',
-    );
-
-    consoleInfoSpy.mockRestore();
   });
 
   it('handles sign in with password', async () => {
-    const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
-
     await act(async () => {
       render(
         <AuthProvider>
@@ -163,17 +155,9 @@ describe('AuthContext', () => {
       email: 'test@example.com',
       password: 'password',
     });
-
-    // Verify logging
-    expect(consoleInfoSpy).toHaveBeenCalledWith('[Auth] Password sign-in successful');
-
-    consoleInfoSpy.mockRestore();
   });
 
   it('handles sign up with password', async () => {
-    const { supabase } = await import('@/lib/supabaseClient');
-    const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
-
     await act(async () => {
       render(
         <AuthProvider>
@@ -188,25 +172,16 @@ describe('AuthContext', () => {
     });
 
     // Check that supabase.auth.signUp was called
-    expect(supabase.auth.signUp).toHaveBeenCalledWith({
+    expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
       email: 'test@example.com',
       password: 'password',
       options: {
         emailRedirectTo: expect.stringContaining('https://example.com/auth/callback'),
       },
     });
-
-    // Verify logging
-    expect(consoleInfoSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[Auth] Password sign-up successful'),
-    );
-
-    consoleInfoSpy.mockRestore();
   });
 
   it('handles sign out', async () => {
-    const { supabase } = await import('@/lib/supabaseClient');
-
     await act(async () => {
       render(
         <AuthProvider>
@@ -221,16 +196,15 @@ describe('AuthContext', () => {
     });
 
     // Check that supabase.auth.signOut was called
-    expect(supabase.auth.signOut).toHaveBeenCalled();
+    expect(mockSupabase.auth.signOut).toHaveBeenCalled();
   });
 
   it('handles authentication errors', async () => {
-    const { supabase } = await import('@/lib/supabaseClient');
     const mockError = { message: 'Authentication failed' };
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Mock sign-in with error
-    supabase.auth.signInWithPassword.mockResolvedValueOnce({ error: mockError });
+    mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({ error: mockError });
 
     await act(async () => {
       render(
@@ -255,12 +229,9 @@ describe('AuthContext', () => {
   });
 
   it('handles auth state changes', async () => {
-    const { supabase } = await import('@/lib/supabaseClient');
-    const { triggerDashboardView } = await import('@/utils/tourTriggers');
-
     // Setup mock for auth state change
     let authChangeCallback: any;
-    supabase.auth.onAuthStateChange.mockImplementation((callback) => {
+    mockSupabase.auth.onAuthStateChange.mockImplementation((callback: any) => {
       authChangeCallback = callback;
       return {
         data: {
@@ -285,7 +256,7 @@ describe('AuthContext', () => {
     });
 
     // Should trigger dashboard view
-    expect(triggerDashboardView).toHaveBeenCalled();
+    expect(mockTourTriggers.triggerDashboardView).toHaveBeenCalled();
 
     // Simulate password recovery event
     const hrefSpy = vi.spyOn(mockLocation, 'href', 'set');

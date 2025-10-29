@@ -1,5 +1,5 @@
 // src/services/aiRetryService.ts
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import { analyticsService } from './analyticsService';
 
@@ -91,10 +91,10 @@ class AIRetryService {
       try {
         const startTime = Date.now();
         const result = await operation();
-        const _duration = Date.now() - startTime;
+        const duration = Date.now() - startTime;
 
         // Success - update circuit breaker
-        this.recordSuccess(_duration);
+        this.recordSuccess(duration);
         this.recordAttempt(true, undefined, attempt);
 
         if (this.circuitState === CircuitState.HALF_OPEN) {
@@ -107,7 +107,7 @@ class AIRetryService {
           analyticsService.track('ai_request_retry_success', {
             context,
             attempts: attempt + 1,
-            _duration,
+            duration,
           });
         }
 

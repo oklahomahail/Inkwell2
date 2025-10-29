@@ -3,7 +3,7 @@
  *
  * Convenience functions for starting tours from various parts of the app.
  */
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import { DEFAULT_TOUR_ID, defaultTourConfig, defaultTourSteps } from './configs/defaultTour';
 import { isTourDone, markTourDone, resetTour } from './persistence';

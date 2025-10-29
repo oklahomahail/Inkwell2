@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-
 import Logo from '@/components/Logo';
 import { useAuth } from '@/context/AuthContext';
-import devLog from "@/utils/devLog";
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 const RATE_LIMIT_SECONDS = 30;
 

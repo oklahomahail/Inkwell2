@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 
-import devLog from "@/utils/devLog";
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import { getSpotlightSteps } from '../getSpotlightSteps';
 import { tourService } from '../TourService';

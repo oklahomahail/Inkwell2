@@ -1,5 +1,7 @@
 // src/components/Onboarding/hooks/tourHookUtils.ts
 
+import devLog from '@/utils/devLog';
+
 /**
  * Check if tours are suppressed for the current route
  */

@@ -1,15 +1,17 @@
-type Args = any[];
+type Args = unknown[];
 
 const isDev = typeof process !== 'undefined' && process.env.NODE_ENV !== 'production';
 
 export const devLog = {
-  debug: (...args: Args) => {
-    if (isDev) devLog.debug(...args);
+  debug: (...args: Args): void => {
+    if (isDev) console.debug(...args);
   },
-  warn: (...args: Args) => {
-    if (isDev) devLog.warn(...args);
+  warn: (...args: Args): void => {
+    if (isDev) console.warn(...args);
   },
-  error: (...args: Args) => devLog.error(...args), // errors always surface
+  error: (...args: Args): void => {
+    console.error(...args); // errors always surface
+  },
 };
 
 export default devLog;

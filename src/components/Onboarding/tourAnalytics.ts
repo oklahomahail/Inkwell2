@@ -1,5 +1,6 @@
+import devLog from '@/utils/devLog';
+
 /**
-import devLog from "@/utils/devLog";
  * Tour Analytics Tracking Utilities
  *
  * Provides consistent, telemetry-friendly event tracking for the Inkwell Spotlight Tour.

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**
  * Development-only logging utilities
  * Automatically stripped in production builds

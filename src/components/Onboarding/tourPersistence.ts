@@ -1,5 +1,6 @@
+import devLog from '@/utils/devLog';
+
 /**
-import devLog from "@/utils/devLog";
  * Tour Persistence Utilities
  *
  * Provides version-aware storage for tour progress with forward compatibility.

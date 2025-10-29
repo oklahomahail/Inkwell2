@@ -1,8 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-import devLog from "@/utils/devLog";
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 const PORTAL_ID = 'spotlight-root';
 
