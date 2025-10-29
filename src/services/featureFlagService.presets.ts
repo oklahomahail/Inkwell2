@@ -4,7 +4,6 @@
 export interface FeatureFlagPreset {
   tours: {
     spotlightTour: boolean;
-    simpleTour: boolean;
   };
   ui: {
     showPowerMenu: boolean;
@@ -55,7 +54,6 @@ export interface FeatureFlagPreset {
 export const BeginnerPreset: FeatureFlagPreset = {
   tours: {
     spotlightTour: true,
-    simpleTour: false,
   },
   ui: {
     showPowerMenu: false,
@@ -107,7 +105,6 @@ export const BeginnerPreset: FeatureFlagPreset = {
 export const ProPreset: FeatureFlagPreset = {
   tours: {
     spotlightTour: true,
-    simpleTour: false,
   },
   ui: {
     showPowerMenu: true,

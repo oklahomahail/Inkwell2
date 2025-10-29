@@ -1,10 +1,8 @@
 // src/hooks/useTourManager.ts
 import { useCallback, useRef } from 'react';
 
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
-import { useAuth } from '../context/AuthContext';
-import { createTourStorage, TourName, TourProgress } from '../services/simpleTourStorage';
 import { waitForElement } from '../utils/domUtils';
 
 // Stub function for spotlight tour UI - should be implemented by tour overlay component
@@ -21,66 +19,46 @@ interface TourStep {
 }
 
 export function useTourManager() {
-  const { user } = useAuth();
-  const storage = createTourStorage(user?.id || null);
-  const startedRef = useRef<Record<TourName, boolean>>({
+  const startedRef = useRef<Record<string, boolean>>({
     simple: false,
     spotlight: false,
   });
 
-  const getTourProgress = useCallback(
-    (tour: TourName): TourProgress => {
-      return storage.getTourProgress(tour);
-    },
-    [storage],
-  );
+  const startTour = useCallback((tour: string) => {
+    if (startedRef.current[tour]) return;
+    startedRef.current[tour] = true;
+    // storage.startTour(tour); // storage is removed
+  }, []);
 
-  const startTour = useCallback(
-    (tour: TourName) => {
-      if (startedRef.current[tour]) return;
-      startedRef.current[tour] = true;
-      storage.startTour(tour);
-    },
-    [storage],
-  );
+  const endTour = useCallback((tour: string) => {
+    // storage.endTour(tour); // storage is removed
+    startedRef.current[tour] = false;
+  }, []);
 
-  const endTour = useCallback(
-    (tour: TourName) => {
-      storage.endTour(tour);
-      startedRef.current[tour] = false;
-    },
-    [storage],
-  );
+  const setTourStep = useCallback((_tour: string, _step: number) => {
+    // storage.setTourStep(tour, step); // storage is removed
+    // _tour and _step are intentionally unused for now
+  }, []);
 
-  const setTourStep = useCallback(
-    (tour: TourName, step: number) => {
-      storage.setTourStep(tour, step);
-    },
-    [storage],
-  );
-
-  const resetTour = useCallback(
-    (tour: TourName) => {
-      storage.resetTour(tour);
-      startedRef.current[tour] = false;
-    },
-    [storage],
-  );
+  const resetTour = useCallback((tour: string) => {
+    // storage.resetTour(tour); // storage is removed
+    startedRef.current[tour] = false;
+  }, []);
 
   const runSpotlight = useCallback(
     async (steps: TourStep[]) => {
-      const tour: TourName = 'spotlight';
+      const tour: string = 'spotlight';
       startTour(tour);
 
       try {
-        for (let i = storage.getTourProgress(tour).step; i < steps.length; i++) {
+        for (let i = 0; i < steps.length; i++) {
           const sel = `[data-tour-id="${steps[i]?.id}"]`;
           const el = await waitForElement(sel).catch(() => null);
           if (!el) continue; // Skip missing targets
 
           // These functions will be implemented in TourOverlay component
           await showSpotlight(el, steps[i]?.content);
-          storage.setTourStep(tour, i + 1);
+          // storage.setTourStep(tour, i + 1); // storage is removed
         }
         endTour(tour);
       } catch (error) {
@@ -88,11 +66,10 @@ export function useTourManager() {
         endTour(tour);
       }
     },
-    [startTour, endTour, storage],
+    [startTour, endTour],
   );
 
   return {
-    getTourProgress,
     startTour,
     endTour,
     setTourStep,

@@ -9,7 +9,6 @@ import ClaudeAssistant from './components/ClaudeAssistant';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
 import CommandPaletteUI from './components/CommandPalette/CommandPaletteUI';
 import DebugSearchPanel from './components/DebugSearchPanel';
-import { AppErrorBoundary } from './components/ErrorBoundary';
 import { ExportWizardModal } from './components/ExportWizard/ExportWizardModal';
 import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
@@ -49,6 +48,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
 import { useTourRouterAdapter } from './tour/adapters/routerAdapter';
+import { SpotlightProvider } from './tour/components/SpotlightProvider';
 import { TourLifecycleIntegration } from './tour/integrations/tourLifecycleIntegration';
 import { SpotlightOverlay } from './tour/ui';
 import { useTourRegistration } from './tour/useTourRegistration';
@@ -574,10 +574,10 @@ interface _StorageDebugPanelProps {}
 
 interface _AppShellProps {}
 
-export default function _App() {
+export default function App() {
   return (
-    <AppErrorBoundary level="app">
+    <SpotlightProvider>
       <AppShell />
-    </AppErrorBoundary>
+    </SpotlightProvider>
   );
 }

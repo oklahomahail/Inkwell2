@@ -5,7 +5,6 @@ import React from 'react';
 import { cn } from '@/utils/cn';
 
 import { OnboardingOrchestrator } from '../../onboarding/OnboardingOrchestrator';
-import { useSimpleTourAutostart } from '../Onboarding/hooks/useSimpleTourAutostart';
 import { useSpotlightAutostart } from '../Onboarding/hooks/useSpotlightAutostart';
 import { TourProvider } from '../Onboarding/TourProvider';
 
@@ -22,7 +21,6 @@ function AppShellComponent({ children, header, sidebar, banner }: AppShellProps)
   // Initialize tour autostart hooks after providers/portals are mounted
   // Use a simple default profile identifier; no storage coupling needed
   const profileId = 'default';
-  useSimpleTourAutostart(profileId);
   useSpotlightAutostart([profileId]);
 
   // Prevent double scroll on body - lock scrolling to main content only

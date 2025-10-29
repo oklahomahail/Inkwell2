@@ -5,7 +5,6 @@ import React, { useState } from 'react';
 // IMPORTANT: import from the barrel so tests that mock "@/components/icons" work
 import { InkwellFeather } from '@/components/icons';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
-import { featureFlagService } from '@/services/featureFlagService';
 import { startDefaultTour } from '@/tour/tourEntry';
 
 import { CORE_TOUR_STEPS } from './tourRegistry';
@@ -33,7 +32,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
     'tour',
   );
 
-  if (!isOpen || !featureFlagService.isEnabled('tour_simpleTour')) return null;
+  if (!isOpen) return null;
 
   const handleStartTour = async () => {
     logAnalytics('welcome_modal_start_tour');

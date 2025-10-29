@@ -1,5 +1,5 @@
 // src/services/featureFlagService.ts
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import { analyticsService } from './analyticsService';
 
@@ -139,13 +139,6 @@ class FeatureFlagService {
       key: 'analytics_enabled',
       name: 'Privacy-First Analytics',
       description: 'Track user interactions while respecting privacy',
-      enabled: true,
-      category: 'ui',
-    },
-    {
-      key: 'tour_simpleTour',
-      name: 'Spotlight Tour',
-      description: 'Modern cinematic onboarding tour experience',
       enabled: true,
       category: 'ui',
     },
