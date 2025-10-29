@@ -500,7 +500,10 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
               </div>
 
               {/* TipTap Editor */}
-              <div className="flex-1 p-6 overflow-auto bg-white dark:bg-gray-900">
+              <div
+                className="flex-1 p-6 overflow-auto bg-white dark:bg-gray-900"
+                data-spotlight-id="writing.editor"
+              >
                 <TipTapEditor
                   value={currentScene.content || ''}
                   onChange={handleContentChange}

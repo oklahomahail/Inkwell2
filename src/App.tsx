@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
+import { SpotlightProvider } from '@/components/Tour/SpotlightProvider';
 import devLog from '@/utils/devLog';
 import { log } from '@/utils/logger';
 
@@ -48,7 +49,6 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
 import { useTourRouterAdapter } from './tour/adapters/routerAdapter';
-import { SpotlightProvider } from './tour/components/SpotlightProvider';
 import { TourLifecycleIntegration } from './tour/integrations/tourLifecycleIntegration';
 import { SpotlightOverlay } from './tour/ui';
 import { useTourRegistration } from './tour/useTourRegistration';

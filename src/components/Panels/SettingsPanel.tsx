@@ -7,6 +7,7 @@ import { PrivacyControls } from '@/components/Privacy/PrivacyControls';
 import BackupControls from '@/components/Settings/BackupControls';
 import SnapshotHistoryDialog from '@/components/Settings/SnapshotHistoryDialog';
 import { TourReplayButton } from '@/components/Settings/TourReplayButton';
+import { useSpotlightTour } from '@/components/Tour/SpotlightProvider';
 import { Button } from '@/components/ui/Button';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
@@ -18,6 +19,7 @@ import { triggerAiIntegrationConfigured } from '@/utils/tourTriggers';
 const SettingsPanel: React.FC = () => {
   const { state, claudeActions, claude, currentProject } = useAppContext();
   const { showToast } = useToast();
+  const { start } = useSpotlightTour();
 
   // API Key Management
   const [apiKey, setApiKey] = useState('');
@@ -870,7 +872,13 @@ const SettingsPanel: React.FC = () => {
           <p className="text-slate-400 text-sm mb-3">
             Start the guided tour to learn about Inkwell's core features.
           </p>
-          <button data-spotlight-id="settings.startTour">Start Tour</button>
+          <button
+            data-spotlight-id="settings.startTour"
+            onClick={start}
+            className="rounded bg-inkwell-gold px-4 py-2 text-slate-900 font-medium"
+          >
+            Start Tour
+          </button>
         </section>
       </div>
     </div>

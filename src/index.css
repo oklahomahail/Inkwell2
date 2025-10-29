@@ -706,3 +706,40 @@ main[data-tour-id='dashboard'] {
 /* ============================================================================
    END TOUR FIXES
    ============================================================================ */
+
+/* Spotlight Tour Styles
+   ------------------------------------------------------------------- */
+@layer components {
+  .spotlight-header {
+    @apply flex flex-col gap-1;
+  }
+
+  .spotlight-text {
+    @apply text-sm leading-snug text-white mb-1;
+  }
+
+  .spotlight-progress {
+    @apply text-xs text-slate-300 font-medium;
+  }
+
+  .spotlight-buttons {
+    @apply flex gap-3 justify-end mt-3;
+  }
+
+  .spotlight-btn-next {
+    @apply bg-inkwell-gold text-inkwell-blue font-semibold text-xs px-3 py-1.5 rounded-md hover:bg-yellow-400 transition;
+  }
+
+  .spotlight-btn-skip {
+    @apply bg-transparent text-slate-300 text-xs px-2 py-1 hover:text-white underline-offset-2 hover:underline transition;
+  }
+}
+
+#spotlight-overlay {
+  @apply fixed rounded-xl pointer-events-none z-[9999] transition-all duration-200;
+
+  box-shadow:
+    0 0 0 2000px rgb(0 0 0 / 60%),
+    0 0 0 2px #d4af37,
+    0 0 20px 6px rgb(212 175 55 / 50%);
+}
