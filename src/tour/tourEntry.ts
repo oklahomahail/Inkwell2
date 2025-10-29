@@ -63,7 +63,38 @@ export function startDefaultTour(): void {
 // Debug helper for manual testing
 if (typeof window !== 'undefined') {
   // @ts-expect-error - debug utility
-  window.inkwellStartTour = startDefaultTour;
+  window.inkwellStartTour = startDefaultTour; // @ts-expect-error - debug utility for diagnosing tour issues
+  window.debugTour = () => {
+    /* eslint-disable no-console */
+    console.log('=== Inkwell Tour Diagnostics ===');
+    console.log('Tour Service State:', tourService.getState());
+    console.log('Tour Config:', defaultTourConfig);
+    console.log('\nChecking tour anchors in DOM:');
+
+    defaultTourSteps.forEach((step, idx) => {
+      console.log(`\nStep ${idx + 1}: ${step.title}`);
+      console.log(`  Selectors: ${step.selectors.join(', ')}`);
+
+      let found = false;
+      for (const selector of step.selectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+          console.log(`  ✓ Found: ${selector}`, element);
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        console.warn(`  ✗ NOT FOUND - None of the selectors matched an element in the DOM`);
+        console.warn(`    This step will fail to display!`);
+      }
+    });
+
+    console.log('\n=== End Diagnostics ===');
+    console.log('To start the tour manually, run: window.inkwellStartTour()');
+    /* eslint-enable no-console */
+  };
 }
 
 /**

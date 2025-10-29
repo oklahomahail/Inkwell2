@@ -46,12 +46,26 @@ export function useSpotlightUI() {
     let target: HTMLElement | null = null;
     for (const selector of currentStep.selectors) {
       target = document.querySelector(selector) as HTMLElement;
-      if (target) break;
+      if (target) {
+        devLog.debug(`[SpotlightTour] Found target for selector: ${selector}`);
+        break;
+      }
     }
 
     if (!target) {
       devLog.warn(
         `[SpotlightTour] Target element not found for selectors: ${currentStep.selectors.join(', ')}`,
+      );
+      devLog.warn(
+        `[SpotlightTour] Current step: ${currentStep.title}. Ensure the tour anchor elements are present in the DOM.`,
+      );
+      console.error(
+        '[SpotlightTour] Missing tour anchor! The tour step cannot proceed because the target element is not in the DOM.',
+        {
+          step: currentStep.title,
+          selectors: currentStep.selectors,
+          suggestion: 'Check that data-tour-id attributes are present on the required elements',
+        },
       );
       setAnchorRect(null);
       return;
@@ -63,7 +77,7 @@ export function useSpotlightUI() {
     // Compute optimal placement based on available viewport space
     const optimalPlacement = computeOptimalPlacement(rect);
     setPlacement(optimalPlacement);
-  }, [currentStep?.selectors]);
+  }, [currentStep?.selectors, currentStep?.title]);
 
   // Subscribe to TourService state and listen for tour start events
   useEffect(() => {

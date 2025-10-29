@@ -5,35 +5,90 @@
  */
 
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
+import { useToast } from '@/context/toast';
 import { resetTour } from '@/tour/persistence';
 import { startDefaultTour } from '@/tour/tourEntry';
+import { tourService } from '@/tour/TourService';
+import devLog from '@/utils/devLog';
+import { useGo } from '@/utils/navigate';
 
 const FIRST_RUN_KEY = 'inkwell:firstRunShown';
 
 export function TourReplayButton() {
   const [isResetting, setIsResetting] = useState(false);
+  const { showToast } = useToast();
+  const navigate = useGo();
+  const location = useLocation();
 
   // Check if user has completed tour before (from localStorage)
   const hasCompletedBefore = localStorage.getItem('inkwell:tour:completed') === 'true';
+
+  // Check if we're on Settings page
+  const isOnSettings = location.search.includes('view=dashboard');
 
   const handleReplay = async () => {
     setIsResetting(true);
 
     try {
-      // Reset tour completion state
-      resetTour('DEFAULT_TOUR_ID');
+      // Reset tour completion state - use actual DEFAULT_TOUR_ID from config
+      resetTour('inkwell-onboarding-v1');
 
       // Reset first-run flag so tour can auto-start again if needed
       localStorage.removeItem(FIRST_RUN_KEY);
 
+      // Clear any crash shield state that might block the tour
+      try {
+        sessionStorage.removeItem('inkwell:tour:crash-shield');
+      } catch (err) {
+        console.warn('[TourReplay] Could not clear crash shield:', err);
+      }
+
+      // If we're in Settings, offer to navigate to Dashboard
+      if (isOnSettings) {
+        showToast('Navigating to Dashboard to start tour...', 'info');
+
+        // Navigate to dashboard first
+        navigate('/dashboard');
+
+        // Wait for navigation and DOM to settle
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
       // Small delay for visual feedback
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Start the tour
+      // Start the tour with logging
+      devLog.log('[TourReplay] Starting default tour...');
       startDefaultTour();
+
+      // Verify tour started and provide feedback
+      setTimeout(() => {
+        const tourState = tourService.getState();
+        devLog.log('[TourReplay] Tour state after start:', tourState);
+
+        if (!tourState?.isRunning) {
+          devLog.error(
+            '[TourReplay] Tour did not start! Check for missing tour anchors in the DOM.',
+          );
+          showToast(
+            'Unable to start tour. Some required elements may not be visible. Please try again from the Dashboard.',
+            'error',
+          );
+
+          // Log detailed diagnostics
+          if (typeof (window as any).debugTour === 'function') {
+            devLog.log('[TourReplay] Running diagnostics...');
+            (window as any).debugTour();
+          }
+        } else {
+          showToast('Tour started! Follow the highlighted areas.', 'success');
+        }
+      }, 100);
     } catch (error) {
       console.error('[TourReplay] Failed to restart tour:', error);
+      showToast('Failed to start tour. Please try again.', 'error');
     } finally {
       setIsResetting(false);
     }
@@ -111,6 +166,27 @@ export function TourReplayButton() {
         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Your progress will be reset, and you'll be guided through the full walkthrough again.
+          </p>
+        </div>
+      )}
+
+      {isOnSettings && (
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
+            <svg
+              className="w-4 h-4 mt-0.5 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>The tour will navigate you to the Dashboard to showcase all core features.</span>
           </p>
         </div>
       )}

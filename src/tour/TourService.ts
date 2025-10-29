@@ -2,7 +2,7 @@
  * Tour Service
  * Manages tour state and lifecycle
  */
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import { tourAnalytics } from './adapters/analyticsAdapter';
 
@@ -77,13 +77,19 @@ class TourService {
    */
   async start(config: TourConfig, opts?: { forceRestart?: boolean }): Promise<void> {
     if (this.state.isRunning && !opts?.forceRestart) {
-      console.warn('[TourService] Tour already running, stopping current tour');
+      devLog.warn('[TourService] Tour already running, stopping current tour');
       return;
     }
 
     if (this.state.isRunning) {
       this.stop();
     }
+
+    devLog.log('[TourService] Starting tour:', {
+      id: config.id,
+      steps: config.steps.length,
+      firstTarget: config.steps[0]?.target,
+    });
 
     this.config = config;
     this.state = {
