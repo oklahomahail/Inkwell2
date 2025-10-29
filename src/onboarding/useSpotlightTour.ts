@@ -11,14 +11,22 @@ export function useSpotlightTour(): SpotlightTour {
 
   return {
     start: async () => {
-      try {
-        // Use the TourController system instead of looking for window.__INKWELL_TOUR__
-        const { tourController } = await import('../components/Onboarding/hooks/TourController');
-        tourController.startTour('spotlight', 'default', { steps: steps.length });
-        // Overlay listens to tour:start event and renders steps internally
-      } catch (error) {
-        console.error('Failed to start spotlight tour:', error);
-      }
+      // Defer tour start until DOM is ready and anchors are present
+      const tryStart = async (attempt = 0) => {
+        const anchors = document.querySelectorAll('[data-spotlight-id]');
+        if (anchors.length === 0 && attempt < 5) {
+          console.warn('No anchors found, retrying...');
+          setTimeout(() => tryStart(attempt + 1), 300);
+          return;
+        }
+        try {
+          const { tourController } = await import('../components/Onboarding/hooks/TourController');
+          tourController.startTour('spotlight', 'default', { steps: steps.length });
+        } catch (error) {
+          console.error('Failed to start spotlight tour:', error);
+        }
+      };
+      requestAnimationFrame(() => tryStart());
     },
   };
 }
