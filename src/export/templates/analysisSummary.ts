@@ -41,7 +41,7 @@ export function renderAnalysisSummaryHTML(input: {
   const insights = (input.insights || [])
     .slice(0, 5)
     .map(
-      (ins, idx) => `
+      (ins) => `
     <li class="avoid-break">
       <strong>${escapeHtml(ins.finding)}</strong>
       <div>${escapeHtml(ins.suggestion)}</div>

@@ -24,7 +24,7 @@ interface WelcomeModalProps {
 export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   isOpen,
   onClose,
-  onStartTour,
+  onStartTour: _onStartTour,
   onOpenChecklist,
 }) => {
   const { setNeverShowAgain, setRemindMeLater, logAnalytics, preferences, startTour } = useTour();

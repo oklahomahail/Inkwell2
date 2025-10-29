@@ -5,7 +5,6 @@ import type { Project } from '@/context/AppContext';
 import type { BookMetrics, ChapterMetrics, PlotAnalysisFilters } from './types';
 
 const MAX_SUMMARY_CHARS = 1200;
-const MAX_SUMMARY_TOKENS = 220; // Rough estimate: ~5.5 chars per token
 const MAX_CHAPTERS = 30;
 const CONFLICT_VERBS = [
   'struggle',

@@ -8,12 +8,6 @@ import TourCompletionCard from '@/features/analytics/components/TourCompletionCa
 import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 import { triggerAnalyticsVisited } from '@/utils/tourTriggers';
 
-interface WritingSession {
-  date: string;
-  wordCount: number;
-  duration?: number;
-}
-
 const AnalyticsPanel: React.FC = () => {
   const { state, currentProject } = useAppContext();
   const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('advanced');

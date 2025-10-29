@@ -79,7 +79,7 @@ function getAuthErrorMessage(
 export function AuthForm({
   mode,
   redirect,
-  primaryCtaLabel,
+  primaryCtaLabel: _primaryCtaLabel,
 }: {
   mode: AuthFormMode;
   redirect: string;

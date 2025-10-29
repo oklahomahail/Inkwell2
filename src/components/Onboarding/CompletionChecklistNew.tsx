@@ -94,7 +94,7 @@ export const CompletionChecklist: React.FC<CompletionChecklistProps> = ({
   onStartTour,
 }) => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [checklist, setChecklist] = useState<Record<string, boolean>>(() => {
+  const [checklist, _setChecklist] = useState<Record<string, boolean>>(() => {
     try {
       const saved = localStorage.getItem(CHECKLIST_KEY);
       return saved ? JSON.parse(saved) : {};

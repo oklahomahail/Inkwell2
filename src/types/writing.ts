@@ -16,7 +16,7 @@ declare global {
   // Only define once
   // @ts-ignore
   if (!globalThis.__inkwell_has_global_exportformat__) {
-    type ExportFormat = 'markdown' | 'html' | 'pdf' | 'docx' | (string & {});
+    type _ExportFormat = 'markdown' | 'html' | 'pdf' | 'docx' | (string & {});
     // @ts-ignore
     globalThis.__inkwell_has_global_exportformat__ = true;
   }

@@ -9,7 +9,7 @@
 export function mark(name: string): void {
   try {
     performance.mark(name);
-  } catch (e) {
+  } catch {
     // Silently fail in environments without performance API
   }
 }

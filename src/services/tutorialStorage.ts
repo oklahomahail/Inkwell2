@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 import { useAuth } from '../context/AuthContext';
-import { useMaybeDB, defineStores } from '../data/dbFactory';
+import { useMaybeDB } from '../data/dbFactory';
 
 export interface TutorialProgress {
   slug: string;
@@ -43,7 +43,6 @@ export interface CompletionChecklist {
 export function useTutorialStorage() {
   const { user } = useAuth();
   const db = useMaybeDB();
-  const stores = defineStores(db);
 
   const isUserActive = Boolean(user?.id && db);
 
@@ -233,7 +232,7 @@ export class LegacyTutorialStorage {
 export async function _migrateLegacyTutorialData(
   profileId: string,
   db: any, // Replace with the correct ProfileStorageManager type
-  isFirstProfile = false,
+  _isFirstProfile = false,
 ): Promise<void> {
   // TODO: implement migration logic from LegacyTutorialStorage to IndexedDB
   // Use `defineStores(db)` and upsert data into appropriate tables.
