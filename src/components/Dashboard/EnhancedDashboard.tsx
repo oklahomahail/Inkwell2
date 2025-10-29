@@ -13,7 +13,7 @@ import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 
 const EnhancedDashboard: React.FC = () => {
   const { state, currentProject, addProject, setCurrentProjectId, dispatch } = useAppContext();
-  const { newProjectDialogOpen, openNewProjectDialog, closeNewProjectDialog } = useUI();
+  const { openNewProjectDialog } = useUI();
   const [storageModalOpen, setStorageModalOpen] = useState(false);
 
   // Check for tour=start in URL and trigger tour if found
