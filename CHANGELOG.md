@@ -4,6 +4,58 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Added - User-Defined Data Persistence System
+
+**New Feature:** Users now have full control over where and how their writing data is stored.
+
+**What's New:**
+
+- **Three Storage Modes:**
+  - **Local-Only**: All data stays on your device, no cloud sync
+  - **Cloud Sync**: Real-time synchronization with Supabase backend
+  - **Hybrid**: Local-first with periodic cloud backups
+- **User-Facing Controls:**
+  - Settings page for choosing and configuring persistence mode
+  - Real-time sync status and storage usage insights
+  - Manual sync and backup triggers
+  - Data export functionality (JSON format)
+- **Technical Implementation:**
+  - `userPersistenceService`: Central service for persistence management
+  - `useUserPersistence`: React hook for component integration
+  - Smart migration between storage modes
+  - Conflict resolution UI for sync conflicts
+  - Browser capability detection (private mode, storage persistence)
+- **Privacy-First Design:**
+  - User choice at every step
+  - Clear explanations of each mode's tradeoffs
+  - No data sent to cloud without explicit user consent
+  - Easy export and portability
+
+**Files Added:**
+
+- `src/types/persistenceConfig.ts` - Type definitions
+- `src/services/userPersistenceService.ts` - Core service
+- `src/hooks/useUserPersistence.ts` - React hook
+- `src/components/Settings/PersistenceModeSelector.tsx` - Mode selection UI
+- `src/components/Settings/PersistenceAdvancedSettings.tsx` - Advanced controls
+- `src/components/Settings/DataPersistenceSettingsPage.tsx` - Full settings page
+
+**Documentation:**
+
+- `DATA_PERSISTENCE_IMPLEMENTATION.md` - Technical implementation guide
+- `USER_GUIDE_DATA_PERSISTENCE.md` - User-facing documentation
+- `USER_PERSISTENCE_SUMMARY.md` - Feature summary
+- `INTEGRATION_EXAMPLES.md` - Code integration examples
+
+**Next Steps:**
+
+- Integration with main settings navigation
+- Onboarding flow for first-time setup
+- Migration progress UI
+- Comprehensive testing
+
+For technical details, see [DATA_PERSISTENCE_IMPLEMENTATION.md](./DATA_PERSISTENCE_IMPLEMENTATION.md)
+
 ### Removed - Multi-Profile Workspace System
 
 **Breaking Change:** Inkwell has been simplified to a single-user model. The multi-profile workspace system has been completely removed.

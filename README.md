@@ -239,6 +239,14 @@ MIT
 
 - **⚡ Performance Guardrails** — Virtualized lists, debounced search, and deferred operations
 - **📊 Performance Monitoring** — Real-time render and scroll performance tracking
+- **💾 User-Defined Data Persistence** — Full control over where and how your writing is stored:
+  - **Three Storage Modes**: Local-only, Cloud sync, or Hybrid approach
+  - **Privacy-First Architecture** — Your data, your choice, your control
+  - **Flexible Migration** — Seamlessly switch between storage modes
+  - **Automatic Sync & Backup** — Configurable intervals for cloud-enabled modes
+  - **Storage Insights** — Real-time visibility into data usage and sync status
+  - **Export Capabilities** — Export all your data anytime in JSON format
+  - **Conflict Resolution** — Smart handling of sync conflicts with user control
 - **Command Palette** (⌘K) with full keyboard navigation
 - **Writing Goals & Analytics** — Daily targets, streak tracking, and productivity insights
 - **Multi-layer Backups** with version history and recovery
