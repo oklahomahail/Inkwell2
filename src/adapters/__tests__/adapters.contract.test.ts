@@ -298,14 +298,16 @@ describe('Character Adapters - Contract Tests', () => {
     it('should convert persisted character to canonical format', () => {
       const persisted: PersistedCharacter = {
         id: 'char-1',
+        project_id: 'proj-1',
+        client_rev: 1,
         name: 'Alice',
         bio: 'A curious adventurer',
         traits: {
           personality: ['brave', 'curious'],
           quirks: 'Always carries a notebook',
         },
-        createdAt: 1700000000000,
-        updatedAt: 1700000001000,
+        created_at: '2023-11-14T00:00:00.000Z',
+        updated_at: '2023-11-14T00:00:01.000Z',
       };
 
       const canonical = characterFromPersisted(persisted);
@@ -314,8 +316,8 @@ describe('Character Adapters - Contract Tests', () => {
       expect(canonical.name).toBe('Alice');
       expect(canonical.description).toBe('A curious adventurer');
       expect(canonical.role).toBe('supporting'); // Default
-      expect(canonical.createdAt).toBe(1700000000000);
-      expect(canonical.updatedAt).toBe(1700000001000);
+      expect(canonical.createdAt).toBe(new Date('2023-11-14T00:00:00.000Z').getTime());
+      expect(canonical.updatedAt).toBe(new Date('2023-11-14T00:00:01.000Z').getTime());
 
       // Required fields have defaults
       expect(canonical.personality).toEqual([]);
@@ -351,11 +353,13 @@ describe('Character Adapters - Contract Tests', () => {
     it('should preserve shared fields through persisted → canonical → persisted', () => {
       const original: PersistedCharacter = {
         id: 'char-roundtrip',
+        project_id: 'proj-1',
+        client_rev: 1,
         name: 'Charlie',
         bio: 'A mysterious figure',
         traits: { mood: 'brooding' },
-        createdAt: 1700000000000,
-        updatedAt: 1700000001000,
+        created_at: '2023-11-14T00:00:00.000Z',
+        updated_at: '2023-11-14T00:00:01.000Z',
       };
 
       const canonical = characterFromPersisted(original);
@@ -365,8 +369,8 @@ describe('Character Adapters - Contract Tests', () => {
       expect(converted.id).toBe(original.id);
       expect(converted.name).toBe(original.name);
       expect(converted.bio).toBe(original.bio);
-      expect(converted.createdAt).toBe(original.createdAt);
-      expect(converted.updatedAt).toBe(original.updatedAt);
+      expect(converted.created_at).toBe(original.created_at);
+      expect(converted.updated_at).toBe(original.updated_at);
     });
   });
 
