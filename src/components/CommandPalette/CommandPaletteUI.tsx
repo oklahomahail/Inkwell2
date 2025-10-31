@@ -9,6 +9,7 @@ import {
   Brain,
   FolderOpen,
   Settings,
+  Upload,
 } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 
@@ -53,6 +54,8 @@ const CommandPaletteUI: React.FC = () => {
         return Brain;
       case 'project':
         return FolderOpen;
+      case 'export':
+        return Upload;
       case 'settings':
         return Settings;
       default:
@@ -71,6 +74,8 @@ const CommandPaletteUI: React.FC = () => {
         return 'text-purple-500';
       case 'project':
         return 'text-orange-500';
+      case 'export':
+        return 'text-teal-500';
       case 'settings':
         return 'text-gray-500';
       default:
