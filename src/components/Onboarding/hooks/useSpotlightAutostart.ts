@@ -15,11 +15,73 @@ function targetsExist(selectors: string[]) {
   return selectors.every((sel) => !!document.querySelector(sel));
 }
 
-function whenTargetsReady(selectors: string[], timeoutMs = 8000): Promise<boolean> {
-  // quick path
-  if (targetsExist(selectors)) return Promise.resolve(true);
+/**
+ * Wait for React to mount to the #root element before proceeding with tour.
+ * This ensures the React application is fully mounted and hydrated before
+ * we start looking for tour target elements.
+ *
+ * @param timeout - Maximum time to wait for React mount (default 5000ms)
+ * @returns Promise<boolean> - true if React mounted, false if timeout
+ */
+function waitForReactMount(timeout = 5000): Promise<boolean> {
+  return new Promise((resolve) => {
+    const root = document.getElementById('root');
+    if (!root) {
+      console.warn('[waitForReactMount] #root element not found');
+      resolve(false);
+      return;
+    }
 
-  // Guard against missing document.documentElement (e.g. during auth flows or SSR)
+    // Check if React has already mounted
+    if (root.childNodes.length > 0) {
+      // Additional check: ensure it's not just a loading state
+      const hasReactContent =
+        root.querySelector('[data-reactroot], [data-react-root]') || root.children.length > 0;
+
+      if (hasReactContent) {
+        resolve(true);
+        return;
+      }
+    }
+
+    // Watch for React mount
+    const observer = new MutationObserver(() => {
+      if (root.childNodes.length > 0) {
+        observer.disconnect();
+        // Give React one more frame to hydrate
+        requestAnimationFrame(() => {
+          resolve(true);
+        });
+      }
+    });
+
+    observer.observe(root, { childList: true, subtree: true });
+
+    // Timeout fallback
+    setTimeout(() => {
+      observer.disconnect();
+      resolve(root.childNodes.length > 0);
+    }, timeout);
+  });
+}
+
+async function whenTargetsReady(selectors: string[], timeoutMs = 8000): Promise<boolean> {
+  // Step 1: Wait for React root to mount
+  const reactMounted = await waitForReactMount(3000);
+  if (!reactMounted) {
+    console.warn('[whenTargetsReady] React mount timeout - tour may not display correctly');
+    return false;
+  }
+
+  // Step 2: Wait one more frame for layout paint
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+
+  // Step 3: Check if targets exist (quick path after React mount)
+  if (targetsExist(selectors)) {
+    return true;
+  }
+
+  // Step 4: Guard against missing document.documentElement (e.g. during auth flows or SSR)
   if (!document || !document.documentElement) {
     console.warn('whenTargetsReady: document.documentElement is not available');
     return Promise.resolve(false);
@@ -101,25 +163,32 @@ export function useSpotlightAutostart(stepSelectors: string[]) {
     if (!shouldAutostart) return;
     once.current = true;
 
-    // Use requestAnimationFrame to ensure the DOM is fully rendered before checking
-    // This helps avoid issues with MutationObserver by waiting for a paint cycle
-    requestAnimationFrame(() => {
-      // Then queue a microtask for additional safety
-      queueMicrotask(async () => {
-        const ok = await whenTargetsReady(stepSelectors);
-        if (!ok) {
-          // If a stale progress record is blocking, allow a one-time reset
-          resetProgress(FEATURE_TOUR_ID);
-          return; // silently bail if targets never appear
-        }
+    // Enhanced tour start flow with DOM readiness checking
+    const startTourFlow = async () => {
+      // Step 1: Wait for DOM ready if needed
+      if (document.readyState === 'loading') {
+        await new Promise<void>((resolve) => {
+          document.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
+        });
+      }
 
-        try {
-          startTour(FEATURE_TOUR_ID); // TourController has its own global double-start guard
-          markTourLaunched(FEATURE_TOUR_ID);
-        } catch (error) {
-          console.error('Error starting tour:', error);
-        }
-      });
-    });
+      // Step 2: Wait for targets to be ready (includes React mount detection)
+      const ok = await whenTargetsReady(stepSelectors);
+      if (!ok) {
+        // If a stale progress record is blocking, allow a one-time reset
+        resetProgress(FEATURE_TOUR_ID);
+        return; // silently bail if targets never appear
+      }
+
+      // Step 3: Start the tour
+      try {
+        startTour(FEATURE_TOUR_ID); // TourController has its own global double-start guard
+        markTourLaunched(FEATURE_TOUR_ID);
+      } catch (error) {
+        console.error('Error starting tour:', error);
+      }
+    };
+
+    startTourFlow();
   }, [loc.pathname, stepSelectors]);
 }
