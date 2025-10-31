@@ -218,19 +218,22 @@ function arrayMove<T>(array: T[], from: number, to: number): T[] {
  * Usage:
  * ```typescript
  * const handleDragEnd = (event: DragEndEvent) => {
- *   const { startIndex, endIndex } = getReorderParams(event, chapters);
- *   await reorder(startIndex, endIndex);
+ *   const params = getReorderParams(event, chapters);
+ *   if (params) await reorder(params.startIndex, params.endIndex);
  * };
  * ```
  */
 export function getReorderParams(
-  event: { active: { id: string }; over: { id: string } | null },
+  event: { active: { id: string | number }; over: { id: string | number } | null },
   chapters: Chapter[],
 ): { startIndex: number; endIndex: number } | null {
   if (!event.over) return null;
 
-  const startIndex = chapters.findIndex((c) => c.id === event.active.id);
-  const endIndex = chapters.findIndex((c) => c.id === event.over!.id);
+  const activeId = String(event.active.id);
+  const overId = String(event.over.id);
+
+  const startIndex = chapters.findIndex((c) => c.id === activeId);
+  const endIndex = chapters.findIndex((c) => c.id === overId);
 
   if (startIndex === -1 || endIndex === -1) return null;
 
