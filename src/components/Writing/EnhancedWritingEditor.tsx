@@ -222,7 +222,7 @@ const EnhancedWritingEditor: React.FC<EnhancedWritingEditorProps> = ({ className
         const chapters = await storageService.loadWritingChapters(currentProject.id);
         if (chapters.length > 0) {
           const firstChapter = chapters[0];
-          if (firstChapter && firstChapter.scenes.length > 0) {
+          if (firstChapter && firstChapter.scenes && firstChapter.scenes.length > 0) {
             const firstScene = firstChapter.scenes[0];
             if (firstScene) {
               setCurrentScene(firstScene);

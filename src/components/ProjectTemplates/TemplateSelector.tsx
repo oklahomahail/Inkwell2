@@ -6,8 +6,6 @@ import { useAppContext, View } from '@/context/AppContext';
 import { PROJECT_TEMPLATES } from '@/data/sampleProject';
 import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 
-import { ChapterStatus } from '../../domain/types';
-
 interface ProjectTemplate {
   id: string;
   name: string;
@@ -116,12 +114,18 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ isOpen, onClose, on
       chapters: selectedTemplate.chapters.map((chapter, index) => ({
         id: `chapter-${index + 1}`,
         title: chapter.title,
+        content: '',
+        wordCount: 0,
+        status: 'planned' as const,
         order: index + 1,
+        charactersInChapter: [],
+        plotPointsResolved: [],
+        notes: '',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        // Legacy compatibility
         scenes: [],
         totalWordCount: 0,
-        status: ChapterStatus.DRAFT,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       })),
       characters: selectedTemplate.characters.map((character, index) => ({
         id: `character-${index + 1}`,

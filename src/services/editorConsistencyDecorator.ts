@@ -5,7 +5,7 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import type { EnhancedProject } from '@/types/project';
 import type { Scene, Chapter } from '@/types/writing';
 import { debounce } from '@/utils/debounce';
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 import { phraseAnalysisService } from '@/utils/textAnalysis';
 
 import { voiceConsistencyService } from './voiceConsistencyService';
@@ -205,7 +205,7 @@ class EditorConsistencyDecorator {
           dialogue.startPos,
         );
 
-        if (speakingCharacter && project.characters.some((c) => c.name === speakingCharacter)) {
+        if (speakingCharacter && project.characters?.some((c) => c.name === speakingCharacter)) {
           // Analyze voice consistency for this character
           const voiceAnalysis = await voiceConsistencyService.analyzeCharacterDialogue(
             project.id,
@@ -249,12 +249,12 @@ class EditorConsistencyDecorator {
       // For real-time checking, we focus on quick character trait contradictions
       const characterMentions = this.findCharacterMentions(
         text,
-        project.characters.map((c) => c.name),
+        project.characters?.map((c) => c.name) ?? [],
       );
 
       for (const mention of characterMentions) {
         // Quick trait consistency check
-        const character = project.characters.find((c) => c.name === mention.characterName);
+        const character = project.characters?.find((c) => c.name === mention.characterName);
         if (!character) continue;
 
         // Check for obvious contradictions in the surrounding text

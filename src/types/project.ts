@@ -115,8 +115,15 @@ export interface Chapter {
   charactersInChapter: string[]; // character ids
   plotPointsResolved: string[]; // plot note ids
   notes: string;
-  createdAt: number; // epoch ms
-  updatedAt: number; // epoch ms
+  createdAt: number | Date; // epoch ms or Date (temporary compatibility)
+  updatedAt: number | Date; // epoch ms or Date (temporary compatibility)
+
+  // LEGACY COMPATIBILITY (v0.6.0 migration in progress)
+  // TODO v0.7.0: Remove these after all components are migrated
+  /** @deprecated Use content property instead - scenes model is deprecated */
+  scenes?: any[];
+  /** @deprecated Use wordCount property instead */
+  totalWordCount?: number;
 }
 
 // ----------------------------------------
@@ -176,11 +183,12 @@ export interface EnhancedProject extends Project {
   // Additional metadata (extends base Project fields)
   targetAudience?: string;
 
-  // Story elements
-  characters: Character[];
-  plotNotes: PlotNote[];
-  worldBuilding: WorldBuildingNote[];
-  chapters: Chapter[];
+  // Story elements (temporarily optional during v0.6.0 migration)
+  // TODO v0.7.0: Make these required again after migration complete
+  characters?: Character[];
+  plotNotes?: PlotNote[];
+  worldBuilding?: WorldBuildingNote[];
+  chapters?: Chapter[];
 
   /**
    * Last ~1000 words for assistant/contextual tools.

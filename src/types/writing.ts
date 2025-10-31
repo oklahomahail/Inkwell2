@@ -4,9 +4,6 @@
  * - Strong where it matters (ids, nesting), loose for optional props
  */
 
-// Re-export canonical Chapter and Character types from project.ts
-export type { Chapter, Character } from './project';
-
 /** Export formats used by ExportDialog and downstream utilities */
 export type ExportFormat = 'markdown' | 'html' | 'pdf' | 'docx' | (string & {});
 
@@ -28,6 +25,12 @@ export interface BaseEntity {
   createdAt?: Date | number | string;
   updatedAt?: Date | number | string;
 }
+
+// Import and re-export canonical Chapter and Character types from project.ts
+// Moved after BaseEntity to avoid circular reference issues
+import type { Chapter as ProjectChapter, Character as ProjectCharacter } from './project';
+export type Chapter = ProjectChapter;
+export type Character = ProjectCharacter;
 
 //
 // ⚠️ DEPRECATED: Scene-based architecture

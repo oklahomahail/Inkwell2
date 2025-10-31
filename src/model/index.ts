@@ -49,11 +49,6 @@ export {
 } from './characters';
 
 // Re-export canonical types for convenience
-export type {
-  Project,
-  EnhancedProject,
-  Chapter,
-  Character,
-  ChapterMeta,
-  ChapterDoc,
-} from '@/types';
+export type { Project, EnhancedProject, Chapter, Character } from '@/types/project';
+
+export type { ChapterMeta, ChapterDoc } from '@/types/writing';

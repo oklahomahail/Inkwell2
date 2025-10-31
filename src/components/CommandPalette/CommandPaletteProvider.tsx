@@ -1,7 +1,7 @@
 // src/components/CommandPalette/CommandPaletteProvider.tsx
 import React, { useCallback, useEffect, useState, type ReactNode } from 'react';
 
-import { SCENE_STATUS, CHAPTER_STATUS, EXPORT_FORMAT } from '@/consts/writing';
+import { SCENE_STATUS, EXPORT_FORMAT } from '@/consts/writing';
 import { useAppContext, View } from '@/context/AppContext';
 import {
   CommandPaletteContext,
@@ -48,17 +48,23 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     if (!currentProject) return showToast('No project selected', 'error');
     try {
       const existing = await storageService.loadWritingChapters(currentProject.id);
-      const newChapter = {
+      const newChapter: WritingChapter = {
         id: generateId('chapter'),
         title: `Chapter ${existing.length + 1}`,
+        content: '',
+        wordCount: 0,
+        status: 'planned',
         order: existing.length,
+        charactersInChapter: [],
+        plotPointsResolved: [],
+        notes: '',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        // Legacy compatibility
         scenes: [],
         totalWordCount: 0,
-        status: CHAPTER_STATUS.DRAFT,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
-      await storageService.saveWritingChapters(currentProject.id, [...existing, newChapter]);
+      await storageService.saveWritingChapters(currentProject.id, [...existing, newChapter] as any);
       showToast(`Created ${newChapter.title}`, 'success');
       setView(View.Writing);
     } catch (e) {

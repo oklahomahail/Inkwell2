@@ -99,7 +99,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, type, data
             <p className="text-sm text-blue-700 dark:text-blue-300">
               {type === 'scene'
                 ? `${(data as Scene).wordCount} words`
-                : `${(data as Chapter).scenes.length} scenes • ${(data as Chapter).totalWordCount} words`}
+                : `${(data as Chapter).scenes?.length ?? 0} scenes • ${(data as Chapter).totalWordCount ?? (data as Chapter).wordCount ?? 0} words`}
             </p>
           </div>
 

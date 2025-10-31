@@ -20,6 +20,7 @@ import { useLocation } from 'react-router-dom';
 
 import Logo from '@/components/Logo';
 import NewProjectDialog from '@/components/Projects/NewProjectDialog';
+import { StorageStatusIndicator } from '@/components/Storage/StorageStatusIndicator';
 import { BRAND_NAME, ORGANIZATION_NAME } from '@/constants/brand';
 import { ALT_TAGLINE } from '@/constants/branding';
 import { useAppContext, View } from '@/context/AppContext';
@@ -705,17 +706,24 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         {/* Footer */}
         <footer className="mt-auto border-t border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-center gap-3 text-sm text-slate-500 dark:text-slate-400">
-              <div className="flex items-center gap-2">
-                <Logo variant="svg-feather-gold" size={18} className="opacity-80" />
-                <span className="font-medium">Inkwell</span>
+            <div className="flex items-center justify-between gap-3 text-sm text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Logo variant="svg-feather-gold" size={18} className="opacity-80" />
+                  <span className="font-medium">Inkwell</span>
+                </div>
+                <span className="text-slate-300 dark:text-slate-600">by</span>
+                <span className="font-medium text-slate-600 dark:text-slate-300">
+                  {ORGANIZATION_NAME}
+                </span>
+                <span className="text-slate-300 dark:text-slate-600">•</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">{ALT_TAGLINE}</span>
               </div>
-              <span className="text-slate-300 dark:text-slate-600">by</span>
-              <span className="font-medium text-slate-600 dark:text-slate-300">
-                {ORGANIZATION_NAME}
-              </span>
-              <span className="text-slate-300 dark:text-slate-600">•</span>
-              <span className="text-sm text-slate-500 dark:text-slate-400">{ALT_TAGLINE}</span>
+
+              {/* Storage Status Indicator */}
+              <div className="relative">
+                <StorageStatusIndicator variant="compact" />
+              </div>
             </div>
           </div>
         </footer>

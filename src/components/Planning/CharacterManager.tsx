@@ -6,7 +6,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
 import { triggerCharactersAdded } from '@/utils/tourTriggers';
 
-interface Character {
+interface PlanningCharacter {
   id: string;
   name: string;
   role: 'protagonist' | 'antagonist' | 'supporting' | 'minor';
@@ -24,21 +24,21 @@ const CharacterManager: React.FC = () => {
   const { showToast } = useToast();
 
   // Load characters from current project
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  const [characters, setCharacters] = useState<PlanningCharacter[]>([]);
+  const [selectedCharacter, setSelectedCharacter] = useState<PlanningCharacter | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showNewCharacterForm, setShowNewCharacterForm] = useState(false);
 
   // Sync characters from project when it changes
   React.useEffect(() => {
     if (currentProject?.characters) {
-      setCharacters(currentProject.characters as Character[]);
+      setCharacters(currentProject.characters as any);
     }
   }, [currentProject?.id, currentProject?.characters]);
 
   // Create new character
   const createCharacter = () => {
-    const newCharacter: Character = {
+    const newCharacter: PlanningCharacter = {
       id: `char_${Date.now()}`,
       name: '',
       role: 'supporting',
@@ -60,7 +60,7 @@ const CharacterManager: React.FC = () => {
   const saveCharacter = () => {
     if (!selectedCharacter || !currentProject) return;
 
-    let updatedCharacters: Character[];
+    let updatedCharacters: PlanningCharacter[];
     if (showNewCharacterForm) {
       // Fire tour trigger on first character added
       if (characters.length === 0) {
@@ -114,7 +114,7 @@ const CharacterManager: React.FC = () => {
   };
 
   // Update selected character
-  const updateCharacter = (updates: Partial<Character>) => {
+  const updateCharacter = (updates: Partial<PlanningCharacter>) => {
     if (!selectedCharacter) return;
 
     setSelectedCharacter({
@@ -125,7 +125,7 @@ const CharacterManager: React.FC = () => {
   };
 
   // Role colors and icons
-  const getRoleStyle = (role: Character['role']) => {
+  const getRoleStyle = (role: PlanningCharacter['role']) => {
     switch (role) {
       case 'protagonist':
         return { color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/20' };
@@ -137,6 +137,8 @@ const CharacterManager: React.FC = () => {
           bg: 'bg-green-100 dark:bg-green-900/20',
         };
       case 'minor':
+        return { color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-100 dark:bg-gray-700' };
+      default:
         return { color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-100 dark:bg-gray-700' };
     }
   };
@@ -320,7 +322,7 @@ const CharacterManager: React.FC = () => {
                     <select
                       value={selectedCharacter.role}
                       onChange={(e) =>
-                        updateCharacter({ role: e.target.value as Character['role'] })
+                        updateCharacter({ role: e.target.value as PlanningCharacter['role'] })
                       }
                       disabled={!isEditing}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:bg-gray-50 dark:disabled:bg-gray-700"

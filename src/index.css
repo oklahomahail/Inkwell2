@@ -496,6 +496,10 @@ h6 {
   .glow-ink {
     filter: drop-shadow(0 0 8px rgb(91 140 255 / 30%));
   }
+
+  .text-inkwell-blue {
+    color: hsl(var(--ink-500));
+  }
 }
 
 @layer components {

@@ -22,6 +22,7 @@ import {
 } from './components/Recovery/StorageRecoveryBanner';
 import { PreviewGuard } from './components/RouteGuards/PreviewGuard';
 import { StorageBanner } from './components/Storage/StorageBanner';
+import { StorageErrorToast } from './components/Storage/StorageErrorToast';
 import { ToastContainer } from './components/ToastContainer';
 import ViewSwitcher from './components/ViewSwitcher';
 // Context and providers
@@ -48,6 +49,8 @@ import ProtectedRoute from './routes/ProtectedRoute';
 // Services
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
+import { storageErrorLogger } from './services/storageErrorLogger';
+import { storageManager } from './services/storageManager';
 import { useTourRouterAdapter } from './tour/adapters/routerAdapter';
 import { TourLifecycleIntegration } from './tour/integrations/tourLifecycleIntegration';
 import { SpotlightOverlay } from './tour/ui';
@@ -292,6 +295,34 @@ function ProfileAppShell() {
     return unsubscribe;
   }, []);
 
+  // Initialize storage manager and error logger
+  useEffect(() => {
+    const initializeStorage = async () => {
+      try {
+        // Initialize error logger
+        storageErrorLogger.initialize();
+
+        // Initialize storage manager (requests persistence, starts monitoring)
+        const result = await storageManager.initialize();
+
+        if (result.granted) {
+          devLog.log('[App] Storage persistence granted');
+        } else {
+          devLog.warn('[App] Storage persistence not granted - data may be cleared');
+        }
+      } catch (error) {
+        devLog.error('[App] Failed to initialize storage manager:', error);
+      }
+    };
+
+    void initializeStorage();
+
+    // Cleanup on unmount
+    return () => {
+      storageManager.stopMonitoring();
+    };
+  }, []);
+
   // maintenance after start
   useEffect(() => {
     const performStartupMaintenance = async () => {
@@ -349,6 +380,9 @@ function ProfileAppShell() {
 
       {/* PWA Install Prompt */}
       <PWAInstallButton variant="fab" />
+
+      {/* Storage Error Toast Notifications */}
+      <StorageErrorToast />
 
       <MainLayout>
         <ViewSwitcher />

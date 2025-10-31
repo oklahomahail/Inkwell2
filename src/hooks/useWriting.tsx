@@ -33,7 +33,7 @@ function writingReducer(state: WritingState, action: WritingAction): WritingStat
         ...state,
         chapters: state.chapters.map((chapter) =>
           chapter.id === action.payload.chapterId
-            ? { ...chapter, scenes: [...chapter.scenes, action.payload.scene] }
+            ? { ...chapter, scenes: [...(chapter.scenes ?? []), action.payload.scene] }
             : chapter,
         ),
       };
