@@ -224,15 +224,45 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
   const exportChaptersAsPDF = useCallback(async () => {
     if (!currentProject) return showToast('No project selected', 'error');
     if (chapters.length === 0) return showToast('No chapters to export', 'error');
-    showToast('PDF export coming soon in Phase 5', 'info', 3000);
-    // TODO Phase 5: Implement full PDF export via export service
+    try {
+      showToast('Preparing PDF export...', 'info', 2000);
+      const result = await exportService.exportPDF(currentProject.id, {
+        format: EXPORT_FORMAT.PDF,
+        includeMetadata: true,
+        includeSynopsis: true,
+        customTitle: currentProject.name,
+      });
+      if (result.success) {
+        showToast('PDF export ready - check print dialog', 'success', 4000);
+      } else {
+        showToast(result.error || 'PDF export failed', 'error');
+      }
+    } catch (error) {
+      console.error('PDF export error:', error);
+      showToast('Failed to export PDF', 'error');
+    }
   }, [currentProject, chapters, showToast]);
 
   const exportChaptersAsDOCX = useCallback(async () => {
     if (!currentProject) return showToast('No project selected', 'error');
     if (chapters.length === 0) return showToast('No chapters to export', 'error');
-    showToast('DOCX export coming soon in Phase 5', 'info', 3000);
-    // TODO Phase 5: Implement full DOCX export via export service
+    try {
+      showToast('Preparing DOCX export...', 'info', 2000);
+      const result = await exportService.exportDOCX(currentProject.id, {
+        format: EXPORT_FORMAT.DOCX,
+        includeMetadata: true,
+        includeSynopsis: true,
+        customTitle: currentProject.name,
+      });
+      if (result.success) {
+        showToast(`Downloaded ${result.filename}`, 'success', 4000);
+      } else {
+        showToast(result.error || 'DOCX export failed', 'error');
+      }
+    } catch (error) {
+      console.error('DOCX export error:', error);
+      showToast('Failed to export DOCX', 'error');
+    }
   }, [currentProject, chapters, showToast]);
 
   // Build commands when deps change
@@ -317,7 +347,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       {
         id: 'chapter-export-pdf',
         label: 'Export Chapters → PDF',
-        description: 'Export all chapters as a PDF document (coming soon)',
+        description: 'Export all chapters as a professionally formatted PDF document',
         category: 'export',
         action: exportChaptersAsPDF,
         condition: () => !!currentProject && chapters.length > 0,
@@ -325,7 +355,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
       {
         id: 'chapter-export-docx',
         label: 'Export Chapters → DOCX',
-        description: 'Export all chapters as a Word document (coming soon)',
+        description: 'Export all chapters as a Word-compatible RTF document',
         category: 'export',
         action: exportChaptersAsDOCX,
         condition: () => !!currentProject && chapters.length > 0,
