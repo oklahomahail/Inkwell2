@@ -48,22 +48,23 @@ function splitContentIntoScenes(chapter: Chapter): Scene[] {
 
   if (matches.length === 0) {
     // No scenes found, create single scene
-    return [{
-      id: `${chapter.id}-scene-1`,
-      title: 'Scene 1',
-      content,
-      order: 0,
-      status: 'draft',
-      createdAt: chapter.createdAt,
-      updatedAt: chapter.updatedAt,
-      wordCount: chapter.wordCount,
-      characterIds: chapter.charactersInChapter,
-    }];
+    return [
+      {
+        id: `${chapter.id}-scene-1`,
+        title: 'Scene 1',
+        content,
+        order: 0,
+        status: 'draft',
+        createdAt: chapter.createdAt,
+        updatedAt: chapter.updatedAt,
+        wordCount: chapter.wordCount,
+        characterIds: chapter.charactersInChapter,
+      },
+    ];
   }
 
   // Split content by h2 tags
   const scenes: Scene[] = [];
-  let lastIndex = 0;
 
   matches.forEach((match, index) => {
     const title = match[1] || `Scene ${index + 1}`;
@@ -75,7 +76,7 @@ function splitContentIntoScenes(chapter: Chapter): Scene[] {
       .replace(/<[^>]*>/g, '')
       .trim()
       .split(/\s+/)
-      .filter(word => word.length > 0).length;
+      .filter((word) => word.length > 0).length;
 
     scenes.push({
       id: `${chapter.id}-scene-${index + 1}`,
@@ -88,8 +89,6 @@ function splitContentIntoScenes(chapter: Chapter): Scene[] {
       wordCount,
       characterIds: chapter.charactersInChapter,
     });
-
-    lastIndex = endIndex;
   });
 
   return scenes;
@@ -100,11 +99,11 @@ function splitContentIntoScenes(chapter: Chapter): Scene[] {
  */
 function mapCanonicalStatus(status: Chapter['status']): string {
   const statusMap: Record<Chapter['status'], string> = {
-    'planned': 'draft',
+    planned: 'draft',
     'in-progress': 'in_progress',
     'first-draft': 'draft',
-    'revised': 'revising',
-    'completed': 'final',
+    revised: 'revising',
+    completed: 'final',
   };
 
   return statusMap[status] || 'draft';
@@ -140,14 +139,11 @@ export function chapterToSingleScene(chapter: Chapter): Scene {
  * Merge multiple scenes back into chapter content
  * Used when saving legacy scene edits to canonical chapter
  */
-export function mergeScenesIntoChapter(
-  chapter: Chapter,
-  scenes: Scene[]
-): Chapter {
+export function mergeScenesIntoChapter(chapter: Chapter, scenes: Scene[]): Chapter {
   const sortedScenes = [...scenes].sort((a, b) => (a.order || 0) - (b.order || 0));
 
   const combinedContent = sortedScenes
-    .map(scene => {
+    .map((scene) => {
       const title = scene.title ? `<h2>${scene.title}</h2>\n` : '';
       return title + (scene.content || '');
     })
@@ -157,11 +153,11 @@ export function mergeScenesIntoChapter(
     .replace(/<[^>]*>/g, '')
     .trim()
     .split(/\s+/)
-    .filter(word => word.length > 0).length;
+    .filter((word) => word.length > 0).length;
 
   // Extract unique character IDs from all scenes
   const charactersInChapter = Array.from(
-    new Set(sortedScenes.flatMap(scene => scene.characterIds || []))
+    new Set(sortedScenes.flatMap((scene) => scene.characterIds || [])),
   );
 
   return {

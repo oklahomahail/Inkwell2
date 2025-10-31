@@ -1,13 +1,14 @@
 // src/components/CommandPalette/CommandPaletteProvider.tsx
 import React, { useCallback, useEffect, useState, type ReactNode } from 'react';
 
-import { SCENE_STATUS, CHAPTER_STATUS, EXPORT_FORMAT } from '@/consts/writing';
+import { SCENE_STATUS, EXPORT_FORMAT } from '@/consts/writing';
 import { useAppContext, View } from '@/context/AppContext';
 import {
   CommandPaletteContext,
   type CommandPaletteContextValue,
 } from '@/context/CommandPaletteContext';
 import { useToast } from '@/context/toast';
+import { useChapters, ChapterHelpers } from '@/hooks/useChapters';
 import { exportService } from '@/services/exportService';
 import { storageService } from '@/services/storageService';
 import type { Chapter as WritingChapter } from '@/types/writing';
@@ -31,10 +32,17 @@ interface State {
   selectedIndex: number;
   commands: Command[];
 }
-export function _useCommandPalette() {}
+
 export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { setView, claudeActions, currentProject, projects } = useAppContext();
   const { showToast } = useToast();
+
+  // Use new chapter hooks for v0.6.0 chapter system
+  const {
+    chapters,
+    createChapter,
+    loading: chaptersLoading,
+  } = useChapters(currentProject?.id ?? null);
 
   const [state, setState] = useState<State>({
     isOpen: false,
@@ -46,26 +54,23 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
   // --- commands ---
   const createNewChapter = useCallback(async () => {
     if (!currentProject) return showToast('No project selected', 'error');
+    if (chaptersLoading) return showToast('Loading chapters...', 'info');
     try {
-      const existing = await storageService.loadWritingChapters(currentProject.id);
-      const newChapter = {
-        id: generateId('chapter'),
-        title: `Chapter ${existing.length + 1}`,
-        order: existing.length,
-        scenes: [],
-        totalWordCount: 0,
-        status: CHAPTER_STATUS.DRAFT,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      await storageService.saveWritingChapters(currentProject.id, [...existing, newChapter]);
-      showToast(`Created ${newChapter.title}`, 'success');
+      const sortedChapters = ChapterHelpers.sortByOrder(chapters);
+      const nextIndex = sortedChapters.length;
+      const chapter = await createChapter(`Chapter ${nextIndex + 1}`, {
+        order: nextIndex,
+        status: 'in-progress',
+        content: '',
+        wordCount: 0,
+      });
+      showToast(`Created ${chapter.title}`, 'success');
       setView(View.Writing);
     } catch (e) {
       console.error(e);
       showToast('Failed to create chapter', 'error');
     }
-  }, [currentProject, showToast, setView]); // storageService is a stable import, not needed in deps
+  }, [currentProject, chaptersLoading, chapters, createChapter, showToast, setView]);
 
   const createNewScene = useCallback(async () => {
     if (!currentProject) {
@@ -186,6 +191,80 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     }
   }, [currentProject, showToast]); // storageService is stable
 
+  // New chapter system commands (v0.6.0)
+  const copyChaptersAsMarkdown = useCallback(async () => {
+    if (!currentProject) return showToast('No project selected', 'error');
+    if (chapters.length === 0) return showToast('No chapters to export', 'error');
+    try {
+      const sortedChapters = ChapterHelpers.sortByOrder(chapters);
+      const markdown = sortedChapters
+        .map((ch, idx) => {
+          const header = `# Chapter ${idx + 1}: ${ch.title}\n\n`;
+          const summary = ch.summary ? `> ${ch.summary}\n\n` : '';
+          const content = ch.content || '_[No content yet]_';
+          const meta = `\n\n---\n_${ch.wordCount.toLocaleString()} words • Status: ${ch.status}_\n\n`;
+          return header + summary + content + meta;
+        })
+        .join('\n');
+
+      const fullMarkdown = `# ${currentProject.name}\n\n${currentProject.description || ''}\n\n---\n\n${markdown}`;
+
+      await navigator.clipboard.writeText(fullMarkdown);
+      showToast(
+        `Copied ${chapters.length} chapters (${ChapterHelpers.getTotalWords(chapters).toLocaleString()} words) to clipboard`,
+        'success',
+        4000,
+      );
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to copy markdown', 'error');
+    }
+  }, [currentProject, chapters, showToast]);
+
+  const exportChaptersAsPDF = useCallback(async () => {
+    if (!currentProject) return showToast('No project selected', 'error');
+    if (chapters.length === 0) return showToast('No chapters to export', 'error');
+    try {
+      showToast('Preparing PDF export...', 'info', 2000);
+      const result = await exportService.exportPDF(currentProject.id, {
+        format: EXPORT_FORMAT.PDF,
+        includeMetadata: true,
+        includeSynopsis: true,
+        customTitle: currentProject.name,
+      });
+      if (result.success) {
+        showToast('PDF export ready - check print dialog', 'success', 4000);
+      } else {
+        showToast(result.error || 'PDF export failed', 'error');
+      }
+    } catch (error) {
+      console.error('PDF export error:', error);
+      showToast('Failed to export PDF', 'error');
+    }
+  }, [currentProject, chapters, showToast]);
+
+  const exportChaptersAsDOCX = useCallback(async () => {
+    if (!currentProject) return showToast('No project selected', 'error');
+    if (chapters.length === 0) return showToast('No chapters to export', 'error');
+    try {
+      showToast('Preparing DOCX export...', 'info', 2000);
+      const result = await exportService.exportDOCX(currentProject.id, {
+        format: EXPORT_FORMAT.DOCX,
+        includeMetadata: true,
+        includeSynopsis: true,
+        customTitle: currentProject.name,
+      });
+      if (result.success) {
+        showToast(`Downloaded ${result.filename}`, 'success', 4000);
+      } else {
+        showToast(result.error || 'DOCX export failed', 'error');
+      }
+    } catch (error) {
+      console.error('DOCX export error:', error);
+      showToast('Failed to export DOCX', 'error');
+    }
+  }, [currentProject, chapters, showToast]);
+
   // Build commands when deps change
   useEffect(() => {
     const cmds: Command[] = [
@@ -253,6 +332,33 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         category: 'writing',
         action: showWordCount,
         condition: () => !!currentProject,
+      },
+
+      // New chapter system commands
+      {
+        id: 'chapter-copy-markdown',
+        label: 'Copy Chapters as Markdown',
+        description: 'Copy all chapters to clipboard in Markdown format',
+        category: 'export',
+        shortcut: '⌘⇧C',
+        action: copyChaptersAsMarkdown,
+        condition: () => !!currentProject && chapters.length > 0,
+      },
+      {
+        id: 'chapter-export-pdf',
+        label: 'Export Chapters → PDF',
+        description: 'Export all chapters as a professionally formatted PDF document',
+        category: 'export',
+        action: exportChaptersAsPDF,
+        condition: () => !!currentProject && chapters.length > 0,
+      },
+      {
+        id: 'chapter-export-docx',
+        label: 'Export Chapters → DOCX',
+        description: 'Export all chapters as a Word-compatible RTF document',
+        category: 'export',
+        action: exportChaptersAsDOCX,
+        condition: () => !!currentProject && chapters.length > 0,
       },
 
       {
@@ -395,28 +501,44 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
           ),
       },
 
-      // Tour commands
+      // Tour & Onboarding commands
       {
-        id: 'tour-spotlight',
-        label: 'Tour: Replay Spotlight',
-        description: 'Replay the interactive Spotlight Tour',
+        id: 'tour-start-onboarding',
+        label: 'Start Onboarding Tour',
+        description: 'Begin the interactive Inkwell tour from the beginning',
         category: 'settings',
         shortcut: 'Shift+?',
-        action: () => window.InkwellTour?.start('spotlight', { source: 'command_palette' }),
+        action: () => {
+          window.InkwellTour?.start('spotlight', {
+            restart: true,
+            source: 'command_palette',
+          });
+          showToast?.('Starting Inkwell onboarding tour...', 'info');
+        },
+      },
+      {
+        id: 'tour-replay',
+        label: 'Replay Tour',
+        description: 'Replay the Spotlight Tour with your current progress',
+        category: 'settings',
+        action: () => {
+          window.InkwellTour?.start('spotlight', { source: 'command_palette' });
+          showToast?.('Continuing Inkwell tour...', 'info');
+        },
       },
       {
         id: 'tour-reset',
-        label: 'Tour: Reset Progress',
-        description: 'Reset all tour progress and preferences',
+        label: 'Reset Tour Progress',
+        description: 'Clear all tour progress and start fresh',
         category: 'settings',
         action: () => {
           if (
             confirm(
-              'Reset all tour progress? This will allow you to replay all tours from the beginning.',
+              'Reset all tour progress? This will clear your completed steps and allow you to experience the full tour again.',
             )
           ) {
             window.InkwellTour?.reset('spotlight');
-            showToast('Tour progress reset', 'success');
+            showToast?.('Tour progress reset successfully', 'success');
           }
         },
       },
@@ -428,6 +550,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     claudeActions,
     currentProject,
     projects,
+    chapters,
     showToast,
     backupProject,
     createNewChapter,
@@ -436,6 +559,9 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     quickExportMarkdown,
     quickExportPDF,
     showWordCount,
+    copyChaptersAsMarkdown,
+    exportChaptersAsPDF,
+    exportChaptersAsDOCX,
   ]);
 
   // ---- filtering ----

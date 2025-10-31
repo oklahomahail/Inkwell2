@@ -25,8 +25,42 @@ type SpotlightTooltipProps = {
   gap?: number; // space between anchor and tooltip
 };
 
-function clamp(num: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, num));
+/**
+ * Get viewport dimensions including scroll position
+ * Accounts for window scroll to ensure proper positioning
+ */
+function getViewportDimensions() {
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight,
+    scrollX: window.scrollX || window.pageXOffset,
+    scrollY: window.scrollY || window.pageYOffset,
+  };
+}
+
+/**
+ * Enhanced clamp with minimum visible threshold
+ * Ensures at least minVisiblePercent (default 80%) of the tooltip is visible
+ * If a position would result in less visibility, snap to edge instead
+ *
+ * @param value - The desired position
+ * @param min - Minimum allowed position
+ * @param max - Maximum allowed position
+ * @param minVisiblePercent - Minimum visible percentage (0-1)
+ */
+function clampWithMinVisible(value: number, min: number, max: number, minVisiblePercent = 0.8) {
+  const range = max - min;
+  const minVisible = range * minVisiblePercent;
+
+  // If value would result in less than minVisiblePercent visible, force to min or max
+  if (value < min + minVisible && value > min) {
+    return min;
+  }
+  if (value > max - minVisible && value < max) {
+    return max;
+  }
+
+  return Math.max(min, Math.min(max, value));
 }
 
 export default function SpotlightTooltip({
@@ -50,52 +84,122 @@ export default function SpotlightTooltip({
     const card = cardRef.current;
     if (!card) return;
 
-    const vpW = window.innerWidth;
-    const vpH = window.innerHeight;
+    const viewport = getViewportDimensions();
     const rect = card.getBoundingClientRect();
     const cardW = rect.width;
     const cardH = rect.height;
+
+    // Account for fixed/sticky headers or footers
+    const reservedTop = 60; // Typical header height
+    const reservedBottom = 0; // No footer typically
+    const margin = 12; // Minimum margin from viewport edge
+
+    const effectiveVpH = viewport.height - reservedTop - reservedBottom;
 
     const tryPlacement = (p: TooltipPlacement) => {
       switch (p) {
         case 'top':
           return {
-            left: clamp(anchorRect.x + anchorRect.width / 2 - cardW / 2, 8, vpW - cardW - 8),
-            top: clamp(anchorRect.y - gap - cardH, 8, vpH - cardH - 8),
+            left: clampWithMinVisible(
+              anchorRect.x + anchorRect.width / 2 - cardW / 2,
+              margin,
+              viewport.width - cardW - margin,
+            ),
+            top: clampWithMinVisible(
+              anchorRect.y - gap - cardH,
+              reservedTop + margin,
+              reservedTop + effectiveVpH - cardH - margin,
+            ),
           };
         case 'bottom':
           return {
-            left: clamp(anchorRect.x + anchorRect.width / 2 - cardW / 2, 8, vpW - cardW - 8),
-            top: clamp(anchorRect.y + anchorRect.height + gap, 8, vpH - cardH - 8),
+            left: clampWithMinVisible(
+              anchorRect.x + anchorRect.width / 2 - cardW / 2,
+              margin,
+              viewport.width - cardW - margin,
+            ),
+            top: clampWithMinVisible(
+              anchorRect.y + anchorRect.height + gap,
+              reservedTop + margin,
+              reservedTop + effectiveVpH - cardH - margin,
+            ),
           };
         case 'left':
           return {
-            left: clamp(anchorRect.x - gap - cardW, 8, vpW - cardW - 8),
-            top: clamp(anchorRect.y + anchorRect.height / 2 - cardH / 2, 8, vpH - cardH - 8),
+            left: clampWithMinVisible(
+              anchorRect.x - gap - cardW,
+              margin,
+              viewport.width - cardW - margin,
+            ),
+            top: clampWithMinVisible(
+              anchorRect.y + anchorRect.height / 2 - cardH / 2,
+              reservedTop + margin,
+              reservedTop + effectiveVpH - cardH - margin,
+            ),
           };
         case 'right':
           return {
-            left: clamp(anchorRect.x + anchorRect.width + gap, 8, vpW - cardW - 8),
-            top: clamp(anchorRect.y + anchorRect.height / 2 - cardH / 2, 8, vpH - cardH - 8),
+            left: clampWithMinVisible(
+              anchorRect.x + anchorRect.width + gap,
+              margin,
+              viewport.width - cardW - margin,
+            ),
+            top: clampWithMinVisible(
+              anchorRect.y + anchorRect.height / 2 - cardH / 2,
+              reservedTop + margin,
+              reservedTop + effectiveVpH - cardH - margin,
+            ),
           };
         default:
           // Auto: prefer bottom, then top, right, left
           const bottomTop = {
             bottom: {
-              left: clamp(anchorRect.x + anchorRect.width / 2 - cardW / 2, 8, vpW - cardW - 8),
-              top: clamp(anchorRect.y + anchorRect.height + gap, 8, vpH - cardH - 8),
+              left: clampWithMinVisible(
+                anchorRect.x + anchorRect.width / 2 - cardW / 2,
+                margin,
+                viewport.width - cardW - margin,
+              ),
+              top: clampWithMinVisible(
+                anchorRect.y + anchorRect.height + gap,
+                reservedTop + margin,
+                reservedTop + effectiveVpH - cardH - margin,
+              ),
             },
             top: {
-              left: clamp(anchorRect.x + anchorRect.width / 2 - cardW / 2, 8, vpW - cardW - 8),
-              top: clamp(anchorRect.y - gap - cardH, 8, vpH - cardH - 8),
+              left: clampWithMinVisible(
+                anchorRect.x + anchorRect.width / 2 - cardW / 2,
+                margin,
+                viewport.width - cardW - margin,
+              ),
+              top: clampWithMinVisible(
+                anchorRect.y - gap - cardH,
+                reservedTop + margin,
+                reservedTop + effectiveVpH - cardH - margin,
+              ),
             },
             right: {
-              left: clamp(anchorRect.x + anchorRect.width + gap, 8, vpW - cardW - 8),
-              top: clamp(anchorRect.y + anchorRect.height / 2 - cardH / 2, 8, vpH - cardH - 8),
+              left: clampWithMinVisible(
+                anchorRect.x + anchorRect.width + gap,
+                margin,
+                viewport.width - cardW - margin,
+              ),
+              top: clampWithMinVisible(
+                anchorRect.y + anchorRect.height / 2 - cardH / 2,
+                reservedTop + margin,
+                reservedTop + effectiveVpH - cardH - margin,
+              ),
             },
             left: {
-              left: clamp(anchorRect.x - gap - cardW, 8, vpW - cardW - 8),
-              top: clamp(anchorRect.y + anchorRect.height / 2 - cardH / 2, 8, vpH - cardH - 8),
+              left: clampWithMinVisible(
+                anchorRect.x - gap - cardW,
+                margin,
+                viewport.width - cardW - margin,
+              ),
+              top: clampWithMinVisible(
+                anchorRect.y + anchorRect.height / 2 - cardH / 2,
+                reservedTop + margin,
+                reservedTop + effectiveVpH - cardH - margin,
+              ),
             },
           };
           // Choose the first position that keeps most of the card in view.
@@ -111,7 +215,14 @@ export default function SpotlightTooltip({
           ];
           let bestScore = -Infinity;
           for (const c of candidates) {
-            const score = scorePlacement(c[1], cardW, cardH, vpW, vpH);
+            const score = scorePlacement(
+              c[1],
+              cardW,
+              cardH,
+              viewport.width,
+              effectiveVpH,
+              reservedTop,
+            );
             if (score > bestScore) {
               best = c;
               bestScore = score;
@@ -172,7 +283,7 @@ export default function SpotlightTooltip({
       aria-labelledby={stepId}
       aria-describedby={describedById}
       onKeyDown={handleKeyDown}
-      className="fixed z-[9999] max-w-sm rounded-2xl border bg-white text-gray-900 shadow-xl outline-none dark:bg-neutral-900 dark:text-neutral-50 dark:border-neutral-700 pointer-events-auto"
+      className="fixed z-tour-tooltip max-w-sm max-h-[calc(100vh-120px)] overflow-auto rounded-2xl border bg-white text-gray-900 shadow-xl outline-none dark:bg-neutral-900 dark:text-neutral-50 dark:border-neutral-700 pointer-events-auto"
       style={{ left: coords.left, top: coords.top }}
     >
       <div className="p-4">
@@ -247,20 +358,41 @@ export default function SpotlightTooltip({
   );
 }
 
-// Simple score that rewards on-screen area and penalizes overflow.
+/**
+ * Score placement options based on visible area and overflow
+ * Rewards on-screen area and penalizes overflow
+ * Now accounts for reserved header space at top of viewport
+ *
+ * @param pos - The position to score {left, top}
+ * @param w - Width of the tooltip
+ * @param h - Height of the tooltip
+ * @param vpW - Viewport width
+ * @param vpH - Effective viewport height (after reserved space)
+ * @param reservedTop - Reserved space at top (e.g., header height)
+ */
 function scorePlacement(
   pos: { left: number; top: number },
   w: number,
   h: number,
   vpW: number,
   vpH: number,
+  reservedTop = 0,
 ) {
   const right = pos.left + w;
   const bottom = pos.top + h;
+
+  // Calculate visible width (left-right bounds)
   const visW = Math.max(0, Math.min(right, vpW) - Math.max(pos.left, 0));
-  const visH = Math.max(0, Math.min(bottom, vpH) - Math.max(pos.top, 0));
+
+  // Calculate visible height accounting for reserved top space
+  const effectiveTop = Math.max(pos.top, reservedTop);
+  const effectiveBottom = Math.min(bottom, reservedTop + vpH);
+  const visH = Math.max(0, effectiveBottom - effectiveTop);
+
   const visibleArea = visW * visH;
   const overflow = w * h - visibleArea;
+
+  // Penalize overflow more heavily (2x) to prefer fully visible positions
   return visibleArea - overflow * 2;
 }
 

@@ -12,7 +12,7 @@ import {
   createCharacter as createCanonicalCharacter,
   validateCharacter,
 } from '@/adapters';
-import type { Character } from '@/types';
+import type { Character } from '@/types/project';
 
 // Lazy imports
 let storageService: any = null;
@@ -21,7 +21,7 @@ let supabaseClient: any = null;
 async function getStorageService() {
   if (!storageService) {
     const module = await import('@/services/storageService');
-    storageService = module.default || module.storageService;
+    storageService = module.EnhancedStorageService;
   }
   return storageService;
 }
@@ -29,7 +29,7 @@ async function getStorageService() {
 async function getSupabase() {
   if (!supabaseClient) {
     try {
-      const module = await import('@/lib/supabase');
+      const module = await import('@/lib/supabaseClient');
       supabaseClient = module.supabase;
     } catch (error) {
       console.warn('Supabase not available:', error);
@@ -82,19 +82,16 @@ export async function getCharacters(projectId: string): Promise<Character[]> {
  */
 export async function getCharacter(
   projectId: string,
-  characterId: string
+  characterId: string,
 ): Promise<Character | null> {
   const characters = await getCharacters(projectId);
-  return characters.find(c => c.id === characterId) || null;
+  return characters.find((c) => c.id === characterId) || null;
 }
 
 /**
  * Save a character (create or update)
  */
-export async function saveCharacter(
-  projectId: string,
-  character: Character
-): Promise<Character> {
+export async function saveCharacter(projectId: string, character: Character): Promise<Character> {
   // Validate character
   if (!validateCharacter(character)) {
     throw new Error('Invalid character: missing required fields');
@@ -152,7 +149,7 @@ export async function createCharacter(
   projectId: string,
   name: string,
   role: Character['role'] = 'supporting',
-  overrides: Partial<Character> = {}
+  overrides: Partial<Character> = {},
 ): Promise<Character> {
   const character = createCanonicalCharacter(name, role, overrides);
   return saveCharacter(projectId, character);
@@ -161,10 +158,7 @@ export async function createCharacter(
 /**
  * Delete a character
  */
-export async function deleteCharacter(
-  projectId: string,
-  characterId: string
-): Promise<void> {
+export async function deleteCharacter(projectId: string, characterId: string): Promise<void> {
   // Try Supabase first
   const supabase = await getSupabase();
   if (supabase) {
@@ -199,7 +193,7 @@ export async function deleteCharacter(
 export async function updateCharacterRelationships(
   projectId: string,
   characterId: string,
-  relationships: Character['relationships']
+  relationships: Character['relationships'],
 ): Promise<void> {
   const character = await getCharacter(projectId, characterId);
   if (!character) {
@@ -218,7 +212,7 @@ export async function updateCharacterRelationships(
 export async function addCharacterToChapter(
   projectId: string,
   characterId: string,
-  chapterId: string
+  chapterId: string,
 ): Promise<void> {
   const character = await getCharacter(projectId, characterId);
   if (!character) return;
@@ -236,12 +230,14 @@ export async function addCharacterToChapter(
 export async function removeCharacterFromChapter(
   projectId: string,
   characterId: string,
-  chapterId: string
+  chapterId: string,
 ): Promise<void> {
   const character = await getCharacter(projectId, characterId);
   if (!character) return;
 
-  character.appearsInChapters = character.appearsInChapters.filter(id => id !== chapterId);
+  character.appearsInChapters = character.appearsInChapters.filter(
+    (id: string) => id !== chapterId,
+  );
   character.updatedAt = Date.now();
 
   await saveCharacter(projectId, character);
@@ -252,26 +248,24 @@ export async function removeCharacterFromChapter(
  */
 export async function getCharactersInChapter(
   projectId: string,
-  chapterId: string
+  chapterId: string,
 ): Promise<Character[]> {
   const characters = await getCharacters(projectId);
-  return characters.filter(c => c.appearsInChapters.includes(chapterId));
+  return characters.filter((c) => c.appearsInChapters.includes(chapterId));
 }
 
 /**
  * Search characters by name or role
  */
-export async function searchCharacters(
-  projectId: string,
-  query: string
-): Promise<Character[]> {
+export async function searchCharacters(projectId: string, query: string): Promise<Character[]> {
   const characters = await getCharacters(projectId);
   const lowerQuery = query.toLowerCase();
 
-  return characters.filter(c =>
-    c.name.toLowerCase().includes(lowerQuery) ||
-    c.role.toLowerCase().includes(lowerQuery) ||
-    c.description.toLowerCase().includes(lowerQuery)
+  return characters.filter(
+    (c) =>
+      c.name.toLowerCase().includes(lowerQuery) ||
+      c.role.toLowerCase().includes(lowerQuery) ||
+      c.description.toLowerCase().includes(lowerQuery),
   );
 }
 

@@ -19,7 +19,7 @@ import {
   Save,
   Download,
 } from 'lucide-react';
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 
 import ClaudeToolbar from '@/components/Writing/ClaudeToolbar';
 import ExportDialog from '@/components/Writing/ExportDialog';
@@ -145,7 +145,16 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
   const initializeChapter = (): Chapter => ({
     id: 'chapter-1',
     title: currentProject?.name || 'Chapter 1',
+    content: draftText || '<p>Start writing your story here...</p>',
+    wordCount: 0,
+    status: 'planned',
     order: 0,
+    charactersInChapter: [],
+    plotPointsResolved: [],
+    notes: '',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    // Legacy compatibility
     scenes: [
       {
         id: 'scene-1',
@@ -161,13 +170,11 @@ const WritingPanel: React.FC<WritingPanelProps> = ({
       },
     ],
     totalWordCount: 0,
-    status: 'draft' as any,
-    createdAt: new Date(),
-    updatedAt: new Date(),
   });
 
   const chapter = currentChapter || initializeChapter();
-  const scenes: Scene[] = chapter.scenes; // Fixed: chapter is never undefined due to fallback above
+  // Wrap scenes in useMemo to avoid changing on every render
+  const scenes: Scene[] = useMemo(() => chapter.scenes ?? [], [chapter.scenes]);
   const currentScene = scenes.find((s) => s.id === currentSceneId);
   const currentSceneIndex = scenes.findIndex((s) => s.id === currentSceneId);
 

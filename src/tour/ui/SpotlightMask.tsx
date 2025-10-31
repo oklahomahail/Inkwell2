@@ -24,7 +24,7 @@ export default function SpotlightMask({
   // The mask uses even-odd fill rule. First path is the full-screen rect, second is the rounded "hole".
   return (
     <div
-      className="fixed inset-0 z-[9998] pointer-events-none"
+      className="fixed inset-0 z-tour-spotlight pointer-events-none"
       aria-hidden="true"
       onClick={onClickBackdrop}
     >

@@ -17,7 +17,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
 import { storageService } from '@/services/storageService';
-import { Chapter, Scene, SceneStatus, ChapterStatus } from '@/types/writing';
+import { ChapterStatus } from '@/types/project';
+import { Chapter, Scene, SceneStatus } from '@/types/writing';
 import { generateId } from '@/utils/id';
 
 interface SceneNavigationPanelProps {
@@ -51,7 +52,7 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
       | { type: 'scene'; data: Scene; chapter: ChapterWithExpanded }
     > = [{ type: 'chapter' as const, data: chapter }];
 
-    if (chapter.isExpanded) {
+    if (chapter.isExpanded && chapter.scenes) {
       chapter.scenes.forEach((scene) => {
         items.push({ type: 'scene' as const, data: scene, chapter });
       });
@@ -87,7 +88,8 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
           {chapter.title}
         </h4>
         <p className="text-xs text-gray-500">
-          {chapter.scenes.length} scenes • {chapter.totalWordCount.toLocaleString()} words
+          {chapter.scenes?.length ?? 0} scenes •{' '}
+          {(chapter.totalWordCount ?? chapter.wordCount ?? 0).toLocaleString()} words
         </p>
       </div>
       <button
@@ -200,10 +202,15 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
 
   const getChapterStatusColor = (status: ChapterStatus) => {
     switch (status) {
-      case 'final':
+      case 'completed':
         return 'text-green-600';
-      case 'draft':
+      case 'first-draft':
+      case 'planned':
         return 'text-blue-600';
+      case 'in-progress':
+        return 'text-yellow-600';
+      case 'revised':
+        return 'text-purple-600';
       default:
         return 'text-gray-600';
     }
@@ -234,11 +241,11 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
 
       const newScene: Scene = {
         id: generateId('scene'),
-        title: `Scene ${chapter.scenes.length + 1}`,
+        title: `Scene ${(chapter.scenes?.length ?? 0) + 1}`,
         content: '',
         wordCount: 0,
         status: 'draft' as SceneStatus,
-        order: chapter.scenes.length,
+        order: chapter.scenes?.length ?? 0,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -272,12 +279,18 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
       const newChapter: Chapter = {
         id: generateId('chapter'),
         title: `Chapter ${chapters.length + 1}`,
+        content: '',
+        wordCount: 0,
+        status: 'planned' as ChapterStatus,
         order: chapters.length,
+        charactersInChapter: [],
+        plotPointsResolved: [],
+        notes: '',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        // Legacy compatibility
         scenes: [],
         totalWordCount: 0,
-        status: 'draft' as ChapterStatus,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
       const updatedChapters = [
@@ -311,7 +324,7 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
             ...scene,
             id: generateId('scene'),
             title: `${scene.title} (Copy)`,
-            order: chapter.scenes.length,
+            order: chapter.scenes?.length ?? 0,
             createdAt: new Date(),
             updatedAt: new Date(),
           };
@@ -438,12 +451,14 @@ const SceneNavigationPanel: React.FC<SceneNavigationPanelProps> = ({
           </div>
           <div className="flex justify-between">
             <span>Total Scenes:</span>
-            <span>{chapters.reduce((total, ch) => total + ch.scenes.length, 0)}</span>
+            <span>{chapters.reduce((total, ch) => total + (ch.scenes?.length ?? 0), 0)}</span>
           </div>
           <div className="flex justify-between">
             <span>Total Words:</span>
             <span>
-              {chapters.reduce((total, ch) => total + ch.totalWordCount, 0).toLocaleString()}
+              {chapters
+                .reduce((total, ch) => total + (ch.totalWordCount ?? ch.wordCount ?? 0), 0)
+                .toLocaleString()}
             </span>
           </div>
         </div>

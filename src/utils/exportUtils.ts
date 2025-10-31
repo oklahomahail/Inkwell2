@@ -1,6 +1,6 @@
 // src/utils/exportUtils.ts - NEW FILE
 import { type Scene, type Chapter } from '@/types/writing';
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 export type ExportFormat = 'markdown' | 'txt' | 'docx' | 'html';
 
@@ -143,8 +143,8 @@ export function _exportChapter(
   // Chapter header
   if (includeMetadata) {
     const chapterMeta = [
-      `Total Words: ${chapter.totalWordCount}`,
-      `Scenes: ${chapter.scenes.length}`,
+      `Total Words: ${chapter.totalWordCount ?? chapter.wordCount ?? 0}`,
+      `Scenes: ${chapter.scenes?.length ?? 0}`,
       `Updated: ${(chapter.updatedAt instanceof Date ? chapter.updatedAt : new Date(chapter.updatedAt as any)).toLocaleDateString()}`,
     ].join(' • ');
 
@@ -192,7 +192,7 @@ export function _exportChapter(
   }
 
   // Add scenes
-  chapter.scenes.forEach((scene, _index) => {
+  chapter.scenes?.forEach((scene, _index) => {
     if (separateScenes && _index > 0) {
       switch (format) {
         case 'markdown':

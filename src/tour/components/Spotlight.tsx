@@ -76,7 +76,7 @@ export function Spotlight({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center"
+      className="fixed inset-0 z-tour-backdrop flex items-center justify-center"
       onClick={onClose}
       role="dialog"
       aria-modal="true"

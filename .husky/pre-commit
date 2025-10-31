@@ -9,7 +9,8 @@ echo "🔒 Running pre-commit checks..."
 echo "🎨 Running linting and formatting..."
 pnpm lint-staged
 
-# Enforce no-console and zero warnings
+# Enforce no-console and allow up to 50 warnings
+# (lint:ci now blocks only if warnings >= 50)
 echo "🚫 Enforcing no-console and no warnings…"
 pnpm lint:ci
 

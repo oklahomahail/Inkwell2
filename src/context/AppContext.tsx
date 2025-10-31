@@ -8,8 +8,8 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import type { Project } from '@/types/project';
-import devLog from "@/utils/devLog";
+import type { Project, Chapter } from '@/types/project';
+import devLog from '@/utils/devLog';
 
 import { useClaude } from './ClaudeProvider';
 
@@ -167,6 +167,22 @@ export interface AppContextValue {
     generatePlotIdeas: (_prompt: string) => Promise<string>;
     analyzeCharacter: (_character: string) => Promise<string>;
     brainstormIdeas: (_topic: string) => Promise<string>;
+  };
+
+  // Chapter management (v0.6.0+)
+  chapters: {
+    data: Chapter[];
+    loading: boolean;
+    error: string | null;
+    count: number;
+    totalWords: number;
+    refresh: () => Promise<void>;
+    getById: (id: string) => Promise<Chapter | null>;
+    save: (chapter: Chapter) => Promise<void>;
+    create: (title: string, options?: Partial<Chapter>) => Promise<Chapter>;
+    updateContent: (chapterId: string, content: string, wordCount?: number) => Promise<void>;
+    delete: (chapterId: string) => Promise<void>;
+    reorder: (chapterIds: string[]) => Promise<void>;
   };
 }
 
@@ -345,6 +361,26 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         const prompt = `Brainstorm ideas about: ${_topic}`;
         return claudeContext.sendMessage ? claudeContext.sendMessage(prompt) : Promise.resolve('');
       },
+    },
+
+    // Chapter management (v0.6.0+)
+    // Note: Chapters are managed via useChapters() hook in components
+    // Context only provides project selection; hooks handle chapter data
+    chapters: {
+      // Placeholder - use useChapters(currentProjectId) in components instead
+      // This keeps context lightweight and avoids circular dependencies
+      data: [],
+      loading: false,
+      error: null,
+      count: 0,
+      totalWords: 0,
+      refresh: async () => {},
+      getById: async () => null,
+      save: async () => {},
+      create: async () => ({}) as Chapter,
+      updateContent: async () => {},
+      delete: async () => {},
+      reorder: async () => {},
     },
   };
 

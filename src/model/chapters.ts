@@ -17,7 +17,7 @@ import {
   canonicalToLegacyChapter,
   isLegacyChapterFormat,
 } from '@/adapters';
-import type { Chapter } from '@/types';
+import type { Chapter } from '@/types/project';
 import { FEATURE_FLAGS } from '@/utils/featureFlags.config';
 
 // Lazy imports to avoid circular dependencies
@@ -35,7 +35,7 @@ async function getChaptersService() {
 async function getStorageService() {
   if (!storageService) {
     const module = await import('@/services/storageService');
-    storageService = module.default || module.storageService;
+    storageService = module.EnhancedStorageService;
   }
   return storageService;
 }
@@ -44,7 +44,7 @@ async function getStorageService() {
  * Feature flag check - centralized for testing
  */
 export function isChapterModelEnabled(): boolean {
-  return FEATURE_FLAGS.CHAPTER_MODEL.defaultValue;
+  return FEATURE_FLAGS.CHAPTER_MODEL?.defaultValue ?? false;
 }
 
 /**
@@ -81,7 +81,7 @@ export async function getChapters(projectId: string): Promise<Chapter[]> {
   } else {
     // Legacy model: Use storageService (localStorage) and convert
     const storage = await getStorageService();
-    const legacyChapters = await storage.getChapters?.(projectId) || [];
+    const legacyChapters = (await storage.getChapters?.(projectId)) || [];
 
     // Convert legacy scene-based chapters to canonical format
     if (legacyChapters.length > 0 && isLegacyChapterFormat(legacyChapters[0])) {
@@ -193,7 +193,7 @@ export async function saveChapter(projectId: string, chapter: Chapter): Promise<
 export async function createChapter(
   projectId: string,
   title: string,
-  options: Partial<Chapter> = {}
+  options: Partial<Chapter> = {},
 ): Promise<Chapter> {
   const now = Date.now();
   const id = options.id || `chapter-${now}-${Math.random().toString(36).substr(2, 9)}`;
@@ -224,7 +224,7 @@ export async function updateChapterContent(
   projectId: string,
   chapterId: string,
   content: string,
-  wordCount?: number
+  wordCount?: number,
 ): Promise<void> {
   if (isChapterModelEnabled()) {
     // New model: Direct content update
@@ -272,10 +272,7 @@ export async function deleteChapter(projectId: string, chapterId: string): Promi
 /**
  * Reorder chapters
  */
-export async function reorderChapters(
-  projectId: string,
-  chapterIds: string[]
-): Promise<void> {
+export async function reorderChapters(projectId: string, chapterIds: string[]): Promise<void> {
   if (isChapterModelEnabled()) {
     // New model
     const service = await getChaptersService();
@@ -283,13 +280,15 @@ export async function reorderChapters(
   } else {
     // Legacy model: Load all, update order, save
     const chapters = await getChapters(projectId);
-    const reordered = chapterIds.map((id, index) => {
-      const chapter = chapters.find(c => c.id === id);
-      if (chapter) {
-        chapter.order = index;
-      }
-      return chapter;
-    }).filter(Boolean) as Chapter[];
+    const reordered = chapterIds
+      .map((id, index) => {
+        const chapter = chapters.find((c) => c.id === id);
+        if (chapter) {
+          chapter.order = index;
+        }
+        return chapter;
+      })
+      .filter(Boolean) as Chapter[];
 
     for (const chapter of reordered) {
       await saveChapter(projectId, chapter);
@@ -321,11 +320,11 @@ export async function getTotalWordCount(projectId: string): Promise<number> {
     // New model: Sum from metas (no need to load content)
     const service = await getChaptersService();
     const metas = await service.list(projectId);
-    return metas.reduce((sum, meta) => sum + meta.wordCount, 0);
+    return metas.reduce((sum: number, meta: any) => sum + meta.wordCount, 0);
   } else {
     // Legacy model: Load chapters and sum
     const chapters = await getChapters(projectId);
-    return chapters.reduce((sum, chapter) => sum + chapter.wordCount, 0);
+    return chapters.reduce((sum: number, chapter: Chapter) => sum + chapter.wordCount, 0);
   }
 }
 
@@ -338,9 +337,9 @@ export async function getTotalWordCount(projectId: string): Promise<number> {
  */
 function mapChapterStatus(status: 'draft' | 'revising' | 'final'): Chapter['status'] {
   const statusMap: Record<string, Chapter['status']> = {
-    'draft': 'first-draft',
-    'revising': 'revised',
-    'final': 'completed',
+    draft: 'first-draft',
+    revising: 'revised',
+    final: 'completed',
   };
   return statusMap[status] || 'in-progress';
 }
@@ -350,11 +349,11 @@ function mapChapterStatus(status: 'draft' | 'revising' | 'final'): Chapter['stat
  */
 function mapToChapterMetaStatus(status: Chapter['status']): 'draft' | 'revising' | 'final' {
   const statusMap: Record<Chapter['status'], 'draft' | 'revising' | 'final'> = {
-    'planned': 'draft',
+    planned: 'draft',
     'in-progress': 'draft',
     'first-draft': 'draft',
-    'revised': 'revising',
-    'completed': 'final',
+    revised: 'revising',
+    completed: 'final',
   };
   return statusMap[status] || 'draft';
 }
@@ -367,7 +366,7 @@ function countWords(content: string): number {
     .replace(/<[^>]*>/g, '') // Remove HTML tags
     .trim()
     .split(/\s+/)
-    .filter(word => word.length > 0).length;
+    .filter((word) => word.length > 0).length;
 }
 
 /**
