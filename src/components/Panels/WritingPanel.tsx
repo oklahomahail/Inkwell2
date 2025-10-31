@@ -1,4 +1,15 @@
-// src/components/Panels/WritingPanel.tsx - Fixed version
+/**
+ * @deprecated This component uses the legacy scene-based writing model.
+ * Use ChapterWritingPanel instead, which uses the new chapter-only model.
+ * This file will be removed in v0.7.0 after full migration.
+ *
+ * Migration guide:
+ * - Replace <WritingPanel /> with <ChapterWritingPanel projectId={projectId} />
+ * - Scene-based chapters will be automatically converted to chapter-only format
+ * - See src/adapters/sceneToChapter.ts for data migration details
+ */
+
+// src/components/Panels/WritingPanel.tsx - Fixed version (DEPRECATED)
 import {
   PlusCircle,
   BookOpen,

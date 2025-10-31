@@ -4,8 +4,8 @@
  * - Strong where it matters (ids, nesting), loose for optional props
  */
 
-export type SceneStatus = 'draft' | 'in_progress' | 'final' | 'archived' | (string & {});
-export type ChapterStatus = 'draft' | 'revising' | 'final' | 'archived' | (string & {});
+// Re-export canonical Chapter and Character types from project.ts
+export type { Chapter, Character } from './project';
 
 /** Export formats used by ExportDialog and downstream utilities */
 export type ExportFormat = 'markdown' | 'html' | 'pdf' | 'docx' | (string & {});
@@ -29,42 +29,30 @@ export interface BaseEntity {
   updatedAt?: Date | number | string;
 }
 
-/** Character (needed by timelineConflictService and tests) */
-export interface Character extends BaseEntity {
-  name: string;
-  description?: string;
-  traits?: Record<string, unknown>;
-  tags?: string[];
-  [key: string]: any;
-}
+//
+// ⚠️ DEPRECATED: Scene-based architecture
+// Scenes have been removed in favor of chapter-only content
+// Keep these types temporarily for backwards compatibility during migration
+//
 
-/** Scene is the atomic writing unit */
+/** @deprecated Use Chapter.content instead of nested scenes */
+export type SceneStatus = 'draft' | 'in_progress' | 'final' | 'archived' | (string & {});
+
+/** @deprecated Scene-based writing is deprecated - use chapters directly */
 export interface Scene extends BaseEntity {
   title: string;
   content?: string;
-  /** numeric order inside its chapter (1-based or 0-based depending on caller) */
   order?: number;
   status?: SceneStatus;
-  /** optional metadata used around the app */
   summary?: string;
   pov?: string;
   location?: string;
   characterIds?: string[];
   tags?: string[];
-  eventType?: string; // e.g., 'plot', 'character', etc.
+  eventType?: string;
   importance?: 'minor' | 'major' | (string & {});
-  [key: string]: any; // keep permissive for legacy usage
-}
-
-/** Chapter groups scenes */
-export interface Chapter extends BaseEntity {
-  title: string;
-  scenes: Scene[];
-  order?: number;
-  status?: ChapterStatus;
-  summary?: string;
-  notes?: string;
   [key: string]: any;
+  // Kept for migration period only
 }
 
 // ========================================

@@ -8,6 +8,7 @@ import React, {
   type ReactNode,
 } from 'react';
 
+import type { Project } from '@/types/project';
 import devLog from "@/utils/devLog";
 
 import { useClaude } from './ClaudeProvider';
@@ -26,17 +27,8 @@ export enum View {
   Analytics = 'Analytics', // keeping as-is to avoid breaking callers
 }
 
-export interface Project {
-  chapters: any;
-  characters: never[];
-  beatSheet: never[];
-  id: string;
-  name: string;
-  description: string;
-  content?: string;
-  createdAt: number;
-  updatedAt: number;
-}
+// Re-export Project type for backward compatibility
+export type { Project } from '@/types/project';
 
 export type Theme = 'light' | 'dark';
 

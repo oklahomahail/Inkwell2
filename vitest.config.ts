@@ -23,6 +23,8 @@ export default defineConfig({
       'src/tour/**/*.{test,spec}.ts',
       'src/features/**/*.{test,spec}.tsx',
       'src/context/**/*.{test,spec}.tsx',
+      'src/adapters/**/*.{test,spec}.ts', // v0.6.0 adapter tests
+      'src/model/**/*.{test,spec}.ts', // v0.6.0 model gateway tests
     ],
     coverage: {
       enabled: true,

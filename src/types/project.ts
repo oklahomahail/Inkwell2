@@ -104,7 +104,6 @@ export interface WorldBuildingNote {
 }
 
 export interface Chapter {
-  scenes: any;
   id: string;
   title: string;
   summary?: string;
@@ -144,18 +143,38 @@ export interface WritingSession {
 }
 
 // ----------------------------------------
-// Enhanced Project
+// Project Types
 // ----------------------------------------
 
-export interface EnhancedProject {
-  // Core project info
+/**
+ * Base Project - minimal fields for UI state management
+ * Used by AppContext for lightweight project list
+ */
+export interface Project {
   id: string;
   name: string;
   description: string;
+  createdAt: number;
+  updatedAt: number;
+  // Optional fields
   genre?: string;
-  targetAudience?: string;
   targetWordCount?: number;
-  currentWordCount: number;
+  currentWordCount?: number;
+  currentChapterId?: string;
+  // Legacy/compatibility fields (for migration period)
+  content?: string; // Legacy monolithic content field (deprecated - use chapters)
+  chapters?: Chapter[]; // Can be present but use EnhancedProject for full typing
+  characters?: Character[]; // Can be present but use EnhancedProject for full typing
+  beatSheet?: any[]; // Legacy beat sheet (deprecated)
+}
+
+/**
+ * Enhanced Project - full project with all story elements
+ * Used by storage services and full editing features
+ */
+export interface EnhancedProject extends Project {
+  // Additional metadata (extends base Project fields)
+  targetAudience?: string;
 
   // Story elements
   characters: Character[];
@@ -163,17 +182,11 @@ export interface EnhancedProject {
   worldBuilding: WorldBuildingNote[];
   chapters: Chapter[];
 
-  // Writing context
-  currentChapterId?: string; // chapter id
   /**
    * Last ~1000 words for assistant/contextual tools.
    * Keep this trimmed in code; type is just string.
    */
   recentContent: string;
-
-  // Metadata
-  createdAt: number; // epoch ms
-  updatedAt: number; // epoch ms
 
   // Writing analytics
   sessions: WritingSession[];

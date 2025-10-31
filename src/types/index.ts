@@ -1,13 +1,75 @@
 /**
  * Shared type definitions for the Inkwell application
+ *
+ * ⚠️ CANONICAL TYPE EXPORTS (v0.6.0+)
+ * ====================================
+ * This file exports the canonical types that should be used throughout the app.
+ * DO NOT import from types/project.ts, types/writing.ts, or types/persistence.ts directly.
+ * Always import from types/index.ts to ensure type consistency.
  */
+
+// ============================================
+// CANONICAL PROJECT TYPES
+// ============================================
+
+export type {
+  Project,
+  EnhancedProject,
+  Chapter,
+  Character,
+  CharacterRole,
+  CharacterRelationship,
+  PlotNote,
+  PlotNoteType,
+  NotePriority,
+  NoteStatus,
+  WorldBuildingNote,
+  WorldBuildingType,
+  ChapterStatus,
+  RelationshipType,
+  WritingSession,
+  ContextLength,
+} from './project';
+
+// ============================================
+// CHAPTER MANAGEMENT TYPES
+// ============================================
+
+export type {
+  ChapterMeta,
+  ChapterDoc,
+  FullChapter,
+  CreateChapterInput,
+  UpdateChapterInput,
+} from './writing';
+
+// ============================================
+// DEPRECATED TYPES (v0.6.0 Migration)
+// ============================================
+
+/**
+ * @deprecated Scene-based writing is deprecated.
+ * Use Chapter.content instead of nested scenes.
+ * Will be removed in v0.7.0
+ */
+export type { Scene, SceneStatus } from './writing';
+
+/**
+ * @deprecated Use EnhancedProject instead
+ * Will be removed in v0.7.0
+ */
+export type { WritingProject } from './writing';
+
+// ============================================
+// SHARED TYPES
+// ============================================
 
 // Theme types
 export type Theme = 'light' | 'dark';
 
 // Export types
 // Import ExportFormat enum from writing types
-export type { ExportFormat } from './writing';
+export type { ExportFormat, ExportRequest } from './writing';
 export type LegacyExportFormat = 'PDF' | 'DOCX' | 'EPUB';
 
 export type ExportJobStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';

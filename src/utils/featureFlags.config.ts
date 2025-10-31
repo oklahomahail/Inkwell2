@@ -153,4 +153,16 @@ export const FEATURE_FLAGS: FeatureFlagConfig = {
     defaultValue: true,
     category: 'core',
   },
+
+  // === v0.6.0 Data Model Consolidation ===
+
+  // Chapter-Based Model
+  CHAPTER_MODEL: {
+    key: 'chapterModel',
+    name: 'Chapter-Based Data Model',
+    description: 'New chapter-based architecture (replaces legacy scene-based model)',
+    defaultValue: import.meta.env.VITE_ENABLE_CHAPTER_MODEL === 'true',
+    category: 'experimental',
+    requiresReload: true,
+  },
 };
