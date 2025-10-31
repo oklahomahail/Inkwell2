@@ -8,6 +8,7 @@ import {
   type CommandPaletteContextValue,
 } from '@/context/CommandPaletteContext';
 import { useToast } from '@/context/toast';
+import { useChapters, ChapterHelpers } from '@/hooks/useChapters';
 import { exportService } from '@/services/exportService';
 import { storageService } from '@/services/storageService';
 import type { Chapter as WritingChapter } from '@/types/writing';
@@ -36,6 +37,13 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
   const { setView, claudeActions, currentProject, projects } = useAppContext();
   const { showToast } = useToast();
 
+  // Use new chapter hooks for v0.6.0 chapter system
+  const {
+    chapters,
+    createChapter,
+    loading: chaptersLoading,
+  } = useChapters(currentProject?.id ?? null);
+
   const [state, setState] = useState<State>({
     isOpen: false,
     query: '',
@@ -46,32 +54,23 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
   // --- commands ---
   const createNewChapter = useCallback(async () => {
     if (!currentProject) return showToast('No project selected', 'error');
+    if (chaptersLoading) return showToast('Loading chapters...', 'info');
     try {
-      const existing = await storageService.loadWritingChapters(currentProject.id);
-      const newChapter: WritingChapter = {
-        id: generateId('chapter'),
-        title: `Chapter ${existing.length + 1}`,
+      const sortedChapters = ChapterHelpers.sortByOrder(chapters);
+      const nextIndex = sortedChapters.length;
+      const chapter = await createChapter(`Chapter ${nextIndex + 1}`, {
+        order: nextIndex,
+        status: 'in-progress',
         content: '',
         wordCount: 0,
-        status: 'planned',
-        order: existing.length,
-        charactersInChapter: [],
-        plotPointsResolved: [],
-        notes: '',
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        // Legacy compatibility
-        scenes: [],
-        totalWordCount: 0,
-      };
-      await storageService.saveWritingChapters(currentProject.id, [...existing, newChapter] as any);
-      showToast(`Created ${newChapter.title}`, 'success');
+      });
+      showToast(`Created ${chapter.title}`, 'success');
       setView(View.Writing);
     } catch (e) {
       console.error(e);
       showToast('Failed to create chapter', 'error');
     }
-  }, [currentProject, showToast, setView]); // storageService is a stable import, not needed in deps
+  }, [currentProject, chaptersLoading, chapters, createChapter, showToast, setView]);
 
   const createNewScene = useCallback(async () => {
     if (!currentProject) {
@@ -192,6 +191,50 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     }
   }, [currentProject, showToast]); // storageService is stable
 
+  // New chapter system commands (v0.6.0)
+  const copyChaptersAsMarkdown = useCallback(async () => {
+    if (!currentProject) return showToast('No project selected', 'error');
+    if (chapters.length === 0) return showToast('No chapters to export', 'error');
+    try {
+      const sortedChapters = ChapterHelpers.sortByOrder(chapters);
+      const markdown = sortedChapters
+        .map((ch, idx) => {
+          const header = `# Chapter ${idx + 1}: ${ch.title}\n\n`;
+          const summary = ch.summary ? `> ${ch.summary}\n\n` : '';
+          const content = ch.content || '_[No content yet]_';
+          const meta = `\n\n---\n_${ch.wordCount.toLocaleString()} words • Status: ${ch.status}_\n\n`;
+          return header + summary + content + meta;
+        })
+        .join('\n');
+
+      const fullMarkdown = `# ${currentProject.name}\n\n${currentProject.description || ''}\n\n---\n\n${markdown}`;
+
+      await navigator.clipboard.writeText(fullMarkdown);
+      showToast(
+        `Copied ${chapters.length} chapters (${ChapterHelpers.getTotalWords(chapters).toLocaleString()} words) to clipboard`,
+        'success',
+        4000,
+      );
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to copy markdown', 'error');
+    }
+  }, [currentProject, chapters, showToast]);
+
+  const exportChaptersAsPDF = useCallback(async () => {
+    if (!currentProject) return showToast('No project selected', 'error');
+    if (chapters.length === 0) return showToast('No chapters to export', 'error');
+    showToast('PDF export coming soon in Phase 5', 'info', 3000);
+    // TODO Phase 5: Implement full PDF export via export service
+  }, [currentProject, chapters, showToast]);
+
+  const exportChaptersAsDOCX = useCallback(async () => {
+    if (!currentProject) return showToast('No project selected', 'error');
+    if (chapters.length === 0) return showToast('No chapters to export', 'error');
+    showToast('DOCX export coming soon in Phase 5', 'info', 3000);
+    // TODO Phase 5: Implement full DOCX export via export service
+  }, [currentProject, chapters, showToast]);
+
   // Build commands when deps change
   useEffect(() => {
     const cmds: Command[] = [
@@ -259,6 +302,33 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         category: 'writing',
         action: showWordCount,
         condition: () => !!currentProject,
+      },
+
+      // New chapter system commands
+      {
+        id: 'chapter-copy-markdown',
+        label: 'Copy Chapters as Markdown',
+        description: 'Copy all chapters to clipboard in Markdown format',
+        category: 'export',
+        shortcut: '⌘⇧C',
+        action: copyChaptersAsMarkdown,
+        condition: () => !!currentProject && chapters.length > 0,
+      },
+      {
+        id: 'chapter-export-pdf',
+        label: 'Export Chapters → PDF',
+        description: 'Export all chapters as a PDF document (coming soon)',
+        category: 'export',
+        action: exportChaptersAsPDF,
+        condition: () => !!currentProject && chapters.length > 0,
+      },
+      {
+        id: 'chapter-export-docx',
+        label: 'Export Chapters → DOCX',
+        description: 'Export all chapters as a Word document (coming soon)',
+        category: 'export',
+        action: exportChaptersAsDOCX,
+        condition: () => !!currentProject && chapters.length > 0,
       },
 
       {
@@ -450,6 +520,7 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     claudeActions,
     currentProject,
     projects,
+    chapters,
     showToast,
     backupProject,
     createNewChapter,
@@ -458,6 +529,9 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     quickExportMarkdown,
     quickExportPDF,
     showWordCount,
+    copyChaptersAsMarkdown,
+    exportChaptersAsPDF,
+    exportChaptersAsDOCX,
   ]);
 
   // ---- filtering ----
