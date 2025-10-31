@@ -49,7 +49,7 @@ export function StorageErrorToast() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 space-y-2 max-w-md">
+    <div className="fixed bottom-4 right-4 z-toast space-y-2 max-w-md">
       {visibleErrors.map((entry) => (
         <ErrorToastItem
           key={entry.id}

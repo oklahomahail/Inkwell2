@@ -621,7 +621,16 @@ useEffect(() => {
    - Added `max-h-[calc(100vh-120px)] overflow-auto` for scrollable tooltips
    - Updated `scorePlacement()` to account for reserved header space
    - All 735 tests passing, 0 TypeScript errors
-5. ⏳ Z-index system (Task 4.1, 4.2)
+5. ✅ Z-index system (Task 4.1, 4.2) - **COMPLETED**
+   - Added centralized z-index scale to tailwind.config.js
+   - Base layers (0-999): base, dropdown, sticky, fixed
+   - Overlay layers (1000-1999): modal-backdrop, modal, popover
+   - Tour layers (9000-9029): tour-backdrop, tour-spotlight, tour-tooltip
+   - Notifications (9030+): toast
+   - Debug (9999): debug
+   - Updated all tour components to use new tokens
+   - Updated StorageErrorToast to use z-toast
+   - All 735 tests passing, 0 TypeScript errors
 6. ⏳ Command palette integration (Task 6.1)
 
 ### Priority 3 (Polish):

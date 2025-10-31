@@ -82,6 +82,29 @@ theme: {
         // Custom slow spin animation (for logo, etc.)
         'spin-slow': 'spin 20s linear infinite',
       },
+      zIndex: {
+        // Base layers (0-999)
+        'base': '0',
+        'dropdown': '1000',
+        'sticky': '1020',
+        'fixed': '1030',
+
+        // Overlay layers (1000-1999)
+        'modal-backdrop': '1040',
+        'modal': '1050',
+        'popover': '1060',
+
+        // Tour/Onboarding layers (9000-9029) - Highest priority for user guidance
+        'tour-backdrop': '9000',
+        'tour-spotlight': '9010',
+        'tour-tooltip': '9020',
+
+        // Notifications and toasts (9030+)
+        'toast': '9030',
+
+        // Debugging/Development (9999) - Always on top
+        'debug': '9999',
+      },
     },
   },
   plugins: [

@@ -94,7 +94,7 @@ export default function SpotlightOverlay() {
       role="dialog"
       aria-modal="true"
       aria-label="Product tour"
-      className="fixed inset-0 z-[10000]"
+      className="fixed inset-0 z-tour-backdrop"
       style={{ pointerEvents: 'none' }}
       data-tour-active="true"
     >

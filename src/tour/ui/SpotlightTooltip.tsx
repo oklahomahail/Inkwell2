@@ -283,7 +283,7 @@ export default function SpotlightTooltip({
       aria-labelledby={stepId}
       aria-describedby={describedById}
       onKeyDown={handleKeyDown}
-      className="fixed z-[9999] max-w-sm max-h-[calc(100vh-120px)] overflow-auto rounded-2xl border bg-white text-gray-900 shadow-xl outline-none dark:bg-neutral-900 dark:text-neutral-50 dark:border-neutral-700 pointer-events-auto"
+      className="fixed z-tour-tooltip max-w-sm max-h-[calc(100vh-120px)] overflow-auto rounded-2xl border bg-white text-gray-900 shadow-xl outline-none dark:bg-neutral-900 dark:text-neutral-50 dark:border-neutral-700 pointer-events-auto"
       style={{ left: coords.left, top: coords.top }}
     >
       <div className="p-4">
