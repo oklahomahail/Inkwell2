@@ -50,6 +50,20 @@ export const createMockAppContextValue = (
       analyzeCharacter: vi.fn(async () => ''),
       brainstormIdeas: vi.fn(async () => ''),
     },
+    chapters: {
+      data: [],
+      loading: false,
+      error: null,
+      count: 0,
+      totalWords: 0,
+      refresh: vi.fn(async () => {}),
+      getById: vi.fn(async () => null),
+      save: vi.fn(async () => {}),
+      create: vi.fn(async () => ({}) as any),
+      updateContent: vi.fn(async () => {}),
+      delete: vi.fn(async () => {}),
+      reorder: vi.fn(async () => {}),
+    },
     ...(extra ?? {}),
   };
 };
