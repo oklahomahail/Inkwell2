@@ -18,16 +18,16 @@ jobs:
       
       - name: Check for .bak files
         run: |
-          if find . -type f -name "*.bak" -o -name "*.bak[0-9]" -not -path "./node_modules/*" -not -path "./.git/*" -not -path "./dist/*" | grep -q .; then
+          if find . -type f \( -name "*.bak" -o -name "*.bak[0-9]" \) -not -path "./node_modules/*" -not -path "./.git/*" -not -path "./dist/*" | grep -q .; then
             echo "::error::Found .bak files in the repository"
-            find . -type f -name "*.bak" -o -name "*.bak[0-9]" -not -path "./node_modules/*" -not -path "./.git/*" -not -path "./dist/*"
+            find . -type f \( -name "*.bak" -o -name "*.bak[0-9]" \) -not -path "./node_modules/*" -not -path "./.git/*" -not -path "./dist/*"
             exit 1
           fi
-      
+
       - name: Check for backup directories
         run: |
-          if find . -type d -name "backup" -o -name "backups" -not -path "./node_modules/*" -not -path "./.git/*" -not -path "./dist/*" | grep -q .; then
+          if find . -type d \( -name "backup" -o -name "backups" \) -not -path "./node_modules/*" -not -path "./.git/*" -not -path "./dist/*" | grep -q .; then
             echo "::error::Found backup directories in the repository"
-            find . -type d -name "backup" -o -name "backups" -not -path "./node_modules/*" -not -path "./.git/*" -not -path "./dist/*"
+            find . -type d \( -name "backup" -o -name "backups" \) -not -path "./node_modules/*" -not -path "./.git/*" -not -path "./dist/*"
             exit 1
           fi
