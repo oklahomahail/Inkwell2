@@ -747,3 +747,18 @@ main[data-tour-id='dashboard'] {
     0 0 0 2px #d4af37,
     0 0 20px 6px rgb(212 175 55 / 50%);
 }
+
+/* ============================================================================
+   DARK MODE FLASH PREVENTION
+   ============================================================================
+   Prevent transitions during initial page load to avoid dark mode flash.
+   The 'loading' class is added in index.html and removed after React mounts.
+   Must be at the end to override all previous transition declarations.
+*/
+html.loading,
+html.loading *,
+html.loading *::before,
+html.loading *::after {
+  transition: none !important;
+  animation-duration: 0s !important;
+}

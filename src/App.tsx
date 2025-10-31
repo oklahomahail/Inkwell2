@@ -609,6 +609,15 @@ interface _StorageDebugPanelProps {}
 interface _AppShellProps {}
 
 export default function App() {
+  // Remove loading class after React mounts to enable transitions
+  useEffect(() => {
+    // Wait for one frame to ensure React has fully mounted and painted
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove('loading');
+      devLog.log('[App] Loading class removed - transitions enabled');
+    });
+  }, []);
+
   return (
     <SpotlightProvider>
       <AppShell />

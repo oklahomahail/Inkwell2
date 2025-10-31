@@ -14,15 +14,38 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Theme initialization - zero-dependency, no-flash, respects user choice -->
+    <!-- Theme initialization - zero-dependency, no-flash, respects user choice AND system preferences -->
     <script>
-      const theme = localStorage.getItem('theme');
-      if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-      }
+      (function() {
+        // Add loading class to prevent transition flash
+        document.documentElement.classList.add('loading');
+
+        // Check localStorage first
+        const savedTheme = localStorage.getItem('theme');
+
+        // Determine effective theme
+        let theme;
+        if (savedTheme) {
+          theme = savedTheme;
+        } else {
+          // Respect system preference if no saved theme
+          const prefersDark = window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches;
+          theme = prefersDark ? 'dark' : 'light';
+        }
+
+        // Apply theme immediately (before page render)
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+
+        // Store resolved theme (so we know user's effective preference)
+        if (!savedTheme) {
+          localStorage.setItem('theme', theme);
+        }
+      })();
     </script>
 
     <!-- Theme meta tags -->
