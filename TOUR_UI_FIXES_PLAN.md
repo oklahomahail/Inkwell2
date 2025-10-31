@@ -614,7 +614,13 @@ useEffect(() => {
 
 ### Priority 2 (High Impact):
 
-4. ⏳ Viewport boundary detection (Task 2.1, 2.2)
+4. ✅ Viewport boundary detection (Task 2.1, 2.2) - **COMPLETED**
+   - Added `getViewportDimensions()` function to account for scroll position
+   - Added `clampWithMinVisible()` with 80% minimum visible threshold
+   - Account for fixed headers (60px reserved top)
+   - Added `max-h-[calc(100vh-120px)] overflow-auto` for scrollable tooltips
+   - Updated `scorePlacement()` to account for reserved header space
+   - All 735 tests passing, 0 TypeScript errors
 5. ⏳ Z-index system (Task 4.1, 4.2)
 6. ⏳ Command palette integration (Task 6.1)
 
