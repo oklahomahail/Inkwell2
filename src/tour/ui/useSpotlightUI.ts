@@ -169,7 +169,10 @@ export function useSpotlightUI() {
       return;
     }
 
-    updateAnchorRect();
+    // Add delay to ensure DOM is ready (fixes "[SpotlightTour] Missing tour anchor" errors)
+    const timeoutId = setTimeout(() => {
+      updateAnchorRect();
+    }, 1000);
 
     // Listen for viewport changes
     const onResize = () => updateAnchorRect();
@@ -179,6 +182,7 @@ export function useSpotlightUI() {
     window.addEventListener('scroll', onScroll, true);
 
     return () => {
+      clearTimeout(timeoutId);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('scroll', onScroll, true);
     };
