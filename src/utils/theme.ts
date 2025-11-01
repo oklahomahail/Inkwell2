@@ -11,16 +11,27 @@ export type Theme = 'light' | 'dark';
 /**
  * Set the theme and persist to localStorage
  * Always toggles only the 'dark' class (light mode = no class)
+ * Dispatches a custom event so components can react to theme changes
  */
 export function setTheme(theme: Theme): void {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
     document.documentElement.classList.toggle('dark', theme === 'dark');
+
+    // Dispatch theme change event for reactive components (charts, layouts, etc.)
+    window.dispatchEvent(new CustomEvent('themechange', { detail: theme }));
   } catch (error) {
     // localStorage unavailable (private mode)
     devLog.warn('[Theme] Failed to persist theme:', error);
     // Still apply the class change
     document.documentElement.classList.toggle('dark', theme === 'dark');
+
+    // Still dispatch event even if persistence failed
+    try {
+      window.dispatchEvent(new CustomEvent('themechange', { detail: theme }));
+    } catch {
+      // Ignore if event dispatch also fails
+    }
   }
 }
 
