@@ -22,7 +22,7 @@ describe('theme utilities', () => {
 
   describe('Theme init respects localStorage over prefers-color-scheme', () => {
     it('uses localStorage value when present', () => {
-      localStorage.setItem('inkwell-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
       const theme = getTheme();
       expect(theme).toBe('dark');
     });
@@ -54,7 +54,7 @@ describe('theme utilities', () => {
     });
 
     it('localStorage "light" overrides dark system preference', () => {
-      localStorage.setItem('inkwell-theme', 'light');
+      localStorage.setItem('theme', 'light');
 
       // Mock matchMedia to prefer dark mode
       window.matchMedia = vi.fn().mockImplementation((query) => ({
@@ -72,7 +72,7 @@ describe('theme utilities', () => {
   describe('setTheme', () => {
     it('persists theme to localStorage', () => {
       setTheme('dark');
-      expect(localStorage.getItem('inkwell-theme')).toBe('dark');
+      expect(localStorage.getItem('theme')).toBe('dark');
     });
 
     it('adds dark class when theme is dark', () => {

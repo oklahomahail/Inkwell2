@@ -8,8 +8,9 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
+import { DEFAULT_TOUR_ID } from '../configs/defaultTour';
 import { isTourDone } from '../persistence';
 import { startDefaultTour } from '../tourEntry';
 
@@ -43,17 +44,17 @@ export function TourLifecycleIntegration(): null {
     // Only consider auto-start on the dashboard, never on /settings or auth routes
     const onDashboard = pathname === '/dashboard';
     const alreadyShown = localStorage.getItem(FIRST_RUN_KEY) === '1';
-    const done = isTourDone('DEFAULT_TOUR_ID');
+    const done = isTourDone(DEFAULT_TOUR_ID);
 
     if (onDashboard && !alreadyShown && !done) {
-      // Small delay so anchors exist (post-layout)
+      // Increased delay to ensure DOM is fully rendered and stable
       // Use requestAnimationFrame + setTimeout to ensure elements are rendered
       requestAnimationFrame(() => {
         setTimeout(() => {
           devLog.debug('[TourLifecycle] Auto-starting tour for first-time user');
           startDefaultTour();
           localStorage.setItem(FIRST_RUN_KEY, '1');
-        }, 200);
+        }, 500); // Increased from 200ms to 500ms for more reliable anchor detection
       });
     }
   }, [pathname]);

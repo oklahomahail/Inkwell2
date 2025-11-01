@@ -1,5 +1,9 @@
 // @ts-nocheck
 // src/services/exportService.ts
+import type { Chapter } from '@/types/project';
+import devLog from '@/utils/devLog';
+
+import { exportHistory } from './exportHistory';
 import { storageService } from './storageService';
 
 export interface ExportOptions {
@@ -396,6 +400,323 @@ class ExportService {
           error: `Unsupported format: ${format}`,
         };
     }
+  }
+
+  /**
+   * Generate content from new chapter format (v0.6.0+)
+   * Uses Chapter[] instead of scene-based format
+   */
+  private async generateContentFromChapters(
+    projectId: string,
+    chapters: Chapter[],
+    options: ExportOptions,
+  ): Promise<string> {
+    const project = storageService.loadProject(projectId);
+
+    if (!project) {
+      throw new Error('Project not found');
+    }
+
+    let content = '';
+
+    // Title page
+    if (options.includeMetadata) {
+      content += `# ${options.customTitle || project.name}\n\n`;
+      if (project.description) {
+        content += `${project.description}\n\n`;
+      }
+      content += `*Generated on ${new Date().toLocaleDateString()}*\n\n`;
+      content += '---\n\n';
+    }
+
+    // Synopsis
+    if (options.includeSynopsis && project.description) {
+      content += '## Synopsis\n\n';
+      content += `${project.description}\n\n`;
+      content += '---\n\n';
+    }
+
+    // Sort chapters by order
+    const sortedChapters = [...chapters].sort((a, b) => a.order - b.order);
+
+    // Main content from chapters
+    sortedChapters.forEach((chapter, chapterIndex) => {
+      // Chapter header
+      content += `# ${chapter.title}\n\n`;
+
+      // Chapter summary (if exists)
+      if (chapter.summary) {
+        content += `> ${chapter.summary}\n\n`;
+      }
+
+      // Chapter content
+      if (chapter.content) {
+        content += `${chapter.content}\n\n`;
+      }
+
+      // Chapter separator
+      if (chapterIndex < sortedChapters.length - 1 && options.chapterSeparator) {
+        content += `${options.chapterSeparator}\n\n`;
+      }
+    });
+
+    return content.trim();
+  }
+
+  /**
+   * Export with telemetry tracking (v0.7.0)
+   * Wraps export methods with performance tracking and history logging
+   */
+  private async exportWithTelemetry(
+    projectId: string,
+    chapters: Chapter[],
+    exportType: 'pdf' | 'docx' | 'markdown',
+    exportFn: () => Promise<ExportResult>,
+  ): Promise<ExportResult> {
+    const startTime = performance.now();
+
+    try {
+      const result = await exportFn();
+      const endTime = performance.now();
+      const durationMs = Math.round(endTime - startTime);
+
+      // Calculate total word count
+      const totalWordCount = chapters.reduce((sum, ch) => sum + (ch.wordCount || 0), 0);
+
+      // Prepare chapter metadata for history
+      const chaptersIncluded = chapters
+        .sort((a, b) => a.order - b.order)
+        .map((ch) => ({
+          id: ch.id,
+          title: ch.title,
+          position: ch.order,
+        }));
+
+      // Log export to history
+      try {
+        await exportHistory.add({
+          projectId,
+          type: exportType,
+          chaptersIncluded,
+          totalWordCount,
+          durationMs,
+          result: result.success ? 'success' : 'fail',
+          errorMessage: result.error,
+        });
+
+        devLog.log('[ExportService] Export logged to history:', {
+          type: exportType,
+          chapters: chaptersIncluded.length,
+          words: totalWordCount,
+          duration: `${durationMs}ms`,
+          success: result.success,
+        });
+      } catch (historyError) {
+        devLog.error('[ExportService] Failed to log export history:', historyError);
+        // Don't fail the export if history logging fails
+      }
+
+      return result;
+    } catch (error) {
+      const endTime = performance.now();
+      const durationMs = Math.round(endTime - startTime);
+
+      // Log failed export
+      try {
+        await exportHistory.add({
+          projectId,
+          type: exportType,
+          chaptersIncluded: chapters.map((ch) => ({
+            id: ch.id,
+            title: ch.title,
+            position: ch.order,
+          })),
+          totalWordCount: 0,
+          durationMs,
+          result: 'fail',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        });
+      } catch (historyError) {
+        devLog.error('[ExportService] Failed to log failed export:', historyError);
+      }
+
+      throw error;
+    }
+  }
+
+  /**
+   * Export PDF with new chapter format and telemetry (v0.7.0)
+   */
+  async exportPDFWithChapters(
+    projectId: string,
+    chapters: Chapter[],
+    options: ExportOptions,
+  ): Promise<ExportResult> {
+    return this.exportWithTelemetry(projectId, chapters, 'pdf', async () => {
+      const content = await this.generateContentFromChapters(projectId, chapters, options);
+      const project = storageService.loadProject(projectId);
+
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      // Create a printable HTML version
+      const htmlContent = this.markdownToHTML(content);
+      const printWindow = window.open('', '_blank');
+
+      if (!printWindow) {
+        throw new Error('Popup blocked - please allow popups for PDF export');
+      }
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${options.customTitle || project.name}</title>
+          <style>
+            body {
+              font-family: 'Times New Roman', serif;
+              font-size: 12pt;
+              line-height: 1.6;
+              max-width: 8.5in;
+              margin: 1in auto;
+              padding: 0;
+              color: #000;
+            }
+            h1 {
+              font-size: 18pt;
+              font-weight: bold;
+              margin: 24pt 0 12pt 0;
+              page-break-after: avoid;
+            }
+            h2 {
+              font-size: 14pt;
+              font-weight: bold;
+              margin: 18pt 0 9pt 0;
+              page-break-after: avoid;
+            }
+            p {
+              margin: 0 0 12pt 0;
+              text-align: justify;
+            }
+            blockquote {
+              margin: 12pt 0;
+              padding-left: 20pt;
+              font-style: italic;
+              border-left: 2pt solid #ccc;
+            }
+            .page-break {
+              page-break-before: always;
+            }
+            @media print {
+              body { margin: 1in; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="no-print" style="position: fixed; top: 10px; right: 10px; background: #007cba; color: white; padding: 10px; border-radius: 5px; z-index: 1000;">
+            <button onclick="window.print()" style="background: none; border: none; color: white; cursor: pointer;">📄 Print to PDF</button>
+            <button onclick="window.close()" style="background: none; border: none; color: white; cursor: pointer; margin-left: 10px;">✖ Close</button>
+          </div>
+          ${htmlContent}
+        </body>
+        </html>
+      `);
+
+      printWindow.document.close();
+
+      // Auto-trigger print dialog after a short delay
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+
+      return {
+        success: true,
+        filename: `${this.sanitizeFilename(options.customTitle || project.name)}.pdf`,
+      };
+    });
+  }
+
+  /**
+   * Export DOCX with new chapter format and telemetry (v0.7.0)
+   */
+  async exportDOCXWithChapters(
+    projectId: string,
+    chapters: Chapter[],
+    options: ExportOptions,
+  ): Promise<ExportResult> {
+    return this.exportWithTelemetry(projectId, chapters, 'docx', async () => {
+      const content = await this.generateContentFromChapters(projectId, chapters, options);
+      const project = storageService.loadProject(projectId);
+
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      // Convert markdown to RTF format
+      const rtfContent = this.markdownToRTF(content);
+      const filename = `${this.sanitizeFilename(options.customTitle || project.name)}.rtf`;
+
+      const blob = new Blob([rtfContent], { type: 'application/rtf' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      return {
+        success: true,
+        filename,
+        downloadUrl: url,
+      };
+    });
+  }
+
+  /**
+   * Export Markdown with new chapter format and telemetry (v0.7.0)
+   */
+  async exportMarkdownWithChapters(
+    projectId: string,
+    chapters: Chapter[],
+    options: ExportOptions,
+  ): Promise<ExportResult> {
+    return this.exportWithTelemetry(projectId, chapters, 'markdown', async () => {
+      const content = await this.generateContentFromChapters(projectId, chapters, options);
+      const project = storageService.loadProject(projectId);
+
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      const filename = `${this.sanitizeFilename(options.customTitle || project.name)}.md`;
+
+      // Create download
+      const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+
+      // Trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Cleanup
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      return {
+        success: true,
+        filename,
+        downloadUrl: url,
+      };
+    });
   }
 }
 
