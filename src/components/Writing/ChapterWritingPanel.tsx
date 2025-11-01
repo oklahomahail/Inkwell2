@@ -8,11 +8,17 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React, { useState, useCallback, useEffect } from 'react';
 
+import AutosaveIndicator from '@/components/Topbar/AutosaveIndicator';
 import { ChapterBreadcrumbs, ChapterListView } from '@/components/Writing/Chapters';
 import TipTapEditor from '@/components/Writing/TipTapEditor';
+import EnhancedChapterEditor from '@/editor/EnhancedChapterEditor';
 import { useChapters, ChapterHelpers } from '@/hooks/useChapters';
 import { cn } from '@/lib/utils';
+import { AutosaveService } from '@/services/autosaveService';
 import { countWords } from '@/utils/text';
+
+// Feature flag for v0.8.0 enhanced editor with integrated autosave
+const ENABLE_ENHANCED_EDITOR = import.meta.env.VITE_ENABLE_ENHANCED_EDITOR === 'true';
 
 interface ChapterWritingPanelProps {
   projectId: string;
@@ -32,6 +38,17 @@ export default function ChapterWritingPanel({
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [showSidebar, setShowSidebar] = useState(true);
   const [saveTimeoutId, setSaveTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
+  // Create AutosaveService instance for enhanced editor (v0.8.0)
+  const [autosaveService] = useState(() => {
+    if (!ENABLE_ENHANCED_EDITOR) return null;
+
+    return new AutosaveService(async (chapterId: string, content: string) => {
+      const wordCount = countWords(content);
+      await updateContent(chapterId, content, wordCount);
+      return { checksum: `${chapterId}-${Date.now()}` };
+    }, 1000);
+  });
 
   // Get the active chapter from chapters array
   const activeChapter = ChapterHelpers.findById(chapters, activeChapterId ?? '');
@@ -244,7 +261,9 @@ export default function ChapterWritingPanel({
 
             <div className="flex items-center gap-4">
               {/* Autosave indicator */}
-              {activeChapter && (
+              {activeChapter && ENABLE_ENHANCED_EDITOR && autosaveService ? (
+                <AutosaveIndicator service={autosaveService} />
+              ) : activeChapter && !ENABLE_ENHANCED_EDITOR ? (
                 <div className="text-xs text-gray-500 flex items-center gap-1">
                   {isSaving ? (
                     <>
@@ -260,7 +279,7 @@ export default function ChapterWritingPanel({
                     <span>—</span>
                   )}
                 </div>
-              )}
+              ) : null}
               {/* Word count and status */}
               {activeChapter && (
                 <div className="text-sm text-gray-500">
@@ -287,12 +306,26 @@ export default function ChapterWritingPanel({
         <div className="flex-1 overflow-auto bg-white dark:bg-gray-900">
           {activeChapter ? (
             <div className="max-w-4xl mx-auto px-6 py-8">
-              <TipTapEditor
-                value={editorContent}
-                onChange={handleContentChange}
-                placeholder="Start writing…"
-                className="min-h-full"
-              />
+              {ENABLE_ENHANCED_EDITOR && autosaveService ? (
+                <EnhancedChapterEditor
+                  chapterId={activeChapter.id}
+                  initialContent={editorContent}
+                  saveFn={async (id: string, content: string) => {
+                    const wordCount = countWords(content);
+                    await updateContent(id, content, wordCount);
+                    return { checksum: `${id}-${Date.now()}` };
+                  }}
+                  onSaved={() => setLastSavedAt(new Date())}
+                  className="min-h-full"
+                />
+              ) : (
+                <TipTapEditor
+                  value={editorContent}
+                  onChange={handleContentChange}
+                  placeholder="Start writing…"
+                  className="min-h-full"
+                />
+              )}
             </div>
           ) : chapters.length === 0 ? (
             <div className="flex items-center justify-center h-full text-gray-500">
