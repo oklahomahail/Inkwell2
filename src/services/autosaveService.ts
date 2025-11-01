@@ -33,7 +33,9 @@ export class AutosaveService {
    */
   onState(fn: (s: AutosaveState) => void) {
     this.stateListeners.add(fn);
-    return () => this.stateListeners.delete(fn);
+    return () => {
+      this.stateListeners.delete(fn);
+    };
   }
 
   private setState(s: AutosaveState) {
