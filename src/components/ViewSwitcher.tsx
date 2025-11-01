@@ -2,6 +2,7 @@
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 
 import { useAppContext, View } from '@/context/AppContext';
+import { useChapters } from '@/hooks/useChapters';
 
 import { PlotBoards } from '../features/plotboards';
 import { useFeatureDiscovery } from '../hooks/useAnalyticsTracking';
@@ -25,10 +26,16 @@ const PlotAnalysisPanel = lazy(() =>
   })),
 );
 
+// Lazy-load Export Dashboard (v0.7.0)
+const ExportDashboard = lazy(() => import('@/components/Dashboard/ExportDashboard'));
+
 const ViewSwitcher: React.FC = () => {
   const { state, currentProject, updateProject } = useAppContext();
   const { recordFeatureUse } = useFeatureDiscovery();
   const [_selectedText, _setSelectedText] = useState('');
+
+  // Load chapters for Export Dashboard (v0.7.0)
+  const { chapters } = useChapters(currentProject?.id ?? null);
 
   // Get current project content or default
   const _draftText = currentProject?.content || '';
@@ -165,6 +172,28 @@ const ViewSwitcher: React.FC = () => {
             <SettingsPanel />
           </Suspense>
         </FeatureErrorBoundary>
+      );
+    case View.Export:
+      return currentProject ? (
+        <FeatureErrorBoundary featureName="Export Dashboard">
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-500">Loading Export Dashboard...</p>
+              </div>
+            }
+          >
+            <ExportDashboard
+              projectId={currentProject.id}
+              projectName={currentProject.name}
+              chapters={chapters}
+            />
+          </Suspense>
+        </FeatureErrorBoundary>
+      ) : (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500">Please select a project to view export dashboard</p>
+        </div>
       );
     default:
       return (

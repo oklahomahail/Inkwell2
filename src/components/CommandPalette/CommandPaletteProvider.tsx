@@ -226,7 +226,8 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     if (chapters.length === 0) return showToast('No chapters to export', 'error');
     try {
       showToast('Preparing PDF export...', 'info', 2000);
-      const result = await exportService.exportPDF(currentProject.id, {
+      // Use new telemetry-enabled export method (v0.7.0)
+      const result = await exportService.exportPDFWithChapters(currentProject.id, chapters, {
         format: EXPORT_FORMAT.PDF,
         includeMetadata: true,
         includeSynopsis: true,
@@ -248,7 +249,8 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
     if (chapters.length === 0) return showToast('No chapters to export', 'error');
     try {
       showToast('Preparing DOCX export...', 'info', 2000);
-      const result = await exportService.exportDOCX(currentProject.id, {
+      // Use new telemetry-enabled export method (v0.7.0)
+      const result = await exportService.exportDOCXWithChapters(currentProject.id, chapters, {
         format: EXPORT_FORMAT.DOCX,
         includeMetadata: true,
         includeSynopsis: true,
@@ -307,6 +309,15 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         category: 'navigation',
         shortcut: '⌘,',
         action: () => setView(View.Settings),
+      },
+      {
+        id: 'nav-export',
+        label: 'Open Export Dashboard',
+        description: 'View export history and analytics',
+        category: 'navigation',
+        shortcut: '⌘E',
+        action: () => setView(View.Export),
+        condition: () => !!currentProject,
       },
 
       {

@@ -25,6 +25,7 @@ export enum View {
   Plot = 'plot',
   Settings = 'settings',
   Analytics = 'Analytics', // keeping as-is to avoid breaking callers
+  Export = 'export', // v0.7.0 - Export Dashboard
 }
 
 // Re-export Project type for backward compatibility
