@@ -3,10 +3,11 @@
  *
  * Displays a bar chart showing word count distribution across chapters.
  * Simple CSS-based visualization without external chart libraries.
+ * Theme-reactive: recomputes layout on theme changes.
  */
 
 import { BarChart3 } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import type { Chapter } from '@/types/project';
 
@@ -19,6 +20,19 @@ export function ChapterDistributionChart({
   chapters,
   loading = false,
 }: ChapterDistributionChartProps) {
+  // Force re-render on theme change to ensure smooth transitions
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    const handleThemeChange = () => {
+      requestAnimationFrame(() => {
+        forceUpdate((n) => n + 1);
+      });
+    };
+
+    window.addEventListener('themechange', handleThemeChange);
+    return () => window.removeEventListener('themechange', handleThemeChange);
+  }, []);
   if (loading) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 animate-pulse">

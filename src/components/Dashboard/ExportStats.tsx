@@ -6,10 +6,12 @@
  * - Last export time
  * - Last export word count
  * - Average duration
+ *
+ * Theme-reactive: updates display on theme changes.
  */
 
 import { FileDown, Clock, FileText, TrendingUp } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import type { ExportHistoryStats } from '@/types/export';
 
@@ -19,6 +21,19 @@ interface ExportStatsProps {
 }
 
 export function ExportStats({ stats, loading = false }: ExportStatsProps) {
+  // Force re-render on theme change for smooth transitions
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    const handleThemeChange = () => {
+      requestAnimationFrame(() => {
+        forceUpdate((n) => n + 1);
+      });
+    };
+
+    window.addEventListener('themechange', handleThemeChange);
+    return () => window.removeEventListener('themechange', handleThemeChange);
+  }, []);
   const formatDuration = (ms: number): string => {
     if (ms < 1000) return `${ms}ms`;
     if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
