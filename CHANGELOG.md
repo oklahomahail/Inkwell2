@@ -4,6 +4,86 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+---
+
+## [0.7.1] - 2025-01-XX
+
+### Added
+
+- **Theme Reactivity for Export Dashboard** - ChapterDistributionChart and ExportStats now smoothly re-render on theme changes
+- **ExportDashboardErrorBoundary** - Graceful error handling for Export Dashboard with retry mechanisms
+
+### Improved
+
+- 60fps performance for theme transitions using `requestAnimationFrame`
+- Memory leak prevention with proper event listener cleanup
+- Error recovery UX with user-friendly fallback UI
+
+### Technical
+
+- Added `themechange` event integration for reactive components
+- 735/735 tests passing
+- 0 TypeScript errors
+- Pre-commit hooks verified
+
+**GitHub Release**: [v0.7.1](https://github.com/oklahomahail/Inkwell2/releases/tag/v0.7.1)
+
+---
+
+## [0.7.0] - 2024-12-XX
+
+### Added - Export Dashboard with Telemetry & Analytics
+
+**Major Feature**: Comprehensive export history visualization and analytics system.
+
+**Core Components**:
+
+- **Export Dashboard** (`ExportDashboard.tsx`) - Main dashboard with stats, charts, and export history
+- **Export Statistics** (`ExportStats.tsx`) - Real-time export metrics (total, success/fail, duration, word counts)
+- **Chapter Distribution Chart** (`ChapterDistributionChart.tsx`) - Visual word count distribution across chapters
+- **Exports Table** (`ExportsTable.tsx`) - Detailed export records with timestamps and metadata
+- **Export History Service** (`exportHistory.ts`) - IndexedDB-backed persistence and querying
+
+**Export Capabilities**:
+
+- Quick Actions: Export PDF, DOCX, Markdown with one click
+- Export tracking with comprehensive telemetry
+- Export history persistence (last 50 exports per project)
+- Clear history functionality
+
+**Integration**:
+
+- Accessible via Command Palette (⌘E shortcut)
+- ViewSwitcher integration with lazy loading
+- Full dark mode support
+- Error boundaries and loading states
+
+**Testing**:
+
+- 14 comprehensive E2E tests (Playwright)
+- Tests cover: basic UI, export actions, history, stats, persistence, edge cases
+
+**Files Added**:
+
+- `src/components/Dashboard/ExportDashboard.tsx`
+- `src/components/Dashboard/ExportStats.tsx`
+- `src/components/Dashboard/ExportsTable.tsx`
+- `src/components/Dashboard/ChapterDistributionChart.tsx`
+- `src/services/exportHistory.ts`
+- `src/types/export.ts`
+- `e2e/export-dashboard.spec.ts`
+
+**Documentation**:
+
+- Export Dashboard integrated into README
+- E2E test documentation
+
+**GitHub Release**: [v0.7.0](https://github.com/oklahomahail/Inkwell2/releases/tag/v0.7.0)
+
+---
+
+## [Unreleased - Pre v0.7.0]
+
 ### Added - User-Defined Data Persistence System
 
 **New Feature:** Users now have full control over where and how their writing data is stored.

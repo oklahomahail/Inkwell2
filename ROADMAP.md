@@ -1,142 +1,186 @@
 # Inkwell Platform Roadmap 2025
 
-_Last updated: October 5, 2025_
+_Last updated: January 2025_
 
 ## Vision
 
-Inkwell is an offline‑first writing platform for serious authors. The focus is a calm, reliable writing flow with smart assistance that stays out of the way.
-
-## What changed in this update
-
-- **Enhanced Timeline Integration** – **COMPLETED** – Comprehensive conflict detection, scene linkage, and chronological navigation
-- **Timeline Validation System** – **COMPLETED** – 5 types of conflict detection with auto-fix capabilities
-- **Scene-Timeline Linkage** – **COMPLETED** – Intelligent auto-detection and manual linking with validation
-- **Timeline Navigation** – **COMPLETED** – Chronological scene navigation with sibling detection
-- **Story Architect Service** – **IN PROGRESS** – Next immediate priority for Phase 2 completion
+Inkwell is an offline-first writing platform for serious authors. The focus is a calm, reliable writing flow with smart assistance that stays out of the way.
 
 ---
 
-## Completed (since v0.4.0)
+## Current Status: v0.7.1 (January 2025)
 
-### v0.5.0 – Supabase Integration Complete – **October 28, 2025** ✅
+**Latest Release:** v0.7.1 - Export Dashboard UI Finalization
+**GitHub Release:** https://github.com/oklahomahail/Inkwell2/releases/tag/v0.7.1
 
-- **Local-First Architecture** – IndexedDB + Supabase dual persistence with optional cloud sync
-- **Conflict Detection & Sync Queue** – Intelligent conflict resolution with last-write-wins strategy
-- **Cloud Sync UI** – Real-time sync status badges and cloud sync toggle control
-- **Row-Level Security (RLS)** – Postgres RLS policies enforcing user data isolation
-- **Server-Controlled Timestamps** – `updated_at` managed by database triggers for consistency
-- **8 Core Migrations** – Fully tested migration suite with profiles, roles, and bulk operations
-- **Comprehensive Documentation** – Complete setup guides, migration references, and quickstart docs
-- **Developer Scripts** – Health checks, migration tools, and testing utilities
+### ✅ Recently Completed
 
-> **Why this matters**: Establishes production-ready cloud sync foundation enabling collaboration features, real-time updates, and data portability while maintaining local-first reliability.
+#### v0.7.1 - Export Dashboard UI Finalization (January 2025)
 
-### Spotlight Tour Phase 2 – **October 25, 2025** ✅
+- **Theme Reactivity**: ChapterDistributionChart and ExportStats with smooth theme transitions
+- **Error Boundaries**: ExportDashboardErrorBoundary for graceful error recovery
+- **Performance**: 60fps transitions using requestAnimationFrame
+- **Test Coverage**: 735/735 tests passing, 0 TypeScript errors
 
-- **Interactive Guided Tours** with SpotlightOverlay UI component
-- **Auto-start Integration** for first-time users on dashboard
-- **Feature-Specific Tours** for AI tools and Export features
-- **Analytics Integration** via analyticsService adapter
-- **Help Menu Launchers** for replaying tours
-- **6-step Default Tour** covering all major UI areas
-- **Accessibility Features** with keyboard navigation and ARIA support
-- **Comprehensive Documentation** in `/docs/TOUR_QUICK_REFERENCE.md`
+#### v0.7.0 - Export Dashboard with Telemetry (December 2024)
 
-### Enhanced Timeline Integration – **October 2025** ✅
+- **Export Dashboard**: Comprehensive export history visualization
+- **Export Statistics**: Real-time export analytics and metrics
+- **Chapter Distribution**: Visual word count distribution across chapters
+- **Export History**: Detailed export records with filtering and search
+- **Telemetry Integration**: Full export tracking and analytics
+- **E2E Testing**: 14 comprehensive Playwright tests
 
-- **Enhanced Timeline Service** (`enhancedTimelineService.ts`) – Comprehensive conflict detection and validation system
-- **5 Types of Conflict Detection**:
-  - Time overlap conflicts (characters in multiple locations simultaneously)
-  - Character presence validation (timeline vs chapter consistency)
-  - Location mismatch detection (impossible travel times)
-  - POV inconsistencies (POV character validation)
-  - Chronological errors (invalid time ranges)
-- **Scene-Timeline Linkage** – Bidirectional linking with intelligent auto-detection based on content analysis
-- **Timeline Navigation** – Chronological scene navigation with sibling scene detection
-- **Timeline Health Scoring** – Overall timeline quality assessment (0-100 scale) with optimization suggestions
-- **Three New UI Components**:
-  - `TimelineValidationPanel` – Visual conflict detection with auto-fix capabilities
-  - `SceneLinkageSuggestions` – AI-powered scene linkage recommendations
-  - `TimelineNavigation` – Chronological navigation between scenes
-- **Enhanced Timeline Panel** – Modern tabbed interface integrating all timeline features
-- **Comprehensive Test Suite** – 22 new tests, 88 total tests passing (100% success rate)
-- **Performance Optimization** – Validated for projects with 1000+ timeline events
+#### v0.5.0 - Supabase Integration (October 2025)
 
-> **Why this matters**: This establishes a robust foundation for story consistency validation and provides writers with powerful tools to maintain narrative coherence across complex timelines.
+- **Local-First Architecture**: IndexedDB + Supabase dual persistence with optional cloud sync
+- **Conflict Detection & Sync Queue**: Intelligent conflict resolution with last-write-wins strategy
+- **Cloud Sync UI**: Real-time sync status badges and cloud sync toggle control
+- **Row-Level Security (RLS)**: Postgres RLS policies enforcing user data isolation
+- **8 Core Migrations**: Fully tested migration suite with profiles, roles, and bulk operations
 
-### Story Architect – Real Claude API integration with fallback
+#### Spotlight Tour System (October 2025)
 
-- `storyArchitectService` now uses live Claude API calls.
-- Robust error handling routes failures to the existing mock generator so flows continue gracefully.
-- Deterministic options and token budgeting added to protect responsiveness in long documents.
-- Logs and surface‑level telemetry added for easier debugging during Phase 2 work.
-
-### Enhanced Writing Editor – Stability + TS fixes
-
-- Resolved TypeScript errors across the editor and shared services.
-- Improved selection, undo/redo, and snapshot reliability under long‑session usage.
+- **Interactive Guided Tours**: SpotlightOverlay UI component with keyboard navigation
+- **Auto-start Integration**: First-time user onboarding on dashboard
+- **Feature-Specific Tours**: AI tools and Export feature tours
+- **Analytics Integration**: Tour completion tracking via analyticsService
+- **Accessibility**: Full keyboard navigation and ARIA support
 
 ---
 
-## Phase 2 – Story Architect Mode (Current Focus)
+## Next Up: v0.8.0 (Q1 2025)
 
-**Status**: Timeline Integration ✅ **COMPLETED** – Story Architect ⏳ **IN PROGRESS**
+**Target:** Mid-late January 2025
+**Focus:** Author Flow, Reliability, Publishing, Intelligence, Polish
 
-### Next Immediate Priorities
+For complete v0.8.0 scope, see [docs/product/v0.8.0-scope.md](docs/product/v0.8.0-scope.md)
 
-- **Story Architect Service** – Core service implementation for scene outline management and story structure templates
-- **Story Outline Editor** – Interactive outline editing interface with drag-and-drop reordering
-- **Template System** – Predefined story structure templates (3-act, hero's journey, Save the Cat, etc.)
-- **Architect Panel Integration** – Main story architect interface with visualization
-- **Advanced Integration Features** – Scene dependency tracking and plot thread analysis
+### 🎯 Key Features
 
-### Still Planned
+#### A. Chapter Editing Experience
 
-- **Consistency Guardian** – cross‑chapter continuity checks and style guidance (enhanced with timeline integration)
-- **Advanced Focus Mode** – deeper distraction‑reduction and context scoping for long writing sessions
-- **Quality of life** – incremental editor ergonomics, prompt presets, and export polish
-- **Reliability** – background save hardening and defensive guards around long operations
+- Enhanced chapter editor with autosave queue + debounce
+- Inline word/character count indicator
+- Conflict resolver for stale local vs. remote changes
+- Autosave status indicator in Topbar
 
-### Documentation & UX Hardening – **Current Sprint**
+#### B. EPUB Export
 
-**Documentation Updates**:
+- Professional e-book output with JSZip + manifest builder
+- Auto-generated metadata (title, author, ISBN, cover, TOC)
+- EPUB validation (OPF, NCX, XHTML)
+- Integration with Export Dashboard
 
-- ✅ Removed all Clerk references, updated to Supabase-only
-- ✅ Added Spotlight Tour integration guide
-- ✅ Clarified theme default (light mode primary)
-- ✅ Documented Focus Mode exit (Esc key)
-- ✅ Enhanced troubleshooting with Settings/MutationObserver fixes
-- ✅ Added testing guide for Vitest + IndexedDB
+#### C. Enhanced AI Assistance
 
-**Quick Wins (UI)**:
+- Claude streaming (ClaudeService 2.0)
+- Chapter summary cache for AI context awareness
+- "Ask Inkwell" shortcut (⌘⇧A) for contextual prompts
+- Inline AI rewrite and feedback side panel
 
-- ⏳ Add visible "Exit Focus Mode" button
-- ⏳ Improve Settings panel routing guards
-- ⏳ Add data-tour-id attributes for feature tours
+#### D. Timeline & Conflict Detection
 
----
+- Timeline Inspector modal with chapter sequence visualization
+- AI-assisted detection of temporal inconsistencies
+- Exportable timeline views (CSV, Markdown)
 
-## Phase 3+ – Future Roadmap
+#### E. Onboarding & UX Polish
 
-### v0.6.0 – Realtime + Collaboration (Planned)
+- Quick Tour V2 (3-step overlay on first launch)
+- Persistent Docs Drawer
+- Enhanced Command Palette discoverability
+- Refined Tailwind design tokens
 
-- **Supabase Realtime** – Live presence, cursor sync, and collaborative editing
-- **User Profiles** – Public author profiles and project sharing capabilities
-- **Shared Projects** – Multi-user collaboration with conflict resolution
-- **Push Notifications** – Supabase Functions for notification delivery
-- **PWA Integration** – Progressive Web App capabilities with offline analytics
-- **Realtime Sync** – Live updates across devices and collaborators
+### 📦 Release Plan
 
----- **Phase 3** – Advanced AI Integration (Claude API, plot hole detection, style analysis)
-
-- **Phase 4** – Collaboration Features (multi-user editing, comments, version control)
-- **Phase 5** – Publishing & Export (professional formatting, EPUB, platform integration)
-- **Phase 6** – Advanced Analytics (writing patterns, productivity insights, story metrics)
+| Phase   | Target | Focus             |
+| ------- | ------ | ----------------- |
+| Phase 1 | Week 1 | Editor + Autosave |
+| Phase 2 | Week 2 | EPUB Export       |
+| Phase 3 | Week 3 | AI + Timeline     |
+| Phase 4 | Week 4 | UX Polish         |
 
 ---
 
-## Guardrails and principles
+## Future Releases
 
-- Local‑first storage with explicit, user‑controlled exports.
-- AI is opt‑in and transparent; fallbacks preserve core writing flows.
-- Minimal UI pauses; long operations must provide progress and a cancel path.
+### v0.9.0 - Collaboration (Q2 2025)
+
+- **Supabase Realtime**: Live presence and collaborative editing
+- **User Profiles**: Public author profiles and project sharing
+- **Shared Projects**: Multi-user collaboration with conflict resolution
+- **Push Notifications**: Supabase Functions for notification delivery
+- **PWA Integration**: Progressive Web App capabilities
+
+### v1.0.0 - Production Ready (Q3 2025)
+
+- **Advanced AI Integration**: Plot hole detection, style analysis
+- **Professional Publishing**: Advanced EPUB, MOBI, PDF export templates
+- **Analytics Dashboard**: Writing patterns, productivity insights
+- **Mobile Optimization**: Touch-optimized editor and mobile PWA
+
+### Future Enhancements
+
+- **Phase 4**: Collaboration Features (multi-user editing, comments, version control)
+- **Phase 5**: Publishing & Export (professional formatting, EPUB, platform integration)
+- **Phase 6**: Advanced Analytics (writing patterns, productivity insights, story metrics)
+
+---
+
+## Completed Milestones
+
+### Enhanced Timeline Integration (October 2025) ✅
+
+- **Enhanced Timeline Service**: Comprehensive conflict detection (5 types)
+- **Scene-Timeline Linkage**: Bidirectional linking with auto-detection
+- **Timeline Navigation**: Chronological scene navigation
+- **Timeline Health Scoring**: 0-100 quality assessment
+- **Three New UI Components**: ValidationPanel, LinkageSuggestions, Navigation
+- **22 New Tests**: 88 total tests passing (100% success rate)
+
+### Story Architect - Claude API Integration ✅
+
+- Live Claude API calls with fallback to mock generator
+- Robust error handling and graceful degradation
+- Deterministic options and token budgeting
+- Logging and telemetry for debugging
+
+### Enhanced Writing Editor ✅
+
+- TypeScript error resolution across editor and services
+- Improved selection, undo/redo, and snapshot reliability
+- Enhanced stability for long-session usage
+
+---
+
+## Guardrails and Principles
+
+- **Local-first storage** with explicit, user-controlled exports
+- **AI is opt-in** and transparent; fallbacks preserve core writing flows
+- **Minimal UI pauses**; long operations provide progress and cancel path
+- **Privacy-first**: No data sent to cloud without explicit user consent
+- **Accessibility**: WCAG AA compliant throughout
+- **Performance**: Typing latency < 20ms, autosave < 300ms
+
+---
+
+## Documentation
+
+- **v0.8.0 Scope**: [docs/product/v0.8.0-scope.md](docs/product/v0.8.0-scope.md)
+- **Developer Setup**: [docs/dev/setup.md](docs/dev/setup.md)
+- **Deployment Guide**: [docs/ops/01-deploy.md](docs/ops/01-deploy.md)
+- **Feature Docs**: [docs/features/](docs/features/)
+- **Testing Guide**: [docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md)
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branching, commits, and PR checks.
+
+---
+
+**Last Updated**: January 2025
+**Maintainers**: @davehail
+**Status**: v0.7.1 released, v0.8.0 planning underway
