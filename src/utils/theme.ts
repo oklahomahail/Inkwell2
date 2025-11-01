@@ -4,7 +4,7 @@ import devLog from '@/utils/devLog';
  * Matches the inline script in index.html for consistency
  */
 
-const THEME_STORAGE_KEY = 'inkwell-theme';
+const THEME_STORAGE_KEY = 'theme';
 
 export type Theme = 'light' | 'dark';
 

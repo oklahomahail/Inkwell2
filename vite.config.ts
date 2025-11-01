@@ -148,7 +148,6 @@ export default defineConfig({
               'icon-192.png',
               'icon-512.png',
               'site.webmanifest',
-              'manifest.json',
               'icons/*.png',
             ],
             manifest: {

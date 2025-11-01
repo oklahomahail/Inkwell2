@@ -86,7 +86,7 @@ describe('Smoke Tests - Brand & UI', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('theme')).toHaveTextContent('dark');
-        expect(localStorage.getItem('inkwell:theme')).toBe('dark');
+        expect(localStorage.getItem('theme')).toBe('dark');
       });
     });
 
@@ -98,9 +98,9 @@ describe('Smoke Tests - Brand & UI', () => {
 
       render(<TestComponent />);
 
-      // Check that the key is namespaced
+      // Check that the key matches index.html
       const key = Object.keys(localStorage).find((k) => k.includes('theme'));
-      expect(key).toBe('inkwell:theme');
+      expect(key).toBe('theme');
     });
   });
 
