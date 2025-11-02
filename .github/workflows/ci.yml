@@ -58,6 +58,7 @@ jobs:
         with:
           node-version: '22.x'
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
 
       - name: Grep for console.log
@@ -86,6 +87,7 @@ jobs:
         with:
           node-version: '22.x'
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
 
@@ -104,6 +106,7 @@ jobs:
         with:
           node-version: '22.x'
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm test -- --run --coverage
       - name: Upload coverage
@@ -128,6 +131,7 @@ jobs:
         with:
           node-version: '22.x'
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check:env
       - name: Build
