@@ -116,7 +116,7 @@ class ExtendedBackupManager extends BackupManager {
   async restoreBackup(payload: any, { strategy = 'prompt' } = {}) {
     if (payload?.inkwellBackup !== 1) throw new Error('Invalid backup file');
     const { projects, chapters, settings } = payload.data ?? {};
-    await this.store.restore({ projects, chapters, settings }, { strategy });
+    return await this.store.restore({ projects, chapters, settings }, { strategy });
   }
 }
 
@@ -216,7 +216,8 @@ export default function BackupPanel({ performBackup }: BackupPanelProps) {
           setStatus('Restoring…');
           const text = await file.text();
           try {
-            const result = await mgr.store.restore(JSON.parse(text).data, { strategy: 'prompt' });
+            // Use schema validation and error handling from ExtendedBackupManager
+            const result = await mgr.restoreBackup(JSON.parse(text), { strategy: 'prompt' });
             setRestoreResults(result);
             setStatus('Done');
             setMessage({ text: 'Restore completed.', type: 'success' });
