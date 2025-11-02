@@ -64,7 +64,9 @@ export function waitForAnchors(
 
     // Cleanup on timeout
     setTimeout(() => {
-      cancelAnimationFrame(rafId);
+      if (typeof cancelAnimationFrame !== 'undefined') {
+        cancelAnimationFrame(rafId);
+      }
       resolve(false);
     }, timeout + 100);
   });
