@@ -25,6 +25,7 @@ export default defineConfig({
       'src/context/**/*.{test,spec}.tsx',
       'src/adapters/**/*.{test,spec}.ts', // v0.6.0 adapter tests
       'src/model/**/*.{test,spec}.ts', // v0.6.0 model gateway tests
+      'src/editor/**/*.{test,spec}.tsx', // v0.8.0 editor tests
     ],
     coverage: {
       enabled: true,

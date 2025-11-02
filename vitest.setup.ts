@@ -24,6 +24,7 @@ const EXPECTED_ERROR_PATTERNS = [
   /ReactDOMTestUtils\.act.*is deprecated/,
   /An update to.*inside a test was not wrapped in act/,
   /ReferenceError: localStorage is not defined/,
+  /\[EnhancedChapterEditor\] Failed to autosave:/,
 ];
 
 function isExpectedError(message: string): boolean {

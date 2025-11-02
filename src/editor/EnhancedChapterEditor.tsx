@@ -10,7 +10,7 @@
  * - onChange event emission for parent components
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import useAutoSave from '../hooks/useAutoSave';
 import { wrapSaveWithTelemetry } from '../services/saveWithTelemetry';
@@ -34,31 +34,39 @@ export default function EnhancedChapterEditor({
   const [checksum, setChecksum] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
-  const saveWithTelemetry = useMemo(
-    () =>
-      wrapSaveWithTelemetry(async (id: string, body: string) => {
-        const res = await saveFn(id, body);
-        return res; // { checksum }
-      }),
-    [saveFn],
+  // When chapter ID changes, reset content and status for new chapter
+  useEffect(() => {
+    setContent(initialContent);
+    setChecksum(undefined);
+    setStatus('idle');
+  }, [chapterId, initialContent]);
+
+  const handleSave = useCallback(
+    async (latest: string) => {
+      try {
+        const wrappedSave = wrapSaveWithTelemetry(async (id: string, body: string) => {
+          const res = await saveFn(id, body);
+          return res;
+        });
+        const { checksum: next } = await wrappedSave(chapterId, latest);
+        setChecksum(next);
+        setStatus('saved');
+        onSaved?.();
+      } catch (e) {
+        console.error('[EnhancedChapterEditor] Failed to autosave:', e);
+        throw e;
+      }
+    },
+    [chapterId, saveFn, onSaved],
   );
 
   useAutoSave({
     value: content,
     delay: 750,
-    onSave: async (latest) => {
-      setStatus('saving');
-      try {
-        const { checksum: next } = await saveWithTelemetry(chapterId, latest);
-        setChecksum(next);
-        setStatus('saved');
-        onSaved?.();
-        // No return value needed
-      } catch (e) {
-        setStatus('error');
-        throw e;
-      }
-    },
+    onSave: handleSave,
+    onBeforeSave: () => setStatus('saving'),
+    onError: () => setStatus('error'),
+    flushOnUnmount: true,
   });
 
   // TODO: Wire TipTap editor here

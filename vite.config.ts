@@ -221,8 +221,7 @@ export default defineConfig({
   },
 
   optimizeDeps: {
-    include: ['react', 'react-dom'],
-    exclude: ['recharts'], // don't prebundle recharts
+    include: ['lucide-react'],
   },
 
   test: {
