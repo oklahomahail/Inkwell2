@@ -295,6 +295,6 @@ Create these after v0.8.0 ships:
 
 ---
 
-**Prepared by**: GitHub Copilot  
-**Date**: November 2, 2025  
+**Prepared by**: GitHub Copilot
+**Date**: November 2, 2025
 **Build**: Clean | Tests: 778/778 ✅ | Security: OK ✅
