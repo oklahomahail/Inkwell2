@@ -8,17 +8,19 @@ export function wrapSaveWithTelemetry(
     track('autosave.start', { chapterId, bytes: content.length });
     try {
       const res = await saveFn(chapterId, content);
+      const durationMs = Math.round(performance.now() - start);
       track('autosave.success', {
         chapterId,
         bytes: content.length,
-        durationMs: Math.round(performance.now() - start),
+        durationMs: Math.max(durationMs, 1), // Ensure minimum 1ms for telemetry
       });
       return res;
     } catch (error: any) {
+      const durationMs = Math.round(performance.now() - start);
       track('autosave.error', {
         chapterId,
         bytes: content.length,
-        durationMs: Math.round(performance.now() - start),
+        durationMs: Math.max(durationMs, 1), // Ensure minimum 1ms for telemetry
         errorCode: error?.code ?? 'UNKNOWN',
       });
       throw error;

@@ -1,12 +1,17 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import * as telemetryModule from '../telemetry';
 import { wrapSaveWithTelemetry } from '../saveWithTelemetry';
 
-const trackMock = vi.fn();
-vi.mock('../telemetry', () => ({ track: trackMock }));
-
 describe('wrapSaveWithTelemetry', () => {
-  it('should track start and success on resolve', async () => {
+  let trackMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    trackMock = vi.fn();
+    vi.spyOn(telemetryModule, 'track').mockImplementation(trackMock);
     trackMock.mockClear();
+  });
+
+  it('should track start and success on resolve', async () => {
     const saveFn = vi.fn().mockResolvedValue({ checksum: 'abc123' });
     const wrapped = wrapSaveWithTelemetry(saveFn);
     const content = 'hello world';
@@ -27,7 +32,6 @@ describe('wrapSaveWithTelemetry', () => {
   });
 
   it('should track start and error on reject', async () => {
-    trackMock.mockClear();
     const saveFn = vi.fn().mockRejectedValue({ code: 'FAIL' });
     const wrapped = wrapSaveWithTelemetry(saveFn);
     const content = 'fail content';
