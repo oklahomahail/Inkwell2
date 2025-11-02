@@ -69,6 +69,15 @@ jobs:
             echo "✅ No console.log found."
           fi
 
+      - name: Lucide import hygiene guard
+        run: |
+          if rg -n "lucide-react/(icons|native)" src; then
+            echo "❌ Avoid lucide subpath imports"
+            exit 1
+          else
+            echo "✅ Lucide imports clean"
+          fi
+
       - run: pnpm lint:ci
 
   typecheck:

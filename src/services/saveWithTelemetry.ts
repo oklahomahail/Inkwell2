@@ -1,4 +1,4 @@
-import { track } from './telemetry';
+import { track } from '@/services/telemetry';
 
 export function wrapSaveWithTelemetry(
   saveFn: (id: string, content: string) => Promise<{ checksum: string }>,
