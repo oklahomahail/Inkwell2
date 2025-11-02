@@ -1,0 +1,13 @@
+/Users/davehail/Developer/inkwell/index.html:11:    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/inkwell-favicon-32.png" />
+/Users/davehail/Developer/inkwell/index.html:12:    <link rel="icon" href="/assets/brand/inkwell-favicon.ico" />
+/Users/davehail/Developer/inkwell/index.html:13:    <link rel="apple-touch-icon" href="/assets/brand/inkwell-logo-icon-180.png" />
+/Users/davehail/Developer/inkwell/index.html:14:    <link rel="manifest" href="/site.webmanifest" />
+/Users/davehail/Developer/inkwell/public/assets/brand/README.md:7:### Icons & Favicons
+/Users/davehail/Developer/inkwell/public/assets/brand/README.md:8:- `inkwell-favicon.ico` - Browser favicon (16x16, 32x32)
+/Users/davehail/Developer/inkwell/public/assets/brand/README.md:9:- `inkwell-favicon-32.png` - 32x32 favicon
+/Users/davehail/Developer/inkwell/public/assets/brand/README.md:38:- `/index.html` - Favicons and OG images
+/Users/davehail/Developer/inkwell/public/assets/brand/README.md:39:- `/public/site.webmanifest` - PWA icons
+/Users/davehail/Developer/inkwell/public/assets/brand/README.md:49:- [favicon.io](https://favicon.io/) for favicons
+/Users/davehail/Developer/inkwell/public/assets/brand/README.md:58:- Icons should be recognizable at small sizes (16x16)
+/Users/davehail/Developer/inkwell/public/site.webmanifest:10:  "icons": [
+/Users/davehail/Developer/inkwell/public/site.webmanifest:12:      "src": "/assets/brand/inkwell-favicon.ico",
