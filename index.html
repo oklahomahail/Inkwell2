@@ -28,10 +28,8 @@
         if (savedTheme) {
           theme = savedTheme;
         } else {
-          // Respect system preference if no saved theme
-          const prefersDark =
-            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          theme = prefersDark ? 'dark' : 'light';
+          // Default to light mode (brand decision)
+          theme = 'light';
         }
 
         // Apply theme immediately (before page render)

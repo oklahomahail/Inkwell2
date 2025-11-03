@@ -262,9 +262,9 @@ Before marking deployment as complete:
 - [ ] Theme defaulting correctly
 - [ ] Documentation updated (this file committed to repo)
 
-**Deployed by**: ******\_\_\_******  
-**Date/Time**: ******\_\_\_******  
-**Version**: ******\_\_\_******  
+**Deployed by**: **\*\***\_\_\_**\*\***  
+**Date/Time**: **\*\***\_\_\_**\*\***  
+**Version**: **\*\***\_\_\_**\*\***  
 **Rollback tested**: [ ] Yes [ ] No
 
 ---

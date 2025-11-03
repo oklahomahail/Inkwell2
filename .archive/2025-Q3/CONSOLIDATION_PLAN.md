@@ -1,4 +1,5 @@
 # Inkwell Codebase Consolidation Plan
+
 ## v0.6.0 - Stability, Structure, and Story Organization
 
 **Generated**: 2025-10-30
@@ -26,17 +27,20 @@ Deep dive audit revealed **critical duplications and conflicts** that risk data 
 ### Goal: Single source of truth for data models
 
 ### 1.1 Project Type Unification
+
 **Files to modify:**
+
 - `src/context/AppContext.tsx` (remove local Project interface)
 - `src/types/project.ts` (keep EnhancedProject as canonical)
 - All imports across codebase
 
 **Changes:**
+
 ```typescript
 // REMOVE from AppContext.tsx:
 export interface Project {
-  chapters: any;        // ❌ any type!
-  characters: never[];  // ❌ never[]!
+  chapters: any; // ❌ any type!
+  characters: never[]; // ❌ never[]!
   // ...
 }
 
@@ -45,7 +49,7 @@ export interface Project {
   id: string;
   name: string;
   description: string;
-  chapters: Chapter[];     // ✅ properly typed
+  chapters: Chapter[]; // ✅ properly typed
   characters: Character[]; // ✅ properly typed
   // ...
 }
@@ -58,11 +62,14 @@ export interface Project {
 ---
 
 ### 1.2 Chapter Type Consolidation
+
 **Files to modify:**
+
 - `src/types/writing.ts` (consolidate Chapter types)
 - Remove Scene-based types entirely
 
 **Final type structure:**
+
 ```typescript
 // Core chapter types (KEEP)
 export interface ChapterMeta {
@@ -104,11 +111,14 @@ export type WritingChapter = Chapter;    // ❌ Remove alias
 ### Goal: Single, clear storage architecture
 
 ### 2.1 Resolve `EnhancedStorageService` Name Collision
+
 **Files to rename/consolidate:**
+
 - `src/services/storageService.ts` → REMOVE (merge into enhanced)
 - `src/services/enhancedStorageService.ts` → Rename to `projectStorageService.ts`
 
 **Changes:**
+
 1. Merge functionality from both into single service
 2. Remove `@ts-nocheck` directive from storageService
 3. Keep enhanced version's safety features:
@@ -126,6 +136,7 @@ export type WritingChapter = Chapter;    // ❌ Remove alias
 ### 2.2 Choose Storage Strategy
 
 **Option A: Full IndexedDB Migration** (RECOMMENDED)
+
 - Migrate all project data to IndexedDB
 - Keep localStorage only for preferences (theme, UI state)
 - Use chaptersService architecture for all data
@@ -133,6 +144,7 @@ export type WritingChapter = Chapter;    // ❌ Remove alias
 - Risk: Migration script required for existing users
 
 **Option B: Hybrid Approach**
+
 - Projects metadata in localStorage
 - Chapter content in IndexedDB (current state)
 - Keep dual system but document clearly
@@ -145,12 +157,15 @@ export type WritingChapter = Chapter;    // ❌ Remove alias
 ---
 
 ### 2.3 Backup System Consolidation
+
 **Files to consolidate:**
+
 - `src/services/backupService.ts` (REMOVE)
 - `src/services/backupServices.ts` (REMOVE - appears to be duplicate file)
 - `src/services/backupExport.ts` (KEEP - most complete)
 
 **Changes:**
+
 1. Use `backupExport.ts` as canonical backup system
 2. Remove generic backup services
 3. Integrate backup hooks into main storage service
@@ -167,7 +182,9 @@ export type WritingChapter = Chapter;    // ❌ Remove alias
 ### Goal: Remove scene-based system entirely
 
 ### 3.1 Component Removal
+
 **Files to REMOVE:**
+
 - `src/components/Writing/EnhancedWritingEditor.tsx`
 - `src/components/Panels/WritingPanel.tsx` (scene-based)
 - `src/components/Writing/SceneEditor.tsx`
@@ -177,9 +194,11 @@ export type WritingChapter = Chapter;    // ❌ Remove alias
 - `src/components/Writing/SceneNavigationPanel.tsx`
 
 **Files to UPDATE:**
+
 - `src/components/Views/WritingView.tsx` → use ChapterWritingPanel
 
 **Changes:**
+
 ```typescript
 // BEFORE (WritingView.tsx):
 import EnhancedWritingEditor from '../Writing/EnhancedWritingEditor';
@@ -197,10 +216,13 @@ return <ChapterWritingPanel projectId={currentProjectId} />;
 ---
 
 ### 3.2 Remove Scene Storage Methods
+
 **Files to modify:**
+
 - `src/services/storageService.ts` (or projectStorageService after rename)
 
 **Methods to REMOVE:**
+
 - `saveScene()`
 - `updateScene()`
 - `loadScenes()`
@@ -212,12 +234,15 @@ return <ChapterWritingPanel projectId={currentProjectId} />;
 ---
 
 ### 3.3 Update Export Services
+
 **Files to modify:**
+
 - `src/services/exportService.ts`
 - `src/services/professionalExportService.ts`
 - `src/exports/manuscriptAssembler.ts`
 
 **Changes:**
+
 - Remove scene-level export
 - Update to work with chapters only
 - Simplify manuscript assembly (no scene joining needed)
@@ -231,10 +256,13 @@ return <ChapterWritingPanel projectId={currentProjectId} />;
 ## Phase 4: State Management Cleanup (Week 4)
 
 ### 4.1 Remove Incomplete Zustand Store
+
 **File to REMOVE:**
+
 - `src/stores/useChaptersStore.ts` (incomplete, duplicates ChaptersContext)
 
 **Files to check for imports:**
+
 - Search codebase for `useChaptersStore` usage
 - Update any imports to use ChaptersContext instead
 
@@ -244,28 +272,34 @@ return <ChapterWritingPanel projectId={currentProjectId} />;
 ---
 
 ### 4.2 Document Context Architecture
+
 **Files to CREATE:**
+
 - `docs/architecture/STATE_MANAGEMENT.md`
 
 **Content:**
+
 ```markdown
 # State Management Architecture
 
 ## Context Providers
 
 ### AppContext
+
 - **Purpose**: Global app state
 - **Manages**: Projects, current project, theme, view routing
 - **Storage**: localStorage (`inkwell_projects`, `inkwell_current_project_id`)
 - **Use when**: Accessing project list, theme, navigation
 
 ### ChaptersContext
+
 - **Purpose**: Chapter UI state
 - **Manages**: Active chapter, chapter list for project
 - **Storage**: localStorage (`lastChapter-{projectId}`)
 - **Use when**: Chapter navigation, chapter metadata
 
 ### EditorContext
+
 - **Purpose**: Track active TipTap editor instance
 - **Manages**: Current editor ref
 - **Storage**: None (runtime only)
@@ -274,6 +308,7 @@ return <ChapterWritingPanel projectId={currentProjectId} />;
 ## Services (Not State)
 
 ### chaptersService
+
 - **Purpose**: Chapter persistence
 - **Storage**: IndexedDB
 - **Use when**: Saving/loading chapter content
@@ -287,7 +322,9 @@ return <ChapterWritingPanel projectId={currentProjectId} />;
 ## Phase 5: Editor Hierarchy Documentation (Week 4)
 
 ### 5.1 Audit Editor Components
+
 **Need to read and document:**
+
 - TipTapEditor.tsx (base?)
 - WritingEditor.tsx (wrapper?)
 - FocusModeEditor.tsx (variant?)
@@ -296,6 +333,7 @@ return <ChapterWritingPanel projectId={currentProjectId} />;
 - FallbackEditor.tsx (error boundary)
 
 **Create diagram showing:**
+
 ```
 ┌─────────────────────────────────────┐
 │     ChapterWritingPanel             │
@@ -317,6 +355,7 @@ Utilities:
 ```
 
 **Files to CREATE:**
+
 - `docs/architecture/EDITOR_COMPONENTS.md`
 
 **Risk**: NONE - documentation only
@@ -327,28 +366,34 @@ Utilities:
 ## Phase 6: Search Service Documentation (Week 4)
 
 ### 6.1 Document Search Architecture
+
 **Files to CREATE:**
+
 - `docs/architecture/SEARCH_SYSTEM.md`
 
 **Content:**
+
 ```markdown
 # Search System Architecture
 
 ## Layered Design (Bottom to Top)
 
 ### Layer 1: searchService.ts
+
 - **Purpose**: Core search engine
 - **Algorithm**: BM25 ranking with inverted index
 - **Use when**: Building custom search features
 - **API**: `search(query, corpus)` → ranked results
 
 ### Layer 2: enhancedSearchService.ts
+
 - **Purpose**: Performance optimization layer
 - **Features**: Web Worker delegation, main-thread fallback
 - **Use when**: Need performant search with large corpus
 - **API**: Same as searchService but async
 
 ### Layer 3: smartSearchService.ts
+
 - **Purpose**: AI-enhanced semantic search
 - **Features**: Query parsing, suggestions, history, Claude ranking
 - **Use when**: User-facing search (recommended)
@@ -369,6 +414,7 @@ Utilities:
 ## Testing Strategy
 
 ### Regression Test Suite
+
 **Must pass before consolidation is complete:**
 
 1. **Project CRUD**
@@ -409,6 +455,7 @@ Utilities:
 **Script: `scripts/migrate-v0.6.0.ts`**
 
 Must handle:
+
 1. **Scene → Chapter migration**
    - Detect projects with Scene[] data
    - Convert Scene → Chapter (flatten hierarchy)
@@ -427,6 +474,7 @@ Must handle:
    - Add missing required fields with defaults
 
 **Testing:**
+
 - Create test projects with old data format
 - Run migration
 - Verify all data accessible in new format
@@ -437,6 +485,7 @@ Must handle:
 ## Rollout Plan
 
 ### Phase Sequence (4 weeks)
+
 ```
 Week 1: Critical Types     ████████░░░░
 Week 2: Storage            ░░░░░░░░████
@@ -445,13 +494,16 @@ Week 4: Docs & Cleanup     ░░░░░░░░░░░░░░░░█�
 ```
 
 ### Risk Mitigation
+
 1. **Create feature flag**: `ENABLE_V06_CONSOLIDATION`
 2. **Dual-write period**: Write to both old and new systems for 1 week
 3. **Backup enforcement**: Force backup before any migration
 4. **Staged rollout**: Incremental phases with testing gates
 
 ### Rollback Strategy
+
 If critical issues found:
+
 1. Revert to tagged version `v0.5.x`
 2. User data preserved in old format (dual-write ensures this)
 3. Fix issues and retry migration
@@ -461,17 +513,20 @@ If critical issues found:
 ## Success Metrics
 
 ### Code Quality
+
 - ✅ Zero `@ts-nocheck` directives
 - ✅ Zero `any` types in core interfaces
 - ✅ <5 ESLint warnings
 - ✅ 100% TypeScript strict mode compliance
 
 ### Performance
+
 - ✅ Chapter load time <100ms
 - ✅ Autosave debounce working (no excessive saves)
 - ✅ Search results in <200ms for 100k word corpus
 
 ### Data Integrity
+
 - ✅ Zero reports of data loss
 - ✅ Successful migration for 100% of test projects
 - ✅ Backup/restore cycle 100% successful

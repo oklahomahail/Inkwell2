@@ -1,4 +1,5 @@
 # Type Consolidation Status Report
+
 ## Phase 1: Project and Chapter Types
 
 **Date**: 2025-10-30
@@ -9,6 +10,7 @@
 ## ✅ Completed
 
 ### 1. Project Type Consolidation
+
 - **DONE**: Created canonical `Project` type in `src/types/project.ts`
 - **DONE**: Made EnhancedProject extend Project
 - **DONE**: Updated AppContext to import Project from types/project.ts
@@ -20,6 +22,7 @@
 ---
 
 ### 2. Chapter Type - Removed scenes property
+
 - **DONE**: Removed `scenes: any` from Chapter in project.ts
 - **DONE**: Added re-export of Chapter from project.ts in writing.ts
 - **DONE**: Marked Scene as @deprecated in writing.ts
@@ -34,6 +37,7 @@
 ### 1. THREE Different Character Types!
 
 **Location 1: `src/types/project.ts`** (Detailed)
+
 ```typescript
 export interface Character {
   id: string;
@@ -54,6 +58,7 @@ export interface Character {
 ```
 
 **Location 2: `src/types/persistence.ts`** (Minimal - Supabase?)
+
 ```typescript
 export interface Character extends BaseEntity {
   name: string;
@@ -63,6 +68,7 @@ export interface Character extends BaseEntity {
 ```
 
 **Location 3: `src/types/writing.ts`** (Flexible)
+
 ```typescript
 export interface Character extends BaseEntity {
   name: string;
@@ -92,12 +98,14 @@ This suggests there's YET ANOTHER Character type with `motivation`, `conflict`, 
 ### 3. WritingChapter vs Chapter Confusion
 
 **Current State**:
+
 - `WritingChapter` is an alias for `Chapter` in writing.ts
 - But now `Chapter` is re-exported from project.ts
 - Old code expected `Chapter.scenes: Scene[]`
 - New code has `Chapter.content: string`
 
 **Files Still Using Scene-Based Chapter**:
+
 - `src/components/Panels/WritingPanel.tsx` - creates mock Chapter with scenes
 - `src/components/timeline/SceneLinkageSuggestions.tsx` - accesses `chapter.scenes`
 - `src/hooks/useWriting.tsx` - type conversion error with Chapter[]
@@ -131,6 +139,7 @@ This suggests there's YET ANOTHER Character type with `motivation`, `conflict`, 
 **Decision Required**: Which Character type is canonical?
 
 **Recommendation**:
+
 - Use `project.ts` Character (most detailed) as canonical
 - Rename `persistence.ts` Character → `PersistedCharacter` (Supabase storage format)
 - Remove `writing.ts` Character (was just re-exporting anyway)
@@ -140,22 +149,25 @@ This suggests there's YET ANOTHER Character type with `motivation`, `conflict`, 
 **Issue**: Components creating partial EnhancedProject objects
 
 **Files to fix**:
+
 - `src/components/Panels/WritingPanel.tsx:187`
 - `src/components/Writing/EnhancedWritingEditor.tsx:259,311`
 
 **Solution**: Provide default values for required arrays:
+
 ```typescript
 const enhancedProject: EnhancedProject = {
   ...currentProject,
   characters: currentProject.characters || [],
   chapters: currentProject.chapters || [],
   // ... other required fields
-}
+};
 ```
 
 ### Priority 3: Remove Scene-based Code
 
 **Components to update/remove**:
+
 1. `WritingPanel.tsx` - Remove scene logic, use chapter content directly
 2. `SceneLinkageSuggestions.tsx` - Update to not access `chapter.scenes`
 3. `TemplateSelector.tsx` - Fix template creation
@@ -164,11 +176,13 @@ const enhancedProject: EnhancedProject = {
 ### Priority 4: Update ChapterMeta/ChapterDoc System
 
 **Current State**:
+
 - `ChapterMeta` and `ChapterDoc` in writing.ts are for IndexedDB split storage
 - `Chapter` in project.ts is the "full" in-memory representation
 - These should remain separate (different purposes)
 
 **Clarification needed**:
+
 - ChapterMeta is lightweight for lists
 - ChapterDoc is heavy content for editing
 - Chapter is full type for services
@@ -180,22 +194,26 @@ This is CORRECT - keep all three but document the distinction!
 ## 🎯 Recommended Action Plan
 
 ### Step 1: Character Type Resolution (30 min)
+
 1. Rename persistence.ts Character → PersistedCharacter
 2. Keep project.ts Character as canonical
 3. Update imports in components
 
 ### Step 2: Fix EnhancedProject Instantiation (1 hour)
+
 1. Add helper function `createEnhancedProject(project: Project): EnhancedProject`
 2. Provides defaults for all required fields
 3. Update 3 files creating EnhancedProject
 
 ### Step 3: Remove Scene Access (2 hours)
+
 1. Update WritingPanel to not create mock scenes
 2. Fix SceneLinkageSuggestions
 3. Fix TemplateSelector
 4. Fix useWriting type conversion
 
 ### Step 4: Run Full Typecheck (15 min)
+
 1. Verify all errors resolved
 2. Document any remaining issues
 

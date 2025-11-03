@@ -748,6 +748,13 @@ main[data-tour-id='dashboard'] {
     0 0 20px 6px rgb(212 175 55 / 50%);
 }
 
+#spotlight-tooltip {
+  @apply fixed z-[10000] pointer-events-auto;
+  @apply bg-inkwell-navy dark:bg-slate-800 rounded-lg shadow-2xl;
+  @apply p-4 max-w-sm;
+  @apply border-2 border-inkwell-gold;
+}
+
 /* ============================================================================
    DARK MODE FLASH PREVENTION
    ============================================================================

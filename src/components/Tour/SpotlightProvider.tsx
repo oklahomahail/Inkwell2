@@ -23,7 +23,9 @@ export const SpotlightProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const showStep = useCallback(
     (index: number) => {
       const step = tourConfig[index];
-      if (!step) return stop();
+      if (!step) {
+        return stop();
+      }
 
       // Clean up prior overlays/tooltips
       document.getElementById('spotlight-overlay')?.remove();
@@ -31,8 +33,19 @@ export const SpotlightProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       const target = document.querySelector(step.target) as HTMLElement | null;
       if (!target) {
-        console.warn(`Missing anchor for step ${index}: ${step.target}`);
-        stop();
+        console.warn(`[Spotlight] Missing anchor for step ${index}: ${step.target}`);
+        console.warn(
+          '[Spotlight] Available spotlight IDs:',
+          Array.from(document.querySelectorAll('[data-spotlight-id]')).map((el) =>
+            el.getAttribute('data-spotlight-id'),
+          ),
+        );
+        // Don't stop immediately - try next step in case this one is just not visible
+        if (index + 1 < tourConfig.length) {
+          setTimeout(() => showStep(index + 1), 100);
+        } else {
+          stop();
+        }
         return;
       }
 
@@ -109,19 +122,37 @@ export const SpotlightProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const anchors = document.querySelectorAll('[data-spotlight-id]');
       if (anchors.length > 0) {
         showStep(0);
-      } else if (tries++ < 10) setTimeout(attempt, 250);
-      else console.warn('Spotlight: no anchors found after retries');
+      } else if (tries++ < 10) {
+        setTimeout(attempt, 250);
+      } else {
+        console.warn('[Spotlight] No anchors found after 10 retries');
+        console.warn('[Spotlight] Make sure elements have data-spotlight-id attributes');
+      }
     };
     attempt();
   }, [showStep]);
 
   React.useEffect(() => {
+    // Listen for tour start events from the tour launcher system
+    const handleStartTour = (_e: CustomEvent) => {
+      start();
+    };
+
+    const handleResetTour = (_e: CustomEvent) => {
+      stop();
+    };
+
+    window.addEventListener('inkwell:start-tour', handleStartTour as EventListener);
+    window.addEventListener('inkwell:reset-tour', handleResetTour as EventListener);
+
     // Clean up overlays on unmount
     return () => {
+      window.removeEventListener('inkwell:start-tour', handleStartTour as EventListener);
+      window.removeEventListener('inkwell:reset-tour', handleResetTour as EventListener);
       document.getElementById('spotlight-overlay')?.remove();
       document.getElementById('spotlight-tooltip')?.remove();
     };
-  }, []);
+  }, [start, stop]);
 
   const value = { start, stop };
   return <SpotlightContext.Provider value={value}>{children}</SpotlightContext.Provider>;
