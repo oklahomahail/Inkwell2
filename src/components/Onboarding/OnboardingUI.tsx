@@ -33,20 +33,32 @@ export function OnboardingUI() {
 
   // Auto-show welcome modal for first-time users
   useEffect(() => {
+    console.warn('[OnboardingUI] Route check:', {
+      pathname: location.pathname,
+      allowed: FIRST_TIME_ALLOWED_ROUTES,
+      isAllowed: FIRST_TIME_ALLOWED_ROUTES.includes(location.pathname),
+      tourDone: isTourDone('spotlight'),
+      shouldShow: shouldShowModal(),
+    });
+
     // Only check on allowed routes
     if (!FIRST_TIME_ALLOWED_ROUTES.includes(location.pathname)) {
+      console.warn('[OnboardingUI] Not on allowed route, skipping modal');
       return undefined;
     }
 
     // Check if tour is already completed
     if (isTourDone('spotlight')) {
+      console.warn('[OnboardingUI] Tour already done, skipping modal');
       return undefined;
     }
 
     // Check gate conditions
     if (shouldShowModal()) {
+      console.warn('[OnboardingUI] Gate conditions met, will show modal in 1s');
       // Small delay to ensure page is loaded
       const timer = setTimeout(() => {
+        console.warn('[OnboardingUI] Showing welcome modal now');
         setShowWelcome(true);
 
         // Track analytics
@@ -61,6 +73,7 @@ export function OnboardingUI() {
 
       return () => clearTimeout(timer);
     }
+    console.warn('[OnboardingUI] Gate conditions not met, skipping modal');
     return undefined;
   }, [location.pathname, shouldShowModal]);
 
@@ -77,6 +90,18 @@ export function OnboardingUI() {
 
   const handleStartTour = () => {
     console.warn('[OnboardingUI] Starting tour, current route:', location.pathname);
+
+    // If not on dashboard, this shouldn't happen - but handle it gracefully
+    if (location.pathname !== '/dashboard') {
+      console.error(
+        '[OnboardingUI] ERROR: Tour started from non-dashboard route:',
+        location.pathname,
+      );
+      console.error('[OnboardingUI] Dashboard components are not mounted yet!');
+      // Close modal and let the route redirect happen naturally
+      setShowWelcome(false);
+      return;
+    }
 
     // Mark tour as active to prevent modal from re-opening
     setTourActive(true);
@@ -100,6 +125,10 @@ export function OnboardingUI() {
 
         if (anchors.length === 0) {
           console.error('[OnboardingUI] No tour anchors found! Dashboard may not be mounted.');
+          console.error(
+            '[OnboardingUI] Available elements:',
+            document.body.innerHTML.substring(0, 500),
+          );
         }
 
         // Start spotlight tour with the new system
