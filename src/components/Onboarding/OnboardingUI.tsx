@@ -76,6 +76,8 @@ export function OnboardingUI() {
   }, [completeOnboarding, setTourActive]);
 
   const handleStartTour = () => {
+    console.warn('[OnboardingUI] Starting tour, current route:', location.pathname);
+
     // Mark tour as active to prevent modal from re-opening
     setTourActive(true);
     setShowWelcome(false);
@@ -89,12 +91,20 @@ export function OnboardingUI() {
       console.warn('Failed to track tour start analytics:', error);
     }
 
-    // Delay to ensure modal is fully closed
+    // Longer delay to ensure dashboard components are fully mounted
     requestAnimationFrame(() => {
       setTimeout(() => {
+        // Check if we have the required anchors before starting
+        const anchors = document.querySelectorAll('[data-spotlight-id]');
+        console.warn('[OnboardingUI] Found', anchors.length, 'spotlight anchors');
+
+        if (anchors.length === 0) {
+          console.error('[OnboardingUI] No tour anchors found! Dashboard may not be mounted.');
+        }
+
         // Start spotlight tour with the new system
         startTour('spotlight', { source: 'welcome', restart: true });
-      }, 100);
+      }, 500); // Increased from 100ms to 500ms
     });
   };
 
