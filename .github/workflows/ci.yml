@@ -44,7 +44,7 @@ jobs:
               - 'Dockerfile'
 
   lint:
-    name: Lint
+    name: Lint & Code Quality
     needs: [detect-changes]
     if: ${{ needs.detect-changes.outputs.code == 'true' || github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
@@ -82,7 +82,7 @@ jobs:
       - run: pnpm lint:ci
 
   typecheck:
-    name: Typecheck
+    name: Type Safety
     needs: [detect-changes]
     if: ${{ needs.detect-changes.outputs.code == 'true' || github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
@@ -101,7 +101,7 @@ jobs:
       - run: pnpm typecheck
 
   test:
-    name: Test
+    name: Unit Tests & Coverage
     needs: [detect-changes]
     if: ${{ needs.detect-changes.outputs.code == 'true' || github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
@@ -126,7 +126,7 @@ jobs:
         if: always()
 
   build:
-    name: Build
+    name: Build & Production Ready
     needs: [detect-changes]
     if: ${{ needs.detect-changes.outputs.code == 'true' || github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
