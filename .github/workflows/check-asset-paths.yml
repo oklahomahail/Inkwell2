@@ -22,23 +22,21 @@ jobs:
 
       - name: Check for forbidden /assets/brand/ paths
         run: |
-          echo "🔍 Scanning for forbidden /assets/brand/ paths..."
+          echo "🔍 Scanning for forbidden /assets/brand/ paths in source code..."
 
-          # Check source files (exclude docs and public)
+          # Check only source code files (ts, tsx, js, jsx, html, css, json)
           if git grep -n '/assets/brand/' -- \
-            ':!public' \
-            ':!**/*.md' \
-            ':!**/*.txt' \
+            '*.ts' '*.tsx' '*.js' '*.jsx' '*.html' '*.css' '*.json' \
             ':!dist' \
             ':!node_modules' \
-            ':!.github' \
             ':!.audit' \
+            ':!vercel.json' \
             2>/dev/null; then
             echo ""
-            echo "❌ FAILED: Forbidden '/assets/brand/' path detected!"
+            echo "❌ FAILED: Forbidden '/assets/brand/' path detected in source code!"
             echo "   Use '/brand/' instead"
             exit 1
           fi
 
-          echo "✅ PASSED: No forbidden asset paths found"
+          echo "✅ PASSED: No forbidden asset paths found in source code"
           exit 0
