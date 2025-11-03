@@ -117,10 +117,13 @@ export const SpotlightProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   );
 
   const start = useCallback(() => {
+    console.warn('[SpotlightProvider] start() called');
     let tries = 0;
     const attempt = () => {
       const anchors = document.querySelectorAll('[data-spotlight-id]');
+      console.warn(`[SpotlightProvider] Attempt ${tries + 1}: Found ${anchors.length} anchors`);
       if (anchors.length > 0) {
+        console.warn('[SpotlightProvider] Starting showStep(0)');
         showStep(0);
       } else if (tries++ < 10) {
         setTimeout(attempt, 250);
@@ -134,16 +137,20 @@ export const SpotlightProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   React.useEffect(() => {
     // Listen for tour start events from the tour launcher system
-    const handleStartTour = (_e: CustomEvent) => {
+    const handleStartTour = (e: CustomEvent) => {
+      console.warn('[SpotlightProvider] Received inkwell:start-tour event', e.detail);
       start();
     };
 
-    const handleResetTour = (_e: CustomEvent) => {
+    const handleResetTour = (e: CustomEvent) => {
+      console.warn('[SpotlightProvider] Received inkwell:reset-tour event', e.detail);
       stop();
     };
 
+    console.warn('[SpotlightProvider] Setting up event listeners');
     window.addEventListener('inkwell:start-tour', handleStartTour as EventListener);
     window.addEventListener('inkwell:reset-tour', handleResetTour as EventListener);
+    console.warn('[SpotlightProvider] Event listeners registered');
 
     // Clean up overlays on unmount
     return () => {

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Inkwell Cache</title>
+</head>
+<body>
+    <h1>Clearing Inkwell Cache...</h1>
+    <div id="status"></div>
+    <script>
+        const status = document.getElementById('status');
+        
+        // Clear localStorage
+        localStorage.clear();
+        status.innerHTML += '<p>✅ localStorage cleared</p>';
+        
+        // Clear sessionStorage
+        sessionStorage.clear();
+        status.innerHTML += '<p>✅ sessionStorage cleared</p>';
+        
+        // Try to clear IndexedDB
+        if ('indexedDB' in window) {
+            indexedDB.databases().then(databases => {
+                databases.forEach(db => {
+                    if (db.name) {
+                        indexedDB.deleteDatabase(db.name);
+                        status.innerHTML += `<p>✅ IndexedDB "${db.name}" deleted</p>`;
+                    }
+                });
+            }).catch(err => {
+                status.innerHTML += `<p>⚠️ Could not clear IndexedDB: ${err}</p>`;
+            });
+        }
+        
+        status.innerHTML += '<p><strong>Cache cleared!</strong></p>';
+        status.innerHTML += '<p>Now do a hard refresh: Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows)</p>';
+        status.innerHTML += '<p><a href="/">Return to Inkwell</a></p>';
+    </script>
+</body>
+</html>

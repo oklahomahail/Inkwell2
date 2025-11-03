@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 // src/tour/useTourRegistration.ts - Hook to register tours on app boot
-
 
 import { registerTours, bindTourShortcut, handleTourDeepLink } from './tourLauncher';
 
@@ -16,13 +15,15 @@ export function useTourRegistration() {
     registerTours({
       spotlight: {
         start: (opts) => {
-          devLog.debug('[useTourRegistration] Starting Spotlight Tour', opts);
+          console.warn('[useTourRegistration] Starting Spotlight Tour', opts);
 
           // Dispatch custom event that the tour provider can listen to
           const event = new CustomEvent('inkwell:start-tour', {
             detail: { tourId: 'spotlight', opts },
           });
+          console.warn('[useTourRegistration] Dispatching inkwell:start-tour event');
           window.dispatchEvent(event);
+          console.warn('[useTourRegistration] Event dispatched');
         },
         reset: () => {
           devLog.debug('[useTourRegistration] Resetting Spotlight Tour');
