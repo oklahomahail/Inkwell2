@@ -18,44 +18,44 @@ type Props = {
 
 const ASSET_MAP: Record<LogoVariant, { src: string; aspectRatio: number; fallback?: string }> = {
   'mark-light': {
-    src: '/assets/brand/inkwell-wordmark.svg',
+    src: '/brand/inkwell-wordmark.svg',
     aspectRatio: 4,
-    fallback: '/assets/brand/inkwell-lockup-dark.svg',
+    fallback: '/brand/inkwell-lockup-dark.svg',
   },
   'mark-dark': {
-    src: '/assets/brand/inkwell-lockup-dark.svg',
+    src: '/brand/inkwell-lockup-dark.svg',
     aspectRatio: 4,
-    fallback: '/assets/brand/inkwell-wordmark.svg',
+    fallback: '/brand/inkwell-wordmark.svg',
   },
   'wordmark-light': {
-    src: '/assets/brand/inkwell-wordmark.svg',
+    src: '/brand/inkwell-wordmark.svg',
     aspectRatio: 4,
-    fallback: '/assets/brand/inkwell-lockup-dark.svg',
+    fallback: '/brand/inkwell-lockup-dark.svg',
   },
   'wordmark-dark': {
-    src: '/assets/brand/inkwell-lockup-dark.svg',
+    src: '/brand/inkwell-lockup-dark.svg',
     aspectRatio: 4,
-    fallback: '/assets/brand/inkwell-wordmark.svg',
+    fallback: '/brand/inkwell-wordmark.svg',
   },
   'outline-dark': {
-    src: '/assets/brand/inkwell-lockup-dark.svg',
+    src: '/brand/inkwell-lockup-dark.svg',
     aspectRatio: 4,
-    fallback: '/assets/brand/inkwell-wordmark.svg',
+    fallback: '/brand/inkwell-wordmark.svg',
   },
   'outline-light': {
-    src: '/assets/brand/inkwell-wordmark.svg',
+    src: '/brand/inkwell-wordmark.svg',
     aspectRatio: 4,
-    fallback: '/assets/brand/inkwell-lockup-dark.svg',
+    fallback: '/brand/inkwell-lockup-dark.svg',
   },
   'svg-feather-gold': {
-    src: '/assets/brand/inkwell-wordmark.svg',
+    src: '/brand/inkwell-wordmark.svg',
     aspectRatio: 4,
-    fallback: '/assets/brand/inkwell-lockup-dark.svg',
+    fallback: '/brand/inkwell-lockup-dark.svg',
   },
   'svg-feather-navy': {
-    src: '/assets/brand/inkwell-lockup-dark.svg',
+    src: '/brand/inkwell-lockup-dark.svg',
     aspectRatio: 4,
-    fallback: '/assets/brand/inkwell-wordmark.svg',
+    fallback: '/brand/inkwell-wordmark.svg',
   },
 };
 
@@ -79,7 +79,7 @@ export default function Logo({ variant, size = 48, className }: Props) {
         }
         // Last resort: use the wordmark
         else if (!currentSrc.includes('inkwell-wordmark.svg')) {
-          e.currentTarget.src = '/assets/brand/inkwell-wordmark.svg';
+          e.currentTarget.src = '/brand/inkwell-wordmark.svg';
         }
         // Prevent infinite error loop
         else {

@@ -10,7 +10,7 @@ type Props = {
 export default function AuthHeader({
   title = 'Sign in to Inkwell',
   subtitle = 'Welcome back, pick up where you left off.',
-  logoSrc = '/assets/brand/inkwell-logo-horizontal.png',
+  logoSrc = '/brand/inkwell-logo-horizontal.png',
   className = '',
 }: Props) {
   return (

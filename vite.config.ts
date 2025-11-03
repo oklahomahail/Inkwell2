@@ -136,20 +136,12 @@ export default defineConfig({
                 },
               ],
               // Ensure core application assets are precached - update revision to force new SW installation
-              // NOTE: manifest.json is already included by Workbox via globPatterns, so we don't add it here
-              // to avoid "add-to-cache-list-conflicting-entries" error
+              // NOTE: site.webmanifest is already included by Workbox via globPatterns, so we only cache root here
               additionalManifestEntries: [
                 { url: '/', revision: `v2025-10-27.1-${Date.now().toString()}` },
-                { url: '/site.webmanifest', revision: `v2025-10-27.1-${Date.now().toString()}` },
               ],
             },
-            includeAssets: [
-              'favicon.ico',
-              'icon-192.png',
-              'icon-512.png',
-              'site.webmanifest',
-              'icons/*.png',
-            ],
+            includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'icons/*.png'],
             manifest: {
               name: 'Inkwell - Professional Writing Studio',
               short_name: 'Inkwell',

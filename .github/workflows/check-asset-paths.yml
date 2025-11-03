@@ -1,0 +1,43 @@
+name: Asset Path Regression Check
+
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'src/**'
+      - 'vite.config.ts'
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  check-asset-paths:
+    name: Verify no /assets/brand/ paths
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for forbidden /assets/brand/ paths
+        run: |
+          echo "🔍 Scanning for forbidden /assets/brand/ paths..."
+
+          # Check source files (exclude docs and public)
+          if git grep -n '/assets/brand/' -- \
+            ':!public' \
+            ':!**/*.md' \
+            ':!**/*.txt' \
+            ':!dist' \
+            ':!node_modules' \
+            ':!.github' \
+            2>/dev/null; then
+            echo ""
+            echo "❌ FAILED: Forbidden '/assets/brand/' path detected!"
+            echo "   Use '/brand/' instead"
+            exit 1
+          fi
+
+          echo "✅ PASSED: No forbidden asset paths found"
+          exit 0

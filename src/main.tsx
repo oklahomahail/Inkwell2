@@ -39,6 +39,22 @@ ensurePersistentStorage().then((result) => {
 
 warnIfDifferentOrigin();
 
+// Initialize Service Worker cache cleanup on app boot
+// This ensures stale caches don't interfere with fresh assets or tour measurements
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    devLog.debug('🔄 Service Worker controller changed - new version active');
+  });
+
+  navigator.serviceWorker.getRegistration().then((reg) => {
+    if (reg?.waiting) {
+      // Promote waiting SW and skip old one
+      reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      devLog.debug('📡 Requested service worker update');
+    }
+  });
+}
+
 // Initialize Sentry for error tracking and performance monitoring
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
