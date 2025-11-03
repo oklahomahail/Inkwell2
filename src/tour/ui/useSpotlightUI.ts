@@ -35,7 +35,7 @@ export function useSpotlightUI() {
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const [placement, setPlacement] = useState<TourPlacement>('bottom');
 
-  // Update anchor rect when step changes or viewport changes
+  // Update anchor rect when step changes
   const updateAnchorRect = useCallback(() => {
     if (!currentStep?.selectors || currentStep.selectors.length === 0) {
       setAnchorRect(null);
@@ -53,20 +53,18 @@ export function useSpotlightUI() {
     }
 
     if (!target) {
-      devLog.warn(
+      devLog.debug(
         `[SpotlightTour] Target element not found for selectors: ${currentStep.selectors.join(', ')}`,
       );
-      devLog.warn(
+      devLog.debug(
         `[SpotlightTour] Current step: ${currentStep.title}. Ensure the tour anchor elements are present in the DOM.`,
       );
-      console.error(
-        '[SpotlightTour] Missing tour anchor! The tour step cannot proceed because the target element is not in the DOM.',
-        {
-          step: currentStep.title,
-          selectors: currentStep.selectors,
-          suggestion: 'Check that data-tour-id attributes are present on the required elements',
-        },
-      );
+      // Log error detail in object form to help debugging but don't console.error to avoid polluting logs
+      devLog.warn('[SpotlightTour] Missing tour anchor!', {
+        step: currentStep.title,
+        selectors: currentStep.selectors,
+        suggestion: 'Check that data-tour-id attributes are present on the required elements',
+      });
       setAnchorRect(null);
       return;
     }
@@ -98,6 +96,41 @@ export function useSpotlightUI() {
       }
     });
 
+    // Helper to extract selectors from target (handles both strings and functions)
+    const extractSelectors = (target: any): string[] => {
+      if (typeof target === 'function') {
+        // Call function to get element, then try to extract meaningful selectors from it
+        const element = target();
+        if (element) {
+          const selectors: string[] = [];
+
+          // Try to build selectors from the element's attributes
+          if (element.id) {
+            selectors.push(`#${element.id}`);
+          }
+          if (element.className) {
+            const classes = element.className
+              .split(' ')
+              .filter((c: string) => c && !c.startsWith('spotlight-'))
+              .slice(0, 3); // Limit to first 3 classes for specificity
+            if (classes.length > 0) {
+              selectors.push(`.${classes.join('.')}`);
+            }
+          }
+          if (element.getAttribute('data-tour-id')) {
+            selectors.push(`[data-tour-id="${element.getAttribute('data-tour-id')}"]`);
+          }
+          if (element.tagName) {
+            selectors.push(element.tagName.toLowerCase());
+          }
+
+          return selectors.length > 0 ? selectors : ['body']; // Fallback to body if no selectors found
+        }
+        return ['body']; // Fallback if function returns null
+      }
+      return [target as string];
+    };
+
     // Listen for tour start event from the launcher
     const handleStartTour = (event: CustomEvent) => {
       // Clear any crash shield state
@@ -116,15 +149,27 @@ export function useSpotlightUI() {
 
       // Convert SpotlightStep[] to TourStep[] format
       currentSteps = spotlightSteps.map((step, idx) => {
-        // Extract selector from target (handle both string and function)
-        const targetSelector =
+        // Extract selectors from target (the spotlight steps already have selector arrays as functions)
+        const selectors =
           typeof step.target === 'function'
-            ? '[data-tour-id="default"]' // Fallback for function targets
-            : step.target;
+            ? (() => {
+                // The target function in SpotlightStep already contains selector logic
+                // Extract those selectors by examining what the function would try
+                const el = step.target();
+                if (el) {
+                  // If we found an element, we can use data-tour-id or construct selectors
+                  const dataId = el.getAttribute('data-tour-id');
+                  if (dataId) return [`[data-tour-id="${dataId}"]`];
+                  if (el.id) return [`#${el.id}`];
+                  return [el.tagName.toLowerCase()];
+                }
+                return ['body'];
+              })()
+            : [step.target as string];
 
         return {
           id: `step-${idx}`,
-          selectors: [targetSelector],
+          selectors,
           title: step.title,
           body: step.content,
           placement: step.placement || 'bottom',
@@ -138,7 +183,18 @@ export function useSpotlightUI() {
         id: 'spotlight',
         steps: spotlightSteps.map((step, _idx) => {
           const targetSelector =
-            typeof step.target === 'function' ? '[data-tour-id="default"]' : step.target;
+            typeof step.target === 'function'
+              ? (() => {
+                  const el = step.target();
+                  if (el) {
+                    const dataId = el.getAttribute('data-tour-id');
+                    if (dataId) return `[data-tour-id="${dataId}"]`;
+                    if (el.id) return `#${el.id}`;
+                    return el.tagName.toLowerCase();
+                  }
+                  return 'body';
+                })()
+              : (step.target as string);
 
           return {
             target: targetSelector,
@@ -169,10 +225,18 @@ export function useSpotlightUI() {
       return;
     }
 
-    // Add delay to ensure DOM is ready (fixes "[SpotlightTour] Missing tour anchor" errors)
+    let retryTimeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    // Add longer delay to ensure DOM is ready and all async operations complete
+    // This prevents "[SpotlightTour] Missing tour anchor" errors by ensuring the target element is rendered
     const timeoutId = setTimeout(() => {
       updateAnchorRect();
-    }, 1000);
+
+      // Retry once if the element isn't found (helps with late-rendering components)
+      retryTimeoutId = setTimeout(() => {
+        updateAnchorRect();
+      }, 500);
+    }, 1500); // Increased from 1000ms to 1500ms for more stable DOM
 
     // Listen for viewport changes
     const onResize = () => updateAnchorRect();
@@ -183,6 +247,9 @@ export function useSpotlightUI() {
 
     return () => {
       clearTimeout(timeoutId);
+      if (retryTimeoutId) {
+        clearTimeout(retryTimeoutId);
+      }
       window.removeEventListener('resize', onResize);
       window.removeEventListener('scroll', onScroll, true);
     };
