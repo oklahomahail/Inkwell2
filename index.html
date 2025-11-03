@@ -8,15 +8,15 @@
       rel="stylesheet"
     />
     <!-- Preload critical brand assets - removed unused preload to fix "preloaded but not used" warning -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/inkwell-favicon-32.png" />
-    <link rel="icon" href="/assets/brand/inkwell-favicon.ico" />
-    <link rel="apple-touch-icon" href="/assets/brand/inkwell-logo-icon-180.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/inkwell-favicon-32.png" />
+    <link rel="icon" href="/brand/inkwell-favicon.ico" />
+    <link rel="apple-touch-icon" href="/brand/inkwell-logo-icon-180.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Theme initialization - zero-dependency, no-flash, respects user choice AND system preferences -->
     <script>
-      (function() {
+      (function () {
         // Add loading class to prevent transition flash
         document.documentElement.classList.add('loading');
 
@@ -29,8 +29,8 @@
           theme = savedTheme;
         } else {
           // Respect system preference if no saved theme
-          const prefersDark = window.matchMedia &&
-            window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const prefersDark =
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
           theme = prefersDark ? 'dark' : 'light';
         }
 
@@ -82,7 +82,7 @@
     <meta property="og:url" content="https://inkwell.leadwithnexus.com" />
     <meta
       property="og:image"
-      content="https://inkwell.leadwithnexus.com/assets/brand/inkwell-og-1200x630.png"
+      content="https://inkwell.leadwithnexus.com/brand/inkwell-og-1200x630.png"
     />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -98,7 +98,7 @@
     />
     <meta
       name="twitter:image"
-      content="https://inkwell.leadwithnexus.com/assets/brand/inkwell-og-1200x630.png"
+      content="https://inkwell.leadwithnexus.com/brand/inkwell-og-1200x630.png"
     />
     <meta name="twitter:site" content="@inkwell" />
 
@@ -172,7 +172,7 @@
 
     <!-- Microsoft Tiles -->
     <meta name="msapplication-TileColor" content="#1B2A41" />
-    <meta name="msapplication-TileImage" content="/assets/brand/inkwell-logo-icon-192.png" />
+    <meta name="msapplication-TileImage" content="/brand/inkwell-logo-icon-192.png" />
 
     <!-- Early Error Logging -->
     <script>

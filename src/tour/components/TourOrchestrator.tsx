@@ -1,15 +1,22 @@
 // @ts-nocheck
 // File: src/tour/components/TourOrchestrator.tsx
-// Main tour orchestrator with state management
+// Main tour orchestrator with state management + layout stability guards
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import { useAnalytics } from '../hooks/useAnalytics';
 import { useRouter } from '../hooks/useRouter';
 import { useTourStorage } from '../hooks/useTourStorage';
 import { getIdealPlacement } from '../targets';
+import {
+  waitForLayoutSettled,
+  observeAnchor,
+  createDebouncedMeasure,
+  recordMeasurement,
+  recordAdjustment,
+} from '../utils/layoutGuards';
 
 import { Spotlight } from './Spotlight';
 import { StepCard } from './StepCard';
@@ -36,6 +43,7 @@ export function TourOrchestrator({
   const router = useRouter();
   const storage = useTourStorage(tourId);
   const analytics = useAnalytics();
+  const unobserveRef = useRef<(() => void) | null>(null);
 
   const step = steps[currentStep];
 
@@ -77,6 +85,103 @@ export function TourOrchestrator({
       if (timeout) clearTimeout(timeout);
     };
   }, [step?.target]);
+
+  // Wait for layout to settle before first measurement and set up anchor observation
+  useEffect(() => {
+    if (!targetElement || !step?.id) {
+      // Clean up previous observer if target changed
+      if (unobserveRef.current) {
+        unobserveRef.current();
+        unobserveRef.current = null;
+      }
+      return;
+    }
+
+    let isMounted = true;
+
+    (async () => {
+      try {
+        // Wait for fonts, images, and layout to settle
+        await waitForLayoutSettled();
+
+        if (!isMounted) return;
+
+        // Record initial measurement for telemetry
+        const initialMeasurement = recordMeasurement(step.id, targetElement);
+        devLog.debug('[Tour] Initial measurement:', initialMeasurement);
+
+        // Fire telemetry event (can be tracked by analytics)
+        analytics?.trackEvent('tour_step_measured', {
+          tourId,
+          stepId: step.id,
+          ...initialMeasurement,
+        });
+
+        // Set up observation for layout changes
+        if (unobserveRef.current) {
+          unobserveRef.current();
+        }
+
+        // Create debounced re-measure to avoid thrashing
+        const debouncedRemeasure = createDebouncedMeasure(() => {
+          if (!isMounted || !targetElement) return;
+
+          const _newMeasurement = recordMeasurement(step.id, targetElement);
+          const oldRect = targetElement.getBoundingClientRect();
+
+          // Check if position actually changed significantly
+          const hasChanged =
+            Math.abs(oldRect.left - initialMeasurement.x) > 2 ||
+            Math.abs(oldRect.top - initialMeasurement.y) > 2 ||
+            Math.abs(oldRect.width - initialMeasurement.w) > 2 ||
+            Math.abs(oldRect.height - initialMeasurement.h) > 2;
+
+          if (hasChanged) {
+            const adjustment = recordAdjustment(
+              step.id,
+              {
+                left: initialMeasurement.x,
+                top: initialMeasurement.y,
+                width: initialMeasurement.w,
+                height: initialMeasurement.h,
+              } as DOMRect,
+              oldRect,
+              'intersection',
+            );
+
+            devLog.debug('[Tour] Measurement adjusted:', adjustment);
+
+            analytics?.trackEvent('tour_step_adjusted', {
+              tourId,
+              stepId: step.id,
+              ...adjustment,
+            });
+          }
+        }, 16);
+
+        // Observe anchor for changes
+        unobserveRef.current = observeAnchor(targetElement, (reason) => {
+          devLog.debug(`[Tour] Anchor changed (${reason}), scheduling re-measure`);
+          debouncedRemeasure.trigger();
+        });
+
+        // Clean up debounce on unmount
+        return () => {
+          debouncedRemeasure.cancel();
+        };
+      } catch (error) {
+        devLog.warn('[Tour] Layout settlement failed:', error);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+      if (unobserveRef.current) {
+        unobserveRef.current();
+        unobserveRef.current = null;
+      }
+    };
+  }, [targetElement, step?.id, tourId, analytics]);
 
   // Handle route changes if needed
   useEffect(() => {

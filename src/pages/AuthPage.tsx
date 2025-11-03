@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import AuthFooter from '../components/Auth/AuthFooter';
 import { AuthForm } from '../components/Auth/AuthForm';
@@ -81,7 +81,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
       <div className="w-full max-w-md">
         <div className="flex justify-center">
           <img
-            src="/assets/brand/inkwell-lockup-dark.svg"
+            src="/brand/inkwell-lockup-dark.svg"
             alt="Inkwell"
             className="h-16 w-auto"
             onError={(e) => {
@@ -94,7 +94,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
               // Try fallback src if not already tried
               if (img.dataset.fallbackApplied !== '1') {
                 img.dataset.fallbackApplied = '1';
-                img.src = '/assets/brand/inkwell-wordmark.svg';
+                img.src = '/brand/inkwell-wordmark.svg';
                 return;
               }
 

@@ -7,9 +7,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import '@testing-library/jest-dom';
 
-import AuthHeader from '@/components/Auth/AuthHeader';
-import { useTheme } from '@/hooks/useTheme';
+import AuthHeader from '../../components/Auth/AuthHeader';
+import { useTheme } from '../../hooks/useTheme';
 
 // Mock tour service
 vi.mock('@/tour/TourService', () => ({
@@ -31,7 +32,7 @@ describe('Smoke Tests - Brand & UI', () => {
       render(<AuthHeader />);
       const logo = screen.getByAltText('Inkwell') as HTMLImageElement;
       expect(logo).toBeInTheDocument();
-      expect(logo.src).toContain('/assets/brand/inkwell-logo-horizontal.png');
+      expect(logo.src).toContain('/brand/inkwell-logo-horizontal.png');
     });
 
     it('has proper width and height attributes', () => {

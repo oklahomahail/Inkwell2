@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
 import { supabase } from '@/lib/supabaseClient';
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 import { normalizeSafeRedirect } from '@/utils/safeRedirect';
 
 export default function ForgotPassword() {
@@ -55,13 +55,13 @@ export default function ForgotPassword() {
       <div className="w-full max-w-md">
         <div className="flex justify-center">
           <img
-            src="/assets/brand/inkwell-lockup-dark.svg"
+            src="/brand/inkwell-lockup-dark.svg"
             alt="Inkwell"
             className="h-16 w-auto"
             onError={(e) => {
               devLog.error('Logo failed to load, falling back to wordmark');
               // First try the logo path
-              (e.currentTarget as HTMLImageElement).src = '/assets/brand/inkwell-wordmark.svg';
+              (e.currentTarget as HTMLImageElement).src = '/brand/inkwell-wordmark.svg';
               // Add a second fallback in case the logo also fails
               (e.currentTarget as HTMLImageElement).onerror = () => {
                 devLog.error('Fallback logo also failed, using text wordmark');

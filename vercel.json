@@ -8,7 +8,7 @@
   ],
   "headers": [
     {
-      "source": "/assets/brand/(.*)",
+      "source": "/brand/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
