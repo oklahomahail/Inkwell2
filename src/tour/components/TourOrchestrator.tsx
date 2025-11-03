@@ -126,7 +126,7 @@ export function TourOrchestrator({
         const debouncedRemeasure = createDebouncedMeasure(() => {
           if (!isMounted || !targetElement) return;
 
-          const newMeasurement = recordMeasurement(step.id, targetElement);
+          const _newMeasurement = recordMeasurement(step.id, targetElement);
           const oldRect = targetElement.getBoundingClientRect();
 
           // Check if position actually changed significantly

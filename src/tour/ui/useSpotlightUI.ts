@@ -97,7 +97,7 @@ export function useSpotlightUI() {
     });
 
     // Helper to extract selectors from target (handles both strings and functions)
-    const extractSelectors = (target: any): string[] => {
+    const _extractSelectors = (target: any): string[] => {
       if (typeof target === 'function') {
         // Call function to get element, then try to extract meaningful selectors from it
         const element = target();

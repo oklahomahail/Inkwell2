@@ -18,7 +18,7 @@ export async function waitForLayoutSettled(): Promise<void> {
     try {
       await (document as any).fonts?.ready;
       devLog.debug('[Tour] Fonts settled');
-    } catch (e) {
+    } catch (_e) {
       // fonts API may not be available, continue
     }
 
@@ -104,7 +104,7 @@ export function observeAnchor(
     observers.forEach((obs) => {
       try {
         obs.disconnect();
-      } catch (e) {
+      } catch (_e) {
         // Ignore disconnect errors
       }
     });
