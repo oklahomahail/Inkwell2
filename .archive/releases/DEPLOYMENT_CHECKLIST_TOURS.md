@@ -403,8 +403,8 @@ git push origin main
 - [ ] Product: Acceptance criteria met
 - [ ] Deploy Engineer: Checklist reviewed
 
-**Deployment Authorization:** ******\_\_\_******  
-**Date:** ******\_\_\_******
+**Deployment Authorization:** **\*\***\_\_\_**\*\***  
+**Date:** **\*\***\_\_\_**\*\***
 
 ---
 

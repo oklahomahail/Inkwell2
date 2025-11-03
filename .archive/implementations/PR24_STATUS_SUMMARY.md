@@ -437,10 +437,10 @@ If critical issues are found:
 
 ## Approval Sign-offs
 
-- [ ] Code Review Approved by: ******\_\_\_******
-- [ ] QA Testing Approved by: ******\_\_\_******
-- [ ] Architecture Review by: ******\_\_\_******
-- [ ] Final Merge Approved by: ******\_\_\_******
+- [ ] Code Review Approved by: **\*\***\_\_\_**\*\***
+- [ ] QA Testing Approved by: **\*\***\_\_\_**\*\***
+- [ ] Architecture Review by: **\*\***\_\_\_**\*\***
+- [ ] Final Merge Approved by: **\*\***\_\_\_**\*\***
 
 ---
 

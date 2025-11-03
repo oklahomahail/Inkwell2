@@ -188,10 +188,10 @@ Update external templates:
 ```tsx
 // Professional light theme colors
 const BrandColors = {
-  navy: '#0c5c3d',    // Deep Navy for headers
-  gold: '#d4a537',    // Warm Gold for accents
+  navy: '#0c5c3d', // Deep Navy for headers
+  gold: '#d4a537', // Warm Gold for accents
   charcoal: '#2e2e2e', // Charcoal for body text
-  white: '#ffffff'     // Clean white background
+  white: '#ffffff', // Clean white background
 };
 ```
 
