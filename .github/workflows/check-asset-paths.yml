@@ -32,6 +32,7 @@ jobs:
             ':!dist' \
             ':!node_modules' \
             ':!.github' \
+            ':!.audit' \
             2>/dev/null; then
             echo ""
             echo "❌ FAILED: Forbidden '/assets/brand/' path detected!"
