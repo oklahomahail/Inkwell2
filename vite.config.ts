@@ -80,10 +80,17 @@ export default defineConfig({
       : [
           VitePWA({
             registerType: 'autoUpdate',
+            manifestFilename: 'site.webmanifest', // Output to site.webmanifest, not manifest.webmanifest
             workbox: {
               globDirectory: 'dist',
               globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2}'],
-              globIgnores: ['**/node_modules/**/*', 'sw.js', 'workbox-*.js'],
+              globIgnores: [
+                '**/node_modules/**/*',
+                'sw.js',
+                'workbox-*.js',
+                'site.webmanifest',
+                '*.webmanifest',
+              ],
               navigateFallback: '/index.html',
               runtimeCaching: [
                 // Cache the editor shell and core assets
@@ -135,8 +142,8 @@ export default defineConfig({
                   },
                 },
               ],
-              // Ensure core application assets are precached - update revision to force new SW installation
-              // NOTE: site.webmanifest is already included by Workbox via globPatterns, so we only cache root here
+              // Ensure core application assets are precached
+              // NOTE: site.webmanifest is explicitly added here with matching path to VitePWA's output
               additionalManifestEntries: [
                 { url: '/', revision: `v2025-10-27.1-${Date.now().toString()}` },
               ],

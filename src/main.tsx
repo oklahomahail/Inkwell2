@@ -86,6 +86,33 @@ if (import.meta.env.VITE_SENTRY_DSN) {
   devLog.debug('ℹ️ Sentry monitoring disabled (no VITE_SENTRY_DSN)');
 }
 
+// Sanity check: detect duplicate precache entries (development only)
+if (import.meta.env.DEV) {
+  (async () => {
+    // @ts-ignore injected by workbox
+    const m = (self as any)?.__WB_MANIFEST as Array<{ url: string; revision?: string }>;
+    if (Array.isArray(m)) {
+      const byUrl = new Map<string, Set<string>>();
+      for (const e of m) {
+        const url = typeof e === 'string' ? e : e.url;
+        const rev = typeof e === 'string' ? '' : (e.revision ?? '');
+        const set = byUrl.get(url) ?? new Set<string>();
+        set.add(rev);
+        byUrl.set(url, set);
+      }
+      for (const [url, revisions] of byUrl.entries()) {
+        if (revisions.size > 1) {
+          console.warn(
+            '[WB] ⚠️ Duplicate precache URL with multiple revisions:',
+            url,
+            Array.from(revisions),
+          );
+        }
+      }
+    }
+  })();
+}
+
 // Safety net: wait for root element to be available before mounting
 // Uses resilient gate with multiple checks to avoid edge races
 waitForRoot('root')
