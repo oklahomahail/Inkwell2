@@ -129,7 +129,7 @@ export function OnboardingUI() {
     setShowWelcome(false);
 
     // Wait for modal close + sidebar animation + dashboard render
-    const delayMs = needsToOpenSidebar ? 1200 : 800; // Extra time for modal close + dashboard mount
+    const delayMs = needsToOpenSidebar ? 2000 : 2000; // Extra time for modal close + dashboard mount
     console.warn('[OnboardingUI] Waiting', delayMs, 'ms for dashboard to render');
 
     requestAnimationFrame(() => {
