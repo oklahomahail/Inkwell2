@@ -44,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const filename = (meta?.filename || 'export.pdf').replace(/[^a-z0-9_\-\.]+/gi, '_');
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.status(200).end(Buffer.from(pdf));
+    return res.status(200).end(Buffer.from(pdf));
   } catch (e: unknown) {
     console.error(e);
     return res.status(500).json({ error: 'Failed to render PDF' });
