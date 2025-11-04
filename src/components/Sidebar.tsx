@@ -49,7 +49,7 @@ export const Sidebar: React.FC = () => {
         {navItems.map(({ key, label, icon }) => (
           <button
             key={key}
-            data-tour={`${key}-nav`}
+            data-tour={key === 'settings' ? 'settings' : `${key}-nav`}
             className={cn(
               'nav-item flex items-center gap-2',
               activeView === key && 'bg-ink-50 text-ink-700 font-medium',
