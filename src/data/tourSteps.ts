@@ -77,10 +77,43 @@ export const defaultTourSteps: TourStep[] = [
     placement: 'left',
   },
   {
+    id: 'ai-assistant',
+    selector: '[data-tour="settings"]',
+    title: 'AI Writing Assistant',
+    content:
+      "Configure Claude AI to help with writer's block, generate ideas, and improve your prose. Go to Settings → AI to set up your API key.",
+    placement: 'left',
+  },
+  {
+    id: 'export-options',
+    selector: '[data-tour="dashboard"]',
+    title: 'Export Your Work',
+    content:
+      'Export your finished work to PDF, DOCX, or Markdown formats. Perfect for sharing with beta readers or publishers.',
+    placement: 'bottom',
+  },
+  {
+    id: 'keyboard-shortcuts',
+    selector: '[data-tour="dashboard"]',
+    title: 'Keyboard Shortcuts',
+    content:
+      'Speed up your workflow with shortcuts: ⌘K for command palette, ⌘1-5 for quick view switching, and ⌘S to save.',
+    placement: 'bottom',
+  },
+  {
+    id: 'offline-mode',
+    selector: '[data-tour="dashboard"]',
+    title: 'Offline-First',
+    content:
+      'Inkwell works completely offline. Your data is stored locally in your browser, so you can write anywhere, anytime.',
+    placement: 'bottom',
+  },
+  {
     id: 'complete',
     selector: '[data-tour="dashboard"]',
     title: "You're Ready!",
-    content: "That's it! You can restart this tour anytime from Settings → Help. Happy writing!",
+    content:
+      "That's it! You can restart this tour anytime from Settings → Help. Happy writing! 📝✨",
     placement: 'bottom',
   },
 ];

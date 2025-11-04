@@ -18,6 +18,7 @@ export function TourTooltip() {
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [visible, setVisible] = useState(false);
+  const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null);
 
   // Find anchor element and calculate position
   useEffect(() => {
@@ -79,6 +80,7 @@ export function TourTooltip() {
       top = Math.max(spacing, Math.min(top, maxTop));
 
       setPosition({ top, left });
+      setHighlightRect(rect);
       setVisible(true);
 
       // Scroll anchor into view if needed
@@ -106,6 +108,23 @@ export function TourTooltip() {
         style={{ opacity: visible ? 1 : 0 }}
         onClick={skip}
       />
+
+      {/* Animated spotlight highlight on active element */}
+      {highlightRect && (
+        <div
+          className="fixed z-[9999] pointer-events-none rounded-lg transition-all duration-300"
+          style={{
+            top: `${highlightRect.top - 4}px`,
+            left: `${highlightRect.left - 4}px`,
+            width: `${highlightRect.width + 8}px`,
+            height: `${highlightRect.height + 8}px`,
+            border: '3px solid rgb(59, 130, 246)',
+            boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.2), 0 0 20px 8px rgba(59, 130, 246, 0.4)',
+            animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            opacity: visible ? 1 : 0,
+          }}
+        />
+      )}
 
       {/* Tooltip */}
       <div
