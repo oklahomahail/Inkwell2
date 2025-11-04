@@ -19,7 +19,8 @@ import {
 import React, { useState, useEffect } from 'react';
 
 import analyticsService from '@/services/analyticsService';
-import { isTourDone } from '@/tour/persistence';
+// Tour import temporarily stubbed during rebuild
+const isTourDone = (_tourId: string) => false;
 
 interface ChecklistItemConfig {
   key: string;

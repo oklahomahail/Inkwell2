@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
-import { SpotlightProvider } from '@/components/Tour/SpotlightProvider';
 import devLog from '@/utils/devLog';
 import { log } from '@/utils/logger';
 
@@ -51,10 +50,6 @@ import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
 import { storageErrorLogger } from './services/storageErrorLogger';
 import { storageManager } from './services/storageManager';
-import { useTourRouterAdapter } from './tour/adapters/routerAdapter';
-import { TourLifecycleIntegration } from './tour/integrations/tourLifecycleIntegration';
-import { SpotlightOverlay } from './tour/ui';
-import { useTourRegistration } from './tour/useTourRegistration';
 import { isPublicRoute } from './utils/auth';
 // Tour components
 
@@ -115,11 +110,6 @@ function AppShell() {
   const { user, loading, signOut } = useAuth();
   const isPublic = isPublicRoute(location.pathname);
 
-  // Register tours on app boot
-  useTourRegistration();
-
-  // Enable tour router adapter (refreshes anchors on route changes)
-  useTourRouterAdapter();
 
   // Show loading spinner while checking auth (prevents content flash)
   if (loading) {
@@ -149,11 +139,6 @@ function AppShell() {
 
   return (
     <>
-      {/* Tour lifecycle integration - wires analytics and persistence */}
-      <TourLifecycleIntegration />
-
-      {/* Spotlight overlay for tour UI */}
-      <SpotlightOverlay />
 
       {/* New unified onboarding UI (welcome modal, checklist, contextual hints) */}
       <OnboardingUI />
@@ -618,9 +603,5 @@ export default function App() {
     });
   }, []);
 
-  return (
-    <SpotlightProvider>
-      <AppShell />
-    </SpotlightProvider>
-  );
+  return <AppShell />;
 }

@@ -5,7 +5,8 @@ import React, { useState } from 'react';
 // IMPORTANT: import from the barrel so tests that mock "@/components/icons" work
 import { InkwellFeather } from '@/components/icons';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
-import { startDefaultTour } from '@/tour/tourEntry';
+// Tour import temporarily stubbed during rebuild
+const startDefaultTour = () => console.warn('Tour system being rebuilt');
 
 import { CORE_TOUR_STEPS } from './tourRegistry';
 import { useTour } from './useTour';

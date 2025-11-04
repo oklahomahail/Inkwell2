@@ -6,8 +6,9 @@ import { useEffect, useState } from 'react';
 
 
 
-import { getSpotlightSteps } from '@/tour/getSpotlightSteps';
-import { tourService } from '@/tour/TourService';
+// Tour imports temporarily stubbed during rebuild
+const getSpotlightSteps = () => [] as any;
+const tourService = { isRunning: () => false, start: (_options?: any) => {} };
 import devLog from "@/utils/devLog";
 
 const TOUR_COMPLETED_KEY = 'inkwell:tour:completed';

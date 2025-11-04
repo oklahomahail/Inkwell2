@@ -15,8 +15,9 @@ import { useLocation } from 'react-router-dom';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 import { useUI } from '@/hooks/useUI';
 import analyticsService from '@/services/analyticsService';
-import { isTourDone } from '@/tour/persistence';
-import { startTour } from '@/tour/tourLauncher';
+// Tour imports temporarily stubbed during rebuild
+const isTourDone = (_tourId: string) => false;
+const startTour = (_tourId: string, _options?: any) => console.warn('Tour system being rebuilt');
 
 import { CompletionChecklistComponent as CompletionChecklist } from './CompletionChecklistNew';
 import { FeatureDiscoveryProvider } from './FeatureDiscovery';
