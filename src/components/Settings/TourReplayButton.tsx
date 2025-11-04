@@ -7,13 +7,14 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { useTourContext } from '@/components/Tour/TourProvider';
+import { startTour as startTourController } from '@/components/Onboarding/tour-core/TourController';
 import { useToast } from '@/context/toast';
+import { useGo } from '@/utils/navigate';
 
 export function TourReplayButton() {
-  const { start } = useTourContext();
   const { showToast } = useToast();
   const location = useLocation();
+  const go = useGo();
 
   // Check if user has completed tour before (from localStorage)
   const hasCompletedBefore = localStorage.getItem('inkwell:tour:completed') === 'true';
@@ -23,8 +24,16 @@ export function TourReplayButton() {
   const isResetting = false;
 
   const handleReplay = async () => {
-    start();
-    showToast('Starting Inkwell tour...', 'success');
+    // Navigate to dashboard if not already there
+    if (location.pathname !== '/dashboard') {
+      go('/dashboard');
+    }
+
+    // Start the tour after a brief delay to let navigation complete
+    setTimeout(async () => {
+      await startTourController('spotlight', undefined, { force: true });
+      showToast('Starting Inkwell tour...', 'success');
+    }, 300);
   };
 
   return (
