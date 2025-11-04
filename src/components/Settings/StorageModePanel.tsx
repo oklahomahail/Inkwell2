@@ -27,6 +27,7 @@ export default function StorageModePanel({ projectId }: StorageModePanelProps) {
   const [status, setStatus] = useState(sync.getContext());
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   useEffect(() => {
     // Poll status every 2s when syncing
@@ -116,6 +117,63 @@ export default function StorageModePanel({ projectId }: StorageModePanelProps) {
 
   const passStrength = calculatePasswordStrength(pass);
 
+  // Recovery Kit import handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = () => {
+    setDragActive(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+    setError(null);
+
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.json')) {
+      setError('Please drop a valid Recovery Kit JSON file');
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const kit = JSON.parse(text);
+
+      // Validate Recovery Kit format
+      if (kit.inkwell_recovery_kit !== 1 || !kit.wrapped_dek || !kit.kdf) {
+        throw new Error('Invalid Recovery Kit format');
+      }
+
+      if (kit.project_id !== projectId) {
+        setError(`This Recovery Kit is for a different project (${kit.project_id})`);
+        return;
+      }
+
+      devLog.log('[StorageModePanel] Recovery Kit loaded', { projectId: kit.project_id });
+      alert('Recovery Kit loaded! Enter your passphrase to restore access.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to parse Recovery Kit';
+      setError(msg);
+      devLog.error('[StorageModePanel] Recovery Kit import failed:', msg);
+    }
+  };
+
+  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fakeEvent = {
+      preventDefault: () => {},
+      dataTransfer: { files: [file] },
+    } as unknown as React.DragEvent;
+    await handleDrop(fakeEvent);
+  };
+
   return (
     <div className="space-y-6 p-4 bg-white rounded-lg shadow">
       <div>
@@ -155,6 +213,29 @@ export default function StorageModePanel({ projectId }: StorageModePanelProps) {
             <input type="checkbox" checked={e2ee} onChange={(e) => setE2ee(e.target.checked)} />
             <span className="font-medium">Enable encrypted cloud backups</span>
           </label>
+
+          {/* Recovery Kit Import */}
+          {e2ee && (
+            <div
+              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700">Import Recovery Kit</p>
+                <p className="text-xs text-gray-500">
+                  Drag and drop your recovery kit JSON file here
+                </p>
+                <label className="inline-block px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded cursor-pointer text-sm font-medium">
+                  Or browse files
+                  <input type="file" accept=".json" className="hidden" onChange={handleFileInput} />
+                </label>
+              </div>
+            </div>
+          )}
 
           {e2ee && (
             <div className="space-y-3 pl-6">
