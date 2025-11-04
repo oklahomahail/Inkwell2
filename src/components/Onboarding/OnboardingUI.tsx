@@ -13,6 +13,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
+import { useUI } from '@/hooks/useUI';
 import analyticsService from '@/services/analyticsService';
 import { isTourDone } from '@/tour/persistence';
 import { startTour } from '@/tour/tourLauncher';
@@ -27,6 +28,7 @@ const FIRST_TIME_ALLOWED_ROUTES = ['/dashboard'];
 export function OnboardingUI() {
   const location = useLocation();
   const { shouldShowModal, setTourActive, completeOnboarding } = useOnboardingGate();
+  const { sidebarCollapsed, toggleSidebar } = useUI();
 
   const [showWelcome, setShowWelcome] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
@@ -103,6 +105,13 @@ export function OnboardingUI() {
       return;
     }
 
+    // Ensure sidebar is visible for tour (it contains tour anchors)
+    const needsToOpenSidebar = sidebarCollapsed;
+    if (needsToOpenSidebar) {
+      console.warn('[OnboardingUI] Opening sidebar for tour');
+      toggleSidebar();
+    }
+
     // Mark tour as active to prevent modal from re-opening
     setTourActive(true);
     setShowWelcome(false);
@@ -116,7 +125,10 @@ export function OnboardingUI() {
       console.warn('Failed to track tour start analytics:', error);
     }
 
-    // Longer delay to ensure dashboard components are fully mounted
+    // Wait for sidebar animation (300ms) + buffer time for components to mount
+    const delayMs = needsToOpenSidebar ? 800 : 500; // Extra time if sidebar needs to animate
+    console.warn('[OnboardingUI] Waiting', delayMs, 'ms for components to be ready');
+
     requestAnimationFrame(() => {
       setTimeout(() => {
         // Check if we have the required anchors before starting
@@ -133,7 +145,7 @@ export function OnboardingUI() {
 
         // Start spotlight tour with the new system
         startTour('spotlight', { source: 'welcome', restart: true });
-      }, 500); // Increased from 100ms to 500ms
+      }, delayMs);
     });
   };
 
