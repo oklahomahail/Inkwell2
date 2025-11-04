@@ -1,16 +1,13 @@
 // src/components/Onboarding/WelcomeModal.tsx
-import { Clock, X, ArrowRight, CheckCircle, Lightbulb } from 'lucide-react';
+import { Clock, X, CheckCircle } from 'lucide-react';
 import React, { useState } from 'react';
 
 // IMPORTANT: import from the barrel so tests that mock "@/components/icons" work
 import { InkwellFeather } from '@/components/icons';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
-// Tour import temporarily stubbed during rebuild
-const startDefaultTour = () => console.warn('Tour system being rebuilt');
+import analyticsService from '@/services/analyticsService';
 
 import { CORE_TOUR_STEPS } from './tourRegistry';
-import { useTour } from './useTour';
-import { startTourSafely, getSafeTourSteps } from './utils/tourSafety';
 
 interface WelcomeModalProps {
   isOpen: boolean;
@@ -24,80 +21,52 @@ interface WelcomeModalProps {
 export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   isOpen,
   onClose,
-  onStartTour: _onStartTour,
+  onStartTour,
   onOpenChecklist,
 }) => {
-  const { setNeverShowAgain, setRemindMeLater, logAnalytics, preferences, startTour } = useTour();
-  const { setTourActive, snoozeModal, dismissModal } = useOnboardingGate();
+  const { snoozeModal, dismissModal, completeOnboarding } = useOnboardingGate();
   const [selectedOption, setSelectedOption] = useState<'tour' | 'checklist' | 'later' | 'never'>(
     'tour',
   );
 
   if (!isOpen) return null;
 
-  const handleStartTour = async () => {
-    logAnalytics('welcome_modal_start_tour');
-
-    // 1. Store hide preference
+  const handleStartTour = () => {
     try {
-      localStorage.setItem('hideWelcome', 'true');
-    } catch {
-      // ignore storage errors in tests/SSR
+      analyticsService.trackEvent('welcome_modal_start_tour', { source: 'welcome_modal' });
+    } catch (_error) {
+      // ignore analytics errors
     }
-
-    // 2. Prevent modal re-opening during tour
-    setTourActive(true);
-
-    // 3. Snooze modal for 7 days (will be set to completed when tour finishes)
-    snoozeModal(7 * 24); // 7 days
-
-    // 4. Close modal first to release focus trap
-    onClose();
-
-    // 5. Start tour safely on next frame so modal is fully unmounted
-    requestAnimationFrame(async () => {
-      try {
-        const safeTourSteps = getSafeTourSteps(CORE_TOUR_STEPS?.length ? CORE_TOUR_STEPS : []);
-        if (safeTourSteps.length > 0) {
-          await startTourSafely(safeTourSteps, startTour);
-        } else {
-          // Fallback to default tour if no steps
-          startDefaultTour();
-        }
-
-        // Watchdog: if no overlay after 400ms, hard-start the default tour
-        setTimeout(() => {
-          const overlay = document.querySelector('[data-spotlight-overlay],[data-tour-overlay]');
-          if (!overlay) {
-            console.warn('Tour watchdog: overlay not detected, starting default tour directly');
-            startDefaultTour();
-          }
-        }, 400);
-      } catch (error) {
-        console.error('Failed to start tour:', error);
-        // Fallback to the original method if safe start fails
-        startDefaultTour();
-      }
-    });
+    onStartTour('tour');
   };
 
   const handleOpenChecklist = () => {
-    logAnalytics('welcome_modal_open_checklist');
+    try {
+      analyticsService.trackEvent('welcome_modal_open_checklist', { source: 'welcome_modal' });
+    } catch (_error) {
+      // ignore analytics errors
+    }
     onOpenChecklist();
     onClose();
   };
 
   const handleRemindLater = () => {
-    logAnalytics('welcome_modal_remind_later');
-    setRemindMeLater(true); // Remind later
-    snoozeModal(24); // Also update gate
+    try {
+      analyticsService.trackEvent('welcome_modal_remind_later', { source: 'welcome_modal' });
+    } catch (_error) {
+      // ignore analytics errors
+    }
+    snoozeModal(24);
     onClose();
   };
 
   const handleNeverShow = () => {
-    logAnalytics('welcome_modal_never_show');
-    setNeverShowAgain(true);
-    dismissModal(); // Also update gate
+    try {
+      analyticsService.trackEvent('welcome_modal_never_show', { source: 'welcome_modal' });
+    } catch (_error) {
+      // ignore analytics errors
+    }
+    dismissModal();
     onClose();
   };
 
@@ -292,7 +261,6 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
                   className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
                 >
                   Start Tour
-                  <ArrowRight className="w-4 h-4" />
                 </button>
               )}
 
@@ -328,16 +296,6 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
             </div>
           </div>
         </div>
-
-        {/* Prior dismissals note */}
-        {preferences && preferences.tourDismissals > 0 && (
-          <div className="px-6 pb-2">
-            <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg">
-              <Lightbulb className="w-3 h-3" />
-              We notice you've skipped the tour before. Taking it now can save you time later!
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
