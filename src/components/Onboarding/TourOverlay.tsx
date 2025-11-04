@@ -151,7 +151,7 @@ export function TourOverlay() {
           className="fixed z-[10000] bg-white dark:bg-slate-800 rounded-lg shadow-2xl p-6 max-w-sm pointer-events-auto"
           style={{
             left: `${Math.min(spotlightPos.x + spotlightPos.width + 20, window.innerWidth - 320)}px`,
-            top: `${Math.max(spotlightPos.y, 20)}px`,
+            top: `${Math.min(Math.max(spotlightPos.y, 20), window.innerHeight - 400)}px`,
           }}
         >
           <div className="flex items-start justify-between mb-3">
