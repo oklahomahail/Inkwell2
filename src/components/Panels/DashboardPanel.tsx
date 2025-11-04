@@ -52,7 +52,10 @@ const DashboardPanel: React.FC = () => {
 
       {/* Current Project */}
       {currentProject ? (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div
+          className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700"
+          data-spotlight-id="dashboard.welcome"
+        >
           <div className="flex items-start justify-between mb-4">
             <div>
               <h2 className="text-xl font-semibold mb-2">{currentProject.name}</h2>
