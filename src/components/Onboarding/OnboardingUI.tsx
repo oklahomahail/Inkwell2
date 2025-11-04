@@ -15,12 +15,11 @@ import { useLocation } from 'react-router-dom';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 import { useUI } from '@/hooks/useUI';
 import analyticsService from '@/services/analyticsService';
-// Tour imports temporarily stubbed during rebuild
-const isTourDone = (_tourId: string) => false;
-const startTour = (_tourId: string, _options?: any) => console.warn('Tour system being rebuilt');
 
 import { CompletionChecklistComponent as CompletionChecklist } from './CompletionChecklistNew';
 import { FeatureDiscoveryProvider } from './FeatureDiscovery';
+import { startTour as startTourController } from './tour-core/TourController';
+import { TourOverlay } from './TourOverlay';
 import { WelcomeModal } from './WelcomeModalNew';
 
 // Routes where welcome modal is allowed to auto-show
@@ -40,19 +39,12 @@ export function OnboardingUI() {
       pathname: location.pathname,
       allowed: FIRST_TIME_ALLOWED_ROUTES,
       isAllowed: FIRST_TIME_ALLOWED_ROUTES.includes(location.pathname),
-      tourDone: isTourDone('spotlight'),
       shouldShow: shouldShowModal(),
     });
 
     // Only check on allowed routes
     if (!FIRST_TIME_ALLOWED_ROUTES.includes(location.pathname)) {
       console.warn('[OnboardingUI] Not on allowed route, skipping modal');
-      return undefined;
-    }
-
-    // Check if tour is already completed
-    if (isTourDone('spotlight')) {
-      console.warn('[OnboardingUI] Tour already done, skipping modal');
       return undefined;
     }
 
@@ -91,7 +83,7 @@ export function OnboardingUI() {
     return () => window.removeEventListener('inkwell:tour:completed', handleTourComplete);
   }, [completeOnboarding, setTourActive]);
 
-  const handleStartTour = () => {
+  const handleStartTour = async () => {
     console.warn('[OnboardingUI] Starting tour, current route:', location.pathname);
 
     // If not on dashboard, this shouldn't happen - but handle it gracefully
@@ -133,7 +125,7 @@ export function OnboardingUI() {
     console.warn('[OnboardingUI] Waiting', delayMs, 'ms for dashboard to render');
 
     requestAnimationFrame(() => {
-      setTimeout(() => {
+      setTimeout(async () => {
         // Check if we have the required anchors before starting
         const anchors = document.querySelectorAll('[data-tour]');
         console.warn('[OnboardingUI] Found', anchors.length, 'tour anchors');
@@ -146,8 +138,8 @@ export function OnboardingUI() {
           );
         }
 
-        // Start spotlight tour with the new system
-        startTour('spotlight', { source: 'welcome', restart: true });
+        // Start spotlight tour with the TourController
+        await startTourController('spotlight', undefined, { force: true });
       }, delayMs);
     });
   };
@@ -166,7 +158,7 @@ export function OnboardingUI() {
     }
   };
 
-  const handleChecklistTour = (tourType: string) => {
+  const handleChecklistTour = async (tourType: string) => {
     setShowChecklist(false);
 
     // Track analytics
@@ -180,11 +172,12 @@ export function OnboardingUI() {
     }
 
     // Launch spotlight tour
-    startTour('spotlight', { source: 'checklist', restart: true });
+    await startTourController('spotlight', undefined, { force: true });
   };
 
   return (
     <FeatureDiscoveryProvider>
+      <TourOverlay />
       <WelcomeModal
         isOpen={showWelcome}
         onClose={() => setShowWelcome(false)}
