@@ -115,7 +115,6 @@ export function OnboardingUI() {
 
     // Mark tour as active to prevent modal from re-opening
     setTourActive(true);
-    setShowWelcome(false);
 
     // Track analytics
     try {
@@ -126,9 +125,12 @@ export function OnboardingUI() {
       console.warn('Failed to track tour start analytics:', error);
     }
 
-    // Wait for sidebar animation (300ms) + buffer time for components to mount
-    const delayMs = needsToOpenSidebar ? 800 : 500; // Extra time if sidebar needs to animate
-    console.warn('[OnboardingUI] Waiting', delayMs, 'ms for components to be ready');
+    // Close modal FIRST, then wait for dashboard to render
+    setShowWelcome(false);
+
+    // Wait for modal close + sidebar animation + dashboard render
+    const delayMs = needsToOpenSidebar ? 1200 : 800; // Extra time for modal close + dashboard mount
+    console.warn('[OnboardingUI] Waiting', delayMs, 'ms for dashboard to render');
 
     requestAnimationFrame(() => {
       setTimeout(() => {
