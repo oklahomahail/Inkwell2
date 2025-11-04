@@ -1,16 +1,9 @@
-import {
-  BookOpen,
-  Video,
-  MessageSquare,
-  Sparkles,
-  RotateCw,
-  Wand2,
-  FileDown,
-  PlayCircle,
-} from 'lucide-react';
+import { BookOpen, Video, MessageSquare, PlayCircle } from 'lucide-react';
 import React from 'react';
 
+import { useTourContext } from '@/components/Tour/TourProvider';
 import devLog from '@/utils/devLog';
+
 import { Button } from '../ui/Button';
 
 interface HelpMenuProps {
@@ -23,32 +16,11 @@ function startTourByKey(_key: 'core' | 'ai-tools' | 'export') {
 }
 
 export function HelpMenu({ className }: HelpMenuProps) {
-  const lastTourUsed = null; // Temporary - will be restored in Phase 2
+  const { start } = useTourContext();
 
-  const startSpotlightTour = () => {
-    console.warn('[HelpMenu] Tour system being rebuilt');
-  };
-
-  const handleManualTourStart = () => {
-    devLog.debug('[HelpMenu] Tour system being rebuilt');
-  };
-
-  const handleRestartLastTour = () => {
-    if (lastTourUsed) {
-      startTourByKey(lastTourUsed);
-    } else {
-      // Fallback to default tour
-      handleRestartTour();
-    }
-  };
-
-  const handleRestartTour = () => {
-    console.warn('[HelpMenu] Tour system being rebuilt');
-  };
-
-  // Get button label for last tour
-  const getLastTourLabel = (): string => {
-    return 'Restart Tour';
+  const handleStartTour = () => {
+    devLog.debug('[HelpMenu] Starting tour');
+    start();
   };
 
   return (
@@ -59,30 +31,11 @@ export function HelpMenu({ className }: HelpMenuProps) {
           variant="ghost"
           size="sm"
           className="justify-start text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-950"
-          onClick={handleManualTourStart}
-          title="Force start the tour if it's stuck or not appearing"
+          onClick={handleStartTour}
+          title="Start the guided tour of Inkwell"
         >
           <PlayCircle className="w-4 h-4 mr-2" />
           Start Tour
-        </Button>
-        {lastTourUsed && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="justify-start font-semibold"
-            onClick={handleRestartLastTour}
-          >
-            <RotateCw className="w-4 h-4 mr-2" />
-            {getLastTourLabel()}
-          </Button>
-        )}
-        <Button variant="ghost" size="sm" className="justify-start" onClick={handleRestartTour}>
-          <RotateCw className="w-4 h-4 mr-2" />
-          Restart Core Tour
-        </Button>
-        <Button variant="ghost" size="sm" className="justify-start" onClick={startSpotlightTour}>
-          <Sparkles className="w-4 h-4 mr-2" />
-          Feature Tour
         </Button>
         <Button
           variant="ghost"

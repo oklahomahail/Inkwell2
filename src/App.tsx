@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
+import { TourProvider } from '@/components/Tour/TourProvider';
 import devLog from '@/utils/devLog';
 import { log } from '@/utils/logger';
 
@@ -110,7 +111,6 @@ function AppShell() {
   const { user, loading, signOut } = useAuth();
   const isPublic = isPublicRoute(location.pathname);
 
-
   // Show loading spinner while checking auth (prevents content flash)
   if (loading) {
     // Log loading state for debugging
@@ -139,7 +139,6 @@ function AppShell() {
 
   return (
     <>
-
       {/* New unified onboarding UI (welcome modal, checklist, contextual hints) */}
       <OnboardingUI />
 
@@ -603,5 +602,9 @@ export default function App() {
     });
   }, []);
 
-  return <AppShell />;
+  return (
+    <TourProvider>
+      <AppShell />
+    </TourProvider>
+  );
 }

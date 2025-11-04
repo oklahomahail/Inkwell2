@@ -7,9 +7,11 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { useTourContext } from '@/components/Tour/TourProvider';
 import { useToast } from '@/context/toast';
 
 export function TourReplayButton() {
+  const { start } = useTourContext();
   const { showToast } = useToast();
   const location = useLocation();
 
@@ -21,7 +23,8 @@ export function TourReplayButton() {
   const isResetting = false;
 
   const handleReplay = async () => {
-    showToast('Tour system being rebuilt - available soon!', 'info');
+    start();
+    showToast('Starting Inkwell tour...', 'success');
   };
 
   return (
