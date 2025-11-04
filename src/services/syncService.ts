@@ -2,14 +2,11 @@
 // Minimal manual push and pull with E2EE gate. IndexedDB is the source of truth.
 // This module wires cryptoService to Supabase and exposes a small status surface.
 
-import type {
-  KdfParams,
-  WrappedKeyRecord,
-  RecoveryKit,
-  StorageMode,
-  SyncContext,
-} from '@/types/crypto';
+import type { KdfParams, WrappedKeyRecord, RecoveryKit, SyncContext } from '@/types/crypto';
+import type { StorageMode } from '@/types/crypto';
 
+// Re-export for external use
+export type { StorageMode };
 import {
   buildRecoveryKit,
   decryptJSON,

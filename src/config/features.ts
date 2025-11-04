@@ -14,6 +14,11 @@ export const FEATURES = {
   // Timeline and consistency
   timelineConsistency: true,
   characterConsistency: true,
+
+  // E2EE Sync (Beta)
+  e2eeSync:
+    import.meta.env.VITE_ENABLE_E2EE_SYNC === 'true' || import.meta.env.MODE === 'development',
+  backgroundSync: import.meta.env.VITE_ENABLE_BACKGROUND_SYNC === 'true',
 } as const;
 
 // Simple feature check function
