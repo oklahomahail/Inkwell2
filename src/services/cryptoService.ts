@@ -211,8 +211,8 @@ export async function encryptBytes(plaintext: Uint8Array, dek: Uint8Array): Prom
   const ct = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(plaintext, null, null, nonce, dek);
 
   return {
-    ciphertext: b64encode(ct),
-    nonce: b64encode(nonce),
+    ciphertext: b64encode(new Uint8Array(ct)),
+    nonce: b64encode(new Uint8Array(nonce)),
     ver: 1,
   };
 }
@@ -223,7 +223,7 @@ export async function decryptBytes(input: DecryptInput, dek: Uint8Array): Promis
   const ct = b64decode(input.ciphertext);
 
   const pt = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(null, ct, null, nonce, dek);
-  return pt;
+  return new Uint8Array(pt);
 }
 
 // JSON helpers
