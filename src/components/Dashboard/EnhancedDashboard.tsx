@@ -229,7 +229,11 @@ const EnhancedDashboard: React.FC = () => {
   }
 
   return (
-    <div className="enhanced-dashboard fade-in" data-spotlight-id="dashboard.welcome">
+    <div
+      className="enhanced-dashboard fade-in"
+      data-tour="dashboard"
+      data-spotlight-id="dashboard.welcome"
+    >
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
