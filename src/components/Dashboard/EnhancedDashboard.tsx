@@ -126,7 +126,7 @@ const EnhancedDashboard: React.FC = () => {
   // If no projects exist, show onboarding
   if (state.projects.length === 0) {
     return (
-      <div className="enhanced-dashboard fade-in">
+      <div className="enhanced-dashboard fade-in" data-tour="dashboard">
         <div className="max-w-4xl mx-auto text-center py-16">
           {/* Welcome Header */}
           <div className="mb-12">
@@ -183,7 +183,7 @@ const EnhancedDashboard: React.FC = () => {
               className="btn btn-primary btn-lg"
               type="button"
               data-test="create-first-project"
-              data-tour-id="create-project-button"
+              data-tour="new-project"
             >
               <PlusCircle className="w-5 h-5" />
               Create Your First Project
@@ -245,7 +245,7 @@ const EnhancedDashboard: React.FC = () => {
               className="btn btn-primary"
               type="button"
               data-test="new-project"
-              data-tour-id="new-project-button"
+              data-tour="new-project"
             >
               <PlusCircle className="w-4 h-4" />
               New Project
@@ -390,7 +390,7 @@ const EnhancedDashboard: React.FC = () => {
 
       {/* Recent Projects */}
       {state.projects.length > 1 && (
-        <div className="mb-8">
+        <div className="mb-8" data-tour="projects">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
               Recent Projects
