@@ -133,8 +133,8 @@ export function OnboardingUI() {
     requestAnimationFrame(() => {
       setTimeout(() => {
         // Check if we have the required anchors before starting
-        const anchors = document.querySelectorAll('[data-spotlight-id]');
-        console.warn('[OnboardingUI] Found', anchors.length, 'spotlight anchors');
+        const anchors = document.querySelectorAll('[data-tour]');
+        console.warn('[OnboardingUI] Found', anchors.length, 'tour anchors');
 
         if (anchors.length === 0) {
           console.error('[OnboardingUI] No tour anchors found! Dashboard may not be mounted.');
