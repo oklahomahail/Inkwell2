@@ -2,19 +2,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import devLog from "@/utils/devLog";
-import devLog from "@/utils/devLog";
-import devLog from "@/utils/devLog";
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
+import devLog from '@/utils/devLog';
+import devLog from '@/utils/devLog';
+import devLog from '@/utils/devLog';
 
 import { analyticsService } from '../../services/analyticsService';
 import { useTutorialStorage } from '../../services/tutorialStorage';
 
 import { loadTourPreset } from './presetLoaderHelper';
 
-
 import type { TourType } from './steps/Step.types';
-
 
 type Props = {
   tourType?: TourType;

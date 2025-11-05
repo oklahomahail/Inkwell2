@@ -249,6 +249,39 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     }
 
     hasHydrated.current = true;
+
+    // Initialize welcome project for first-time users
+    (async () => {
+      try {
+        // Import welcome project utilities dynamically
+        const { reconcileWelcomeProjectPointer, ensureWelcomeProject } = await import(
+          '@/onboarding/welcomeProject'
+        );
+
+        // Reconcile any stale pointers first
+        await reconcileWelcomeProjectPointer();
+
+        // Create welcome project if eligible
+        const welcomeProjectId = await ensureWelcomeProject();
+
+        if (welcomeProjectId) {
+          // Reload projects to include the welcome project
+          const updatedProjects = JSON.parse(
+            localStorage.getItem(PROJECTS_KEY) || '[]',
+          ) as Project[];
+          dispatch({ type: 'SET_PROJECTS', payload: updatedProjects });
+
+          // Optionally set as current project if no other project is selected
+          const storedProjectId = localStorage.getItem(PROJECT_ID_KEY);
+          if (!storedProjectId) {
+            dispatch({ type: 'SET_CURRENT_PROJECT', payload: welcomeProjectId });
+          }
+        }
+      } catch (error) {
+        devLog.error('[AppContext] Error initializing welcome project:', error);
+        // Don't throw - app should continue even if welcome project fails
+      }
+    })();
   }, []);
 
   // Persist projects (only after hydration)

@@ -25,6 +25,10 @@ const EXPECTED_ERROR_PATTERNS = [
   /An update to.*inside a test was not wrapped in act/,
   /ReferenceError: localStorage is not defined/,
   /\[EnhancedChapterEditor\] Failed to autosave:/,
+  /\[WelcomeProject\] Error checking creation eligibility:/,
+  /\[WelcomeProject\] Error creating welcome project:/,
+  /\[WelcomeProject\] Error deleting welcome project:/,
+  /\[WelcomeProject\] Error reconciling pointer:/,
 ];
 
 function isExpectedError(message: string): boolean {

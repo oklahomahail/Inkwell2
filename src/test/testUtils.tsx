@@ -8,7 +8,6 @@ import { render, type RenderOptions } from '@testing-library/react';
 import { MemoryRouter, type MemoryRouterProps } from 'react-router-dom';
 import { vi } from 'vitest';
 
-
 import { AppProvider } from '@/context/AppContext';
 import type { AppState } from '@/context/AppContext';
 import { AuthProvider } from '@/context/AuthContext';

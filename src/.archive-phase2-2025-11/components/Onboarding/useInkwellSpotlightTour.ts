@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import { useTour } from './TourProvider';
 import { INKWELL_SPOTLIGHT_STEPS } from './tourRegistry';

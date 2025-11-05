@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import analyticsService from '../../services/analyticsService';
 import * as tourGatingMod from './tourGating';
 import { hasPromptedThisSession } from './tourGating';
-
 
 // Re-export the tour map for backwards compatibility
 export {
@@ -28,7 +27,6 @@ const CHECKLIST_KEY = 'inkwell-completion-checklist';
 
 // ===== Types
 import { type TourStep as BaseTourStep } from './tourRegistry';
-
 
 export interface TourStep extends BaseTourStep {
   action?: 'click' | 'hover' | 'none';

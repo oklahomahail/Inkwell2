@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import { useCommands } from './useCommands';
 

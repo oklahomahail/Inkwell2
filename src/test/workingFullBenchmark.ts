@@ -1,10 +1,9 @@
 // @ts-nocheck
 import { searchService } from '@/services/searchService';
 import { storageService } from '@/services/storageService';
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import { _generateSyntheticCorpus as generateSyntheticCorpus } from './syntheticCorpusGenerator';
-
 
 async function _workingFullBenchmark() {
   try {

@@ -1,1 +1,1 @@
-// Privacy Components exports export { PrivacyControls } from './PrivacyControls'; 
+// Privacy Components exports export { PrivacyControls } from './PrivacyControls';

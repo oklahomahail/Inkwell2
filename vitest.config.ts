@@ -26,6 +26,7 @@ export default defineConfig({
       'src/adapters/**/*.{test,spec}.ts', // v0.6.0 adapter tests
       'src/model/**/*.{test,spec}.ts', // v0.6.0 model gateway tests
       'src/editor/**/*.{test,spec}.tsx', // v0.8.0 editor tests
+      'src/onboarding/**/*.{test,spec}.ts', // v0.9.0 onboarding tests
     ],
     coverage: {
       enabled: true,

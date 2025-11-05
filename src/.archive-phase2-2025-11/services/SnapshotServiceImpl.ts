@@ -1,7 +1,7 @@
 // @ts-nocheck
 /** IMPORTANT: This is the real implementation. Tests mock via ../snapshotService */
 
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 import quotaAwareStorage from '@/utils/quotaAwareStorage';
 
 export interface SnapshotMeta {

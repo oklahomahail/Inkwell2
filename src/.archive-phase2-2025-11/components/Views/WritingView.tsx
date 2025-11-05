@@ -51,4 +51,4 @@ const WritingView: React.FC = () => {
   );
 };
 
-export default WritingView; 
+export default WritingView;

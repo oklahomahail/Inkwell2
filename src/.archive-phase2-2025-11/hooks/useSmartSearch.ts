@@ -2,8 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
-import devLog from "@/utils/devLog";
-
+import devLog from '@/utils/devLog';
 
 import { SmartSearchResult } from '../services/smartSearchService';
 

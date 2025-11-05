@@ -164,9 +164,9 @@ All critical checks completed successfully:
 
 ### Emergency Contacts
 
-- **Engineering Lead:** ******\_\_\_******
-- **Product Manager:** ******\_\_\_******
-- **On-Call Engineer:** ******\_\_\_******
+- **Engineering Lead:** **\*\***\_\_\_**\*\***
+- **Product Manager:** **\*\***\_\_\_**\*\***
+- **On-Call Engineer:** **\*\***\_\_\_**\*\***
 
 ### Rollback Procedures
 
@@ -246,14 +246,14 @@ window.tourFlags.disableAll();
 
 **Stakeholder Sign-Off:**
 
-- [ ] **Engineering Lead:** ******\_\_\_******  
-      _Confirms technical readiness and guardrails_
+- [ ] **Engineering Lead:** **\*\***\_\_\_**\*\***  
+       _Confirms technical readiness and guardrails_
 
-- [ ] **Product Manager:** ******\_\_\_******  
-      _Approves phased rollout plan and success metrics_
+- [ ] **Product Manager:** **\*\***\_\_\_**\*\***  
+       _Approves phased rollout plan and success metrics_
 
-- [ ] **QA Lead:** ******\_\_\_******  
-      _Verifies test coverage and manual QA results_
+- [ ] **QA Lead:** **\*\***\_\_\_**\*\***  
+       _Verifies test coverage and manual QA results_
 
 ---
 
@@ -410,5 +410,5 @@ JSON.parse(localStorage.getItem('analytics.tour.events') || '[]').filter(
 ---
 
 **Prepared By:** Engineering Team  
-**Approved By:** ******\_\_\_******  
+**Approved By:** **\*\***\_\_\_**\*\***  
 **Date:** October 27, 2025

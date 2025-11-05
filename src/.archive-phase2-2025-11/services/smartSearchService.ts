@@ -3,7 +3,7 @@
 
 import type { EnhancedProject } from '@/types/project';
 import type { Chapter } from '@/types/writing';
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import claudeService from './claudeService';
 import { enhancedSearchService, SearchResult, SearchOptions } from './enhancedSearchService';

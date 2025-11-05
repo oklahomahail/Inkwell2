@@ -1,4 +1,4 @@
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 /**
  * Migration utility to convert old profile-based localStorage keys to user-based keys
  * Run once at application boot to ensure smooth transition from multi-profile to single-user

@@ -6,6 +6,119 @@ All notable changes to this project are documented here.
 
 ---
 
+## [0.9.1-beta] - 2025-11-05
+
+### Added - Onboarding, EPUB Export, Telemetry & Bundle Guard
+
+**Major Features**: Welcome Project (#6), Quick Start Docs (#7), EPUB Export (#9), Telemetry (#14), Bundle Guard (#15)
+
+#### Welcome Project & Onboarding (#6, #7)
+
+- **Welcome Project** - Pre-populated sample project for new users
+  - 3 chapters with embedded quick start guide
+  - Demonstrates core features (chapters, scenes, characters)
+  - Auto-created on first visit, deleted after tour completion
+  - Feature-flagged: `VITE_ENABLE_WELCOME_PROJECT` (default: true)
+
+- **Quick Start Documentation** - In-project guidance links
+  - Help menu with documentation shortcuts
+  - Learn More links in onboarding modals
+  - Contextual documentation for export, AI tools
+
+- **Telemetry Events**:
+  - `onboarding.welcome.created` - Welcome project created
+  - `onboarding.welcome.deleted` - Welcome project deleted
+  - `onboarding.welcome.skipped` - User skipped welcome project
+  - `onboarding.welcome.completed` - User completed onboarding
+
+#### EPUB 3.0 Export (#9)
+
+- **EPUB Export (Beta)** - Minimal, valid EPUB 3.0 with single-spine content
+  - Package metadata (title, author, language, UUID)
+  - Navigation document (TOC from chapter titles)
+  - Single content document with all chapters
+  - Mandatory EPUB structure (mimetype, container.xml, package.opf)
+  - Feature-flagged: `VITE_ENABLE_EPUB_EXPORT` (default: true)
+
+- **Validation**:
+  - Passes `epubcheck --mode basic`
+  - Opens in Calibre, Apple Books, Google Play Books
+  - Kindle-compatible (via KindleGen conversion)
+
+- **Known Limitations (Phase 1)**:
+  - No custom CSS (basic reader defaults)
+  - No cover image
+  - Single-spine only (one HTML file)
+  - No extended metadata (publisher, date, rights)
+
+- **Files**:
+  - `src/services/export/exportService.epub.ts` (295 lines)
+  - `src/services/__tests__/exportService.epub.test.ts` (27 tests, all passing)
+  - `.implementations/EPUB_FOUNDATION_CHECKLIST.md` (comprehensive QA guide)
+
+- **Telemetry Events**:
+  - `export.epub.success` - EPUB export succeeded
+  - `export.epub.failure` - EPUB export failed
+
+#### Telemetry & Privacy (#14)
+
+- **Session Tracking** - Anonymous session monitoring
+  - `session.start` (on app boot)
+  - `session.end` (on unload/background)
+  - Session ID (UUID v4) in sessionStorage, cleared on tab close
+
+- **Export Tracking** - Anonymous export metrics
+  - `export.run` (format: PDF/DOCX/EPUB/MARKDOWN/TXT, chapters: all/subset)
+  - No content, titles, or identifiable data collected
+
+- **Privacy**:
+  - All telemetry PII-free (no writing, project names, or personal info)
+  - Opt-out via Settings → Privacy (coming) or localStorage flag
+  - `inkwell_telemetry_disabled=true` disables all events
+  - Transmitted via `navigator.sendBeacon()` API
+
+- **Files**:
+  - `src/services/telemetry.ts` - Session management, export events
+  - `src/main.tsx` - Session start/end wiring
+  - `docs/privacy.md` - Privacy documentation with event tables
+
+#### Bundle Guard (#15)
+
+- **CI Bundle Size Enforcement** - Automated bundle size monitoring
+  - Per-chunk thresholds: +5% warn, +10% error
+  - 22 tracked chunks (largest: index-CbLRcMAx.js @ 1127 KB)
+  - CI fails if any chunk exceeds error threshold
+  - Bundle baseline: `bundle-baseline.json`
+
+- **Scripts**:
+  - `scripts/generate-bundle-baseline.mjs` - Generate baseline from build
+  - `scripts/check-bundle-sizes.mjs` - CI validation script
+
+- **CI Integration**:
+  - `.github/workflows/ci.yml` - Added bundle size guard step
+  - Badge in README: [![Bundle Guard](https://img.shields.io/badge/bundle-guarded-success)](...)
+
+### Documentation
+
+- **[docs/autosave.md](docs/autosave.md)** - Autosave system guide (debounce, latency, troubleshooting)
+- **[docs/backup.md](docs/backup.md)** - Backup & recovery system (shadow copies, manual backups, 3-tier recovery)
+- **[docs/exporting.md](docs/exporting.md)** - Export format guide (PDF, DOCX, Markdown, EPUB, TXT)
+- **[docs/privacy.md](docs/privacy.md)** - Privacy & telemetry documentation
+- **[docs/README.md](docs/README.md)** - Documentation index with quick links
+
+### Changed
+
+- **README.md** - Updated features list with links to documentation
+- **README.md** - Added feature flags and privacy opt-out tables
+- **README.md** - Added bundle guard badge
+
+### Fixed
+
+- **Language normalization** - EPUB nav/content now normalize language codes to lowercase
+- **Export telemetry** - Added `emitExportRun()` to all export methods
+
+---
+
 ## [0.9.0-beta] - 2025-02-04
 
 ### Added - E2EE Foundation (Client-Side Encryption for Cloud Backups)

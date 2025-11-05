@@ -2,7 +2,7 @@
 // Search worker service
 import type { EnhancedProject } from '@/types/project';
 import type { Chapter } from '@/types/writing';
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 // For compatibility with older TypeScript
 declare var _WorkerGlobalScope: any;

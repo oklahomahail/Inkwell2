@@ -1,5 +1,5 @@
 // @ts-nocheck
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import { _generateSyntheticCorpus as generateSyntheticCorpus } from './syntheticCorpusGenerator';
 async function _debugBenchmark() {

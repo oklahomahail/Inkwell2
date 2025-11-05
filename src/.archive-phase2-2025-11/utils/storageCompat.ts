@@ -1,5 +1,5 @@
 // Storage key compatibility layer for migration to new key format
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import { getLocalStorage } from './storageAccess';
 

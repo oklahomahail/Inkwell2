@@ -1,7 +1,8 @@
 // Privacy Controls Component for Analytics Preferences
-import { Shield, Eye, EyeOff, Database, Trash2, Download, Info } from 'lucide-react';
+import { Shield, Eye, EyeOff, Database, Trash2, Download, Info, ExternalLink } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
+import { isTelemetryEnabled, setTelemetryEnabled } from '@/services/telemetry';
 import type { AnalyticsStore } from '@/types/analytics';
 
 import { analyticsService, useAnalytics } from '../../services/analyticsService';
@@ -17,12 +18,14 @@ export const PrivacyControls: React.FC<PrivacyControlsProps> = ({
 }) => {
   const { isEnabled } = useAnalytics();
   const [analyticsEnabled, setAnalyticsEnabled] = useState(isEnabled);
+  const [telemetryEnabled, setTelemetryEnabledState] = useState(true);
   const [dataSize, setDataSize] = useState(0);
   const [showDataPreview, setShowDataPreview] = useState(false);
   const [localAnalytics, setLocalAnalytics] = useState<AnalyticsStore>({});
 
   useEffect(() => {
     setAnalyticsEnabled(analyticsService.isAnalyticsEnabled());
+    setTelemetryEnabledState(isTelemetryEnabled());
 
     // Calculate stored data size
     const analytics = analyticsService.getLocalAnalytics();
@@ -40,6 +43,12 @@ export const PrivacyControls: React.FC<PrivacyControlsProps> = ({
       analyticsService.enable();
       setAnalyticsEnabled(true);
     }
+  };
+
+  const handleToggleTelemetry = () => {
+    const nextState = !telemetryEnabled;
+    setTelemetryEnabled(nextState);
+    setTelemetryEnabledState(nextState);
   };
 
   const handleClearData = () => {
@@ -83,14 +92,63 @@ export const PrivacyControls: React.FC<PrivacyControlsProps> = ({
   if (!detailed) {
     // Simple toggle for settings panels
     return (
-      <div className={`privacy-controls ${className}`}>
+      <div className={`privacy-controls ${className} space-y-4`}>
+        {/* Telemetry Toggle */}
         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <div className="flex items-center gap-3">
             <Shield className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             <div>
+              <h3 className="font-medium text-gray-900 dark:text-white">Anonymous Telemetry</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Help improve Inkwell with minimal, anonymous performance data
+              </p>
+            </div>
+          </div>
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={telemetryEnabled}
+              onChange={handleToggleTelemetry}
+              className="sr-only"
+            />
+            <div
+              className={`relative w-11 h-6 rounded-full transition-colors ${
+                telemetryEnabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
+            >
+              <div
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                  telemetryEnabled ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </div>
+          </label>
+        </div>
+
+        {/* Privacy Documentation Link */}
+        <div className="text-sm text-gray-600 dark:text-gray-400 px-4">
+          <p>
+            No content, titles, or personal info are ever transmitted.{' '}
+            <a
+              href="/docs/privacy.md"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
+            >
+              Learn more
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </p>
+        </div>
+
+        {/* Usage Analytics Toggle (old system) */}
+        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex items-center gap-3">
+            <Database className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <div>
               <h3 className="font-medium text-gray-900 dark:text-white">Usage Analytics</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Help improve Inkwell with anonymous usage data
+                Local feature usage tracking (stored on device)
               </p>
             </div>
           </div>

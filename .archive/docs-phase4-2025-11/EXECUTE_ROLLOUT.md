@@ -220,31 +220,31 @@ JSON.parse(localStorage.getItem('analytics.tour.events') || '[]');
 
 ### Day 1 (Today - Phase 1 Start)
 
-**Time:** ****\_****  
+**Time:** \***\*\_\*\***  
 **Deployed:** [ ]  
 **Canary Enabled:** [ ]  
 **Completion Rate:** **\_**  
 **Errors:** **\_**  
-**Notes:** ************\_\_\_************
+**Notes:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
 
 ### Day 2
 
 **Completion Rate:** **\_**  
 **Errors:** **\_**  
-**Notes:** ************\_\_\_************
+**Notes:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
 
 ### Day 3
 
 **Completion Rate:** **\_**  
 **Errors:** **\_**  
-**Notes:** ************\_\_\_************
+**Notes:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
 
 ### Day 4
 
 **Completion Rate:** **\_**  
 **Errors:** **\_**  
 **Go/No-Go for Phase 2:** [ ] GO [ ] NO-GO  
-**Reason:** ************\_\_\_************
+**Reason:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
 
 ---
 
@@ -281,8 +281,8 @@ Quick links for deploy day:
 **Team briefed?** [ ] YES  
 **Stakeholders notified?** [ ] YES
 
-**DEPLOY AUTHORIZATION:** ******\_\_\_******  
-**DATE/TIME:** ******\_\_\_******
+**DEPLOY AUTHORIZATION:** **\*\***\_\_\_**\*\***  
+**DATE/TIME:** **\*\***\_\_\_**\*\***
 
 ---
 

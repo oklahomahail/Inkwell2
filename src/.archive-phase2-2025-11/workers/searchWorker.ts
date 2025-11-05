@@ -5,7 +5,7 @@
 // Allow TS to understand the worker global
 export {}; // keep this a module
 declare const self: DedicatedWorkerGlobalScope;
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import type { EnhancedProject } from '../types/project';
 import type { Chapter } from '../types/writing';

@@ -5,9 +5,10 @@
 [![CI](https://github.com/davehail/inkwell/actions/workflows/ci.yml/badge.svg)](https://github.com/davehail/inkwell/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4?logo=prettier)](https://prettier.io/)
+[![Bundle Guard](https://img.shields.io/badge/bundle-guarded-success?logo=github)](https://github.com/davehail/inkwell/blob/main/bundle-baseline.json)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[Docs](/docs/dev/setup.md) · [Roadmap](/docs/product/roadmap.md) · [Changelog](./CHANGELOG.md) · [Workflow Guide](/docs/engineering/linting-and-ci-playbook.md)
+[Docs](/docs/README.md) · [Roadmap](/docs/product/roadmap.md) · [Changelog](./CHANGELOG.md) · [Privacy](/docs/privacy.md) · [Onboarding](/docs/ONBOARDING.md)
 
 ---
 
@@ -44,24 +45,50 @@ If you encounter issues with authentication:
 
 ## Features
 
-- Chapter & scene tracker with reordering
-- Character profiles (bios, arcs, relationships)
-- Clue tracker (planting → resolution mapping)
-- Writing progress: word count, streaks, goals
-- Story notes with tagging
-- Timeline conflict checker
-- Theme & motif tracker
-- Offline-first (IndexedDB), instant startup
-- Light theme by default with optional dark mode
-- Keyboard shortcuts and command palette
-- Claude/OpenAI assistant panel (generate or critique)
-- Export/import project data
-- **Interactive Product Tours** - Guided walkthroughs for onboarding and feature discovery
-  - Core tour (Dashboard, Sidebar, Topbar navigation)
-  - AI Tools tour (Model selector, Assistant panel, Privacy)
-  - Export tour (Export button, Template selection, PDF generation)
-  - Full accessibility support (keyboard navigation, screen readers, ARIA)
-  - Tour completion analytics tracking
+### Writing & Organization
+
+- **Chapter & Scene Tracker** - Organize long-form fiction with drag-and-drop reordering
+- **Character Profiles** - Bios, arcs, relationships, and character development tracking
+- **Clue Tracker** - Plant clues and map them to resolutions
+- **Timeline Conflict Checker** - Catch chronology errors
+- **Theme & Motif Tracker** - Track recurring elements
+- **Story Notes** - Tagging and organization
+
+### Data Safety & Performance
+
+- **[Autosave System](/docs/autosave.md)** - 2-second debounced saves with latency monitoring (p50/p95/p99)
+- **[3-Tier Recovery](/docs/backup.md)** - IndexedDB → localStorage → memory fallback
+- **Shadow Copies** - Automatic timestamped snapshots (last 10 per chapter)
+- **[Offline-First](/docs/backup.md#air-gap-test-offline-reliability)** - Works without network, IndexedDB persistence
+- **Bundle Guard** - CI-enforced bundle size limits (+5% warn, +10% error)
+
+### Export & Backup
+
+- **[PDF Export](/docs/exporting.md#1-pdf-export)** - Print-ready formatted output
+- **[DOCX Export](/docs/exporting.md#2-docx-export-rtf)** - RTF format for Word/Google Docs
+- **[Markdown Export](/docs/exporting.md#3-markdown-export)** - Plain text with frontmatter
+- **[EPUB Export](/docs/exporting.md#4-epub-export-beta)** _(Beta)_ - E-reader compatible (Kindle, Apple Books, Calibre)
+- **Manual Backups** - Full project export as JSON
+
+### Onboarding & Guidance
+
+- **[Welcome Project](/docs/ONBOARDING.md)** - Pre-populated sample project with quick start guide
+- **[Interactive Tours](/docs/ONBOARDING.md#product-tours)** - Guided walkthroughs (Core, AI Tools, Export)
+- **Quick Start Docs** - In-app documentation links
+- **Full Accessibility** - Keyboard navigation, screen readers, ARIA labels
+
+### Privacy & Telemetry
+
+- **[Anonymous Telemetry](/docs/privacy.md)** - Session tracking, export metrics, autosave latency (PII-free)
+- **Opt-Out Toggle** - Disable all telemetry via Settings → Privacy
+- **Local-First** - No cloud sync, all data in browser IndexedDB
+
+### Other Features
+
+- **AI Assistant Panel** - Claude/OpenAI integration (generate or critique)
+- **Light/Dark Theme** - System preference with manual toggle
+- **Keyboard Shortcuts** - Command palette for power users
+- **Writing Progress** - Word count, streaks, goals
 
 ## Quick Start
 
@@ -87,14 +114,33 @@ For React Hooks development guidelines, see [HOOKS_QUICK_REF.md](./HOOKS_QUICK_R
 
 ## Configuration
 
-| Key                    | Required | Purpose                     |
-| ---------------------- | -------- | --------------------------- |
-| VITE_SUPABASE_URL      | yes      | Supabase API URL            |
-| VITE_SUPABASE_ANON_KEY | yes      | Supabase anonymous API key  |
-| VITE_BASE_URL          | yes      | App origin for redirects    |
-| VITE_SENTRY_DSN        | no       | Error reporting (prod only) |
+### Environment Variables
+
+| Key                    | Required | Default | Purpose                     |
+| ---------------------- | -------- | ------- | --------------------------- |
+| VITE_SUPABASE_URL      | yes      | -       | Supabase API URL            |
+| VITE_SUPABASE_ANON_KEY | yes      | -       | Supabase anonymous API key  |
+| VITE_BASE_URL          | yes      | -       | App origin for redirects    |
+| VITE_SENTRY_DSN        | no       | -       | Error reporting (prod only) |
+| VITE_ENABLE_PWA        | no       | `true`  | Enable service worker/PWA   |
 
 See [/docs/ops/01-deploy.md](/docs/ops/01-deploy.md) and [/docs/ops/03-secrets.md](/docs/ops/03-secrets.md) for full guidance.
+
+### Feature Flags
+
+| Flag                        | Default | Purpose                            |
+| --------------------------- | ------- | ---------------------------------- |
+| VITE_ENABLE_WELCOME_PROJECT | `true`  | Show welcome project to new users  |
+| VITE_ENABLE_EPUB_EXPORT     | `true`  | Enable EPUB export option (beta)   |
+| VITE_ENABLE_DEV_METRICS     | `false` | Show developer performance metrics |
+
+### Privacy/Telemetry Opt-Out
+
+| localStorage Key             | Default | Effect                       |
+| ---------------------------- | ------- | ---------------------------- |
+| `inkwell_telemetry_disabled` | `false` | Disable all telemetry events |
+
+See [Privacy & Telemetry](/docs/privacy.md) for details.
 
 ## Architecture
 

@@ -2,8 +2,7 @@
 // src/services/enhancedSearchService.ts
 // Enhanced search service that prefers a Web Worker and cleanly falls back to main thread
 import type { Chapter } from '@/types/writing';
-import devLog from "@/utils/devLog";
-
+import devLog from '@/utils/devLog';
 
 import { searchWorkerService } from './searchWorkerService';
 import { storageService } from './storageService';

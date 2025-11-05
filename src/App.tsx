@@ -41,14 +41,22 @@ import { isPublicRoute } from './utils/auth';
 const ClaudeAssistant = lazy(() => import('./components/ClaudeAssistant'));
 const CommandPaletteUI = lazy(() => import('./components/CommandPalette/CommandPaletteUI'));
 const DebugSearchPanel = lazy(() => import('./components/DebugSearchPanel'));
-const ExportWizardModal = lazy(() => import('./components/ExportWizard/ExportWizardModal').then(m => ({ default: m.ExportWizardModal })));
+const ExportWizardModal = lazy(() =>
+  import('./components/ExportWizard/ExportWizardModal').then((m) => ({
+    default: m.ExportWizardModal,
+  })),
+);
 const ViewSwitcher = lazy(() => import('./components/ViewSwitcher'));
 
 // Lazy-loaded pages
 const PreviewDashboard = lazy(() => import('./features/preview/PreviewDashboard'));
 const PreviewLandingPage = lazy(() => import('./features/preview/PreviewLandingPage'));
 const PreviewWriter = lazy(() => import('./features/preview/PreviewWriter'));
-const OnboardingOrchestrator = lazy(() => import('./onboarding/OnboardingOrchestrator').then(m => ({ default: m.OnboardingOrchestrator })));
+const OnboardingOrchestrator = lazy(() =>
+  import('./onboarding/OnboardingOrchestrator').then((m) => ({
+    default: m.OnboardingOrchestrator,
+  })),
+);
 const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 const BrandPage = lazy(() => import('./pages/Brand'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));

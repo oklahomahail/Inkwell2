@@ -8,7 +8,6 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { AuthContext, AuthContextType } from '@/context/AuthContext';
 
-
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   authOverride?: Partial<AuthContextType>;
   initialRoute?: string;

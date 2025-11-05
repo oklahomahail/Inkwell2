@@ -1,7 +1,7 @@
 // @ts-nocheck
 // src/services/tourStorage.ts
 import type { TourStep } from '@/types/tour';
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 export interface TourProgress {
   currentStep: number;
