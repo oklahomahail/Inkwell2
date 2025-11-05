@@ -2,7 +2,6 @@
 import {
   FileText,
   Clock,
-  Save,
   Maximize2,
   Minimize2,
   ArrowLeft,
@@ -10,33 +9,56 @@ import {
   Eye,
   EyeOff,
   Type,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
+import { RealtimeStatus } from '@/components/Chapters/RealtimeStatus';
 import { useAppContext, View } from '@/context/AppContext';
+import { useChaptersHybrid } from '@/hooks/useChaptersHybrid';
 
 interface EnhancedWritingPanelProps {
   className?: string;
 }
 
 const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }) => {
-  const { state: _state, currentProject, updateProject, dispatch } = useAppContext();
+  const { state: _state, currentProject, dispatch } = useAppContext();
   const [content, setContent] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState<number | null>(null);
   const [wordCount, setWordCount] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showStats, setShowStats] = useState(true);
   const [focusMode, setFocusMode] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load content when project changes
+  // Chapter management with hybrid sync
+  const {
+    chapters,
+    activeId,
+    getActiveChapter,
+    setActive,
+    createChapter,
+    deleteChapter,
+    updateContent: updateChapterContent,
+    syncing,
+    lastSynced,
+    syncNow,
+    realtimeConnected,
+    liveUpdateReceived,
+  } = useChaptersHybrid(currentProject?.id || '');
+
+  // Load active chapter content
   useEffect(() => {
-    if (currentProject) {
-      setContent(currentProject.content || '');
-    }
-  }, [currentProject]);
+    if (!activeId) return;
+
+    (async () => {
+      const chapter = await getActiveChapter();
+      if (chapter) {
+        setContent(chapter.content);
+      }
+    })();
+  }, [activeId, getActiveChapter]);
 
   // Calculate word count
   useEffect(() => {
@@ -47,62 +69,45 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     setWordCount(words.length);
   }, [content]);
 
-  // Auto-save functionality
-  const saveContent = useCallback(async () => {
-    if (!currentProject || content === (currentProject.content || '')) return;
-
-    setIsSaving(true);
-    try {
-      const updatedProject = {
-        ...currentProject,
-        content,
-        updatedAt: Date.now(),
-      };
-
-      updateProject(updatedProject);
-      setLastSaved(Date.now());
-    } finally {
-      setIsSaving(false);
-    }
-  }, [currentProject, content, updateProject]);
-
-  // Auto-save with debouncing
+  // Auto-save chapter content (debounced in hook)
   useEffect(() => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
+    if (activeId && content) {
+      updateChapterContent(activeId, content);
     }
-
-    saveTimeoutRef.current = setTimeout(() => {
-      saveContent();
-    }, 1000); // Save after 1 second of inactivity
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [content, saveContent]);
-
-  // Manual save
-  const handleManualSave = () => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    saveContent();
-  };
+  }, [content, activeId, updateChapterContent]);
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
   };
 
-  const formatLastSaved = () => {
-    if (!lastSaved) return '';
-    const now = Date.now();
-    const diff = now - lastSaved;
+  // Chapter navigation
+  const activeChapter = chapters.find((ch) => ch.id === activeId);
+  const currentIndex = activeChapter ? chapters.indexOf(activeChapter) : -1;
+  const hasNext = currentIndex >= 0 && currentIndex < chapters.length - 1;
+  const hasPrev = currentIndex > 0;
 
-    if (diff < 60000) return 'Just now';
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-    return `${Math.floor(diff / 3600000)}h ago`;
+  const goToNextChapter = () => {
+    const nextChapter = chapters[currentIndex + 1];
+    if (hasNext && nextChapter) {
+      setActive(nextChapter.id);
+    }
+  };
+
+  const goToPrevChapter = () => {
+    const prevChapter = chapters[currentIndex - 1];
+    if (hasPrev && prevChapter) {
+      setActive(prevChapter.id);
+    }
+  };
+
+  const handleCreateChapter = () => {
+    createChapter();
+  };
+
+  const _handleDeleteChapter = () => {
+    if (activeId && confirm('Delete this chapter?')) {
+      deleteChapter(activeId);
+    }
   };
 
   const getReadingTime = () => {
@@ -190,36 +195,47 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Save Status */}
-              <div className="flex items-center gap-2 text-caption text-slate-500">
-                {isSaving ? (
-                  <>
-                    <div className="loading w-3 h-3" />
-                    Saving...
-                  </>
-                ) : lastSaved ? (
-                  <>
-                    <div className="w-2 h-2 bg-green-500 rounded-full" />
-                    Saved {formatLastSaved()}
-                  </>
-                ) : (
-                  <>
-                    <div className="w-2 h-2 bg-slate-300 rounded-full" />
-                    No changes
-                  </>
-                )}
+              {/* Chapter Navigation */}
+              <div className="flex items-center gap-1 border-r border-slate-200 dark:border-slate-700 pr-3 mr-1">
+                <button
+                  onClick={goToPrevChapter}
+                  disabled={!hasPrev}
+                  className="btn btn-ghost btn-sm"
+                  title="Previous chapter"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="px-2 text-caption text-slate-600 dark:text-slate-400 min-w-[120px] text-center">
+                  {activeChapter ? (
+                    <>
+                      <span className="font-medium">{activeChapter.title}</span>
+                      <span className="text-slate-400 dark:text-slate-500">
+                        {' '}
+                        ({currentIndex + 1}/{chapters.length})
+                      </span>
+                    </>
+                  ) : (
+                    'No chapter'
+                  )}
+                </div>
+                <button
+                  onClick={goToNextChapter}
+                  disabled={!hasNext}
+                  className="btn btn-ghost btn-sm"
+                  title="Next chapter"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleCreateChapter}
+                  className="btn btn-ghost btn-sm"
+                  title="New chapter"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
               </div>
 
               {/* Actions */}
-              <button
-                onClick={handleManualSave}
-                className="btn btn-ghost btn-sm"
-                title="Save now"
-                disabled={isSaving}
-              >
-                <Save className="w-4 h-4" />
-              </button>
-
               <button
                 onClick={() => setShowStats(!showStats)}
                 className="btn btn-ghost btn-sm"
@@ -249,6 +265,15 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
               </button>
             </div>
           </div>
+
+          {/* Realtime Status Bar */}
+          <RealtimeStatus
+            connected={realtimeConnected}
+            liveUpdate={liveUpdateReceived}
+            syncing={syncing}
+            lastSynced={lastSynced}
+            onSync={syncNow}
+          />
         </div>
       )}
 
