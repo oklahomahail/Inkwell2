@@ -287,12 +287,18 @@ describe('RecoveryService', () => {
     });
 
     it('should handle malformed JSON', async () => {
+      // Suppress expected error logs
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
       const invalidJson = 'this is not valid JSON {';
       const result = await recoveryService.recoverFromUserUpload(invalidJson);
 
       expect(result.success).toBe(false);
       expect(result.tier).toBe('userUpload');
       expect(result.error).toBeDefined();
+
+      // Restore console.error
+      consoleErrorSpy.mockRestore();
     });
   });
 
