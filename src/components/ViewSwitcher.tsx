@@ -13,6 +13,7 @@ import { useFeatureDiscovery } from '../hooks/useAnalyticsTracking';
 
 import EnhancedDashboard from './Dashboard/EnhancedDashboard';
 import { FeatureErrorBoundary } from './ErrorBoundary';
+import { RecoveryErrorBoundary } from './ErrorBoundary/RecoveryErrorBoundary';
 import { TimelinePanel } from './Panels';
 import StoryPlanningView from './Views/StoryPlanningView';
 import EnhancedWritingPanel from './Writing/EnhancedWritingPanel';
@@ -87,15 +88,19 @@ const ViewSwitcher: React.FC = () => {
   switch (currentView) {
     case View.Dashboard:
       return (
-        <FeatureErrorBoundary featureName="Dashboard">
-          <EnhancedDashboard />
-        </FeatureErrorBoundary>
+        <RecoveryErrorBoundary panelName="Dashboard">
+          <FeatureErrorBoundary featureName="Dashboard">
+            <EnhancedDashboard />
+          </FeatureErrorBoundary>
+        </RecoveryErrorBoundary>
       );
     case View.Writing:
       return (
-        <FeatureErrorBoundary featureName="Writing Editor">
-          <EnhancedWritingPanel />
-        </FeatureErrorBoundary>
+        <RecoveryErrorBoundary panelName="Editor">
+          <FeatureErrorBoundary featureName="Writing Editor">
+            <EnhancedWritingPanel />
+          </FeatureErrorBoundary>
+        </RecoveryErrorBoundary>
       );
     case View.Timeline:
       return (
