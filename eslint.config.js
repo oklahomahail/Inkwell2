@@ -26,6 +26,8 @@ export default [
       'src/bench/**', // Migrated from .eslintignore
       'scripts/**', // All scripts (including .mjs)
       '.audit/**', // Audit tools
+      'src/.archive-phase2-2025-11/**', // Phase 2 archived files
+      'src/**/_archive/**', // All _archive directories
     ],
   },
 

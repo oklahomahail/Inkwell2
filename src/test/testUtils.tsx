@@ -7,12 +7,14 @@
 import { render, type RenderOptions } from '@testing-library/react';
 import { MemoryRouter, type MemoryRouterProps } from 'react-router-dom';
 import { vi } from 'vitest';
-import type { ReactElement, ReactNode } from 'react';
-import type { User, Session } from '@supabase/supabase-js';
 
-import { AuthProvider } from '@/context/AuthContext';
+
 import { AppProvider } from '@/context/AppContext';
 import type { AppState } from '@/context/AppContext';
+import { AuthProvider } from '@/context/AuthContext';
+
+import type { User, Session } from '@supabase/supabase-js';
+import type { ReactElement, ReactNode } from 'react';
 
 // ===== MOCK FACTORIES =====
 
