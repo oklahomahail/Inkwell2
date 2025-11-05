@@ -4,27 +4,28 @@ export interface SpotlightStep {
   content: string;
   fallback?: {
     x: number | 'center';
-    y: number;
+    y: number | 'center';
   };
 }
 
 export const spotlightSteps: SpotlightStep[] = [
   {
-    id: 'open-search',
-    target: '[data-spot="enhanced-search"], #enhanced-search, .js-enhanced-search',
-    content: 'Type to search everything.',
-    fallback: { x: 'center', y: 96 },
-  },
-  {
     id: 'sidebar-navigation',
-    target: '[data-tour="spotlight-nav"], .nav-primary',
-    content: 'Quick access to all your projects and tools.',
+    target: '[data-tour="sidebar"]',
+    content:
+      'Quick access to all your projects and tools. Switch between Dashboard, Writing, Planning, Timeline, Analytics, and Settings.',
     fallback: { x: 48, y: 120 },
   },
   {
-    id: 'editor-toolbar',
-    target: '[data-tour="editor-tools"], .editor-toolbar',
-    content: 'Format and enhance your writing.',
-    fallback: { x: 'center', y: 48 },
+    id: 'dashboard-view',
+    target: '[data-tour="dashboard-nav"]',
+    content: 'View all your writing projects and recent work in one place.',
+    fallback: { x: 200, y: 200 },
+  },
+  {
+    id: 'create-project',
+    target: '[data-tour="new-project"]',
+    content: 'Create a new writing project to start your next story.',
+    fallback: { x: 48, y: 'center' as 'center' },
   },
 ];

@@ -24,7 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const browser = await puppeteer.launch({
       args: chromium.args,
       executablePath: execPath,
-      headless: chromium.headless,
+      headless: true,
       defaultViewport: { width: 1200, height: 800, deviceScaleFactor: 2 },
     });
 
@@ -44,9 +44,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const filename = (meta?.filename || 'export.pdf').replace(/[^a-z0-9_\-\.]+/gi, '_');
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.status(200).end(Buffer.from(pdf));
+    return res.status(200).end(Buffer.from(pdf));
   } catch (e: unknown) {
     console.error(e);
-    res.status(500).json({ error: 'Failed to render PDF' });
+    return res.status(500).json({ error: 'Failed to render PDF' });
   }
 }

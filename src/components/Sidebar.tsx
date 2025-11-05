@@ -26,9 +26,8 @@ export const Sidebar: React.FC = () => {
         'fixed left-0 top-0 z-40 h-full bg-slate-900 flex flex-col',
         sidebarCollapsed ? 'w-14' : 'w-64',
       )}
-      data-spotlight-id="sidebar.container"
+      data-tour="sidebar"
       data-testid="sidebar"
-      data-tour-id="sidebar"
       data-collapsed={sidebarCollapsed}
     >
       <div className="p-4 flex items-center space-x-2" data-spotlight-id="sidebar.logo">
@@ -50,7 +49,7 @@ export const Sidebar: React.FC = () => {
         {navItems.map(({ key, label, icon }) => (
           <button
             key={key}
-            data-spotlight-id={`sidebar.${key}`}
+            data-tour={key === 'settings' ? 'settings' : `${key}-nav`}
             className={cn(
               'nav-item flex items-center gap-2',
               activeView === key && 'bg-ink-50 text-ink-700 font-medium',
@@ -65,7 +64,7 @@ export const Sidebar: React.FC = () => {
       </nav>
       <div className="p-3 border-t border-slate-700">
         <button
-          data-spotlight-id="sidebar.newProject"
+          data-tour="new-project"
           onClick={openNewProjectDialog}
           className="w-full rounded-md px-3 py-2 text-left text-sm font-medium text-slate-200 hover:bg-slate-800"
         >

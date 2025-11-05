@@ -13,12 +13,13 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
+import { useUI } from '@/hooks/useUI';
 import analyticsService from '@/services/analyticsService';
-import { isTourDone } from '@/tour/persistence';
-import { startTour } from '@/tour/tourLauncher';
 
 import { CompletionChecklistComponent as CompletionChecklist } from './CompletionChecklistNew';
 import { FeatureDiscoveryProvider } from './FeatureDiscovery';
+import { startTour as startTourController } from './tour-core/TourController';
+import { TourOverlay } from './TourOverlay';
 import { WelcomeModal } from './WelcomeModalNew';
 
 // Routes where welcome modal is allowed to auto-show
@@ -27,26 +28,32 @@ const FIRST_TIME_ALLOWED_ROUTES = ['/dashboard'];
 export function OnboardingUI() {
   const location = useLocation();
   const { shouldShowModal, setTourActive, completeOnboarding } = useOnboardingGate();
+  const { sidebarCollapsed, toggleSidebar } = useUI();
 
   const [showWelcome, setShowWelcome] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
 
   // Auto-show welcome modal for first-time users
   useEffect(() => {
+    console.warn('[OnboardingUI] Route check:', {
+      pathname: location.pathname,
+      allowed: FIRST_TIME_ALLOWED_ROUTES,
+      isAllowed: FIRST_TIME_ALLOWED_ROUTES.includes(location.pathname),
+      shouldShow: shouldShowModal(),
+    });
+
     // Only check on allowed routes
     if (!FIRST_TIME_ALLOWED_ROUTES.includes(location.pathname)) {
-      return undefined;
-    }
-
-    // Check if tour is already completed
-    if (isTourDone('spotlight')) {
+      console.warn('[OnboardingUI] Not on allowed route, skipping modal');
       return undefined;
     }
 
     // Check gate conditions
     if (shouldShowModal()) {
+      console.warn('[OnboardingUI] Gate conditions met, will show modal in 1s');
       // Small delay to ensure page is loaded
       const timer = setTimeout(() => {
+        console.warn('[OnboardingUI] Showing welcome modal now');
         setShowWelcome(true);
 
         // Track analytics
@@ -61,6 +68,7 @@ export function OnboardingUI() {
 
       return () => clearTimeout(timer);
     }
+    console.warn('[OnboardingUI] Gate conditions not met, skipping modal');
     return undefined;
   }, [location.pathname, shouldShowModal]);
 
@@ -75,10 +83,30 @@ export function OnboardingUI() {
     return () => window.removeEventListener('inkwell:tour:completed', handleTourComplete);
   }, [completeOnboarding, setTourActive]);
 
-  const handleStartTour = () => {
+  const handleStartTour = async () => {
+    console.warn('[OnboardingUI] Starting tour, current route:', location.pathname);
+
+    // If not on dashboard, this shouldn't happen - but handle it gracefully
+    if (location.pathname !== '/dashboard') {
+      console.error(
+        '[OnboardingUI] ERROR: Tour started from non-dashboard route:',
+        location.pathname,
+      );
+      console.error('[OnboardingUI] Dashboard components are not mounted yet!');
+      // Close modal and let the route redirect happen naturally
+      setShowWelcome(false);
+      return;
+    }
+
+    // Ensure sidebar is visible for tour (it contains tour anchors)
+    const needsToOpenSidebar = sidebarCollapsed;
+    if (needsToOpenSidebar) {
+      console.warn('[OnboardingUI] Opening sidebar for tour');
+      toggleSidebar();
+    }
+
     // Mark tour as active to prevent modal from re-opening
     setTourActive(true);
-    setShowWelcome(false);
 
     // Track analytics
     try {
@@ -89,12 +117,30 @@ export function OnboardingUI() {
       console.warn('Failed to track tour start analytics:', error);
     }
 
-    // Delay to ensure modal is fully closed
+    // Close modal FIRST, then wait for dashboard to render
+    setShowWelcome(false);
+
+    // Wait for modal close + sidebar animation + dashboard render
+    const delayMs = needsToOpenSidebar ? 2000 : 2000; // Extra time for modal close + dashboard mount
+    console.warn('[OnboardingUI] Waiting', delayMs, 'ms for dashboard to render');
+
     requestAnimationFrame(() => {
-      setTimeout(() => {
-        // Start spotlight tour with the new system
-        startTour('spotlight', { source: 'welcome', restart: true });
-      }, 100);
+      setTimeout(async () => {
+        // Check if we have the required anchors before starting
+        const anchors = document.querySelectorAll('[data-tour]');
+        console.warn('[OnboardingUI] Found', anchors.length, 'tour anchors');
+
+        if (anchors.length === 0) {
+          console.error('[OnboardingUI] No tour anchors found! Dashboard may not be mounted.');
+          console.error(
+            '[OnboardingUI] Available elements:',
+            document.body.innerHTML.substring(0, 500),
+          );
+        }
+
+        // Start spotlight tour with the TourController
+        await startTourController('spotlight', undefined, { force: true });
+      }, delayMs);
     });
   };
 
@@ -112,7 +158,7 @@ export function OnboardingUI() {
     }
   };
 
-  const handleChecklistTour = (tourType: string) => {
+  const handleChecklistTour = async (tourType: string) => {
     setShowChecklist(false);
 
     // Track analytics
@@ -126,11 +172,12 @@ export function OnboardingUI() {
     }
 
     // Launch spotlight tour
-    startTour('spotlight', { source: 'checklist', restart: true });
+    await startTourController('spotlight', undefined, { force: true });
   };
 
   return (
     <FeatureDiscoveryProvider>
+      <TourOverlay />
       <WelcomeModal
         isOpen={showWelcome}
         onClose={() => setShowWelcome(false)}

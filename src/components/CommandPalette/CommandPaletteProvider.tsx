@@ -512,46 +512,13 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
           ),
       },
 
-      // Tour & Onboarding commands
+      // Tour commands - temporarily disabled during rebuild
       {
-        id: 'tour-start-onboarding',
-        label: 'Start Onboarding Tour',
-        description: 'Begin the interactive Inkwell tour from the beginning',
+        id: 'tour-start',
+        label: 'Start Tour',
+        description: 'Tour system being rebuilt',
         category: 'settings',
-        shortcut: 'Shift+?',
-        action: () => {
-          window.InkwellTour?.start('spotlight', {
-            restart: true,
-            source: 'command_palette',
-          });
-          showToast?.('Starting Inkwell onboarding tour...', 'info');
-        },
-      },
-      {
-        id: 'tour-replay',
-        label: 'Replay Tour',
-        description: 'Replay the Spotlight Tour with your current progress',
-        category: 'settings',
-        action: () => {
-          window.InkwellTour?.start('spotlight', { source: 'command_palette' });
-          showToast?.('Continuing Inkwell tour...', 'info');
-        },
-      },
-      {
-        id: 'tour-reset',
-        label: 'Reset Tour Progress',
-        description: 'Clear all tour progress and start fresh',
-        category: 'settings',
-        action: () => {
-          if (
-            confirm(
-              'Reset all tour progress? This will clear your completed steps and allow you to experience the full tour again.',
-            )
-          ) {
-            window.InkwellTour?.reset('spotlight');
-            showToast?.('Tour progress reset successfully', 'success');
-          }
-        },
+        action: () => showToast?.('Tour system being rebuilt', 'info'),
       },
     ];
 

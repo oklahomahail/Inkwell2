@@ -31,7 +31,7 @@ const DashboardPanel: React.FC = () => {
   const lastEditedChapter = useLastEditedChapter(currentProject?.id ?? '');
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" data-tour="dashboard">
       {/* Branded welcome section */}
       <Welcome onCreateProject={openNewProjectDialog} hasProjects={state.projects.length > 0} />
 
@@ -52,7 +52,10 @@ const DashboardPanel: React.FC = () => {
 
       {/* Current Project */}
       {currentProject ? (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div
+          className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700"
+          data-spotlight-id="dashboard.welcome"
+        >
           <div className="flex items-start justify-between mb-4">
             <div>
               <h2 className="text-xl font-semibold mb-2">{currentProject.name}</h2>
@@ -161,7 +164,10 @@ const DashboardPanel: React.FC = () => {
 
       {/* Recent Projects */}
       {state.projects.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div
+          className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700"
+          data-tour="projects"
+        >
           <h2 className="text-xl font-semibold mb-4">Recent Projects</h2>
           <div className="space-y-3">
             {state.projects.slice(0, 5).map((project) => (
