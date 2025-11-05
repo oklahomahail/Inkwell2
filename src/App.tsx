@@ -1,16 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import { TourProvider } from '@/components/Tour/TourProvider';
 import devLog from '@/utils/devLog';
 import { log } from '@/utils/logger';
 
-// UI + panels
-import ClaudeAssistant from './components/ClaudeAssistant';
+// Core UI components (needed immediately)
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
-import CommandPaletteUI from './components/CommandPalette/CommandPaletteUI';
-import DebugSearchPanel from './components/DebugSearchPanel';
-import { ExportWizardModal } from './components/ExportWizard/ExportWizardModal';
 import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
 import { OnboardingUI } from './components/Onboarding/OnboardingUI';
@@ -24,35 +20,52 @@ import { PreviewGuard } from './components/RouteGuards/PreviewGuard';
 import { StorageBanner } from './components/Storage/StorageBanner';
 import { StorageErrorToast } from './components/Storage/StorageErrorToast';
 import { ToastContainer } from './components/ToastContainer';
-import ViewSwitcher from './components/ViewSwitcher';
+
 // Context and providers
 import { useAppContext } from './context/AppContext';
 import { useAuth } from './context/AuthContext';
 import { useEditorContext } from './context/EditorContext';
 // Route guards
-// Tutorial Router
-// Pages
-import PreviewDashboard from './features/preview/PreviewDashboard';
-import PreviewLandingPage from './features/preview/PreviewLandingPage';
-import PreviewWriter from './features/preview/PreviewWriter';
 import { usePrivateModeWarning } from './hooks/usePrivateModeWarning';
-import { OnboardingOrchestrator } from './onboarding/OnboardingOrchestrator';
-import AuthCallback from './pages/AuthCallback';
-import BrandPage from './pages/Brand';
-import ForgotPassword from './pages/ForgotPassword';
-import SignIn from './pages/SignInPage';
-import SignUp from './pages/SignUpPage';
-import UpdatePassword from './pages/UpdatePassword';
 import AnonOnlyRoute from './routes/AnonOnlyRoute';
-import SupabaseHealth from './routes/Health';
 import ProtectedRoute from './routes/ProtectedRoute';
+// Hooks
 // Services
 import { connectivityService } from './services/connectivityService';
 import { enhancedStorageService } from './services/enhancedStorageService';
 import { storageErrorLogger } from './services/storageErrorLogger';
 import { storageManager } from './services/storageManager';
 import { isPublicRoute } from './utils/auth';
-// Tour components
+
+// Lazy-loaded heavy components (loaded on-demand)
+const ClaudeAssistant = lazy(() => import('./components/ClaudeAssistant'));
+const CommandPaletteUI = lazy(() => import('./components/CommandPalette/CommandPaletteUI'));
+const DebugSearchPanel = lazy(() => import('./components/DebugSearchPanel'));
+const ExportWizardModal = lazy(() => import('./components/ExportWizard/ExportWizardModal').then(m => ({ default: m.ExportWizardModal })));
+const ViewSwitcher = lazy(() => import('./components/ViewSwitcher'));
+
+// Lazy-loaded pages
+const PreviewDashboard = lazy(() => import('./features/preview/PreviewDashboard'));
+const PreviewLandingPage = lazy(() => import('./features/preview/PreviewLandingPage'));
+const PreviewWriter = lazy(() => import('./features/preview/PreviewWriter'));
+const OnboardingOrchestrator = lazy(() => import('./onboarding/OnboardingOrchestrator').then(m => ({ default: m.OnboardingOrchestrator })));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
+const BrandPage = lazy(() => import('./pages/Brand'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const SignIn = lazy(() => import('./pages/SignInPage'));
+const SignUp = lazy(() => import('./pages/SignUpPage'));
+const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
+const SupabaseHealth = lazy(() => import('./routes/Health'));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="text-center">
+      <div className="w-12 h-12 border-4 border-inkwell-navy border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+    </div>
+  </div>
+);
 
 // Debug utilities (development only)
 if (import.meta.env.DEV) {
@@ -155,92 +168,94 @@ function AppShell() {
           )}
         </div>
       </header>
-      <Routes>
-        {/* Health check route */}
-        <Route path="/health" element={<HealthCheck />} />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Health check route */}
+          <Route path="/health" element={<HealthCheck />} />
 
-        {/* Supabase integration health check */}
-        <Route path="/health/supabase" element={<SupabaseHealth />} />
+          {/* Supabase integration health check */}
+          <Route path="/health/supabase" element={<SupabaseHealth />} />
 
-        {/* Auth callback route - handles magic link code exchange and password reset flow */}
-        <Route path="/auth/callback" element={<AuthCallback />} />
+          {/* Auth callback route - handles magic link code exchange and password reset flow */}
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
-        {/* Auth routes - protected from authenticated users */}
-        <Route
-          path="/sign-in"
-          element={
-            <AnonOnlyRoute>
-              <SignIn />
-            </AnonOnlyRoute>
-          }
-        />
-        <Route
-          path="/sign-up"
-          element={
-            <AnonOnlyRoute>
-              <SignUp />
-            </AnonOnlyRoute>
-          }
-        />
-        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-        <Route path="/auth/update-password" element={<UpdatePassword />} />
+          {/* Auth routes - protected from authenticated users */}
+          <Route
+            path="/sign-in"
+            element={
+              <AnonOnlyRoute>
+                <SignIn />
+              </AnonOnlyRoute>
+            }
+          />
+          <Route
+            path="/sign-up"
+            element={
+              <AnonOnlyRoute>
+                <SignUp />
+              </AnonOnlyRoute>
+            }
+          />
+          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+          <Route path="/auth/update-password" element={<UpdatePassword />} />
 
-        {/* Legacy routes - redirects */}
-        <Route path="/login" element={<Navigate to="/sign-in" replace />} />
-        <Route path="/signup" element={<Navigate to="/sign-up" replace />} />
+          {/* Legacy routes - redirects */}
+          <Route path="/login" element={<Navigate to="/sign-in" replace />} />
+          <Route path="/signup" element={<Navigate to="/sign-up" replace />} />
 
-        {/* Preview mode routes - for unauthenticated users */}
-        <Route
-          path="/preview"
-          element={
-            <PreviewGuard>
-              <PreviewLandingPage />
-            </PreviewGuard>
-          }
-        />
-        <Route
-          path="/preview/write"
-          element={
-            <PreviewGuard>
-              <PreviewWriter />
-            </PreviewGuard>
-          }
-        />
-        <Route
-          path="/preview/dashboard"
-          element={
-            <PreviewGuard>
-              <PreviewDashboard />
-            </PreviewGuard>
-          }
-        />
+          {/* Preview mode routes - for unauthenticated users */}
+          <Route
+            path="/preview"
+            element={
+              <PreviewGuard>
+                <PreviewLandingPage />
+              </PreviewGuard>
+            }
+          />
+          <Route
+            path="/preview/write"
+            element={
+              <PreviewGuard>
+                <PreviewWriter />
+              </PreviewGuard>
+            }
+          />
+          <Route
+            path="/preview/dashboard"
+            element={
+              <PreviewGuard>
+                <PreviewDashboard />
+              </PreviewGuard>
+            }
+          />
 
-        {/* Root redirect */}
-        <Route path="/" element={<RootRedirect />} />
+          {/* Root redirect */}
+          <Route path="/" element={<RootRedirect />} />
 
-        {/* Dashboard route - main app */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <ProfileAppShell />
-            </ProtectedRoute>
-          }
-        />
+          {/* Dashboard route - main app */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <ProfileAppShell />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Brand showcase route */}
-        <Route
-          path="/brand"
-          element={
-            <ProtectedRoute>
-              <BrandPage />
-            </ProtectedRoute>
-          }
-        />
+          {/* Brand showcase route */}
+          <Route
+            path="/brand"
+            element={
+              <ProtectedRoute>
+                <BrandPage />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Not Found - explicit redirect to root */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Not Found - explicit redirect to root */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </>
   );
 }
@@ -369,28 +384,34 @@ function ProfileAppShell() {
       <StorageErrorToast />
 
       <MainLayout>
-        <ViewSwitcher />
+        <Suspense fallback={null}>
+          <ViewSwitcher />
+        </Suspense>
         <ToastContainer />
 
         {/* Claude Assistant with Error Boundary */}
         {claude?.isVisible && (
           <ClaudeErrorBoundary>
-            <ClaudeAssistant
-              selectedText=""
-              onInsertText={(text) => {
-                insertText(text);
-              }}
-            />
+            <Suspense fallback={null}>
+              <ClaudeAssistant
+                selectedText=""
+                onInsertText={(text) => {
+                  insertText(text);
+                }}
+              />
+            </Suspense>
           </ClaudeErrorBoundary>
         )}
 
         {/* Export Wizard */}
         {currentProject && (
-          <ExportWizardModal
-            isOpen={isExportDialogOpen}
-            projectId={currentProject.id}
-            onClose={closeExportDialog}
-          />
+          <Suspense fallback={null}>
+            <ExportWizardModal
+              isOpen={isExportDialogOpen}
+              projectId={currentProject.id}
+              onClose={closeExportDialog}
+            />
+          </Suspense>
         )}
 
         {/* Offline Queue Modal */}
@@ -399,10 +420,14 @@ function ProfileAppShell() {
         )}
 
         {/* Command Palette UI */}
-        <CommandPaletteUI />
+        <Suspense fallback={null}>
+          <CommandPaletteUI />
+        </Suspense>
 
         {/* Onboarding System */}
-        <OnboardingOrchestrator />
+        <Suspense fallback={null}>
+          <OnboardingOrchestrator />
+        </Suspense>
 
         {/* Hidden global export trigger */}
         <div style={{ display: 'none' }}>
@@ -412,7 +437,11 @@ function ProfileAppShell() {
         </div>
 
         {/* Dev-only debug panels */}
-        {import.meta.env.DEV && <DebugSearchPanel />}
+        {import.meta.env.DEV && (
+          <Suspense fallback={null}>
+            <DebugSearchPanel />
+          </Suspense>
+        )}
         {import.meta.env.DEV && <StorageDebugPanel />}
       </MainLayout>
     </>
