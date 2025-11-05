@@ -9,7 +9,10 @@
  * - Offline detection and state management
  * - Error backoff with retry support
  * - State change subscriptions for UI updates
+ * - Performance metrics tracking
  */
+
+import { autosaveMetrics } from './autosaveMetrics';
 
 type SaveFn = (chapterId: string, content: string) => Promise<{ checksum: string }>;
 
@@ -62,12 +65,27 @@ export class AutosaveService {
     this.inflight = true;
     this.setState(navigator.onLine ? 'saving' : 'offline');
 
+    const startTime = performance.now();
+    const contentSize = new Blob([content]).size;
+
     try {
       const res = await this.saveFn(chapterId, content);
+      const latency = performance.now() - startTime;
+
       this.lastChecksum.set(chapterId, res.checksum);
       this.setState('saved');
+
+      // Record metrics
+      autosaveMetrics.recordSave(latency, contentSize, true);
     } catch (e) {
+      const latency = performance.now() - startTime;
+      const errorCode = (e as any)?.code || 'UNKNOWN';
+
       this.setState(navigator.onLine ? 'error' : 'offline');
+
+      // Record metrics for failed save
+      autosaveMetrics.recordSave(latency, contentSize, false, errorCode);
+
       throw e;
     } finally {
       this.inflight = false;

@@ -1,4 +1,8 @@
-export type TelemetryEvent = 'autosave.start' | 'autosave.success' | 'autosave.error';
+export type TelemetryEvent =
+  | 'autosave.start'
+  | 'autosave.success'
+  | 'autosave.error'
+  | 'editor.autosave.latency';
 
 export function track(event: TelemetryEvent, payload: Record<string, unknown> = {}) {
   try {
