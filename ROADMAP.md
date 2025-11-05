@@ -1,6 +1,6 @@
 # Inkwell Platform Roadmap 2025
 
-_Last updated: January 2025_
+_Last updated: November 2025_
 
 ## Vision
 
@@ -8,123 +8,102 @@ Inkwell is an offline-first writing platform for serious authors. The focus is a
 
 ---
 
-## Current Status: v0.7.1 (January 2025)
+## Current Status: v0.9.1-beta (November 2025)
 
-**Latest Release:** v0.7.1 - Export Dashboard UI Finalization
-**GitHub Release:** https://github.com/oklahomahail/Inkwell2/releases/tag/v0.7.1
+**Latest Release:** v0.9.1-beta - Onboarding, EPUB, Telemetry & Bundle Guard
+**Package Version:** v1.2.1
+**Repository:** https://github.com/davehail/inkwell
+**Live Demo:** https://inkwell-writing.vercel.app
 
 ### ✅ Recently Completed
 
-#### v0.7.1 - Export Dashboard UI Finalization (January 2025)
+#### v0.9.1-beta - Onboarding, EPUB, Telemetry & Bundle Guard (November 2025)
 
-- **Theme Reactivity**: ChapterDistributionChart and ExportStats with smooth theme transitions
-- **Error Boundaries**: ExportDashboardErrorBoundary for graceful error recovery
-- **Performance**: 60fps transitions using requestAnimationFrame
-- **Test Coverage**: 735/735 tests passing, 0 TypeScript errors
+- **Welcome Project**: Pre-populated sample project for new users with quick start guide
+- **EPUB 3.0 Export**: Beta e-book export compatible with Kindle, Apple Books, Calibre
+- **Enhanced Telemetry**: Session tracking, export metrics, autosave latency monitoring
+- **Bundle Guard**: CI-enforced bundle size limits (+5% warn, +10% error)
+- **Privacy Controls**: User-facing telemetry opt-out toggle in Settings
+- **Comprehensive Documentation**: autosave.md, backup.md, exporting.md, privacy.md
 
-#### v0.7.0 - Export Dashboard with Telemetry (December 2024)
+#### v0.9.0-beta - Reliability & Performance Layer (October 2025)
 
-- **Export Dashboard**: Comprehensive export history visualization
-- **Export Statistics**: Real-time export analytics and metrics
-- **Chapter Distribution**: Visual word count distribution across chapters
-- **Export History**: Detailed export records with filtering and search
-- **Telemetry Integration**: Full export tracking and analytics
-- **E2E Testing**: 14 comprehensive Playwright tests
+- **Defensive Guards**: File corruption prevention, defensive IndexedDB access
+- **Service Worker Fixes**: Precaching improvements and asset verification
+- **Bloat Cleanup (4 Phases)**: Removed unused dependencies, archived 300+ files, 29% bundle reduction
+- **Bundle Optimization**: Lazy-loading reduced bundle from 1,151 KB to 812 KB
+- **Autosave System**: 2-second debounced saves with latency monitoring
+- **3-Tier Recovery**: IndexedDB → localStorage → memory fallback
 
-#### v0.5.0 - Supabase Integration (October 2025)
+#### v0.8.0 - Enhanced Export & AI (Historical)
 
-- **Local-First Architecture**: IndexedDB + Supabase dual persistence with optional cloud sync
-- **Conflict Detection & Sync Queue**: Intelligent conflict resolution with last-write-wins strategy
-- **Cloud Sync UI**: Real-time sync status badges and cloud sync toggle control
-- **Row-Level Security (RLS)**: Postgres RLS policies enforcing user data isolation
-- **8 Core Migrations**: Fully tested migration suite with profiles, roles, and bulk operations
+- **Professional Export System**: Multi-format wizard (PDF, DOCX, EPUB, Markdown)
+- **AI Plot Analysis**: Comprehensive plot structure analysis with pacing graphs
+- **Export Dashboard**: History visualization and analytics
+- **Export Readiness**: Real-time project validation and recommendations
 
-#### Spotlight Tour System (October 2025)
-
-- **Interactive Guided Tours**: SpotlightOverlay UI component with keyboard navigation
-- **Auto-start Integration**: First-time user onboarding on dashboard
-- **Feature-Specific Tours**: AI tools and Export feature tours
-- **Analytics Integration**: Tour completion tracking via analyticsService
-- **Accessibility**: Full keyboard navigation and ARIA support
+See [CHANGELOG.md](./CHANGELOG.md) for full release history.
 
 ---
 
-## Next Up: v0.8.0 (Q1 2025)
+## Next Up: v1.0.0 - Production Ready (Q4 2025 - Q1 2026)
 
-**Target:** Mid-late January 2025
-**Focus:** Author Flow, Reliability, Publishing, Intelligence, Polish
+**Focus:** Polish, Stability, Performance, Documentation
 
-For complete v0.8.0 scope, see [docs/product/v0.8.0-scope.md](docs/product/v0.8.0-scope.md)
+### 🎯 Key Priorities
 
-### 🎯 Key Features
+#### A. Performance & Optimization
 
-#### A. Chapter Editing Experience
+- Advanced virtualization for large projects (1000+ scenes)
+- Web Worker for search indexing and background processing
+- Optimized IndexedDB queries and batch operations
+- Memory leak detection and prevention
 
-- Enhanced chapter editor with autosave queue + debounce
-- Inline word/character count indicator
-- Conflict resolver for stale local vs. remote changes
-- Autosave status indicator in Topbar
+#### B. Enhanced AI Features
 
-#### B. EPUB Export
+- Streaming AI responses for better UX
+- Context-aware AI suggestions based on full manuscript
+- Plot hole detection across entire story
+- Style consistency analysis
 
-- Professional e-book output with JSZip + manifest builder
-- Auto-generated metadata (title, author, ISBN, cover, TOC)
-- EPUB validation (OPF, NCX, XHTML)
-- Integration with Export Dashboard
+#### C. Advanced Export Features
 
-#### C. Enhanced AI Assistance
+- EPUB cover image support
+- Custom CSS themes for EPUB export
+- Professional manuscript formatting templates
+- Batch export for multiple formats
 
-- Claude streaming (ClaudeService 2.0)
-- Chapter summary cache for AI context awareness
-- "Ask Inkwell" shortcut (⌘⇧A) for contextual prompts
-- Inline AI rewrite and feedback side panel
+#### D. Collaboration Foundation
 
-#### D. Timeline & Conflict Detection
+- Conflict-free data structures for offline collaboration
+- Export/import project packages for sharing
+- Version history and rollback capabilities
 
-- Timeline Inspector modal with chapter sequence visualization
-- AI-assisted detection of temporal inconsistencies
-- Exportable timeline views (CSV, Markdown)
+#### E. Documentation & Testing
 
-#### E. Onboarding & UX Polish
-
-- Quick Tour V2 (3-step overlay on first launch)
-- Persistent Docs Drawer
-- Enhanced Command Palette discoverability
-- Refined Tailwind design tokens
-
-### 📦 Release Plan
-
-| Phase   | Target | Focus             |
-| ------- | ------ | ----------------- |
-| Phase 1 | Week 1 | Editor + Autosave |
-| Phase 2 | Week 2 | EPUB Export       |
-| Phase 3 | Week 3 | AI + Timeline     |
-| Phase 4 | Week 4 | UX Polish         |
+- Comprehensive user documentation
+- Video tutorials and screencasts
+- Increase test coverage to 80%+
+- E2E testing for critical user journeys
 
 ---
 
-## Future Releases
+## Future Releases (Beyond v1.0.0)
 
-### v0.9.0 - Collaboration (Q2 2025)
+### v2.0.0 - Collaboration & Cloud Sync (Future)
 
 - **Supabase Realtime**: Live presence and collaborative editing
-- **User Profiles**: Public author profiles and project sharing
-- **Shared Projects**: Multi-user collaboration with conflict resolution
-- **Push Notifications**: Supabase Functions for notification delivery
-- **PWA Integration**: Progressive Web App capabilities
+- **Cloud Sync**: Optional cloud backup with conflict resolution
+- **Shared Projects**: Multi-user collaboration features
+- **Mobile PWA**: Touch-optimized editor for tablets
 
-### v1.0.0 - Production Ready (Q3 2025)
+### Future Enhancements (Roadmap Items)
 
-- **Advanced AI Integration**: Plot hole detection, style analysis
-- **Professional Publishing**: Advanced EPUB, MOBI, PDF export templates
-- **Analytics Dashboard**: Writing patterns, productivity insights
-- **Mobile Optimization**: Touch-optimized editor and mobile PWA
-
-### Future Enhancements
-
-- **Phase 4**: Collaboration Features (multi-user editing, comments, version control)
-- **Phase 5**: Publishing & Export (professional formatting, EPUB, platform integration)
-- **Phase 6**: Advanced Analytics (writing patterns, productivity insights, story metrics)
+- **Advanced Analytics**: Writing patterns, productivity insights, story metrics
+- **Publishing Integration**: Direct export to publishing platforms
+- **AI Story Coach**: Personalized writing feedback and improvement suggestions
+- **Theme Marketplace**: Custom editor themes and export templates
+- **Plugin System**: Community extensions and integrations
 
 ---
 
@@ -181,6 +160,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for branching, commits, and PR checks.
 
 ---
 
-**Last Updated**: January 2025
+**Last Updated**: November 2025
 **Maintainers**: @davehail
-**Status**: v0.7.1 released, v0.8.0 planning underway
+**Status**: v0.9.1-beta released, v1.0.0 planning underway

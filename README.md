@@ -37,10 +37,8 @@ Each user has a single workspace with all their projects, chapters, characters, 
 If you encounter issues with authentication:
 
 - For email delivery problems during sign-up or password reset, see [Supabase Auth Email Troubleshooting](/docs/SUPABASE_AUTH_EMAIL_TROUBLESHOOTING.md)
-- For general auth flow issues, see [Auth Troubleshooting Guide](./AUTH_TROUBLESHOOTING.md) (updated October 2025)
-- For deployment settings, see [Supabase Auth Deployment Checklist](/docs/SUPABASE_AUTH_DEPLOYMENT_CHECKLIST.md) (updated October 2025)
+- For authentication architecture and implementation details, see [Authentication Feature Documentation](/docs/features/AUTHENTICATION.md)
 - For React hooks issues in auth components, see [React Hooks Safety Guidelines](/docs/HOOKS_SAFETY.md)
-- For details on hardened authentication flow, see [Supabase Auth Checklist](./SUPABASE_AUTH_CHECKLIST.md) (updated October 2025)
 - For MutationObserver safety implementations, see [MutationObserver Guards](/docs/MUTATION_OBSERVER_GUARDS.md)
 
 ## Features
@@ -110,7 +108,7 @@ pnpm build       # production build
 pnpm tree:update # regenerate file tree in README
 ```
 
-For React Hooks development guidelines, see [HOOKS_QUICK_REF.md](./HOOKS_QUICK_REF.md) and [REACT_HOOKS_FIX_SUMMARY.md](./REACT_HOOKS_FIX_SUMMARY.md).
+For React Hooks development guidelines, see [React Hooks Safety Guidelines](/docs/HOOKS_SAFETY.md).
 
 ## Configuration
 
@@ -229,17 +227,6 @@ MIT
 - **Story Structure Visualizer** — Professional story health analytics and pacing insights
 - **Planning Tools** — Beat sheet templates, character profiles, and project analytics
 
-### Multi-Profile Workspace System
-
-- **🔐 Complete Data Isolation** — Each profile gets its own database with zero data leakage
-- **🌐 Profile-Based URLs** — Deep links work with profile context (`/p/{profileId}/dashboard`)
-- **🔄 Seamless Profile Switching** — Quick profile switching via header dropdown
-- **🚀 Smart Profile Creation** — Beautiful onboarding flow with customizable colors and avatars
-- **📦 Legacy Data Migration** — Automatic migration of existing data to profile-specific storage
-- **🛡️ Profile-Aware Routing** — ProfileGate ensures valid profile access across the application
-- **💾 Persistent Profile State** — Profile selection survives page reloads and browser sessions
-- **🎓 Profile-Aware Tutorials** — Each profile has isolated tutorial progress and preferences
-
 ### Project Management & Organization
 
 - **Enhanced Project Browser** — Advanced search and filtering across all projects
@@ -315,8 +302,8 @@ MIT
 
 ```bash
 # Clone the repository
-git clone https://github.com/oklahomahail/Inkwell2.git
-cd Inkwell2
+git clone https://github.com/davehail/inkwell.git
+cd inkwell
 
 # Install dependencies
 pnpm install
@@ -340,10 +327,10 @@ For detailed documentation, see the `/docs` directory:
 
 - **Developer Setup**: [docs/dev/setup.md](docs/dev/setup.md)
 - **Deployment Guide**: [docs/ops/01-deploy.md](docs/ops/01-deploy.md)
-- **Authentication**: [docs/ops/02-auth.md](docs/ops/02-auth.md)
+- **Authentication**: [docs/features/AUTHENTICATION.md](docs/features/AUTHENTICATION.md)
 - **Release Process**: [docs/dev/release.md](docs/dev/release.md)
 - **Product Roadmap**: [docs/product/roadmap.md](docs/product/roadmap.md)
-- **Tour System**: [docs/TOUR_INDEX.md](docs/TOUR_INDEX.md) ⭐ **NEW**
+- **Tour System**: [docs/TOUR_INDEX.md](docs/TOUR_INDEX.md)
 
 ### Authentication Setup (Supabase)
 
@@ -427,16 +414,6 @@ pnpm vercel:test     # Test production build locally
   - **🎨 Icon System Unification**: Standardized on lucide-react with 80+ components, added Icon adapter for flexibility
   - **🏗️ Architecture Streamlining**: Consolidated UI components, removed dark mode remnants, maintained full backward compatibility
   - **✅ Build Verification**: Confirmed all core functionality intact with successful production builds
-
-- ✅ **Multi-Profile Workspace System** — Complete multi-user workspace isolation with seamless switching:
-  - **🔐 Profile-Specific Data Storage**: Each profile uses isolated database with prefixed keys (`profile_{id}_*`)
-  - **🌐 Profile-Based Routing**: React Router implementation with `/p/{profileId}/*` URL structure
-  - **🛡️ ProfileGate System**: Ensures valid profile access with automatic redirects and error handling
-  - **🎨 Profile Creation Flow**: Beautiful profile picker with customizable colors and avatar support
-  - **🔄 Profile Switching**: Header-integrated dropdown for quick profile switching without data loss
-  - **📦 Data Migration System**: Automatic migration of existing data to first profile with backup preservation
-  - **💾 Persistent Profile State**: Profile selection survives browser reloads and navigation
-  - **🔍 SEO Optimization**: Comprehensive meta tags, robots.txt, and sitemap.xml for search engines
 
 - ✅ **Beginner Mode & First Draft Path System** — Revolutionary user onboarding with 60%+ activation improvement:
   - **🚀 5-Step First Draft Path**: Guided journey from project creation to 300 words in 15 minutes
@@ -542,11 +519,8 @@ src/
 │   ├── Views/           # Main application views
 │   ├── Planning/        # Story planning tools
 │   ├── Writing/         # Editor components
-│   ├── ProfileSwitcher.tsx  # Profile switching dropdown component
 │   ├── Onboarding/      # Enhanced tour and onboarding system
-│   │   ├── ProfileTourProvider.tsx   # Profile-aware tour state & analytics
-│   │   ├── TutorialRouter.tsx        # Profile-aware tutorial routing system
-│   │   ├── TourProvider.tsx          # Legacy tour provider (compatibility)
+│   │   ├── TourProvider.tsx          # Tour state management
 │   │   ├── TourOverlay.tsx           # Accessible tour with spotlight
 │   │   ├── FeatureDiscovery.tsx      # Contextual hints system
 │   │   ├── WelcomeModal.tsx          # First-run experience with options
@@ -580,15 +554,9 @@ src/
 │   │   ├── SceneLinkageSuggestions.tsx
 │   │   └── TimelineNavigation.tsx
 │   └── Claude/          # AI integration
-├── context/
-│   └── ProfileContext.tsx   # Profile state management and actions
-├── routes/
-│   └── shell/               # Routing shell components
-│       ├── ProfileGate.tsx      # Profile validation and routing guard
-│       └── ProfilePicker.tsx    # Profile creation and selection interface
+├── context/             # React context providers
+├── routes/              # Application routing
 ├── data/                # Data management layer
-│   ├── dbFactory.ts         # Profile-specific database factory
-│   └── migrateToProfiles.ts # Legacy data migration utility
 ├── features/            # Feature-based architecture
 │   └── plotboards/      # Plot Boards feature
 │       ├── components/          # Kanban UI components
@@ -617,7 +585,7 @@ src/
 │   ├── storyArchitectService.ts   # Story outline & templates
 │   ├── timelineService.ts         # Basic timeline management
 │   ├── enhancedTimelineService.ts # Advanced timeline features
-│   ├── tutorialStorage.ts         # Profile-aware tutorial storage
+│   ├── tutorialStorage.ts         # Tutorial progress storage
 │   ├── storageService.ts          # Data persistence
 │   ├── searchService.ts           # Full-text search
 │   └── backupService.ts           # Backup & recovery
@@ -634,10 +602,8 @@ src/
 ├── utils/               # Shared utilities
 │   ├── flags.ts         # Feature flag system
 │   ├── storage.ts       # Enhanced storage with IndexedDB + compatibility layer
-│   ├── tutorialLinks.ts # Profile-aware tutorial URL generation utilities
 │   └── trace.ts         # Comprehensive tracing system (performance, user actions, storage)
 ├── types/              # TypeScript definitions
-│   └── profile.ts       # Profile types and interfaces
 └── styles/             # CSS modules and globals
 ```
 
@@ -648,8 +614,7 @@ graph TB
     %% User Interface Layer
     subgraph "🎨 User Interface Layer"
         UI["React + TypeScript UI"]
-        Router["Profile-Aware Routing"]
-        Profiles["Multi-Profile System"]
+        Router["Application Routing"]
     end
 
     %% Feature Layer
@@ -685,12 +650,11 @@ graph TB
 
     %% Data Flow
     UI --> Router
-    Router --> Profiles
-    Profiles --> Writing
-    Profiles --> Planning
-    Profiles --> AI
-    Profiles --> Analytics
-    Profiles --> Onboarding
+    Router --> Writing
+    Router --> Planning
+    Router --> AI
+    Router --> Analytics
+    Router --> Onboarding
 
     Writing --> FeatureFlags
     Planning --> Search
@@ -708,11 +672,6 @@ graph TB
     Migration --> IndexedDB
     Migration --> LocalStorage
 
-    %% Profile Isolation
-    IndexedDB -.-> |"profile_123_*"| IndexedDB
-    IndexedDB -.-> |"profile_456_*"| IndexedDB
-    IndexedDB -.-> |"profile_789_*"| IndexedDB
-
     %% Styling
     classDef userInterface fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
     classDef feature fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
@@ -720,7 +679,7 @@ graph TB
     classDef data fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
     classDef external fill:#fce4ec,stroke:#c2185b,stroke-width:2px
 
-    class UI,Router,Profiles userInterface
+    class UI,Router userInterface
     class Writing,Planning,AI,Analytics,Onboarding feature
     class FeatureFlags,Search,Export,Backup,AIRetry service
     class IndexedDB,LocalStorage,Migration data
@@ -729,11 +688,11 @@ graph TB
 
 **Key Architectural Principles:**
 
-- **Profile Isolation**: Complete data separation with prefixed storage keys
-- **Feature Flag Driven**: All major features controlled by toggles
+- **Local-First**: All data stored locally in IndexedDB with localStorage fallback
+- **Feature Flag Driven**: All major features controlled by feature flags
 - **AI-First Design**: Mock and production AI services with circuit breakers
-- **Local-First**: All data stored locally with optional cloud AI
-- **Progressive Enhancement**: Works offline with graceful AI degradation
+- **Offline-Capable**: Works without network, with graceful AI degradation
+- **Progressive Enhancement**: Core features work without AI, enhanced with it
 - **Accessible by Design**: WCAG AA compliant throughout
 
 ---
@@ -744,8 +703,8 @@ graph TB
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/oklahomahail/Inkwell2.git
-cd Inkwell2
+git clone https://github.com/davehail/inkwell.git
+cd inkwell
 
 # 2. Install dependencies (pnpm required)
 pnpm install
@@ -758,12 +717,11 @@ pnpm dev
 
 ### First Time Setup Workflow
 
-When you first open Inkwell, you'll go through a quick setup:
+When you first open Inkwell, you'll go through a quick onboarding:
 
-1. **Create Your First Profile** — Choose a name and color for your workspace
-2. **Choose Your Experience Level** — Select Beginner Mode (recommended) or Pro Mode
-3. **Optional Tour** — Take a 60-90 second tour of the main features
-4. **Start Writing** — Either create a blank project or use the guided First Draft Path
+1. **Welcome Project** — View the pre-populated sample project with quick start guide (optional)
+2. **Optional Tour** — Take a 60-90 second tour of the main features
+3. **Start Writing** — Create a blank project or use the guided First Draft Path
 
 ### Developer Workflow
 
@@ -782,22 +740,12 @@ pnpm test:run      # Run all tests once
 pnpm test:coverage # Generate coverage report
 ```
 
-### Understanding the Profile System
-
-Inkwell uses a multi-profile system where each "profile" is an isolated workspace:
-
-- **URLs**: All routes are profile-scoped: `/p/{profileId}/dashboard`
-- **Data**: Each profile has its own database with prefixed keys
-- **Features**: Profiles can have different feature flag settings (Beginner vs Pro)
-- **Tours**: Tutorial progress is tracked per profile
-
 ### Testing Your Changes
 
-1. **Create Test Profiles** — Use different profiles to test isolation
-2. **Test Both Modes** — Switch between Beginner and Pro modes
-3. **Test the Onboarding** — Clear your localStorage to test first-run experience
-4. **Run the Test Suite** — Ensure all 598 tests still pass (✅ 72.31% coverage)
-5. **Run Coverage Reports** — Use `pnpm test:coverage` to verify your changes maintain coverage
+1. **Test the Onboarding** — Clear your localStorage to test first-run experience
+2. **Run the Test Suite** — Ensure all tests pass with `pnpm test:run`
+3. **Run Coverage Reports** — Use `pnpm test:coverage` to verify your changes maintain coverage
+4. **Build Check** — Run `pnpm build` to ensure production build succeeds
 
 See **[Testing Guide](docs/TESTING_GUIDE.md)** for comprehensive testing patterns and best practices.
 
@@ -814,7 +762,7 @@ See **[Testing Guide](docs/TESTING_GUIDE.md)** for comprehensive testing pattern
 
 We welcome contributions! Please:
 
-1. Check [Issues](https://github.com/oklahomahail/Inkwell2/issues) for open tasks
+1. Check [Issues](https://github.com/davehail/inkwell/issues) for open tasks
 2. Follow TypeScript + ESLint conventions
 3. Test thoroughly before submitting PRs
 4. Include clear commit messages
@@ -852,12 +800,11 @@ MIT License © 2025 Inkwell Authors
 
 ### Feature Documentation
 
-🔐 **[Multi-Profile System](docs/MULTI_PROFILE_SYSTEM.md)** - Complete multi-user workspace isolation
 🎓 **[Beginner Mode Integration](docs/BEGINNER_MODE_INTEGRATION.md)** - 15-minute onboarding system
 🎨 **[Plot Boards](docs/PLOT_BOARDS.md)** - Kanban-style story organization with collaboration
 🎯 **[Enhanced Onboarding](src/components/Onboarding/README.md)** - 8-layer onboarding system
 📂 **[Project Management](src/components/ProjectManagement/README.md)** - Project organization and search
-⚡ **[Performance Guardrails](docs/PERFORMANCE_GuARDRAILS.md)** - Optimization for large projects
+⚡ **[Performance Guardrails](docs/PERFORMANCE_GUARDRAILS.md)** - Optimization for large projects
 
 ### Brand & Design
 
@@ -868,15 +815,14 @@ MIT License © 2025 Inkwell Authors
 
 ### Deployment & Operations
 
-🚀 **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
+🚀 **[Deployment Guide](docs/ops/01-deploy.md)** - Production deployment instructions
 🔧 **[ESLint Migration](docs/ESLINT_MIGRATION.md)** - Technical migration details
 📊 **[Trace System](docs/TRACE_SYSTEM.md)** - Performance monitoring and debugging
-🤖 **[AI Services (Legacy)](docs/AI_SERVICES.md)** - Original AI documentation
 
 ---
 
 ## Links
 
-**Live Demo:** https://vercel.com/dave-hails-projects-c68e1a61/inkwell2
-**Repository:** https://github.com/oklahomahail/Inkwell2
-**Issues:** https://github.com/oklahomahail/Inkwell2/issues
+**Live Demo:** https://inkwell-writing.vercel.app
+**Repository:** https://github.com/davehail/inkwell
+**Issues:** https://github.com/davehail/inkwell/issues

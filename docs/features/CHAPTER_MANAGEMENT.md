@@ -468,11 +468,10 @@ pnpm test:e2e chapters
 
 ---
 
-**Last updated:** October 2025  
-**Maintainer:** Inkwell Core Team  
+**Last updated:** October 2025
+**Maintainer:** Inkwell Core Team
 **Related Docs:**
 
-- [User Guide](../user/USER_GUIDE.md)
-- [Analytics Guide](../features/ANALYTICS.md)
-- [Export Formats](../dev/EXPORT_FORMATS.md)
-- [IndexedDB Architecture](../dev/INDEXEDDB_ARCHITECTURE.md)
+- [User Guide](../../ONBOARDING.md)
+- [Export Formats](export.md)
+- [Storage Guide](../dev/storage.md)
