@@ -10,9 +10,10 @@
  * - onChange event emission for parent components
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 import useAutoSave from '../hooks/useAutoSave';
+import { autosaveMetrics } from '../services/autosaveMetrics';
 import { wrapSaveWithTelemetry } from '../services/saveWithTelemetry';
 
 interface EnhancedChapterEditorProps {
@@ -31,8 +32,12 @@ export default function EnhancedChapterEditor({
   className = '',
 }: EnhancedChapterEditorProps) {
   const [content, setContent] = useState(initialContent);
-  const [checksum, setChecksum] = useState<string | undefined>(undefined);
+  const [_checksum, setChecksum] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  // Track render performance
+  const inputTimestamp = useRef<number>(0);
+  const renderStart = useRef<number>(0);
 
   // When chapter ID changes, reset content and status for new chapter
   useEffect(() => {
@@ -69,6 +74,19 @@ export default function EnhancedChapterEditor({
     flushOnUnmount: true,
   });
 
+  // Track render drift on every render
+  useEffect(() => {
+    const renderEnd = performance.now();
+    const renderTime = renderEnd - renderStart.current;
+
+    if (renderStart.current > 0 && inputTimestamp.current > 0) {
+      const drift = renderEnd - inputTimestamp.current;
+      autosaveMetrics.recordRender(renderTime, drift);
+    }
+
+    renderStart.current = performance.now();
+  });
+
   // TODO: Wire TipTap editor here
   // For now, use a simple textarea as placeholder
   return (
@@ -87,7 +105,10 @@ export default function EnhancedChapterEditor({
       <textarea
         className="w-full h-full p-4 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
         value={content}
-        onChange={(e) => setContent(e.target.value)}
+        onChange={(e) => {
+          inputTimestamp.current = performance.now();
+          setContent(e.target.value);
+        }}
         placeholder="Start writing your chapter..."
         data-testid="editor-textarea"
       />

@@ -1,8 +1,7 @@
 // @ts-nocheck
 // src/services/enhancedStorageService.ts
 import { EnhancedProject } from '@/types/project';
-import devLog from "@/utils/devLog";
-
+import devLog from '@/utils/devLog';
 
 import { quotaAwareStorage } from '../utils/quotaAwareStorage';
 import { validateProject } from '../validation/projectSchema';
@@ -68,6 +67,9 @@ export class EnhancedStorageService {
 
       // Create snapshot if needed (enhanced functionality)
       this.maybeCreateSnapshot(updatedProject);
+
+      // Update shadow copy for recovery
+      this.updateShadowCopy();
     } catch (error) {
       devLog.error('Failed to save project:', error);
     }
@@ -192,6 +194,9 @@ export class EnhancedStorageService {
 
       // Create snapshot if significant changes
       await this.maybeCreateSnapshotAsync(updatedProject);
+
+      // Update shadow copy for recovery
+      this.updateShadowCopy();
 
       devLog.debug(`Project saved safely: ${updatedProject.name || updatedProject.id}`);
       return { success: true };
@@ -517,6 +522,28 @@ export class EnhancedStorageService {
           devLog.warn(`Failed to remove ${key}:`, error);
         }
       }
+    }
+  }
+
+  /**
+   * Update shadow copy for recovery purposes
+   * Called automatically after successful project saves
+   */
+  private static updateShadowCopy(): void {
+    try {
+      // Import recoveryService dynamically to avoid circular dependencies
+      import('./recoveryService')
+        .then(({ recoveryService }) => {
+          const projects = this.loadAllProjects();
+          // For now, chapters would need to be loaded from ChapterGateway
+          // We'll update shadow copy with projects only, chapters can be added later
+          recoveryService.saveShadowCopy(projects, []);
+        })
+        .catch((error) => {
+          devLog.warn('Failed to update shadow copy:', error);
+        });
+    } catch (error) {
+      devLog.warn('Failed to update shadow copy:', error);
     }
   }
 

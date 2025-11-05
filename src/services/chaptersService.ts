@@ -17,6 +17,8 @@ import type {
   UpdateChapterInput,
 } from '@/types/writing';
 
+import { chapterCache, CacheKeys } from './chapterCache';
+
 // IndexedDB configuration
 const DB_NAME = 'inkwell_chapters';
 const DB_VERSION = 1;
@@ -203,12 +205,18 @@ class ChaptersService {
       updatedAt: new Date().toISOString(),
     };
 
-    return new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readwrite');
       const request = tx.objectStore(META_STORE).put(updated);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
+
+    // Invalidate cache
+    chapterCache.invalidate([
+      CacheKeys.chapterList(meta.projectId),
+      CacheKeys.chapterMeta(input.id),
+    ]);
   }
 
   /**
@@ -222,12 +230,15 @@ class ChaptersService {
     meta.wordCount = wordCount;
     meta.updatedAt = new Date().toISOString();
 
-    return new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readwrite');
       const request = tx.objectStore(META_STORE).put(meta);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
+
+    // Invalidate cache
+    chapterCache.invalidate([CacheKeys.chapterList(meta.projectId), CacheKeys.chapterMeta(id)]);
   }
 
   /**
@@ -236,12 +247,21 @@ class ChaptersService {
   async saveDoc(doc: ChapterDoc): Promise<void> {
     const db = await this.getDB();
 
-    return new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(DOC_STORE, 'readwrite');
       const request = tx.objectStore(DOC_STORE).put(doc);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
+
+    // Invalidate doc cache (note: we need to fetch meta to get projectId)
+    const meta = await this.getMeta(doc.id);
+    if (meta) {
+      chapterCache.invalidate([
+        CacheKeys.chapterList(meta.projectId),
+        CacheKeys.chapterDoc(doc.id),
+      ]);
+    }
   }
 
   /**
@@ -271,6 +291,9 @@ class ChaptersService {
     });
 
     await Promise.all(promises);
+
+    // Invalidate all chapter caches for this project
+    chapterCache.invalidateProject(projectId);
   }
 
   /**
@@ -278,6 +301,9 @@ class ChaptersService {
    */
   async remove(id: string): Promise<void> {
     const db = await this.getDB();
+
+    // Get meta first to know projectId for cache invalidation
+    const meta = await this.getMeta(id);
 
     // Delete metadata
     await new Promise<void>((resolve, reject) => {
@@ -294,6 +320,15 @@ class ChaptersService {
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
+
+    // Invalidate cache
+    if (meta) {
+      chapterCache.invalidate([
+        CacheKeys.chapterList(meta.projectId),
+        CacheKeys.chapterMeta(id),
+        CacheKeys.chapterDoc(id),
+      ]);
+    }
   }
 
   /**

@@ -18,9 +18,11 @@ import { waitForRoot } from './utils/dom/waitForRoot';
 import { warnIfDifferentOrigin } from './utils/storage/originGuard';
 import { ensurePersistentStorage } from './utils/storage/persistence';
 
-// Initialize tour development tools in development mode
+// Initialize development tools in development mode
 if (import.meta.env.DEV) {
   import('./dev/index');
+  import('./utils/cacheDebug'); // Cache inspection utilities
+  import('./utils/recoveryDebug'); // Recovery inspection utilities
 }
 
 // Initialize global error handlers first

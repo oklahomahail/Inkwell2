@@ -17,8 +17,10 @@ import {
   canonicalToLegacyChapter,
   isLegacyChapterFormat,
 } from '@/adapters';
+import { chapterCache, CacheKeys, withChapterListCache } from '@/services/chapterCache';
 import type { Chapter } from '@/types/project';
 import { FEATURE_FLAGS } from '@/utils/featureFlags.config';
+import { trackChapterQuery } from '@/utils/perf';
 
 // Lazy imports to avoid circular dependencies
 let chaptersService: any = null;
@@ -52,87 +54,93 @@ export function isChapterModelEnabled(): boolean {
  * Returns canonical Chapter[] regardless of storage format
  */
 export async function getChapters(projectId: string): Promise<Chapter[]> {
-  if (isChapterModelEnabled()) {
-    // New model: Use chaptersService (IndexedDB)
-    const service = await getChaptersService();
-    const chapterMetas = await service.list(projectId);
+  return trackChapterQuery('getChapters', async () => {
+    if (isChapterModelEnabled()) {
+      // New model: Use chaptersService (IndexedDB) with cache
+      const service = await getChaptersService();
 
-    // Load full chapters (meta + content)
-    const chapters: Chapter[] = [];
-    for (const meta of chapterMetas) {
-      const fullChapter = await service.get(meta.id);
-      chapters.push({
-        id: fullChapter.id,
-        title: fullChapter.title,
-        summary: fullChapter.summary,
-        content: fullChapter.content,
-        wordCount: fullChapter.wordCount,
-        targetWordCount: undefined,
-        status: mapChapterStatus(fullChapter.status),
-        order: fullChapter.index,
-        charactersInChapter: [],
-        plotPointsResolved: [],
-        notes: '',
-        createdAt: new Date(fullChapter.createdAt).getTime(),
-        updatedAt: new Date(fullChapter.updatedAt).getTime(),
-      });
+      // Use cache wrapper for chapterMetas list
+      const chapterMetas = await withChapterListCache(projectId, () => service.list(projectId));
+
+      // Load full chapters (meta + content)
+      const chapters: Chapter[] = [];
+      for (const meta of chapterMetas) {
+        const fullChapter = await service.get(meta.id);
+        chapters.push({
+          id: fullChapter.id,
+          title: fullChapter.title,
+          summary: fullChapter.summary,
+          content: fullChapter.content,
+          wordCount: fullChapter.wordCount,
+          targetWordCount: undefined,
+          status: mapChapterStatus(fullChapter.status),
+          order: fullChapter.index,
+          charactersInChapter: [],
+          plotPointsResolved: [],
+          notes: '',
+          createdAt: new Date(fullChapter.createdAt).getTime(),
+          updatedAt: new Date(fullChapter.updatedAt).getTime(),
+        });
+      }
+      return chapters;
+    } else {
+      // Legacy model: Use storageService (localStorage) and convert
+      const storage = await getStorageService();
+      const legacyChapters = (await storage.getChapters?.(projectId)) || [];
+
+      // Convert legacy scene-based chapters to canonical format
+      if (legacyChapters.length > 0 && isLegacyChapterFormat(legacyChapters[0])) {
+        return convertLegacyChapters(legacyChapters);
+      }
+
+      return legacyChapters;
     }
-    return chapters;
-  } else {
-    // Legacy model: Use storageService (localStorage) and convert
-    const storage = await getStorageService();
-    const legacyChapters = (await storage.getChapters?.(projectId)) || [];
-
-    // Convert legacy scene-based chapters to canonical format
-    if (legacyChapters.length > 0 && isLegacyChapterFormat(legacyChapters[0])) {
-      return convertLegacyChapters(legacyChapters);
-    }
-
-    return legacyChapters;
-  }
+  });
 }
 
 /**
  * Get a single chapter by ID
  */
 export async function getChapter(chapterId: string): Promise<Chapter | null> {
-  if (isChapterModelEnabled()) {
-    // New model
-    const service = await getChaptersService();
-    try {
-      const fullChapter = await service.get(chapterId);
-      return {
-        id: fullChapter.id,
-        title: fullChapter.title,
-        summary: fullChapter.summary,
-        content: fullChapter.content,
-        wordCount: fullChapter.wordCount,
-        targetWordCount: undefined,
-        status: mapChapterStatus(fullChapter.status),
-        order: fullChapter.index,
-        charactersInChapter: [],
-        plotPointsResolved: [],
-        notes: '',
-        createdAt: new Date(fullChapter.createdAt).getTime(),
-        updatedAt: new Date(fullChapter.updatedAt).getTime(),
-      };
-    } catch (error) {
-      console.error('Failed to get chapter:', error);
-      return null;
+  return trackChapterQuery('getChapter', async () => {
+    if (isChapterModelEnabled()) {
+      // New model
+      const service = await getChaptersService();
+      try {
+        const fullChapter = await service.get(chapterId);
+        return {
+          id: fullChapter.id,
+          title: fullChapter.title,
+          summary: fullChapter.summary,
+          content: fullChapter.content,
+          wordCount: fullChapter.wordCount,
+          targetWordCount: undefined,
+          status: mapChapterStatus(fullChapter.status),
+          order: fullChapter.index,
+          charactersInChapter: [],
+          plotPointsResolved: [],
+          notes: '',
+          createdAt: new Date(fullChapter.createdAt).getTime(),
+          updatedAt: new Date(fullChapter.updatedAt).getTime(),
+        };
+      } catch (error) {
+        console.error('Failed to get chapter:', error);
+        return null;
+      }
+    } else {
+      // Legacy model
+      const storage = await getStorageService();
+      const legacyChapter = await storage.getChapter?.(chapterId);
+
+      if (!legacyChapter) return null;
+
+      if (isLegacyChapterFormat(legacyChapter)) {
+        return sceneChapterToCanonical(legacyChapter);
+      }
+
+      return legacyChapter;
     }
-  } else {
-    // Legacy model
-    const storage = await getStorageService();
-    const legacyChapter = await storage.getChapter?.(chapterId);
-
-    if (!legacyChapter) return null;
-
-    if (isLegacyChapterFormat(legacyChapter)) {
-      return sceneChapterToCanonical(legacyChapter);
-    }
-
-    return legacyChapter;
-  }
+  });
 }
 
 /**
@@ -172,6 +180,9 @@ export async function saveChapter(projectId: string, chapter: Chapter): Promise<
         status: mapToChapterMetaStatus(chapter.status),
       });
     }
+
+    // Invalidate cache for this project and chapter
+    chapterCache.invalidate([CacheKeys.chapterList(projectId), CacheKeys.chapterMeta(chapter.id)]);
 
     return chapter;
   } else {
@@ -242,6 +253,9 @@ export async function updateChapterContent(
         wordCount: wordCount ?? countWords(content),
       });
     }
+
+    // Invalidate cache
+    chapterCache.invalidate([CacheKeys.chapterList(projectId), CacheKeys.chapterMeta(chapterId)]);
   } else {
     // Legacy model: Load, modify, save
     const chapter = await getChapter(chapterId);
@@ -262,6 +276,9 @@ export async function deleteChapter(projectId: string, chapterId: string): Promi
     // New model
     const service = await getChaptersService();
     await service.remove(chapterId);
+
+    // Invalidate cache
+    chapterCache.invalidate([CacheKeys.chapterList(projectId), CacheKeys.chapterMeta(chapterId)]);
   } else {
     // Legacy model
     const storage = await getStorageService();
@@ -277,6 +294,9 @@ export async function reorderChapters(projectId: string, chapterIds: string[]): 
     // New model
     const service = await getChaptersService();
     await service.reorder(projectId, chapterIds);
+
+    // Invalidate entire project cache (all chapter metadata affected)
+    chapterCache.invalidateProject(projectId);
   } else {
     // Legacy model: Load all, update order, save
     const chapters = await getChapters(projectId);

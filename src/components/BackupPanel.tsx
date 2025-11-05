@@ -5,6 +5,8 @@ import { ChapterGateway } from '@/model/chapters';
 import { BackupManager } from '@/services/backupCore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 
+import { RecoveryErrorBoundary } from './ErrorBoundary/RecoveryErrorBoundary';
+
 function downloadJson(obj: unknown, filename: string) {
   const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -124,7 +126,7 @@ export type BackupPanelProps = {
   performBackup?: () => Promise<void>;
 };
 
-export default function BackupPanel({ performBackup }: BackupPanelProps) {
+function BackupPanelInner({ performBackup }: BackupPanelProps) {
   const [message, setMessage] = useState<{ text: string; type: string }>({
     text: '',
     type: 'info',
@@ -264,5 +266,13 @@ export default function BackupPanel({ performBackup }: BackupPanelProps) {
         aria-label="Content editor with auto-save"
       />
     </div>
+  );
+}
+
+export default function BackupPanel(props: BackupPanelProps) {
+  return (
+    <RecoveryErrorBoundary panelName="Backup">
+      <BackupPanelInner {...props} />
+    </RecoveryErrorBoundary>
   );
 }
