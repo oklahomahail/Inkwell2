@@ -1,5 +1,5 @@
 // Pure function test setup - no DOM or React dependencies
-import { expect, afterEach } from 'vitest';
+import { afterEach } from 'vitest';
 
 // Reset any module mocks after each test
 afterEach(() => {
