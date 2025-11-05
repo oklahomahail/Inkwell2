@@ -8,15 +8,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+          run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '22.x'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       - name: Install ripgrep
         run: sudo apt-get update && sudo apt-get install -y ripgrep
       - name: Install deps
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Run audit
-        run: npm run audit:ci
+        run: pnpm run audit:ci
       - name: Upload audit artifacts
         uses: actions/upload-artifact@v4
         with:
