@@ -5,7 +5,12 @@ export type TelemetryEvent =
   | 'editor.autosave.latency'
   | 'recovery.attempt'
   | 'recovery.success'
-  | 'recovery.failure';
+  | 'recovery.failure'
+  | 'onboarding.welcome.created'
+  | 'onboarding.welcome.deleted'
+  | 'onboarding.welcome.skipped'
+  | 'onboarding.welcome.completed'
+  | 'onboarding.tour.seen';
 
 export function track(event: TelemetryEvent, payload: Record<string, unknown> = {}) {
   try {

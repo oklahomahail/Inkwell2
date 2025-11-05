@@ -38,10 +38,14 @@ export function useTour(): UseTourReturn {
     }
   }, []);
 
-  // Mark tour as completed
-  const markCompleted = useCallback(() => {
+  // Mark tour as completed and clean up welcome project
+  const markCompleted = useCallback(async () => {
     try {
       localStorage.setItem(TOUR_COMPLETED_KEY, 'true');
+
+      // Clean up welcome project on tour completion
+      const { completeWelcomeFlow } = await import('@/onboarding/welcomeProject');
+      await completeWelcomeFlow();
     } catch (error) {
       console.warn('[useTour] Failed to mark tour as completed:', error);
     }
