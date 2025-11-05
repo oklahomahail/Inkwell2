@@ -6,23 +6,24 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
 
-import type { TourStep } from '@/data/tourSteps';
+import { TourTooltip } from '@/components/TourTooltip';
+import type { TourStep } from '@/data/tourSets';
 import { useTour } from '@/hooks/useTour';
 
-import { TourTooltip } from './TourTooltip';
+// Import the new TourTooltip
 
 interface TourContextValue {
+  isActive: boolean;
+  currentSet: string | null;
+  currentStep: TourStep | null;
+  index: number;
   steps: TourStep[];
-  currentStep: number;
-  active: boolean;
-  start: () => void;
+  totalSteps: number;
+  start: (setKey: string, force?: boolean) => boolean;
   next: () => void;
   prev: () => void;
   end: () => void;
   skip: () => void;
-  isFirstStep: boolean;
-  isLastStep: boolean;
-  progress: number;
 }
 
 const TourContext = createContext<TourContextValue | null>(null);
@@ -37,7 +38,7 @@ export function TourProvider({ children }: TourProviderProps) {
   return (
     <TourContext.Provider value={tour}>
       {children}
-      {tour.active && <TourTooltip />}
+      {tour.isActive && <TourTooltip />}
     </TourContext.Provider>
   );
 }

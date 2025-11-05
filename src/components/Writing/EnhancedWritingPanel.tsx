@@ -196,7 +196,10 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
 
             <div className="flex items-center gap-2">
               {/* Chapter Navigation */}
-              <div className="flex items-center gap-1 border-r border-slate-200 dark:border-slate-700 pr-3 mr-1">
+              <div
+                className="flex items-center gap-1 border-r border-slate-200 dark:border-slate-700 pr-3 mr-1"
+                data-tour="chapter-nav"
+              >
                 <button
                   onClick={goToPrevChapter}
                   disabled={!hasPrev}
@@ -338,6 +341,7 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
                 ? 'Begin your story...'
                 : `Start writing "${currentProject.name}"...\n\nTip: Press Ctrl+S to save manually, or just keep writing - we'll save automatically.`
             }
+            data-tour="editor"
             className={`
               writing-editor w-full resize-none border-none outline-none
               ${

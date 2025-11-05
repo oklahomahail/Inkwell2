@@ -1,114 +1,252 @@
+// src/hooks/useTour.ts
 /**
- * useTour Hook - Tour state management
+ * useTour Hook - Universal Tour Controller
  *
- * Manages tour progression, step navigation, and completion state.
+ * Provides a centralized controller for managing contextual mini-tours.
+ * Features:
+ * - Selector-based filtering: Only shows steps for visible DOM elements
+ * - Keyboard navigation: Arrow keys, Escape
+ * - Completion tracking: localStorage persistence
+ * - Runtime validation: Graceful fallback for missing anchors
+ *
+ * Usage:
+ * ```tsx
+ * const { isActive, currentStep, start, next, prev, end } = useTour();
+ *
+ * // Start a tour
+ * <button onClick={() => start('gettingStarted')}>Start Tour</button>
+ *
+ * // Tour will automatically show TourTooltip if isActive === true
+ * ```
  */
 
 import { useState, useCallback, useEffect } from 'react';
 
-import { defaultTourSteps, TourStep } from '@/data/tourSteps';
-
-const TOUR_COMPLETED_KEY = 'inkwell:tour:completed';
+import { getTourSet, markTourCompleted, isTourCompleted } from '@/data/tourSets';
+import type { TourStep } from '@/data/tourSets';
 
 interface UseTourReturn {
+  isActive: boolean;
+  currentSet: string | null;
+  currentStep: TourStep | null;
+  index: number;
   steps: TourStep[];
-  currentStep: number;
-  active: boolean;
-  start: () => void;
+  totalSteps: number;
+  start: (setKey: string, force?: boolean) => boolean;
   next: () => void;
   prev: () => void;
   end: () => void;
   skip: () => void;
-  isFirstStep: boolean;
-  isLastStep: boolean;
-  progress: number;
 }
 
+/**
+ * Global tour state (singleton pattern)
+ * This ensures only one tour can be active at a time across the entire app
+ */
+let globalTourState: {
+  isActive: boolean;
+  currentSet: string | null;
+} = {
+  isActive: false,
+  currentSet: null,
+};
+
 export function useTour(): UseTourReturn {
-  const [steps] = useState<TourStep[]>(defaultTourSteps);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [active, setActive] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [currentSet, setCurrentSet] = useState<string | null>(null);
+  const [steps, setSteps] = useState<TourStep[]>([]);
+  const [index, setIndex] = useState(0);
 
-  // Check if tour has been completed before
-  const isCompleted = useCallback(() => {
-    try {
-      return localStorage.getItem(TOUR_COMPLETED_KEY) === 'true';
-    } catch {
-      return false;
-    }
-  }, []);
-
-  // Mark tour as completed and clean up welcome project
-  const markCompleted = useCallback(async () => {
-    try {
-      localStorage.setItem(TOUR_COMPLETED_KEY, 'true');
-
-      // Clean up welcome project on tour completion
-      const { completeWelcomeFlow } = await import('@/onboarding/welcomeProject');
-      await completeWelcomeFlow();
-    } catch (error) {
-      console.warn('[useTour] Failed to mark tour as completed:', error);
-    }
-  }, []);
-
-  // Start the tour
-  const start = useCallback(() => {
-    setActive(true);
-    setCurrentStep(0);
-  }, []);
-
-  // Move to next step
-  const next = useCallback(() => {
-    setCurrentStep((prev) => {
-      const nextStep = Math.min(prev + 1, steps.length - 1);
-      // If we've reached the last step, mark tour as completed
-      if (nextStep === steps.length - 1) {
-        setTimeout(markCompleted, 100);
+  /**
+   * Filter steps to only include those with visible anchors
+   */
+  const filterVisibleSteps = useCallback((allSteps: TourStep[]): TourStep[] => {
+    return allSteps.filter((step) => {
+      const element = document.querySelector(step.selector);
+      if (!element) {
+        console.warn(`[Tour] Anchor not found for step "${step.id}": ${step.selector}`);
+        return false;
       }
-      return nextStep;
+      return true;
     });
-  }, [steps.length, markCompleted]);
-
-  // Move to previous step
-  const prev = useCallback(() => {
-    setCurrentStep((prev) => Math.max(prev - 1, 0));
   }, []);
 
-  // End the tour
+  /**
+   * End tour without marking as completed
+   */
   const end = useCallback(() => {
-    setActive(false);
-    markCompleted();
-  }, [markCompleted]);
+    setIsActive(false);
+    setCurrentSet(null);
+    setSteps([]);
+    setIndex(0);
 
-  // Skip the tour
-  const skip = useCallback(() => {
-    setActive(false);
-    markCompleted();
-  }, [markCompleted]);
+    // Update global state
+    globalTourState = { isActive: false, currentSet: null };
 
-  // Auto-start tour for first-time users (optional)
-  useEffect(() => {
-    if (!isCompleted() && !active) {
-      // You can enable auto-start here if desired
-      // setTimeout(() => start(), 1000);
+    if (import.meta.env.DEV) {
+      console.warn('[Tour] Tour ended');
     }
-  }, [isCompleted, active]);
+  }, []);
 
-  const isFirstStep = currentStep === 0;
-  const isLastStep = currentStep === steps.length - 1;
-  const progress = ((currentStep + 1) / steps.length) * 100;
+  /**
+   * Start a tour
+   *
+   * @param setKey - Tour set ID from TOUR_SETS
+   * @param force - If true, skip completion check and restart tour
+   * @returns true if tour started, false if already completed or not found
+   */
+  const start = useCallback(
+    (setKey: string, force = false): boolean => {
+      // Check if tour is already completed (unless forced)
+      if (!force && isTourCompleted(setKey)) {
+        if (import.meta.env.DEV) {
+          console.warn(`[Tour] Tour "${setKey}" already completed. Use force=true to restart.`);
+        }
+        return false;
+      }
+
+      // Get tour set
+      const tourSet = getTourSet(setKey);
+      if (!tourSet) {
+        console.error(`[Tour] Tour set "${setKey}" not found`);
+        return false;
+      }
+
+      // Filter visible steps
+      const visibleSteps = filterVisibleSteps(tourSet.steps);
+      if (visibleSteps.length === 0) {
+        console.warn(`[Tour] No visible anchors found for tour "${setKey}"`);
+        return false;
+      }
+
+      // End any active tour first
+      if (globalTourState.isActive) {
+        if (import.meta.env.DEV) {
+          console.warn('[Tour] Ending previous tour before starting new one');
+        }
+        end();
+      }
+
+      // Start tour
+      setSteps(visibleSteps);
+      setCurrentSet(setKey);
+      setIndex(0);
+      setIsActive(true);
+
+      // Update global state
+      globalTourState = { isActive: true, currentSet: setKey };
+
+      if (import.meta.env.DEV) {
+        console.warn(`[Tour] Started tour "${setKey}" with ${visibleSteps.length} steps`);
+      }
+      return true;
+    },
+    [filterVisibleSteps, end],
+  );
+
+  /**
+   * Move to next step (or end tour if on last step)
+   */
+  const next = useCallback(() => {
+    if (!isActive) return;
+
+    if (index < steps.length - 1) {
+      setIndex((prev) => prev + 1);
+    } else {
+      // Last step - complete tour
+      if (currentSet) {
+        markTourCompleted(currentSet);
+        if (import.meta.env.DEV) {
+          console.warn(`[Tour] Completed tour "${currentSet}"`);
+        }
+      }
+      end();
+    }
+  }, [isActive, index, steps.length, currentSet, end]);
+
+  /**
+   * Move to previous step
+   */
+  const prev = useCallback(() => {
+    if (!isActive || index === 0) return;
+    setIndex((prev) => prev - 1);
+  }, [isActive, index]);
+
+  /**
+   * Skip tour and mark as completed
+   */
+  const skip = useCallback(() => {
+    if (currentSet) {
+      markTourCompleted(currentSet);
+      if (import.meta.env.DEV) {
+        console.warn(`[Tour] Skipped and marked tour "${currentSet}" as completed`);
+      }
+    }
+    end();
+  }, [currentSet, end]);
+
+  /**
+   * Keyboard navigation
+   */
+  useEffect(() => {
+    if (!isActive) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'Escape':
+          end();
+          break;
+        case 'ArrowRight':
+          next();
+          break;
+        case 'ArrowLeft':
+          prev();
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isActive, next, prev, end]);
+
+  /**
+   * Cleanup on unmount
+   */
+  useEffect(() => {
+    return () => {
+      if (globalTourState.isActive) {
+        globalTourState = { isActive: false, currentSet: null };
+      }
+    };
+  }, []);
 
   return {
+    isActive,
+    currentSet,
+    currentStep: steps[index] || null,
+    index,
     steps,
-    currentStep,
-    active,
+    totalSteps: steps.length,
     start,
     next,
     prev,
     end,
     skip,
-    isFirstStep,
-    isLastStep,
-    progress,
   };
+}
+
+/**
+ * Check if any tour is currently active (useful for global UI state)
+ */
+export function isTourActive(): boolean {
+  return globalTourState.isActive;
+}
+
+/**
+ * Get the ID of the currently active tour (if any)
+ */
+export function getActiveTourId(): string | null {
+  return globalTourState.currentSet;
 }

@@ -43,7 +43,10 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-3 px-3 py-2 bg-slate-900 border-l border-slate-800">
+    <div
+      className="flex items-center gap-3 px-3 py-2 bg-slate-900 border-l border-slate-800"
+      data-tour="realtime-status"
+    >
       {/* Live Update Flash */}
       {liveUpdate && (
         <div className="flex items-center gap-1.5 text-xs text-emerald-400 animate-pulse">
