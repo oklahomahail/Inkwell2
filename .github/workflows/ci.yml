@@ -43,6 +43,21 @@ jobs:
               - 'vercel.json'
               - 'Dockerfile'
 
+  docs-check:
+    name: Documentation Link Check
+    needs: [detect-changes]
+    if: ${{ needs.detect-changes.outputs.docs == 'true' || github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check markdown links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          config-file: '.mlc.config.json'
+          folder-path: 'docs'
+          file-path: 'README.md, CHANGELOG.md'
+          max-depth: 3
+
   lint:
     name: Lint & Code Quality
     needs: [detect-changes]
@@ -150,4 +165,10 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_ENABLE_PWA: 'true'
       - name: Bundle size guard
-        run: node scripts/check-bundle-sizes.mjs
+        run: node scripts/check-bundle-sizes.mjs | tee bundle-report.txt
+      - name: Upload bundle report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-report
+          path: bundle-report.txt
+        if: always()
