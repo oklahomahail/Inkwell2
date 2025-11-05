@@ -113,6 +113,7 @@
     "jszip": "^3.10.1",
     "libsodium-wrappers-sumo": "^0.7.15",
     "lucide-react": "^0.552.0",
+    "nanoid": "^5.1.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-router-dom": "^7.9.4",
