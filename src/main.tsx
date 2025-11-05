@@ -13,10 +13,12 @@ import { AppProviders } from './AppProviders';
 import { initGlobalErrorHandlers } from './boot/globalErrors';
 import './index.css';
 import './utils/flags';
+import { emitSessionEnd, emitSessionStart } from './services/telemetry';
 import { waitForRoot } from './utils/dom/waitForRoot';
 // Initialize storage persistence and monitoring
 import { warnIfDifferentOrigin } from './utils/storage/originGuard';
 import { ensurePersistentStorage } from './utils/storage/persistence';
+// Initialize telemetry
 
 // Initialize development tools in development mode
 if (import.meta.env.DEV) {
@@ -40,6 +42,17 @@ ensurePersistentStorage().then((result) => {
 });
 
 warnIfDifferentOrigin();
+
+// Initialize session telemetry
+emitSessionStart();
+
+// Emit session.end on page unload or visibility change to hidden
+window.addEventListener('beforeunload', () => emitSessionEnd('unload'));
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    emitSessionEnd('background');
+  }
+});
 
 // Initialize Service Worker cache cleanup on app boot
 // This ensures stale caches don't interfere with fresh assets or tour measurements

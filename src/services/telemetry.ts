@@ -14,7 +14,34 @@ export type TelemetryEvent =
   | 'onboarding.learn_more.clicked'
   | 'telemetry.opt_out_changed'
   | 'export.epub.success'
-  | 'export.epub.failure';
+  | 'export.epub.failure'
+  | 'session.start'
+  | 'session.end'
+  | 'export.run';
+
+// ============================================
+// Session Management
+// ============================================
+
+const SESSION_KEY = 'inkwell_session_id';
+
+/**
+ * Get or create a session ID for this browser tab
+ * Session ID is stored in sessionStorage (clears on tab close)
+ */
+function getSessionId(): string {
+  try {
+    let id = sessionStorage.getItem(SESSION_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      sessionStorage.setItem(SESSION_KEY, id);
+    }
+    return id;
+  } catch {
+    // If sessionStorage unavailable, generate ephemeral ID
+    return crypto.randomUUID();
+  }
+}
 
 // ============================================
 // Telemetry Opt-Out
@@ -67,10 +94,51 @@ export function track(event: TelemetryEvent, payload: Record<string, unknown> = 
   }
 
   try {
-    const body = JSON.stringify({ event, ts: Date.now(), payload });
+    const body = JSON.stringify({
+      event,
+      ts: Date.now(),
+      sessionId: getSessionId(),
+      ...payload,
+    });
     navigator.sendBeacon?.('/telemetry', new Blob([body], { type: 'application/json' })) ||
       fetch('/telemetry', { method: 'POST', body, keepalive: true }).catch(() => {});
   } catch {
     // Silently fail telemetry errors
   }
+}
+
+// ============================================
+// Session Events
+// ============================================
+
+/**
+ * Emit session.start event on app boot
+ * Should be called once per page load
+ */
+export function emitSessionStart(): void {
+  track('session.start', { sample: 1 });
+}
+
+/**
+ * Emit session.end event on app exit
+ * @param reason - Why the session is ending (unload, background)
+ */
+export function emitSessionEnd(reason: 'unload' | 'background'): void {
+  track('session.end', { reason, sample: 1 });
+}
+
+// ============================================
+// Export Events
+// ============================================
+
+export type ExportFormat = 'PDF' | 'DOCX' | 'EPUB' | 'MARKDOWN' | 'TXT';
+export type ExportChapters = 'all' | 'subset';
+
+/**
+ * Emit export.run event when user triggers any export
+ * @param format - Export format (PDF, DOCX, EPUB, etc.)
+ * @param chapters - Whether all chapters or a subset were exported
+ */
+export function emitExportRun(format: ExportFormat, chapters: ExportChapters): void {
+  track('export.run', { format, chapters, sample: 1 });
 }

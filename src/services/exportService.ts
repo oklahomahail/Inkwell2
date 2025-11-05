@@ -5,6 +5,7 @@ import devLog from '@/utils/devLog';
 
 import { exportHistory } from './exportHistory';
 import { storageService } from './storageService';
+import { emitExportRun } from './telemetry';
 
 export interface ExportOptions {
   format: string;
@@ -478,10 +479,26 @@ class ExportService {
   private async exportWithTelemetry(
     projectId: string,
     chapters: Chapter[],
-    exportType: 'pdf' | 'docx' | 'markdown',
+    exportType: 'pdf' | 'docx' | 'markdown' | 'epub',
     exportFn: () => Promise<ExportResult>,
   ): Promise<ExportResult> {
     const startTime = performance.now();
+
+    // Emit export.run telemetry event (PII-free)
+    try {
+      // Map exportType to uppercase format
+      const format = exportType.toUpperCase() as 'PDF' | 'DOCX' | 'EPUB' | 'MARKDOWN';
+
+      // Determine if all chapters are being exported
+      // We assume 'all' for now since we don't have total chapter count in this context
+      // UI layer would need to pass this information for accurate tracking
+      const chaptersFlag: 'all' | 'subset' = 'all';
+
+      emitExportRun(format, chaptersFlag);
+    } catch (telemetryError) {
+      // Silently fail telemetry - don't block export
+      devLog.error('[ExportService] Failed to emit export.run telemetry:', telemetryError);
+    }
 
     try {
       const result = await exportFn();
@@ -735,7 +752,7 @@ class ExportService {
     chapters: Chapter[],
     options: ExportOptions,
   ): Promise<ExportResult> {
-    return this.exportWithTelemetry(projectId, chapters, 'epub' as any, async () => {
+    return this.exportWithTelemetry(projectId, chapters, 'epub', async () => {
       const project = storageService.loadProject(projectId);
 
       if (!project) {

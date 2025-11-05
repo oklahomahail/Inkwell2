@@ -1,0 +1,112 @@
+{
+  "index-CbLRcMAx.js": {
+    "baseline": 1127,
+    "warn": 1184,
+    "error": 1240
+  },
+  "index-686PBbqC.js": {
+    "baseline": 463,
+    "warn": 487,
+    "error": 510
+  },
+  "chunk-CuWcKfTH.js": {
+    "baseline": 255,
+    "warn": 268,
+    "error": 281
+  },
+  "chunk-BOJNMLh9.js": {
+    "baseline": 97,
+    "warn": 102,
+    "error": 107
+  },
+  "chunk-C9LDixNK.js": {
+    "baseline": 66,
+    "warn": 70,
+    "error": 73
+  },
+  "chunk-Cx5zQVJj.js": {
+    "baseline": 60,
+    "warn": 63,
+    "error": 66
+  },
+  "PlotAnalysisPanel-Dgrt6UR-.js": {
+    "baseline": 30,
+    "warn": 32,
+    "error": 33
+  },
+  "chunk-BlENdGuE.js": {
+    "baseline": 21,
+    "warn": 23,
+    "error": 24
+  },
+  "WorldBuildingPanel-DiiYbdYN.js": {
+    "baseline": 20,
+    "warn": 21,
+    "error": 22
+  },
+  "ExportDashboard-BrwkYuKr.js": {
+    "baseline": 18,
+    "warn": 19,
+    "error": 20
+  },
+  "chunk-YESokxaK.js": {
+    "baseline": 12,
+    "warn": 13,
+    "error": 14
+  },
+  "proofreadService-Bn5xxYo0.js": {
+    "baseline": 9,
+    "warn": 10,
+    "error": 10
+  },
+  "welcomeProject-C6CsWCQw.js": {
+    "baseline": 8,
+    "warn": 9,
+    "error": 9
+  },
+  "chaptersService-CwGiM3Kf.js": {
+    "baseline": 7,
+    "warn": 8,
+    "error": 8
+  },
+  "pdfEngine-Bz52eYpE.js": {
+    "baseline": 6,
+    "warn": 7,
+    "error": 7
+  },
+  "epubEngine-T_Cc1g8o.js": {
+    "baseline": 5,
+    "warn": 6,
+    "error": 6
+  },
+  "exportService.epub-Bje7VHvE.js": {
+    "baseline": 4,
+    "warn": 5,
+    "error": 5
+  },
+  "index-ClKpMWTp.js": {
+    "baseline": 4,
+    "warn": 5,
+    "error": 5
+  },
+  "docxEngine-1wq3n6Dn.js": {
+    "baseline": 3,
+    "warn": 4,
+    "error": 4
+  },
+  "TourController-DowYpnni.js": {
+    "baseline": 1,
+    "warn": 2,
+    "error": 2
+  },
+  "chunk-CoTMnBsw.js": {
+    "baseline": 0,
+    "warn": 0,
+    "error": 0
+  },
+  "phraseWorker-C9nPcHp1.js": {
+    "baseline": 0,
+    "warn": 0,
+    "error": 0
+  }
+}

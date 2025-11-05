@@ -5,6 +5,7 @@
 [![CI](https://github.com/davehail/inkwell/actions/workflows/ci.yml/badge.svg)](https://github.com/davehail/inkwell/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4?logo=prettier)](https://prettier.io/)
+[![Bundle Guard](https://img.shields.io/badge/bundle-guarded-success?logo=github)](https://github.com/davehail/inkwell/blob/main/bundle-baseline.json)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 [Docs](/docs/dev/setup.md) · [Roadmap](/docs/product/roadmap.md) · [Changelog](./CHANGELOG.md) · [Workflow Guide](/docs/engineering/linting-and-ci-playbook.md)
