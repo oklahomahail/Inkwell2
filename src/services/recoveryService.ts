@@ -14,6 +14,7 @@ import type { EnhancedProject } from '@/types/project';
 import devLog from '@/utils/devLog';
 
 import { supabaseSyncService } from './supabaseSync';
+import { track } from './telemetry';
 
 export interface RecoveryResult {
   success: boolean;
@@ -52,16 +53,26 @@ class RecoveryService {
       requireUserUpload = false,
     } = options;
 
+    const startTime = Date.now();
     devLog.log('[RecoveryService] Starting recovery sequence');
+    track('recovery.attempt', { timestamp: startTime });
 
     // Tier 1: Supabase pull
     if (attemptSupabase) {
       const supabaseResult = await this.recoverFromSupabase();
       if (supabaseResult.success) {
         devLog.log('[RecoveryService] Tier 1 (Supabase) recovery successful');
+        track('recovery.success', {
+          tier: 1,
+          tierName: 'supabase',
+          duration: Date.now() - startTime,
+          projectsRecovered: supabaseResult.recoveredProjects,
+          chaptersRecovered: supabaseResult.recoveredChapters,
+        });
         return supabaseResult;
       }
       devLog.warn('[RecoveryService] Tier 1 (Supabase) recovery failed:', supabaseResult.error);
+      track('recovery.failure', { tier: 1, tierName: 'supabase', reason: supabaseResult.error });
     }
 
     // Tier 2: localStorage shadow copy
@@ -69,12 +80,20 @@ class RecoveryService {
       const shadowResult = await this.recoverFromShadowCopy();
       if (shadowResult.success) {
         devLog.log('[RecoveryService] Tier 2 (localStorage shadow) recovery successful');
+        track('recovery.success', {
+          tier: 2,
+          tierName: 'localStorage',
+          duration: Date.now() - startTime,
+          projectsRecovered: shadowResult.recoveredProjects,
+          chaptersRecovered: shadowResult.recoveredChapters,
+        });
         return shadowResult;
       }
       devLog.warn(
         '[RecoveryService] Tier 2 (localStorage shadow) recovery failed:',
         shadowResult.error,
       );
+      track('recovery.failure', { tier: 2, tierName: 'localStorage', reason: shadowResult.error });
     }
 
     // Tier 3: User upload (requires UI interaction)
@@ -411,7 +430,7 @@ class RecoveryService {
    * Re-derive E2EE key from passphrase
    * (Placeholder - actual E2EE implementation would be needed)
    */
-  async reDeriveEncryptionKey(passphrase: string): Promise<{ success: boolean; error?: string }> {
+  async reDeriveEncryptionKey(_passphrase: string): Promise<{ success: boolean; error?: string }> {
     // This would integrate with actual E2EE service when available
     // For now, return a placeholder
     devLog.warn('[RecoveryService] E2EE key derivation not yet implemented');

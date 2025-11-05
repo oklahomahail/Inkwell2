@@ -68,15 +68,13 @@ describe('RecoveryService', () => {
       const mockChapters: Chapter[] = [
         {
           id: 'chapter-1',
-          projectId: 'project-1',
+          project_id: 'project-1',
+          client_rev: 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          index_in_project: 0,
           title: 'Chapter 1',
-          summary: 'Test chapter',
-          content: 'Chapter content',
-          wordCount: 100,
-          status: 'draft',
-          order: 0,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
+          body: 'Chapter content',
         },
       ];
 
@@ -185,15 +183,13 @@ describe('RecoveryService', () => {
       const mockChapters: Chapter[] = [
         {
           id: 'chapter-1',
-          projectId: 'project-1',
+          project_id: 'project-1',
+          client_rev: 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          index_in_project: 0,
           title: 'Chapter 1',
-          summary: 'Test chapter',
-          content: 'Chapter content',
-          wordCount: 100,
-          status: 'draft',
-          order: 0,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
+          body: 'Chapter content',
         },
       ];
 

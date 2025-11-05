@@ -22,6 +22,7 @@ import { ensurePersistentStorage } from './utils/storage/persistence';
 if (import.meta.env.DEV) {
   import('./dev/index');
   import('./utils/cacheDebug'); // Cache inspection utilities
+  import('./utils/recoveryDebug'); // Recovery inspection utilities
 }
 
 // Initialize global error handlers first

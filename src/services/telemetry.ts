@@ -2,7 +2,10 @@ export type TelemetryEvent =
   | 'autosave.start'
   | 'autosave.success'
   | 'autosave.error'
-  | 'editor.autosave.latency';
+  | 'editor.autosave.latency'
+  | 'recovery.attempt'
+  | 'recovery.success'
+  | 'recovery.failure';
 
 export function track(event: TelemetryEvent, payload: Record<string, unknown> = {}) {
   try {
