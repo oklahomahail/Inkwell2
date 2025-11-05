@@ -12,7 +12,9 @@ export type TelemetryEvent =
   | 'onboarding.welcome.completed'
   | 'onboarding.tour.seen'
   | 'onboarding.learn_more.clicked'
-  | 'telemetry.opt_out_changed';
+  | 'telemetry.opt_out_changed'
+  | 'export.epub.success'
+  | 'export.epub.failure';
 
 // ============================================
 // Telemetry Opt-Out

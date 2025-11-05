@@ -28,6 +28,7 @@ export enum ExportFormat {
   TXT = 'txt',
   PDF = 'pdf',
   DOCX = 'docx',
+  EPUB = 'epub',
 }
 
 class ExportService {
@@ -393,6 +394,13 @@ class ExportService {
         return this.exportPDF(projectId, fullOptions);
       case ExportFormat.DOCX:
         return this.exportDOCX(projectId, fullOptions);
+      case ExportFormat.EPUB:
+        // Note: EPUB export uses chapter-based method, not legacy exportProject
+        return {
+          success: false,
+          filename: '',
+          error: 'EPUB export requires using exportEPUBWithChapters() method',
+        };
       default:
         return {
           success: false,
@@ -715,6 +723,53 @@ class ExportService {
         success: true,
         filename,
         downloadUrl: url,
+      };
+    });
+  }
+
+  /**
+   * Export EPUB with new chapter format and telemetry (v0.9.1)
+   */
+  async exportEPUBWithChapters(
+    projectId: string,
+    chapters: Chapter[],
+    options: ExportOptions,
+  ): Promise<ExportResult> {
+    return this.exportWithTelemetry(projectId, chapters, 'epub' as any, async () => {
+      const project = storageService.loadProject(projectId);
+
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      // Import EPUB service dynamically to avoid circular dependencies
+      const { exportEpub, downloadEpub } = await import('./export/exportService.epub');
+
+      // Sort chapters by order
+      const sortedChapters = [...chapters].sort((a, b) => a.order - b.order);
+
+      // Convert chapters to EPUB format
+      const epubChapters = sortedChapters.map((chapter) => ({
+        id: chapter.id,
+        title: chapter.title,
+        bodyHtml: this.markdownToHTML(chapter.content || ''),
+      }));
+
+      // Generate EPUB blob
+      const blob = await exportEpub({
+        title: options.customTitle || project.name,
+        author: (project as any).author || undefined,
+        language: 'en', // TODO: Make this configurable
+        chapters: epubChapters,
+      });
+
+      // Download EPUB
+      const filename = `${this.sanitizeFilename(options.customTitle || project.name)}.epub`;
+      downloadEpub(blob, options.customTitle || project.name);
+
+      return {
+        success: true,
+        filename,
       };
     });
   }
