@@ -65,3 +65,94 @@ export function getMeasures(pattern?: string): PerformanceEntry[] {
     return [];
   }
 }
+
+/**
+ * Chapter Query Telemetry
+ * Tracks query latencies with percentile calculations
+ */
+class QueryMetricsCollector {
+  private latencies: number[] = [];
+  private maxSamples = 1000; // Keep last 1000 samples
+
+  record(durationMs: number): void {
+    this.latencies.push(durationMs);
+
+    // Trim to max samples (FIFO)
+    if (this.latencies.length > this.maxSamples) {
+      this.latencies.shift();
+    }
+  }
+
+  getPercentile(p: number): number {
+    if (this.latencies.length === 0) return 0;
+
+    const sorted = [...this.latencies].sort((a, b) => a - b);
+    const index = Math.ceil((p / 100) * sorted.length) - 1;
+    return sorted[Math.max(0, index)] ?? 0;
+  }
+
+  getMetrics() {
+    if (this.latencies.length === 0) {
+      return { p50: 0, p95: 0, count: 0, mean: 0 };
+    }
+
+    const p50 = this.getPercentile(50);
+    const p95 = this.getPercentile(95);
+    const mean = this.latencies.reduce((a, b) => a + b, 0) / this.latencies.length;
+
+    return {
+      p50: Math.round(p50),
+      p95: Math.round(p95),
+      count: this.latencies.length,
+      mean: Math.round(mean),
+    };
+  }
+
+  clear(): void {
+    this.latencies = [];
+  }
+}
+
+// Singleton for chapter query metrics
+const chapterQueryMetrics = new QueryMetricsCollector();
+
+/**
+ * Track a chapter query with automatic timing
+ */
+export async function trackChapterQuery<T>(label: string, queryFn: () => Promise<T>): Promise<T> {
+  const start = performance.now();
+
+  try {
+    const result = await queryFn();
+    const duration = performance.now() - start;
+
+    // Record latency
+    chapterQueryMetrics.record(duration);
+
+    // Log if threshold exceeded
+    const metrics = chapterQueryMetrics.getMetrics();
+    if (metrics.p95 > 250 || metrics.p50 > 150) {
+      console.warn(`[Chapter Query] ${label} - p50: ${metrics.p50}ms, p95: ${metrics.p95}ms`);
+    }
+
+    return result;
+  } catch (error) {
+    const duration = performance.now() - start;
+    chapterQueryMetrics.record(duration);
+    throw error;
+  }
+}
+
+/**
+ * Get current chapter query metrics
+ */
+export function getChapterQueryMetrics() {
+  return chapterQueryMetrics.getMetrics();
+}
+
+/**
+ * Clear chapter query metrics
+ */
+export function clearChapterQueryMetrics() {
+  chapterQueryMetrics.clear();
+}

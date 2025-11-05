@@ -183,6 +183,12 @@
 }
 
 /* Global font fallback and base layout tweaks */
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: var(--font-sans);
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
