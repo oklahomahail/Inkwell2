@@ -3,6 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { AccountMenu } from '@/components/Modals/AccountMenu';
 import { ShortcutsModal } from '@/components/Modals/ShortcutsModal';
 import { NotificationsPanel } from '@/components/NotificationsPanel';
+import StatusBar from '@/components/StatusBar/StatusBar';
 import { Avatar } from '@/components/ui/Avatar';
 import { useAppContext } from '@/context/AppContext';
 import { useCurrentProject } from '@/context/AppContext';
@@ -119,12 +120,15 @@ export default function Topbar({
       </div>
 
       {/* Right: status pill, user account, buttons */}
-      <div className="flex items-center gap-2">
-        {/* Status Pill */}
+      <div className="flex items-center gap-4">
+        {/* Autosave Status */}
         <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full">
           <div className="w-2 h-2 bg-[#CDAA47] rounded-full"></div>
           <span className="text-xs text-white/90">{renderSaveStatus()}</span>
         </div>
+
+        {/* Sync Status */}
+        <StatusBar />
 
         {/* Account Button */}
         <button
