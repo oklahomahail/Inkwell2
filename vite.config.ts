@@ -42,7 +42,7 @@ export default defineConfig({
         manualChunks: {
           // Vendor chunks for better caching
           'vendor-react': ['react', 'react-dom'],
-          'vendor-ui': ['lucide-react', 'clsx', 'tailwind-merge'],
+          'vendor-ui': ['lucide-react', 'clsx'],
           // Heavy dependencies get their own chunks
           'vendor-tiptap': [
             '@tiptap/core',
@@ -56,7 +56,7 @@ export default defineConfig({
           ],
           'vendor-charts': ['recharts'],
           'vendor-crypto': ['crypto-js'],
-          'vendor-utils': ['date-fns', 'lodash', 'zod'],
+          'vendor-utils': ['date-fns', 'zod'],
           'vendor-export': ['file-saver', 'jszip'],
         },
         // Ensure deterministic chunk naming

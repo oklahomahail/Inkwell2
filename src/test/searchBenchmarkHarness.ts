@@ -1,14 +1,14 @@
 // @ts-nocheck
 // src/test/searchBenchmarkHarness.ts
-import devLog from "@/utils/devLog";
+import { approxWordCount, makeCorpus } from '@/dev/makeCoprus';
+import { searchService, type SearchOptions } from '@/services/searchService';
+import devLog from '@/utils/devLog';
+
 import {
   generateSyntheticCorpus,
   type GeneratedCorpus,
   type CorpusSettings,
 } from './syntheticCorpusGenerator';
-
-import { searchService, type SearchOptions } from '@/services/searchService';
-import { approxWordCount, makeCorpus } from '@/dev/makeCoprus';
 
 export interface BenchmarkConfig {
   warmupQueries: number; // Number of warmup queries to run first
@@ -173,7 +173,9 @@ class SearchBenchmarkHarness {
     const indexStats = searchService.getStats(this.corpus.project.id);
     const indexSize = indexStats?.indexSize || 0;
 
-    devLog.debug(`Search index built in ${indexTime}ms (${(indexSize / 1024 / 1024).toFixed(2)}MB)`);
+    devLog.debug(
+      `Search index built in ${indexTime}ms (${(indexSize / 1024 / 1024).toFixed(2)}MB)`,
+    );
 
     // Generate queries
     devLog.debug('Generating benchmark queries...');

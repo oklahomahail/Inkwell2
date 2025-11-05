@@ -1,11 +1,12 @@
 /**
  * Test utility for rendering components with all necessary providers
  */
-import React from 'react';
-import { render as rtlRender, RenderOptions } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { AuthContext, AuthContextType } from '@/context/AuthContext';
 import { User } from '@supabase/supabase-js';
+import { render as rtlRender, RenderOptions } from '@testing-library/react';
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+
+import { AuthContext, AuthContextType } from '@/context/AuthContext';
 
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   authOverride?: Partial<AuthContextType>;
