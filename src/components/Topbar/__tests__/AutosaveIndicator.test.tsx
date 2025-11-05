@@ -4,8 +4,8 @@
  * Tests for the autosave status indicator UI component
  */
 
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { AutosaveService } from '@/services/autosaveService';
 
@@ -57,10 +57,13 @@ describe('AutosaveIndicator', () => {
     // Trigger saving state
     const savePromise = savingService.flush('ch1', 'content');
 
-    const indicator = await screen.findByTestId('autosave-indicator');
-    expect(indicator).toHaveTextContent('Saving…');
-    expect(indicator).toHaveAttribute('data-state', 'saving');
-    expect(indicator.querySelector('.animate-spin')).toBeInTheDocument();
+    // Wait for the indicator to appear and show saving state
+    await waitFor(async () => {
+      const indicator = await screen.findByTestId('autosave-indicator');
+      expect(indicator).toHaveTextContent('Saving…');
+      expect(indicator).toHaveAttribute('data-state', 'saving');
+      expect(indicator.querySelector('.animate-spin')).toBeInTheDocument();
+    });
 
     await savePromise;
     savingService.destroy();
@@ -71,9 +74,12 @@ describe('AutosaveIndicator', () => {
 
     await service.flush('ch1', 'content');
 
-    const indicator = await screen.findByTestId('autosave-indicator');
-    expect(indicator).toHaveTextContent('Saved');
-    expect(indicator).toHaveAttribute('data-state', 'saved');
+    // Wait for the saved state to appear
+    await waitFor(async () => {
+      const indicator = await screen.findByTestId('autosave-indicator');
+      expect(indicator).toHaveTextContent('Saved');
+      expect(indicator).toHaveAttribute('data-state', 'saved');
+    });
   });
 
   it('should render "Offline (saving locally)" when offline', async () => {
@@ -93,9 +99,12 @@ describe('AutosaveIndicator', () => {
 
     const savePromise = offlineService.flush('ch1', 'content');
 
-    const indicator = await screen.findByTestId('autosave-indicator');
-    expect(indicator).toHaveTextContent('Offline (saving locally)');
-    expect(indicator).toHaveAttribute('data-state', 'offline');
+    // Wait for the offline state to appear
+    await waitFor(async () => {
+      const indicator = await screen.findByTestId('autosave-indicator');
+      expect(indicator).toHaveTextContent('Offline (saving locally)');
+      expect(indicator).toHaveAttribute('data-state', 'offline');
+    });
 
     await savePromise;
     offlineService.destroy();
@@ -112,9 +121,12 @@ describe('AutosaveIndicator', () => {
       // Expected
     }
 
-    const indicator = await screen.findByTestId('autosave-indicator');
-    expect(indicator).toHaveTextContent('Save error');
-    expect(indicator).toHaveAttribute('data-state', 'error');
+    // Wait for the error state to appear
+    await waitFor(async () => {
+      const indicator = await screen.findByTestId('autosave-indicator');
+      expect(indicator).toHaveTextContent('Save error');
+      expect(indicator).toHaveAttribute('data-state', 'error');
+    });
   });
 
   it('should update when service state changes', async () => {
@@ -133,15 +145,19 @@ describe('AutosaveIndicator', () => {
     const savePromise = slowService.flush('ch1', 'content');
 
     // Should show saving
-    let indicator = await screen.findByTestId('autosave-indicator');
-    expect(indicator).toHaveTextContent('Saving…');
+    await waitFor(async () => {
+      const indicator = await screen.findByTestId('autosave-indicator');
+      expect(indicator).toHaveTextContent('Saving…');
+    });
 
     await savePromise;
 
     // Should show saved (wait for state update)
-    await screen.findByText('Saved');
-    indicator = screen.getByTestId('autosave-indicator');
-    expect(indicator).toHaveTextContent('Saved');
+    await waitFor(async () => {
+      const indicator = await screen.findByText('Saved');
+      expect(indicator).toBeInTheDocument();
+      expect(screen.getByTestId('autosave-indicator')).toHaveTextContent('Saved');
+    });
 
     slowService.destroy();
   });
