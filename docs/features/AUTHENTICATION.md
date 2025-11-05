@@ -470,10 +470,9 @@ Supabase enforces:
 
 ---
 
-**Last updated:** October 2025  
-**Maintainer:** Inkwell Core Team  
+**Last updated:** October 2025
+**Maintainer:** Inkwell Core Team
 **Related Docs:**
 
-- [Supabase Setup Guide](../../.archive/checklists/SUPABASE_AUTH_CHECKLIST.md)
-- [Deployment Guide](../dev/DEPLOYMENT.md)
-- [User Guide](../user/USER_GUIDE.md)
+- [Deployment Guide](../dev/BRANCH_PROTECTION_SETUP.md)
+- [User Guide](../../ONBOARDING.md)

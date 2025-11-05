@@ -361,10 +361,9 @@ Planned improvements (see `ROADMAP.md`):
 
 ---
 
-**Last updated:** October 2025  
-**Maintainer:** Inkwell Core Team  
+**Last updated:** October 2025
+**Maintainer:** Inkwell Core Team
 **Related Docs:**
 
-- [User Guide](../user/USER_GUIDE.md)
-- [Analytics](../dev/ANALYTICS.md)
-- [Accessibility Guide](../brand/ACCESSIBILITY.md)
+- [User Guide](../../ONBOARDING.md)
+- [Accessibility Guide](../BRAND_ACCESSIBILITY_GUIDE.md)
