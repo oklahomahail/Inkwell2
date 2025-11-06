@@ -32,7 +32,7 @@ export const Sidebar: React.FC = () => {
     >
       <div className="p-4 flex items-center space-x-2" data-spotlight-id="sidebar.logo">
         {/* Logo and title */}
-        <img src="/brand/inkwell-icon-64.png" alt="Inkwell" className="h-8 w-8" />
+        <img src="/brand/inkwell-icon.svg" alt="Inkwell" className="h-8 w-8" />
         {!sidebarCollapsed && <span className="text-slate-100 font-semibold text-lg">Inkwell</span>}
       </div>
       <button
