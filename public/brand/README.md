@@ -1,36 +1,28 @@
 # Inkwell Brand Assets
 
-This directory contains brand assets for Inkwell. The following files are required for the application to function properly:
+This directory contains the canonical brand assets for Inkwell.
 
-## Required Assets
+## SVG Assets (Semantic Names)
 
-### Icons & Favicons
-- `inkwell-favicon.ico` - Browser favicon (16x16, 32x32)
-- `inkwell-favicon-32.png` - 32x32 favicon
-- `inkwell-logo-icon-180.png` - Apple touch icon (180x180)
-- `inkwell-logo-icon-192.png` - PWA icon (192x192)
-- `inkwell-logo-icon-512.png` - PWA icon (512x512)
+- `inkwell-icon.svg` - Feather-only icon, square format (641B)
+- `inkwell-lockup-dark.svg` - White text on dark background (535B)
+- `inkwell-lockup-light.svg` - Navy text on light background (537B)
 
-### Logo Variants
-- `inkwell-logo-horizontal.png` - Horizontal logo with text
-- `inkwell-logo-full.png` - Full logo
-- `inkwell-logo-icon-variant-a.png` - Icon variant A
-- `inkwell-logo-icon-variant-b.png` - Icon variant B
-- `inkwell-logo-icon-variant-c.png` - Icon variant C
-- `inkwell-logo-icon-variant-d.png` - Icon variant D
+## PNG Icons (Generated from SVG)
 
-### SVG Lockups
-- `inkwell-lockup-dark.svg` - Dark background lockup logo
-- `inkwell-wordmark.svg` - Wordmark only
+Used by manifest and meta tags:
+- `inkwell-icon-32.png` - Favicon (32×32, 1.7KB)
+- `inkwell-icon-180.png` - Apple touch icon (180×180, 21KB)
+- `inkwell-icon-192.png` - PWA icon (192×192, 24KB)
+- `inkwell-icon-512.png` - PWA icon (512×512, 173KB)
+- `inkwell-og-1200x630.png` - Open Graph social sharing image (1200×630, 533KB)
 
-### Social Media
-- `inkwell-og-1200x630.png` - Open Graph image for social sharing (1200x1200x630)
+**Regenerate PNGs:** Run `pnpm build:icons` to regenerate all PNG assets from the SVG sources.
 
 ## Brand Colors
 
 - **Inkwell Blue (Navy)**: `#13294B` (Primary brand color)
-- **Inkwell Gold**: `#D4AF37` (Accent color)
-- **Dark Background**: `#0b1020` (App dark mode background)
+- **Inkwell Gold**: `#D4AF37` (Accent color for highlights and interactive elements)
 
 ## Usage
 
@@ -41,18 +33,23 @@ These assets are referenced in:
 - `/src/components/Auth/AuthHeader.tsx` - Authentication pages
 - Various auth pages (`/src/pages/AuthPage.tsx`, etc.)
 
-## Missing Assets
+## Import Aliases
 
-If you see 404 errors for brand assets, please ensure all files listed above are present in this directory.
+Use semantic import aliases in your code (configured in `vite.config.ts`):
 
-To quickly generate placeholder assets for development, you can use:
-- [favicon.io](https://favicon.io/) for favicons
-- [Canva](https://www.canva.com/) for logo designs
-- Any image editor to create appropriately sized PNG files
+```typescript
+import icon from '@brand/icon';           // inkwell-icon.svg
+import logoDark from '@brand/logo-dark';  // inkwell-lockup-dark.svg
+import logoLight from '@brand/logo-light'; // inkwell-lockup-light.svg
+```
+
+## Validation
+
+Run `node scripts/check-brand-assets.mjs` to validate all required brand assets are present before building.
 
 ## Notes
 
-- All PNG files should use transparent backgrounds where appropriate
-- SVG files should be optimized and minified
-- Ensure proper color contrast for accessibility
-- Icons should be recognizable at small sizes (16x16)
+- All SVG files include proper `viewBox` attributes for responsive scaling
+- PNG files are regenerated from SVG sources to maintain quality
+- Paths use `currentColor` or explicit brand colors as appropriate
+- All assets are precached by the service worker for offline support

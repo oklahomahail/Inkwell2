@@ -18,44 +18,44 @@ type Props = {
 
 const ASSET_MAP: Record<LogoVariant, { src: string; aspectRatio: number; fallback?: string }> = {
   'mark-light': {
-    src: '/brand/inkwell-wordmark.svg',
-    aspectRatio: 4,
-    fallback: '/brand/inkwell-lockup-dark.svg',
+    src: '/brand/inkwell-icon.svg', // icon only
+    aspectRatio: 1,
+    fallback: '/brand/inkwell-lockup-light.svg',
   },
   'mark-dark': {
-    src: '/brand/inkwell-lockup-dark.svg',
-    aspectRatio: 4,
-    fallback: '/brand/inkwell-wordmark.svg',
+    src: '/brand/inkwell-icon.svg', // icon only
+    aspectRatio: 1,
+    fallback: '/brand/inkwell-lockup-dark.svg',
   },
   'wordmark-light': {
-    src: '/brand/inkwell-wordmark.svg',
+    src: '/brand/inkwell-lockup-light.svg', // lockup light (navy on white)
     aspectRatio: 4,
-    fallback: '/brand/inkwell-lockup-dark.svg',
+    fallback: '/brand/inkwell-icon.svg',
   },
   'wordmark-dark': {
-    src: '/brand/inkwell-lockup-dark.svg',
+    src: '/brand/inkwell-lockup-dark.svg', // lockup dark (white on navy)
     aspectRatio: 4,
-    fallback: '/brand/inkwell-wordmark.svg',
+    fallback: '/brand/inkwell-icon.svg',
   },
   'outline-dark': {
-    src: '/brand/inkwell-lockup-dark.svg',
-    aspectRatio: 4,
-    fallback: '/brand/inkwell-wordmark.svg',
+    src: '/brand/inkwell-icon.svg', // icon only
+    aspectRatio: 1,
+    fallback: '/brand/inkwell-lockup-dark.svg',
   },
   'outline-light': {
-    src: '/brand/inkwell-wordmark.svg',
-    aspectRatio: 4,
-    fallback: '/brand/inkwell-lockup-dark.svg',
+    src: '/brand/inkwell-icon.svg', // icon only
+    aspectRatio: 1,
+    fallback: '/brand/inkwell-lockup-light.svg',
   },
   'svg-feather-gold': {
-    src: '/brand/inkwell-wordmark.svg',
-    aspectRatio: 4,
-    fallback: '/brand/inkwell-lockup-dark.svg',
+    src: '/brand/inkwell-icon.svg', // icon only
+    aspectRatio: 1,
+    fallback: '/brand/inkwell-lockup-light.svg',
   },
   'svg-feather-navy': {
-    src: '/brand/inkwell-lockup-dark.svg',
-    aspectRatio: 4,
-    fallback: '/brand/inkwell-wordmark.svg',
+    src: '/brand/inkwell-icon.svg', // icon only
+    aspectRatio: 1,
+    fallback: '/brand/inkwell-lockup-dark.svg',
   },
 };
 
@@ -77,9 +77,9 @@ export default function Logo({ variant, size = 48, className }: Props) {
         if (asset.fallback && !currentSrc.includes(asset.fallback)) {
           e.currentTarget.src = asset.fallback;
         }
-        // Last resort: use the wordmark
-        else if (!currentSrc.includes('inkwell-wordmark.svg')) {
-          e.currentTarget.src = '/brand/inkwell-wordmark.svg';
+        // Last resort: use the icon
+        else if (!currentSrc.includes('inkwell-icon.svg')) {
+          e.currentTarget.src = '/brand/inkwell-icon.svg';
         }
         // Prevent infinite error loop
         else {

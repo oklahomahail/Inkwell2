@@ -94,7 +94,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
               // Try fallback src if not already tried
               if (img.dataset.fallbackApplied !== '1') {
                 img.dataset.fallbackApplied = '1';
-                img.src = '/brand/inkwell-wordmark.svg';
+                img.src = '/brand/inkwell-icon.svg';
                 return;
               }
 

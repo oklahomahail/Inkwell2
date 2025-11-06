@@ -210,6 +210,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@brand/icon': '/brand/inkwell-icon.svg',
+      '@brand/logo-dark': '/brand/inkwell-lockup-dark.svg',
+      '@brand/logo-light': '/brand/inkwell-lockup-light.svg',
     },
     dedupe: ['react', 'react-dom'],
   },

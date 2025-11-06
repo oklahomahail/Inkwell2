@@ -16,6 +16,7 @@
     "hygiene": "git grep -nE 'TODO\\(>30d\\)' -- ':!node_modules' && exit 1 || exit 0",
     "prettier:check": "prettier --check .",
     "check:env": "node scripts/check-env-vars.mjs",
+    "build:icons": "magick public/brand/inkwell-icon.svg -resize 32x32 public/brand/inkwell-icon-32.png && magick public/brand/inkwell-icon.svg -resize 180x180 public/brand/inkwell-icon-180.png && magick public/brand/inkwell-icon.svg -resize 192x192 public/brand/inkwell-icon-192.png && magick public/brand/inkwell-icon.svg -resize 512x512 public/brand/inkwell-icon-512.png && magick public/brand/inkwell-lockup-light.svg -resize 1200x630 public/brand/inkwell-og-1200x630.png",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",

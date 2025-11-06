@@ -32,7 +32,7 @@ describe('Smoke Tests - Brand & UI', () => {
       render(<AuthHeader />);
       const logo = screen.getByAltText('Inkwell') as HTMLImageElement;
       expect(logo).toBeInTheDocument();
-      expect(logo.src).toContain('/brand/inkwell-logo-horizontal.png');
+      expect(logo.src).toContain('/brand/inkwell-lockup-dark.svg');
     });
 
     it('has proper width and height attributes', () => {
