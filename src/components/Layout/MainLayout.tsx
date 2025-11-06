@@ -12,7 +12,6 @@ import {
   Sun,
   Moon,
   Command,
-  Plus,
   Kanban,
 } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -492,15 +491,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
           {!sidebarCollapsed && (
             <div className="p-4 border-t border-subtle">
               <div className="space-y-2">
-                <button
-                  className="w-full ink-btn gap-2"
-                  onClick={() => {
-                    // TODO: Implement create project
-                  }}
-                >
-                  <Plus className="w-4 h-4" />
-                  New Project
-                </button>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={toggleDarkMode}
@@ -521,15 +511,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
           {/* Collapsed mode quick actions */}
           {sidebarCollapsed && (
             <div className="p-2 border-t border-subtle space-y-2">
-              <button
-                className="w-full ink-btn p-2"
-                onClick={() => {
-                  // TODO: Implement create project
-                }}
-                title="New Project"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
               <button
                 onClick={toggleDarkMode}
                 className="w-full btn btn-ghost btn-sm p-2"
