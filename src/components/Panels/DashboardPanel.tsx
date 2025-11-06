@@ -170,29 +170,41 @@ const DashboardPanel: React.FC = () => {
         >
           <h2 className="text-xl font-semibold mb-4">Recent Projects</h2>
           <div className="space-y-3">
-            {state.projects.slice(0, 5).map((project) => (
-              <div
-                key={project.id}
-                className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                  currentProject?.id === project.id
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-                onClick={() => setCurrentProjectId(project.id)}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-medium">{project.name}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      {project.description}
-                    </p>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {new Date(project.updatedAt).toLocaleDateString()}
+            {state.projects.slice(0, 5).map((project) => {
+              const isWelcome = project.name === 'Welcome to Inkwell';
+              return (
+                <div
+                  key={project.id}
+                  className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                    isWelcome
+                      ? 'border-inkwell-gold bg-amber-50 dark:bg-amber-900/20 ring-2 ring-inkwell-gold/50'
+                      : currentProject?.id === project.id
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                  onClick={() => setCurrentProjectId(project.id)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium">{project.name}</h3>
+                        {isWelcome && (
+                          <span className="px-2 py-0.5 text-xs font-semibold bg-inkwell-gold text-slate-900 rounded-full">
+                            ✨ Tutorial
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {project.description}
+                      </p>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {new Date(project.updatedAt).toLocaleDateString()}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

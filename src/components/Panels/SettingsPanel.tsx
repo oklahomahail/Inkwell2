@@ -236,6 +236,47 @@ const SettingsPanel: React.FC = () => {
           </p>
         </div>
 
+        {/* How AI Works - Explanation Section */}
+        <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-xl p-6 border border-blue-700/50">
+          <h3 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
+            <Info className="w-5 h-5 text-blue-400" />
+            How AI Works in Inkwell
+          </h3>
+          <div className="space-y-3 text-sm">
+            <p className="text-gray-300">Inkwell offers two ways to use AI in your writing:</p>
+            <div className="space-y-2 ml-4">
+              <div className="flex gap-2">
+                <span className="text-blue-400 font-bold">•</span>
+                <div>
+                  <strong className="text-white">Simple Mode:</strong>
+                  <span className="text-gray-300">
+                    {' '}
+                    Uses Inkwell's built-in AI with rate limits. Perfect for quick suggestions and
+                    edits. No API key needed.
+                  </span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-purple-400 font-bold">•</span>
+                <div>
+                  <strong className="text-white">Power Mode:</strong>
+                  <span className="text-gray-300">
+                    {' '}
+                    Connect your own API key for unlimited access and advanced features. You control
+                    costs and usage.
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-blue-900/20 border border-blue-700/50 rounded-lg">
+              <p className="text-blue-200 text-xs">
+                💡 <strong>Tip:</strong> Start with Simple Mode to try features, then upgrade to
+                Power Mode when you need more control and unlimited usage.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Two-Tier AI Integration */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
           <h3 className="text-xl font-semibold text-white mb-4">AI Writing Companion</h3>
@@ -261,16 +302,16 @@ const SettingsPanel: React.FC = () => {
 
           {/* Quick Setup Guide */}
           {!claude.isConfigured && (
-            <div className="mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
-              <h4 className="text-lg font-medium text-blue-200 mb-3">Quick Setup Guide</h4>
-              <ol className="text-sm text-blue-300 space-y-2 list-decimal list-inside">
+            <div className="mb-6 p-4 bg-amber-900/20 border border-amber-700/50 rounded-lg">
+              <h4 className="text-lg font-medium text-amber-100 mb-3">⚡ Quick Setup Guide</h4>
+              <ol className="text-sm text-gray-200 space-y-2 list-decimal list-inside">
                 <li>
                   Visit{' '}
                   <a
                     href="https://console.anthropic.com/settings/keys"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline inline-flex items-center gap-1"
+                    className="text-amber-300 hover:text-amber-200 underline inline-flex items-center gap-1 font-medium"
                   >
                     Anthropic Console
                     <ExternalLink className="w-3 h-3" />
@@ -502,7 +543,42 @@ const SettingsPanel: React.FC = () => {
 
         {/* Phrase Hygiene Settings */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold text-white mb-4">Phrase Hygiene</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">Phrase Hygiene</h3>
+          <p className="text-gray-400 text-sm mb-4">
+            Catch repetitive phrases and overused words to improve your writing quality.
+          </p>
+
+          {/* What is Phrase Hygiene */}
+          <div className="mb-6 p-4 bg-emerald-900/20 border border-emerald-700/50 rounded-lg">
+            <h4 className="text-sm font-semibold text-emerald-200 mb-2">
+              📝 What is Phrase Hygiene?
+            </h4>
+            <div className="text-sm text-gray-300 space-y-2">
+              <p>
+                Phrase hygiene helps you identify patterns that make writing feel repetitive or
+                amateurish:
+              </p>
+              <ul className="list-disc list-inside ml-2 space-y-1 text-gray-400">
+                <li>
+                  <strong className="text-gray-300">Overused phrases:</strong> "all of a sudden",
+                  "at the end of the day"
+                </li>
+                <li>
+                  <strong className="text-gray-300">Repeated words:</strong> Using "walked" 5 times
+                  in one paragraph
+                </li>
+                <li>
+                  <strong className="text-gray-300">Crutch words:</strong> "very", "just", "really",
+                  "actually"
+                </li>
+              </ul>
+              <p className="text-emerald-200 text-xs mt-3">
+                <strong>How to use:</strong> Enable detection to get highlights as you write. Review
+                suggested improvements and decide what to change.
+              </p>
+            </div>
+          </div>
+
           {!currentProject ? (
             <p className="text-gray-400 text-sm mb-4">
               Select a project to configure phrase detection settings.
@@ -533,8 +609,12 @@ const SettingsPanel: React.FC = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        N-gram sizes (word phrase lengths to check)
+                        Phrase Length to Check
                       </label>
+                      <p className="text-xs text-gray-400 mb-2">
+                        Select which phrase lengths to analyze. Shorter phrases catch more
+                        repetition, longer phrases catch specific clichés.
+                      </p>
                       <div className="flex gap-2">
                         {[2, 3, 4, 5].map((size) => (
                           <label key={size} className="flex items-center text-sm text-gray-300">
@@ -547,39 +627,38 @@ const SettingsPanel: React.FC = () => {
                                   : phraseSettings.ngramSizes.filter((s) => s !== size);
                                 setPhraseSettings({ ...phraseSettings, ngramSizes: newSizes });
                               }}
-                              className="mr-1 w-3 h-3 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"
+                              className="mr-1 w-3 h-3 text-emerald-500 bg-gray-800 border-gray-600 rounded focus:ring-emerald-500"
                             />
                             {size} words
                           </label>
                         ))}
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Example: "2 words" checks "very good", "3 words" checks "very good indeed"
+                      <p className="text-xs text-emerald-300 mt-2 italic">
+                        💡 2 words: "very much" • 3 words: "all of a" • 4 words: "at the end of"
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Minimum occurrences
-                        </label>
-                        <input
-                          type="number"
-                          value={phraseSettings.minOccurrences}
-                          onChange={(e) =>
-                            setPhraseSettings({
-                              ...phraseSettings,
-                              minOccurrences: Math.max(1, parseInt(e.target.value) || 2),
-                            })
-                          }
-                          min={1}
-                          max={20}
-                          className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6]"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Only flag phrases that appear this many times
-                        </p>
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Minimum Repetitions
+                      </label>
+                      <input
+                        type="number"
+                        value={phraseSettings.minOccurrences}
+                        onChange={(e) =>
+                          setPhraseSettings({
+                            ...phraseSettings,
+                            minOccurrences: Math.max(1, parseInt(e.target.value) || 2),
+                          })
+                        }
+                        min={1}
+                        max={20}
+                        className="w-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-emerald-500"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        A phrase must appear this many times before being flagged (e.g., 3 means
+                        it's only marked after the 3rd use)
+                      </p>
                     </div>
 
                     <div>

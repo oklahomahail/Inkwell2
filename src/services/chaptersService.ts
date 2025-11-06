@@ -202,6 +202,7 @@ class ChaptersService {
       summary: input.summary ?? meta.summary,
       status: input.status ?? meta.status,
       tags: input.tags ?? meta.tags,
+      wordCount: input.wordCount ?? meta.wordCount,
       updatedAt: new Date().toISOString(),
     };
 

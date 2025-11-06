@@ -13,6 +13,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Lightbulb,
+  BookOpen,
+  Menu,
 } from 'lucide-react';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
@@ -35,6 +37,7 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
   const [focusMode, setFocusMode] = useState(false);
   const [showAISuggestion, setShowAISuggestion] = useState(false);
   const [isCreatingSection, setIsCreatingSection] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Section management with hybrid sync
@@ -60,10 +63,11 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     (async () => {
       const section = await getActiveSection();
       if (section) {
-        setContent(section.content);
+        setContent(section.content || '');
       }
     })();
-  }, [activeId, getActiveSection]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId]); // Only depend on activeId, not getActiveSection
 
   // Calculate word count
   useEffect(() => {
@@ -75,11 +79,13 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
   }, [content]);
 
   // Auto-save section content (debounced in hook)
+  // Only save when content changes, not when activeId changes
   useEffect(() => {
     if (activeId && content) {
       updateSectionContent(activeId, content);
     }
-  }, [content, activeId, updateSectionContent]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content]); // Only run when content changes, not when activeId changes
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
@@ -423,45 +429,113 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
         </div>
       )}
 
-      {/* Writing Area */}
-      <div className={`writing-area flex-1 ${focusMode ? 'p-8 max-w-4xl mx-auto' : 'p-6'}`}>
-        <div className="relative">
-          <textarea
-            ref={textareaRef}
-            value={content}
-            onChange={handleContentChange}
-            placeholder={
-              focusMode
-                ? 'Begin your story...'
-                : `Start writing "${currentProject.name}"...\n\nTip: Press Ctrl+S to save manually, or just keep writing - we'll save automatically.`
-            }
-            data-tour="editor"
-            className={`
-              writing-editor w-full resize-none border-none outline-none
-              ${
-                focusMode
-                  ? 'text-lg leading-relaxed min-h-[600px] bg-transparent'
-                  : 'text-base leading-normal min-h-[500px] bg-white dark:bg-slate-800'
-              }
-              text-slate-900 dark:text-slate-100
-              placeholder:text-slate-400 dark:placeholder:text-slate-500
-              ${focusMode ? '' : 'rounded-lg border border-slate-200 dark:border-slate-700 p-6'}
-              transition-all duration-200
-              focus:ring-0 focus:border-primary-300 dark:focus:border-primary-600
-            `}
-            autoFocus
-          />
-
-          {/* Focus Mode Overlay Stats */}
-          {focusMode && showStats && (
-            <div className="absolute bottom-4 right-4 bg-slate-900/80 dark:bg-slate-100/80 text-white dark:text-slate-900 px-3 py-2 rounded-lg backdrop-blur-sm">
-              <div className="flex items-center gap-4 text-sm">
-                <span>{wordCount} words</span>
-                <span>•</span>
-                <span>{getReadingTime()}m read</span>
+      {/* Main Content Area with Sidebar */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Collapsible Chapter Sidebar */}
+        {!focusMode && showSidebar && (
+          <div className="w-64 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 overflow-y-auto">
+            <div className="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                <h3 className="font-semibold text-sm text-slate-900 dark:text-white">Chapters</h3>
               </div>
+              <button
+                onClick={() => setShowSidebar(false)}
+                className="btn btn-ghost btn-xs"
+                title="Hide sidebar"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
             </div>
-          )}
+            <div className="p-2 space-y-1">
+              {sortedSections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => setActive(section.id)}
+                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    section.id === activeId
+                      ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                      : 'hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-sm truncate">{section.title}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">
+                      {SECTION_TYPE_META[section.type].label}
+                    </span>
+                  </div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    {section.wordCount || 0} words
+                  </div>
+                </button>
+              ))}
+
+              {/* Add New Section Button */}
+              <button
+                onClick={handleCreateSection}
+                disabled={isCreatingSection}
+                className="w-full text-left px-3 py-2 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2 text-slate-600 dark:text-slate-400"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm">{isCreatingSection ? 'Creating...' : 'New Section'}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Toggle Sidebar Button (when hidden) */}
+        {!focusMode && !showSidebar && (
+          <button
+            onClick={() => setShowSidebar(true)}
+            className="fixed left-4 top-24 z-10 btn btn-ghost btn-sm shadow-lg bg-white dark:bg-slate-800"
+            title="Show chapter list"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+        )}
+
+        {/* Writing Area */}
+        <div
+          className={`writing-area flex-1 ${focusMode ? 'p-8 max-w-4xl mx-auto' : 'p-6'} overflow-auto`}
+        >
+          <div className="relative">
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={handleContentChange}
+              placeholder={
+                focusMode
+                  ? 'Begin your story...'
+                  : `Start writing "${currentProject.name}"...\n\nTip: Press Ctrl+S to save manually, or just keep writing - we'll save automatically.`
+              }
+              data-tour="editor"
+              className={`
+                writing-editor w-full resize-none border-none outline-none
+                ${
+                  focusMode
+                    ? 'text-lg leading-relaxed min-h-[600px] bg-transparent'
+                    : 'text-base leading-normal min-h-[500px] bg-white dark:bg-slate-800'
+                }
+                text-slate-900 dark:text-slate-100
+                placeholder:text-slate-400 dark:placeholder:text-slate-500
+                ${focusMode ? '' : 'rounded-lg border border-slate-200 dark:border-slate-700 p-6'}
+                transition-all duration-200
+                focus:ring-0 focus:border-primary-300 dark:focus:border-primary-600
+              `}
+              autoFocus
+            />
+
+            {/* Focus Mode Overlay Stats */}
+            {focusMode && showStats && (
+              <div className="absolute bottom-4 right-4 bg-slate-900/80 dark:bg-slate-100/80 text-white dark:text-slate-900 px-3 py-2 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center gap-4 text-sm">
+                  <span>{wordCount} words</span>
+                  <span>•</span>
+                  <span>{getReadingTime()}m read</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 import React, { lazy, Suspense, useEffect, useState, useCallback } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
-import { TourProvider } from '@/components/Tour/TourProvider';
+import { TourProvider, useTourContext } from '@/components/Tour/TourProvider';
 import devLog from '@/utils/devLog';
 import { log } from '@/utils/logger';
 
@@ -272,6 +272,7 @@ function ProfileAppShell() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [_showChecklist, _setShowChecklist] = useState(false);
   const { shouldShowModal, completeOnboarding, setTourActive } = useOnboardingGate();
+  const tour = useTourContext();
 
   // Check if we should show welcome modal on mount
   useEffect(() => {
@@ -294,7 +295,7 @@ function ProfileAppShell() {
 
         // Create welcome project if needed
         const { ensureWelcomeProject } = await import('./onboarding/welcomeProject');
-        await ensureWelcomeProject();
+        const projectId = await ensureWelcomeProject();
 
         // Mark that a tour is active
         setTourActive(true);
@@ -302,8 +303,20 @@ function ProfileAppShell() {
         // Close welcome modal
         setShowWelcome(false);
 
-        // Mark onboarding as complete
+        // Mark onboarding as complete (before starting tour so it doesn't interfere)
         completeOnboarding();
+
+        // Start the actual tour after a brief delay to let the welcome project load
+        if (tour && projectId) {
+          setTimeout(() => {
+            const started = tour.start('gettingStarted', true);
+            if (started) {
+              devLog.log('[App] Getting Started tour launched');
+            } else {
+              devLog.warn('[App] Failed to start tour - DOM elements may not be ready');
+            }
+          }, 500);
+        }
 
         // Track onboarding completion
         try {
@@ -326,7 +339,7 @@ function ProfileAppShell() {
         }
       }
     },
-    [setTourActive, completeOnboarding],
+    [setTourActive, completeOnboarding, tour],
   );
 
   const handleOpenChecklist = useCallback(async () => {
