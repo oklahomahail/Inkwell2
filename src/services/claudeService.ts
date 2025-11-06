@@ -1,7 +1,7 @@
 // src/services/claudeService.ts - FIXED VERSION
 import CryptoJS from 'crypto-js';
 
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 const MESSAGE_LIMIT = 50;
 const API_KEY_STORAGE = 'claude_api_key_encrypted';
@@ -457,6 +457,92 @@ Context: You have access to the user's current project and any selected text. Al
 
   generateMessageId(): string {
     return `msg_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  }
+
+  /**
+   * Stream tokens from Claude API in real-time
+   * @param prompt - The prompt to send to Claude
+   * @param options - Optional configuration including signal for cancellation
+   * @yields Text tokens as they arrive from the API
+   */
+  async *generateStream(
+    prompt: string,
+    options?: { signal?: AbortSignal; temperature?: number; maxTokens?: number },
+  ): AsyncGenerator<string, void, unknown> {
+    if (!this.isConfigured()) {
+      throw this.createError('Claude API key not configured', 'auth_error', false);
+    }
+
+    if (this.isRateLimited()) {
+      throw this.createError(
+        'Rate limit exceeded. Please try again in a minute.',
+        'rate_limit',
+        true,
+      );
+    }
+
+    this.updateRateLimit();
+
+    try {
+      const response = await fetch('/api/ai/stream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          temperature: options?.temperature ?? 0.8,
+          maxTokens: options?.maxTokens ?? 800,
+        }),
+        signal: options?.signal,
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw this.createError(`Claude API error: ${error}`, 'api_error', response.status === 429);
+      }
+
+      if (!response.body) {
+        throw this.createError('No response body from Claude API', 'api_error', false);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+                yield parsed.delta.text;
+              }
+            } catch (e) {
+              // Skip invalid JSON lines
+              devLog.warn('Failed to parse SSE event:', e);
+            }
+          }
+        }
+      }
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        devLog.debug('Stream aborted by user');
+        return;
+      }
+      devLog.error('Streaming error:', error);
+      throw error;
+    }
   }
 }
 

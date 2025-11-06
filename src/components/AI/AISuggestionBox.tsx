@@ -1,6 +1,6 @@
 // src/components/AI/AISuggestionBox.tsx
-import { X, Send, Wand2, Sparkles, MessageCircle, Settings2 } from 'lucide-react';
-import React, { useState, useEffect, useCallback } from 'react';
+import { X, Send, Wand2, Sparkles, MessageCircle, Settings2, StopCircle } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import claudeService from '@/services/claudeService';
 
@@ -22,8 +22,18 @@ export default function AISuggestionBox({
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [model, setModel] = useState<'claude' | 'gpt'>('claude');
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const outputRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll as response grows
+  useEffect(() => {
+    if (outputRef.current && isStreaming) {
+      outputRef.current.scrollTop = outputRef.current.scrollHeight;
+    }
+  }, [response, isStreaming]);
 
   // Reset state when modal closes
   useEffect(() => {
@@ -31,6 +41,11 @@ export default function AISuggestionBox({
       setPrompt('');
       setResponse('');
       setError(null);
+      setIsStreaming(false);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
     }
   }, [isOpen]);
 
@@ -59,26 +74,48 @@ export default function AISuggestionBox({
     }
 
     setIsLoading(true);
+    setIsStreaming(true);
     setError(null);
+    setResponse('');
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
       const input = prompt.trim() || `Improve or continue this text:\n\n${context}`;
 
-      // Use Claude service (GPT support can be added later)
+      // Use Claude streaming service
       if (model === 'claude') {
-        const result = await claudeService.sendMessage(input);
-        setResponse(result.content || result.text);
+        for await (const token of claudeService.generateStream(input, {
+          signal: controller.signal,
+        })) {
+          setResponse((prev) => prev + token);
+        }
       } else {
         // GPT placeholder - implement when useOpenAI hook exists
         setError('GPT integration coming soon. Please use Claude for now.');
       }
-    } catch (err) {
-      console.error('AI Suggestion error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to generate suggestion');
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        // Stream was cancelled by user - this is expected
+      } else {
+        console.error('AI Suggestion error:', err);
+        setError(err instanceof Error ? err.message : 'Failed to generate suggestion');
+      }
     } finally {
       setIsLoading(false);
+      setIsStreaming(false);
+      abortControllerRef.current = null;
     }
   }, [prompt, context, model]);
+
+  const handleCancel = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setIsStreaming(false);
+      setIsLoading(false);
+    }
+  }, []);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -219,36 +256,54 @@ export default function AISuggestionBox({
           </div>
         )}
 
-        {/* Submit button */}
-        <div className="flex justify-end mt-3">
-          <button
-            onClick={handleSubmit}
-            disabled={isLoading || (!prompt.trim() && !context.trim())}
-            className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-md transition-colors"
-          >
-            <Send className="w-4 h-4" />
-            {isLoading ? 'Thinking…' : 'Generate'}
-          </button>
+        {/* Submit/Cancel buttons */}
+        <div className="flex justify-end mt-3 gap-2">
+          {isStreaming ? (
+            <button
+              onClick={handleCancel}
+              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors"
+            >
+              <StopCircle className="w-4 h-4" />
+              Stop
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              disabled={isLoading || (!prompt.trim() && !context.trim())}
+              className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-md transition-colors"
+            >
+              <Send className="w-4 h-4" />
+              {isLoading ? 'Thinking…' : 'Generate'}
+            </button>
+          )}
         </div>
 
         {/* Output */}
         {response && (
           <div className="mt-4 bg-slate-800 p-4 rounded-md border border-slate-700">
-            <div className="text-sm whitespace-pre-wrap text-slate-100">{response}</div>
-            <div className="flex gap-3 mt-4 pt-3 border-t border-slate-700">
-              <button
-                onClick={() => handleInsert('insert')}
-                className="flex-1 text-primary-400 hover:text-primary-300 text-sm font-medium py-2 px-3 rounded-md hover:bg-slate-700/50 transition-colors"
-              >
-                Insert Below
-              </button>
-              <button
-                onClick={() => handleInsert('replace')}
-                className="flex-1 text-amber-400 hover:text-amber-300 text-sm font-medium py-2 px-3 rounded-md hover:bg-slate-700/50 transition-colors"
-              >
-                Replace Selection
-              </button>
+            <div
+              ref={outputRef}
+              className="text-sm whitespace-pre-wrap text-slate-100 max-h-64 overflow-y-auto"
+            >
+              {response}
+              {isStreaming && <StreamingCursor />}
             </div>
+            {!isStreaming && (
+              <div className="flex gap-3 mt-4 pt-3 border-t border-slate-700">
+                <button
+                  onClick={() => handleInsert('insert')}
+                  className="flex-1 text-primary-400 hover:text-primary-300 text-sm font-medium py-2 px-3 rounded-md hover:bg-slate-700/50 transition-colors"
+                >
+                  Insert Below
+                </button>
+                <button
+                  onClick={() => handleInsert('replace')}
+                  className="flex-1 text-amber-400 hover:text-amber-300 text-sm font-medium py-2 px-3 rounded-md hover:bg-slate-700/50 transition-colors"
+                >
+                  Replace Selection
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -274,4 +329,8 @@ function QuickButton({ icon: Icon, label, onClick, disabled }: QuickButtonProps)
       {label}
     </button>
   );
+}
+
+function StreamingCursor() {
+  return <span className="inline-block w-1 h-4 bg-amber-400 ml-1 animate-pulse align-middle" />;
 }
