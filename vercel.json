@@ -22,6 +22,10 @@
     "api/export/pdf.ts": {
       "memory": 1024,
       "maxDuration": 30
+    },
+    "api/telemetry.ts": {
+      "memory": 128,
+      "maxDuration": 10
     }
   }
 }
