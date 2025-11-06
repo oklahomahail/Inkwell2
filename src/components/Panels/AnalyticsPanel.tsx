@@ -4,16 +4,44 @@ import React, { useEffect, useState } from 'react';
 
 import WritingAnalyticsView from '@/components/Analytics/WritingAnalyticsView';
 import { useAppContext } from '@/context/AppContext';
-import TourCompletionCard from '@/features/analytics/components/TourCompletionCard';
+import { useChapters } from '@/context/ChaptersContext';
 import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
+import { Chapters } from '@/services/chaptersService';
 import { triggerAnalyticsVisited } from '@/utils/tourTriggers';
 
 const AnalyticsPanel: React.FC = () => {
   const { state, currentProject } = useAppContext();
   const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('advanced');
+  const { dispatch } = useChapters();
+  const projectId = currentProject?.id ?? state.currentProjectId ?? '';
+
+  // Load fresh chapter data from IndexedDB on mount and when project changes
+  useEffect(() => {
+    if (!projectId) return;
+
+    const loadChapters = async () => {
+      try {
+        const chapters = await Chapters.list(projectId);
+        dispatch({
+          type: 'LOAD_FOR_PROJECT',
+          payload: { projectId, chapters },
+        });
+      } catch (error) {
+        console.error('[AnalyticsPanel] Failed to load chapters:', error);
+      }
+    };
+
+    // Load immediately
+    loadChapters();
+
+    // Refresh every 3 seconds to pick up live changes from WritingPanel
+    const interval = setInterval(loadChapters, 3000);
+
+    return () => clearInterval(interval);
+  }, [projectId, dispatch]);
 
   // Get comprehensive analytics with chapter integration
-  const analytics = useProjectAnalytics(currentProject?.id ?? state.currentProjectId ?? '');
+  const analytics = useProjectAnalytics(projectId);
 
   // Fire tour trigger on component mount
   useEffect(() => {
@@ -132,9 +160,6 @@ const AnalyticsPanel: React.FC = () => {
               {totals.streak} day{totals.streak !== 1 ? 's' : ''}
             </div>
           </div>
-
-          {/* Tour Completion Card */}
-          <TourCompletionCard />
         </div>
 
         {/* Chapter Stats Section */}

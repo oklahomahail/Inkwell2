@@ -140,7 +140,12 @@ export function useSections(projectId: string) {
       if (lastActive && sectionsData.some((s) => s.id === lastActive)) {
         setActiveId(lastActive);
       } else if (sectionsData.length > 0 && sectionsData[0]) {
+        // Clean up stale localStorage entry
+        if (lastActive) {
+          localStorage.removeItem(`lastSection-${projectId}`);
+        }
         setActiveId(sectionsData[0].id);
+        localStorage.setItem(`lastSection-${projectId}`, sectionsData[0].id);
       }
 
       // Pull remote changes (background)
@@ -345,28 +350,37 @@ export function useSections(projectId: string) {
   const updateContent = useMemo(
     () =>
       debounce(async (id: string, content: string) => {
-        // Get current version
-        const chapter = await Chapters.get(id);
+        try {
+          // Get current version
+          const chapter = await Chapters.get(id);
 
-        // Update content
-        await Chapters.saveDoc({
-          id,
-          content,
-          version: chapter.version + 1,
-          scenes: chapter.scenes,
-        });
+          // Update content
+          await Chapters.saveDoc({
+            id,
+            content,
+            version: chapter.version + 1,
+            scenes: chapter.scenes,
+          });
 
-        // Calculate and update word count
-        const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
-        await Chapters.updateMeta({ id, wordCount } as any);
+          // Calculate and update word count
+          const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+          await Chapters.updateMeta({ id, wordCount } as any);
 
-        setSections((prev) =>
-          prev.map((s) =>
-            s.id === id ? { ...s, wordCount, updatedAt: new Date().toISOString() } : s,
-          ),
-        );
+          setSections((prev) =>
+            prev.map((s) =>
+              s.id === id ? { ...s, wordCount, updatedAt: new Date().toISOString() } : s,
+            ),
+          );
+        } catch (error) {
+          console.error(`[useSections] Failed to update content for section ${id}:`, error);
+          // Clear invalid active ID
+          if (error instanceof Error && error.message.includes('not found')) {
+            setActiveId(null);
+            localStorage.removeItem(`lastSection-${projectId}`);
+          }
+        }
       }, 600),
-    [],
+    [projectId],
   );
 
   /**
@@ -379,9 +393,14 @@ export function useSections(projectId: string) {
       return chapterToSection(chapter);
     } catch (error) {
       console.error('[useSections] Failed to get active section:', error);
+      // Clear invalid active ID
+      if (error instanceof Error && error.message.includes('not found')) {
+        setActiveId(null);
+        localStorage.removeItem(`lastSection-${projectId}`);
+      }
       return null;
     }
-  }, [activeId, chapterToSection]);
+  }, [activeId, chapterToSection, projectId]);
 
   /**
    * Set active section

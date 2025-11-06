@@ -289,10 +289,22 @@ function AppProviderInner({ children }: { children: ReactNode }) {
         const welcomeProjectId = await ensureWelcomeProject();
 
         if (welcomeProjectId) {
-          // Reload projects to include the welcome project
-          const updatedProjects = JSON.parse(
-            localStorage.getItem(PROJECTS_KEY) || '[]',
-          ) as Project[];
+          // Load from enhanced storage (where welcome project is saved)
+          const { EnhancedStorageService } = await import('@/services/storageService');
+          const enhancedProjects = EnhancedStorageService.loadAllProjects();
+
+          // Convert EnhancedProject[] to Project[] for AppContext
+          const updatedProjects: Project[] = enhancedProjects.map((ep) => ({
+            id: ep.id,
+            name: ep.name,
+            description: ep.description || '',
+            createdAt: ep.createdAt,
+            updatedAt: ep.updatedAt,
+            genre: ep.genre,
+            currentWordCount: ep.currentWordCount,
+            targetWordCount: ep.targetWordCount,
+          }));
+
           dispatch({ type: 'SET_PROJECTS', payload: updatedProjects });
 
           // Optionally set as current project if no other project is selected
