@@ -1,15 +1,21 @@
 // File: src/components/Sidebar.tsx
-import React from 'react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
 
 import { InkwellFeather } from '@/components/icons/InkwellFeather';
 import { useAppContext } from '@/context/AppContext';
+import { useChaptersHybrid } from '@/hooks/useChaptersHybrid';
 import { useUI } from '@/hooks/useUI';
 import { cn } from '@/lib/utils';
 
 export const Sidebar: React.FC = () => {
   const { sidebarCollapsed, toggleSidebar } = useUI();
-  const { state, setView } = useAppContext();
+  const { state, setView, currentProject } = useAppContext();
   const activeView = state.view;
+  const [chaptersExpanded, setChaptersExpanded] = useState(true);
+
+  // Get chapters for the current project
+  const { chapters, activeId, setActive } = useChaptersHybrid(currentProject?.id || '');
 
   const navItems = [
     { key: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -45,21 +51,61 @@ export const Sidebar: React.FC = () => {
       >
         <InkwellFeather name={sidebarCollapsed ? 'chevron-right' : 'chevron-left'} size="sm" />
       </button>
-      <nav className="flex-1 px-3 space-y-1 mt-4" role="navigation">
+      <nav className="flex-1 px-3 space-y-1 mt-4 overflow-y-auto" role="navigation">
         {navItems.map(({ key, label, icon }) => (
-          <button
-            key={key}
-            data-tour={key === 'settings' ? 'settings' : `${key}-nav`}
-            className={cn(
-              'nav-item flex items-center gap-2',
-              activeView === key && 'bg-ink-50 text-ink-700 font-medium',
-              sidebarCollapsed && 'justify-center',
+          <div key={key}>
+            <button
+              data-tour={key === 'settings' ? 'settings' : `${key}-nav`}
+              className={cn(
+                'nav-item flex items-center gap-2 w-full',
+                activeView === key && 'bg-ink-50 text-ink-700 font-medium',
+                sidebarCollapsed && 'justify-center',
+              )}
+              onClick={() => setView(key as any)}
+            >
+              <InkwellFeather name={icon} size="sm" data-testid={`icon-${key}`} data-size="sm" />
+              {!sidebarCollapsed ? label : null}
+              {key === 'writing' && !sidebarCollapsed && chapters.length > 0 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setChaptersExpanded(!chaptersExpanded);
+                  }}
+                  className="ml-auto p-1 hover:bg-slate-800 rounded"
+                >
+                  {chaptersExpanded ? (
+                    <ChevronDown className="w-3 h-3" />
+                  ) : (
+                    <ChevronRight className="w-3 h-3" />
+                  )}
+                </button>
+              )}
+            </button>
+
+            {/* Chapter list under Writing tab */}
+            {key === 'writing' && !sidebarCollapsed && chaptersExpanded && chapters.length > 0 && (
+              <div className="ml-8 mt-1 space-y-1">
+                {chapters.map((chapter) => (
+                  <button
+                    key={chapter.id}
+                    onClick={() => {
+                      setActive(chapter.id);
+                      setView('writing' as any);
+                    }}
+                    className={cn(
+                      'block w-full text-left px-2 py-1.5 rounded text-sm truncate transition-colors',
+                      chapter.id === activeId
+                        ? 'bg-primary-500 text-white font-medium'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white',
+                    )}
+                    title={chapter.title || 'Untitled Chapter'}
+                  >
+                    {chapter.title || 'Untitled Chapter'}
+                  </button>
+                ))}
+              </div>
             )}
-            onClick={() => setView(key as any)}
-          >
-            <InkwellFeather name={icon} size="sm" data-testid={`icon-${key}`} data-size="sm" />
-            {!sidebarCollapsed ? label : null}
-          </button>
+          </div>
         ))}
       </nav>
     </aside>

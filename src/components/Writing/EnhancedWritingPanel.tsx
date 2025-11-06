@@ -231,10 +231,11 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
                 </button>
                 <button
                   onClick={handleCreateChapter}
-                  className="btn btn-ghost btn-sm"
+                  className="btn btn-primary btn-sm flex items-center gap-2"
                   title="New chapter"
                 >
                   <Plus className="w-4 h-4" />
+                  <span>New Chapter</span>
                 </button>
               </div>
 
