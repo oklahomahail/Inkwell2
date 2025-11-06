@@ -9,7 +9,6 @@ import { log } from '@/utils/logger';
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
 import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
-import { OnboardingUI } from './components/Onboarding/OnboardingUI';
 import { PWAInstallButton, PWAUpdateNotification } from './components/PWA';
 import {
   StorageRecoveryBanner,
@@ -52,11 +51,6 @@ const ViewSwitcher = lazy(() => import('./components/ViewSwitcher'));
 const PreviewDashboard = lazy(() => import('./features/preview/PreviewDashboard'));
 const PreviewLandingPage = lazy(() => import('./features/preview/PreviewLandingPage'));
 const PreviewWriter = lazy(() => import('./features/preview/PreviewWriter'));
-const OnboardingOrchestrator = lazy(() =>
-  import('./onboarding/OnboardingOrchestrator').then((m) => ({
-    default: m.OnboardingOrchestrator,
-  })),
-);
 const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 const BrandPage = lazy(() => import('./pages/Brand'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
@@ -160,9 +154,6 @@ function AppShell() {
 
   return (
     <>
-      {/* New unified onboarding UI (welcome modal, checklist, contextual hints) */}
-      <OnboardingUI />
-
       <header className="flex justify-between items-center p-4 border-b">
         <div className="flex items-center gap-4">
           {!user ? (
@@ -430,11 +421,6 @@ function ProfileAppShell() {
         {/* Command Palette UI */}
         <Suspense fallback={null}>
           <CommandPaletteUI />
-        </Suspense>
-
-        {/* Onboarding System */}
-        <Suspense fallback={null}>
-          <OnboardingOrchestrator />
         </Suspense>
 
         {/* Hidden global export trigger */}

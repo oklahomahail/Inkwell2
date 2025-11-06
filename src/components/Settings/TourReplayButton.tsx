@@ -7,7 +7,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { startTour as startTourController } from '@/components/Onboarding/tour-core/TourController';
+import { useTourContext } from '@/components/Tour/TourProvider';
 import { useToast } from '@/context/toast';
 import { useGo } from '@/utils/navigate';
 
@@ -15,6 +15,7 @@ export function TourReplayButton() {
   const { showToast } = useToast();
   const location = useLocation();
   const go = useGo();
+  const { start: startTour } = useTourContext();
 
   // Check if user has completed tour before (from localStorage)
   const hasCompletedBefore = localStorage.getItem('inkwell:tour:completed') === 'true';
@@ -30,9 +31,13 @@ export function TourReplayButton() {
     }
 
     // Start the tour after a brief delay to let navigation complete
-    setTimeout(async () => {
-      await startTourController('spotlight', undefined, { force: true });
-      showToast('Starting Inkwell tour...', 'success');
+    setTimeout(() => {
+      const started = startTour('dashboard', true); // force=true to replay
+      if (started) {
+        showToast('Starting Inkwell tour...', 'success');
+      } else {
+        showToast('Unable to start tour. Please try again.', 'error');
+      }
     }, 300);
   };
 
