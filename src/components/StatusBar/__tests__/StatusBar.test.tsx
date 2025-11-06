@@ -265,7 +265,7 @@ describe('StatusBar', () => {
       expect(tooltip).toHaveTextContent('Never synced');
     });
 
-    it('should format recent sync as relative time', () => {
+    it('should format recent sync as relative time (minutes)', () => {
       // 30 minutes ago
       const lastSync = new Date(Date.now() - 30 * 60 * 1000);
 
@@ -283,6 +283,49 @@ describe('StatusBar', () => {
       const tooltip = screen.getByTestId('status-tooltip');
 
       expect(tooltip).toHaveTextContent('30m ago');
+    });
+
+    it('should format sync as hours ago when less than 24 hours', () => {
+      // 5 hours ago
+      const lastSync = new Date(Date.now() - 5 * 60 * 60 * 1000);
+
+      vi.spyOn(useSyncModule, 'useSync').mockReturnValue({
+        status: 'synced',
+        isOnline: true,
+        queuedOps: 0,
+        lastSync,
+        retry: vi.fn(),
+        isRetrying: false,
+      });
+
+      render(<StatusBar />);
+
+      const tooltip = screen.getByTestId('status-tooltip');
+
+      expect(tooltip).toHaveTextContent('5h ago');
+    });
+
+    it('should format sync as date when more than 24 hours ago', () => {
+      // 2 days ago
+      const lastSync = new Date(Date.now() - 48 * 60 * 60 * 1000);
+
+      vi.spyOn(useSyncModule, 'useSync').mockReturnValue({
+        status: 'synced',
+        isOnline: true,
+        queuedOps: 0,
+        lastSync,
+        retry: vi.fn(),
+        isRetrying: false,
+      });
+
+      render(<StatusBar />);
+
+      const tooltip = screen.getByTestId('status-tooltip');
+
+      // Should contain month and day (formatted as date)
+      // The exact format depends on locale, so we just check it's not showing relative time
+      expect(tooltip).not.toHaveTextContent('ago');
+      expect(tooltip.textContent).toMatch(/\w+\s+\d+/); // e.g., "Jan 1" or similar
     });
   });
 });

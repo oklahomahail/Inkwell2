@@ -23,4 +23,25 @@ describe('normalizeSafeRedirect', () => {
     expect(r).toBe('/dashboard');
     expect(spy).toHaveBeenCalled();
   });
+
+  it('returns fallback for null or undefined input', () => {
+    const spy = vi.fn();
+    expect(normalizeSafeRedirect(null, spy)).toBe('/dashboard');
+    expect(normalizeSafeRedirect(undefined, spy)).toBe('/dashboard');
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('preserves query parameters and hash in safe paths', () => {
+    const spy = vi.fn();
+    const r = normalizeSafeRedirect('/dashboard?tab=settings#profile', spy);
+    expect(r).toBe('/dashboard?tab=settings#profile');
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('uses custom fallback when provided', () => {
+    const spy = vi.fn();
+    const r = normalizeSafeRedirect('https://evil.com', spy, '/home');
+    expect(r).toBe('/home');
+    expect(spy).toHaveBeenCalled();
+  });
 });

@@ -4,7 +4,7 @@
  * Tests for the autosave status indicator UI component
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { AutosaveService } from '@/services/autosaveService';
@@ -55,7 +55,10 @@ describe('AutosaveIndicator', () => {
     render(<AutosaveIndicator service={savingService} />);
 
     // Trigger saving state
-    const savePromise = savingService.flush('ch1', 'content');
+    let savePromise: Promise<unknown>;
+    await act(async () => {
+      savePromise = savingService.flush('ch1', 'content');
+    });
 
     // Wait for the indicator to appear and show saving state
     await waitFor(async () => {
@@ -65,14 +68,18 @@ describe('AutosaveIndicator', () => {
       expect(indicator.querySelector('.animate-spin')).toBeInTheDocument();
     });
 
-    await savePromise;
+    await act(async () => {
+      await savePromise!;
+    });
     savingService.destroy();
   });
 
   it('should render "Saved" with checkmark when saved', async () => {
     render(<AutosaveIndicator service={service} />);
 
-    await service.flush('ch1', 'content');
+    await act(async () => {
+      await service.flush('ch1', 'content');
+    });
 
     // Wait for the saved state to appear
     await waitFor(async () => {
@@ -97,7 +104,10 @@ describe('AutosaveIndicator', () => {
       value: false,
     });
 
-    const savePromise = offlineService.flush('ch1', 'content');
+    let savePromise: Promise<unknown>;
+    await act(async () => {
+      savePromise = offlineService.flush('ch1', 'content');
+    });
 
     // Wait for the offline state to appear
     await waitFor(async () => {
@@ -106,7 +116,9 @@ describe('AutosaveIndicator', () => {
       expect(indicator).toHaveAttribute('data-state', 'offline');
     });
 
-    await savePromise;
+    await act(async () => {
+      await savePromise!;
+    });
     offlineService.destroy();
   });
 
@@ -115,11 +127,13 @@ describe('AutosaveIndicator', () => {
 
     mockSaveFn.mockRejectedValueOnce(new Error('Save failed'));
 
-    try {
-      await service.flush('ch1', 'content');
-    } catch {
-      // Expected
-    }
+    await act(async () => {
+      try {
+        await service.flush('ch1', 'content');
+      } catch {
+        // Expected
+      }
+    });
 
     // Wait for the error state to appear
     await waitFor(async () => {
@@ -142,7 +156,10 @@ describe('AutosaveIndicator', () => {
     expect(screen.queryByTestId('autosave-indicator')).not.toBeInTheDocument();
 
     // Trigger save
-    const savePromise = slowService.flush('ch1', 'content');
+    let savePromise: Promise<unknown>;
+    await act(async () => {
+      savePromise = slowService.flush('ch1', 'content');
+    });
 
     // Should show saving
     await waitFor(async () => {
@@ -150,7 +167,9 @@ describe('AutosaveIndicator', () => {
       expect(indicator).toHaveTextContent('Saving…');
     });
 
-    await savePromise;
+    await act(async () => {
+      await savePromise!;
+    });
 
     // Should show saved (wait for state update)
     await waitFor(async () => {
@@ -165,7 +184,9 @@ describe('AutosaveIndicator', () => {
   it('should have aria-live="polite" for accessibility', async () => {
     render(<AutosaveIndicator service={service} />);
 
-    await service.flush('ch1', 'content');
+    await act(async () => {
+      await service.flush('ch1', 'content');
+    });
 
     const indicator = await screen.findByTestId('autosave-indicator');
     expect(indicator).toHaveAttribute('aria-live', 'polite');
@@ -174,7 +195,9 @@ describe('AutosaveIndicator', () => {
   it('should apply custom className', async () => {
     render(<AutosaveIndicator service={service} className="custom-class" />);
 
-    await service.flush('ch1', 'content');
+    await act(async () => {
+      await service.flush('ch1', 'content');
+    });
 
     const indicator = await screen.findByTestId('autosave-indicator');
     expect(indicator).toHaveClass('custom-class');
@@ -184,7 +207,9 @@ describe('AutosaveIndicator', () => {
     const { rerender } = render(<AutosaveIndicator service={service} />);
 
     // Saved state - green
-    await service.flush('ch1', 'content');
+    await act(async () => {
+      await service.flush('ch1', 'content');
+    });
     let indicator = await screen.findByTestId('autosave-indicator');
     expect(indicator.className).toContain('text-green-600');
 
@@ -198,11 +223,13 @@ describe('AutosaveIndicator', () => {
       value: true,
     });
 
-    try {
-      await errorService.flush('ch1', 'content');
-    } catch {
-      // Expected
-    }
+    await act(async () => {
+      try {
+        await errorService.flush('ch1', 'content');
+      } catch {
+        // Expected
+      }
+    });
 
     indicator = await screen.findByTestId('autosave-indicator');
     expect(indicator.className).toContain('text-red-600');

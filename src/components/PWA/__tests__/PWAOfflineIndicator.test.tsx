@@ -241,6 +241,26 @@ describe('PWAOfflineIndicator', () => {
       expect(storageInfoElement).toBeInTheDocument();
     });
 
+    it('shows yellow progress bar when storage is between 60-80%', async () => {
+      setStorageInfo({
+        quota: 100000000, // 100 MB
+        usage: 70000000, // 70 MB
+        percentUsed: 70,
+      });
+
+      const { container } = render(<PWAOfflineIndicator variant="detailed" />);
+
+      // Wait for the storage info to be set
+      await waitFor(() => {
+        expect(screen.getByText('Storage Used:')).toBeInTheDocument();
+      });
+
+      // Find the progress bar with yellow background
+      const progressBar = container.querySelector('.bg-yellow-500');
+      expect(progressBar).toBeInTheDocument();
+      expect(progressBar).toHaveClass('h-1.5', 'rounded-full');
+    });
+
     it('shows warning when storage is nearly full', async () => {
       setStorageInfo({
         quota: 100000000, // 100 MB

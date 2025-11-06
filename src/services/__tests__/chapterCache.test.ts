@@ -9,7 +9,12 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { chapterCache, CacheKeys } from '../chapterCache';
+import {
+  chapterCache,
+  CacheKeys,
+  withChapterListCache,
+  withChapterMetaCache,
+} from '../chapterCache';
 
 describe('ChapterCache', () => {
   beforeEach(() => {
@@ -164,6 +169,81 @@ describe('ChapterCache', () => {
       expect(CacheKeys.chapterList(projectId)).toBe('chapterList:project-123');
       expect(CacheKeys.chapterMeta(chapterId)).toBe('chapterMeta:chapter-456');
       expect(CacheKeys.chapterDoc(chapterId)).toBe('chapterDoc:chapter-456');
+    });
+  });
+
+  describe('withChapterListCache helper', () => {
+    it('should return cached data if available', async () => {
+      const projectId = 'project-123';
+      const mockData = [{ id: 'ch1', title: 'Chapter 1' }] as any;
+      const fetcher = vi.fn().mockResolvedValue(mockData);
+
+      // First call - should hit fetcher
+      const result1 = await withChapterListCache(projectId, fetcher);
+      expect(result1).toEqual(mockData);
+      expect(fetcher).toHaveBeenCalledTimes(1);
+
+      // Second call - should use cache
+      const result2 = await withChapterListCache(projectId, fetcher);
+      expect(result2).toEqual(mockData);
+      expect(fetcher).toHaveBeenCalledTimes(1); // Still only called once
+    });
+
+    it('should call fetcher if cache is empty', async () => {
+      const projectId = 'project-456';
+      const mockData = [{ id: 'ch2', title: 'Chapter 2' }] as any;
+      const fetcher = vi.fn().mockResolvedValue(mockData);
+
+      const result = await withChapterListCache(projectId, fetcher);
+
+      expect(result).toEqual(mockData);
+      expect(fetcher).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('withChapterMetaCache helper', () => {
+    it('should return cached data if available', async () => {
+      const chapterId = 'chapter-123';
+      const mockMeta = { id: chapterId, title: 'Test Chapter' } as any;
+      const fetcher = vi.fn().mockResolvedValue(mockMeta);
+
+      // First call - should hit fetcher
+      const result1 = await withChapterMetaCache(chapterId, fetcher);
+      expect(result1).toEqual(mockMeta);
+      expect(fetcher).toHaveBeenCalledTimes(1);
+
+      // Second call - should use cache
+      const result2 = await withChapterMetaCache(chapterId, fetcher);
+      expect(result2).toEqual(mockMeta);
+      expect(fetcher).toHaveBeenCalledTimes(1); // Still only called once
+    });
+
+    it('should call fetcher if cache is empty', async () => {
+      const chapterId = 'chapter-456';
+      const mockMeta = { id: chapterId, title: 'Another Chapter' } as any;
+      const fetcher = vi.fn().mockResolvedValue(mockMeta);
+
+      const result = await withChapterMetaCache(chapterId, fetcher);
+
+      expect(result).toEqual(mockMeta);
+      expect(fetcher).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle null results from fetcher', async () => {
+      const chapterId = 'nonexistent';
+      const fetcher = vi.fn().mockResolvedValue(null);
+
+      const result = await withChapterMetaCache(chapterId, fetcher);
+
+      expect(result).toBeNull();
+      expect(fetcher).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('destroy method', () => {
+    it('should clean up BroadcastChannel', () => {
+      // Test that destroy doesn't throw
+      expect(() => chapterCache.destroy()).not.toThrow();
     });
   });
 });

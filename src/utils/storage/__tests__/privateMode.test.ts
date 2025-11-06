@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { isLikelyPrivateMode } from '../privateMode';
+import { isLikelyPrivateMode, getPrivateModeWarning, isRestrictedStorage } from '../privateMode';
 
 describe('privateMode detection', () => {
   beforeEach(() => {
@@ -241,6 +241,131 @@ describe('privateMode detection', () => {
 
       const result = await isLikelyPrivateMode();
       expect(result).toBe(true);
+    });
+  });
+
+  describe('getPrivateModeWarning', () => {
+    it('returns a user-friendly warning message', () => {
+      const warning = getPrivateModeWarning();
+      expect(warning).toBeTruthy();
+      expect(typeof warning).toBe('string');
+      expect(warning).toContain('private');
+      expect(warning).toContain('incognito');
+    });
+  });
+
+  describe('isRestrictedStorage', () => {
+    it('returns true when in private mode', async () => {
+      const mockStorage = {
+        estimate: vi.fn().mockResolvedValue({
+          quota: 50 * 1024 * 1024, // Low quota indicates private mode
+        }),
+        persist: vi.fn(),
+        persisted: vi.fn(),
+      };
+
+      Object.defineProperty(global.navigator, 'storage', {
+        value: mockStorage,
+        writable: true,
+        configurable: true,
+      });
+
+      const result = await isRestrictedStorage();
+      expect(result).toBe(true);
+    });
+
+    it('returns true when storage quota is severely limited', async () => {
+      const mockStorage = {
+        estimate: vi.fn().mockResolvedValue({
+          quota: 30 * 1024 * 1024, // Less than 50MB threshold
+        }),
+        persist: vi.fn(),
+        persisted: vi.fn(),
+      };
+
+      Object.defineProperty(global.navigator, 'storage', {
+        value: mockStorage,
+        writable: true,
+        configurable: true,
+      });
+
+      // Mock IndexedDB success to avoid private mode detection
+      const mockOpen = vi.fn().mockImplementation(() => {
+        const mockRequest = {
+          onsuccess: null as ((this: IDBOpenDBRequest, ev: Event) => void) | null,
+          onerror: null,
+          result: {
+            close: vi.fn(),
+          },
+        } as unknown as IDBOpenDBRequest;
+
+        setTimeout(() => {
+          if (mockRequest.onsuccess) {
+            mockRequest.onsuccess.call(mockRequest, new Event('success'));
+          }
+        }, 0);
+
+        return mockRequest;
+      });
+
+      Object.defineProperty(global, 'indexedDB', {
+        value: {
+          open: mockOpen,
+          deleteDatabase: vi.fn(),
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      const result = await isRestrictedStorage();
+      expect(result).toBe(true);
+    });
+
+    it('returns false when storage is sufficient', async () => {
+      const mockStorage = {
+        estimate: vi.fn().mockResolvedValue({
+          quota: 100 * 1024 * 1024, // Above 50MB threshold
+        }),
+        persist: vi.fn(),
+        persisted: vi.fn(),
+      };
+
+      Object.defineProperty(global.navigator, 'storage', {
+        value: mockStorage,
+        writable: true,
+        configurable: true,
+      });
+
+      // Mock IndexedDB success
+      const mockOpen = vi.fn().mockImplementation(() => {
+        const mockRequest = {
+          onsuccess: null as ((this: IDBOpenDBRequest, ev: Event) => void) | null,
+          onerror: null,
+          result: {
+            close: vi.fn(),
+          },
+        } as unknown as IDBOpenDBRequest;
+
+        setTimeout(() => {
+          if (mockRequest.onsuccess) {
+            mockRequest.onsuccess.call(mockRequest, new Event('success'));
+          }
+        }, 0);
+
+        return mockRequest;
+      });
+
+      Object.defineProperty(global, 'indexedDB', {
+        value: {
+          open: mockOpen,
+          deleteDatabase: vi.fn(),
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      const result = await isRestrictedStorage();
+      expect(result).toBe(false);
     });
   });
 });

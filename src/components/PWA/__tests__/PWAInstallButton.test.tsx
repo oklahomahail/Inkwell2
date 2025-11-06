@@ -176,6 +176,60 @@ describe('PWAInstallButton', () => {
       });
     });
 
+    it('shows loading state in fab variant during installation', async () => {
+      let resolveInstall: (value: boolean) => void;
+      const installPromise = new Promise<boolean>((resolve) => {
+        resolveInstall = resolve;
+      });
+
+      mockInstallApp.mockClear().mockReturnValue(installPromise);
+      setCanInstall(true);
+
+      await act(async () => {
+        render(<PWAInstallButton variant="fab" />);
+      });
+
+      const installButton = screen.getByLabelText('Install Inkwell app');
+
+      await act(async () => {
+        fireEvent.click(installButton);
+      });
+
+      // Check for loading spinner in fab variant
+      expect(screen.getByText('Installing...')).toBeInTheDocument();
+
+      await act(async () => {
+        resolveInstall!(true);
+      });
+    });
+
+    it('shows loading state in banner variant during installation', async () => {
+      let resolveInstall: (value: boolean) => void;
+      const installPromise = new Promise<boolean>((resolve) => {
+        resolveInstall = resolve;
+      });
+
+      mockInstallApp.mockClear().mockReturnValue(installPromise);
+      setCanInstall(true);
+
+      await act(async () => {
+        render(<PWAInstallButton variant="banner" />);
+      });
+
+      const installButton = screen.getByText('Install Now').closest('button');
+
+      await act(async () => {
+        fireEvent.click(installButton!);
+      });
+
+      // Check for loading text in banner variant
+      expect(screen.getByText('Installing...')).toBeInTheDocument();
+
+      await act(async () => {
+        resolveInstall!(true);
+      });
+    });
+
     it('calls onInstall callback when installation completes', async () => {
       // Setup callback and mock
       const onInstall = vi.fn();
