@@ -12,9 +12,11 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
+  Lightbulb,
 } from 'lucide-react';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
+import AISuggestionBox from '@/components/AI/AISuggestionBox';
 import { RealtimeStatus } from '@/components/Chapters/RealtimeStatus';
 import { useAppContext, View } from '@/context/AppContext';
 import { useChaptersHybrid } from '@/hooks/useChaptersHybrid';
@@ -30,6 +32,7 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showStats, setShowStats] = useState(true);
   const [focusMode, setFocusMode] = useState(false);
+  const [showAISuggestion, setShowAISuggestion] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Chapter management with hybrid sync
@@ -132,13 +135,75 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     dispatch({ type: 'SET_VIEW', payload: View.Dashboard });
   };
 
-  // Keyboard shortcut to exit focus mode with Escape
+  // Get context text for AI suggestion
+  const getContextText = useCallback(() => {
+    if (!textareaRef.current) return '';
+
+    const textarea = textareaRef.current;
+    const { selectionStart, selectionEnd, value } = textarea;
+
+    // If text is selected, return selection
+    if (selectionStart !== selectionEnd) {
+      return value.substring(selectionStart, selectionEnd).trim();
+    }
+
+    // Otherwise, return current paragraph
+    const before = value.lastIndexOf('\n', selectionStart - 1) + 1;
+    const after = value.indexOf('\n', selectionEnd);
+    const paragraph = value.substring(before, after === -1 ? value.length : after).trim();
+
+    return paragraph;
+  }, []);
+
+  // Handle text insertion from AI suggestion
+  const handleAIInsert = useCallback((text: string, mode: 'insert' | 'replace') => {
+    if (!textareaRef.current) return;
+
+    const textarea = textareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const value = textarea.value;
+
+    let newValue = '';
+    let newCursorPos = 0;
+
+    if (mode === 'replace') {
+      newValue = value.substring(0, start) + text + value.substring(end);
+      newCursorPos = start + text.length;
+    } else {
+      // Insert with proper spacing
+      const beforeInsert = value.substring(0, end);
+      const afterInsert = value.substring(end);
+      const needsSpaceBefore = beforeInsert && !beforeInsert.endsWith('\n\n');
+      const needsSpaceAfter = afterInsert && !afterInsert.startsWith('\n\n');
+
+      const prefix = needsSpaceBefore ? '\n\n' : '';
+      const suffix = needsSpaceAfter ? '\n\n' : '';
+
+      newValue = beforeInsert + prefix + text + suffix + afterInsert;
+      newCursorPos = (beforeInsert + prefix + text).length;
+    }
+
+    setContent(newValue);
+    textarea.value = newValue;
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+    textarea.focus();
+  }, []);
+
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Escape to exit focus mode
       if (event.key === 'Escape' && focusMode) {
         event.preventDefault();
         setFocusMode(false);
         setShowStats(true);
+      }
+
+      // Cmd/Ctrl + Shift + G to open AI Suggestion
+      if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'g') {
+        event.preventDefault();
+        setShowAISuggestion(true);
       }
     };
 
@@ -240,6 +305,15 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
               </div>
 
               {/* Actions */}
+              <button
+                onClick={() => setShowAISuggestion(true)}
+                className="btn btn-sm flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white border-none"
+                title="Get AI Suggestion (⌘⇧G)"
+              >
+                <Lightbulb className="w-4 h-4" />
+                <span>AI Suggestion</span>
+              </button>
+
               <button
                 onClick={() => setShowStats(!showStats)}
                 className="btn btn-ghost btn-sm"
@@ -385,6 +459,14 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
           </button>
         </div>
       )}
+
+      {/* AI Suggestion Modal */}
+      <AISuggestionBox
+        isOpen={showAISuggestion}
+        onClose={() => setShowAISuggestion(false)}
+        context={getContextText()}
+        onInsert={handleAIInsert}
+      />
     </div>
   );
 };
