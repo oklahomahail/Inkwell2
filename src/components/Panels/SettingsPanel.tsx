@@ -766,9 +766,25 @@ const SettingsPanel: React.FC = () => {
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
           <h3 className="text-xl font-semibold text-white mb-4">Help & Onboarding</h3>
           <p className="text-sm text-gray-400 mb-6">
-            Replay the interactive tour or access help resources
+            Restart the welcome experience or replay the interactive tour
           </p>
-          <TourReplayButton />
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => {
+                // Clear onboarding gate
+                localStorage.removeItem('inkwell.onboarding.gate');
+                localStorage.removeItem('inkwell_hasSeenTour');
+                showToast(
+                  'Onboarding reset! Please refresh the page to see the welcome modal.',
+                  'success',
+                );
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors"
+            >
+              Restart Onboarding
+            </button>
+            <TourReplayButton />
+          </div>
         </div>
 
         {/* About */}
@@ -863,7 +879,6 @@ const SettingsPanel: React.FC = () => {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState, useCallback } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import { TourProvider } from '@/components/Tour/TourProvider';
@@ -24,6 +24,7 @@ import { useAppContext } from './context/AppContext';
 import { useAuth } from './context/AuthContext';
 import { useEditorContext } from './context/EditorContext';
 // Route guards
+import { useOnboardingGate } from './hooks/useOnboardingGate';
 import { usePrivateModeWarning } from './hooks/usePrivateModeWarning';
 import AnonOnlyRoute from './routes/AnonOnlyRoute';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -45,6 +46,7 @@ const ExportWizardModal = lazy(() =>
   })),
 );
 const ViewSwitcher = lazy(() => import('./components/ViewSwitcher'));
+const WelcomeModal = lazy(() => import('./components/Onboarding/WelcomeModal'));
 
 // Lazy-loaded pages
 const PreviewDashboard = lazy(() => import('./features/preview/PreviewDashboard'));
@@ -266,6 +268,82 @@ function ProfileAppShell() {
   // storage recovery
   const { showRecoveryBanner, dismissRecoveryBanner } = useStorageRecovery();
 
+  // Onboarding state
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [_showChecklist, _setShowChecklist] = useState(false);
+  const { shouldShowModal, completeOnboarding, setTourActive } = useOnboardingGate();
+
+  // Check if we should show welcome modal on mount
+  useEffect(() => {
+    if (shouldShowModal()) {
+      setShowWelcome(true);
+    }
+  }, [shouldShowModal]);
+
+  // Handle welcome modal actions
+  const handleStartTour = useCallback(
+    async (_tourType: string) => {
+      try {
+        // Track onboarding start
+        try {
+          const { track } = await import('./services/telemetry');
+          track('onboarding.started', { method: 'tour', sample: 1 });
+        } catch {
+          // Ignore telemetry errors
+        }
+
+        // Create welcome project if needed
+        const { ensureWelcomeProject } = await import('./onboarding/welcomeProject');
+        await ensureWelcomeProject();
+
+        // Mark that a tour is active
+        setTourActive(true);
+
+        // Close welcome modal
+        setShowWelcome(false);
+
+        // Mark onboarding as complete
+        completeOnboarding();
+
+        // Track onboarding completion
+        try {
+          const { track } = await import('./services/telemetry');
+          track('onboarding.completed', { method: 'tour', sample: 1 });
+        } catch {
+          // Ignore telemetry errors
+        }
+
+        devLog.log('[App] Welcome project created, tour started');
+      } catch (error) {
+        devLog.error('[App] Failed to start tour:', error);
+
+        // Track onboarding failure
+        try {
+          const { track } = await import('./services/telemetry');
+          track('onboarding.failed', { method: 'tour', error: String(error), sample: 1 });
+        } catch {
+          // Ignore telemetry errors
+        }
+      }
+    },
+    [setTourActive, completeOnboarding],
+  );
+
+  const handleOpenChecklist = useCallback(async () => {
+    // Track checklist selection
+    try {
+      const { track } = await import('./services/telemetry');
+      track('onboarding.started', { method: 'checklist', sample: 1 });
+      track('onboarding.completed', { method: 'checklist', sample: 1 });
+    } catch {
+      // Ignore telemetry errors
+    }
+
+    setShowWelcome(false);
+    _setShowChecklist(true);
+    completeOnboarding();
+  }, [completeOnboarding]);
+
   // Private mode warning - warns before closing if in private mode
   usePrivateModeWarning(false); // Can be enhanced to track actual unsaved changes
 
@@ -380,6 +458,18 @@ function ProfileAppShell() {
 
       {/* Storage Error Toast Notifications */}
       <StorageErrorToast />
+
+      {/* Welcome Modal - First-time user onboarding */}
+      {showWelcome && (
+        <Suspense fallback={null}>
+          <WelcomeModal
+            isOpen={showWelcome}
+            onClose={() => setShowWelcome(false)}
+            onStartTour={handleStartTour}
+            onOpenChecklist={handleOpenChecklist}
+          />
+        </Suspense>
+      )}
 
       <MainLayout>
         <Suspense fallback={null}>

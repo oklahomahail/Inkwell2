@@ -34,6 +34,7 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
   const [showStats, setShowStats] = useState(true);
   const [focusMode, setFocusMode] = useState(false);
   const [showAISuggestion, setShowAISuggestion] = useState(false);
+  const [isCreatingSection, setIsCreatingSection] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Section management with hybrid sync
@@ -105,8 +106,21 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     }
   };
 
-  const handleCreateSection = () => {
-    createSection('New Chapter', 'chapter');
+  const handleCreateSection = async () => {
+    // Guard against double-clicks
+    if (isCreatingSection) {
+      return;
+    }
+
+    try {
+      setIsCreatingSection(true);
+      await createSection('New Section', 'chapter');
+    } catch (error) {
+      console.error('[EnhancedWritingPanel] Failed to create section:', error);
+      // TODO: Show user-friendly error toast
+    } finally {
+      setIsCreatingSection(false);
+    }
   };
 
   const _handleDeleteSection = () => {
@@ -300,11 +314,12 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
                 </button>
                 <button
                   onClick={handleCreateSection}
+                  disabled={isCreatingSection}
                   className="btn btn-primary btn-sm flex items-center gap-2"
-                  title="New section"
+                  title={isCreatingSection ? 'Creating section...' : 'New section'}
                 >
                   <Plus className="w-4 h-4" />
-                  <span>New Section</span>
+                  <span>{isCreatingSection ? 'Creating...' : 'New Section'}</span>
                 </button>
               </div>
 
