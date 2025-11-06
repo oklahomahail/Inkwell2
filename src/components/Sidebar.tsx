@@ -7,7 +7,7 @@ import { useUI } from '@/hooks/useUI';
 import { cn } from '@/lib/utils';
 
 export const Sidebar: React.FC = () => {
-  const { sidebarCollapsed, openNewProjectDialog, toggleSidebar } = useUI();
+  const { sidebarCollapsed, toggleSidebar } = useUI();
   const { state, setView } = useAppContext();
   const activeView = state.view;
 
@@ -62,15 +62,6 @@ export const Sidebar: React.FC = () => {
           </button>
         ))}
       </nav>
-      <div className="p-3 border-t border-slate-700">
-        <button
-          data-tour="new-project"
-          onClick={openNewProjectDialog}
-          className="w-full rounded-md px-3 py-2 text-left text-sm font-medium text-slate-200 hover:bg-slate-800"
-        >
-          {!sidebarCollapsed ? '+ New Project' : <InkwellFeather name="plus" size="sm" />}
-        </button>
-      </div>
     </aside>
   );
 };
