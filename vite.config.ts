@@ -148,7 +148,12 @@ export default defineConfig({
                 { url: '/', revision: `v2025-10-27.1-${Date.now().toString()}` },
               ],
             },
-            includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'icons/*.png'],
+            includeAssets: [
+              'favicon.ico',
+              'brand/inkwell-icon-192.png',
+              'brand/inkwell-icon-512.png',
+              'brand/*.png',
+            ],
             manifest: {
               name: 'Inkwell - Professional Writing Studio',
               short_name: 'Inkwell',
@@ -162,13 +167,13 @@ export default defineConfig({
               start_url: '/',
               icons: [
                 {
-                  src: 'icon-192.png',
+                  src: 'brand/inkwell-icon-192.png',
                   sizes: '192x192',
                   type: 'image/png',
                   purpose: 'maskable any',
                 },
                 {
-                  src: 'icon-512.png',
+                  src: 'brand/inkwell-icon-512.png',
                   sizes: '512x512',
                   type: 'image/png',
                   purpose: 'maskable any',

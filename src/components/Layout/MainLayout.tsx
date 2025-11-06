@@ -376,7 +376,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             >
               <div className="flex-shrink-0">
                 <img
-                  src="/brand/inkwell-logo-icon-64.png"
+                  src="/brand/inkwell-icon-64.png"
                   alt="Inkwell"
                   className="w-8 h-8 transition-all duration-300"
                 />
