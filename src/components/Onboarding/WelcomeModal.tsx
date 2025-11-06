@@ -24,7 +24,11 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   onStartTour,
   onOpenChecklist,
 }) => {
-  const { snoozeModal, dismissModal, completeOnboarding } = useOnboardingGate();
+  const {
+    snoozeModal,
+    dismissModal,
+    completeOnboarding: _completeOnboarding,
+  } = useOnboardingGate();
   const [selectedOption, setSelectedOption] = useState<'tour' | 'checklist' | 'later' | 'never'>(
     'tour',
   );

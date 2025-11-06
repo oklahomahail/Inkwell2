@@ -14,23 +14,45 @@ import { useGo } from '@/utils/navigate';
  */
 export default function OnboardingChoice() {
   const go = useGo();
-  const _appContext = useAppContext(); // TODO: Add createProject and setActiveProject to AppContext
+  const { createProject, setActiveProject, setActiveSection, setCreationMode } = useAppContext();
   const [loading, setLoading] = useState<'writing' | 'planning' | null>(null);
 
   const handleChoice = async (mode: 'writing' | 'planning') => {
     setLoading(mode);
 
     try {
-      // TODO: Implement project creation with section support
-      // This requires extending AppContext to support:
-      // 1. createProject method
-      // 2. setActiveProject method
-      // 3. creationMode field on Project type
-      // 4. Initial sections array
+      // Set creation mode first
+      setCreationMode('blank');
 
-      // Placeholder for project creation
-      if (mode) {
-        // mode will be used once AppContext is updated
+      // Create project with appropriate mode
+      const project = await createProject({
+        title: 'My First Project',
+        description:
+          mode === 'writing'
+            ? 'Start writing and discover your story'
+            : 'Plan your world and characters first',
+        creationMode: mode,
+      });
+
+      // Set as active project
+      setActiveProject(project.id);
+
+      // For writing mode, create a first chapter section
+      if (mode === 'writing') {
+        // Import Chapters service to create first section
+        const { Chapters } = await import('@/services/chaptersService');
+
+        const firstSection = await Chapters.create({
+          projectId: project.id,
+          title: 'Chapter 1',
+          content: '',
+          type: 'chapter',
+          index: 0,
+        });
+
+        // Set as active section in context and localStorage
+        setActiveSection(firstSection.id);
+        localStorage.setItem(`lastSection-${project.id}`, firstSection.id);
       }
 
       // Navigate to appropriate view

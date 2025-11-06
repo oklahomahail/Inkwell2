@@ -1,6 +1,15 @@
-import React, { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+  type ReactNode,
+} from 'react';
 
 /** UI Context with sidebar state */
+
+const SIDEBAR_COLLAPSED_KEY = 'inkwell_sidebar_collapsed';
 
 export interface UIContextValue {
   sidebarCollapsed: boolean;
@@ -32,8 +41,25 @@ export function UIProvider({
   children: ReactNode;
   initialCollapsed?: boolean;
 }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(initialCollapsed);
+  // Hydrate from localStorage on mount
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+      return stored ? stored === 'true' : initialCollapsed;
+    } catch {
+      return initialCollapsed;
+    }
+  });
   const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
+
+  // Persist to localStorage on change
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed));
+    } catch (error) {
+      console.warn('[UIProvider] Failed to persist sidebar state:', error);
+    }
+  }, [sidebarCollapsed]);
 
   const value = useMemo(
     () => ({

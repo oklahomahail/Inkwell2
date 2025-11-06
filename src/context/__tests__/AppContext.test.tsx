@@ -124,6 +124,9 @@ describe('AppContext', () => {
         error: null,
       },
       claude: undefined,
+      // UI-only state (v1.3.0+)
+      activeSectionId: null,
+      creationMode: null,
     });
   });
 

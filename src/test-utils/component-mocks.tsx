@@ -34,6 +34,18 @@ export const createMockAppContextValue = (
     updateProject: vi.fn(),
     deleteProject: vi.fn(),
     setCurrentProjectId: vi.fn(),
+    // New methods for section system (v1.3.0+)
+    createProject: vi.fn(async () => ({
+      id: 'test-project',
+      name: 'Test Project',
+      description: '',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      currentWordCount: 0,
+    })),
+    setActiveProject: vi.fn(),
+    setActiveSection: vi.fn(),
+    setCreationMode: vi.fn(),
     setAutoSaveSaving: vi.fn(),
     setAutoSaveSuccess: vi.fn(),
     setAutoSaveError: vi.fn(),

@@ -1,7 +1,7 @@
 // src/components/Sections/BookBuilderModal.tsx
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
 import { X, GripVertical, Plus, Trash, Copy, Sparkles, Loader2 } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { useSections } from '@/hooks/useSections';
 import { getSectionIcon, getSectionIconColor } from '@/lib/sectionIcons';
@@ -25,7 +25,7 @@ interface BookBuilderModalProps {
  */
 export default function BookBuilderModal({ isOpen, onClose, projectId }: BookBuilderModalProps) {
   const {
-    sections,
+    ordered, // Use memoized sorted list instead of sorting manually
     createSection,
     updateSection,
     deleteSection,
@@ -42,8 +42,27 @@ export default function BookBuilderModal({ isOpen, onClose, projectId }: BookBui
   const [suggested, setSuggested] = useState<Section[]>([]);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
 
-  // Sort sections by order
-  const sortedSections = useMemo(() => [...sections].sort((a, b) => a.order - b.order), [sections]);
+  // ARIA announcement state
+  const [announcement, setAnnouncement] = useState<string>('');
+
+  // Keyboard navigation
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    // Cmd/Ctrl+N to create new section
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'n') {
+      e.preventDefault();
+      const input = document.querySelector<HTMLInputElement>(
+        '[data-testid="new-section-title-input"]',
+      );
+      input?.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, handleKeyDown]);
 
   if (!isOpen) return null;
 
@@ -66,7 +85,15 @@ export default function BookBuilderModal({ isOpen, onClose, projectId }: BookBui
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
+    const section = ordered[result.source.index];
+    if (!section) return;
+
+    const newPosition = result.destination.index + 1; // 1-indexed for announcement
     reorderSections(result.source.index, result.destination.index);
+
+    // Announce to screen readers
+    setAnnouncement(`Moved "${section.title}" to position ${newPosition}`);
+    setTimeout(() => setAnnouncement(''), 3000);
   };
 
   /**
@@ -86,7 +113,7 @@ export default function BookBuilderModal({ isOpen, onClose, projectId }: BookBui
       }
 
       // Build outline for Claude
-      const outline = sortedSections
+      const outline = ordered
         .map((s, i) => `${i + 1}. "${s.title}" (${SECTION_TYPE_META[s.type].label})`)
         .join('\n');
 
@@ -142,7 +169,7 @@ Format:
       // Match suggested titles to actual sections
       const suggestedOrder: Section[] = [];
       for (const title of lines) {
-        const section = sortedSections.find(
+        const section = ordered.find(
           (s) => s.title.toLowerCase().trim() === title.toLowerCase().trim(),
         );
         if (section) {
@@ -151,7 +178,7 @@ Format:
       }
 
       // Add any sections that weren't matched (to avoid losing them)
-      for (const section of sortedSections) {
+      for (const section of ordered) {
         if (!suggestedOrder.find((s) => s.id === section.id)) {
           suggestedOrder.push(section);
         }
@@ -177,13 +204,18 @@ Format:
       className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
+      {/* ARIA live region for announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {announcement}
+      </div>
+
       <div className="bg-slate-900 text-slate-100 w-[800px] max-h-[85vh] overflow-hidden rounded-xl shadow-2xl border border-slate-700">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 p-4 bg-slate-800/50">
           <div>
             <h2 className="text-xl font-semibold">Book Builder</h2>
             <p className="text-sm text-slate-400 mt-0.5">
-              Manage, reorder, and organize your manuscript sections
+              Manage, reorder, and organize your manuscript sections (Press Cmd+N for new)
             </p>
           </div>
           <button
@@ -263,7 +295,7 @@ Format:
 
           {/* Sections List */}
           <div className="p-4">
-            {sortedSections.length === 0 ? (
+            {ordered.length === 0 ? (
               <div className="text-center py-8 text-slate-400">
                 <p className="text-sm">No sections yet. Add your first section below.</p>
               </div>
@@ -272,7 +304,7 @@ Format:
                 <Droppable droppableId="sections">
                   {(provided) => (
                     <ul {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
-                      {sortedSections.map((section, index) => (
+                      {ordered.map((section, index) => (
                         <Draggable key={section.id} draggableId={section.id} index={index}>
                           {(prov, snapshot) => {
                             const Icon = getSectionIcon(section.type);
@@ -361,11 +393,13 @@ Format:
         <div className="border-t border-slate-800 p-4 bg-slate-800/50">
           <div className="flex items-center gap-2">
             <input
+              data-testid="new-section-title-input"
               className="flex-1 bg-slate-900 px-3 py-2 rounded-lg text-sm text-slate-100 border border-slate-700 focus:border-amber-400 focus:outline-none"
               placeholder="New section title..."
               value={newSectionTitle}
               onChange={(e) => setNewSectionTitle(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+              aria-label="New section title"
             />
             <select
               className="bg-slate-900 px-2 py-2 rounded-lg text-sm text-slate-100 border border-slate-700 focus:border-amber-400 focus:outline-none"

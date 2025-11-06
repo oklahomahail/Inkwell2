@@ -46,6 +46,9 @@ export interface AppState {
     lastSaved: Date | null;
     error: string | null;
   };
+  // UI-only state (v1.3.0+)
+  activeSectionId: string | null;
+  creationMode: 'blank' | 'import' | 'template' | null;
 }
 
 // ===== ACTIONS =====
@@ -61,7 +64,9 @@ type AppAction =
   | { type: 'SET_THEME'; payload: Theme }
   | { type: 'SET_AUTO_SAVE_SAVING'; payload: boolean }
   | { type: 'SET_AUTO_SAVE_SUCCESS'; payload: Date }
-  | { type: 'SET_AUTO_SAVE_ERROR'; payload: string | null };
+  | { type: 'SET_AUTO_SAVE_ERROR'; payload: string | null }
+  | { type: 'SET_ACTIVE_SECTION'; payload: string | null }
+  | { type: 'SET_CREATION_MODE'; payload: 'blank' | 'import' | 'template' | null };
 
 // ===== INITIAL STATE =====
 export const initialState: AppState = {
@@ -77,6 +82,9 @@ export const initialState: AppState = {
     error: null,
   },
   claude: undefined,
+  // UI-only state
+  activeSectionId: null,
+  creationMode: null,
 };
 
 // ===== REDUCER =====
@@ -136,6 +144,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
         autoSave: { ...state.autoSave, isSaving: false, error: action.payload },
       };
 
+    case 'SET_ACTIVE_SECTION':
+      return { ...state, activeSectionId: action.payload };
+
+    case 'SET_CREATION_MODE':
+      return { ...state, creationMode: action.payload };
+
     default:
       return state;
   }
@@ -153,6 +167,16 @@ export interface AppContextValue {
   updateProject: (_project: Project) => void;
   deleteProject: (_id: string) => void;
   setCurrentProjectId: (_id: string | null) => void;
+  // New methods for section system (v1.3.0+)
+  createProject: (_options: {
+    title: string;
+    description?: string;
+    creationMode?: 'writing' | 'planning';
+    genre?: string;
+  }) => Promise<Project>;
+  setActiveProject: (_id: string) => void;
+  setActiveSection: (_id: string | null) => void;
+  setCreationMode: (_mode: 'blank' | 'import' | 'template' | null) => void;
   setAutoSaveSaving: (_saving: boolean) => void;
   setAutoSaveSuccess: (_date: Date) => void;
   setAutoSaveError: (_error: string | null) => void;
@@ -336,6 +360,37 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     updateProject: (_project) => dispatch({ type: 'UPDATE_PROJECT', payload: _project }),
     deleteProject: (_id) => dispatch({ type: 'DELETE_PROJECT', payload: _id }),
     setCurrentProjectId: (_id) => dispatch({ type: 'SET_CURRENT_PROJECT', payload: _id }),
+
+    // New methods for section system (v1.3.0+)
+    createProject: async (_options) => {
+      const now = Date.now();
+      const newProject: Project = {
+        id: crypto.randomUUID(),
+        name: _options.title || 'Untitled Project',
+        description: _options.description || '',
+        createdAt: now,
+        updatedAt: now,
+        genre: _options.genre,
+        creationMode: _options.creationMode || 'writing',
+        currentWordCount: 0,
+      };
+
+      dispatch({ type: 'ADD_PROJECT', payload: newProject });
+      return newProject;
+    },
+
+    setActiveProject: (_id) => {
+      dispatch({ type: 'SET_CURRENT_PROJECT', payload: _id });
+    },
+
+    setActiveSection: (_id) => {
+      dispatch({ type: 'SET_ACTIVE_SECTION', payload: _id });
+    },
+
+    setCreationMode: (_mode) => {
+      dispatch({ type: 'SET_CREATION_MODE', payload: _mode });
+    },
+
     setAutoSaveSaving: (_saving) => dispatch({ type: 'SET_AUTO_SAVE_SAVING', payload: _saving }),
     setAutoSaveSuccess: (_date) => dispatch({ type: 'SET_AUTO_SAVE_SUCCESS', payload: _date }),
     setAutoSaveError: (_error) => dispatch({ type: 'SET_AUTO_SAVE_ERROR', payload: _error }),

@@ -23,6 +23,7 @@ import {
   syncChapters,
   subscribeToChapterChanges,
 } from '@/services/chaptersSyncService';
+import { autoMigrate } from '@/services/sectionMigration';
 import type { Section, SectionType } from '@/types/section';
 
 /**
@@ -126,6 +127,9 @@ export function useSections(projectId: string) {
    */
   useEffect(() => {
     (async () => {
+      // Run automatic migration first
+      await autoMigrate(projectId);
+
       // Load from local IndexedDB first
       const local = await Chapters.list(projectId);
       const sectionsData = local.map(chapterToSection);
@@ -417,9 +421,19 @@ export function useSections(projectId: string) {
       .reduce((total, s) => total + (s.wordCount || 0), 0);
   }, [sections]);
 
+  /**
+   * Memoized sorted sections (by order field)
+   * Consumers should use this instead of sorting manually
+   */
+  const ordered = useMemo(
+    () => [...sections].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+    [sections],
+  );
+
   return {
     // Core state
     sections,
+    ordered, // Memoized sorted list
     activeId,
     getActiveSection,
     setActive,

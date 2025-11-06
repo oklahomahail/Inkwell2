@@ -112,6 +112,7 @@ export interface CreateChapterInput {
   content?: string;
   index?: number; // if not provided, appends to end
   status?: 'draft' | 'revising' | 'final';
+  type?: string; // Section type (v1.3.0+)
 }
 
 /**
@@ -123,6 +124,9 @@ export interface UpdateChapterInput {
   summary?: string;
   status?: 'draft' | 'revising' | 'final';
   tags?: string[];
+  type?: string; // Section type (v1.3.0+)
+  index?: number; // Section order (v1.3.0+)
+  wordCount?: number; // Word count (v1.3.0+)
 }
 
 /** Helpful aliases used around services */
