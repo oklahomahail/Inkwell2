@@ -1,21 +1,24 @@
 // File: src/components/Sidebar.tsx
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, Settings2 } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { InkwellFeather } from '@/components/icons/InkwellFeather';
+import BookBuilderModal from '@/components/Sections/BookBuilderModal';
 import { useAppContext } from '@/context/AppContext';
-import { useChaptersHybrid } from '@/hooks/useChaptersHybrid';
+import { useSections } from '@/hooks/useSections';
 import { useUI } from '@/hooks/useUI';
+import { getSectionIcon, getSectionIconColor } from '@/lib/sectionIcons';
 import { cn } from '@/lib/utils';
 
 export const Sidebar: React.FC = () => {
   const { sidebarCollapsed, toggleSidebar } = useUI();
   const { state, setView, currentProject } = useAppContext();
   const activeView = state.view;
-  const [chaptersExpanded, setChaptersExpanded] = useState(true);
+  const [sectionsExpanded, setSectionsExpanded] = useState(true);
+  const [showBookBuilder, setShowBookBuilder] = useState(false);
 
-  // Get chapters for the current project
-  const { chapters, activeId, setActive } = useChaptersHybrid(currentProject?.id || '');
+  // Get sections for the current project
+  const { sections, activeId, setActive, createSection } = useSections(currentProject?.id || '');
 
   const navItems = [
     { key: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -65,15 +68,15 @@ export const Sidebar: React.FC = () => {
             >
               <InkwellFeather name={icon} size="sm" data-testid={`icon-${key}`} data-size="sm" />
               {!sidebarCollapsed ? label : null}
-              {key === 'writing' && !sidebarCollapsed && chapters.length > 0 && (
+              {key === 'writing' && !sidebarCollapsed && sections.length > 0 && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setChaptersExpanded(!chaptersExpanded);
+                    setSectionsExpanded(!sectionsExpanded);
                   }}
                   className="ml-auto p-1 hover:bg-slate-800 rounded"
                 >
-                  {chaptersExpanded ? (
+                  {sectionsExpanded ? (
                     <ChevronDown className="w-3 h-3" />
                   ) : (
                     <ChevronRight className="w-3 h-3" />
@@ -82,32 +85,78 @@ export const Sidebar: React.FC = () => {
               )}
             </button>
 
-            {/* Chapter list under Writing tab */}
-            {key === 'writing' && !sidebarCollapsed && chaptersExpanded && chapters.length > 0 && (
-              <div className="ml-8 mt-1 space-y-1">
-                {chapters.map((chapter) => (
+            {/* Section list under Writing tab */}
+            {key === 'writing' && !sidebarCollapsed && sectionsExpanded && (
+              <div className="ml-6 mt-1 space-y-1">
+                {sections.length === 0 ? (
+                  <div className="text-xs text-slate-500 px-2 py-1">No sections yet</div>
+                ) : (
+                  sections
+                    .sort((a, b) => a.order - b.order)
+                    .map((section) => {
+                      const SectionIcon = getSectionIcon(section.type);
+                      const iconColor = getSectionIconColor(section.type);
+
+                      return (
+                        <button
+                          key={section.id}
+                          onClick={() => {
+                            setActive(section.id);
+                            setView('writing' as any);
+                          }}
+                          className={cn(
+                            'flex items-center gap-2 w-full text-left px-2 py-1.5 rounded text-sm transition-colors group',
+                            section.id === activeId
+                              ? 'bg-primary-500 text-white font-medium'
+                              : 'text-slate-300 hover:bg-slate-800 hover:text-white',
+                          )}
+                          title={section.title}
+                        >
+                          <SectionIcon
+                            className={cn(
+                              'w-3 h-3 flex-shrink-0',
+                              section.id === activeId ? 'text-white' : iconColor,
+                            )}
+                          />
+                          <span className="truncate flex-1">{section.title}</span>
+                        </button>
+                      );
+                    })
+                )}
+
+                {/* Section Management Actions */}
+                <div className="flex items-center gap-1 mt-2 pt-2 border-t border-slate-800">
                   <button
-                    key={chapter.id}
-                    onClick={() => {
-                      setActive(chapter.id);
-                      setView('writing' as any);
-                    }}
-                    className={cn(
-                      'block w-full text-left px-2 py-1.5 rounded text-sm truncate transition-colors',
-                      chapter.id === activeId
-                        ? 'bg-primary-500 text-white font-medium'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white',
-                    )}
-                    title={chapter.title || 'Untitled Chapter'}
+                    onClick={() => createSection('New Chapter', 'chapter')}
+                    className="flex-1 flex items-center justify-center gap-1 px-2 py-1 text-xs text-amber-400 hover:text-amber-300 hover:bg-slate-800 rounded transition-colors"
+                    title="Add new chapter"
                   >
-                    {chapter.title || 'Untitled Chapter'}
+                    <Plus className="w-3 h-3" />
+                    <span>New</span>
                   </button>
-                ))}
+                  <button
+                    onClick={() => setShowBookBuilder(true)}
+                    className="flex-1 flex items-center justify-center gap-1 px-2 py-1 text-xs text-slate-400 hover:text-slate-300 hover:bg-slate-800 rounded transition-colors"
+                    title="Open Book Builder"
+                  >
+                    <Settings2 className="w-3 h-3" />
+                    <span>Manage</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
         ))}
       </nav>
+
+      {/* Book Builder Modal */}
+      {currentProject && (
+        <BookBuilderModal
+          isOpen={showBookBuilder}
+          onClose={() => setShowBookBuilder(false)}
+          projectId={currentProject.id}
+        />
+      )}
     </aside>
   );
 };

@@ -19,7 +19,6 @@ import { PreviewGuard } from './components/RouteGuards/PreviewGuard';
 import { StorageBanner } from './components/Storage/StorageBanner';
 import { StorageErrorToast } from './components/Storage/StorageErrorToast';
 import { ToastContainer } from './components/ToastContainer';
-
 // Context and providers
 import { useAppContext } from './context/AppContext';
 import { useAuth } from './context/AuthContext';

@@ -14,12 +14,13 @@ import {
   ChevronRight,
   Lightbulb,
 } from 'lucide-react';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 import AISuggestionBox from '@/components/AI/AISuggestionBox';
 import { RealtimeStatus } from '@/components/Chapters/RealtimeStatus';
 import { useAppContext, View } from '@/context/AppContext';
-import { useChaptersHybrid } from '@/hooks/useChaptersHybrid';
+import { useSections } from '@/hooks/useSections';
+import { SECTION_TYPE_META } from '@/types/section';
 
 interface EnhancedWritingPanelProps {
   className?: string;
@@ -35,33 +36,33 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
   const [showAISuggestion, setShowAISuggestion] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Chapter management with hybrid sync
+  // Section management with hybrid sync
   const {
-    chapters,
+    sections,
     activeId,
-    getActiveChapter,
+    getActiveSection,
     setActive,
-    createChapter,
-    deleteChapter,
-    updateContent: updateChapterContent,
+    createSection,
+    deleteSection,
+    updateContent: updateSectionContent,
     syncing,
     lastSynced,
     syncNow,
     realtimeConnected,
     liveUpdateReceived,
-  } = useChaptersHybrid(currentProject?.id || '');
+  } = useSections(currentProject?.id || '');
 
-  // Load active chapter content
+  // Load active section content
   useEffect(() => {
     if (!activeId) return;
 
     (async () => {
-      const chapter = await getActiveChapter();
-      if (chapter) {
-        setContent(chapter.content);
+      const section = await getActiveSection();
+      if (section) {
+        setContent(section.content);
       }
     })();
-  }, [activeId, getActiveChapter]);
+  }, [activeId, getActiveSection]);
 
   // Calculate word count
   useEffect(() => {
@@ -72,44 +73,45 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     setWordCount(words.length);
   }, [content]);
 
-  // Auto-save chapter content (debounced in hook)
+  // Auto-save section content (debounced in hook)
   useEffect(() => {
     if (activeId && content) {
-      updateChapterContent(activeId, content);
+      updateSectionContent(activeId, content);
     }
-  }, [content, activeId, updateChapterContent]);
+  }, [content, activeId, updateSectionContent]);
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
   };
 
-  // Chapter navigation
-  const activeChapter = chapters.find((ch) => ch.id === activeId);
-  const currentIndex = activeChapter ? chapters.indexOf(activeChapter) : -1;
-  const hasNext = currentIndex >= 0 && currentIndex < chapters.length - 1;
+  // Section navigation (sorted by order)
+  const sortedSections = useMemo(() => [...sections].sort((a, b) => a.order - b.order), [sections]);
+  const activeSection = sortedSections.find((s: { id: string }) => s.id === activeId);
+  const currentIndex = activeSection ? sortedSections.indexOf(activeSection) : -1;
+  const hasNext = currentIndex >= 0 && currentIndex < sortedSections.length - 1;
   const hasPrev = currentIndex > 0;
 
-  const goToNextChapter = () => {
-    const nextChapter = chapters[currentIndex + 1];
-    if (hasNext && nextChapter) {
-      setActive(nextChapter.id);
+  const goToNextSection = () => {
+    const nextSection = sortedSections[currentIndex + 1];
+    if (hasNext && nextSection) {
+      setActive(nextSection.id);
     }
   };
 
-  const goToPrevChapter = () => {
-    const prevChapter = chapters[currentIndex - 1];
-    if (hasPrev && prevChapter) {
-      setActive(prevChapter.id);
+  const goToPrevSection = () => {
+    const prevSection = sortedSections[currentIndex - 1];
+    if (hasPrev && prevSection) {
+      setActive(prevSection.id);
     }
   };
 
-  const handleCreateChapter = () => {
-    createChapter();
+  const handleCreateSection = () => {
+    createSection('New Chapter', 'chapter');
   };
 
-  const _handleDeleteChapter = () => {
-    if (activeId && confirm('Delete this chapter?')) {
-      deleteChapter(activeId);
+  const _handleDeleteSection = () => {
+    if (activeId && confirm('Delete this section?')) {
+      deleteSection(activeId);
     }
   };
 
@@ -260,47 +262,49 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Chapter Navigation */}
+              {/* Section Navigation */}
               <div
                 className="flex items-center gap-1 border-r border-slate-200 dark:border-slate-700 pr-3 mr-1"
-                data-tour="chapter-nav"
+                data-tour="section-nav"
               >
                 <button
-                  onClick={goToPrevChapter}
+                  onClick={goToPrevSection}
                   disabled={!hasPrev}
                   className="btn btn-ghost btn-sm"
-                  title="Previous chapter"
+                  title="Previous section"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <div className="px-2 text-caption text-slate-600 dark:text-slate-400 min-w-[120px] text-center">
-                  {activeChapter ? (
+                <div className="px-2 text-caption text-slate-600 dark:text-slate-400 min-w-[160px] text-center">
+                  {activeSection ? (
                     <>
-                      <span className="font-medium">{activeChapter.title}</span>
-                      <span className="text-slate-400 dark:text-slate-500">
-                        {' '}
-                        ({currentIndex + 1}/{chapters.length})
+                      <span className="font-medium">{activeSection.title}</span>
+                      <span className="text-slate-400 dark:text-slate-500 text-xs ml-1">
+                        ({SECTION_TYPE_META[activeSection.type].label})
                       </span>
+                      <div className="text-xs text-slate-400 dark:text-slate-500">
+                        {currentIndex + 1}/{sortedSections.length}
+                      </div>
                     </>
                   ) : (
-                    'No chapter'
+                    'No section'
                   )}
                 </div>
                 <button
-                  onClick={goToNextChapter}
+                  onClick={goToNextSection}
                   disabled={!hasNext}
                   className="btn btn-ghost btn-sm"
-                  title="Next chapter"
+                  title="Next section"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={handleCreateChapter}
+                  onClick={handleCreateSection}
                   className="btn btn-primary btn-sm flex items-center gap-2"
-                  title="New chapter"
+                  title="New section"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>New Chapter</span>
+                  <span>New Section</span>
                 </button>
               </div>
 
