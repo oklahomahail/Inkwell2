@@ -179,11 +179,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     if (savedDarkMode) {
       setIsDarkMode(JSON.parse(savedDarkMode));
     } else {
-      // Default to system preference
-      const systemDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setIsDarkMode(systemDarkMode);
-      // Sync with app state
-      dispatch({ type: 'SET_THEME', payload: systemDarkMode ? 'dark' : 'light' });
+      // Check if index.html already set a theme preference
+      const indexHtmlTheme = localStorage.getItem('theme');
+      if (indexHtmlTheme) {
+        // Use the theme set by index.html (defaults to 'light' for new users)
+        const isDark = indexHtmlTheme === 'dark';
+        setIsDarkMode(isDark);
+        dispatch({ type: 'SET_THEME', payload: indexHtmlTheme as 'light' | 'dark' });
+        // Sync to inkwell-dark-mode for consistency
+        localStorage.setItem('inkwell-dark-mode', JSON.stringify(isDark));
+      } else {
+        // Fallback: Default to light mode (brand decision)
+        setIsDarkMode(false);
+        dispatch({ type: 'SET_THEME', payload: 'light' });
+        localStorage.setItem('inkwell-dark-mode', JSON.stringify(false));
+      }
     }
 
     // Listen for system theme changes
