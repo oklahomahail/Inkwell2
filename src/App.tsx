@@ -314,6 +314,8 @@ function ProfileAppShell() {
   const handleStartTour = useCallback(
     async (_tourType: string) => {
       try {
+        devLog.log('[App] Starting tour flow...');
+
         // Track onboarding start
         try {
           const { track } = await import('./services/telemetry');
@@ -325,26 +327,44 @@ function ProfileAppShell() {
         // Create welcome project if needed
         const { ensureWelcomeProject } = await import('./onboarding/welcomeProject');
         const projectId = await ensureWelcomeProject();
+        devLog.log('[App] Welcome project created:', projectId);
 
         // Mark that a tour is active
         setTourActive(true);
+        devLog.log('[App] Tour active flag set');
 
         // Close welcome modal
         setShowWelcome(false);
+        devLog.log('[App] Welcome modal closed');
 
         // Mark onboarding as complete (before starting tour so it doesn't interfere)
         completeOnboarding();
+        devLog.log('[App] Onboarding marked complete');
 
         // Start the actual tour after a brief delay to let the welcome project load
         if (tour && projectId) {
+          devLog.log('[App] Attempting to start tour after 500ms delay...');
           setTimeout(() => {
+            devLog.log('[App] Calling tour.start("gettingStarted", true)...');
             const started = tour.start('gettingStarted', true);
             if (started) {
-              devLog.log('[App] Getting Started tour launched');
+              devLog.log('[App] ✓ Getting Started tour launched successfully');
             } else {
-              devLog.warn('[App] Failed to start tour - DOM elements may not be ready');
+              devLog.warn('[App] ✗ Failed to start tour - DOM elements may not be ready');
+              // Log available tour anchors
+              const anchors = [
+                "[data-tour='sidebar']",
+                "[data-tour='create-project-btn']",
+                "[data-tour='projects']",
+              ];
+              anchors.forEach((selector) => {
+                const element = document.querySelector(selector);
+                devLog.log(`[App] Tour anchor ${selector}:`, element ? 'FOUND' : 'MISSING');
+              });
             }
           }, 500);
+        } else {
+          devLog.error('[App] Tour or projectId not available:', { tour: !!tour, projectId });
         }
 
         // Track onboarding completion
@@ -355,7 +375,7 @@ function ProfileAppShell() {
           // Ignore telemetry errors
         }
 
-        devLog.log('[App] Welcome project created, tour started');
+        devLog.log('[App] Tour flow completed');
       } catch (error) {
         devLog.error('[App] Failed to start tour:', error);
 

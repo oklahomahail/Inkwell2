@@ -56,7 +56,7 @@ export const TOUR_SETS: Record<string, TourSet> = {
       },
       {
         id: 'create-project',
-        selector: "[data-tour='create-project']",
+        selector: "[data-tour='create-project-btn']",
         title: 'Create Your First Project',
         content:
           'Click here to create a new writing project. Each project can contain multiple chapters, characters, and notes.',
@@ -64,7 +64,7 @@ export const TOUR_SETS: Record<string, TourSet> = {
       },
       {
         id: 'project-list',
-        selector: "[data-tour='project-list']",
+        selector: "[data-tour='projects']",
         title: 'Your Projects',
         content:
           'All your projects appear here. Click on any project to open it and start writing.',
