@@ -47,6 +47,9 @@ const ExportWizardModal = lazy(() =>
 );
 const ViewSwitcher = lazy(() => import('./components/ViewSwitcher'));
 const WelcomeModal = lazy(() => import('./components/Onboarding/WelcomeModal'));
+const OnboardingPreferencesModal = lazy(
+  () => import('./components/Onboarding/OnboardingPreferencesModal'),
+);
 
 // Lazy-loaded pages
 const PreviewDashboard = lazy(() => import('./features/preview/PreviewDashboard'));
@@ -269,17 +272,43 @@ function ProfileAppShell() {
   const { showRecoveryBanner, dismissRecoveryBanner } = useStorageRecovery();
 
   // Onboarding state
+  const [showPreferences, setShowPreferences] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [_showChecklist, _setShowChecklist] = useState(false);
   const { shouldShowModal, completeOnboarding, setTourActive } = useOnboardingGate();
   const tour = useTourContext();
 
-  // Check if we should show welcome modal on mount
+  // Helper to check if preferences have been completed
+  const hasCompletedPreferences = useCallback(() => {
+    try {
+      const stored = localStorage.getItem('inkwell.user.preferences');
+      return stored !== null;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  // Check if we should show onboarding modals on mount
   useEffect(() => {
     if (shouldShowModal()) {
-      setShowWelcome(true);
+      // Check if user has completed preferences
+      const completedPreferences = hasCompletedPreferences();
+      if (!completedPreferences) {
+        // Show preferences modal first
+        setShowPreferences(true);
+      } else {
+        // Show welcome modal directly
+        setShowWelcome(true);
+      }
     }
-  }, [shouldShowModal]);
+  }, [shouldShowModal, hasCompletedPreferences]);
+
+  // Handle preferences completion
+  const handlePreferencesComplete = useCallback(() => {
+    setShowPreferences(false);
+    // After preferences, show the welcome modal
+    setShowWelcome(true);
+  }, []);
 
   // Handle welcome modal actions
   const handleStartTour = useCallback(
@@ -471,6 +500,16 @@ function ProfileAppShell() {
 
       {/* Storage Error Toast Notifications */}
       <StorageErrorToast />
+
+      {/* Preferences Modal - User preferences selection (shows first) */}
+      {showPreferences && (
+        <Suspense fallback={null}>
+          <OnboardingPreferencesModal
+            isOpen={showPreferences}
+            onComplete={handlePreferencesComplete}
+          />
+        </Suspense>
+      )}
 
       {/* Welcome Modal - First-time user onboarding */}
       {showWelcome && (

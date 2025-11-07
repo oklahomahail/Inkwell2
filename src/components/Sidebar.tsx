@@ -41,7 +41,7 @@ export const Sidebar: React.FC = () => {
     >
       <div className="p-4 flex items-center space-x-2" data-spotlight-id="sidebar.logo">
         {/* Logo and title */}
-        <img src="/brand/inkwell-icon.svg" alt="Inkwell" className="h-8 w-8" />
+        <img src="/brand/inkwell-icon.svg" alt="Inkwell" className="h-8 w-8 shrink-0" />
         {!sidebarCollapsed && <span className="text-slate-100 font-semibold text-lg">Inkwell</span>}
       </div>
       <button
@@ -52,7 +52,11 @@ export const Sidebar: React.FC = () => {
           sidebarCollapsed ? 'self-center' : 'self-end',
         )}
       >
-        <InkwellFeather name={sidebarCollapsed ? 'chevron-right' : 'chevron-left'} size="sm" />
+        <InkwellFeather
+          name={sidebarCollapsed ? 'chevron-right' : 'chevron-left'}
+          size="sm"
+          className="shrink-0"
+        />
       </button>
       <nav className="flex-1 px-3 space-y-1 mt-4 overflow-y-auto" role="navigation">
         {navItems.map(({ key, label, icon }) => (
@@ -66,7 +70,13 @@ export const Sidebar: React.FC = () => {
               )}
               onClick={() => setView(key as any)}
             >
-              <InkwellFeather name={icon} size="sm" data-testid={`icon-${key}`} data-size="sm" />
+              <InkwellFeather
+                name={icon}
+                size="sm"
+                data-testid={`icon-${key}`}
+                data-size="sm"
+                className="shrink-0"
+              />
               {!sidebarCollapsed ? label : null}
               {key === 'writing' && !sidebarCollapsed && sections.length > 0 && (
                 <button

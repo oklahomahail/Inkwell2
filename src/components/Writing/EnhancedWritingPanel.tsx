@@ -1,5 +1,15 @@
 // src/components/Writing/EnhancedWritingPanel.tsx
 import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import {
   FileText,
   Clock,
   Maximize2,
@@ -15,6 +25,7 @@ import {
   Lightbulb,
   BookOpen,
   Menu,
+  GripVertical,
 } from 'lucide-react';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
@@ -28,6 +39,107 @@ interface EnhancedWritingPanelProps {
   className?: string;
 }
 
+interface SortableSectionItemProps {
+  section: {
+    id: string;
+    title: string;
+    type: string;
+    wordCount?: number;
+  };
+  isActive: boolean;
+  isEditing: boolean;
+  editingValue: string;
+  onSetActive: () => void;
+  onStartEditing: () => void;
+  onEditingChange: (value: string) => void;
+  onSaveTitle: () => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
+  sectionTypeMeta: { label: string };
+}
+
+const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
+  section,
+  isActive,
+  isEditing,
+  editingValue,
+  onSetActive,
+  onStartEditing,
+  onEditingChange,
+  onSaveTitle,
+  onKeyDown,
+  sectionTypeMeta,
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: section.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`w-full px-3 py-2 rounded-lg transition-colors ${
+        isActive
+          ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+          : 'hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 flex-shrink-0"
+          title="Drag to reorder"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            {isEditing ? (
+              <input
+                type="text"
+                value={editingValue}
+                onChange={(e) => onEditingChange(e.target.value)}
+                onBlur={onSaveTitle}
+                onKeyDown={onKeyDown}
+                className="flex-1 bg-white dark:bg-slate-700 border border-primary-400 dark:border-primary-500 rounded px-2 py-1 text-sm font-medium outline-none focus:ring-2 focus:ring-primary-500"
+                autoFocus
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSetActive();
+                }}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  onStartEditing();
+                }}
+                className="flex-1 text-left min-w-0"
+              >
+                <span className="font-medium text-sm truncate block">{section.title}</span>
+              </button>
+            )}
+            <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">
+              {sectionTypeMeta.label}
+            </span>
+          </div>
+          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            {section.wordCount || 0} words
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }) => {
   const { state: _state, currentProject, dispatch } = useAppContext();
   const [content, setContent] = useState('');
@@ -38,6 +150,8 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
   const [showAISuggestion, setShowAISuggestion] = useState(false);
   const [isCreatingSection, setIsCreatingSection] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
+  const [editingTitleValue, setEditingTitleValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Section management with hybrid sync
@@ -48,6 +162,8 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     setActive,
     createSection,
     deleteSection,
+    renameSection,
+    reorderSections,
     updateContent: updateSectionContent,
     syncing,
     lastSynced,
@@ -56,15 +172,27 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     liveUpdateReceived,
   } = useSections(currentProject?.id || '');
 
+  // Track previous activeId to save content before switching
+  const prevActiveIdRef = useRef<string | null>(null);
+
   // Load active section content
   useEffect(() => {
     if (!activeId) return;
 
     (async () => {
+      // Save content from previous section before switching
+      if (prevActiveIdRef.current && prevActiveIdRef.current !== activeId && content) {
+        updateSectionContent(prevActiveIdRef.current, content);
+      }
+
+      // Load new section content
       const section = await getActiveSection();
       if (section) {
         setContent(section.content || '');
       }
+
+      // Update the previous ID ref
+      prevActiveIdRef.current = activeId;
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeId]); // Only depend on activeId, not getActiveSection
@@ -128,6 +256,55 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
       setIsCreatingSection(false);
     }
   };
+
+  const handleStartEditingTitle = (sectionId: string, currentTitle: string) => {
+    setEditingTitleId(sectionId);
+    setEditingTitleValue(currentTitle);
+  };
+
+  const handleSaveTitle = async (sectionId: string) => {
+    if (editingTitleValue.trim()) {
+      await renameSection(sectionId, editingTitleValue.trim());
+    }
+    setEditingTitleId(null);
+    setEditingTitleValue('');
+  };
+
+  const handleCancelEditingTitle = () => {
+    setEditingTitleId(null);
+    setEditingTitleValue('');
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent, sectionId: string) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveTitle(sectionId);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancelEditingTitle();
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = sortedSections.findIndex((s) => s.id === active.id);
+      const newIndex = sortedSections.findIndex((s) => s.id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        reorderSections(oldIndex, newIndex);
+      }
+    }
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement required before drag starts
+      },
+    }),
+  );
 
   const _handleDeleteSection = () => {
     if (activeId && confirm('Delete this section?')) {
@@ -432,66 +609,82 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
       {/* Main Content Area with Sidebar */}
       <div className="flex flex-1 overflow-hidden">
         {/* Collapsible Chapter Sidebar */}
-        {!focusMode && showSidebar && (
-          <div className="w-64 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 overflow-y-auto">
-            <div className="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                <h3 className="font-semibold text-sm text-slate-900 dark:text-white">Chapters</h3>
-              </div>
-              <button
-                onClick={() => setShowSidebar(false)}
-                className="btn btn-ghost btn-xs"
-                title="Hide sidebar"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-2 space-y-1">
-              {sortedSections.map((section) => (
-                <button
-                  key={section.id}
-                  onClick={() => setActive(section.id)}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                    section.id === activeId
-                      ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-                      : 'hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-sm truncate">{section.title}</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">
-                      {SECTION_TYPE_META[section.type].label}
-                    </span>
-                  </div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    {section.wordCount || 0} words
-                  </div>
-                </button>
-              ))}
-
-              {/* Add New Section Button */}
-              <button
-                onClick={handleCreateSection}
-                disabled={isCreatingSection}
-                className="w-full text-left px-3 py-2 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2 text-slate-600 dark:text-slate-400"
-              >
-                <Plus className="w-4 h-4" />
-                <span className="text-sm">{isCreatingSection ? 'Creating...' : 'New Section'}</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Toggle Sidebar Button (when hidden) */}
-        {!focusMode && !showSidebar && (
-          <button
-            onClick={() => setShowSidebar(true)}
-            className="fixed left-4 top-24 z-10 btn btn-ghost btn-sm shadow-lg bg-white dark:bg-slate-800"
-            title="Show chapter list"
+        {!focusMode && (
+          <div
+            className={`border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 overflow-y-auto transition-all duration-200 flex-shrink-0 ${
+              showSidebar ? 'w-64' : 'w-14'
+            }`}
           >
-            <Menu className="w-4 h-4" />
-          </button>
+            <div className="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between min-h-[52px]">
+              {showSidebar ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-slate-600 dark:text-slate-400 shrink-0" />
+                    <h3 className="font-semibold text-sm text-slate-900 dark:text-white">
+                      Chapters
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setShowSidebar(false)}
+                    className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors shrink-0"
+                    title="Hide chapter list"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setShowSidebar(true)}
+                  className="w-full p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors flex items-center justify-center"
+                  title="Show chapter list"
+                >
+                  <Menu className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                </button>
+              )}
+            </div>
+            {showSidebar && (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={sortedSections.map((s) => s.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="p-2 space-y-1">
+                    {sortedSections.map((section) => (
+                      <SortableSectionItem
+                        key={section.id}
+                        section={section}
+                        isActive={section.id === activeId}
+                        isEditing={editingTitleId === section.id}
+                        editingValue={editingTitleValue}
+                        onSetActive={() => setActive(section.id)}
+                        onStartEditing={() => handleStartEditingTitle(section.id, section.title)}
+                        onEditingChange={setEditingTitleValue}
+                        onSaveTitle={() => handleSaveTitle(section.id)}
+                        onKeyDown={(e) => handleTitleKeyDown(e, section.id)}
+                        sectionTypeMeta={SECTION_TYPE_META[section.type]}
+                      />
+                    ))}
+
+                    {/* Add New Section Button */}
+                    <button
+                      onClick={handleCreateSection}
+                      disabled={isCreatingSection}
+                      className="w-full text-left px-3 py-2 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2 text-slate-600 dark:text-slate-400"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span className="text-sm">
+                        {isCreatingSection ? 'Creating...' : 'New Section'}
+                      </span>
+                    </button>
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+          </div>
         )}
 
         {/* Writing Area */}
