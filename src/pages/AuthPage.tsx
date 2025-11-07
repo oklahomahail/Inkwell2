@@ -54,7 +54,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
     if (mode === 'signup') {
       return {
         title: 'Create your Inkwell account',
-        subtitle: 'find your story, weave it well',
+        subtitle: 'Because Great Stories Deserve Great Tools',
         primaryCtaLabel: 'Create account',
         headerAccent: 'border-b-2 border-[#D4AF37]', // solid border
         badge: (
@@ -66,7 +66,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
     }
     return {
       title: 'Sign in to Inkwell',
-      subtitle: 'find your story, weave it well',
+      subtitle: 'Because Great Stories Deserve Great Tools',
       primaryCtaLabel: 'Sign in',
       headerAccent: 'border-b-2 border-dashed border-[#D4AF37]', // dashed border
       badge: null,
