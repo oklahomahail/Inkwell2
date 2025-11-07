@@ -77,13 +77,13 @@ export default defineConfig({
         'src/utils/webWorkers.ts',
       ],
 
-      // Set reasonable thresholds - temporarily relaxed to meet immediate CI requirements
-      // Reduced from 64% to 63% after removing duplicate AnalyticsPanel.sync.test.tsx
+      // Set reasonable thresholds
+      // Increased to 64% after test cleanup improved coverage from 63.13% to 64.8%
       thresholds: {
-        lines: 63,
+        lines: 64,
         functions: 50,
         branches: 60,
-        statements: 63,
+        statements: 64,
       },
     },
   },
