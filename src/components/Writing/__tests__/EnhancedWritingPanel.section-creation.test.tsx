@@ -70,8 +70,10 @@ describe('EnhancedWritingPanel - Section Creation', () => {
 
   it('should render "New Section" button', () => {
     render(<EnhancedWritingPanel />);
-    const button = screen.getByRole('button', { name: /new section/i });
-    expect(button).toBeInTheDocument();
+    // Use getAllByRole and find the header button (first one with btn-primary class)
+    const buttons = screen.getAllByRole('button', { name: /new section/i });
+    expect(buttons.length).toBeGreaterThan(0);
+    expect(buttons[0]).toBeInTheDocument();
   });
 
   it('should call createSection when button is clicked', async () => {
@@ -86,7 +88,9 @@ describe('EnhancedWritingPanel - Section Creation', () => {
     });
 
     render(<EnhancedWritingPanel />);
-    const button = screen.getByRole('button', { name: /new section/i });
+    // Get the header button (first one)
+    const buttons = screen.getAllByRole('button', { name: /new section/i });
+    const button = buttons[0];
 
     await user.click(button);
 
@@ -104,12 +108,15 @@ describe('EnhancedWritingPanel - Section Creation', () => {
     mockCreateSection.mockReturnValue(createPromise);
 
     render(<EnhancedWritingPanel />);
-    const button = screen.getByRole('button', { name: /new section/i });
+    // Get the header button (first one)
+    const buttons = screen.getAllByRole('button', { name: /new section/i });
+    const button = buttons[0];
 
     await user.click(button);
 
-    // Button should show "Creating..." text
-    expect(screen.getByText(/creating/i)).toBeInTheDocument();
+    // Button should show "Creating..." text (both buttons will show this)
+    const creatingButtons = screen.getAllByText(/creating/i);
+    expect(creatingButtons.length).toBeGreaterThan(0);
 
     // Resolve the promise
     resolveCreate({
@@ -136,7 +143,9 @@ describe('EnhancedWritingPanel - Section Creation', () => {
     mockCreateSection.mockReturnValue(createPromise);
 
     render(<EnhancedWritingPanel />);
-    const button = screen.getByRole('button', { name: /new section/i });
+    // Get the header button (first one)
+    const buttons = screen.getAllByRole('button', { name: /new section/i });
+    const button = buttons[0];
 
     await user.click(button);
 
@@ -168,7 +177,9 @@ describe('EnhancedWritingPanel - Section Creation', () => {
     mockCreateSection.mockReturnValue(createPromise);
 
     render(<EnhancedWritingPanel />);
-    const button = screen.getByRole('button', { name: /new section/i });
+    // Get the header button (first one)
+    const buttons = screen.getAllByRole('button', { name: /new section/i });
+    const button = buttons[0];
 
     // Click multiple times rapidly
     await user.click(button);
@@ -199,7 +210,9 @@ describe('EnhancedWritingPanel - Section Creation', () => {
     mockCreateSection.mockRejectedValue(new Error('Failed to create section'));
 
     render(<EnhancedWritingPanel />);
-    const button = screen.getByRole('button', { name: /new section/i });
+    // Get the header button (first one)
+    const buttons = screen.getAllByRole('button', { name: /new section/i });
+    const button = buttons[0];
 
     await user.click(button);
 
@@ -222,7 +235,9 @@ describe('EnhancedWritingPanel - Section Creation', () => {
     mockCreateSection.mockRejectedValue(new Error('Network error'));
 
     render(<EnhancedWritingPanel />);
-    const button = screen.getByRole('button', { name: /new section/i });
+    // Get the header button (first one)
+    const buttons = screen.getAllByRole('button', { name: /new section/i });
+    const button = buttons[0];
 
     await user.click(button);
 
