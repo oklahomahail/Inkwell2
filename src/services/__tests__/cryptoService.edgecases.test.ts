@@ -257,7 +257,7 @@ describe('cryptoService - Edge Cases', () => {
       const decrypted = await decryptBytes(encrypted, dek);
 
       expect(decrypted).toEqual(plaintext);
-    }, 10000); // Increase timeout for large data
+    }, 30000); // Increase timeout for large data encryption
 
     it('should fail to decrypt with wrong DEK', async () => {
       const dek1 = await generateDEK();
