@@ -365,5 +365,6 @@ Planned improvements (see `ROADMAP.md`):
 **Maintainer:** Inkwell Core Team
 **Related Docs:**
 
-- [User Guide](../../ONBOARDING.md)
+<!-- - [User Guide](../../ONBOARDING.md) -->
+
 - [Accessibility Guide](../BRAND_ACCESSIBILITY_GUIDE.md)

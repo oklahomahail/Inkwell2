@@ -145,8 +145,8 @@ ENABLE_BEGINNER_MODE=false
 ## 📚 Related Documentation
 
 - **[docs/BEGINNER_MODE_INTEGRATION.md](./BEGINNER_MODE_INTEGRATION.md)** — Complete technical integration guide
-- **[docs/featureFlagService.md](./featureFlagService.md)** — Feature flag reference
-- **[docs/analytics_events.md](./analytics_events.md)** — Event schema and funnel tracking
+  <!-- - **[docs/featureFlagService.md](./featureFlagService.md)** — Feature flag reference -->
+  <!-- - **[docs/analytics_events.md](./analytics_events.md)** — Event schema and funnel tracking -->
 
 ---
 

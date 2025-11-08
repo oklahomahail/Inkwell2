@@ -475,4 +475,4 @@ Supabase enforces:
 **Related Docs:**
 
 - [Deployment Guide](../dev/BRANCH_PROTECTION_SETUP.md)
-- [User Guide](../../ONBOARDING.md)
+<!-- - [User Guide](../../ONBOARDING.md) -->

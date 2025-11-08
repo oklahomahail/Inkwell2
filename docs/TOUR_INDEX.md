@@ -8,13 +8,13 @@
 
 ## Quick Links
 
-| Document                                         | Purpose                       | Audience              |
-| ------------------------------------------------ | ----------------------------- | --------------------- |
-| [Quick Reference](./TOUR_QUICK_REFERENCE.md)     | Fast lookup for common tasks  | All developers        |
-| [Integration Guide](./TOUR_INTEGRATION_GUIDE.md) | Complete setup instructions   | Integration engineers |
-| [Data Attributes](./TOUR_DATA_ATTRIBUTES.md)     | All `data-tour-id` attributes | Frontend developers   |
-| [Pitfalls Guide](./TOUR_PITFALLS_GUIDE.md)       | Common mistakes & solutions   | Troubleshooters       |
-| [Ship Checklist](./TOUR_SHIP_CHECKLIST.md)       | Pre-deployment verification   | Release managers      |
+| Document                                         | Purpose                                    | Audience                    |
+| ------------------------------------------------ | ------------------------------------------ | --------------------------- | ---------------- | --- |
+| [Quick Reference](./TOUR_QUICK_REFERENCE.md)     | Fast lookup for common tasks               | All developers              |
+| [Integration Guide](./TOUR_INTEGRATION_GUIDE.md) | Complete setup instructions                | Integration engineers       |
+| [Data Attributes](./TOUR_DATA_ATTRIBUTES.md)     | All `data-tour-id` attributes              | Frontend developers         |
+| [Pitfalls Guide](./TOUR_PITFALLS_GUIDE.md)       | Common mistakes & solutions                | Troubleshooters             |
+| <!--                                             | [Ship Checklist](./TOUR_SHIP_CHECKLIST.md) | Pre-deployment verification | Release managers | --> |
 
 ---
 
@@ -30,11 +30,11 @@
 
 ### Implementation Details
 
-- **[TOUR_DATA_ATTRIBUTES.md](./TOUR_DATA_ATTRIBUTES.md)**  
+- **[TOUR_DATA_ATTRIBUTES.md](./TOUR_DATA_ATTRIBUTES.md)**
   Comprehensive list of all `data-tour-id` attributes used throughout the application.
 
-- **[TOUR_DATA_ATTRIBUTES_IMPLEMENTATION.md](./TOUR_DATA_ATTRIBUTES_IMPLEMENTATION.md)**  
-  Technical details about data attribute implementation and verification.
+<!-- - **[TOUR_DATA_ATTRIBUTES_IMPLEMENTATION.md](./TOUR_DATA_ATTRIBUTES_IMPLEMENTATION.md)**
+  Technical details about data attribute implementation and verification. -->
 
 - **[TOUR_A11Y_ANALYTICS_VARIANTS.md](./TOUR_A11Y_ANALYTICS_VARIANTS.md)**  
   Accessibility enhancements, analytics integration, and tour variants documentation.
@@ -46,8 +46,8 @@
 
 ### Deployment
 
-- **[TOUR_SHIP_CHECKLIST.md](./TOUR_SHIP_CHECKLIST.md)**  
-  Pre-deployment checklist ensuring all tour components are production-ready.
+<!-- - **[TOUR_SHIP_CHECKLIST.md](./TOUR_SHIP_CHECKLIST.md)**
+  Pre-deployment checklist ensuring all tour components are production-ready. -->
 
 ---
 
@@ -211,7 +211,7 @@ src/
 - **Documentation Issues**: Check [TOUR_PITFALLS_GUIDE.md](./TOUR_PITFALLS_GUIDE.md)
 - **Integration Help**: See [TOUR_INTEGRATION_GUIDE.md](./TOUR_INTEGRATION_GUIDE.md)
 - **API Reference**: See [TOUR_QUICK_REFERENCE.md](./TOUR_QUICK_REFERENCE.md)
-- **Deployment**: See [TOUR_SHIP_CHECKLIST.md](./TOUR_SHIP_CHECKLIST.md)
+<!-- - **Deployment**: See [TOUR_SHIP_CHECKLIST.md](./TOUR_SHIP_CHECKLIST.md) -->
 
 ---
 

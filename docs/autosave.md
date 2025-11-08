@@ -101,7 +101,7 @@ If autosave fails, the **3-tier recovery system** activates:
 2. **Tier 2**: Fallback to localStorage (5MB limit)
 3. **Tier 3**: Memory-only snapshot (lost on refresh)
 
-See: [Recovery System Documentation](./recovery.md) (if exists) or [src/services/recoveryService.ts](../src/services/recoveryService.ts)
+See: [src/services/recoveryService.ts](../src/services/recoveryService.ts)
 
 ---
 
@@ -170,7 +170,8 @@ When telemetry backend is deployed, you'll see:
 
 ## Related Documentation
 
-- [Recovery System](./recovery.md) - What happens when autosave fails
+<!-- - [Recovery System](./recovery.md) - What happens when autosave fails -->
+
 - [Backup System](./backup.md) - Shadow copies and manual backups
 - [Privacy & Telemetry](./privacy.md) - What autosave metrics are collected
 

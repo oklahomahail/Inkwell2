@@ -472,6 +472,7 @@ pnpm test:e2e chapters
 **Maintainer:** Inkwell Core Team
 **Related Docs:**
 
-- [User Guide](../../ONBOARDING.md)
+<!-- - [User Guide](../../ONBOARDING.md) -->
+
 - [Export Formats](export.md)
 - [Storage Guide](../dev/storage.md)

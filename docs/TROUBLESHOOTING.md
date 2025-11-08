@@ -402,7 +402,7 @@ pnpm add -D fake-indexeddb
 import 'fake-indexeddb/auto';
 ```
 
-See [docs/TESTING.md](./TESTING.md) for details.
+<!-- See [docs/TESTING.md](./TESTING.md) for details. -->
 
 ### Environment Variables Not Loading
 

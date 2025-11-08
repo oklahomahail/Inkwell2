@@ -8,6 +8,15 @@
     },
     {
       "pattern": "^#"
+    },
+    {
+      "pattern": "^https://inkwell-writing\\.vercel\\.app"
+    },
+    {
+      "pattern": "^https://dashboard\\.supabase\\.com"
+    },
+    {
+      "pattern": "^https://github\\.com/oklahomahail/Inkwell2/discussions"
     }
   ],
   "replacementPatterns": [

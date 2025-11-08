@@ -19,7 +19,9 @@ Choose your starting point based on your role:
 
 ### 👨‍💼 **Project Manager / Tech Lead**
 
-Start here → [`FINAL_SUMMARY.md`](FINAL_SUMMARY.md)
+<!-- Start here → [`FINAL_SUMMARY.md`](FINAL_SUMMARY.md) -->
+
+Start here → [`README_DEFENSIVE_GUARDS.md`](README_DEFENSIVE_GUARDS.md)
 
 - What was delivered
 - Verification results
@@ -62,7 +64,9 @@ Start here → [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.
 
 ### 🚀 **DevOps / Deployment Engineer**
 
-Start here → [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md)
+<!-- Start here → [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md) -->
+
+See the deployment section in [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md)
 
 - Pre-deployment checklist
 - Step-by-step deployment
@@ -108,10 +112,11 @@ Start here → [`IMPLEMENTATION_SUMMARY.txt`](IMPLEMENTATION_SUMMARY.txt)
 
 ```
 ├── QUICK_REFERENCE.md                          [5 min]  ⚡ Fastest
-├── FINAL_SUMMARY.md                            [10 min] 📊 Best overview
+<!-- ├── FINAL_SUMMARY.md                            [10 min] 📊 Best overview -->
+├── README_DEFENSIVE_GUARDS.md                  [10 min] 📊 Best overview
 ├── IMPLEMENTATION_SUMMARY.txt                  [10 min] 🎨 ASCII formatted
 ├── DEFENSIVE_GUARDS_USAGE_GUIDE.md             [15 min] 💻 Code examples
-├── DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md    [20 min] 🚀 Deploy guide
+<!-- ├── DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md    [20 min] 🚀 Deploy guide -->
 └── (This file)                                 [5 min]  🗂️ Directory
 ```
 
@@ -147,7 +152,9 @@ Start here → [`IMPLEMENTATION_SUMMARY.txt`](IMPLEMENTATION_SUMMARY.txt)
 
 ### Task: Deploy to Production
 
-1. Read: [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md)
+<!-- 1. Read: [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md) -->
+
+1. Read: [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md)
 2. Run: `./verify-defensive-guards.sh`
 3. Run: `npm run build`
 4. Follow step-by-step guide
@@ -290,7 +297,9 @@ RESULT: ALL CHECKS PASS ✅
 
 ### Beginner (First Time)
 
-1. [`FINAL_SUMMARY.md`](FINAL_SUMMARY.md) - Overview
+<!-- 1. [`FINAL_SUMMARY.md`](FINAL_SUMMARY.md) - Overview -->
+
+1. [`README_DEFENSIVE_GUARDS.md`](README_DEFENSIVE_GUARDS.md) - Overview
 2. [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md) - Essentials
 3. [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md) - Code
 
@@ -320,13 +329,14 @@ RESULT: ALL CHECKS PASS ✅
 
 ### Questions About...
 
-| Topic          | Document                                                                               |
-| -------------- | -------------------------------------------------------------------------------------- |
-| How to use     | [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md)                   |
-| How to deploy  | [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md) |
-| Quick answer   | [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md)                                             |
-| Full overview  | [`FINAL_SUMMARY.md`](FINAL_SUMMARY.md)                                                 |
-| Visual summary | [`IMPLEMENTATION_SUMMARY.txt`](IMPLEMENTATION_SUMMARY.txt)                             |
+| Topic          | Document                                                             |
+| -------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | --- |
+| How to use     | [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md) |
+| <!--           | How to deploy                                                        | [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md) | --> |
+| Quick answer   | [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md)                           |
+| <!--           | Full overview                                                        | [`FINAL_SUMMARY.md`](FINAL_SUMMARY.md)                                                 | --> |
+| Full overview  | [`README_DEFENSIVE_GUARDS.md`](README_DEFENSIVE_GUARDS.md)           |
+| Visual summary | [`IMPLEMENTATION_SUMMARY.txt`](IMPLEMENTATION_SUMMARY.txt)           |
 
 ---
 
@@ -357,9 +367,11 @@ RESULT: ALL CHECKS PASS ✅
 
 Pick a document above and get started!
 
-- 📊 Want a status update? → [`FINAL_SUMMARY.md`](FINAL_SUMMARY.md)
+<!-- - 📊 Want a status update? → [`FINAL_SUMMARY.md`](FINAL_SUMMARY.md) -->
+
+- 📊 Want a status update? → [`README_DEFENSIVE_GUARDS.md`](README_DEFENSIVE_GUARDS.md)
 - 💻 Need to code something? → [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md)
-- 🚀 Time to deploy? → [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md)
+<!-- - 🚀 Time to deploy? → [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md) -->
 - ⏱️ In a hurry? → [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md)
 
 ---
