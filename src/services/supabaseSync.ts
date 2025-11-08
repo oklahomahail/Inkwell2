@@ -9,12 +9,17 @@
  * - Background sync for future enhancement
  * - Conflict resolution using timestamps
  * - Token-based authentication via Supabase client
+ * - E2EE support for encrypted chapters
  */
 
 import { supabase } from '@/lib/supabaseClient';
+import type { EncryptResult } from '@/types/crypto';
 import type { Chapter, Character } from '@/types/persistence';
 import type { EnhancedProject } from '@/types/project';
 import devLog from '@/utils/devLog';
+
+import { encryptJSON, decryptJSON } from './cryptoService';
+import { e2eeKeyManager } from './e2eeKeyManager';
 
 export interface SyncResult {
   success: boolean;
@@ -208,8 +213,32 @@ class SupabaseSyncService {
       if (charactersResult.error) throw charactersResult.error;
 
       const projects = this.convertToEnhancedProjects(projectsResult.data || []);
-      const chapters = chaptersResult.data || [];
+      const rawChapters = chaptersResult.data || [];
       const characters = charactersResult.data || [];
+
+      // Decrypt chapters if they are encrypted
+      const chapters: Chapter[] = [];
+      for (const rawChapter of rawChapters) {
+        try {
+          const projectId = rawChapter.project_id;
+          if (!projectId) {
+            devLog.warn(`[SupabaseSync] Chapter ${rawChapter.id} missing project_id`);
+            chapters.push(rawChapter as Chapter);
+            continue;
+          }
+
+          const decryptedChapter = await this.decryptChapterIfNeeded(rawChapter, projectId);
+          chapters.push(decryptedChapter);
+        } catch (error) {
+          devLog.error(`[SupabaseSync] Failed to decrypt chapter ${rawChapter.id}:`, error);
+          // Include the encrypted chapter with a warning
+          chapters.push({
+            ...rawChapter,
+            title: '[Decryption Failed]',
+            body: '',
+          } as Chapter);
+        }
+      }
 
       this.lastSyncAt = Date.now();
       this.lastSyncResult = 'success';
@@ -325,7 +354,7 @@ class SupabaseSyncService {
   }
 
   /**
-   * Push chapters to Supabase
+   * Push chapters to Supabase (with E2EE support)
    */
   private async pushChapters(chapters: Chapter[]): Promise<SyncResult> {
     const errors: string[] = [];
@@ -341,9 +370,19 @@ class SupabaseSyncService {
 
       for (const chapter of chapters) {
         try {
-          // Convert to Supabase format (already in correct format)
+          // Extract project_id from chapter
+          const projectId = (chapter as any).project_id;
+          if (!projectId) {
+            errors.push(`Chapter ${chapter.id} missing project_id`);
+            continue;
+          }
+
+          // Encrypt chapter if E2EE is enabled for the project
+          const processedChapter = await this.encryptChapterIfNeeded(chapter, projectId);
+
+          // Convert to Supabase format
           const supabaseChapter = {
-            ...chapter,
+            ...processedChapter,
             user_id: user.id,
           };
 
@@ -355,6 +394,9 @@ class SupabaseSyncService {
             errors.push(`Failed to push chapter ${chapter.id}: ${error.message}`);
           } else {
             itemsProcessed++;
+            devLog.log(
+              `[SupabaseSync] Pushed chapter ${chapter.id} (encrypted: ${!!processedChapter.encrypted_content})`,
+            );
           }
         } catch (error) {
           const msg = error instanceof Error ? error.message : 'Unknown error';
@@ -470,6 +512,117 @@ class SupabaseSyncService {
         }
       });
     });
+  }
+
+  /**
+   * Check if E2EE is enabled and unlocked for a project
+   */
+  private async isE2EEReady(projectId: string): Promise<boolean> {
+    try {
+      const enabled = await e2eeKeyManager.isE2EEEnabled(projectId);
+      if (!enabled) return false;
+
+      const unlocked = e2eeKeyManager.isUnlocked(projectId);
+      if (!unlocked) {
+        devLog.warn(`[SupabaseSync] Project ${projectId} has E2EE enabled but is locked`);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      devLog.error('[SupabaseSync] E2EE readiness check failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Encrypt chapter content if E2EE is enabled
+   */
+  private async encryptChapterIfNeeded(
+    chapter: Chapter,
+    projectId: string,
+  ): Promise<Chapter & { encrypted_content?: EncryptResult }> {
+    const e2eeReady = await this.isE2EEReady(projectId);
+
+    if (!e2eeReady) {
+      // Return unencrypted chapter
+      return chapter;
+    }
+
+    try {
+      const dek = e2eeKeyManager.getDEK(projectId);
+
+      // Encrypt the body/content field
+      const contentToEncrypt = {
+        body: chapter.body,
+        title: chapter.title,
+      };
+
+      const encrypted = await encryptJSON(contentToEncrypt, dek);
+
+      // Return chapter with encrypted content
+      return {
+        ...chapter,
+        body: '', // Clear plaintext body
+        title: '[Encrypted]', // Placeholder title
+        encrypted_content: encrypted,
+      };
+    } catch (error) {
+      devLog.error('[SupabaseSync] Chapter encryption failed:', error);
+      throw new Error(
+        `Failed to encrypt chapter ${chapter.id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  /**
+   * Decrypt chapter content if encrypted
+   */
+  private async decryptChapterIfNeeded(
+    chapter: Chapter & { encrypted_content?: EncryptResult },
+    projectId: string,
+  ): Promise<Chapter> {
+    // If no encrypted content, return as-is
+    if (!chapter.encrypted_content) {
+      return chapter;
+    }
+
+    const e2eeReady = await this.isE2EEReady(projectId);
+
+    if (!e2eeReady) {
+      devLog.warn(
+        `[SupabaseSync] Chapter ${chapter.id} is encrypted but project ${projectId} is not unlocked`,
+      );
+      // Return chapter with encrypted indicator
+      return {
+        ...chapter,
+        title: '[Locked - Please unlock project]',
+        body: '',
+      };
+    }
+
+    try {
+      const dek = e2eeKeyManager.getDEK(projectId);
+
+      // Decrypt content
+      const decrypted = await decryptJSON<{ body: string; title: string }>(
+        chapter.encrypted_content,
+        dek,
+      );
+
+      // Return decrypted chapter
+      return {
+        ...chapter,
+        title: decrypted.title,
+        body: decrypted.body,
+        // Remove encrypted_content from final object
+      };
+    } catch (error) {
+      devLog.error('[SupabaseSync] Chapter decryption failed:', error);
+      throw new Error(
+        `Failed to decrypt chapter ${chapter.id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
   }
 }
 
