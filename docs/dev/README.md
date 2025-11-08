@@ -40,7 +40,8 @@ Before committing, the following will run automatically via Husky:
 
 ## Performance
 
-- [Performance Guidelines](./performance/) - Optimization strategies and monitoring
+<!-- - [Performance Guidelines](./performance/) - Optimization strategies and monitoring -->
+
 - [Performance Guardrails](../PERFORMANCE_GUARDRAILS.md) - Critical performance patterns
 - [**Performance Validation Guide**](./PERFORMANCE_VALIDATION.md) - Validate memoization changes with React DevTools
 

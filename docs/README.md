@@ -46,8 +46,8 @@ Welcome to the Inkwell documentation! This directory contains guides, technical 
 Internal implementation tracking (for contributors):
 
 - **[EPUB Foundation](../.implementations/EPUB_FOUNDATION_CHECKLIST.md)** - EPUB 3.0 export implementation and QA
-<!-- - **[Error Boundaries](../.implementations/ERROR_BOUNDARIES_CHECKLIST.md)** - 3-tier recovery system implementation -->
-- **[Onboarding System](../.implementations/ONBOARDING_CHECKLIST.md)** - Welcome project and product tours
+  <!-- - **[Error Boundaries](../.implementations/ERROR_BOUNDARIES_CHECKLIST.md)** - 3-tier recovery system implementation -->
+  <!-- - **[Onboarding System](../.implementations/ONBOARDING_CHECKLIST.md)** - Welcome project and product tours -->
 
 ---
 

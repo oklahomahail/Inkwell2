@@ -44,7 +44,7 @@ Autosave runs asynchronously and never blocks the editor. If a save fails, the s
 
 Default: **2000ms** (2 seconds)
 
-Located in: `src/components/Editor/Editor.tsx`
+<!-- Located in: `src/components/Editor/Editor.tsx` -->
 
 ```typescript
 const AUTOSAVE_DEBOUNCE_MS = 2000;
@@ -181,7 +181,8 @@ When telemetry backend is deployed, you'll see:
 
 ### Implementation Files
 
-- **Editor Integration**: [src/components/Editor/Editor.tsx](../src/components/Editor/Editor.tsx)
+<!-- - **Editor Integration**: [src/components/Editor/Editor.tsx](../src/components/Editor/Editor.tsx) -->
+
 - **Storage Service**: [src/services/enhancedStorageService.ts](../src/services/enhancedStorageService.ts)
 - **Recovery Layer**: [src/services/recoveryService.ts](../src/services/recoveryService.ts)
 - **Telemetry**: [src/services/telemetry.ts](../src/services/telemetry.ts)

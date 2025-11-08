@@ -215,8 +215,7 @@ window.tourFlags.enableExport();
 
 <!-- - [Tour Post-Deploy Guardrails](./TOUR_POST_DEPLOY_GUARDRAILS.md) -->
 <!-- - [Production Readiness Report](./TOUR_PRODUCTION_READINESS.md) -->
-
-- [PR Checklist](./PR_TEMPLATE_TOUR_CHECKLIST.md)
+<!-- - [PR Checklist](./PR_TEMPLATE_TOUR_CHECKLIST.md) -->
 <!-- - [Deployment Guide](./DEPLOYMENT_CHECKLIST_TOURS.md) -->
 
 ---

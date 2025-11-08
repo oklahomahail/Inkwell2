@@ -222,7 +222,7 @@ try {
 
 ### 4. Adding New AI Features
 
-1. **Define Feature Flag**: Add to `featureFlagService.presets.ts`
+1. **Define Feature Flag**: Add to feature flag service
 2. **Implement Service**: Create service in `src/services/`
 3. **Add Mock Support**: Extend `mockAIService.ts` with new response types
 4. **Update UI**: Create components in `src/components/AI/`

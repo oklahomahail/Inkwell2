@@ -433,7 +433,7 @@ describe('First Draft Path', () => {
 
 ### Feature Flag System
 
-**Location**: `src/services/featureFlagService.presets.ts`
+<!-- **Location**: `src/services/featureFlagService.presets.ts` -->
 
 Controls UI complexity through profile-aware feature flags.
 
