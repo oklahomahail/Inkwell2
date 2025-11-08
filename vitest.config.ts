@@ -80,10 +80,50 @@ export default defineConfig({
       // Set reasonable thresholds
       // Increased to 64% after test cleanup improved coverage from 63.13% to 64.8%
       thresholds: {
+        // Global thresholds (baseline)
         lines: 64,
         functions: 50,
         branches: 60,
         statements: 64,
+
+        // Directory-level overrides (prevent regressions in critical areas)
+        // Phase 1 targets - enforce higher standards
+        'src/model/**': {
+          lines: 7, // Current: 7%, Target: 70% by Phase 1
+          functions: 0,
+          branches: 100,
+        },
+        'src/onboarding/**': {
+          lines: 90, // Maintain excellence
+          functions: 100,
+          branches: 87,
+        },
+        'src/domain/**': {
+          lines: 100, // Maintain perfection
+          functions: 100,
+          branches: 100,
+        },
+        'src/editor/**': {
+          lines: 100, // Maintain perfection
+          functions: 100,
+          branches: 88,
+        },
+        'src/utils/storage/**': {
+          lines: 90, // Maintain high quality
+          functions: 80,
+          branches: 85,
+        },
+        // Phase 2 targets - gradually increase
+        'src/services/**': {
+          lines: 60, // Current avg, target 75% by Phase 2
+          functions: 60,
+          branches: 70,
+        },
+        'src/context/**': {
+          lines: 65, // Current avg, target 80% by Phase 2
+          functions: 30,
+          branches: 70,
+        },
       },
     },
   },

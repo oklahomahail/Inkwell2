@@ -1,0 +1,2842 @@
+{
+  "total": {
+    "lines": {
+      "total": 15282,
+      "covered": 9896,
+      "skipped": 0,
+      "pct": 64.75
+    },
+    "statements": {
+      "total": 15282,
+      "covered": 9896,
+      "skipped": 0,
+      "pct": 64.75
+    },
+    "functions": {
+      "total": 870,
+      "covered": 511,
+      "skipped": 0,
+      "pct": 58.73
+    },
+    "branches": {
+      "total": 2172,
+      "covered": 1714,
+      "skipped": 0,
+      "pct": 78.91
+    },
+    "branchesTrue": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/adapters/chapterToLegacyScene.ts": {
+    "lines": {
+      "total": 110,
+      "covered": 95,
+      "skipped": 0,
+      "pct": 86.36
+    },
+    "functions": {
+      "total": 6,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 66.66
+    },
+    "statements": {
+      "total": 110,
+      "covered": 95,
+      "skipped": 0,
+      "pct": 86.36
+    },
+    "branches": {
+      "total": 17,
+      "covered": 13,
+      "skipped": 0,
+      "pct": 76.47
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/adapters/characterModel.ts": {
+    "lines": {
+      "total": 108,
+      "covered": 104,
+      "skipped": 0,
+      "pct": 96.29
+    },
+    "functions": {
+      "total": 6,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 108,
+      "covered": 104,
+      "skipped": 0,
+      "pct": 96.29
+    },
+    "branches": {
+      "total": 24,
+      "covered": 14,
+      "skipped": 0,
+      "pct": 58.33
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/adapters/sceneToChapter.ts": {
+    "lines": {
+      "total": 101,
+      "covered": 56,
+      "skipped": 0,
+      "pct": 55.44
+    },
+    "functions": {
+      "total": 6,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 50
+    },
+    "statements": {
+      "total": 101,
+      "covered": 56,
+      "skipped": 0,
+      "pct": 55.44
+    },
+    "branches": {
+      "total": 21,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 80.95
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/ProtectedRoute.tsx": {
+    "lines": {
+      "total": 20,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 20,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/RequireAuth.tsx": {
+    "lines": {
+      "total": 20,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 20,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Sidebar.tsx": {
+    "lines": {
+      "total": 141,
+      "covered": 98,
+      "skipped": 0,
+      "pct": 69.5
+    },
+    "functions": {
+      "total": 6,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 33.33
+    },
+    "statements": {
+      "total": 141,
+      "covered": 98,
+      "skipped": 0,
+      "pct": 69.5
+    },
+    "branches": {
+      "total": 27,
+      "covered": 23,
+      "skipped": 0,
+      "pct": 85.18
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/AI/AISuggestionBox.tsx": {
+    "lines": {
+      "total": 251,
+      "covered": 57,
+      "skipped": 0,
+      "pct": 22.7
+    },
+    "functions": {
+      "total": 14,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 7.14
+    },
+    "statements": {
+      "total": 251,
+      "covered": 57,
+      "skipped": 0,
+      "pct": 22.7
+    },
+    "branches": {
+      "total": 13,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 30.76
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Auth/AuthFooter.tsx": {
+    "lines": {
+      "total": 16,
+      "covered": 16,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 16,
+      "covered": 16,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 9,
+      "covered": 9,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Auth/AuthForm.tsx": {
+    "lines": {
+      "total": 249,
+      "covered": 163,
+      "skipped": 0,
+      "pct": 65.46
+    },
+    "functions": {
+      "total": 11,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 54.54
+    },
+    "statements": {
+      "total": 249,
+      "covered": 163,
+      "skipped": 0,
+      "pct": 65.46
+    },
+    "branches": {
+      "total": 40,
+      "covered": 32,
+      "skipped": 0,
+      "pct": 80
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Badges/ExportReadyBadge.tsx": {
+    "lines": {
+      "total": 205,
+      "covered": 182,
+      "skipped": 0,
+      "pct": 88.78
+    },
+    "functions": {
+      "total": 3,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 66.66
+    },
+    "statements": {
+      "total": 205,
+      "covered": 182,
+      "skipped": 0,
+      "pct": 88.78
+    },
+    "branches": {
+      "total": 44,
+      "covered": 43,
+      "skipped": 0,
+      "pct": 97.72
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Brand/InkwellLogo.tsx": {
+    "lines": {
+      "total": 70,
+      "covered": 70,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 70,
+      "covered": 70,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 6,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Chapters/RealtimeStatus.tsx": {
+    "lines": {
+      "total": 56,
+      "covered": 37,
+      "skipped": 0,
+      "pct": 66.07
+    },
+    "functions": {
+      "total": 2,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 50
+    },
+    "statements": {
+      "total": 56,
+      "covered": 37,
+      "skipped": 0,
+      "pct": 66.07
+    },
+    "branches": {
+      "total": 10,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 10
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/CommandPalette/CommandPaletteProvider.tsx": {
+    "lines": {
+      "total": 580,
+      "covered": 305,
+      "skipped": 0,
+      "pct": 52.58
+    },
+    "functions": {
+      "total": 36,
+      "covered": 16,
+      "skipped": 0,
+      "pct": 44.44
+    },
+    "statements": {
+      "total": 580,
+      "covered": 305,
+      "skipped": 0,
+      "pct": 52.58
+    },
+    "branches": {
+      "total": 30,
+      "covered": 24,
+      "skipped": 0,
+      "pct": 80
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Dashboard/EnhancedDashboard.tsx": {
+    "lines": {
+      "total": 413,
+      "covered": 356,
+      "skipped": 0,
+      "pct": 86.19
+    },
+    "functions": {
+      "total": 17,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 35.29
+    },
+    "statements": {
+      "total": 413,
+      "covered": 356,
+      "skipped": 0,
+      "pct": 86.19
+    },
+    "branches": {
+      "total": 28,
+      "covered": 24,
+      "skipped": 0,
+      "pct": 85.71
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Layout/MainLayout.tsx": {
+    "lines": {
+      "total": 695,
+      "covered": 459,
+      "skipped": 0,
+      "pct": 66.04
+    },
+    "functions": {
+      "total": 16,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 18.75
+    },
+    "statements": {
+      "total": 695,
+      "covered": 459,
+      "skipped": 0,
+      "pct": 66.04
+    },
+    "branches": {
+      "total": 75,
+      "covered": 52,
+      "skipped": 0,
+      "pct": 69.33
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Onboarding/_archive/InkwellTourOverlay.tsx": {
+    "lines": {
+      "total": 209,
+      "covered": 188,
+      "skipped": 0,
+      "pct": 89.95
+    },
+    "functions": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 209,
+      "covered": 188,
+      "skipped": 0,
+      "pct": 89.95
+    },
+    "branches": {
+      "total": 46,
+      "covered": 41,
+      "skipped": 0,
+      "pct": 89.13
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/PWA/PWAInstallButton.tsx": {
+    "lines": {
+      "total": 121,
+      "covered": 121,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 121,
+      "covered": 121,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 22,
+      "covered": 22,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/PWA/PWAOfflineIndicator.tsx": {
+    "lines": {
+      "total": 142,
+      "covered": 142,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 142,
+      "covered": 142,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 38,
+      "covered": 37,
+      "skipped": 0,
+      "pct": 97.36
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/PWA/PWAUpdateNotification.tsx": {
+    "lines": {
+      "total": 99,
+      "covered": 82,
+      "skipped": 0,
+      "pct": 82.82
+    },
+    "functions": {
+      "total": 3,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 66.66
+    },
+    "statements": {
+      "total": 99,
+      "covered": 82,
+      "skipped": 0,
+      "pct": 82.82
+    },
+    "branches": {
+      "total": 20,
+      "covered": 15,
+      "skipped": 0,
+      "pct": 75
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Panels/AnalyticsPanel.tsx": {
+    "lines": {
+      "total": 252,
+      "covered": 184,
+      "skipped": 0,
+      "pct": 73.01
+    },
+    "functions": {
+      "total": 6,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 50
+    },
+    "statements": {
+      "total": 252,
+      "covered": 184,
+      "skipped": 0,
+      "pct": 73.01
+    },
+    "branches": {
+      "total": 27,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 74.07
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Projects/NewProjectDialog.tsx": {
+    "lines": {
+      "total": 94,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 21.27
+    },
+    "functions": {
+      "total": 9,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 11.11
+    },
+    "statements": {
+      "total": 94,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 21.27
+    },
+    "branches": {
+      "total": 6,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 66.66
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Sections/BookBuilderModal.tsx": {
+    "lines": {
+      "total": 307,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 2.28
+    },
+    "functions": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 307,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 2.28
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/StatusBar/StatusBar.tsx": {
+    "lines": {
+      "total": 82,
+      "covered": 82,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 82,
+      "covered": 82,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 18,
+      "covered": 18,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Storage/StatusChip.tsx": {
+    "lines": {
+      "total": 52,
+      "covered": 52,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 52,
+      "covered": 52,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 20,
+      "covered": 19,
+      "skipped": 0,
+      "pct": 95
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Storage/StorageHealthWidget.tsx": {
+    "lines": {
+      "total": 127,
+      "covered": 127,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 127,
+      "covered": 127,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 22,
+      "covered": 22,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Storage/StorageStatusIndicator.tsx": {
+    "lines": {
+      "total": 244,
+      "covered": 88,
+      "skipped": 0,
+      "pct": 36.06
+    },
+    "functions": {
+      "total": 7,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 42.85
+    },
+    "statements": {
+      "total": 244,
+      "covered": 88,
+      "skipped": 0,
+      "pct": 36.06
+    },
+    "branches": {
+      "total": 21,
+      "covered": 11,
+      "skipped": 0,
+      "pct": 52.38
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Topbar/AutosaveIndicator.tsx": {
+    "lines": {
+      "total": 57,
+      "covered": 57,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 57,
+      "covered": 57,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 12,
+      "covered": 12,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/Writing/EnhancedWritingPanel.tsx": {
+    "lines": {
+      "total": 558,
+      "covered": 408,
+      "skipped": 0,
+      "pct": 73.11
+    },
+    "functions": {
+      "total": 32,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 15.62
+    },
+    "statements": {
+      "total": 558,
+      "covered": 408,
+      "skipped": 0,
+      "pct": 73.11
+    },
+    "branches": {
+      "total": 59,
+      "covered": 29,
+      "skipped": 0,
+      "pct": 49.15
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/icons/InkwellFeather.tsx": {
+    "lines": {
+      "total": 71,
+      "covered": 71,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 71,
+      "covered": 71,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 10,
+      "covered": 8,
+      "skipped": 0,
+      "pct": 80
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/ui/Button.tsx": {
+    "lines": {
+      "total": 28,
+      "covered": 28,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 28,
+      "covered": 28,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/components/ui/Input.tsx": {
+    "lines": {
+      "total": 50,
+      "covered": 50,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 50,
+      "covered": 50,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 17,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/constants/brand.ts": {
+    "lines": {
+      "total": 17,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 17,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/constants/branding.ts": {
+    "lines": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/consts/writing.ts": {
+    "lines": {
+      "total": 17,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 17,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/context/AppContext.tsx": {
+    "lines": {
+      "total": 310,
+      "covered": 205,
+      "skipped": 0,
+      "pct": 66.12
+    },
+    "functions": {
+      "total": 36,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 11.11
+    },
+    "statements": {
+      "total": 310,
+      "covered": 205,
+      "skipped": 0,
+      "pct": 66.12
+    },
+    "branches": {
+      "total": 49,
+      "covered": 33,
+      "skipped": 0,
+      "pct": 67.34
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/context/AuthContext.tsx": {
+    "lines": {
+      "total": 149,
+      "covered": 131,
+      "skipped": 0,
+      "pct": 87.91
+    },
+    "functions": {
+      "total": 11,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 63.63
+    },
+    "statements": {
+      "total": 149,
+      "covered": 131,
+      "skipped": 0,
+      "pct": 87.91
+    },
+    "branches": {
+      "total": 25,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 80
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/context/ChaptersContext.tsx": {
+    "lines": {
+      "total": 167,
+      "covered": 122,
+      "skipped": 0,
+      "pct": 73.05
+    },
+    "functions": {
+      "total": 18,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 27.77
+    },
+    "statements": {
+      "total": 167,
+      "covered": 122,
+      "skipped": 0,
+      "pct": 73.05
+    },
+    "branches": {
+      "total": 30,
+      "covered": 26,
+      "skipped": 0,
+      "pct": 86.66
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/context/ClaudeProvider.tsx": {
+    "lines": {
+      "total": 186,
+      "covered": 66,
+      "skipped": 0,
+      "pct": 35.48
+    },
+    "functions": {
+      "total": 3,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 66.66
+    },
+    "statements": {
+      "total": 186,
+      "covered": 66,
+      "skipped": 0,
+      "pct": 35.48
+    },
+    "branches": {
+      "total": 7,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 71.42
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/context/EditorContext.tsx": {
+    "lines": {
+      "total": 35,
+      "covered": 35,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 35,
+      "covered": 35,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/context/ToastContext.tsx": {
+    "lines": {
+      "total": 25,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 80
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 25,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 80
+    },
+    "branches": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/context/toast.tsx": {
+    "lines": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 2,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 50
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/data/dbFactory.ts": {
+    "lines": {
+      "total": 12,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 25
+    },
+    "functions": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 12,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 25
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/domain/schemaVersion.ts": {
+    "lines": {
+      "total": 49,
+      "covered": 49,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 49,
+      "covered": 49,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 15,
+      "covered": 15,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/editor/EnhancedChapterEditor.tsx": {
+    "lines": {
+      "total": 80,
+      "covered": 80,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 80,
+      "covered": 80,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 17,
+      "covered": 15,
+      "skipped": 0,
+      "pct": 88.23
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/export/styles/printCss.ts": {
+    "lines": {
+      "total": 23,
+      "covered": 23,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 23,
+      "covered": 23,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/export/templates/analysisSummary.ts": {
+    "lines": {
+      "total": 58,
+      "covered": 47,
+      "skipped": 0,
+      "pct": 81.03
+    },
+    "functions": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 58,
+      "covered": 47,
+      "skipped": 0,
+      "pct": 81.03
+    },
+    "branches": {
+      "total": 17,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 23.52
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/export/templates/manuscript.ts": {
+    "lines": {
+      "total": 42,
+      "covered": 42,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 42,
+      "covered": 42,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 15,
+      "covered": 8,
+      "skipped": 0,
+      "pct": 53.33
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/export/utils/svgCapture.ts": {
+    "lines": {
+      "total": 66,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 30.3
+    },
+    "functions": {
+      "total": 7,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 28.57
+    },
+    "statements": {
+      "total": 66,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 30.3
+    },
+    "branches": {
+      "total": 4,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 50
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/features/export/ExportModal.tsx": {
+    "lines": {
+      "total": 130,
+      "covered": 56,
+      "skipped": 0,
+      "pct": 43.07
+    },
+    "functions": {
+      "total": 5,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 20
+    },
+    "statements": {
+      "total": 130,
+      "covered": 56,
+      "skipped": 0,
+      "pct": 43.07
+    },
+    "branches": {
+      "total": 4,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 25
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/features/preview/analytics.ts": {
+    "lines": {
+      "total": 50,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 12
+    },
+    "functions": {
+      "total": 6,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 50,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 12
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/hooks/useAutoSave.ts": {
+    "lines": {
+      "total": 69,
+      "covered": 52,
+      "skipped": 0,
+      "pct": 75.36
+    },
+    "functions": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 69,
+      "covered": 52,
+      "skipped": 0,
+      "pct": 75.36
+    },
+    "branches": {
+      "total": 18,
+      "covered": 12,
+      "skipped": 0,
+      "pct": 66.66
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/hooks/useChapters.ts": {
+    "lines": {
+      "total": 33,
+      "covered": 13,
+      "skipped": 0,
+      "pct": 39.39
+    },
+    "functions": {
+      "total": 8,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 12.5
+    },
+    "statements": {
+      "total": 33,
+      "covered": 13,
+      "skipped": 0,
+      "pct": 39.39
+    },
+    "branches": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/hooks/useProject.ts": {
+    "lines": {
+      "total": 243,
+      "covered": 60,
+      "skipped": 0,
+      "pct": 24.69
+    },
+    "functions": {
+      "total": 3,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 33.33
+    },
+    "statements": {
+      "total": 243,
+      "covered": 60,
+      "skipped": 0,
+      "pct": 24.69
+    },
+    "branches": {
+      "total": 4,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 75
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/hooks/useSections.ts": {
+    "lines": {
+      "total": 299,
+      "covered": 129,
+      "skipped": 0,
+      "pct": 43.14
+    },
+    "functions": {
+      "total": 3,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 66.66
+    },
+    "statements": {
+      "total": 299,
+      "covered": 129,
+      "skipped": 0,
+      "pct": 43.14
+    },
+    "branches": {
+      "total": 14,
+      "covered": 12,
+      "skipped": 0,
+      "pct": 85.71
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/hooks/useStorageHealth.ts": {
+    "lines": {
+      "total": 25,
+      "covered": 21,
+      "skipped": 0,
+      "pct": 84
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 25,
+      "covered": 21,
+      "skipped": 0,
+      "pct": 84
+    },
+    "branches": {
+      "total": 9,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 66.66
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/hooks/useSync.ts": {
+    "lines": {
+      "total": 48,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 6.25
+    },
+    "functions": {
+      "total": 1,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 48,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 6.25
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/hooks/useUI.tsx": {
+    "lines": {
+      "total": 47,
+      "covered": 43,
+      "skipped": 0,
+      "pct": 91.48
+    },
+    "functions": {
+      "total": 8,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 37.5
+    },
+    "statements": {
+      "total": 47,
+      "covered": 43,
+      "skipped": 0,
+      "pct": 91.48
+    },
+    "branches": {
+      "total": 10,
+      "covered": 8,
+      "skipped": 0,
+      "pct": 80
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/lib/sectionIcons.tsx": {
+    "lines": {
+      "total": 53,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 5.66
+    },
+    "functions": {
+      "total": 2,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 53,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 5.66
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/lib/supabaseClient.ts": {
+    "lines": {
+      "total": 14,
+      "covered": 10,
+      "skipped": 0,
+      "pct": 71.42
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 14,
+      "covered": 10,
+      "skipped": 0,
+      "pct": 71.42
+    },
+    "branches": {
+      "total": 8,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 25
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/lib/utils.ts": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/model/chapters.ts": {
+    "lines": {
+      "total": 272,
+      "covered": 19,
+      "skipped": 0,
+      "pct": 6.98
+    },
+    "functions": {
+      "total": 15,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 272,
+      "covered": 19,
+      "skipped": 0,
+      "pct": 6.98
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/model/characters.ts": {
+    "lines": {
+      "total": 191,
+      "covered": 15,
+      "skipped": 0,
+      "pct": 7.85
+    },
+    "functions": {
+      "total": 12,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 0
+    },
+    "statements": {
+      "total": 191,
+      "covered": 15,
+      "skipped": 0,
+      "pct": 7.85
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/onboarding/welcomeProject.ts": {
+    "lines": {
+      "total": 198,
+      "covered": 178,
+      "skipped": 0,
+      "pct": 89.89
+    },
+    "functions": {
+      "total": 14,
+      "covered": 14,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 198,
+      "covered": 178,
+      "skipped": 0,
+      "pct": 89.89
+    },
+    "branches": {
+      "total": 47,
+      "covered": 41,
+      "skipped": 0,
+      "pct": 87.23
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/onboarding/content/welcomeChapters.ts": {
+    "lines": {
+      "total": 155,
+      "covered": 155,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 155,
+      "covered": 155,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/aiPlotAnalysisService.ts": {
+    "lines": {
+      "total": 157,
+      "covered": 154,
+      "skipped": 0,
+      "pct": 98.08
+    },
+    "functions": {
+      "total": 6,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 157,
+      "covered": 154,
+      "skipped": 0,
+      "pct": 98.08
+    },
+    "branches": {
+      "total": 10,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 60
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/autosaveMetrics.ts": {
+    "lines": {
+      "total": 148,
+      "covered": 123,
+      "skipped": 0,
+      "pct": 83.1
+    },
+    "functions": {
+      "total": 13,
+      "covered": 8,
+      "skipped": 0,
+      "pct": 61.53
+    },
+    "statements": {
+      "total": 148,
+      "covered": 123,
+      "skipped": 0,
+      "pct": 83.1
+    },
+    "branches": {
+      "total": 35,
+      "covered": 30,
+      "skipped": 0,
+      "pct": 85.71
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/autosaveService.ts": {
+    "lines": {
+      "total": 67,
+      "covered": 67,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 10,
+      "covered": 10,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 67,
+      "covered": 67,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 25,
+      "covered": 25,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/chapterCache.ts": {
+    "lines": {
+      "total": 166,
+      "covered": 139,
+      "skipped": 0,
+      "pct": 83.73
+    },
+    "functions": {
+      "total": 18,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 94.44
+    },
+    "statements": {
+      "total": 166,
+      "covered": 139,
+      "skipped": 0,
+      "pct": 83.73
+    },
+    "branches": {
+      "total": 41,
+      "covered": 34,
+      "skipped": 0,
+      "pct": 82.92
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/chaptersService.ts": {
+    "lines": {
+      "total": 361,
+      "covered": 127,
+      "skipped": 0,
+      "pct": 35.18
+    },
+    "functions": {
+      "total": 32,
+      "covered": 14,
+      "skipped": 0,
+      "pct": 43.75
+    },
+    "statements": {
+      "total": 361,
+      "covered": 127,
+      "skipped": 0,
+      "pct": 35.18
+    },
+    "branches": {
+      "total": 39,
+      "covered": 33,
+      "skipped": 0,
+      "pct": 84.61
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/chaptersSyncService.ts": {
+    "lines": {
+      "total": 143,
+      "covered": 24,
+      "skipped": 0,
+      "pct": 16.78
+    },
+    "functions": {
+      "total": 5,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 20
+    },
+    "statements": {
+      "total": 143,
+      "covered": 24,
+      "skipped": 0,
+      "pct": 16.78
+    },
+    "branches": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/claudeService.ts": {
+    "lines": {
+      "total": 414,
+      "covered": 278,
+      "skipped": 0,
+      "pct": 67.14
+    },
+    "functions": {
+      "total": 32,
+      "covered": 26,
+      "skipped": 0,
+      "pct": 81.25
+    },
+    "statements": {
+      "total": 414,
+      "covered": 278,
+      "skipped": 0,
+      "pct": 67.14
+    },
+    "branches": {
+      "total": 95,
+      "covered": 71,
+      "skipped": 0,
+      "pct": 74.73
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/connectivityService.ts": {
+    "lines": {
+      "total": 386,
+      "covered": 282,
+      "skipped": 0,
+      "pct": 73.05
+    },
+    "functions": {
+      "total": 28,
+      "covered": 24,
+      "skipped": 0,
+      "pct": 85.71
+    },
+    "statements": {
+      "total": 386,
+      "covered": 282,
+      "skipped": 0,
+      "pct": 73.05
+    },
+    "branches": {
+      "total": 77,
+      "covered": 58,
+      "skipped": 0,
+      "pct": 75.32
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/cryptoService.ts": {
+    "lines": {
+      "total": 222,
+      "covered": 142,
+      "skipped": 0,
+      "pct": 63.96
+    },
+    "functions": {
+      "total": 14,
+      "covered": 10,
+      "skipped": 0,
+      "pct": 71.42
+    },
+    "statements": {
+      "total": 222,
+      "covered": 142,
+      "skipped": 0,
+      "pct": 63.96
+    },
+    "branches": {
+      "total": 29,
+      "covered": 16,
+      "skipped": 0,
+      "pct": 55.17
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/enhancedStorageService.ts": {
+    "lines": {
+      "total": 476,
+      "covered": 208,
+      "skipped": 0,
+      "pct": 43.69
+    },
+    "functions": {
+      "total": 25,
+      "covered": 15,
+      "skipped": 0,
+      "pct": 60
+    },
+    "statements": {
+      "total": 476,
+      "covered": 208,
+      "skipped": 0,
+      "pct": 43.69
+    },
+    "branches": {
+      "total": 59,
+      "covered": 38,
+      "skipped": 0,
+      "pct": 64.4
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/exportHistory.ts": {
+    "lines": {
+      "total": 209,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 9.56
+    },
+    "functions": {
+      "total": 11,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 9.09
+    },
+    "statements": {
+      "total": 209,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 9.56
+    },
+    "branches": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/pwaService.ts": {
+    "lines": {
+      "total": 196,
+      "covered": 146,
+      "skipped": 0,
+      "pct": 74.48
+    },
+    "functions": {
+      "total": 19,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 89.47
+    },
+    "statements": {
+      "total": 196,
+      "covered": 146,
+      "skipped": 0,
+      "pct": 74.48
+    },
+    "branches": {
+      "total": 45,
+      "covered": 41,
+      "skipped": 0,
+      "pct": 91.11
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/recoveryService.ts": {
+    "lines": {
+      "total": 309,
+      "covered": 218,
+      "skipped": 0,
+      "pct": 70.55
+    },
+    "functions": {
+      "total": 17,
+      "covered": 13,
+      "skipped": 0,
+      "pct": 76.47
+    },
+    "statements": {
+      "total": 309,
+      "covered": 218,
+      "skipped": 0,
+      "pct": 70.55
+    },
+    "branches": {
+      "total": 51,
+      "covered": 34,
+      "skipped": 0,
+      "pct": 66.66
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/saveWithTelemetry.ts": {
+    "lines": {
+      "total": 40,
+      "covered": 40,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 40,
+      "covered": 40,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/sectionMigration.ts": {
+    "lines": {
+      "total": 77,
+      "covered": 11,
+      "skipped": 0,
+      "pct": 14.28
+    },
+    "functions": {
+      "total": 5,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 20
+    },
+    "statements": {
+      "total": 77,
+      "covered": 11,
+      "skipped": 0,
+      "pct": 14.28
+    },
+    "branches": {
+      "total": 4,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 25
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/snapshotService.ts": {
+    "lines": {
+      "total": 225,
+      "covered": 200,
+      "skipped": 0,
+      "pct": 88.88
+    },
+    "functions": {
+      "total": 13,
+      "covered": 13,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 225,
+      "covered": 200,
+      "skipped": 0,
+      "pct": 88.88
+    },
+    "branches": {
+      "total": 55,
+      "covered": 42,
+      "skipped": 0,
+      "pct": 76.36
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/storageManager.ts": {
+    "lines": {
+      "total": 239,
+      "covered": 145,
+      "skipped": 0,
+      "pct": 60.66
+    },
+    "functions": {
+      "total": 15,
+      "covered": 11,
+      "skipped": 0,
+      "pct": 73.33
+    },
+    "statements": {
+      "total": 239,
+      "covered": 145,
+      "skipped": 0,
+      "pct": 60.66
+    },
+    "branches": {
+      "total": 44,
+      "covered": 25,
+      "skipped": 0,
+      "pct": 56.81
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/storageService.ts": {
+    "lines": {
+      "total": 164,
+      "covered": 38,
+      "skipped": 0,
+      "pct": 23.17
+    },
+    "functions": {
+      "total": 18,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 16.66
+    },
+    "statements": {
+      "total": 164,
+      "covered": 38,
+      "skipped": 0,
+      "pct": 23.17
+    },
+    "branches": {
+      "total": 11,
+      "covered": 9,
+      "skipped": 0,
+      "pct": 81.81
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/supabaseSync.ts": {
+    "lines": {
+      "total": 333,
+      "covered": 331,
+      "skipped": 0,
+      "pct": 99.39
+    },
+    "functions": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 333,
+      "covered": 331,
+      "skipped": 0,
+      "pct": 99.39
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/telemetry.ts": {
+    "lines": {
+      "total": 60,
+      "covered": 58,
+      "skipped": 0,
+      "pct": 96.66
+    },
+    "functions": {
+      "total": 7,
+      "covered": 6,
+      "skipped": 0,
+      "pct": 85.71
+    },
+    "statements": {
+      "total": 60,
+      "covered": 58,
+      "skipped": 0,
+      "pct": 96.66
+    },
+    "branches": {
+      "total": 22,
+      "covered": 22,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/tutorialStorage.ts": {
+    "lines": {
+      "total": 151,
+      "covered": 57,
+      "skipped": 0,
+      "pct": 37.74
+    },
+    "functions": {
+      "total": 9,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 77.77
+    },
+    "statements": {
+      "total": 151,
+      "covered": 57,
+      "skipped": 0,
+      "pct": 37.74
+    },
+    "branches": {
+      "total": 24,
+      "covered": 24,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/services/export/exportService.epub.ts": {
+    "lines": {
+      "total": 117,
+      "covered": 105,
+      "skipped": 0,
+      "pct": 89.74
+    },
+    "functions": {
+      "total": 10,
+      "covered": 9,
+      "skipped": 0,
+      "pct": 90
+    },
+    "statements": {
+      "total": 117,
+      "covered": 105,
+      "skipped": 0,
+      "pct": 89.74
+    },
+    "branches": {
+      "total": 27,
+      "covered": 24,
+      "skipped": 0,
+      "pct": 88.88
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/types/section.ts": {
+    "lines": {
+      "total": 81,
+      "covered": 81,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 81,
+      "covered": 81,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/cn.ts": {
+    "lines": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/debounce.ts": {
+    "lines": {
+      "total": 10,
+      "covered": 10,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 10,
+      "covered": 10,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/devLog.ts": {
+    "lines": {
+      "total": 46,
+      "covered": 46,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 9,
+      "covered": 9,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 46,
+      "covered": 46,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 9,
+      "covered": 9,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/id.ts": {
+    "lines": {
+      "total": 21,
+      "covered": 21,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 7,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 21,
+      "covered": 21,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 12,
+      "covered": 12,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/idUtils.ts": {
+    "lines": {
+      "total": 14,
+      "covered": 14,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 14,
+      "covered": 14,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/logger.ts": {
+    "lines": {
+      "total": 17,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 17,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 3,
+      "covered": 3,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/navigate.ts": {
+    "lines": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 5,
+      "covered": 5,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/perf.ts": {
+    "lines": {
+      "total": 106,
+      "covered": 16,
+      "skipped": 0,
+      "pct": 15.09
+    },
+    "functions": {
+      "total": 13,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 7.69
+    },
+    "statements": {
+      "total": 106,
+      "covered": 16,
+      "skipped": 0,
+      "pct": 15.09
+    },
+    "branches": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/projectBundle.ts": {
+    "lines": {
+      "total": 271,
+      "covered": 146,
+      "skipped": 0,
+      "pct": 53.87
+    },
+    "functions": {
+      "total": 8,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 50
+    },
+    "statements": {
+      "total": 271,
+      "covered": 146,
+      "skipped": 0,
+      "pct": 53.87
+    },
+    "branches": {
+      "total": 30,
+      "covered": 16,
+      "skipped": 0,
+      "pct": 53.33
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/quotaAwareStorage.ts": {
+    "lines": {
+      "total": 331,
+      "covered": 280,
+      "skipped": 0,
+      "pct": 84.59
+    },
+    "functions": {
+      "total": 17,
+      "covered": 16,
+      "skipped": 0,
+      "pct": 94.11
+    },
+    "statements": {
+      "total": 331,
+      "covered": 280,
+      "skipped": 0,
+      "pct": 84.59
+    },
+    "branches": {
+      "total": 84,
+      "covered": 62,
+      "skipped": 0,
+      "pct": 73.8
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/safeRedirect.ts": {
+    "lines": {
+      "total": 20,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 85
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 20,
+      "covered": 17,
+      "skipped": 0,
+      "pct": 85
+    },
+    "branches": {
+      "total": 10,
+      "covered": 8,
+      "skipped": 0,
+      "pct": 80
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/storage.ts": {
+    "lines": {
+      "total": 234,
+      "covered": 191,
+      "skipped": 0,
+      "pct": 81.62
+    },
+    "functions": {
+      "total": 44,
+      "covered": 33,
+      "skipped": 0,
+      "pct": 75
+    },
+    "statements": {
+      "total": 234,
+      "covered": 191,
+      "skipped": 0,
+      "pct": 81.62
+    },
+    "branches": {
+      "total": 62,
+      "covered": 57,
+      "skipped": 0,
+      "pct": 91.93
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/theme.ts": {
+    "lines": {
+      "total": 38,
+      "covered": 38,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 38,
+      "covered": 38,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 13,
+      "covered": 13,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/tourTriggers.ts": {
+    "lines": {
+      "total": 74,
+      "covered": 74,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 12,
+      "covered": 12,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 74,
+      "covered": 74,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 20,
+      "covered": 20,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/__tests__/mockFeatureFlagManager.ts": {
+    "lines": {
+      "total": 174,
+      "covered": 158,
+      "skipped": 0,
+      "pct": 90.8
+    },
+    "functions": {
+      "total": 16,
+      "covered": 15,
+      "skipped": 0,
+      "pct": 93.75
+    },
+    "statements": {
+      "total": 174,
+      "covered": 158,
+      "skipped": 0,
+      "pct": 90.8
+    },
+    "branches": {
+      "total": 45,
+      "covered": 39,
+      "skipped": 0,
+      "pct": 86.66
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/dom/safeObserver.ts": {
+    "lines": {
+      "total": 64,
+      "covered": 42,
+      "skipped": 0,
+      "pct": 65.62
+    },
+    "functions": {
+      "total": 5,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 80
+    },
+    "statements": {
+      "total": 64,
+      "covered": 42,
+      "skipped": 0,
+      "pct": 65.62
+    },
+    "branches": {
+      "total": 18,
+      "covered": 12,
+      "skipped": 0,
+      "pct": 66.66
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/dom/waitForRoot.ts": {
+    "lines": {
+      "total": 25,
+      "covered": 21,
+      "skipped": 0,
+      "pct": 84
+    },
+    "functions": {
+      "total": 2,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 25,
+      "covered": 21,
+      "skipped": 0,
+      "pct": 84
+    },
+    "branches": {
+      "total": 11,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 63.63
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/storage/persistence.ts": {
+    "lines": {
+      "total": 66,
+      "covered": 66,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 66,
+      "covered": 66,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 30,
+      "covered": 30,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/storage/privateMode.ts": {
+    "lines": {
+      "total": 65,
+      "covered": 53,
+      "skipped": 0,
+      "pct": 81.53
+    },
+    "functions": {
+      "total": 8,
+      "covered": 7,
+      "skipped": 0,
+      "pct": 87.5
+    },
+    "statements": {
+      "total": 65,
+      "covered": 53,
+      "skipped": 0,
+      "pct": 81.53
+    },
+    "branches": {
+      "total": 32,
+      "covered": 30,
+      "skipped": 0,
+      "pct": 93.75
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/utils/storage/storageHealth.ts": {
+    "lines": {
+      "total": 185,
+      "covered": 174,
+      "skipped": 0,
+      "pct": 94.05
+    },
+    "functions": {
+      "total": 11,
+      "covered": 9,
+      "skipped": 0,
+      "pct": 81.81
+    },
+    "statements": {
+      "total": 185,
+      "covered": 174,
+      "skipped": 0,
+      "pct": 94.05
+    },
+    "branches": {
+      "total": 71,
+      "covered": 62,
+      "skipped": 0,
+      "pct": 87.32
+    }
+  },
+  "/Users/davehail/Developer/inkwell/src/validation/projectSchema.ts": {
+    "lines": {
+      "total": 166,
+      "covered": 110,
+      "skipped": 0,
+      "pct": 66.26
+    },
+    "functions": {
+      "total": 3,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 33.33
+    },
+    "statements": {
+      "total": 166,
+      "covered": 110,
+      "skipped": 0,
+      "pct": 66.26
+    },
+    "branches": {
+      "total": 4,
+      "covered": 2,
+      "skipped": 0,
+      "pct": 50
+    }
+  }
+}
