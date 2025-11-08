@@ -230,11 +230,15 @@ const SettingsPanel: React.FC = () => {
     <div className="h-full bg-[#0A0F1C] text-gray-100 p-6 overflow-y-auto">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
-        <div>
-          <h2 className="text-3xl font-extrabold leading-tight text-white mb-2">Settings</h2>
-          <p className="text-gray-400">
-            Configure your writing environment and Claude AI assistant
-          </p>
+        <div className="flex items-center gap-4">
+          {/* Inkwell Logo */}
+          <img src="/favicon.svg" alt="Inkwell" className="h-12 w-12 flex-shrink-0" />
+          <div>
+            <h2 className="text-3xl font-extrabold leading-tight text-white mb-2">Settings</h2>
+            <p className="text-gray-400">
+              Configure your writing environment and Claude AI assistant
+            </p>
+          </div>
         </div>
 
         {/* How AI Works - Explanation Section */}

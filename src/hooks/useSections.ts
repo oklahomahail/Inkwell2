@@ -14,8 +14,8 @@
  * - Section types: Supports chapters, prologues, epilogues, and more
  */
 
-import { nanoid } from 'nanoid';
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Chapters } from '@/services/chaptersService';
 import {
@@ -213,7 +213,7 @@ export function useSections(projectId: string) {
   const createSection = useCallback(
     async (title = 'Untitled Section', type: SectionType = 'chapter') => {
       const newSection: Section = {
-        id: nanoid(),
+        id: uuidv4(), // Use UUID for Supabase compatibility
         title,
         type,
         order: sections.length,

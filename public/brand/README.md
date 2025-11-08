@@ -1,55 +1,48 @@
 # Inkwell Brand Assets
 
-This directory contains the canonical brand assets for Inkwell.
+This directory contains the official Inkwell brand assets used throughout the application.
 
-## SVG Assets (Semantic Names)
+## Files
 
-- `inkwell-icon.svg` - Feather-only icon, square format (641B)
-- `inkwell-lockup-dark.svg` - White text on dark background (535B)
-- `inkwell-lockup-light.svg` - Navy text on light background (537B)
+### Primary Assets (Your Custom Designs)
 
-## PNG Icons (Generated from SVG)
+- **`inkwell-icon-new.svg`** (1.5MB) - Your custom icon/favicon (from 1.svg)
+  - Used as: `/favicon.svg` in the root
+  - Purpose: Browser tab icon, sidebar collapsed state, panel headers
+  - Size: Scalable vector, typically displayed at 32x32 to 48x48 pixels
 
-Used by manifest and meta tags:
-- `inkwell-icon-32.png` - Favicon (32×32, 1.7KB)
-- `inkwell-icon-180.png` - Apple touch icon (180×180, 21KB)
-- `inkwell-icon-192.png` - PWA icon (192×192, 24KB)
-- `inkwell-icon-512.png` - PWA icon (512×512, 173KB)
-- `inkwell-og-1200x630.png` - Open Graph social sharing image (1200×630, 533KB)
+- **`inkwell-logo-primary.svg`** (140KB) - Your custom primary logo (from 2.svg)
+  - Purpose: Full logo for sidebar (expanded state), dashboard (light mode)
+  - Display: ~200px width max in sidebar, ~80px height on dashboard
 
-**Regenerate PNGs:** Run `pnpm build:icons` to regenerate all PNG assets from the SVG sources.
+- **`inkwell-logo-alt.svg`** (356KB) - Your custom alternate logo (from 3.svg)
+  - Purpose: Alternative logo for dark mode dashboard
+  - Display: ~80px height on dashboard
+
+### PNG Icons (For PWA/Mobile)
+
+- `inkwell-icon-32.png` - 32x32 favicon fallback
+- `inkwell-icon-64.png` - 64x64 favicon fallback
+- `inkwell-icon-180.png` - 180x180 Apple Touch Icon
+- `inkwell-icon-192.png` - 192x192 PWA icon
+- `inkwell-icon-512.png` - 512x512 PWA icon
+
+## Usage Locations
+
+| Location | Asset Used | Size |
+|----------|-----------|------|
+| Browser Tab | `/favicon.svg` | 32x32 |
+| Sidebar (collapsed) | `/favicon.svg` | 32x32 |
+| Sidebar (expanded) | `/brand/inkwell-logo-primary.svg` | h-10 (~40px) |
+| Dashboard (light) | `/brand/inkwell-logo-primary.svg` | h-20 (~80px) |
+| Dashboard (dark) | `/brand/inkwell-logo-alt.svg` | h-20 (~80px) |
+| Writing Panel | `/favicon.svg` | 32x32 |
+| Analytics Panel | `/favicon.svg` | 40x40 |
+| Timeline Panel | `/favicon.svg` | 40x40 |
+| Settings Panel | `/favicon.svg` | 48x48 |
 
 ## Brand Colors
 
-- **Inkwell Blue (Navy)**: `#13294B` (Primary brand color)
-- **Inkwell Gold**: `#D4AF37` (Accent color for highlights and interactive elements)
-
-## Usage
-
-These assets are referenced in:
-- `/index.html` - Favicons and OG images
-- `/public/site.webmanifest` - PWA icons
-- `/src/components/Logo.tsx` - Application logo component
-- `/src/components/Auth/AuthHeader.tsx` - Authentication pages
-- Various auth pages (`/src/pages/AuthPage.tsx`, etc.)
-
-## Import Aliases
-
-Use semantic import aliases in your code (configured in `vite.config.ts`):
-
-```typescript
-import icon from '@brand/icon';           // inkwell-icon.svg
-import logoDark from '@brand/logo-dark';  // inkwell-lockup-dark.svg
-import logoLight from '@brand/logo-light'; // inkwell-lockup-light.svg
-```
-
-## Validation
-
-Run `node scripts/check-brand-assets.mjs` to validate all required brand assets are present before building.
-
-## Notes
-
-- All SVG files include proper `viewBox` attributes for responsive scaling
-- PNG files are regenerated from SVG sources to maintain quality
-- Paths use `currentColor` or explicit brand colors as appropriate
-- All assets are precached by the service worker for offline support
+- **Primary Navy**: `#13294B` (Inkwell Blue)
+- **Accent Gold**: `#D4AF37` (Inkwell Gold)
+- **Background**: `#FFFFFF` (Light) / `#0b1323` (Dark)

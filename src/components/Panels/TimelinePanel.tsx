@@ -266,11 +266,15 @@ const TimelinePanel: React.FC = () => {
     <div data-tour="timeline-panel-root" className="flex flex-col h-full bg-white dark:bg-gray-900">
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Timeline</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {currentProject.name} • Enhanced timeline management
-          </p>
+        <div className="flex items-center gap-4">
+          {/* Inkwell Logo */}
+          <img src="/favicon.svg" alt="Inkwell" className="h-10 w-10 flex-shrink-0" />
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Timeline</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {currentProject.name} • Enhanced timeline management
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">

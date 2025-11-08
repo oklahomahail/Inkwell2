@@ -248,6 +248,14 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
 
     try {
       setIsCreatingSection(true);
+
+      // CRITICAL: Save current section content before creating new one
+      if (activeId && content) {
+        await updateSectionContent(activeId, content);
+        // Wait for the debounced save to complete
+        await new Promise((resolve) => setTimeout(resolve, 700));
+      }
+
       await createSection('New Section', 'chapter');
     } catch (error) {
       console.error('[EnhancedWritingPanel] Failed to create section:', error);
@@ -450,6 +458,8 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
+              {/* Inkwell Logo */}
+              <img src="/favicon.svg" alt="Inkwell" className="h-8 w-8" />
               <div>
                 <h1 className="text-heading-md text-slate-900 dark:text-white">
                   {currentProject.name}

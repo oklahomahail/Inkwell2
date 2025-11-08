@@ -39,10 +39,17 @@ export const Sidebar: React.FC = () => {
       data-testid="sidebar"
       data-collapsed={sidebarCollapsed}
     >
-      <div className="p-4 flex items-center space-x-2" data-spotlight-id="sidebar.logo">
-        {/* Logo and title */}
-        <img src="/brand/inkwell-icon.svg" alt="Inkwell" className="h-8 w-8 shrink-0" />
-        {!sidebarCollapsed && <span className="text-slate-100 font-semibold text-lg">Inkwell</span>}
+      <div className="p-4 flex items-center justify-center" data-spotlight-id="sidebar.logo">
+        {/* Brand Logo */}
+        {sidebarCollapsed ? (
+          <img src="/favicon.svg" alt="Inkwell" className="h-8 w-8 shrink-0" />
+        ) : (
+          <img
+            src="/brand/inkwell-logo-primary.svg"
+            alt="Inkwell"
+            className="h-10 w-auto max-w-[200px]"
+          />
+        )}
       </div>
       <button
         aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}

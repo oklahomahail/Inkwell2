@@ -63,11 +63,17 @@ const AnalyticsPanel: React.FC = () => {
       <div data-tour="analytics-panel-root" className="p-6 space-y-6">
         {/* Header with View Toggle */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Writing Analytics</h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Project: {currentProject?.name ?? state.currentProjectId ?? 'None selected'}
-            </p>
+          <div className="flex items-center gap-4">
+            {/* Inkwell Logo */}
+            <img src="/favicon.svg" alt="Inkwell" className="h-10 w-10 flex-shrink-0" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Writing Analytics
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Project: {currentProject?.name ?? state.currentProjectId ?? 'None selected'}
+              </p>
+            </div>
           </div>
 
           {hasEnhancedAnalytics && (

@@ -10,8 +10,13 @@ interface WelcomeProps {
 export default function _Welcome({ onCreateProject, hasProjects = false }: WelcomeProps) {
   return (
     <section className="mx-auto max-w-3xl text-center py-8">
-      <h1 className="text-4xl font-bold text-slate-900 mb-3">
-        {hasProjects ? 'Welcome back to' : 'Welcome to'} Inkwell
+      {/* Inkwell Logo */}
+      <div className="mb-6 flex justify-center">
+        <img src="/brand/inkwell-logo-primary.svg" alt="Inkwell" className="h-20 dark:hidden" />
+        <img src="/brand/inkwell-logo-alt.svg" alt="Inkwell" className="h-20 hidden dark:block" />
+      </div>
+      <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3">
+        {hasProjects ? 'Welcome back' : 'Welcome to Inkwell'}
       </h1>
       <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
         {hasProjects

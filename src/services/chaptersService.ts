@@ -9,6 +9,8 @@
  * Storage: IndexedDB (local-first) with future Supabase sync capability
  */
 
+import { v4 as uuidv4 } from 'uuid';
+
 import type {
   ChapterMeta,
   ChapterDoc,
@@ -150,7 +152,8 @@ class ChaptersService {
     const index = input.index ?? maxIndex + 1;
 
     const now = new Date().toISOString();
-    const id = `chapter_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Use provided ID (if already exists from sync) or generate a UUID for Supabase compatibility
+    const id = input.id || uuidv4();
 
     const meta: ChapterMeta = {
       id,
