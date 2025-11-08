@@ -228,7 +228,9 @@ export async function decryptBytes(input: DecryptInput, dek: Uint8Array): Promis
 
 // JSON helpers
 export async function encryptJSON(obj: unknown, dek: Uint8Array): Promise<EncryptResult> {
-  const data = new TextEncoder().encode(JSON.stringify(obj));
+  const encoded = new TextEncoder().encode(JSON.stringify(obj));
+  // Convert to plain Uint8Array for libsodium compatibility in Node.js
+  const data = new Uint8Array(encoded);
   return encryptBytes(data, dek);
 }
 
