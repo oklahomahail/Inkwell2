@@ -1,0 +1,32 @@
+File,Current Lines,Current Branches,Current Functions,Target Lines,Priority,Phase,Estimated Hours,Impact,Complexity,Notes
+src/model/chapters.ts,6.98%,100%,0%,70%,CRITICAL,1,5,+2%,High,Core CRUD operations
+src/model/characters.ts,7.85%,100%,0%,70%,CRITICAL,1,5,+1.5%,High,Character gateway
+src/components/Sections/BookBuilderModal.tsx,2.28%,100%,0%,60%,HIGH,1,4,+1.5%,Medium,Export feature
+src/data/dbFactory.ts,25%,100%,0%,80%,HIGH,1,2,+0.5%,Low,DB initialization
+src/components/Projects/NewProjectDialog.tsx,21.27%,66.66%,11.11%,70%,HIGH,1,3,+1%,Medium,User onboarding
+src/components/AI/AISuggestionBox.tsx,22.7%,30.76%,7.14%,60%,HIGH,1,4,+1%,High,AI integration
+src/services/exportHistory.ts,9.56%,100%,9.09%,65%,MEDIUM,1,3,+0.8%,Medium,Export tracking
+src/services/storageService.ts,23.17%,81.81%,16.66%,70%,HIGH,1,4,+1.2%,High,Storage abstraction
+src/services/sectionMigration.ts,14.28%,25%,20%,70%,MEDIUM,1,3,+0.8%,Medium,Data migration
+src/hooks/useSync.ts,6.25%,100%,0%,60%,MEDIUM,1,3,+0.5%,Medium,Realtime sync
+src/hooks/useProject.ts,24.69%,75%,33.33%,65%,MEDIUM,1,3,+0.8%,Medium,Project state
+src/hooks/useChapters.ts,39.39%,100%,12.5%,70%,MEDIUM,1,2,+0.5%,Low,Chapter operations
+src/utils/perf.ts,15.09%,100%,7.69%,90%,LOW,1,1,+0.5%,Low,Performance utils
+src/lib/sectionIcons.tsx,5.66%,100%,0%,80%,LOW,1,1,+0.3%,Low,Icon rendering
+src/features/preview/analytics.ts,12%,100%,0%,75%,LOW,1,1.5,+0.3%,Low,Preview analytics
+src/services/chaptersService.ts,35.18%,79.41%,43.75%,70%,HIGH,2,6,+2%,High,Chapter CRUD + Sync
+src/services/enhancedStorageService.ts,43.69%,64.4%,60%,70%,MEDIUM,2,5,+1.5%,Medium,Enhanced storage
+src/services/tutorialStorage.ts,37.74%,100%,77.77%,65%,LOW,2,2,+0.5%,Low,Tutorial state
+src/services/storageManager.ts,60.66%,56.81%,73.33%,75%,MEDIUM,2,3,+0.8%,Medium,Quota management
+src/context/AppContext.tsx,66.12%,67.34%,11.11%,80%,MEDIUM,2,4,+1%,Medium,Global app state
+src/context/ChaptersContext.tsx,73.05%,86.66%,27.77%,85%,MEDIUM,2,3,+0.8%,Medium,Chapter context
+src/context/ClaudeProvider.tsx,35.48%,71.42%,66.66%,70%,MEDIUM,2,4,+1%,High,AI state management
+src/components/CommandPalette/CommandPaletteProvider.tsx,52.58%,80%,44.44%,75%,MEDIUM,2,6,+1.5%,High,Command palette
+src/components/Layout/MainLayout.tsx,66.04%,69.33%,18.75%,80%,MEDIUM,2,6,+1%,High,Main layout
+src/components/Writing/EnhancedWritingPanel.tsx,73.11%,49.15%,15.62%,85%,HIGH,2,8,+2%,Very High,Core editor
+src/hooks/useSections.ts,45.15%,73.68%,66.66%,70%,MEDIUM,2,4,+1%,Medium,Section operations
+src/components/Dashboard/EnhancedDashboard.tsx,86.19%,85.71%,35.29%,90%,LOW,3,4,+0.5%,Medium,Dashboard view
+src/services/claudeService.ts,67.14%,74.73%,81.25%,75%,MEDIUM,3,4,+0.8%,High,Claude API client
+src/components/Storage/StorageStatusIndicator.tsx,36.06%,52.38%,42.85%,70%,LOW,2,3,+0.8%,Medium,Storage UI
+src/export/utils/svgCapture.ts,30.3%,50%,28.57%,65%,LOW,2,3,+0.5%,Medium,SVG export
+src/features/export/ExportModal.tsx,43.07%,25%,20%,60%,MEDIUM,3,4,+0.8%,Medium,Export UI
