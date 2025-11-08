@@ -145,21 +145,25 @@ export default defineConfig({
               // Ensure core application assets are precached
               // NOTE: site.webmanifest is explicitly added here with matching path to VitePWA's output
               additionalManifestEntries: [
-                { url: '/', revision: `v2025-10-27.1-${Date.now().toString()}` },
+                { url: '/', revision: `v2025-11-08-brand-${Date.now().toString()}` },
               ],
             },
             includeAssets: [
+              'favicon.svg',
               'favicon.ico',
               'brand/inkwell-icon-192.png',
               'brand/inkwell-icon-512.png',
+              'brand/inkwell-logo-primary.svg',
+              'brand/inkwell-logo-alt.svg',
               'brand/*.png',
+              'brand/*.svg',
             ],
             manifest: {
               name: 'Inkwell - Professional Writing Studio',
               short_name: 'Inkwell',
               description:
                 'A sophisticated writing environment for authors, novelists, and creative writers',
-              theme_color: '#0A2F4E', // Navy blue
+              theme_color: '#13294B', // Inkwell Blue (updated to match brand)
               background_color: '#ffffff',
               display: 'standalone',
               orientation: 'portrait-primary',
@@ -167,16 +171,34 @@ export default defineConfig({
               start_url: '/',
               icons: [
                 {
+                  src: 'favicon.svg',
+                  sizes: 'any',
+                  type: 'image/svg+xml',
+                  purpose: 'any',
+                },
+                {
                   src: 'brand/inkwell-icon-192.png',
                   sizes: '192x192',
                   type: 'image/png',
-                  purpose: 'maskable any',
+                  purpose: 'any',
                 },
                 {
                   src: 'brand/inkwell-icon-512.png',
                   sizes: '512x512',
                   type: 'image/png',
-                  purpose: 'maskable any',
+                  purpose: 'any',
+                },
+                {
+                  src: 'brand/inkwell-icon-192.png',
+                  sizes: '192x192',
+                  type: 'image/png',
+                  purpose: 'maskable',
+                },
+                {
+                  src: 'brand/inkwell-icon-512.png',
+                  sizes: '512x512',
+                  type: 'image/png',
+                  purpose: 'maskable',
                 },
               ],
               shortcuts: [
