@@ -278,8 +278,7 @@ For developers and security researchers:
 
 ## Need Help?
 
-- **Documentation:** [Inkwell Docs](https://docs.inkwell.app)
-- **GitHub Issues:** [Report a bug](https://github.com/inkwell/inkwell/issues)
+- **GitHub Issues:** [Report a bug](https://github.com/oklahomahail/Inkwell2/issues)
 - **Security concerns:** security@inkwell.app
 
 **Remember:** Always keep your passphrase and Recovery Kit safe. Inkwell cannot recover your data if you lose both.

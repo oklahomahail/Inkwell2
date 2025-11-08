@@ -29,8 +29,6 @@ When static assets are incorrectly intercepted by middleware or rewrites, you'll
    - Status should be 200, not 302
    - If Status is 302 and redirects to `/sign-in`, your middleware is intercepting static assets
 
-![Network Tab Check](https://docs.inkwell.app/images/network-tab-check.png)
-
 ### Direct Asset Verification
 
 Try accessing a static asset URL directly:

@@ -198,7 +198,7 @@ window.Inkwell.performance.getAll();
 
 - Explore your **Welcome Project** for guided chapters
 - Click **Learn More** in the onboarding banner anytime to return here
-- Visit [github.com/anthropics/inkwell](https://github.com/anthropics/inkwell) for updates and release notes
+- Visit [github.com/oklahomahail/Inkwell2](https://github.com/oklahomahail/Inkwell2) for updates and release notes
 - Join the beta feedback round to shape future releases
 
 ---
@@ -238,7 +238,7 @@ Need additional support?
 
 - **Documentation**: Check this guide for common questions
 - **DevTools**: Use debugging utilities (see section 6)
-- **GitHub Issues**: Report bugs at [github.com/anthropics/inkwell/issues](https://github.com/anthropics/inkwell/issues)
+- **GitHub Issues**: Report bugs at [github.com/oklahomahail/Inkwell2/issues](https://github.com/oklahomahail/Inkwell2/issues)
 - **Community**: Join discussions and share feedback
 
 ---
