@@ -351,7 +351,7 @@ function AIToolbar() {
 
 ### Just-in-Time AI Setup
 
-**Location**: `src/components/AI/JustInTimeAI.tsx`
+<!-- **Location**: `src/components/AI/JustInTimeAI.tsx` -->
 
 Contextual AI setup component that appears when AI features are first accessed.
 

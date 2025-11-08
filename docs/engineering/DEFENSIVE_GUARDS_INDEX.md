@@ -81,7 +81,9 @@ See the deployment section in [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUAR
 
 ### ⏱️ **In a Hurry?**
 
-Start here → [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md)
+<!-- Start here → [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md) -->
+
+Start here → [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md)
 
 - The 4 guards (one-liners)
 - Complete copy-paste pattern
@@ -95,7 +97,9 @@ Start here → [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md)
 
 ### 🎨 **Want a Pretty Overview?**
 
-Start here → [`IMPLEMENTATION_SUMMARY.txt`](IMPLEMENTATION_SUMMARY.txt)
+<!-- Start here → [`IMPLEMENTATION_SUMMARY.txt`](IMPLEMENTATION_SUMMARY.txt) -->
+
+Start here → [`README_DEFENSIVE_GUARDS.md`](README_DEFENSIVE_GUARDS.md)
 
 - ASCII art formatted
 - All key info at a glance
@@ -111,10 +115,10 @@ Start here → [`IMPLEMENTATION_SUMMARY.txt`](IMPLEMENTATION_SUMMARY.txt)
 ### Documentation (7 files)
 
 ```
-├── QUICK_REFERENCE.md                          [5 min]  ⚡ Fastest
+<!-- ├── QUICK_REFERENCE.md                          [5 min]  ⚡ Fastest -->
 <!-- ├── FINAL_SUMMARY.md                            [10 min] 📊 Best overview -->
 ├── README_DEFENSIVE_GUARDS.md                  [10 min] 📊 Best overview
-├── IMPLEMENTATION_SUMMARY.txt                  [10 min] 🎨 ASCII formatted
+<!-- ├── IMPLEMENTATION_SUMMARY.txt                  [10 min] 🎨 ASCII formatted -->
 ├── DEFENSIVE_GUARDS_USAGE_GUIDE.md             [15 min] 💻 Code examples
 <!-- ├── DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md    [20 min] 🚀 Deploy guide -->
 └── (This file)                                 [5 min]  🗂️ Directory
@@ -300,8 +304,8 @@ RESULT: ALL CHECKS PASS ✅
 <!-- 1. [`FINAL_SUMMARY.md`](FINAL_SUMMARY.md) - Overview -->
 
 1. [`README_DEFENSIVE_GUARDS.md`](README_DEFENSIVE_GUARDS.md) - Overview
-2. [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md) - Essentials
-3. [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md) - Code
+<!-- 2. [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md) - Essentials -->
+2. [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md) - Code
 
 ### Intermediate (Want Details)
 
@@ -322,21 +326,22 @@ RESULT: ALL CHECKS PASS ✅
 
 ### If You're Stuck
 
-1. Check [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md) troubleshooting section
-2. Run `./verify-defensive-guards.sh` to diagnose
-3. Check browser console for `[Tour]` debug logs
-4. Review telemetry events in analytics dashboard
+<!-- 1. Check [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md) troubleshooting section -->
+
+1. Run `./verify-defensive-guards.sh` to diagnose
+2. Check browser console for `[Tour]` debug logs
+3. Review telemetry events in analytics dashboard
 
 ### Questions About...
 
-| Topic          | Document                                                             |
-| -------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | --- |
-| How to use     | [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md) |
-| <!--           | How to deploy                                                        | [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md) | --> |
-| Quick answer   | [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md)                           |
-| <!--           | Full overview                                                        | [`FINAL_SUMMARY.md`](FINAL_SUMMARY.md)                                                 | --> |
-| Full overview  | [`README_DEFENSIVE_GUARDS.md`](README_DEFENSIVE_GUARDS.md)           |
-| Visual summary | [`IMPLEMENTATION_SUMMARY.txt`](IMPLEMENTATION_SUMMARY.txt)           |
+| Topic         | Document                                                             |
+| ------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | --- |
+| How to use    | [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md) |
+| <!--          | How to deploy                                                        | [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md) | --> |
+| <!--          | Quick answer                                                         | [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md)                                             | --> |
+| <!--          | Full overview                                                        | [`FINAL_SUMMARY.md`](FINAL_SUMMARY.md)                                                 | --> |
+| Full overview | [`README_DEFENSIVE_GUARDS.md`](README_DEFENSIVE_GUARDS.md)           |
+| <!--          | Visual summary                                                       | [`IMPLEMENTATION_SUMMARY.txt`](IMPLEMENTATION_SUMMARY.txt)                             | --> |
 
 ---
 
@@ -371,8 +376,8 @@ Pick a document above and get started!
 
 - 📊 Want a status update? → [`README_DEFENSIVE_GUARDS.md`](README_DEFENSIVE_GUARDS.md)
 - 💻 Need to code something? → [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md)
-<!-- - 🚀 Time to deploy? → [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md) -->
-- ⏱️ In a hurry? → [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md)
+  <!-- - 🚀 Time to deploy? → [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md) -->
+  <!-- - ⏱️ In a hurry? → [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md) -->
 
 ---
 

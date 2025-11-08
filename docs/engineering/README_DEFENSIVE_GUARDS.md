@@ -58,10 +58,10 @@ status: '✅ PRODUCTION READY'
 | DEFENSIVE_GUARDS_INDEX.md       | 5 min                                    | Master directory - START HERE |
 | <!--                            | FINAL_SUMMARY.md                         | 10 min                        | Status & overview    | --> |
 | <!--                            | DEFENSIVE_GUARDS_DEPLOY_CHECKLIST.md     | 10 min                        | Deployment checklist | --> |
-| QUICK_REFERENCE.md              | 5 min                                    | Cheat sheet                   |
+| <!-- QUICK_REFERENCE.md         | 5 min                                    | Cheat sheet                   | -->                  |
 | DEFENSIVE_GUARDS_USAGE_GUIDE.md | 15 min                                   | Drop-in code examples         |
 | <!--                            | DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md | 20 min                        | Step-by-step deploy  | --> |
-| IMPLEMENTATION_SUMMARY.txt      | 10 min                                   | ASCII formatted               |
+| <!-- IMPLEMENTATION_SUMMARY.txt | 10 min                                   | ASCII formatted               | -->                  |
 | This file                       | 5 min                                    | Quick summary                 |
 
 ---
@@ -106,8 +106,8 @@ git push origin main
 - 🗂️ **Directory:** `DEFENSIVE_GUARDS_INDEX.md`
 <!-- - 📊 **Status:** `FINAL_SUMMARY.md` -->
 - 💻 **Code:** `DEFENSIVE_GUARDS_USAGE_GUIDE.md`
-<!-- - 🚀 **Deploy:** `DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md` -->
-- ⚡ **Quick:** `QUICK_REFERENCE.md`
+  <!-- - 🚀 **Deploy:** `DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md` -->
+  <!-- - ⚡ **Quick:** `QUICK_REFERENCE.md` -->
 
 ---
 
@@ -129,10 +129,11 @@ git push origin main
 
 ## 📞 Need Help?
 
-1. **Quick question?** → `QUICK_REFERENCE.md`
-2. **Want to code?** → `DEFENSIVE_GUARDS_USAGE_GUIDE.md`
-<!-- 3. **Ready to deploy?** → `DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md` -->
-3. **Lost?** → `DEFENSIVE_GUARDS_INDEX.md`
+<!-- 1. **Quick question?** → `QUICK_REFERENCE.md` -->
+
+1. **Want to code?** → `DEFENSIVE_GUARDS_USAGE_GUIDE.md`
+<!-- 2. **Ready to deploy?** → `DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md` -->
+2. **Lost?** → `DEFENSIVE_GUARDS_INDEX.md`
 
 ---
 

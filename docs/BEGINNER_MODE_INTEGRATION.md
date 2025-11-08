@@ -609,8 +609,9 @@ GET /api/health/beginner-mode
 <!-- - **[Feature Flag Presets Documentation](./featureFlagService.presets.ts)**: Complete preset configurations -->
 <!-- - **[First Draft Path State Machine](../state/onboarding/onboardingSlice.ts)**: Onboarding flow implementation -->
 
-- **[Just-in-Time AI Documentation](../components/AI/JustInTimeAI.tsx)**: Contextual AI setup
-- **[Template System](../data/starterTemplates.ts)**: Opinionated project templates
+<!-- - **[Just-in-Time AI Documentation](../components/AI/JustInTimeAI.tsx)**: Contextual AI setup -->
+<!-- - **[Template System](../data/starterTemplates.ts)**: Opinionated project templates -->
+
 - **[Analytics Events](../services/analyticsService.ts)**: All tracked events and data
 
 ---
