@@ -3,6 +3,7 @@ import { Eye, EyeOff, ExternalLink, CheckCircle, AlertCircle, Info } from 'lucid
 import React, { useState, useEffect, type ChangeEvent } from 'react';
 
 import AiSettingsPanel from '@/components/AI/AiSettingsPanel';
+import { E2EESettingsSection } from '@/components/E2EE/E2EESettingsSection';
 import { PrivacyControls } from '@/components/Privacy/PrivacyControls';
 import BackupControls from '@/components/Settings/BackupControls';
 import SnapshotHistoryDialog from '@/components/Settings/SnapshotHistoryDialog';
@@ -832,6 +833,13 @@ const SettingsPanel: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* End-to-End Encryption */}
+        <E2EESettingsSection
+          projectId={currentProject?.id || null}
+          projectTitle={currentProject?.name || null}
+          showToast={showToast}
+        />
 
         {/* Privacy & Analytics */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
