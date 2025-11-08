@@ -3,6 +3,55 @@ import * as matchers from '@testing-library/jest-dom/matchers';
 import { cleanup } from '@testing-library/react';
 import { expect, afterEach, afterAll, vi } from 'vitest';
 
+// Mock fetch globally to prevent network calls in tests
+global.fetch = vi.fn((url: string | URL | Request, _init?: RequestInit) => {
+  const urlString = typeof url === 'string' ? url : url instanceof URL ? url.toString() : url.url;
+
+  // Mock Supabase endpoints
+  if (urlString.includes('127.0.0.1:54321') || urlString.includes('localhost:54321')) {
+    return Promise.resolve({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ data: [], error: null }),
+      text: async () => '{"data":[],"error":null}',
+      blob: async () => new Blob(),
+      arrayBuffer: async () => new ArrayBuffer(0),
+      formData: async () => new FormData(),
+      clone: function () {
+        return this;
+      },
+      body: null,
+      bodyUsed: false,
+      redirected: false,
+      type: 'basic' as ResponseType,
+      url: urlString,
+    } as Response);
+  }
+
+  // Default mock for other URLs
+  return Promise.resolve({
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    headers: new Headers({ 'content-type': 'application/json' }),
+    json: async () => ({}),
+    text: async () => '{}',
+    blob: async () => new Blob(),
+    arrayBuffer: async () => new ArrayBuffer(0),
+    formData: async () => new FormData(),
+    clone: function () {
+      return this;
+    },
+    body: null,
+    bodyUsed: false,
+    redirected: false,
+    type: 'basic' as ResponseType,
+    url: urlString,
+  } as Response);
+}) as any;
+
 // Add matchMedia polyfill for components that need it
 if (!window.matchMedia) {
   Object.defineProperty(window, 'matchMedia', {

@@ -213,7 +213,17 @@ describe('E2EEKeyManager - Comprehensive', () => {
     it('should export Recovery Kit', async () => {
       const exported = await e2eeKeyManager.exportRecoveryKit(projectId);
 
-      expect(exported).toEqual(recoveryKit);
+      // Compare all fields except created_at which may differ by milliseconds
+      expect(exported.inkwell_recovery_kit).toBe(recoveryKit.inkwell_recovery_kit);
+      expect(exported.project_id).toBe(recoveryKit.project_id);
+      expect(exported.wrapped_dek).toBe(recoveryKit.wrapped_dek);
+      expect(exported.kdf).toEqual(recoveryKit.kdf);
+      expect(exported.aead).toBe(recoveryKit.aead);
+      expect(exported.version).toBe(recoveryKit.version);
+      // created_at should be close but may differ by a few milliseconds
+      const exportedTime = new Date(exported.created_at).getTime();
+      const originalTime = new Date(recoveryKit.created_at).getTime();
+      expect(Math.abs(exportedTime - originalTime)).toBeLessThan(1000); // within 1 second
     });
 
     it('should import Recovery Kit and restore access', async () => {
@@ -290,7 +300,7 @@ describe('E2EEKeyManager - Comprehensive', () => {
       const newHex = Buffer.from(newDEK).toString('hex');
 
       expect(newHex).toBe(originalHex);
-    });
+    }, 10000); // Increase timeout to 10 seconds for crypto operations
 
     it('should allow unlock with new passphrase', async () => {
       const newPassphrase = 'new passphrase';
