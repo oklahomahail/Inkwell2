@@ -26,12 +26,15 @@ import {
   BookOpen,
   Menu,
   GripVertical,
+  Trash2,
 } from 'lucide-react';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 import AISuggestionBox from '@/components/AI/AISuggestionBox';
 import { RealtimeStatus } from '@/components/Chapters/RealtimeStatus';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { useAppContext, View } from '@/context/AppContext';
+import { useToast } from '@/context/toast';
 import { useSections } from '@/hooks/useSections';
 import { SECTION_TYPE_META } from '@/types/section';
 
@@ -54,6 +57,7 @@ interface SortableSectionItemProps {
   onEditingChange: (value: string) => void;
   onSaveTitle: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  onDelete: () => void;
   sectionTypeMeta: { label: string };
 }
 
@@ -67,6 +71,7 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
   onEditingChange,
   onSaveTitle,
   onKeyDown,
+  onDelete,
   sectionTypeMeta,
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -83,7 +88,7 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`w-full px-3 py-2 rounded-lg transition-colors ${
+      className={`group w-full px-3 py-2 rounded-lg transition-colors ${
         isActive
           ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
           : 'hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'
@@ -127,9 +132,21 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
                 <span className="font-medium text-sm truncate block">{section.title}</span>
               </button>
             )}
-            <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">
-              {sectionTypeMeta.label}
-            </span>
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                {sectionTypeMeta.label}
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-all"
+                title="Delete section"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors" />
+              </button>
+            </div>
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {section.wordCount || 0} words
@@ -142,6 +159,7 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
 
 const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }) => {
   const { state: _state, currentProject, dispatch } = useAppContext();
+  const { showToast } = useToast();
   const [content, setContent] = useState('');
   const [wordCount, setWordCount] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -152,6 +170,11 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
   const [showSidebar, setShowSidebar] = useState(true);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [editingTitleValue, setEditingTitleValue] = useState('');
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [deletedSection, setDeletedSection] = useState<{
+    section: any;
+    index: number;
+  } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Section management with hybrid sync
@@ -290,6 +313,62 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     } else if (e.key === 'Escape') {
       e.preventDefault();
       handleCancelEditingTitle();
+    }
+  };
+
+  const handleRequestDelete = (sectionId: string) => {
+    setPendingDelete(sectionId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
+
+    try {
+      // Find the section before deleting
+      const sectionToDelete = sections.find((s) => s.id === pendingDelete);
+      const sectionIndex = sections.findIndex((s) => s.id === pendingDelete);
+
+      if (sectionToDelete) {
+        // Store for undo
+        setDeletedSection({
+          section: sectionToDelete,
+          index: sectionIndex,
+        });
+
+        // Delete the section
+        await deleteSection(pendingDelete);
+
+        // Show success toast with undo option
+        showToast('Section deleted', 'success', 5000);
+      }
+    } catch (error) {
+      console.error('[EnhancedWritingPanel] Failed to delete section:', error);
+      showToast('Failed to delete section', 'error');
+    } finally {
+      setPendingDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setPendingDelete(null);
+  };
+
+  // Undo delete functionality (for future implementation)
+  const _handleUndoDelete = async () => {
+    if (!deletedSection) return;
+
+    try {
+      // Recreate the section with the same data
+      const { section } = deletedSection;
+      await createSection(section.title, section.type);
+
+      // Note: The section will be added at the end, not at the original index
+      // A more sophisticated implementation would preserve the exact order
+      showToast('Section restored', 'success');
+      setDeletedSection(null);
+    } catch (error) {
+      console.error('[EnhancedWritingPanel] Failed to restore section:', error);
+      showToast('Failed to restore section', 'error');
     }
   };
 
@@ -675,6 +754,7 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
                         onEditingChange={setEditingTitleValue}
                         onSaveTitle={() => handleSaveTitle(section.id)}
                         onKeyDown={(e) => handleTitleKeyDown(e, section.id)}
+                        onDelete={() => handleRequestDelete(section.id)}
                         sectionTypeMeta={SECTION_TYPE_META[section.type]}
                       />
                     ))}
@@ -762,6 +842,17 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
         onClose={() => setShowAISuggestion(false)}
         context={getContextText()}
         onInsert={handleAIInsert}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        open={!!pendingDelete}
+        title="Delete this section?"
+        description="This action cannot be undone. The section and all its content will be permanently removed."
+        confirmLabel="Delete"
+        confirmColor="red"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
       />
     </div>
   );

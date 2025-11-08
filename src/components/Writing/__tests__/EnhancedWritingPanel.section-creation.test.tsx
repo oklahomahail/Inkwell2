@@ -22,6 +22,15 @@ vi.mock('@/context/EditorContext', () => ({
   }),
 }));
 
+vi.mock('@/context/toast', () => ({
+  useToast: () => ({
+    showToast: vi.fn(),
+    removeToast: vi.fn(),
+    clearToasts: vi.fn(),
+    toasts: [],
+  }),
+}));
+
 vi.mock('@/hooks/useSections');
 
 describe('EnhancedWritingPanel - Section Creation', () => {
