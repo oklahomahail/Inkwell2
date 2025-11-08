@@ -31,7 +31,7 @@ Welcome to the Inkwell documentation! This directory contains guides, technical 
 
 ### Architecture
 
-- **[React Hooks Safety](../HOOKS_SAFETY.md)** - Defensive guards, linting rules, MutationObserver patterns
+- **[React Hooks Safety](./HOOKS_SAFETY.md)** - Defensive guards, linting rules, MutationObserver patterns
 - **[Recovery Service](../src/services/recoveryService.ts)** - Technical implementation of 3-tier recovery
 
 ### Operations
@@ -75,7 +75,8 @@ Internal implementation tracking (for contributors):
 
 **Authentication Issues**
 
-- See [Auth Troubleshooting](../AUTH_TROUBLESHOOTING.md)
+<!-- - See [Auth Troubleshooting](../AUTH_TROUBLESHOOTING.md) -->
+
 - Check Supabase configuration
 - Review email delivery settings
 
@@ -93,8 +94,8 @@ Internal implementation tracking (for contributors):
 ## External Resources
 
 - **Inkwell Homepage**: [writewithinkwell.com](https://writewithinkwell.com)
-- **GitHub Repository**: [github.com/davehail/inkwell](https://github.com/davehail/inkwell)
-- **Issue Tracker**: [github.com/davehail/inkwell/issues](https://github.com/davehail/inkwell/issues)
+- **GitHub Repository**: [github.com/oklahomahail/Inkwell2](https://github.com/oklahomahail/Inkwell2)
+- **Issue Tracker**: [github.com/oklahomahail/Inkwell2/issues](https://github.com/oklahomahail/Inkwell2/issues)
 - **Support Email**: [privacy@writewithinkwell.com](mailto:privacy@writewithinkwell.com)
 
 ---

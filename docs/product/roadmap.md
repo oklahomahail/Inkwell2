@@ -60,4 +60,4 @@ This document outlines the planned features and improvements for Inkwell over th
 We welcome input on our roadmap! Please submit feature requests through:
 
 1. GitHub Issues: [github.com/oklahomahail/Inkwell2/issues](https://github.com/oklahomahail/Inkwell2/issues)
-2. User feedback form: [inkwell.app/feedback](https://inkwell.app/feedback)
+<!-- 2. User feedback form: [inkwell.app/feedback](https://inkwell.app/feedback) -->
