@@ -612,7 +612,7 @@ GET /api/health/beginner-mode
 <!-- - **[Just-in-Time AI Documentation](../components/AI/JustInTimeAI.tsx)**: Contextual AI setup -->
 <!-- - **[Template System](../data/starterTemplates.ts)**: Opinionated project templates -->
 
-- **[Analytics Events](../services/analyticsService.ts)**: All tracked events and data
+- **[Analytics Events](../src/services/analyticsService.ts)**: All tracked events and data
 
 ---
 
