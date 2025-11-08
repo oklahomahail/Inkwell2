@@ -1,18 +1,18 @@
 # Coverage Weekly Report
 
 **Generated:** 2025-11-08
-**Baseline:** No baseline (first run)
+**Baseline:** Previous snapshot
 
 ---
 
 ## Overall Coverage
 
-| Metric         | Current | Baseline | Change    | Status |
-| -------------- | ------- | -------- | --------- | ------ |
-| **Lines**      | 64.75%  | 0.00%    | 🆕 64.75% | 🟢     |
-| **Branches**   | 78.91%  | 0.00%    | 🆕 78.91% | 🟢     |
-| **Functions**  | 58.73%  | 0.00%    | 🆕 58.73% | 🟢     |
-| **Statements** | 64.75%  | 0.00%    | 🆕 64.75% | 🟢     |
+| Metric         | Current | Baseline | Change  | Status |
+| -------------- | ------- | -------- | ------- | ------ |
+| **Lines**      | 65.75%  | 65.75%   | ━ 0.00% | ⚪     |
+| **Branches**   | 79.42%  | 79.42%   | ━ 0.00% | ⚪     |
+| **Functions**  | 61.23%  | 61.23%   | ━ 0.00% | ⚪     |
+| **Statements** | 65.75%  | 65.75%   | ━ 0.00% | ⚪     |
 
 ### ✅ Coverage Stable
 
@@ -24,18 +24,7 @@ Coverage remained stable (+0.00%).
 
 Top 10 files with significant changes:
 
-| File                                             | Current | Baseline | Change     |
-| ------------------------------------------------ | ------- | -------- | ---------- |
-| `src/components/ProtectedRoute.tsx`              | 100.00% | 0.00%    | 🟢 🆕 100% |
-| `src/components/RequireAuth.tsx`                 | 100.00% | 0.00%    | 🟢 🆕 100% |
-| `src/components/Auth/AuthFooter.tsx`             | 100.00% | 0.00%    | 🟢 🆕 100% |
-| `src/components/Brand/InkwellLogo.tsx`           | 100.00% | 0.00%    | 🟢 🆕 100% |
-| `src/components/PWA/PWAInstallButton.tsx`        | 100.00% | 0.00%    | 🟢 🆕 100% |
-| `src/components/PWA/PWAOfflineIndicator.tsx`     | 100.00% | 0.00%    | 🟢 🆕 100% |
-| `src/components/StatusBar/StatusBar.tsx`         | 100.00% | 0.00%    | 🟢 🆕 100% |
-| `src/components/Storage/StatusChip.tsx`          | 100.00% | 0.00%    | 🟢 🆕 100% |
-| `src/components/Storage/StorageHealthWidget.tsx` | 100.00% | 0.00%    | 🟢 🆕 100% |
-| `src/components/Topbar/AutosaveIndicator.tsx`    | 100.00% | 0.00%    | 🟢 🆕 100% |
+_No significant file-level changes (all within ±1%)_
 
 ---
 
@@ -48,10 +37,9 @@ Files that urgently need testing:
 | `src/components/Sections/BookBuilderModal.tsx` | **2.28%**  | 0.00%     |
 | `src/lib/sectionIcons.tsx`                     | **5.66%**  | 0.00%     |
 | `src/hooks/useSync.ts`                         | **6.25%**  | 0.00%     |
-| `src/model/chapters.ts`                        | **6.98%**  | 0.00%     |
-| `src/model/characters.ts`                      | **7.85%**  | 0.00%     |
 | `src/services/exportHistory.ts`                | **9.56%**  | 9.09%     |
 | `src/features/preview/analytics.ts`            | **12.00%** | 0.00%     |
+| `src/services/supabaseSync.ts`                 | **12.91%** | 0.00%     |
 | `src/services/sectionMigration.ts`             | **14.28%** | 20.00%    |
 | `src/utils/perf.ts`                            | **15.09%** | 7.69%     |
 | `src/services/chaptersSyncService.ts`          | **16.78%** | 20.00%    |
@@ -60,7 +48,7 @@ Files that urgently need testing:
 | `src/services/storageService.ts`               | **23.17%** | 16.66%    |
 | `src/hooks/useProject.ts`                      | **24.69%** | 33.33%    |
 
-_Showing top 14 of 14 critical files_
+_Showing top 13 of 13 critical files_
 
 ---
 
