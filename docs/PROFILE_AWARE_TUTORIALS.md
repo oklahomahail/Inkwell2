@@ -539,6 +539,4 @@ export class CustomTutorialProvider extends ProfileTourProvider {
 
 **Related Documentation:**
 
-- [Multi-Profile System](./MULTI_PROFILE_SYSTEM.md)
 - [Rollback Procedures](./ROLLBACK_PROCEDURES.md)
-- [Smoke Test Guide](./SMOKE_TEST_GUIDE.md)

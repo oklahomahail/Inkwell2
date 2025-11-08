@@ -9,8 +9,6 @@
 
 ### React & Hooks
 
-- [**React Hooks Quick Reference**](../../HOOKS_QUICK_REF.md) - Common patterns, fixes, and best practices
-- [**React Hooks Fix Summary**](../../REACT_HOOKS_FIX_SUMMARY.md) - Recent improvements and enforcement details
 - [Hooks Safety Guidelines](../HOOKS_SAFETY.md) - Comprehensive safety patterns
 
 **Run hooks linting locally:**

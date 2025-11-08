@@ -361,5 +361,4 @@ export function FirstActionPrompt() {
 - [Feature Guide: Tour](../features/tour.md)
 - [Architecture: Spotlight Tour](../architecture/spotlight-tour-architecture.md)
 - [Operations: Telemetry](../ops/telemetry.md)
-- [QA Checklist](../../QA_CHECKLIST.md)
 - [User Guide](../../USER_GUIDE.md)

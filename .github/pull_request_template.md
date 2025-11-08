@@ -33,7 +33,7 @@
 - [ ] Build succeeds (`pnpm build`)
 - [ ] No TypeScript errors (`pnpm typecheck`)
 - [ ] Linting passes with zero warnings (`pnpm lint:ci`)
-- [ ] **React Hooks rules pass** (`pnpm lint:hooks`) - see [Quick Ref](../HOOKS_QUICK_REF.md)
+- [ ] **React Hooks rules pass** (`pnpm lint:hooks`)
 - [ ] Prettier formatting applied (`pnpm prettier:check`)
 - [ ] No `console.log` statements (use `devLog.debug` instead)
 - [ ] Pre-commit hooks ran successfully

@@ -440,4 +440,3 @@ Set up alerts for:
 - [Architecture: Spotlight Tour](../architecture/spotlight-tour-architecture.md)
 - [Feature Guide: Tour](../features/tour.md)
 - [Product: First-Run Experience](../product/first-run-experience.md)
-- [QA Checklist](../../QA_CHECKLIST.md)

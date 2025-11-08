@@ -209,7 +209,7 @@ E2E tests in `e2e/tour.spec.ts` validate:
 
 ### Manual QA
 
-See `QA_CHECKLIST.md` for:
+Manual QA should include:
 
 - Visual regression checks
 - Cross-browser testing
@@ -344,5 +344,4 @@ The tour service handles route transitions automatically.
 - [Architecture: Spotlight Tour](../architecture/spotlight-tour-architecture.md)
 - [Operations: Telemetry](../ops/telemetry.md)
 - [Product: First-Run Experience](../product/first-run-experience.md)
-- [QA Checklist](../../QA_CHECKLIST.md)
 - [User Guide](../../USER_GUIDE.md)

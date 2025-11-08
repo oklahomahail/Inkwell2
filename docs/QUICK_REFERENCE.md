@@ -174,7 +174,6 @@ npm run build
 | ------------------------------------------ | --------------------- |
 | `src/tour/utils/layoutGuards.ts`           | Guard implementations |
 | `src/tour/components/TourOrchestrator.tsx` | Integration example   |
-| `DEFENSIVE_GUARDS_COMPLETE.md`             | Full documentation    |
 | `DEFENSIVE_GUARDS_USAGE_GUIDE.md`          | Detailed examples     |
 
 ---

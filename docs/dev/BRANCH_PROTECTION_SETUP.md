@@ -123,8 +123,7 @@ jobs:
 **Solution**:
 
 1. Run `pnpm lint:hooks` locally to see detailed errors
-2. See [HOOKS_QUICK_REF.md](../../HOOKS_QUICK_REF.md) for common fixes
-3. Check [eslint.config.hooks.js](../../eslint.config.hooks.js) for the exact rules
+2. Check [eslint.config.hooks.js](../../eslint.config.hooks.js) for the exact rules
 
 ## Bypassing (Emergency Only)
 
@@ -140,5 +139,3 @@ If you need to bypass in an emergency:
 ## References
 
 - [GitHub Branch Protection Docs](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)
-- [React Hooks Quick Reference](../../HOOKS_QUICK_REF.md)
-- [React Hooks Fix Summary](../../REACT_HOOKS_FIX_SUMMARY.md)

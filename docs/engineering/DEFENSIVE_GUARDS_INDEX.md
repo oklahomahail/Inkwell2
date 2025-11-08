@@ -47,9 +47,9 @@ Start here → [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.
 
 ### 🏗️ **Developer (Implementing Changes)**
 
-Start here → [`DEFENSIVE_GUARDS_COMPLETE.md`](DEFENSIVE_GUARDS_COMPLETE.md)
+Start here → [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md)
 
-- Full technical documentation
+- Drop-in code examples
 - All 6 guard function explanations
 - TourOrchestrator integration details
 - Telemetry event types
@@ -112,7 +112,6 @@ Start here → [`IMPLEMENTATION_SUMMARY.txt`](IMPLEMENTATION_SUMMARY.txt)
 ├── IMPLEMENTATION_SUMMARY.txt                  [10 min] 🎨 ASCII formatted
 ├── DEFENSIVE_GUARDS_USAGE_GUIDE.md             [15 min] 💻 Code examples
 ├── DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md    [20 min] 🚀 Deploy guide
-├── DEFENSIVE_GUARDS_COMPLETE.md                [30 min] 📚 Full reference
 └── (This file)                                 [5 min]  🗂️ Directory
 ```
 
@@ -162,7 +161,7 @@ Start here → [`IMPLEMENTATION_SUMMARY.txt`](IMPLEMENTATION_SUMMARY.txt)
 
 ### Task: Understand How It Works
 
-1. Read: [`DEFENSIVE_GUARDS_COMPLETE.md`](DEFENSIVE_GUARDS_COMPLETE.md)
+1. Read: [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md)
 2. Review: `src/tour/utils/layoutGuards.ts`
 3. Review: `src/tour/components/TourOrchestrator.tsx`
 4. Check code comments for details
@@ -297,7 +296,7 @@ RESULT: ALL CHECKS PASS ✅
 
 ### Intermediate (Want Details)
 
-1. [`DEFENSIVE_GUARDS_COMPLETE.md`](DEFENSIVE_GUARDS_COMPLETE.md) - Deep dive
+1. [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md) - Deep dive
 2. `src/tour/utils/layoutGuards.ts` - Read source
 3. `src/tour/components/TourOrchestrator.tsx` - See integration
 
@@ -324,7 +323,6 @@ RESULT: ALL CHECKS PASS ✅
 | Topic          | Document                                                                               |
 | -------------- | -------------------------------------------------------------------------------------- |
 | How to use     | [`DEFENSIVE_GUARDS_USAGE_GUIDE.md`](DEFENSIVE_GUARDS_USAGE_GUIDE.md)                   |
-| How it works   | [`DEFENSIVE_GUARDS_COMPLETE.md`](DEFENSIVE_GUARDS_COMPLETE.md)                         |
 | How to deploy  | [`DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`](DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md) |
 | Quick answer   | [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md)                                             |
 | Full overview  | [`FINAL_SUMMARY.md`](FINAL_SUMMARY.md)                                                 |

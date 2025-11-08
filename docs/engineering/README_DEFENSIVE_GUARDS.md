@@ -59,7 +59,6 @@ status: '✅ PRODUCTION READY'
 | FINAL_SUMMARY.md                         | 10 min   | Status & overview             |
 | DEFENSIVE_GUARDS_DEPLOY_CHECKLIST.md     | 10 min   | Deployment checklist          |
 | QUICK_REFERENCE.md                       | 5 min    | Cheat sheet                   |
-| DEFENSIVE_GUARDS_COMPLETE.md             | 30 min   | Full technical reference      |
 | DEFENSIVE_GUARDS_USAGE_GUIDE.md          | 15 min   | Drop-in code examples         |
 | DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md | 20 min   | Step-by-step deploy           |
 | IMPLEMENTATION_SUMMARY.txt               | 10 min   | ASCII formatted               |
@@ -132,9 +131,8 @@ git push origin main
 
 1. **Quick question?** → `QUICK_REFERENCE.md`
 2. **Want to code?** → `DEFENSIVE_GUARDS_USAGE_GUIDE.md`
-3. **Need details?** → `DEFENSIVE_GUARDS_COMPLETE.md`
-4. **Ready to deploy?** → `DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`
-5. **Lost?** → `DEFENSIVE_GUARDS_INDEX.md`
+3. **Ready to deploy?** → `DEPLOYMENT_CHECKLIST_DEFENSIVE_GUARDS.md`
+4. **Lost?** → `DEFENSIVE_GUARDS_INDEX.md`
 
 ---
 

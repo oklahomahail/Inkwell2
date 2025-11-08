@@ -331,7 +331,6 @@ Check these files:
 - Implementation: `/src/tour/utils/layoutGuards.ts`
 - Integration: `/src/tour/components/TourOrchestrator.tsx`
 - Analytics: `/src/tour/hooks/useAnalytics.ts`
-- Documentation: `/DEFENSIVE_GUARDS_COMPLETE.md`
 
 Run verification:
 
