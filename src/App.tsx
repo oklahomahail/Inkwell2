@@ -265,7 +265,7 @@ function AppShell() {
 
 // Profile-specific app shell (the original app logic)
 function ProfileAppShell() {
-  const { claude, currentProject } = useAppContext();
+  const { claude, currentProject, setCurrentProjectId } = useAppContext();
   const { insertText } = useEditorContext();
 
   // storage recovery
@@ -329,6 +329,12 @@ function ProfileAppShell() {
         const projectId = await ensureWelcomeProject();
         devLog.log('[App] Welcome project created:', projectId);
 
+        // CRITICAL: Set the welcome project as current project
+        if (projectId) {
+          setCurrentProjectId(projectId);
+          devLog.log('[App] Welcome project set as current:', projectId);
+        }
+
         // Mark that a tour is active
         setTourActive(true);
         devLog.log('[App] Tour active flag set');
@@ -388,7 +394,7 @@ function ProfileAppShell() {
         }
       }
     },
-    [setTourActive, completeOnboarding, tour],
+    [setTourActive, completeOnboarding, tour, setCurrentProjectId],
   );
 
   const handleOpenChecklist = useCallback(async () => {
