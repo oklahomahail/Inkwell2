@@ -17,6 +17,16 @@ Inkwell is an **offline-first writing platform** for serious authors. The focus 
 
 ### ✅ Recently Completed
 
+#### Advanced Mode for AI Providers (November 9, 2025)
+
+- **Advanced Mode Toggle**: Persistent opt-in system for power users with localStorage persistence
+- **User API Key Overrides**: Secure browser-based storage for custom provider API keys
+- **Extended Model Registry**: 9 total models (7 curated baseline + 2 extended experimental)
+- **Priority System**: User overrides → Environment variables with graceful fallbacks
+- **Comprehensive Testing**: 75 new tests achieving 80.59% coverage across AI configuration layer
+- **Error Handling**: Robust localStorage error handling for private browsing and quota scenarios
+- **Documentation**: Complete Advanced Mode guide in docs/ai-providers.md
+
 #### v0.9.1-beta - Onboarding, EPUB, Telemetry & Bundle Guard (November 2025)
 
 - **Welcome Project**: Pre-populated sample project for new users with quick start guide

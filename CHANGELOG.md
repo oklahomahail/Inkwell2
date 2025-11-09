@@ -4,6 +4,49 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Added - Advanced Mode for AI Providers (November 9, 2025)
+
+**Focus**: Power User Features, API Key Management, Extended Models
+
+#### Advanced Mode System
+
+- **Advanced Mode Toggle** - Opt-in power user features
+  - Persistent state in localStorage (`inkwell_ai_advanced_mode`)
+  - Zustand store for state management (`useAiPreferences`)
+  - Simple baseline (7 models) vs Advanced (9 models) layering
+
+- **User API Key Override System**
+  - Store custom provider API keys in browser localStorage
+  - Priority: User overrides → Environment variables
+  - Graceful error handling for private browsing/quota exceeded
+  - Per-provider key management (OpenAI, Anthropic, Google)
+  - Functions: `setUserApiKey()`, `removeUserApiKey()`, `getApiKey()`
+
+- **Extended Model Registry**
+  - **Baseline Mode** (7 curated models):
+    - OpenAI: GPT-4o Mini, GPT-4o, GPT-4 Turbo
+    - Anthropic: Claude 3 Haiku, Claude 3.5 Sonnet
+    - Google: Gemini 1.5 Flash, Gemini 1.5 Pro
+  - **Advanced Mode** (+2 extended models):
+    - OpenAI: GPT-3.5 Turbo
+    - Anthropic: Claude 3 Opus
+
+- **UI Components**:
+  - `AdvancedModeToggle` - Toggle switch with tooltip
+  - `AiProviderKeys` - API key management interface with show/hide
+  - `ModelSelector` - Updated to show extended models when advanced mode enabled
+
+- **Testing & Coverage**:
+  - 75 new comprehensive tests (100% pass rate)
+  - `src/ai/__tests__/config.test.ts` - 26 API key override tests
+  - `src/ai/__tests__/registry.advanced.test.ts` - 49 model registry tests
+  - Coverage: 80.59% overall (config.ts: 95.83%, registry.ts: 72.09%)
+
+- **Documentation**:
+  - Updated `docs/ai-providers.md` with Advanced Mode guide
+  - Complete API documentation for all new functions
+  - Usage examples for baseline and advanced workflows
+
 ### Added - Multi-Provider AI System
 
 **Focus**: User Choice, Flexibility, Free Models

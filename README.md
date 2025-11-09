@@ -201,15 +201,20 @@ MIT
 
 ### AI-Powered Story Development
 
-- **🤖 Enhanced AI System** — Production-ready Claude integration with mock mode for demos
+- **🤖 Enhanced AI System** — Production-ready multi-provider AI integration with mock mode for demos
 - **🛡️ Robust AI Infrastructure** — Circuit breaker, retry logic, and real-time status monitoring
 - **🎭 Demo-Safe Mock Mode** — Full AI functionality without API keys for presentations
+- **⚡ Advanced Mode** — Power user features with API key overrides and extended model selection:
+  - **User API Key Overrides** — Use your own API keys stored securely in browser localStorage
+  - **Extended Model Registry** — Access 9 models (7 baseline + 2 extended: GPT-3.5 Turbo, Claude 3 Opus)
+  - **Layered Architecture** — Simple baseline for beginners, advanced features for power users
+  - **Priority System** — User keys override environment variables for flexible configuration
 - **📊 AI Plot Analysis** — Comprehensive plot structure analysis with pacing graphs, conflict heatmaps, and actionable insights
 - **Story Architect Mode** — Generate complete story outlines from premise to scene details
 - **Consistency Guardian** — AI analysis of character, timeline, and plot consistency
 - **AI Writing Toolbar** — Context-aware suggestions for continuing scenes and improving flow
 - **Character Development** — AI-assisted character arcs, motivations, and conflicts
-- **Multi-Provider Support** — Claude, OpenAI, and custom endpoint compatibility
+- **Multi-Provider Support** — Claude (Anthropic), OpenAI (GPT models), Google (Gemini)
 
 ### Enhanced Timeline Management
 
@@ -385,7 +390,16 @@ pnpm vercel:test     # Test production build locally
 
 **Current Phase:** Phase 2 Advanced Features ✅ (Plot Boards MVP Complete)
 
-**Recently Completed (October 2025):**
+**Recently Completed (November 2025):**
+
+- ✅ **Advanced Mode for AI Providers (Nov 9, 2025)** — Power user features with comprehensive test coverage:
+  - **⚡ Advanced Mode Toggle**: Persistent opt-in system for power users
+  - **🔑 User API Key Overrides**: Store and manage your own provider API keys in localStorage
+  - **📚 Extended Model Registry**: 9 total models (7 curated baseline + 2 extended experimental)
+  - **🎯 Priority System**: User overrides → Environment variables with graceful fallbacks
+  - **✅ Comprehensive Testing**: 75 new tests (26 config tests, 49 registry tests) with 80.59% coverage
+  - **🛡️ Error Handling**: Robust localStorage error handling for private browsing and quota issues
+  - **📖 Full Documentation**: Updated docs/ai-providers.md with Advanced Mode guide
 
 - ✅ **Comprehensive Test Suite Implementation (Oct 27, 2025)** — Achieved 72.31% test coverage exceeding 70% target:
   - **📊 Test Coverage**: 72.31% statements, 79.73% branches, 64.93% functions, 72.31% lines
