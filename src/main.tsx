@@ -13,11 +13,13 @@ import { AppProviders } from './AppProviders';
 import { initGlobalErrorHandlers } from './boot/globalErrors';
 import './index.css';
 import './utils/flags';
+import { analyticsService } from './services/analytics';
 import { emitSessionEnd, emitSessionStart } from './services/telemetry';
 import { waitForRoot } from './utils/dom/waitForRoot';
 // Initialize storage persistence and monitoring
 import { warnIfDifferentOrigin } from './utils/storage/originGuard';
 import { ensurePersistentStorage } from './utils/storage/persistence';
+// Initialize analytics
 // Initialize telemetry
 
 // Initialize development tools in development mode
@@ -43,14 +45,23 @@ ensurePersistentStorage().then((result) => {
 
 warnIfDifferentOrigin();
 
+// Initialize analytics service
+analyticsService.initialize().catch((error) => {
+  devLog.error('Failed to initialize analytics:', error);
+});
+
 // Initialize session telemetry
 emitSessionStart();
 
 // Emit session.end on page unload or visibility change to hidden
-window.addEventListener('beforeunload', () => emitSessionEnd('unload'));
+window.addEventListener('beforeunload', () => {
+  emitSessionEnd('unload');
+  analyticsService.endSession();
+});
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
     emitSessionEnd('background');
+    analyticsService.endSession();
   }
 });
 

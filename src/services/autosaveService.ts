@@ -12,6 +12,7 @@
  * - Performance metrics tracking
  */
 
+import { analyticsService } from './analytics';
 import { autosaveMetrics } from './autosaveMetrics';
 
 type SaveFn = (chapterId: string, content: string) => Promise<{ checksum: string }>;
@@ -75,16 +76,31 @@ export class AutosaveService {
       this.lastChecksum.set(chapterId, res.checksum);
       this.setState('saved');
 
-      // Record metrics
+      // Record metrics (legacy)
       autosaveMetrics.recordSave(latency, contentSize, true);
+
+      // Log to analytics service
+      analyticsService.logMetric('autosave', 'save.latency', latency, 'ms');
+      analyticsService.logMetric('autosave', 'save.size', contentSize, 'bytes');
+      analyticsService.logEvent('autosave', 'save.success', undefined, latency, {
+        contentSize,
+        chapterId,
+      });
     } catch (e) {
       const latency = performance.now() - startTime;
       const errorCode = (e as any)?.code || 'UNKNOWN';
 
       this.setState(navigator.onLine ? 'error' : 'offline');
 
-      // Record metrics for failed save
+      // Record metrics for failed save (legacy)
       autosaveMetrics.recordSave(latency, contentSize, false, errorCode);
+
+      // Log error to analytics service
+      analyticsService.logEvent('autosave', 'save.error', errorCode, latency, {
+        contentSize,
+        chapterId,
+        error: (e as Error).message,
+      });
 
       throw e;
     } finally {

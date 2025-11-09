@@ -3,7 +3,9 @@
 import { CHAPTER_STATUS } from '@/consts/writing';
 import { EnhancedProject, WritingSession } from '@/types/project';
 import { type Scene, type Chapter as WritingChapter } from '@/types/writing';
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
+
+import { analyticsService } from './analytics';
 
 export class EnhancedStorageService {
   private static PROJECTS_KEY = 'inkwell_enhanced_projects';
@@ -12,24 +14,69 @@ export class EnhancedStorageService {
 
   // ---------- EnhancedProject (unchanged shape) ----------
   static saveProject(project: EnhancedProject): void {
+    const startTime = performance.now();
     try {
       const projects = this.loadAllProjects();
       const idx = projects.findIndex((p) => p.id === project.id);
       const updated = { ...project, updatedAt: Date.now() };
+      const isNew = idx < 0;
       if (idx >= 0) projects[idx] = updated;
       else projects.push(updated);
       localStorage.setItem(this.PROJECTS_KEY, JSON.stringify(projects));
+
+      const latency = performance.now() - startTime;
+      const dataSize = new Blob([JSON.stringify(updated)]).size;
+
+      // Log storage operation to analytics
+      analyticsService.logMetric('storage', 'write.latency', latency, 'ms');
+      analyticsService.logMetric('storage', 'write.size', dataSize, 'bytes');
+      analyticsService.logEvent(
+        'storage',
+        isNew ? 'project.create' : 'project.update',
+        undefined,
+        latency,
+        {
+          projectId: project.id,
+          dataSize,
+        },
+      );
     } catch (error) {
+      const latency = performance.now() - startTime;
       devLog.error('Failed to save project:', error);
+
+      // Log storage error to analytics
+      analyticsService.logEvent('storage', 'write.error', 'save_project', latency, {
+        projectId: project.id,
+        errorMessage: (error as Error)?.message,
+      });
     }
   }
 
   static loadProject(projectId: string): EnhancedProject | null {
+    const startTime = performance.now();
     try {
       const projects = this.loadAllProjects();
-      return projects.find((p) => p.id === projectId) || null;
+      const project = projects.find((p) => p.id === projectId) || null;
+      const latency = performance.now() - startTime;
+
+      // Log storage read to analytics
+      analyticsService.logMetric('storage', 'read.latency', latency, 'ms');
+      analyticsService.logEvent('storage', 'project.load', undefined, latency, {
+        projectId,
+        found: !!project,
+      });
+
+      return project;
     } catch (error) {
+      const latency = performance.now() - startTime;
       devLog.error('Failed to load project:', error);
+
+      // Log storage error to analytics
+      analyticsService.logEvent('storage', 'read.error', 'load_project', latency, {
+        projectId,
+        errorMessage: (error as Error)?.message,
+      });
+
       return null;
     }
   }

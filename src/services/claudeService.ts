@@ -3,6 +3,8 @@ import CryptoJS from 'crypto-js';
 
 import devLog from '@/utils/devLog';
 
+import { analyticsService } from './analytics';
+
 const MESSAGE_LIMIT = 50;
 const API_KEY_STORAGE = 'claude_api_key_encrypted';
 const ENCRYPTION_KEY = 'inkwell_claude_key';
@@ -129,6 +131,7 @@ Context: You have access to the user's current project and any selected text. Al
       throw this.createError('Message content cannot be empty', 'invalid_request', false);
     }
 
+    const startTime = performance.now();
     try {
       const messages = this.buildMessageHistory(content, context);
 
@@ -162,6 +165,7 @@ Context: You have access to the user's current project and any selected text. Al
       }
 
       const data = await response.json();
+      const latency = performance.now() - startTime;
       this.updateRateLimit();
 
       devLog.debug('✅ Received response from Claude API', {
@@ -174,20 +178,48 @@ Context: You have access to the user's current project and any selected text. Al
       }
 
       const responseText = data.content[0]?.text || '';
+      const usage = data.usage
+        ? {
+            inputTokens: data.usage.input_tokens,
+            outputTokens: data.usage.output_tokens,
+          }
+        : undefined;
+
+      // Log AI request to analytics
+      analyticsService.logMetric('ai', 'request.latency', latency, 'ms');
+      analyticsService.logEvent('ai', 'request.success', this.config.model, latency, {
+        model: this.config.model,
+        inputTokens: usage?.inputTokens,
+        outputTokens: usage?.outputTokens,
+        totalTokens: (usage?.inputTokens || 0) + (usage?.outputTokens || 0),
+        messageLength: content.length,
+        responseLength: responseText.length,
+      });
+
+      if (usage) {
+        analyticsService.logMetric('ai', 'tokens.input', usage.inputTokens, 'count');
+        analyticsService.logMetric('ai', 'tokens.output', usage.outputTokens, 'count');
+        analyticsService.logAggregate('ai', 'tokens.total', usage.inputTokens + usage.outputTokens);
+      }
 
       return {
         content: responseText,
         text: responseText,
         trim: () => responseText.trim(),
-        usage: data.usage
-          ? {
-              inputTokens: data.usage.input_tokens,
-              outputTokens: data.usage.output_tokens,
-            }
-          : undefined,
+        usage,
       };
     } catch (error) {
+      const latency = performance.now() - startTime;
       devLog.error('❌ Claude API Error:', error);
+
+      // Log AI error to analytics
+      const errorType = (error as ClaudeError)?.type || 'unknown';
+      analyticsService.logEvent('ai', 'request.error', errorType, latency, {
+        model: this.config.model,
+        errorType,
+        errorMessage: (error as Error)?.message,
+        messageLength: content.length,
+      });
 
       if ((error as Error)?.name === 'ClaudeError') {
         throw error;
