@@ -1,16 +1,20 @@
 # Inkwell User Guide
 
-| **Welcome to Inkwell** — where you'll find your story and write it well. Our professiona | Shortcut                | Action                                                                                                  |
-| ---------------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
-| **⌘K** (Mac) / **Ctrl+K** (PC)                                                           | Open Command Palette    |
-| **⌘1**                                                                                   | Switch to Dashboard     |
-| **⌘2**                                                                                   | Switch to Writing       |
-| **⌘3**                                                                                   | Switch to Timeline      |
-| **⌘4**                                                                                   | Switch to Analysis      |
-| **⌘\\**                                                                                  | Toggle Sidebar          |
-| **F11**                                                                                  | Enter Focus Mode        |
-| **Esc**                                                                                  | Exit Focus Mode         |
-| **?**                                                                                    | Show keyboard shortcuts | tform combines focused writing tools with intelligent AI assistance to help bring your stories to life. |
+**Welcome to Inkwell** — where you'll find your story and write it well. Our professional platform combines focused writing tools with intelligent AI assistance to help bring your stories to life.
+
+## ⌨️ Quick Keyboard Shortcuts
+
+| Shortcut                       | Action                  |
+| ------------------------------ | ----------------------- |
+| **⌘K** (Mac) / **Ctrl+K** (PC) | Open Command Palette    |
+| **⌘1**                         | Switch to Dashboard     |
+| **⌘2**                         | Switch to Writing       |
+| **⌘3**                         | Switch to Timeline      |
+| **⌘4**                         | Switch to Analysis      |
+| **⌘\\**                        | Toggle Sidebar          |
+| **F11**                        | Enter Focus Mode        |
+| **Esc**                        | Exit Focus Mode         |
+| **?**                          | Show keyboard shortcuts |
 
 ---
 
@@ -118,17 +122,7 @@ Inkwell now features a **collapsible sidebar** and enhanced navigation:
 
 ### Navigation & Keyboard Shortcuts
 
-| Shortcut                       | Action                  |
-| ------------------------------ | ----------------------- | --- |
-| **⌘K** (Mac) / **Ctrl+K** (PC) | Open Command Palette    |
-| **⌘1**                         | Switch to Dashboard     |
-| **⌘2**                         | Switch to Writing       |
-| **⌘3**                         | Switch to Timeline      |
-| **⌘4**                         | Switch to Analysis      |
-| **⌘\\**                        | Toggle Sidebar          |
-|                                |                         |     |
-| **F11**                        | Enter Focus Mode        |
-| **?**                          | Show keyboard shortcuts |
+See the [Quick Keyboard Shortcuts](#️-quick-keyboard-shortcuts) section at the top of this guide for a complete list of keyboard shortcuts.
 
 ---
 

@@ -4,6 +4,88 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Added - Multi-Provider AI System
+
+**Focus**: User Choice, Flexibility, Free Models
+
+#### AI Provider System (#TBD)
+
+- **Multi-Provider Support** - Choose from multiple AI providers
+  - OpenRouter (recommended): Free models + unified gateway to 20+ providers
+  - OpenAI: GPT-4o, GPT-4 Turbo, GPT-3.5, gpt-4o-mini (free tier)
+  - Anthropic: Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku
+  - Extensible architecture for adding new providers
+
+- **Free Models Available**:
+  - Gemini 2.0 Flash (OpenRouter, free)
+  - Llama 3.2 3B (OpenRouter, free)
+  - Mistral 7B (OpenRouter, free)
+  - GPT-4o Mini (OpenAI, free tier)
+
+- **Premium Model Support**:
+  - User-provided API keys (encrypted client-side)
+  - Automatic key validation and testing
+  - Per-provider usage tracking
+  - Cost transparency (per 1M token pricing)
+
+- **Features**:
+  - Streaming text generation with progress callbacks
+  - Auto-fallback to free models on key errors
+  - Abort/cancel long-running requests
+  - System messages and temperature control
+  - Per-document provider selection support
+
+- **Security**:
+  - Client-side API key encryption (XOR with static key)
+  - Keys never sent to Inkwell backend
+  - Encrypted localStorage storage
+  - Key format validation
+
+- **UI Components**:
+  - `AiModelSettings` - Complete settings interface
+  - Provider/model selection dropdowns
+  - API key management with show/hide
+  - Usage statistics dashboard
+  - Preference toggles (auto-fallback, tracking)
+
+- **Files**:
+  - `src/ai/types.ts` - Core types and interfaces
+  - `src/ai/providers/openaiProvider.ts` - OpenAI adapter (streaming support)
+  - `src/ai/providers/anthropicProvider.ts` - Anthropic adapter (streaming support)
+  - `src/ai/providers/openrouterProvider.ts` - OpenRouter adapter (20+ models)
+  - `src/ai/registry.ts` - Provider registry and helpers
+  - `src/services/aiService.ts` - Main AI service orchestration
+  - `src/services/aiSettingsService.ts` - Settings and encrypted storage
+  - `src/components/Settings/AiModelSettings.tsx` - UI component
+  - `docs/ai-providers.md` - Complete documentation
+  - `docs/examples/ai-generation-example.tsx` - React examples
+
+- **Tests**: 38 comprehensive tests (100% pass rate)
+  - `src/ai/__tests__/providers.test.ts` - 22 provider adapter tests
+  - `src/services/__tests__/aiService.test.ts` - 16 service tests
+  - Coverage: 79.53% statements, 66.5% branches
+
+- **Usage**:
+
+  ```typescript
+  import { aiService, aiSettingsService } from '@/ai';
+
+  // Use free model (no key required)
+  const result = await aiService.generate('Write a poem');
+
+  // Add API key for premium models
+  aiSettingsService.setApiKey('openai', 'sk-...');
+  const premium = await aiService.generate('Analyze this', {
+    providerId: 'openai',
+    modelId: 'gpt-4o',
+  });
+
+  // Streaming
+  for await (const chunk of aiService.generateStream('Tell a story')) {
+    console.log(chunk.content);
+  }
+  ```
+
 ### Added - Production Readiness Pack
 
 **Focus**: Polish, Visibility, Stability

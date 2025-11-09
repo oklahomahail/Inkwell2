@@ -30,6 +30,7 @@ export default defineConfig({
       'src/onboarding/**/*.{test,spec}.ts', // v0.9.0 onboarding tests
       'src/domain/**/*.{test,spec}.ts', // domain layer tests
       'src/types/**/*.{test,spec}.ts', // type helpers and utilities
+      'src/ai/**/*.{test,spec}.ts', // AI provider tests
     ],
     coverage: {
       enabled: true,
