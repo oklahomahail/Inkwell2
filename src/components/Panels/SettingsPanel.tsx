@@ -6,6 +6,7 @@ import AiSettingsPanel from '@/components/AI/AiSettingsPanel';
 import { E2EESettingsSection } from '@/components/E2EE/E2EESettingsSection';
 import { PrivacyControls } from '@/components/Privacy/PrivacyControls';
 import BackupControls from '@/components/Settings/BackupControls';
+import { InsightsPanel } from '@/components/Settings/InsightsPanel';
 import SnapshotHistoryDialog from '@/components/Settings/SnapshotHistoryDialog';
 import { TourReplayButton } from '@/components/Settings/TourReplayButton';
 import { Button } from '@/components/ui/Button';
@@ -845,12 +846,17 @@ const SettingsPanel: React.FC = () => {
           showToast={showToast}
         />
 
-        {/* Privacy & Analytics */}
+        {/* Privacy Controls */}
         <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold text-white mb-4">Privacy & Analytics</h3>
+          <h3 className="text-xl font-semibold text-white mb-4">Privacy Controls</h3>
           <div className="text-gray-300">
             <PrivacyControls />
           </div>
+        </div>
+
+        {/* Writing Insights & Analytics */}
+        <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
+          <InsightsPanel />
         </div>
 
         {/* Help & Onboarding */}

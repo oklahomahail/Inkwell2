@@ -37,7 +37,7 @@ interface CategoryFilter {
 export function AnalyticsDashboard() {
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
-  const [metrics, setMetrics] = useState<AnalyticsMetric[]>([]);
+  const [_metrics, setMetrics] = useState<AnalyticsMetric[]>([]);
   const [metricStats, setMetricStats] = useState<MetricStats[]>([]);
   const [filter, setFilter] = useState<CategoryFilter>({
     category: 'all',
