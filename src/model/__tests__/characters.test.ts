@@ -318,6 +318,33 @@ describe('Character Model Gateway', () => {
       );
     });
 
+    it('should handle project with undefined characters array', async () => {
+      // Test the || [] fallback on line 128
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        upsert: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({ data: null, error: new Error('Offline') }),
+      };
+
+      mockSupabase.from.mockReturnValue(mockQuery);
+
+      const mockProject = {
+        id: projectId,
+        // characters is undefined
+      };
+
+      mockStorageService.getProject.mockResolvedValue(mockProject);
+
+      await saveCharacter(projectId, mockCharacter);
+
+      expect(mockStorageService.saveProject).toHaveBeenCalledWith(
+        expect.objectContaining({
+          characters: [mockCharacter],
+        }),
+      );
+    });
+
     it('should update existing character in localStorage', async () => {
       const mockQuery = {
         select: vi.fn().mockReturnThis(),
@@ -525,6 +552,34 @@ describe('Character Model Gateway', () => {
       );
     });
 
+    it('should handle deletion when project has undefined characters array', async () => {
+      // Test the || [] fallback on line 184
+      const mockQuery = {
+        delete: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+      };
+
+      mockQuery.eq.mockReturnValueOnce(mockQuery);
+      mockQuery.eq.mockResolvedValueOnce({ error: new Error('Offline') });
+
+      mockSupabase.from.mockReturnValue(mockQuery);
+
+      const mockProject = {
+        id: projectId,
+        // characters is undefined
+      };
+
+      mockStorageService.getProject.mockResolvedValue(mockProject);
+
+      await deleteCharacter(projectId, characterId);
+
+      expect(mockStorageService.saveProject).toHaveBeenCalledWith(
+        expect.objectContaining({
+          characters: [],
+        }),
+      );
+    });
+
     it('should handle deletion when project not found', async () => {
       const mockQuery = {
         delete: vi.fn().mockReturnThis(),
@@ -714,6 +769,24 @@ describe('Character Model Gateway', () => {
           appearsInChapters: ['chapter-1', 'chapter-3'],
         }),
       );
+    });
+
+    it('should handle gracefully when character not found', async () => {
+      // Test the early return on line 236 when character doesn't exist
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+      };
+
+      mockSupabase.from.mockReturnValue(mockQuery);
+
+      // Should not throw or call saveCharacter
+      await expect(
+        removeCharacterFromChapter(projectId, 'non-existent-char', 'chapter-1'),
+      ).resolves.toBeUndefined();
+
+      // Verify saveCharacter was not called (no upsert)
+      expect(mockSupabase.from).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -938,6 +1011,72 @@ describe('Character Model Gateway', () => {
       };
 
       await expect(saveCharacter(projectId, character)).rejects.toThrow('Storage error');
+    });
+
+    it('should gracefully handle when Supabase module import fails', async () => {
+      // Test the catch block in getSupabase() when dynamic import fails (lines 35-37)
+      // We need to test this in isolation with a fresh module load
+
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      // Mock the import to fail
+      vi.doMock('@/lib/supabaseClient', () => {
+        throw new Error('Module not found: @/lib/supabaseClient');
+      });
+
+      // Clear module cache to force re-import
+      vi.resetModules();
+
+      // Import fresh version where supabase import will fail
+      const { getCharacters: freshGetCharacters } = await import('../characters');
+
+      mockStorageService.getProject.mockResolvedValue({
+        id: projectId,
+        characters: [{ id: 'char-1', name: 'Test Character', role: 'protagonist' }],
+      });
+
+      // Should fall back to localStorage without errors
+      const result = await freshGetCharacters(projectId);
+
+      expect(result).toBeDefined();
+      expect(result.length).toBe(1);
+      expect(consoleWarnSpy).toHaveBeenCalledWith('Supabase not available:', expect.any(Error));
+
+      consoleWarnSpy.mockRestore();
+      vi.doUnmock('@/lib/supabaseClient');
+      vi.resetModules();
+    });
+
+    it('should handle Supabase delete error and fall back to localStorage', async () => {
+      const mockQuery = {
+        delete: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockRejectedValue(new Error('Supabase delete failed')),
+      };
+
+      mockSupabase.from.mockReturnValue(mockQuery);
+      mockStorageService.getProject.mockResolvedValue({
+        id: projectId,
+        characters: [{ id: characterId, name: 'Test' }],
+      });
+      mockStorageService.saveProject.mockResolvedValue(undefined);
+
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await deleteCharacter(projectId, characterId);
+
+      // Should have attempted Supabase delete
+      expect(mockSupabase.from).toHaveBeenCalledWith('characters');
+
+      // Should fall back to localStorage
+      expect(mockStorageService.getProject).toHaveBeenCalledWith(projectId);
+      expect(mockStorageService.saveProject).toHaveBeenCalled();
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Failed to delete from Supabase, falling back to localStorage:',
+        expect.any(Error),
+      );
+
+      consoleWarnSpy.mockRestore();
     });
   });
 });

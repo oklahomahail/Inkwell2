@@ -109,6 +109,13 @@ describe('Chapter Model Gateway', () => {
 
       expect(isChapterModelEnabled()).toBe(true);
     });
+
+    it('should return false when defaultValue is undefined', () => {
+      // Test the ?? false fallback on line 49
+      mockFeatureFlags.FEATURE_FLAGS.CHAPTER_MODEL.defaultValue = undefined as any;
+
+      expect(isChapterModelEnabled()).toBe(false);
+    });
   });
 
   describe('getChapters (Legacy Mode)', () => {
@@ -164,10 +171,16 @@ describe('Chapter Model Gateway', () => {
         ],
       };
 
+      const { isLegacyChapterFormat, convertLegacyChapters } = await import('@/adapters');
+      vi.mocked(isLegacyChapterFormat).mockReturnValueOnce(true);
+      vi.mocked(convertLegacyChapters).mockReturnValueOnce([legacyChapter as any]);
+
       mockStorageService.getChapters.mockResolvedValue([legacyChapter]);
 
       const result = await getChapters(projectId);
 
+      expect(isLegacyChapterFormat).toHaveBeenCalledWith(legacyChapter);
+      expect(convertLegacyChapters).toHaveBeenCalledWith([legacyChapter]);
       expect(result).toBeDefined();
       expect(result.length).toBeGreaterThan(0);
     });
@@ -314,6 +327,35 @@ describe('Chapter Model Gateway', () => {
 
       expect(result).toBeNull();
       consoleErrorSpy.mockRestore();
+    });
+
+    it('should convert legacy scene-based chapter format in getChapter', async () => {
+      // Use mockFeatureFlags directly
+      mockFeatureFlags.FEATURE_FLAGS.CHAPTER_MODEL.defaultValue = false;
+
+      const legacyChapter = {
+        id: chapterId,
+        title: 'Legacy Chapter',
+        scenes: [
+          {
+            id: 'scene-1',
+            content: 'Scene content',
+            metadata: {},
+          },
+        ],
+      };
+
+      const { isLegacyChapterFormat, sceneChapterToCanonical } = await import('@/adapters');
+      vi.mocked(isLegacyChapterFormat).mockReturnValueOnce(true);
+      vi.mocked(sceneChapterToCanonical).mockReturnValueOnce(legacyChapter as any);
+
+      mockStorageService.getChapter.mockResolvedValue(legacyChapter);
+
+      const result = await getChapter(chapterId);
+
+      expect(isLegacyChapterFormat).toHaveBeenCalledWith(legacyChapter);
+      expect(sceneChapterToCanonical).toHaveBeenCalledWith(legacyChapter);
+      expect(result).toBeDefined();
     });
 
     it('should return null when chapter not found in legacy mode', async () => {
@@ -505,6 +547,39 @@ describe('Chapter Model Gateway', () => {
         expect.objectContaining({
           content: 'New content',
           wordCount: 100,
+        }),
+      );
+    });
+
+    it('should auto-calculate word count when not provided in legacy mode', async () => {
+      // Test the ?? countWords(content) fallback on line 264
+      mockFeatureFlags.FEATURE_FLAGS.CHAPTER_MODEL.defaultValue = false;
+
+      const existingChapter: Chapter = {
+        id: chapterId,
+        title: 'Chapter',
+        summary: '',
+        content: 'Old content',
+        wordCount: 50,
+        status: 'in-progress',
+        order: 0,
+        charactersInChapter: [],
+        plotPointsResolved: [],
+        notes: '',
+        createdAt: Date.now() - 1000,
+        updatedAt: Date.now() - 1000,
+      };
+
+      mockStorageService.getChapter.mockResolvedValue(existingChapter);
+
+      // Call without wordCount parameter (undefined)
+      await updateChapterContent(projectId, chapterId, 'One two three four five');
+
+      expect(mockStorageService.saveChapter).toHaveBeenCalledWith(
+        projectId,
+        expect.objectContaining({
+          content: 'One two three four five',
+          wordCount: 5, // Should be auto-calculated
         }),
       );
     });
@@ -780,6 +855,70 @@ describe('Chapter Model Gateway', () => {
       expect(mockChaptersService.create).toHaveBeenCalledWith(
         expect.objectContaining({
           status: 'final',
+        }),
+      );
+    });
+
+    it('should use fallback status for unmapped ChapterMeta status', async () => {
+      // Test line 364: || 'in-progress' fallback
+      mockFeatureFlags.FEATURE_FLAGS.CHAPTER_MODEL.defaultValue = true;
+
+      mockChaptersService.list.mockResolvedValue([
+        {
+          id: 'ch-1',
+          projectId,
+          title: 'Ch',
+          summary: '',
+          status: 'unknown-status' as any, // Unmapped status
+          index: 0,
+          wordCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ]);
+
+      mockChaptersService.get.mockResolvedValue({
+        id: 'ch-1',
+        projectId,
+        title: 'Ch',
+        summary: '',
+        content: '',
+        status: 'unknown-status' as any,
+        index: 0,
+        wordCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      const chapters = await getChapters(projectId);
+      expect(chapters[0].status).toBe('in-progress');
+    });
+
+    it('should use fallback status for unmapped canonical status when saving', async () => {
+      // Test line 378: || 'draft' fallback
+      mockFeatureFlags.FEATURE_FLAGS.CHAPTER_MODEL.defaultValue = true;
+      mockChaptersService.getMeta.mockResolvedValue(null);
+
+      const chapter: Chapter = {
+        id: chapterId,
+        title: 'Test',
+        summary: '',
+        content: '',
+        wordCount: 0,
+        status: 'unknown-status' as any, // Unmapped status
+        order: 0,
+        charactersInChapter: [],
+        plotPointsResolved: [],
+        notes: '',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+
+      await saveChapter(projectId, chapter);
+
+      expect(mockChaptersService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'draft', // Should fall back to 'draft'
         }),
       );
     });
