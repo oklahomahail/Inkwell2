@@ -418,6 +418,9 @@ export class EnhancedStorageService {
     // Attempt immediate write
     const result = await quotaAwareStorage.safeSetItem(key, data);
     if (!result.success && result.error) {
+      // Log storage errors for debugging
+      devLog.warn(`Storage write failed for ${key}:`, result.error.message);
+
       // If quota error, try emergency cleanup
       if (result.error.type === 'quota') {
         devLog.debug('Quota exceeded, attempting emergency cleanup...');
