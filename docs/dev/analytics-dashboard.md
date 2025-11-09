@@ -6,7 +6,7 @@ The Analytics Dashboard provides a React-based UI for viewing and analyzing Inkw
 
 ## Features
 
-### Dev Dashboard ([/dev/analytics](http://localhost:5173/dev/analytics))
+### Dev Dashboard (`/dev/analytics`)
 
 A comprehensive analytics interface for developers with:
 
@@ -141,7 +141,7 @@ Merges analytics with bundle audit system:
    pnpm dev
    ```
 
-2. Navigate to [http://localhost:5173/dev/analytics](http://localhost:5173/dev/analytics)
+2. Navigate to `/dev/analytics` in your browser
 
 3. Sign in with your Inkwell account
 
@@ -478,7 +478,6 @@ Potential improvements for future releases:
 - [Analytics Types](../../src/services/analytics/types.ts)
 - [Console Analytics Tools](../../src/dev/analyticsExport.ts)
 - [Privacy Policy](../privacy.md)
-- [Developer Mode](../DEVELOPER_MODE.md)
 
 ## Support
 
@@ -487,7 +486,7 @@ For questions or issues with the analytics dashboard:
 1. Check this documentation
 2. Review test files for usage examples
 3. Use DevTools console for debugging
-4. Check [GitHub Issues](https://github.com/yourusername/inkwell/issues)
+4. Check [GitHub Issues](https://github.com/oklahomahail/Inkwell2/issues)
 5. Contact development team
 
 ---

@@ -2,10 +2,10 @@
 
 > A focused, local-first writing studio for long-form fiction.
 
-[![CI](https://github.com/davehail/inkwell/actions/workflows/ci.yml/badge.svg)](https://github.com/davehail/inkwell/actions/workflows/ci.yml)
+[![CI](https://github.com/oklahomahail/Inkwell2/actions/workflows/ci.yml/badge.svg)](https://github.com/oklahomahail/Inkwell2/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4?logo=prettier)](https://prettier.io/)
-[![Bundle Guard](https://img.shields.io/badge/bundle-guarded-success?logo=github)](https://github.com/davehail/inkwell/blob/main/bundle-baseline.json)
+[![Bundle Guard](https://img.shields.io/badge/bundle-guarded-success?logo=github)](https://github.com/oklahomahail/Inkwell2/blob/main/bundle-baseline.json)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 [Docs](/docs/README.md) · [Roadmap](/docs/product/roadmap.md) · [Changelog](./CHANGELOG.md) · [Privacy](/docs/privacy.md) · [Onboarding](/docs/ONBOARDING.md)
@@ -717,7 +717,7 @@ graph TB
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/davehail/inkwell.git
+git clone https://github.com/oklahomahail/Inkwell2.git
 cd inkwell
 
 # 2. Install dependencies (pnpm required)
@@ -776,7 +776,7 @@ See **[Testing Guide](docs/TESTING_GUIDE.md)** for comprehensive testing pattern
 
 We welcome contributions! Please:
 
-1. Check [Issues](https://github.com/davehail/inkwell/issues) for open tasks
+1. Check [Issues](https://github.com/oklahomahail/Inkwell2/issues) for open tasks
 2. Follow TypeScript + ESLint conventions
 3. Test thoroughly before submitting PRs
 4. Include clear commit messages
@@ -838,5 +838,5 @@ MIT License © 2025 Inkwell Authors
 ## Links
 
 **Live Demo:** https://inkwell-writing.vercel.app
-**Repository:** https://github.com/davehail/inkwell
-**Issues:** https://github.com/davehail/inkwell/issues
+**Repository:** https://github.com/oklahomahail/Inkwell2
+**Issues:** https://github.com/oklahomahail/Inkwell2/issues

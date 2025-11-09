@@ -406,7 +406,6 @@ src/services/analytics/
 
 - [ ] Update [docs/ANALYTICS.md](../ANALYTICS.md) with Phase 4 features
 - [ ] Update [docs/dev/analytics-dashboard.md](../dev/analytics-dashboard.md) with chart usage
-- [ ] Add keyboard shortcuts to [docs/KEYBOARD_SHORTCUTS.md](../KEYBOARD_SHORTCUTS.md)
 
 ## Migration Path
 

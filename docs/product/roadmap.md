@@ -12,7 +12,7 @@ Inkwell is an **offline-first writing platform** for serious authors. The focus 
 
 **Latest Release:** v0.9.1-beta - Onboarding, EPUB, Telemetry & Bundle Guard
 **Package Version:** v1.2.1
-**Repository:** https://github.com/davehail/inkwell
+**Repository:** https://github.com/oklahomahail/Inkwell2
 **Live Demo:** https://inkwell-writing.vercel.app
 
 ### ✅ Recently Completed

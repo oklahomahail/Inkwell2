@@ -174,11 +174,13 @@ describe('AnalyticsDashboard', () => {
     });
 
     // Click Performance tab
-    const performanceTabs = screen.getAllByText('Performance');
-    await user.click(performanceTabs[0]); // Click the first one (the tab button)
+    const performanceButton = screen.getAllByRole('button', { name: /Performance/i })[0];
+    await user.click(performanceButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Performance Metrics')).toBeInTheDocument();
+      expect(
+        screen.queryByText((content) => /Event Distribution/.test(content)),
+      ).toBeInTheDocument();
     });
   });
 

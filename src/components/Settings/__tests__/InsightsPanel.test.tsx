@@ -258,11 +258,13 @@ describe('InsightsPanel', () => {
       },
     ]);
 
-    const { rerender } = render(<InsightsPanel />);
+    const { rerender, unmount } = render(<InsightsPanel />);
 
     await waitFor(() => {
-      expect(screen.getByText('Excellent')).toBeInTheDocument();
+      expect(screen.queryByText((content) => /Excellent/.test(content))).toBeInTheDocument();
     });
+
+    unmount();
 
     // Test good performance
     vi.mocked(analyticsService.queryMetrics).mockResolvedValue([
@@ -277,13 +279,13 @@ describe('InsightsPanel', () => {
       },
     ]);
 
-    rerender(<InsightsPanel />);
+    render(<InsightsPanel />);
 
     await waitFor(() => {
-      expect(screen.getByText('Good')).toBeInTheDocument();
+      expect(screen.queryByText((content) => /Good/.test(content))).toBeInTheDocument();
     });
 
-    // Test needs attention
+    // Test needs attention - use a new render
     vi.mocked(analyticsService.queryMetrics).mockResolvedValue([
       {
         id: 'm1',
@@ -296,10 +298,10 @@ describe('InsightsPanel', () => {
       },
     ]);
 
-    rerender(<InsightsPanel />);
+    const { rerender: rerender2 } = render(<InsightsPanel />);
 
     await waitFor(() => {
-      expect(screen.getByText('Needs attention')).toBeInTheDocument();
+      expect(screen.queryByText((content) => /Needs attention/.test(content))).toBeInTheDocument();
     });
   });
 });

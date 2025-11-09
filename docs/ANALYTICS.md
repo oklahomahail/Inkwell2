@@ -169,7 +169,7 @@ await analyticsService.endSession();
 
 ### UI Dashboard (Development Mode)
 
-A comprehensive React-based analytics dashboard is available at [/dev/analytics](http://localhost:5173/dev/analytics) in development mode.
+A comprehensive React-based analytics dashboard is available at `/dev/analytics` in development mode.
 
 **Features:**
 
@@ -466,15 +466,12 @@ Potential improvements for future releases:
 
 - [Analytics Dashboard Guide](./dev/analytics-dashboard.md) - Comprehensive dashboard documentation
 - [Privacy Policy](./privacy.md)
-- [Developer Mode](./DEVELOPER_MODE.md)
-- [Testing Guide](./TESTING.md)
-- [Performance Monitoring](./PERFORMANCE.md)
 
 ## Support
 
 For questions or issues with the analytics system:
 
-1. Check [GitHub Issues](https://github.com/yourusername/inkwell/issues)
+1. Check [GitHub Issues](https://github.com/oklahomahail/Inkwell2/issues)
 2. Review test files for usage examples
 3. Use developer dashboard for debugging
 4. Contact development team
