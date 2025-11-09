@@ -1,49 +1,61 @@
-# AI Provider System
+# AI Provider System - Simplified Baseline
 
-Inkwell supports multiple AI providers, giving users flexibility to choose between free models or add their own API keys for premium models.
+Inkwell supports multiple AI providers with a curated selection of 7 high-quality models from 3 major providers: OpenAI, Anthropic, and Google.
 
 ## Overview
 
-The AI provider system consists of:
+The simplified AI provider system consists of:
 
-- **Provider Adapters**: Implementations for OpenAI, Anthropic, and OpenRouter
-- **Provider Registry**: Central registry of all available providers
-- **Settings Service**: Manages user preferences and encrypted API keys
-- **AI Service**: Main orchestration layer for generation requests
-- **UI Components**: Settings interface for provider and model selection
+- **Provider Adapters**: Implementations for OpenAI, Anthropic, and Google Gemini
+- **Provider Registry**: Curated list of 7 models
+- **Environment Configuration**: API keys via environment variables
+- **AI Service**: Streamlined orchestration layer for generation requests
+- **UI Components**: Simple ModelSelector dropdown for model selection
 
 ## Quick Start
 
-### Using Free Models (No API Key Required)
+### Setup
+
+Add your API keys to `.env` file:
+
+```bash
+VITE_OPENAI_API_KEY=sk-...
+VITE_ANTHROPIC_API_KEY=sk-ant-...
+VITE_GOOGLE_API_KEY=AIza...
+```
+
+### Basic Text Generation
 
 ```typescript
-import { aiService } from '@/services/aiService';
+import { aiService } from '@/ai';
 
-// Generate text using default free model (OpenRouter)
+// Generate text using default model (GPT-4o Mini)
 const result = await aiService.generate('Write a short story about a dragon');
 console.log(result.content);
 ```
 
-### Using Premium Models with API Keys
+### Choosing a Different Provider
 
 ```typescript
-import { aiSettingsService } from '@/services/aiSettingsService';
-import { aiService } from '@/services/aiService';
+import { aiService } from '@/ai';
 
-// Add API key
-aiSettingsService.setApiKey('openai', 'sk-...');
+// Use Anthropic's Claude
+const result = await aiService.generate('Write a short story', {
+  providerId: 'anthropic',
+  modelId: 'claude-3-5-sonnet-20241022',
+});
 
-// Set as default
-aiSettingsService.setDefaultProvider('openai', 'gpt-4o');
-
-// Generate
-const result = await aiService.generate('Write a short story');
+// Use Google's Gemini
+const result = await aiService.generate('Write a short story', {
+  providerId: 'google',
+  modelId: 'gemini-1.5-pro',
+});
 ```
 
 ### Streaming Responses
 
 ```typescript
-import { aiService } from '@/services/aiService';
+import { aiService } from '@/ai';
 
 async function streamExample() {
   for await (const chunk of aiService.generateStream('Tell me a joke')) {
@@ -54,473 +66,348 @@ async function streamExample() {
 }
 ```
 
-## Available Providers
+## Curated Models
 
-### OpenRouter (Recommended for Free Tier)
+The baseline version includes 7 carefully selected models:
 
-- **ID**: `openrouter`
-- **Requires Key**: No (optional)
-- **Free Models**:
-  - Gemini 2.0 Flash
-  - Llama 3.2 3B
-  - Mistral 7B
-- **Premium Models**:
-  - GPT-4o ($2.50/$10.00 per 1M tokens)
-  - Claude 3.5 Sonnet ($3.00/$15.00 per 1M tokens)
-  - Gemini Pro 1.5 ($1.25/$5.00 per 1M tokens)
-  - Grok Beta ($5.00/$15.00 per 1M tokens)
+### OpenAI (3 models)
 
-OpenRouter is a unified gateway to 20+ AI providers. It's perfect for users who want:
+| Model           | ID            | Description            | Use Case                 | Pricing                     |
+| --------------- | ------------- | ---------------------- | ------------------------ | --------------------------- |
+| **GPT-4o Mini** | `gpt-4o-mini` | Fast & affordable      | Quick tasks, high volume | $0.15/$0.60 per 1M tokens   |
+| **GPT-4o**      | `gpt-4o`      | Balanced general model | Most applications        | $2.50/$10.00 per 1M tokens  |
+| **GPT-4 Turbo** | `gpt-4-turbo` | High reasoning depth   | Complex analysis         | $10.00/$30.00 per 1M tokens |
 
-- Free access to multiple models without API keys
-- Single API key for multiple providers
-- Transparent pricing across providers
+### Anthropic (2 models)
 
-```typescript
-// Use free model (no key required)
-await aiService.generate('Hello world', {
-  providerId: 'openrouter',
-  modelId: 'google/gemini-2.0-flash-exp:free',
-});
+| Model                 | ID                           | Description        | Use Case        | Pricing                    |
+| --------------------- | ---------------------------- | ------------------ | --------------- | -------------------------- |
+| **Claude 3 Haiku**    | `claude-3-haiku-20240307`    | Fast summarization | Quick responses | $0.25/$1.25 per 1M tokens  |
+| **Claude 3.5 Sonnet** | `claude-3-5-sonnet-20241022` | Strong reasoning   | Complex tasks   | $3.00/$15.00 per 1M tokens |
 
-// Use premium model (requires OpenRouter key)
-aiSettingsService.setApiKey('openrouter', 'sk-or-...');
-await aiService.generate('Hello world', {
-  providerId: 'openrouter',
-  modelId: 'anthropic/claude-3.5-sonnet',
-});
-```
+### Google (2 models)
 
-### OpenAI
-
-- **ID**: `openai`
-- **Requires Key**: Yes
-- **Models**:
-  - GPT-4o Mini (Free tier)
-  - GPT-4o ($2.50/$10.00 per 1M tokens)
-  - GPT-4 Turbo ($10.00/$30.00 per 1M tokens)
-  - GPT-3.5 Turbo ($0.50/$1.50 per 1M tokens)
-
-```typescript
-aiSettingsService.setApiKey('openai', 'sk-...');
-await aiService.generate('Hello world', {
-  providerId: 'openai',
-  modelId: 'gpt-4o',
-});
-```
-
-### Anthropic
-
-- **ID**: `anthropic`
-- **Requires Key**: Yes
-- **Models**:
-  - Claude 3.5 Sonnet ($3.00/$15.00 per 1M tokens)
-  - Claude 3 Opus ($15.00/$75.00 per 1M tokens)
-  - Claude 3 Haiku ($0.25/$1.25 per 1M tokens)
-
-```typescript
-aiSettingsService.setApiKey('anthropic', 'sk-ant-...');
-await aiService.generate('Hello world', {
-  providerId: 'anthropic',
-  modelId: 'claude-3-5-sonnet-20241022',
-});
-```
+| Model                | ID                 | Description     | Use Case               | Pricing                    |
+| -------------------- | ------------------ | --------------- | ---------------------- | -------------------------- |
+| **Gemini 1.5 Flash** | `gemini-1.5-flash` | Low latency     | Real-time applications | $0.075/$0.30 per 1M tokens |
+| **Gemini 1.5 Pro**   | `gemini-1.5-pro`   | High capability | Complex reasoning      | $1.25/$5.00 per 1M tokens  |
 
 ## API Reference
 
 ### AI Service
 
-#### `generate(prompt: string, options?: GenerateOptions): Promise<AIGenerateResult>`
+#### `generate(prompt, options?)`
 
 Generate text from a prompt.
 
-**Options:**
-
-- `providerId?: string` - Override default provider
-- `modelId?: string` - Override default model
-- `systemMessage?: string` - System message/context
-- `temperature?: number` - Temperature (0-2, default 0.7)
-- `maxTokens?: number` - Max tokens to generate (default 2048)
-- `signal?: AbortSignal` - Abort signal for cancellation
-
-**Returns:**
-
 ```typescript
-{
-  content: string;
-  provider: string;
-  model: string;
-  usage?: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
-  finishReason?: 'stop' | 'length' | 'content_filter' | 'error';
+interface GenerateOptions {
+  providerId?: string; // 'openai' | 'anthropic' | 'google'
+  modelId?: string; // Model ID from curated list
+  systemMessage?: string; // System instructions
+  temperature?: number; // 0-2, default: 0.7
+  maxTokens?: number; // Default: 2048
+  signal?: AbortSignal; // For cancellation
 }
+
+const result = await aiService.generate('Your prompt', {
+  providerId: 'openai',
+  modelId: 'gpt-4o',
+  temperature: 0.9,
+  maxTokens: 1000,
+});
 ```
 
-#### `generateStream(prompt: string, options?: GenerateOptions): AsyncIterable<AIStreamChunk>`
+#### `generateStream(prompt, options?)`
 
-Generate text with streaming.
-
-**Returns:** Async iterable of chunks:
+Generate text with streaming for progressive display.
 
 ```typescript
-{
-  content: string;
-  isComplete: boolean;
-  usage?: {
-    promptTokens?: number;
-    completionTokens?: number;
-    totalTokens?: number;
-  };
-}
-```
+for await (const chunk of aiService.generateStream('Your prompt', options)) {
+  console.log(chunk.content); // Stream chunks as they arrive
 
-#### `testProvider(providerId: string, apiKey?: string): Promise<{success: boolean; error?: string}>`
-
-Test provider configuration.
-
-### Settings Service
-
-#### `setDefaultProvider(providerId: string, modelId: string): void`
-
-Set default provider and model.
-
-#### `setApiKey(providerId: string, apiKey: string): void`
-
-Save encrypted API key for provider.
-
-#### `getApiKey(providerId: string): string | undefined`
-
-Get decrypted API key for provider.
-
-#### `hasApiKey(providerId: string): boolean`
-
-Check if provider has API key.
-
-#### `removeApiKey(providerId: string): void`
-
-Remove API key for provider.
-
-#### `updateUsage(providerId: string, promptTokens: number, completionTokens: number): void`
-
-Update usage statistics.
-
-#### `getUsage(providerId: string)`
-
-Get usage stats for provider.
-
-#### `getTotalUsage()`
-
-Get total usage across all providers.
-
-#### `updatePreferences(preferences: Partial<Preferences>): void`
-
-Update user preferences.
-
-**Preferences:**
-
-- `autoFallback: boolean` - Auto-fallback to free models on error
-- `temperature: number` - Default temperature
-- `maxTokens: number` - Default max tokens
-- `trackUsage: boolean` - Track usage statistics
-
-## UI Integration
-
-### Settings Component
-
-```tsx
-import { AiModelSettings } from '@/components/Settings/AiModelSettings';
-
-function SettingsPage() {
-  return (
-    <div>
-      <h1>Settings</h1>
-      <AiModelSettings />
-    </div>
-  );
-}
-```
-
-The `AiModelSettings` component provides:
-
-- Provider selection dropdown
-- Model selection dropdown
-- API key management with encryption notice
-- API key validation and testing
-- Usage statistics dashboard
-- Preference toggles
-
-## Security
-
-### API Key Encryption
-
-API keys are encrypted client-side before storage using XOR encryption with a fixed key. For production use with sensitive keys, consider:
-
-1. Using Web Crypto API with user-derived keys
-2. Storing keys in secure enclaves
-3. Using environment variables for server-side keys
-
-```typescript
-// Keys are automatically encrypted when saved
-aiSettingsService.setApiKey('openai', 'sk-...');
-
-// And decrypted when retrieved
-const key = aiSettingsService.getApiKey('openai');
-```
-
-### Best Practices
-
-- ✅ Never commit API keys to version control
-- ✅ Store keys client-side when possible
-- ✅ Use environment variables for server-side keys
-- ✅ Implement rate limiting for API calls
-- ✅ Monitor usage to prevent quota exhaustion
-- ✅ Use free models for testing and development
-
-## Error Handling
-
-### Error Types
-
-```typescript
-import { AIKeyError, AIRateLimitError, AIQuotaError, AIProviderError } from '@/ai/types';
-
-try {
-  await aiService.generate('Hello');
-} catch (error) {
-  if (error instanceof AIKeyError) {
-    console.error('Invalid or missing API key');
-  } else if (error instanceof AIRateLimitError) {
-    console.error('Rate limit exceeded, try again later');
-  } else if (error instanceof AIQuotaError) {
-    console.error('Quota exceeded, upgrade plan or add credits');
-  } else if (error instanceof AIProviderError) {
-    console.error('Provider error:', error.message);
+  if (chunk.isComplete) {
+    console.log('Generation complete');
   }
 }
 ```
 
-### Auto-Fallback
+#### `testProvider(providerId)`
 
-Enable auto-fallback to automatically use free models when premium models fail:
+Test if a provider's API key is configured and valid.
 
 ```typescript
-aiSettingsService.updatePreferences({ autoFallback: true });
+const result = await aiService.testProvider('openai');
+console.log(result.success); // true/false
+console.log(result.error); // Error message if failed
+```
 
-// If OpenAI fails, automatically falls back to free OpenRouter model
-try {
-  const result = await aiService.generate('Hello', {
-    providerId: 'openai',
-    modelId: 'gpt-4o',
-  });
-} catch (error) {
-  // Fallback already attempted, handle final error
+### Configuration
+
+#### Get API Key
+
+```typescript
+import { getApiKey, hasApiKey } from '@/ai';
+
+// Check if key is available
+if (hasApiKey('openai')) {
+  const key = getApiKey('openai');
 }
 ```
 
-## Usage Tracking
-
-### Enable Tracking
+#### Get Available Providers
 
 ```typescript
-aiSettingsService.updatePreferences({ trackUsage: true });
+import { getAvailableProviders } from '@/ai';
+
+// Returns array of provider IDs with configured keys
+const available = getAvailableProviders();
+// e.g., ['openai', 'anthropic']
 ```
 
-### View Usage Stats
+### Registry Functions
+
+#### Get Curated Models
 
 ```typescript
-// Per-provider usage
-const openaiUsage = aiSettingsService.getUsage('openai');
-console.log(openaiUsage);
-// {
-//   totalTokens: 15000,
-//   promptTokens: 10000,
-//   completionTokens: 5000,
-//   requestCount: 50,
-//   lastUsed: '2025-01-15T10:30:00Z'
-// }
+import { getCuratedModels } from '@/ai';
 
-// Total usage across all providers
-const totalUsage = aiSettingsService.getTotalUsage();
-console.log(totalUsage);
-// {
-//   totalTokens: 50000,
-//   promptTokens: 30000,
-//   completionTokens: 20000,
-//   requestCount: 200
-// }
+const models = getCuratedModels();
+// Returns: Array<{ provider: AIProvider, model: AIModel }>
 ```
 
-### Reset Usage
+#### Get Default Provider and Model
 
 ```typescript
-// Reset specific provider
-aiSettingsService.resetUsage('openai');
+import { getDefaultProviderAndModel } from '@/ai';
 
-// Reset all providers
-aiSettingsService.resetUsage();
+const defaults = getDefaultProviderAndModel();
+// { providerId: 'openai', modelId: 'gpt-4o-mini' }
 ```
 
-## Advanced Usage
+#### Get Provider by ID
+
+```typescript
+import { getProvider } from '@/ai';
+
+const provider = getProvider('openai');
+// Returns: AIProvider | undefined
+```
+
+## UI Components
+
+### ModelSelector
+
+Simple dropdown component for model selection.
+
+```typescript
+import { ModelSelector } from '@/ai';
+import { useState } from 'react';
+
+function MyComponent() {
+  const [provider, setProvider] = useState('openai');
+  const [model, setModel] = useState('gpt-4o-mini');
+
+  return (
+    <ModelSelector
+      selectedProvider={provider}
+      selectedModel={model}
+      onProviderChange={setProvider}
+      onModelChange={setModel}
+    />
+  );
+}
+```
+
+The component automatically:
+
+- Groups models by provider
+- Shows model descriptions
+- Displays pricing information
+- Auto-selects first model when provider changes
+- Shows context window and max output tokens
+
+## Environment Variables
+
+The baseline version uses environment variables for API keys:
+
+```bash
+# OpenAI
+VITE_OPENAI_API_KEY=sk-...
+
+# Anthropic
+VITE_ANTHROPIC_API_KEY=sk-ant-...
+
+# Google AI
+VITE_GOOGLE_API_KEY=AIza...
+```
+
+**Important**: API keys are read from environment variables at runtime. Make sure to:
+
+1. Never commit `.env` files to version control
+2. Add `.env` to `.gitignore`
+3. Set environment variables in your deployment platform
+
+## Advanced Options
 
 ### Custom Temperature and Max Tokens
 
 ```typescript
-const result = await aiService.generate('Write a creative story', {
-  temperature: 0.9, // Higher = more creative
-  maxTokens: 4000, // Longer output
+const result = await aiService.generate('Your prompt', {
+  temperature: 0.9, // Higher = more creative (0-2)
+  maxTokens: 4000, // Limit response length
 });
 ```
 
 ### System Messages
 
 ```typescript
-const result = await aiService.generate('What is 2+2?', {
-  systemMessage: 'You are a helpful math tutor. Explain your reasoning step by step.',
+const result = await aiService.generate('User question here', {
+  systemMessage: 'You are a helpful coding assistant.',
 });
 ```
 
-### Abort Long-Running Requests
+### Cancellation with AbortSignal
 
 ```typescript
 const controller = new AbortController();
 
 // Start generation
-const promise = aiService.generate('Write a very long story', {
+const promise = aiService.generate('Long task...', {
   signal: controller.signal,
 });
 
-// Cancel after 5 seconds
+// Cancel if needed
 setTimeout(() => controller.abort(), 5000);
 
 try {
   await promise;
 } catch (error) {
-  console.log('Request aborted');
+  console.log('Generation cancelled');
 }
 ```
 
-### Per-Document Provider Selection
+### Streaming with Callback
 
 ```typescript
-// Store provider preference per document
-interface Document {
-  id: string;
-  content: string;
-  aiProvider?: string;
-  aiModel?: string;
-}
+const chunks: string[] = [];
 
-function generateForDocument(doc: Document, prompt: string) {
-  return aiService.generate(prompt, {
-    providerId: doc.aiProvider || undefined,
-    modelId: doc.aiModel || undefined,
-  });
+for await (const chunk of aiService.generateStream('Your prompt', {
+  onStream: (chunk) => {
+    // Called for each chunk
+    chunks.push(chunk.content);
+  },
+})) {
+  // Also yields chunks here
 }
 ```
 
-## Testing
+## Error Handling
 
-Run the AI provider tests:
+```typescript
+import { AIProviderError, AIKeyError } from '@/ai';
+
+try {
+  const result = await aiService.generate('Your prompt');
+} catch (error) {
+  if (error instanceof AIKeyError) {
+    console.error('API key missing or invalid:', error.provider);
+  } else if (error instanceof AIProviderError) {
+    console.error('Provider error:', error.message);
+  }
+}
+```
+
+Error types:
+
+- `AIKeyError`: Missing or invalid API key
+- `AIRateLimitError`: Rate limit exceeded
+- `AIQuotaError`: Usage quota exceeded
+- `AIProviderError`: General provider error
+
+## Best Practices
+
+### Model Selection
+
+Choose models based on your use case:
+
+**For quick, high-volume tasks:**
+
+- GPT-4o Mini (OpenAI) - Best value
+- Gemini 1.5 Flash (Google) - Lowest latency
+
+**For balanced general use:**
+
+- GPT-4o (OpenAI) - Most reliable
+- Claude 3.5 Sonnet (Anthropic) - Strong reasoning
+
+**For complex analysis:**
+
+- GPT-4 Turbo (OpenAI) - Deep reasoning
+- Gemini 1.5 Pro (Google) - Large context
+
+### Cost Optimization
+
+1. **Use cheaper models for simple tasks**: Start with GPT-4o Mini or Gemini Flash
+2. **Monitor token usage**: Lower `maxTokens` when possible
+3. **Batch similar requests**: Combine multiple questions into one prompt
+4. **Cache results**: Store responses for repeated queries
+
+### Performance
+
+1. **Use streaming for long responses**: Better UX with progressive display
+2. **Set appropriate timeouts**: Use `AbortSignal` for long-running requests
+3. **Handle errors gracefully**: Always catch and handle provider errors
+
+## Migration from Previous Version
+
+If migrating from the complex version:
+
+**Before** (Complex):
+
+```typescript
+import { aiSettingsService } from '@/services/aiSettingsService';
+
+aiSettingsService.setApiKey('openai', 'sk-...');
+aiSettingsService.setDefaultProvider('openai', 'gpt-4o');
+```
+
+**After** (Simplified):
 
 ```bash
-pnpm test src/ai/__tests__/providers.test.ts
-pnpm test src/services/__tests__/aiService.test.ts
+# In .env file
+VITE_OPENAI_API_KEY=sk-...
 ```
 
-## Adding New Providers
-
-To add a new AI provider:
-
-1. **Create provider adapter** in `src/ai/providers/`:
+**Before** (Complex):
 
 ```typescript
-// src/ai/providers/myProvider.ts
-import { AIProvider, AIModel, AIGenerateOptions, AIGenerateResult } from '../types';
+import { AiModelSettings } from '@/components/Settings/AiModelSettings';
 
-const MY_MODELS: AIModel[] = [
-  {
-    id: 'my-model-v1',
-    name: 'My Model v1',
-    description: 'Description',
-    isFree: false,
-    contextWindow: 8192,
-    inputCost: 1.0,
-    outputCost: 2.0,
-    maxOutputTokens: 4096,
-    supportsStreaming: true,
-  },
-];
-
-export const myProvider: AIProvider = {
-  id: 'myprovider',
-  name: 'My Provider',
-  description: 'My AI provider',
-  requiresKey: true,
-  models: MY_MODELS,
-  defaultModel: 'my-model-v1',
-
-  async generate(prompt: string, options?: AIGenerateOptions): Promise<AIGenerateResult> {
-    // Implementation
-  },
-
-  async *generateStream(prompt: string, options?: AIGenerateOptions) {
-    // Implementation
-  },
-};
+<AiModelSettings />
 ```
 
-2. **Register in registry** (`src/ai/registry.ts`):
+**After** (Simplified):
 
 ```typescript
-import { myProvider } from './providers/myProvider';
+import { ModelSelector } from '@/ai';
 
-export const providers: AIProvider[] = [
-  openrouterProvider,
-  openaiProvider,
-  anthropicProvider,
-  myProvider, // Add here
-];
+<ModelSelector
+  selectedProvider={provider}
+  selectedModel={model}
+  onProviderChange={setProvider}
+  onModelChange={setModel}
+/>
 ```
 
-3. **Add tests** in `src/ai/__tests__/providers.test.ts`
+## Future: Advanced Mode
 
-4. **Update documentation**
+The baseline version focuses on simplicity. A future "Advanced Mode" will add:
 
-## Troubleshooting
+- User-managed API keys (no environment variables)
+- Custom endpoints (Ollama, LM Studio)
+- Additional providers (Mistral, Cohere)
+- Usage tracking and cost estimation
+- Per-project model selection
 
-### "API key required" error
-
-- Make sure you've added an API key for the provider
-- Use `aiSettingsService.setApiKey(providerId, key)` to save the key
-- Or switch to a free model that doesn't require a key
-
-### "Invalid API key" error
-
-- Verify the key format (OpenAI: `sk-...`, Anthropic: `sk-ant-...`, OpenRouter: `sk-or-...`)
-- Use `aiService.testProvider(providerId, key)` to validate
-- Check provider dashboard for key status
-
-### "Rate limit exceeded" error
-
-- Wait before retrying (usually 1-60 seconds)
-- Enable auto-fallback to switch to free models
-- Consider upgrading your provider plan
-
-### Streaming not working
-
-- Verify the model supports streaming (check `model.supportsStreaming`)
-- Use `aiService.generateStream()` instead of `aiService.generate()`
-- Check browser console for errors
-
-## Examples
-
-See [examples/ai-generation.tsx](../examples/ai-generation.tsx) for complete examples including:
-
-- Basic generation
-- Streaming with progress indicators
-- Error handling with fallbacks
-- Provider switching
-- Usage tracking
-- Abort/cancel functionality
+This layered approach keeps the baseline simple while allowing future extensibility.
