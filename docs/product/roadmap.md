@@ -174,7 +174,7 @@ See [CHANGELOG.md](../../CHANGELOG.md) for full release history.
 
 We welcome input on our roadmap! Please submit feature requests through:
 
-1. **GitHub Issues**: [github.com/davehail/inkwell/issues](https://github.com/davehail/inkwell/issues)
+1. **GitHub Issues**: [github.com/oklahomahail/Inkwell2/issues](https://github.com/oklahomahail/Inkwell2/issues)
 
 ---
 
