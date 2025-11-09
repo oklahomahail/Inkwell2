@@ -11,6 +11,8 @@
 export interface AIStreamChunk {
   content: string;
   isComplete: boolean;
+  provider?: string;
+  model?: string;
   usage?: {
     promptTokens?: number;
     completionTokens?: number;

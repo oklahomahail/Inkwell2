@@ -1,23 +1,32 @@
 /**
- * AI Provider Registry
+ * AI Provider Registry - Simplified Curated Models
  *
- * Central registry of all available AI providers.
- * Makes it easy to list, select, and switch between providers.
+ * Curated list of 7 high-quality models from 3 major providers.
+ * This baseline version focuses on simplicity while maintaining quality.
  */
 
 import { anthropicProvider } from './providers/anthropicProvider';
+import { googleProvider } from './providers/googleProvider';
 import { openaiProvider } from './providers/openaiProvider';
-import { openrouterProvider } from './providers/openrouterProvider';
-import { AIProvider } from './types';
+import { AIProvider, AIModel } from './types';
 
 /**
- * All available AI providers
+ * Curated list of models (Baseline Mode)
+ *
+ * OpenAI: 3 models (fast, balanced, deep reasoning)
+ * Anthropic: 2 models (fast, strong reasoning)
+ * Google: 2 models (low latency, high capability)
  */
-export const providers: AIProvider[] = [
-  openrouterProvider, // Default - includes free models
-  openaiProvider,
-  anthropicProvider,
-];
+export const CURATED_MODELS = {
+  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo'],
+  anthropic: ['claude-3-haiku-20240307', 'claude-3-5-sonnet-20241022'],
+  google: ['gemini-1.5-flash', 'gemini-1.5-pro'],
+} as const;
+
+/**
+ * All available AI providers (Baseline: OpenAI, Anthropic, Google)
+ */
+export const providers: AIProvider[] = [openaiProvider, anthropicProvider, googleProvider];
 
 /**
  * Get provider by ID
@@ -52,10 +61,40 @@ export function getPaidModels() {
 }
 
 /**
- * Get recommended provider for users without API keys
+ * Get curated models list with provider info
  */
-export function getRecommendedFreeProvider(): AIProvider {
-  return openrouterProvider; // Best free option with multiple models
+export function getCuratedModels(): Array<{
+  provider: AIProvider;
+  model: AIModel;
+}> {
+  const curated: Array<{ provider: AIProvider; model: AIModel }> = [];
+
+  for (const [providerId, modelIds] of Object.entries(CURATED_MODELS)) {
+    const provider = getProvider(providerId);
+    if (!provider) continue;
+
+    for (const modelId of modelIds) {
+      const model = provider.models.find((m) => m.id === modelId);
+      if (model) {
+        curated.push({ provider, model });
+      }
+    }
+  }
+
+  return curated;
+}
+
+/**
+ * Get default provider and model (first in curated list)
+ */
+export function getDefaultProviderAndModel(): {
+  providerId: string;
+  modelId: string;
+} {
+  return {
+    providerId: 'openai',
+    modelId: 'gpt-4o-mini',
+  };
 }
 
 /**

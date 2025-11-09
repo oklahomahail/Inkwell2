@@ -1,13 +1,13 @@
 /**
- * AI Provider Tests
+ * AI Provider Tests - Simplified Version
  *
- * Tests for all AI provider adapters.
+ * Tests for all AI provider adapters (OpenAI, Anthropic, Google).
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { openaiProvider } from '../providers/openaiProvider';
 import { anthropicProvider } from '../providers/anthropicProvider';
-import { openrouterProvider } from '../providers/openrouterProvider';
+import { googleProvider } from '../providers/googleProvider';
 import { AIKeyError, AIProviderError } from '../types';
 
 describe('OpenAI Provider', () => {
@@ -236,7 +236,7 @@ describe('Anthropic Provider', () => {
   });
 });
 
-describe('OpenRouter Provider', () => {
+describe('Google Provider', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     global.fetch = vi.fn();
@@ -247,26 +247,35 @@ describe('OpenRouter Provider', () => {
   });
 
   it('has correct metadata', () => {
-    expect(openrouterProvider.id).toBe('openrouter');
-    expect(openrouterProvider.name).toBe('OpenRouter');
-    expect(openrouterProvider.requiresKey).toBe(false); // Optional key
-    expect(openrouterProvider.models.length).toBeGreaterThan(0);
-  });
-
-  it('includes free models', () => {
-    const freeModels = openrouterProvider.models.filter((m) => m.isFree);
-    expect(freeModels.length).toBeGreaterThan(0);
+    expect(googleProvider.id).toBe('google');
+    expect(googleProvider.name).toBe('Google AI');
+    expect(googleProvider.requiresKey).toBe(true);
+    expect(googleProvider.models.length).toBeGreaterThan(0);
   });
 
   it('validates API key format', () => {
-    expect(openrouterProvider.validateKey?.('sk-or-test123456789012345')).toBe(true);
-    expect(openrouterProvider.validateKey?.('invalid-key')).toBe(false);
+    expect(googleProvider.validateKey?.('AIzatest123456789012345')).toBe(true);
+    expect(googleProvider.validateKey?.('invalid-key')).toBe(false);
+    expect(googleProvider.validateKey?.('')).toBe(false);
   });
 
-  it('works without API key for free models', async () => {
+  it('throws error when API key is missing', async () => {
+    await expect(googleProvider.generate('test prompt')).rejects.toThrow(AIKeyError);
+  });
+
+  it('generates text successfully', async () => {
     const mockResponse = {
-      choices: [{ message: { content: 'Generated text' }, finish_reason: 'stop' }],
-      usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+      candidates: [
+        {
+          content: { parts: [{ text: 'Generated text' }] },
+          finishReason: 'STOP',
+        },
+      ],
+      usageMetadata: {
+        promptTokenCount: 10,
+        candidatesTokenCount: 20,
+        totalTokenCount: 30,
+      },
     };
 
     global.fetch = vi.fn().mockResolvedValue({
@@ -274,20 +283,24 @@ describe('OpenRouter Provider', () => {
       json: async () => mockResponse,
     });
 
-    const result = await openrouterProvider.generate('test prompt');
+    const result = await googleProvider.generate('test prompt', {
+      apiKey: 'AIzatest123456789012345',
+    });
 
     expect(result.content).toBe('Generated text');
-    expect(result.provider).toBe('openrouter');
-
-    // Verify headers don't include Authorization when no key provided
-    const callArgs = (global.fetch as any).mock.calls[0];
-    expect(callArgs[1].headers['Authorization']).toBeUndefined();
+    expect(result.provider).toBe('google');
+    expect(result.usage?.promptTokens).toBe(10);
+    expect(result.usage?.completionTokens).toBe(20);
   });
 
-  it('includes API key when provided', async () => {
+  it('handles system messages', async () => {
     const mockResponse = {
-      choices: [{ message: { content: 'Generated text' }, finish_reason: 'stop' }],
-      usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+      candidates: [
+        {
+          content: { parts: [{ text: 'Response' }] },
+          finishReason: 'STOP',
+        },
+      ],
     };
 
     global.fetch = vi.fn().mockResolvedValue({
@@ -295,43 +308,58 @@ describe('OpenRouter Provider', () => {
       json: async () => mockResponse,
     });
 
-    await openrouterProvider.generate('test prompt', {
-      apiKey: 'sk-or-test123456789012345',
+    await googleProvider.generate('test prompt', {
+      apiKey: 'AIzatest123456789012345',
+      systemMessage: 'You are a helpful assistant',
     });
 
     const callArgs = (global.fetch as any).mock.calls[0];
-    expect(callArgs[1].headers['Authorization']).toBe('Bearer sk-or-test123456789012345');
+    const body = JSON.parse(callArgs[1].body);
+    expect(body.contents[0].role).toBe('user');
+    expect(body.contents[0].parts[0].text).toBe('You are a helpful assistant');
+    expect(body.contents[1].role).toBe('model');
   });
 
-  it('includes required headers', async () => {
-    const mockResponse = {
-      choices: [{ message: { content: 'Generated text' }, finish_reason: 'stop' }],
-      usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+  it('supports streaming', async () => {
+    const mockChunks = [
+      'data: {"candidates":[{"content":{"parts":[{"text":"Hello"}]}}]}\n',
+      'data: {"candidates":[{"content":{"parts":[{"text":" world"}]}}]}\n',
+      'data: [DONE]\n',
+    ];
+
+    const mockReader = {
+      read: vi
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(mockChunks[0]),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(mockChunks[1]),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(mockChunks[2]),
+        })
+        .mockResolvedValueOnce({ done: true, value: undefined }),
     };
 
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => mockResponse,
+      body: { getReader: () => mockReader },
     });
 
-    await openrouterProvider.generate('test prompt');
+    const chunks: string[] = [];
+    for await (const chunk of googleProvider.generateStream!('test prompt', {
+      apiKey: 'AIzatest123456789012345',
+    })) {
+      if (chunk.content) {
+        chunks.push(chunk.content);
+      }
+    }
 
-    const callArgs = (global.fetch as any).mock.calls[0];
-    expect(callArgs[1].headers['HTTP-Referer']).toBe('https://inkwell.app');
-    expect(callArgs[1].headers['X-Title']).toBe('Inkwell');
-  });
-
-  it('handles abort signal', async () => {
-    const controller = new AbortController();
-
-    global.fetch = vi.fn().mockImplementation(() => {
-      controller.abort();
-      return Promise.reject(new Error('Aborted'));
-    });
-
-    await expect(
-      openrouterProvider.generate('test prompt', { signal: controller.signal }),
-    ).rejects.toThrow(AIProviderError);
+    expect(chunks).toEqual(['Hello', ' world']);
   });
 });
 

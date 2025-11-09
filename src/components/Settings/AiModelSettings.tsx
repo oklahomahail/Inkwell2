@@ -89,7 +89,7 @@ export const AiModelSettings: React.FC<{ className?: string }> = ({ className })
 
   const handleTestProvider = async (providerId: string) => {
     setTesting(providerId);
-    const result = await aiService.testProvider(providerId, apiKeys[providerId]);
+    const result = await aiService.testProvider(providerId);
     setTestResults({ ...testResults, [providerId]: result });
     setTesting(null);
   };

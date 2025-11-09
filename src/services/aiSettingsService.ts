@@ -5,7 +5,7 @@
  * Stores settings in localStorage with client-side encryption for API keys.
  */
 
-import { getRecommendedFreeProvider } from '@/ai/registry';
+import { getDefaultProviderAndModel } from '@/ai/registry';
 import { UserAISettings } from '@/ai/types';
 
 const STORAGE_KEY = 'inkwell_ai_settings';
@@ -49,10 +49,10 @@ function decryptKey(encrypted: string): string {
  * Get default settings
  */
 function getDefaultSettings(): UserAISettings {
-  const defaultProvider = getRecommendedFreeProvider();
+  const defaults = getDefaultProviderAndModel();
   return {
-    defaultProvider: defaultProvider.id,
-    defaultModel: defaultProvider.defaultModel,
+    defaultProvider: defaults.providerId,
+    defaultModel: defaults.modelId,
     apiKeys: {},
     usage: {},
     preferences: {
