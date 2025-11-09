@@ -1,6 +1,6 @@
 // @ts-nocheck
 // src/services/snapshotService.ts
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import {
   Project,
@@ -24,10 +24,38 @@ class SnapshotService {
   private lastSnapshotTime: number = 0;
 
   /**
+   * Normalize project data to ensure correct types
+   */
+  private normalizeProject(rawProject: any): Project {
+    return {
+      ...rawProject,
+      title: typeof rawProject.title === 'string' ? rawProject.title : rawProject.name || '',
+      createdAt:
+        rawProject.createdAt instanceof Date
+          ? rawProject.createdAt.toISOString()
+          : typeof rawProject.createdAt === 'string'
+            ? rawProject.createdAt
+            : new Date().toISOString(),
+      updatedAt:
+        rawProject.updatedAt instanceof Date
+          ? rawProject.updatedAt.toISOString()
+          : typeof rawProject.updatedAt === 'number'
+            ? new Date(rawProject.updatedAt).toISOString()
+            : typeof rawProject.updatedAt === 'string'
+              ? rawProject.updatedAt
+              : new Date().toISOString(),
+      chapters: Array.isArray(rawProject.chapters) ? rawProject.chapters : [],
+      currentWordCount:
+        typeof rawProject.currentWordCount === 'number' ? rawProject.currentWordCount : 0,
+      version: typeof rawProject.version === 'string' ? rawProject.version : '1.0.0',
+    };
+  }
+
+  /**
    * Create a new snapshot of a project
    */
   async createSnapshot(
-    project: Project,
+    rawProject: Project,
     options: {
       description?: string;
       isAutomatic?: boolean;
@@ -35,6 +63,9 @@ class SnapshotService {
     } = {},
   ): Promise<SnapshotMetadata> {
     try {
+      // Normalize project data to ensure correct types
+      const project = this.normalizeProject(rawProject);
+
       // Validate project data
       const validation = validateProject(project);
       if (!validation.success) {
