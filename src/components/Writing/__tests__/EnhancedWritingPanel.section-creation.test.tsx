@@ -195,7 +195,15 @@ describe('EnhancedWritingPanel - Section Creation', () => {
     await user.click(button);
     await user.click(button);
 
-    // createSection should only be called once
+    // Wait for the 700ms delay before createSection is called
+    await waitFor(
+      () => {
+        expect(mockCreateSection).toHaveBeenCalled();
+      },
+      { timeout: 1000 },
+    );
+
+    // createSection should only be called once despite multiple clicks
     expect(mockCreateSection).toHaveBeenCalledTimes(1);
 
     // Resolve the promise
@@ -225,15 +233,24 @@ describe('EnhancedWritingPanel - Section Creation', () => {
 
     await user.click(button);
 
-    await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[EnhancedWritingPanel] Failed to create section:',
-        expect.any(Error),
-      );
-    });
+    // Wait for error to be logged (after 700ms delay + promise rejection)
+    await waitFor(
+      () => {
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          '[EnhancedWritingPanel] Failed to create section:',
+          expect.any(Error),
+        );
+      },
+      { timeout: 1500 },
+    );
 
     // Button should be enabled again after error
-    expect(button).not.toBeDisabled();
+    await waitFor(
+      () => {
+        expect(button).not.toBeDisabled();
+      },
+      { timeout: 500 },
+    );
 
     consoleErrorSpy.mockRestore();
   });
@@ -250,13 +267,26 @@ describe('EnhancedWritingPanel - Section Creation', () => {
 
     await user.click(button);
 
-    // Wait for error to be handled
-    await waitFor(() => {
-      expect(button).not.toBeDisabled();
-    });
+    // Wait for error to be handled (700ms delay + promise rejection + finally block)
+    await waitFor(
+      () => {
+        expect(button).not.toBeDisabled();
+      },
+      { timeout: 1500 },
+    );
+
+    // Ensure the first call completed
+    expect(mockCreateSection).toHaveBeenCalledTimes(1);
 
     // UI should still be functional - button can be clicked again
     await user.click(button);
-    expect(mockCreateSection).toHaveBeenCalledTimes(2);
+
+    // Wait for the second call to happen (after the 700ms delay)
+    await waitFor(
+      () => {
+        expect(mockCreateSection).toHaveBeenCalledTimes(2);
+      },
+      { timeout: 1000 },
+    );
   });
 });
