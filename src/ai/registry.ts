@@ -24,6 +24,17 @@ export const CURATED_MODELS = {
 } as const;
 
 /**
+ * Extended models (Advanced Mode)
+ *
+ * Additional experimental and specialized models
+ */
+export const EXTENDED_MODELS = {
+  openai: ['gpt-4-turbo-preview', 'gpt-3.5-turbo'],
+  anthropic: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'],
+  google: ['gemini-pro', 'gemini-pro-vision'],
+} as const;
+
+/**
  * All available AI providers (Baseline: OpenAI, Anthropic, Google)
  */
 export const providers: AIProvider[] = [openaiProvider, anthropicProvider, googleProvider];
@@ -82,6 +93,37 @@ export function getCuratedModels(): Array<{
   }
 
   return curated;
+}
+
+/**
+ * Get all models (curated + extended) based on advanced mode
+ */
+export function getModels(includeAdvanced = false): Array<{
+  provider: AIProvider;
+  model: AIModel;
+}> {
+  const curated = getCuratedModels();
+
+  if (!includeAdvanced) {
+    return curated;
+  }
+
+  // Add extended models for advanced mode
+  const extended: Array<{ provider: AIProvider; model: AIModel }> = [];
+
+  for (const [providerId, modelIds] of Object.entries(EXTENDED_MODELS)) {
+    const provider = getProvider(providerId);
+    if (!provider) continue;
+
+    for (const modelId of modelIds) {
+      const model = provider.models.find((m) => m.id === modelId);
+      if (model) {
+        extended.push({ provider, model });
+      }
+    }
+  }
+
+  return [...curated, ...extended];
 }
 
 /**

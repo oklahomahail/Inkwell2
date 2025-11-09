@@ -1,14 +1,15 @@
 /**
- * Model Selector Component - Simplified Version
+ * Model Selector Component
  *
  * Simple dropdown for selecting from curated AI models.
- * Baseline version with 7 models from 3 providers.
+ * Supports both baseline (7 models) and advanced mode (extended models).
  */
 
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Zap } from 'lucide-react';
 import React from 'react';
 
-import { getCuratedModels } from '@/ai/registry';
+import { getModels } from '@/ai/registry';
+import { useAiPreferences } from '@/state/ai/aiPreferences';
 
 interface ModelSelectorProps {
   selectedProvider: string;
@@ -25,10 +26,11 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   onModelChange,
   className = '',
 }) => {
-  const curatedModels = getCuratedModels();
+  const { advancedMode } = useAiPreferences();
+  const allModels = getModels(advancedMode);
 
   // Group models by provider
-  const modelsByProvider = curatedModels.reduce(
+  const modelsByProvider = allModels.reduce(
     (acc, { provider, model }) => {
       if (!acc[provider.id]) {
         acc[provider.id] = { provider, models: [] };
@@ -45,9 +47,17 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
     <div className={`space-y-4 ${className}`}>
       {/* Provider Selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          AI Provider
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            AI Provider
+          </label>
+          {advancedMode && (
+            <span className="flex items-center gap-1 text-xs text-inkwell-gold">
+              <Zap className="w-3 h-3" />
+              Advanced
+            </span>
+          )}
+        </div>
         <select
           value={selectedProvider}
           onChange={(e) => {

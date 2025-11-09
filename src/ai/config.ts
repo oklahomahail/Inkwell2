@@ -1,14 +1,54 @@
 /**
- * AI Configuration - Environment-based API Keys
+ * AI Configuration - Environment-based API Keys with User Overrides
  *
- * Simplified configuration using environment variables.
- * No user-managed API keys in baseline version.
+ * Baseline: Uses environment variables
+ * Advanced Mode: Allows user-provided API key overrides stored in localStorage
  */
 
+const USER_KEYS_STORAGE_KEY = 'inkwell_user_api_keys';
+
 /**
- * Get API key from environment variables
+ * Get user-provided API keys from localStorage
+ */
+function getUserApiKeys(): Record<string, string> {
+  try {
+    const stored = localStorage.getItem(USER_KEYS_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Set user API key for a provider (Advanced Mode)
+ */
+export function setUserApiKey(providerId: string, key: string): void {
+  const userKeys = getUserApiKeys();
+  userKeys[providerId] = key;
+  localStorage.setItem(USER_KEYS_STORAGE_KEY, JSON.stringify(userKeys));
+}
+
+/**
+ * Remove user API key for a provider
+ */
+export function removeUserApiKey(providerId: string): void {
+  const userKeys = getUserApiKeys();
+  delete userKeys[providerId];
+  localStorage.setItem(USER_KEYS_STORAGE_KEY, JSON.stringify(userKeys));
+}
+
+/**
+ * Get API key from user overrides or environment variables
+ * Priority: User override > Environment variable
  */
 export function getApiKey(providerId: string): string | undefined {
+  // Check user override first (Advanced Mode)
+  const userKeys = getUserApiKeys();
+  if (userKeys[providerId]) {
+    return userKeys[providerId];
+  }
+
+  // Fallback to environment variables (Baseline)
   switch (providerId) {
     case 'openai':
       return import.meta.env.VITE_OPENAI_API_KEY;

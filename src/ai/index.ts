@@ -1,8 +1,9 @@
 /**
- * AI Provider System - Simplified Version
+ * AI Provider System
  *
- * Exports for the multi-provider AI system (baseline mode).
- * Uses environment variables for API keys, curated model list.
+ * Exports for the multi-provider AI system.
+ * Baseline Mode: Curated models with environment variables
+ * Advanced Mode: Extended models with user API key overrides
  */
 
 // Types
@@ -21,18 +22,31 @@ export { AIProviderError, AIKeyError, AIRateLimitError, AIQuotaError } from './t
 export {
   providers,
   CURATED_MODELS,
+  EXTENDED_MODELS,
   getProvider,
   getProviderIds,
   getCuratedModels,
+  getModels,
   getDefaultProviderAndModel,
   getModel,
 } from './registry';
 
 // Configuration
-export { getApiKey, hasApiKey, getAvailableProviders } from './config';
+export {
+  getApiKey,
+  hasApiKey,
+  getAvailableProviders,
+  setUserApiKey,
+  removeUserApiKey,
+} from './config';
+
+// State
+export { useAiPreferences } from '../state/ai/aiPreferences';
 
 // Services (main entry points)
 export { aiService } from '../services/aiService';
 
 // UI Components
 export { ModelSelector } from '../components/AI/ModelSelector';
+export { AdvancedModeToggle } from '../components/AI/AdvancedModeToggle';
+export { AiProviderKeys } from '../components/Settings/AiProviderKeys';
