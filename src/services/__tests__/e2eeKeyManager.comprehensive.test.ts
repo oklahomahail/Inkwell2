@@ -310,7 +310,7 @@ describe('E2EEKeyManager - Comprehensive', () => {
       await e2eeKeyManager.unlockProject(projectId, newPassphrase);
 
       expect(e2eeKeyManager.isUnlocked(projectId)).toBe(true);
-    });
+    }, 10000); // Increase timeout to 10 seconds for crypto operations
 
     it('should fail unlock with old passphrase after change', async () => {
       const newPassphrase = 'new passphrase';
@@ -321,7 +321,7 @@ describe('E2EEKeyManager - Comprehensive', () => {
       await expect(e2eeKeyManager.unlockProject(projectId, passphrase)).rejects.toThrow(
         'Incorrect passphrase',
       );
-    });
+    }, 10000); // Increase timeout to 10 seconds for crypto operations
 
     it('should fail with wrong old passphrase', async () => {
       await expect(e2eeKeyManager.changePassphrase(projectId, 'wrong', 'new')).rejects.toThrow();

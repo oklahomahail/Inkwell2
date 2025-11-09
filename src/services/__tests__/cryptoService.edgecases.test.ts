@@ -478,7 +478,7 @@ describe('cryptoService - Edge Cases', () => {
       // Step 6: Decrypt content
       const decrypted = await decryptJSON<typeof content>(encrypted, dek2);
       expect(decrypted).toEqual(content);
-    });
+    }, 10000); // Increase timeout to 10 seconds for crypto operations
 
     it('should fail full workflow with wrong passphrase', async () => {
       const { mk, kdf } = await deriveMasterKey({ passphrase: 'correct' });

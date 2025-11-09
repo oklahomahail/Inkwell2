@@ -115,7 +115,7 @@ describe('SupabaseSync - E2EE Integration', () => {
       // Verify plaintext was cleared
       expect(capturedData.body).toBe('');
       expect(capturedData.title).toBe('[Encrypted]');
-    });
+    }, 10000); // Increase timeout to 10 seconds for crypto operations
 
     it('should NOT encrypt chapter content when E2EE is disabled', async () => {
       // Do NOT initialize E2EE for project

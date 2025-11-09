@@ -27,11 +27,12 @@ export const CURATED_MODELS = {
  * Extended models (Advanced Mode)
  *
  * Additional experimental and specialized models
+ * Note: Only includes models that actually exist in provider definitions
  */
 export const EXTENDED_MODELS = {
-  openai: ['gpt-4-turbo-preview', 'gpt-3.5-turbo'],
-  anthropic: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'],
-  google: ['gemini-pro', 'gemini-pro-vision'],
+  openai: ['gpt-3.5-turbo'], // gpt-3.5-turbo exists in openaiProvider
+  anthropic: ['claude-3-opus-20240229'], // claude-3-opus exists in anthropicProvider
+  google: [], // No additional Google models beyond curated
 } as const;
 
 /**

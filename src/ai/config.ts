@@ -23,18 +23,26 @@ function getUserApiKeys(): Record<string, string> {
  * Set user API key for a provider (Advanced Mode)
  */
 export function setUserApiKey(providerId: string, key: string): void {
-  const userKeys = getUserApiKeys();
-  userKeys[providerId] = key;
-  localStorage.setItem(USER_KEYS_STORAGE_KEY, JSON.stringify(userKeys));
+  try {
+    const userKeys = getUserApiKeys();
+    userKeys[providerId] = key;
+    localStorage.setItem(USER_KEYS_STORAGE_KEY, JSON.stringify(userKeys));
+  } catch {
+    // Ignore localStorage errors (e.g., quota exceeded, private mode)
+  }
 }
 
 /**
  * Remove user API key for a provider
  */
 export function removeUserApiKey(providerId: string): void {
-  const userKeys = getUserApiKeys();
-  delete userKeys[providerId];
-  localStorage.setItem(USER_KEYS_STORAGE_KEY, JSON.stringify(userKeys));
+  try {
+    const userKeys = getUserApiKeys();
+    delete userKeys[providerId];
+    localStorage.setItem(USER_KEYS_STORAGE_KEY, JSON.stringify(userKeys));
+  } catch {
+    // Ignore localStorage errors
+  }
 }
 
 /**
