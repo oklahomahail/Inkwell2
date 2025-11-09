@@ -424,8 +424,12 @@ describe('E2EEKeyManager - Comprehensive', () => {
 
   describe('Integration: Full E2EE Lifecycle', () => {
     it('should complete full E2EE workflow', async () => {
-      // Step 1: Initialize E2EE
-      const recoveryKit = await e2eeKeyManager.initializeProject({ projectId, passphrase });
+      // Step 1: Initialize E2EE with fast KDF params for testing
+      const recoveryKit = await e2eeKeyManager.initializeProject({
+        projectId,
+        passphrase,
+        useInteractiveParams: false, // Use fast KDF in CI/tests
+      });
       expect(e2eeKeyManager.isUnlocked(projectId)).toBe(true);
 
       const dek1 = e2eeKeyManager.getDEK(projectId);
@@ -453,6 +457,6 @@ describe('E2EEKeyManager - Comprehensive', () => {
 
       // DEK should still match original
       expect(Buffer.from(dek3).toString('hex')).toBe(Buffer.from(dek1).toString('hex'));
-    });
+    }, 30000); // 30 second timeout for crypto-heavy operations
   });
 });

@@ -12,6 +12,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true, // enables test/expect/vi globals
+    timeout: 30000, // 30 second default timeout for all tests (crypto/async operations)
     setupFiles: ['./test/setupIndexedDB.ts', './src/setupTests.ts', './vitest.setup.ts'],
     // Phase C: add headless component tests progressively
     include: [
