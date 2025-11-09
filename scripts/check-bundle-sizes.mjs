@@ -8,14 +8,16 @@
  *
  * Usage:
  *   npm run build && node scripts/check-bundle-sizes.mjs
+ *   npm run build && node scripts/check-bundle-sizes.mjs --output-json reports/bundle-size.json
+ *   npm run build && node scripts/check-bundle-sizes.mjs --output-html reports/bundle-size.html
  *
  * Exit codes:
  *   0 - All bundles within limits
  *   1 - One or more bundles exceed error threshold
  */
 
-import { readFile, readdir, stat } from 'fs/promises';
-import { join } from 'path';
+import { readFile, readdir, stat, writeFile, mkdir } from 'fs/promises';
+import { join, dirname } from 'path';
 
 const DIST_DIR = 'dist/assets';
 const BASELINE_FILE = 'bundle-baseline.json';
@@ -89,6 +91,112 @@ function findBaselineMatch(filename, baseline) {
   }
 
   return null;
+}
+
+/**
+ * Generate HTML report
+ */
+function generateHTMLReport(results, baseline, current, hasErrors, hasWarnings) {
+  const totalSize = Object.values(current).reduce((sum, size) => sum + size, 0);
+  const timestamp = new Date().toISOString();
+
+  const statusColors = {
+    error: '#dc2626',
+    warn: '#f59e0b',
+    'ok-increased': '#10b981',
+    'ok-unchanged': '#10b981',
+    'ok-decreased': '#10b981',
+    new: '#3b82f6',
+    removed: '#6b7280',
+  };
+
+  const rows = results
+    .map(
+      (r) => `
+      <tr style="background-color: ${r.status.startsWith('ok') ? '#f0fdf4' : r.status === 'error' ? '#fef2f2' : r.status === 'warn' ? '#fffbeb' : '#fff'}">
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${r.file}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">${r.currentSize ?? '-'} KB</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">${r.baselineSize ?? '-'} KB</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; color: ${r.diff && r.diff > 0 ? '#dc2626' : r.diff && r.diff < 0 ? '#10b981' : '#6b7280'}">
+          ${r.diff !== undefined ? (r.diff > 0 ? '+' : '') + r.diff + ' KB' : '-'}
+        </td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; color: ${r.diffPercent && r.diffPercent > 0 ? '#dc2626' : r.diffPercent && r.diffPercent < 0 ? '#10b981' : '#6b7280'}">
+          ${r.diffPercent !== undefined ? (r.diffPercent > 0 ? '+' : '') + r.diffPercent + '%' : '-'}
+        </td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
+          <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; background-color: ${statusColors[r.status]}20; color: ${statusColors[r.status]}">
+            ${r.status.toUpperCase()}
+          </span>
+        </td>
+      </tr>
+    `
+    )
+    .join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bundle Size Report - Inkwell</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 40px; background: #f9fafb; }
+    .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    h1 { margin: 0 0 8px; color: #111827; }
+    .meta { color: #6b7280; margin-bottom: 32px; font-size: 14px; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .summary-card { padding: 20px; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb; }
+    .summary-card h3 { margin: 0 0 8px; font-size: 14px; color: #6b7280; font-weight: 500; }
+    .summary-card .value { font-size: 32px; font-weight: 700; color: #111827; }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 14px; font-weight: 600; margin-bottom: 24px; }
+    .status-badge.success { background: #d1fae5; color: #065f46; }
+    .status-badge.warning { background: #fef3c7; color: #92400e; }
+    .status-badge.error { background: #fee2e2; color: #991b1b; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; }
+    th.right { text-align: right; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Bundle Size Report</h1>
+    <div class="meta">Generated: ${timestamp}</div>
+
+    <div class="summary">
+      <div class="summary-card">
+        <h3>Total Size</h3>
+        <div class="value">${totalSize} KB</div>
+      </div>
+      <div class="summary-card">
+        <h3>Bundles Tracked</h3>
+        <div class="value">${Object.keys(current).length}</div>
+      </div>
+      <div class="summary-card">
+        <h3>Status</h3>
+        <div class="value" style="font-size: 24px; color: ${hasErrors ? '#dc2626' : hasWarnings ? '#f59e0b' : '#10b981'}">
+          ${hasErrors ? '❌ Failed' : hasWarnings ? '⚠️ Warning' : '✅ Passed'}
+        </div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Bundle</th>
+          <th class="right">Current</th>
+          <th class="right">Baseline</th>
+          <th class="right">Diff (KB)</th>
+          <th class="right">Diff (%)</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>`;
 }
 
 /**
@@ -206,6 +314,49 @@ async function checkBundleSizes() {
   }
 
   console.log('');
+
+  // Generate JSON report if requested
+  const args = process.argv.slice(2);
+  const jsonIndex = args.indexOf('--output-json');
+  const htmlIndex = args.indexOf('--output-html');
+
+  if (jsonIndex !== -1 && args[jsonIndex + 1]) {
+    const jsonPath = args[jsonIndex + 1];
+    const totalSize = Object.values(current).reduce((sum, size) => sum + size, 0);
+
+    const jsonReport = {
+      timestamp: new Date().toISOString(),
+      status: hasErrors ? 'failed' : hasWarnings ? 'warning' : 'passed',
+      summary: {
+        totalSize,
+        bundleCount: Object.keys(current).length,
+        hasErrors,
+        hasWarnings,
+      },
+      bundles: results.map((r) => ({
+        file: r.file,
+        currentSize: r.currentSize,
+        baselineSize: r.baselineSize,
+        diff: r.diff,
+        diffPercent: r.diffPercent,
+        status: r.status,
+      })),
+    };
+
+    await mkdir(dirname(jsonPath), { recursive: true });
+    await writeFile(jsonPath, JSON.stringify(jsonReport, null, 2));
+    console.log(`📄 JSON report saved to: ${jsonPath}`);
+  }
+
+  // Generate HTML report if requested
+  if (htmlIndex !== -1 && args[htmlIndex + 1]) {
+    const htmlPath = args[htmlIndex + 1];
+    const html = generateHTMLReport(results, baseline, current, hasErrors, hasWarnings);
+
+    await mkdir(dirname(htmlPath), { recursive: true });
+    await writeFile(htmlPath, html);
+    console.log(`📄 HTML report saved to: ${htmlPath}`);
+  }
 
   // Summary
   if (hasErrors) {
