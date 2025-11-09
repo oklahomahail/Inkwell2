@@ -63,6 +63,11 @@ const SignUp = lazy(() => import('./pages/SignUpPage'));
 const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
 const SupabaseHealth = lazy(() => import('./routes/Health'));
 
+// Dev-only pages
+const AnalyticsDashboard = lazy(() =>
+  import('./components/Dev/AnalyticsDashboard').then((m) => ({ default: m.AnalyticsDashboard })),
+);
+
 // Loading fallback component
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -254,6 +259,18 @@ function AppShell() {
               </ProtectedRoute>
             }
           />
+
+          {/* Dev-only analytics dashboard */}
+          {import.meta.env.DEV && (
+            <Route
+              path="/dev/analytics"
+              element={
+                <ProtectedRoute>
+                  <AnalyticsDashboard />
+                </ProtectedRoute>
+              }
+            />
+          )}
 
           {/* Not Found - explicit redirect to root */}
           <Route path="*" element={<Navigate to="/" replace />} />

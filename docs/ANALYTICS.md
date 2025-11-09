@@ -167,9 +167,24 @@ await analyticsService.endSession();
 
 ## Developer Dashboard
 
-In development mode, analytics can be queried via the browser console:
+### UI Dashboard (Development Mode)
 
-### Available Commands
+A comprehensive React-based analytics dashboard is available at [/dev/analytics](http://localhost:5173/dev/analytics) in development mode.
+
+**Features:**
+
+- **Overview Tab**: Summary statistics, category breakdown, top actions
+- **Events Tab**: Paginated event listing with filters
+- **Metrics Tab**: Statistical analysis (avg, min, max, p50, p95, p99)
+- **Performance Tab**: Performance insights and event distribution
+- **Export**: JSON and CSV export capabilities
+- **Filters**: Category and time range filtering
+
+See [Analytics Dashboard Documentation](./dev/analytics-dashboard.md) for detailed usage.
+
+### Console Commands
+
+Analytics can also be queried via the browser console:
 
 ```javascript
 // View analytics summary
@@ -388,13 +403,60 @@ const events = await window.analytics.events({ category: 'test' });
 console.table(events);
 ```
 
+## User-Facing Insights
+
+### Settings → Insights Panel
+
+A privacy-focused analytics panel for users:
+
+**Features:**
+
+- Writing session statistics (last 30 days)
+- Recent activity chart (last 7 days)
+- Autosave performance rating
+- AI usage tracking
+- Privacy controls and clear notices
+
+**Usage:**
+
+```tsx
+import { InsightsPanel } from '@/components/Settings/InsightsPanel';
+
+export function SettingsPage() {
+  return <InsightsPanel />;
+}
+```
+
+See [Analytics Dashboard Documentation](./dev/analytics-dashboard.md) for integration details.
+
+## Performance Guard Integration
+
+The analytics system integrates with the performance monitoring to detect regressions:
+
+**Features:**
+
+- Automatic regression detection (> 20% increase = warning)
+- Baseline comparison (7 days ago)
+- Real-time monitoring (autosave, render, storage, AI)
+- Critical/warning severity levels
+
+**Usage:**
+
+```tsx
+import { PerformanceGuardIntegration } from '@/components/Dev/PerformanceGuardIntegration';
+
+export function DevPanel() {
+  return <PerformanceGuardIntegration />;
+}
+```
+
 ## Future Enhancements
 
 Potential improvements for future releases:
 
-1. **Visual Dashboard UI** - React-based dashboard component
+1. ~~**Visual Dashboard UI**~~ - ✅ Implemented in v0.9.3
 2. **Advanced Filtering** - More complex query capabilities
-3. **Data Visualization** - Charts and graphs
+3. **Data Visualization** - Charts and graphs (Chart.js integration)
 4. **Custom Retention Policies** - Per-category retention
 5. **Export Scheduling** - Automated periodic exports
 6. **A/B Testing Support** - Experiment tracking
@@ -402,6 +464,7 @@ Potential improvements for future releases:
 
 ## Related Documentation
 
+- [Analytics Dashboard Guide](./dev/analytics-dashboard.md) - Comprehensive dashboard documentation
 - [Privacy Policy](./privacy.md)
 - [Developer Mode](./DEVELOPER_MODE.md)
 - [Testing Guide](./TESTING.md)
