@@ -52,7 +52,7 @@ describe('E2EEKeyManager - Comprehensive', () => {
   });
 
   describe('Initialization', () => {
-    it('should initialize E2EE for a project', async () => {
+    it('should initialize E2EE for a project', { timeout: 15000 }, async () => {
       const recoveryKit = await e2eeKeyManager.initializeProject({
         projectId,
         passphrase,

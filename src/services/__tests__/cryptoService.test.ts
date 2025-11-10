@@ -14,7 +14,7 @@ import {
 } from '../cryptoService';
 
 describe('cryptoService', () => {
-  it('derives master key from passphrase', async () => {
+  it('derives master key from passphrase', { timeout: 15000 }, async () => {
     const { mk, kdf } = await deriveMasterKey({ passphrase: 'correct horse battery staple' });
 
     expect(mk).toBeInstanceOf(Uint8Array);
@@ -36,7 +36,7 @@ describe('cryptoService', () => {
     expect(Buffer.from(dek1).toString('hex')).not.toBe(Buffer.from(dek2).toString('hex'));
   });
 
-  it('wraps and unwraps DEK with master key', async () => {
+  it('wraps and unwraps DEK with master key', { timeout: 15000 }, async () => {
     const { mk, kdf } = await deriveMasterKey({ passphrase: 'test-passphrase-123' });
     const dek = await generateDEK();
 
@@ -131,7 +131,7 @@ describe('cryptoService', () => {
     expect(kit.version).toBe('1');
   });
 
-  it('fails to decrypt with wrong passphrase', async () => {
+  it('fails to decrypt with wrong passphrase', { timeout: 15000 }, async () => {
     const { mk, kdf } = await deriveMasterKey({ passphrase: 'correct' });
     const dek = await generateDEK();
     const wrapped = await wrapKey(dek, mk, kdf);

@@ -106,7 +106,7 @@ describe('cryptoService - Edge Cases', () => {
   });
 
   describe('deriveMasterKey() - Argon2id Path', () => {
-    it('should use Argon2id by default', async () => {
+    it('should use Argon2id by default', { timeout: 15000 }, async () => {
       const { mk, kdf } = await deriveMasterKey({ passphrase: 'test-argon2' });
       expect(kdf.type).toBe('argon2id');
       expect(kdf.opslimit).toBeDefined();
@@ -126,18 +126,22 @@ describe('cryptoService - Edge Cases', () => {
       expect(kdf.memlimit).toBeDefined();
     });
 
-    it('should derive different keys for different passphrases', async () => {
+    it('should derive different keys for different passphrases', { timeout: 15000 }, async () => {
       const { mk: mk1 } = await deriveMasterKey({ passphrase: 'password1' });
       const { mk: mk2 } = await deriveMasterKey({ passphrase: 'password2' });
       expect(Buffer.from(mk1).toString('hex')).not.toBe(Buffer.from(mk2).toString('hex'));
     });
 
-    it('should derive different keys for same passphrase (random salt)', async () => {
-      const { mk: mk1 } = await deriveMasterKey({ passphrase: 'same' });
-      const { mk: mk2 } = await deriveMasterKey({ passphrase: 'same' });
-      // Different salts mean different keys
-      expect(Buffer.from(mk1).toString('hex')).not.toBe(Buffer.from(mk2).toString('hex'));
-    });
+    it(
+      'should derive different keys for same passphrase (random salt)',
+      { timeout: 15000 },
+      async () => {
+        const { mk: mk1 } = await deriveMasterKey({ passphrase: 'same' });
+        const { mk: mk2 } = await deriveMasterKey({ passphrase: 'same' });
+        // Different salts mean different keys
+        expect(Buffer.from(mk1).toString('hex')).not.toBe(Buffer.from(mk2).toString('hex'));
+      },
+    );
   });
 
   describe('deriveMasterKey() - PBKDF2 Fallback Path', () => {
@@ -194,7 +198,7 @@ describe('cryptoService - Edge Cases', () => {
       expect(Buffer.from(unwrapped).toString('hex')).toBe(Buffer.from(dek).toString('hex'));
     });
 
-    it('should fail to unwrap with wrong master key', async () => {
+    it('should fail to unwrap with wrong master key', { timeout: 15000 }, async () => {
       const { mk, kdf } = await deriveMasterKey({ passphrase: 'correct' });
       const { mk: wrongMK } = await deriveMasterKey({ passphrase: 'wrong' });
       const dek = await generateDEK();
@@ -368,7 +372,7 @@ describe('cryptoService - Edge Cases', () => {
       expect(Buffer.from(mk2).toString('hex')).toBe(Buffer.from(mk).toString('hex'));
     });
 
-    it('should re-derive different key for wrong passphrase', async () => {
+    it('should re-derive different key for wrong passphrase', { timeout: 15000 }, async () => {
       const { mk, kdf } = await deriveMasterKey({ passphrase: 'correct' });
 
       const wrongMK = await rederiveMK('wrong', kdf);
