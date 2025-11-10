@@ -185,13 +185,14 @@ See [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for branching, commits, a
 
 MIT
 
-## Current Features (October 2025)
+## Current Features (November 2025)
 
 ### Core Writing Experience
 
 - **TipTap Rich Text Editor** with real-time word counts and auto-save
 - **Focus Mode** with distraction-free writing environment
 - **Scene-Based Organization** with chapter management
+- **Project-Level Analytics** — Daily writing goals aggregated across all sections with session-based tracking
 - **🚀 3B Publishing & Professional Exports** — Publication-ready export system:
   - **Multi-Format Export Wizard** with guided workflow (PDF, DOCX, EPUB)
   - **Professional Style Templates** (Classic Manuscript, Modern Book)
@@ -201,9 +202,9 @@ MIT
 
 ### AI-Powered Story Development
 
-- **🤖 Enhanced AI System** — Production-ready multi-provider AI integration with mock mode for demos
+- **🤖 Enhanced AI System** — Production-ready multi-provider AI integration with graceful fallback mode
 - **🛡️ Robust AI Infrastructure** — Circuit breaker, retry logic, and real-time status monitoring
-- **🎭 Demo-Safe Mock Mode** — Full AI functionality without API keys for presentations
+- **🎭 Fallback Mode** — Basic AI functionality without API keys with helpful upgrade prompts
 - **⚡ Advanced Mode** — Power user features with API key overrides and extended model selection:
   - **User API Key Overrides** — Use your own API keys stored securely in browser localStorage
   - **Extended Model Registry** — Access 9 models (7 baseline + 2 extended: GPT-3.5 Turbo, Claude 3 Opus)
@@ -391,6 +392,15 @@ pnpm vercel:test     # Test production build locally
 **Current Phase:** Phase 2 Advanced Features ✅ (Plot Boards MVP Complete)
 
 **Recently Completed (November 2025):**
+
+- ✅ **v0.9.2 Production Reliability & UX (Nov 10, 2025)** — Critical fixes for analytics, sync, and AI:
+  - **Project-Level Daily Goals**: Fixed daily goal progress to aggregate across all sections using session-based word counts
+  - **UUID Validation for Sync**: Eliminated 400 errors by validating project IDs before Supabase operations
+  - **Planning Panel Data Binding**: Fixed Story Structure Visualizer to read chapters from IndexedDB
+  - **AI Fallback Mode**: Graceful degradation when Claude API key not configured with helpful upgrade prompts
+  - **User-Configurable Daily Goals**: Persistent daily goal defaults (100-10,000 words) in Settings
+  - **Analytics Telemetry**: AI fallback usage tracking for product insights
+  - **Comprehensive Test Coverage**: 100% test pass rate with regression tests for UUID validation and AI fallback
 
 - ✅ **Advanced Mode for AI Providers (Nov 9, 2025)** — Power user features with comprehensive test coverage:
   - **⚡ Advanced Mode Toggle**: Persistent opt-in system for power users

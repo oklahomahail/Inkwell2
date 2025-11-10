@@ -1,6 +1,6 @@
 # Inkwell Platform Roadmap
 
-_Last updated: November 9, 2025_
+_Last updated: November 10, 2025_
 
 ## Vision
 
@@ -8,14 +8,24 @@ Inkwell is an **offline-first writing platform** for serious authors. The focus 
 
 ---
 
-## Current Status: v0.9.1-beta (November 2025)
+## Current Status: v0.9.2-beta (November 2025)
 
-**Latest Release:** v0.9.1-beta - Onboarding, EPUB, Telemetry & Bundle Guard
+**Latest Release:** v0.9.2-beta - Production Reliability & UX Improvements
 **Package Version:** v1.2.1
 **Repository:** https://github.com/oklahomahail/Inkwell2
 **Live Demo:** https://inkwell-writing.vercel.app
 
 ### ✅ Recently Completed
+
+#### v0.9.2-beta - Production Reliability & UX Improvements (November 10, 2025)
+
+- **Project-Level Daily Goals**: Fixed analytics to aggregate word counts across all sections using session-based tracking
+- **UUID Validation**: Eliminated 400 errors from Supabase sync by validating project IDs before database operations
+- **Planning Panel Fix**: Story Structure Visualizer now correctly reads chapters from IndexedDB instead of empty project metadata
+- **AI Fallback Mode**: Graceful degradation when Claude API key not configured, with helpful upgrade prompts and analytics tracking
+- **User-Configurable Goals**: Persistent daily goal defaults (100-10,000 words) stored in Settings with localStorage persistence
+- **Comprehensive Testing**: 100% test pass rate with new regression tests for UUID validation and AI fallback scenarios
+- **Analytics Telemetry**: Added event tracking for AI fallback usage to inform product decisions
 
 #### Advanced Mode for AI Providers (November 9, 2025)
 
@@ -184,6 +194,6 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md) for branching, commits, and PR chec
 
 ---
 
-**Last Updated**: November 9, 2025
+**Last Updated**: November 10, 2025
 **Maintainers**: @davehail
-**Status**: v0.9.1-beta released, v1.0.0 planning underway
+**Status**: v0.9.2-beta released, v1.0.0 planning underway
