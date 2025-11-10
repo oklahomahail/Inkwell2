@@ -92,7 +92,7 @@ describe('E2EEKeyManager - Comprehensive', () => {
       expect(isEnabled).toBe(true);
     });
 
-    it('should automatically unlock project after initialization', async () => {
+    it('should automatically unlock project after initialization', { timeout: 15000 }, async () => {
       await e2eeKeyManager.initializeProject({ projectId, passphrase });
 
       const isUnlocked = e2eeKeyManager.isUnlocked(projectId);

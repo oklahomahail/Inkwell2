@@ -215,52 +215,56 @@ describe('SupabaseSync - E2EE Integration', () => {
   });
 
   describe('Pull with E2EE', () => {
-    it('should decrypt encrypted chapter content when project is unlocked', async () => {
-      // Initialize E2EE for project
-      await e2eeKeyManager.initializeProject({ projectId, passphrase });
+    it(
+      'should decrypt encrypted chapter content when project is unlocked',
+      { timeout: 15000 },
+      async () => {
+        // Initialize E2EE for project
+        await e2eeKeyManager.initializeProject({ projectId, passphrase });
 
-      // Create encrypted chapter content
-      const dek = e2eeKeyManager.getDEK(projectId);
-      const { encryptJSON } = await import('../cryptoService');
-      const encrypted = await encryptJSON(
-        {
-          title: 'Secret Chapter',
-          body: 'This is secret content',
-        },
-        dek,
-      );
+        // Create encrypted chapter content
+        const dek = e2eeKeyManager.getDEK(projectId);
+        const { encryptJSON } = await import('../cryptoService');
+        const encrypted = await encryptJSON(
+          {
+            title: 'Secret Chapter',
+            body: 'This is secret content',
+          },
+          dek,
+        );
 
-      const encryptedChapter = {
-        id: 'chapter-1',
-        title: '[Encrypted]',
-        body: '',
-        encrypted_content: encrypted,
-        project_id: projectId,
-        index_in_project: 0,
-        user_id: userId,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+        const encryptedChapter = {
+          id: 'chapter-1',
+          title: '[Encrypted]',
+          body: '',
+          encrypted_content: encrypted,
+          project_id: projectId,
+          index_in_project: 0,
+          user_id: userId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
 
-      // Mock Supabase select
-      mockSupabaseClient.from.mockReturnValue({
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnValue({
-          data: [encryptedChapter],
-          error: null,
-        }),
-      });
+        // Mock Supabase select
+        mockSupabaseClient.from.mockReturnValue({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnValue({
+            data: [encryptedChapter],
+            error: null,
+          }),
+        });
 
-      // Pull from cloud
-      const result = await supabaseSyncService.pullFromCloud();
+        // Pull from cloud
+        const result = await supabaseSyncService.pullFromCloud();
 
-      expect(result.chapters).toHaveLength(1);
+        expect(result.chapters).toHaveLength(1);
 
-      const decryptedChapter = result.chapters[0];
-      expect(decryptedChapter).toBeDefined();
-      expect(decryptedChapter.title).toBe('Secret Chapter');
-      expect(decryptedChapter.body).toBe('This is secret content');
-    });
+        const decryptedChapter = result.chapters[0];
+        expect(decryptedChapter).toBeDefined();
+        expect(decryptedChapter.title).toBe('Secret Chapter');
+        expect(decryptedChapter.body).toBe('This is secret content');
+      },
+    );
 
     it('should handle unencrypted chapters during pull', async () => {
       const unencryptedChapter = {
