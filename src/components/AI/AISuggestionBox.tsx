@@ -25,8 +25,14 @@ export default function AISuggestionBox({
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [model, setModel] = useState<'claude' | 'gpt'>('claude');
+  const [isConfigured, setIsConfigured] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const outputRef = useRef<HTMLDivElement>(null);
+
+  // Check if Claude API key is configured
+  useEffect(() => {
+    setIsConfigured(claudeService.isConfigured());
+  }, []);
 
   // Auto-scroll as response grows
   useEffect(() => {
@@ -88,6 +94,7 @@ export default function AISuggestionBox({
       if (model === 'claude') {
         for await (const token of claudeService.generateStream(input, {
           signal: controller.signal,
+          useFallback: true, // Enable fallback mode for unconfigured users
         })) {
           setResponse((prev) => prev + token);
         }
@@ -187,6 +194,19 @@ export default function AISuggestionBox({
           AI Suggestion Assistant
         </h2>
 
+        {/* API Key Status Banner */}
+        {!isConfigured && (
+          <div className="mb-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+            <p className="text-xs text-amber-200 flex items-center gap-2">
+              <Settings2 className="w-4 h-4" />
+              <span>
+                <strong>Basic Mode:</strong> Running without Claude API key. Add your API key in
+                Settings for full AI-powered suggestions.
+              </span>
+            </p>
+          </div>
+        )}
+
         {/* Model selector */}
         <div className="flex items-center gap-3 mb-3">
           <Settings2 className="w-4 h-4 text-slate-400" />
@@ -197,7 +217,7 @@ export default function AISuggestionBox({
             onChange={(e) => setModel(e.target.value as 'claude' | 'gpt')}
             disabled={isLoading}
           >
-            <option value="claude">Claude</option>
+            <option value="claude">Claude {!isConfigured && '(Basic Mode)'}</option>
             <option value="gpt" disabled>
               GPT (Coming Soon)
             </option>

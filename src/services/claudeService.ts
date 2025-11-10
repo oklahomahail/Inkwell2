@@ -102,6 +102,40 @@ Context: You have access to the user's current project and any selected text. Al
     }
   }
 
+  /**
+   * Generate a fallback response when API key is not configured
+   * Provides helpful guidance instead of throwing an error
+   */
+  private generateFallbackResponse(content: string, _context?: any): ClaudeResponse {
+    const summary = content.length > 150 ? content.slice(0, 150) + '...' : content;
+    const responseText = `**AI Suggestion (Basic Mode)**
+
+Your request: "${summary}"
+
+To unlock full AI-powered writing assistance with Claude, please add your Anthropic API key in Settings.
+
+**What you'll get with Claude:**
+- Continue your writing with your unique voice
+- Improve prose clarity and engagement
+- Add vivid dialogue and descriptive details
+- Get creative brainstorming and plot ideas
+- Receive constructive feedback on your writing
+
+**How to upgrade:**
+1. Go to Settings → AI Configuration
+2. Enter your Anthropic API key (starts with 'sk-ant-')
+3. Test the connection
+4. Start using advanced AI suggestions!
+
+Get your API key at: https://console.anthropic.com/`;
+
+    return {
+      content: responseText,
+      text: responseText,
+      trim: () => responseText.trim(),
+    };
+  }
+
   async sendMessage(
     content: string,
     context?: {
@@ -109,9 +143,23 @@ Context: You have access to the user's current project and any selected text. Al
       projectContext?: string;
       conversationHistory?: ClaudeMessage[];
       maxTokens?: number; // 🆕 Allow override for Story Architect
+      useFallback?: boolean; // 🆕 Allow basic mode for unconfigured users
     },
   ): Promise<ClaudeResponse> {
     if (!this.isConfigured()) {
+      // Return fallback response if useFallback is true
+      if (context?.useFallback) {
+        devLog.debug('🔄 Using fallback response (API key not configured)');
+
+        // Track fallback usage for product insights
+        analyticsService.logEvent('ai', 'fallback.used', 'sendMessage', 0, {
+          promptLength: content.length,
+          hasSelectedText: !!context?.selectedText,
+          hasProjectContext: !!context?.projectContext,
+        });
+
+        return this.generateFallbackResponse(content, context);
+      }
       throw this.createError(
         'Claude API key not configured. Please set your API key in settings.',
         'auth_error',
@@ -499,9 +547,28 @@ Context: You have access to the user's current project and any selected text. Al
    */
   async *generateStream(
     prompt: string,
-    options?: { signal?: AbortSignal; temperature?: number; maxTokens?: number },
+    options?: {
+      signal?: AbortSignal;
+      temperature?: number;
+      maxTokens?: number;
+      useFallback?: boolean;
+    },
   ): AsyncGenerator<string, void, unknown> {
     if (!this.isConfigured()) {
+      // Yield fallback response if useFallback is true
+      if (options?.useFallback) {
+        devLog.debug('🔄 Using fallback response for stream (API key not configured)');
+
+        // Track fallback usage for product insights
+        analyticsService.logEvent('ai', 'fallback.used', 'generateStream', 0, {
+          promptLength: prompt.length,
+          hasSignal: !!options?.signal,
+        });
+
+        const fallback = this.generateFallbackResponse(prompt);
+        yield fallback.content;
+        return;
+      }
       throw this.createError('Claude API key not configured', 'auth_error', false);
     }
 

@@ -5,6 +5,7 @@ import { BarChart3, CheckCircle, BookOpen, Users, Zap, Target, Award } from 'luc
 import React, { useMemo } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
+import { useChapterList } from '@/context/ChaptersContext';
 
 interface StoryStructureVisualizerProps {
   className?: string;
@@ -38,6 +39,9 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
 }) => {
   const { currentProject } = useAppContext();
 
+  // Get chapters from IndexedDB via ChaptersContext (project-scoped)
+  const chaptersFromDB = useChapterList(currentProject?.id || '');
+
   // Analyze current project structure
   const { chaptersAnalysis, storyHealth, beatSheetProgress } = useMemo(() => {
     if (!currentProject) {
@@ -54,50 +58,37 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
       };
     }
 
-    // Safely access chapters - handle different possible structures
-    const chapters = currentProject.chapters || [];
+    // Use chapters from IndexedDB (ChaptersContext) instead of embedded project.chapters
+    // This ensures we always get the latest chapter data from the database
+    const chapters = chaptersFromDB;
 
-    // Analyze chapters
+    // Analyze chapters (using ChapterMeta from IndexedDB)
     const chaptersAnalysis: ChapterAnalysis[] = chapters.map((chapter: any, index: number) => {
-      // Safely access scenes with fallback
-      const scenes = chapter.scenes || [];
-      const totalWords = scenes.reduce((sum: number, scene: any) => {
-        // Handle different possible content properties
-        const content = scene.content || scene.text || '';
-        return sum + (typeof content === 'string' ? content.length : 0);
-      }, 0);
-      const sceneCount = scenes.length;
+      // ChapterMeta has wordCount already calculated
+      const totalWords = chapter.wordCount || 0;
 
-      // Determine completion status
+      // Note: Scenes are deprecated - chapters now use direct content
+      // For backwards compatibility, check if scenes exist on legacy data
+      const scenes = chapter.scenes || [];
+      const sceneCount = scenes.length || 1; // Default to 1 if no scenes (direct content model)
+
+      // Determine completion status based on word count
       let completionStatus: ChapterAnalysis['completionStatus'] = 'empty';
       if (totalWords > 1000) completionStatus = 'complete';
       else if (totalWords > 100) completionStatus = 'partial';
-      else if (
-        scenes.some((scene: any) => {
-          const content = scene.content || scene.text || '';
-          return content && content.trim().length > 0;
-        })
-      )
-        completionStatus = 'outline';
+      else if (totalWords > 0) completionStatus = 'outline';
 
-      // Analyze pacing (words per scene)
-      const wordsPerScene = sceneCount > 0 ? totalWords / sceneCount : 0;
+      // Analyze pacing (words per scene or total words if no scenes)
+      const wordsPerScene = sceneCount > 0 ? totalWords / sceneCount : totalWords;
       let pacing: ChapterAnalysis['pacing'] = 'medium';
-      if (wordsPerScene > 800) pacing = 'slow';
-      else if (wordsPerScene < 300) pacing = 'fast';
+      if (wordsPerScene > 2000) pacing = 'slow';
+      else if (wordsPerScene < 500) pacing = 'fast';
 
-      // Estimate dialogue ratio (simplified)
-      const allText = scenes.map((scene: any) => scene.content || scene.text || '').join(' ');
-      const dialogueMatches = allText.match(/["']/g) || [];
-      const dialogueRatio =
-        allText.length > 0 ? (dialogueMatches.length / allText.length) * 100 : 0;
-
-      // Count unique character mentions (simplified) - safely access characters
-      const characters = currentProject.characters || [];
-      const characterCount = characters.filter((char: any) => {
-        const charName = char.name || char.title || '';
-        return charName && allText.toLowerCase().includes(charName.toLowerCase());
-      }).length;
+      // For dialogue and character analysis, we'd need the full chapter content
+      // Since we only have ChapterMeta here (not ChapterDoc), use placeholder values
+      // TODO: Fetch full chapter content for detailed analysis if needed
+      const dialogueRatio = 0; // Placeholder - would need full content to calculate
+      const characterCount = 0; // Placeholder - would need full content to analyze
 
       // Beat sheet analysis - safely access beatSheet
       const beatSheet = currentProject.beatSheet || [];
@@ -190,7 +181,7 @@ const StoryStructureVisualizer: React.FC<StoryStructureVisualizerProps> = ({
       },
       beatSheetProgress: beatProgress,
     };
-  }, [currentProject]);
+  }, [currentProject, chaptersFromDB]);
 
   const getCompletionColor = (status: ChapterAnalysis['completionStatus']): string => {
     switch (status) {

@@ -36,6 +36,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Logo } from '@/components/ui/Logo';
 import { useAppContext, View } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
+import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 import { useSections } from '@/hooks/useSections';
 import { SECTION_TYPE_META } from '@/types/section';
 
@@ -196,6 +197,9 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     liveUpdateReceived,
   } = useSections(currentProject?.id || '');
 
+  // Project-level analytics for daily goal tracking
+  const analytics = useProjectAnalytics(currentProject?.id || '');
+
   // Track previous activeId to save content before switching
   const prevActiveIdRef = useRef<string | null>(null);
 
@@ -263,6 +267,41 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
       setActive(prevSection.id);
     }
   };
+
+  // Calculate project-level daily goal progress
+  const todayWordsWritten = useMemo(() => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    return analytics.sessions
+      .filter((s) => {
+        if (!s.startedAt && !s.date) return false;
+        const sessionDate = new Date(s.startedAt || s.date).toISOString().slice(0, 10);
+        return sessionDate === todayStr;
+      })
+      .reduce((sum, s) => {
+        const wordsWritten = Math.max(
+          0,
+          (s.endWords ?? s.wordCount ?? s.startWords ?? 0) - (s.startWords ?? 0),
+        );
+        return sum + wordsWritten;
+      }, 0);
+  }, [analytics.sessions]);
+
+  // Get daily goal from project or user's default setting
+  const getDefaultDailyGoal = () => {
+    try {
+      const savedSettings = localStorage.getItem('inkwell_app_settings');
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        return parsed.defaultDailyGoal || 1000;
+      }
+    } catch {
+      // Ignore errors
+    }
+    return 1000;
+  };
+
+  const dailyGoal = (currentProject as any)?.dailyGoal ?? getDefaultDailyGoal();
+  const dailyGoalProgress = Math.min((todayWordsWritten / dailyGoal) * 100, 100);
 
   const handleCreateSection = async () => {
     // Guard against double-clicks
@@ -682,13 +721,13 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
               <div className="text-right">
                 <div className="text-caption text-slate-500">Daily Goal</div>
                 <div className="text-body-sm font-medium text-slate-900 dark:text-white">
-                  {wordCount} / 1,000
+                  {todayWordsWritten.toLocaleString()} / {dailyGoal.toLocaleString()}
                 </div>
               </div>
               <div className="w-24 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary-500 transition-all duration-300"
-                  style={{ width: `${Math.min((wordCount / 1000) * 100, 100)}%` }}
+                  style={{ width: `${dailyGoalProgress}%` }}
                 />
               </div>
             </div>

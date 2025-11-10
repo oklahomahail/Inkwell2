@@ -14,3 +14,14 @@ export function _generateUUID(): string {
     return v.toString(16);
   });
 }
+
+/**
+ * Validates if a string is a valid UUID (v4 format)
+ * @param id - String to validate
+ * @returns true if valid UUID, false otherwise
+ */
+export function isValidUUID(id: string): boolean {
+  if (!id || typeof id !== 'string') return false;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
+}

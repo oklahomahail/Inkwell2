@@ -8,10 +8,9 @@ import React, {
   useEffect,
 } from 'react';
 
-
 import claudeService from '@/services/claudeService';
 import type { ClaudeMessage } from '@/services/claudeService';
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 interface ClaudeState {
   messages: ClaudeMessage[];
@@ -92,6 +91,7 @@ export const ClaudeProvider = ({ children }: { children: ReactNode }) => {
         const response = await claudeService.sendMessage(content, {
           ...(selectedText ? { selectedText } : {}),
           conversationHistory: freshMessages,
+          useFallback: true, // Enable fallback mode for unconfigured users
         });
 
         const assistantMessage: ClaudeMessage = {

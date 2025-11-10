@@ -41,6 +41,7 @@ const SettingsPanel: React.FC = () => {
     autoSaveInterval: 30,
     showWordCount: true,
     showReadingTime: true,
+    defaultDailyGoal: 1000, // Default daily writing goal (words)
   });
 
   // Phrase Hygiene Settings
@@ -67,12 +68,32 @@ const SettingsPanel: React.FC = () => {
       console.warn('Could not load Claude configuration:', _error);
     }
 
+    // Load app settings from localStorage
+    try {
+      const savedSettings = localStorage.getItem('inkwell_app_settings');
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        setAppSettings((prev) => ({ ...prev, ...parsed }));
+      }
+    } catch (_error) {
+      console.warn('Could not load app settings:', _error);
+    }
+
     // Load phrase hygiene settings for current project
     if (currentProject) {
       const settings = phraseAnalysisService.getSettings(currentProject.id);
       setPhraseSettings(settings);
     }
   }, [currentProject]);
+
+  // Save app settings to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('inkwell_app_settings', JSON.stringify(appSettings));
+    } catch (_error) {
+      console.warn('Could not save app settings:', _error);
+    }
+  }, [appSettings]);
 
   const validateApiKey = (key: string): boolean => key.startsWith('sk-ant-') && key.length > 20;
 
@@ -543,6 +564,29 @@ const SettingsPanel: React.FC = () => {
                   setAppSettings({ ...appSettings, showReadingTime: e.target.checked })
                 }
                 className="w-4 h-4 text-[#0073E6] bg-gray-800 border-gray-600 rounded focus:ring-[#0073E6]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Default Daily Goal (words)
+              </label>
+              <p className="text-xs text-gray-500 mb-2">
+                New projects will use this daily writing goal by default
+              </p>
+              <input
+                type="number"
+                value={appSettings.defaultDailyGoal}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setAppSettings({
+                    ...appSettings,
+                    defaultDailyGoal: Math.max(100, parseInt(e.target.value) || 1000),
+                  })
+                }
+                min={100}
+                max={10000}
+                step={100}
+                className="w-40 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-[#0073E6]"
               />
             </div>
           </div>
