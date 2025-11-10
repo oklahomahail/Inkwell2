@@ -15,10 +15,11 @@ const AnalyticsPanel: React.FC = () => {
   const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('advanced');
   const { dispatch } = useChapters();
   const projectId = currentProject?.id ?? state.currentProjectId ?? '';
+  const isDemo = currentProject?.isDemo ?? false;
 
   // Load fresh chapter data from IndexedDB on mount and when project changes
   useEffect(() => {
-    if (!projectId) return;
+    if (!projectId || isDemo) return;
 
     const loadChapters = async () => {
       try {
@@ -39,7 +40,7 @@ const AnalyticsPanel: React.FC = () => {
     const interval = setInterval(loadChapters, 3000);
 
     return () => clearInterval(interval);
-  }, [projectId, dispatch]);
+  }, [projectId, dispatch, isDemo]);
 
   // Get comprehensive analytics with chapter integration
   const analytics = useProjectAnalytics(projectId);
@@ -312,6 +313,27 @@ const AnalyticsPanel: React.FC = () => {
       </div>
     );
   };
+
+  // Don't show analytics for demo/tutorial projects
+  if (isDemo) {
+    return (
+      <div className="flex items-center justify-center h-full p-6">
+        <div className="text-center space-y-4">
+          <Logo size={48} className="mx-auto opacity-50" />
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Tutorial Project
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Analytics are not tracked for the welcome tutorial project.
+              <br />
+              Create a new project to start tracking your writing progress.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Render based on mode and available data
   if (viewMode === 'advanced' && hasEnhancedAnalytics) {
