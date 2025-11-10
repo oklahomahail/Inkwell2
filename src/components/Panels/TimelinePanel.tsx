@@ -18,6 +18,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import SceneLinkageSuggestions from '@/components/timeline/SceneLinkageSuggestions';
 import TimelineNavigation from '@/components/timeline/TimelineNavigation';
 import TimelineValidationPanel from '@/components/timeline/TimelineValidationPanel';
+import { Logo } from '@/components/ui/Logo';
 import { useAppContext } from '@/context/AppContext';
 import { useNavigation } from '@/context/NavContext';
 import { useToast } from '@/context/toast';
@@ -268,7 +269,7 @@ const TimelinePanel: React.FC = () => {
       <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-4">
           {/* Inkwell Logo */}
-          <img src="/favicon.svg" alt="Inkwell" className="h-10 w-10 flex-shrink-0" />
+          <Logo size={40} className="flex-shrink-0" />
           <div>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Timeline</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">

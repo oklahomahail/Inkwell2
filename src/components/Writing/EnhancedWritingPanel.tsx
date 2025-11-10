@@ -33,6 +33,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import AISuggestionBox from '@/components/AI/AISuggestionBox';
 import { RealtimeStatus } from '@/components/Chapters/RealtimeStatus';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { Logo } from '@/components/ui/Logo';
 import { useAppContext, View } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
 import { useSections } from '@/hooks/useSections';
@@ -538,7 +539,7 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
                 <ArrowLeft className="w-4 h-4" />
               </button>
               {/* Inkwell Logo */}
-              <img src="/favicon.svg" alt="Inkwell" className="h-8 w-8" />
+              <Logo size={32} className="flex-shrink-0" />
               <div>
                 <h1 className="text-heading-md text-slate-900 dark:text-white">
                   {currentProject.name}

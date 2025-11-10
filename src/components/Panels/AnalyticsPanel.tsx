@@ -3,6 +3,7 @@ import { BarChart3, TrendingUp, Clock, Target, BookOpen, FileText } from 'lucide
 import React, { useEffect, useState } from 'react';
 
 import WritingAnalyticsView from '@/components/Analytics/WritingAnalyticsView';
+import { Logo } from '@/components/ui/Logo';
 import { useAppContext } from '@/context/AppContext';
 import { useChapters } from '@/context/ChaptersContext';
 import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
@@ -65,7 +66,7 @@ const AnalyticsPanel: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* Inkwell Logo */}
-            <img src="/favicon.svg" alt="Inkwell" className="h-10 w-10 flex-shrink-0" />
+            <Logo size={40} className="flex-shrink-0" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Writing Analytics

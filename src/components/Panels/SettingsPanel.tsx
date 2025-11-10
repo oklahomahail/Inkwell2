@@ -10,6 +10,7 @@ import { InsightsPanel } from '@/components/Settings/InsightsPanel';
 import SnapshotHistoryDialog from '@/components/Settings/SnapshotHistoryDialog';
 import { TourReplayButton } from '@/components/Settings/TourReplayButton';
 import { Button } from '@/components/ui/Button';
+import { Logo } from '@/components/ui/Logo';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
 import claudeService from '@/services/claudeService';
@@ -233,7 +234,7 @@ const SettingsPanel: React.FC = () => {
         {/* Header */}
         <div className="flex items-center gap-4">
           {/* Inkwell Logo */}
-          <img src="/favicon.svg" alt="Inkwell" className="h-12 w-12 flex-shrink-0" />
+          <Logo size={48} className="flex-shrink-0" />
           <div>
             <h2 className="text-3xl font-extrabold leading-tight text-white mb-2">Settings</h2>
             <p className="text-gray-400">
