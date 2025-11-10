@@ -33,6 +33,34 @@ vi.mock('@/context/toast', () => ({
 
 vi.mock('@/hooks/useSections');
 
+vi.mock('@/hooks/useProjectAnalytics', () => ({
+  useProjectAnalytics: () => ({
+    totals: {
+      totalWords: 1000,
+      daysWithWriting: 5,
+      dailyAvg: 200,
+      streak: 3,
+    },
+    chapters: {
+      chapterCount: 2,
+      chapterWords: 1000,
+      avgWordsPerChapter: 500,
+    },
+    sessions: [],
+    notice: undefined,
+  }),
+}));
+
+vi.mock('@/context/ChaptersContext', () => ({
+  useChapterList: () => [],
+  useChapterWordTotals: () => ({
+    total: 0,
+    avg: 0,
+    longest: undefined,
+    count: 0,
+  }),
+}));
+
 describe('EnhancedWritingPanel - Section Creation', () => {
   const mockCreateSection = vi.fn();
   const mockSetActive = vi.fn();

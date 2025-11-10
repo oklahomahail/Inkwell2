@@ -62,7 +62,8 @@ import {
 } from '../chaptersSyncService';
 
 describe('ChaptersSyncService - Comprehensive', () => {
-  const projectId = 'test-project-sync';
+  // Use a valid UUID for project ID to match production UUID validation
+  const projectId = '550e8400-e29b-41d4-a716-446655440000';
   const now = new Date().toISOString();
 
   beforeEach(() => {
