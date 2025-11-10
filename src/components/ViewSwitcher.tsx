@@ -15,6 +15,7 @@ import EnhancedDashboard from './Dashboard/EnhancedDashboard';
 import { FeatureErrorBoundary } from './ErrorBoundary';
 import { RecoveryErrorBoundary } from './ErrorBoundary/RecoveryErrorBoundary';
 import { TimelinePanel } from './Panels';
+import OnboardingPanel from './Panels/OnboardingPanel';
 import StoryPlanningView from './Views/StoryPlanningView';
 import EnhancedWritingPanel from './Writing/EnhancedWritingPanel';
 
@@ -199,6 +200,12 @@ const ViewSwitcher: React.FC = () => {
         <div className="flex items-center justify-center h-full">
           <p className="text-gray-500">Please select a project to view export dashboard</p>
         </div>
+      );
+    case View.Onboarding:
+      return (
+        <FeatureErrorBoundary featureName="Onboarding">
+          <OnboardingPanel />
+        </FeatureErrorBoundary>
       );
     default:
       return (

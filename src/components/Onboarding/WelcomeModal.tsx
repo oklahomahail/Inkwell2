@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 
 // IMPORTANT: import from the barrel so tests that mock "@/components/icons" work
 import { InkwellFeather } from '@/components/icons';
+import { useAppContext, View } from '@/context/AppContext';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 import analyticsService from '@/services/analyticsService';
 
@@ -12,7 +13,7 @@ import { CORE_TOUR_STEPS } from './tourRegistry';
 interface WelcomeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onStartTour: (tourType: string) => void;
+  onStartTour?: (tourType: string) => void; // Optional since we route to onboarding panel instead
   onOpenChecklist: () => void;
 }
 
@@ -21,9 +22,10 @@ interface WelcomeModalProps {
 export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   isOpen,
   onClose,
-  onStartTour,
+  onStartTour: _onStartTour,
   onOpenChecklist,
 }) => {
+  const { setView } = useAppContext();
   const {
     snoozeModal,
     dismissModal,
@@ -41,7 +43,9 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
     } catch (_error) {
       // ignore analytics errors
     }
-    onStartTour('tour');
+    // Route to the onboarding panel instead of creating a project directly
+    setView(View.Onboarding);
+    onClose();
   };
 
   const handleOpenChecklist = () => {
