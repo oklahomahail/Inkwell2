@@ -12,8 +12,8 @@ export default function _Welcome({ onCreateProject, hasProjects = false }: Welco
     <section className="mx-auto max-w-3xl text-center py-8">
       {/* Inkwell Logo */}
       <div className="mb-6 flex justify-center">
-        <img src="/brand/inkwell-logo-primary.svg" alt="Inkwell" className="h-20 dark:hidden" />
-        <img src="/brand/inkwell-logo-alt.svg" alt="Inkwell" className="h-20 hidden dark:block" />
+        <img src="/brand/2.svg" alt="Inkwell" className="h-20 dark:hidden" />
+        <img src="/brand/3.svg" alt="Inkwell" className="h-20 hidden dark:block" />
       </div>
       <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3">
         {hasProjects ? 'Welcome back' : 'Welcome to Inkwell'}

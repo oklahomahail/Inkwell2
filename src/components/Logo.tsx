@@ -18,44 +18,44 @@ type Props = {
 
 const ASSET_MAP: Record<LogoVariant, { src: string; aspectRatio: number; fallback?: string }> = {
   'mark-light': {
-    src: '/brand/inkwell-icon.svg', // icon only
+    src: '/brand/1.svg', // square icon
     aspectRatio: 1,
-    fallback: '/brand/inkwell-lockup-light.svg',
+    fallback: '/brand/2.svg',
   },
   'mark-dark': {
-    src: '/brand/inkwell-icon.svg', // icon only
+    src: '/brand/1.svg', // square icon
     aspectRatio: 1,
-    fallback: '/brand/inkwell-lockup-dark.svg',
+    fallback: '/brand/3.svg',
   },
   'wordmark-light': {
-    src: '/brand/inkwell-lockup-light.svg', // lockup light (navy on white)
-    aspectRatio: 4,
-    fallback: '/brand/inkwell-icon.svg',
+    src: '/brand/2.svg', // square logo with wordmark (light background)
+    aspectRatio: 1,
+    fallback: '/brand/1.svg',
   },
   'wordmark-dark': {
-    src: '/brand/inkwell-lockup-dark.svg', // lockup dark (white on navy)
-    aspectRatio: 4,
-    fallback: '/brand/inkwell-icon.svg',
+    src: '/brand/3.svg', // square logo with wordmark (dark background)
+    aspectRatio: 1,
+    fallback: '/brand/1.svg',
   },
   'outline-dark': {
-    src: '/brand/inkwell-icon.svg', // icon only
+    src: '/brand/1.svg', // square icon
     aspectRatio: 1,
-    fallback: '/brand/inkwell-lockup-dark.svg',
+    fallback: '/brand/3.svg',
   },
   'outline-light': {
-    src: '/brand/inkwell-icon.svg', // icon only
+    src: '/brand/1.svg', // square icon
     aspectRatio: 1,
-    fallback: '/brand/inkwell-lockup-light.svg',
+    fallback: '/brand/2.svg',
   },
   'svg-feather-gold': {
-    src: '/brand/inkwell-icon.svg', // icon only
+    src: '/brand/1.svg', // square icon
     aspectRatio: 1,
-    fallback: '/brand/inkwell-lockup-light.svg',
+    fallback: '/brand/2.svg',
   },
   'svg-feather-navy': {
-    src: '/brand/inkwell-icon.svg', // icon only
+    src: '/brand/1.svg', // square icon
     aspectRatio: 1,
-    fallback: '/brand/inkwell-lockup-dark.svg',
+    fallback: '/brand/3.svg',
   },
 };
 
@@ -77,9 +77,9 @@ export default function Logo({ variant, size = 48, className }: Props) {
         if (asset.fallback && !currentSrc.includes(asset.fallback)) {
           e.currentTarget.src = asset.fallback;
         }
-        // Last resort: use the icon
-        else if (!currentSrc.includes('inkwell-icon.svg')) {
-          e.currentTarget.src = '/brand/inkwell-icon.svg';
+        // Last resort: use the square icon
+        else if (!currentSrc.includes('1.svg')) {
+          e.currentTarget.src = '/brand/1.svg';
         }
         // Prevent infinite error loop
         else {

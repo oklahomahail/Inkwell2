@@ -17,13 +17,13 @@ interface LogoProps {
  * Centralized Inkwell logo component
  * Single source of truth for brand mark across the application
  *
- * Uses /brand/inkwell-icon.svg (the square logo) everywhere in the UI.
+ * Uses /brand/1.svg (the square icon) everywhere in the UI.
  * Do NOT use favicon.svg in UI components - that's for browser tabs only.
  */
 export function Logo({ size = 24, className = '' }: LogoProps) {
   return (
     <img
-      src="/brand/inkwell-icon.svg"
+      src="/brand/1.svg"
       alt="Inkwell"
       width={size}
       height={size}

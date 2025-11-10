@@ -386,7 +386,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             >
               <div className="flex-shrink-0">
                 <img
-                  src="/brand/inkwell-icon.svg"
+                  src="/brand/1.svg"
                   alt="Inkwell"
                   className="w-8 h-8 transition-all duration-300"
                 />

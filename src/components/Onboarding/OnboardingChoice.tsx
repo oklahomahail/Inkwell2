@@ -74,7 +74,7 @@ export default function OnboardingChoice() {
       {/* Header */}
       <div className="text-center mb-12 max-w-2xl">
         <div className="flex items-center justify-center mb-6">
-          <img src="/brand/inkwell-icon.svg" alt="Inkwell" className="h-16 w-16" />
+          <img src="/brand/1.svg" alt="Inkwell" className="h-16 w-16" />
         </div>
         <h1 className="text-4xl font-bold mb-3 text-white">Welcome to Inkwell</h1>
         <p className="text-xl text-slate-400 italic">find your story, weave it well</p>

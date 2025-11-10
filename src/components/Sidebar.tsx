@@ -45,11 +45,7 @@ export const Sidebar: React.FC = () => {
         {sidebarCollapsed ? (
           <Logo size={32} className="shrink-0" />
         ) : (
-          <img
-            src="/brand/inkwell-logo-primary.svg"
-            alt="Inkwell"
-            className="h-10 w-auto max-w-[200px]"
-          />
+          <img src="/brand/2.svg" alt="Inkwell" className="h-10 w-auto max-w-[200px]" />
         )}
       </div>
       <button

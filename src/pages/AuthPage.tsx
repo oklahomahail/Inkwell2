@@ -81,7 +81,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
       <div className="w-full max-w-md">
         <div className="flex justify-center">
           <img
-            src="/brand/inkwell-lockup-dark.svg"
+            src="/brand/3.svg"
             alt="Inkwell"
             className="h-16 w-auto"
             onError={(e) => {
@@ -94,7 +94,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
               // Try fallback src if not already tried
               if (img.dataset.fallbackApplied !== '1') {
                 img.dataset.fallbackApplied = '1';
-                img.src = '/brand/inkwell-icon.svg';
+                img.src = '/brand/1.svg';
                 return;
               }
 
