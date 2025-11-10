@@ -22,6 +22,12 @@ import { Chapters } from './chaptersService';
  * Uses upsert to handle both inserts and updates.
  */
 export async function pushLocalChanges(projectId: string): Promise<void> {
+  // Skip demo projects (they use custom string IDs, not UUIDs)
+  if (projectId.startsWith('proj_welcome_')) {
+    console.warn('[Sync] Skipping demo project (not a valid UUID)');
+    return;
+  }
+
   const local = await Chapters.list(projectId);
   if (!local.length) {
     return;
@@ -73,6 +79,12 @@ export async function pushLocalChanges(projectId: string): Promise<void> {
  * Updates local IndexedDB cache.
  */
 export async function pullRemoteChanges(projectId: string): Promise<ChapterMeta[]> {
+  // Skip demo projects (they use custom string IDs, not UUIDs)
+  if (projectId.startsWith('proj_welcome_')) {
+    console.warn('[Sync] Skipping demo project (not a valid UUID)');
+    return [];
+  }
+
   const { data: remote, error } = await supabase
     .from('chapters')
     .select('*')
@@ -162,6 +174,12 @@ export function subscribeToChapterChanges(
   projectId: string,
   onChange: (chapterId?: string) => void,
 ): () => void {
+  // Skip demo projects (they use custom string IDs, not UUIDs)
+  if (projectId.startsWith('proj_welcome_')) {
+    console.warn('[Sync] Skipping realtime subscription for demo project');
+    return () => {}; // Return no-op unsubscribe function
+  }
+
   const channel = supabase
     .channel(`chapters:${projectId}`)
     .on(

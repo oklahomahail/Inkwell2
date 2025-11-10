@@ -84,7 +84,26 @@ export class EnhancedStorageService {
   static loadAllProjects(): EnhancedProject[] {
     try {
       const stored = localStorage.getItem(this.PROJECTS_KEY);
-      return stored ? JSON.parse(stored) : [];
+      const projects: EnhancedProject[] = stored ? JSON.parse(stored) : [];
+
+      // Retroactively mark demo projects
+      let needsSave = false;
+      projects.forEach((project) => {
+        if (
+          (project.name === 'Welcome to Inkwell' || project.id.startsWith('proj_welcome_')) &&
+          !project.isDemo
+        ) {
+          project.isDemo = true;
+          needsSave = true;
+        }
+      });
+
+      // Save back if we made changes
+      if (needsSave) {
+        localStorage.setItem(this.PROJECTS_KEY, JSON.stringify(projects));
+      }
+
+      return projects;
     } catch (error) {
       devLog.error('Failed to load projects:', error);
       return [];

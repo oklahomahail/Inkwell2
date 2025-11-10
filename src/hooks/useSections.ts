@@ -109,6 +109,11 @@ export function useSections(projectId: string) {
       return;
     }
 
+    // Skip syncing demo projects
+    if (projectId.startsWith('proj_welcome_')) {
+      return;
+    }
+
     setSyncing(true);
     try {
       await syncChapters(projectId);
@@ -148,13 +153,15 @@ export function useSections(projectId: string) {
         localStorage.setItem(`lastSection-${projectId}`, sectionsData[0].id);
       }
 
-      // Pull remote changes (background)
-      try {
-        await pullRemoteChanges(projectId);
-        const refreshed = await Chapters.list(projectId);
-        setSections(refreshed.map(chapterToSection));
-      } catch (error) {
-        console.error('[useSections] Failed to pull remote changes:', error);
+      // Pull remote changes (background) - skip for demo projects
+      if (!projectId.startsWith('proj_welcome_')) {
+        try {
+          await pullRemoteChanges(projectId);
+          const refreshed = await Chapters.list(projectId);
+          setSections(refreshed.map(chapterToSection));
+        } catch (error) {
+          console.error('[useSections] Failed to pull remote changes:', error);
+        }
       }
     })();
   }, [projectId, chapterToSection]);
