@@ -1,6 +1,6 @@
 // src/components/Panels/OnboardingPanel.tsx
 import { ArrowRight, CheckCircle, Clock, BookOpen } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useTourContext } from '@/components/Tour/TourProvider';
 import { Button } from '@/components/ui/Button';
@@ -8,19 +8,86 @@ import { useAppContext, View } from '@/context/AppContext';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 import devLog from '@/utils/devLog';
 
+// LocalStorage key for tracking onboarding state
+const ONBOARDING_STATE_KEY = 'inkwell.onboarding.state';
+
+interface OnboardingState {
+  lastVisit: string;
+  viewCount: number;
+  lastAction?: 'tour_started' | 'tour_skipped' | 'dashboard_clicked';
+}
+
 export default function OnboardingPanel() {
   const { setView, setCurrentProjectId } = useAppContext();
   const tour = useTourContext();
   const { setTourActive, completeOnboarding } = useOnboardingGate();
 
+  // Track panel view on mount
+  useEffect(() => {
+    const trackPanelView = async () => {
+      try {
+        // Load existing state
+        const storedState = localStorage.getItem(ONBOARDING_STATE_KEY);
+        const state: OnboardingState = storedState
+          ? JSON.parse(storedState)
+          : { lastVisit: new Date().toISOString(), viewCount: 0 };
+
+        // Update state
+        const updatedState: OnboardingState = {
+          ...state,
+          lastVisit: new Date().toISOString(),
+          viewCount: state.viewCount + 1,
+        };
+
+        // Save updated state
+        localStorage.setItem(ONBOARDING_STATE_KEY, JSON.stringify(updatedState));
+
+        // Track telemetry
+        const { track } = await import('@/services/telemetry');
+        track('onboarding.panel_viewed', {
+          viewCount: updatedState.viewCount,
+          returning: state.viewCount > 0,
+          sample: 1,
+        });
+
+        devLog.log('[OnboardingPanel] Panel viewed', updatedState);
+      } catch (error) {
+        devLog.warn('[OnboardingPanel] Failed to track panel view:', error);
+      }
+    };
+
+    trackPanelView();
+  }, []);
+
   const handleStartTour = async () => {
     try {
       devLog.log('[OnboardingPanel] Starting tour flow...');
 
+      // Update localStorage state
+      try {
+        const storedState = localStorage.getItem(ONBOARDING_STATE_KEY);
+        const state: OnboardingState = storedState
+          ? JSON.parse(storedState)
+          : { lastVisit: new Date().toISOString(), viewCount: 1 };
+
+        const updatedState: OnboardingState = {
+          ...state,
+          lastAction: 'tour_started',
+        };
+
+        localStorage.setItem(ONBOARDING_STATE_KEY, JSON.stringify(updatedState));
+      } catch (error) {
+        devLog.warn('[OnboardingPanel] Failed to update state:', error);
+      }
+
       // Track onboarding start
       try {
         const { track } = await import('@/services/telemetry');
-        track('onboarding.started', { method: 'tour_panel', sample: 1 });
+        track('onboarding.started', {
+          method: 'tour_panel',
+          source: 'onboarding_panel',
+          sample: 1,
+        });
       } catch {
         // Ignore telemetry errors
       }
@@ -89,8 +156,38 @@ export default function OnboardingPanel() {
     }
   };
 
-  const handleSkipTour = () => {
+  const handleSkipTour = async () => {
     devLog.log('[OnboardingPanel] User skipped tour, navigating to dashboard');
+
+    // Update localStorage state
+    try {
+      const storedState = localStorage.getItem(ONBOARDING_STATE_KEY);
+      const state: OnboardingState = storedState
+        ? JSON.parse(storedState)
+        : { lastVisit: new Date().toISOString(), viewCount: 1 };
+
+      const updatedState: OnboardingState = {
+        ...state,
+        lastAction: 'dashboard_clicked',
+      };
+
+      localStorage.setItem(ONBOARDING_STATE_KEY, JSON.stringify(updatedState));
+    } catch (error) {
+      devLog.warn('[OnboardingPanel] Failed to update state:', error);
+    }
+
+    // Track skip action
+    try {
+      const { track } = await import('@/services/telemetry');
+      track('onboarding.skipped', {
+        method: 'dashboard_click',
+        source: 'onboarding_panel',
+        sample: 1,
+      });
+    } catch {
+      // Ignore telemetry errors
+    }
+
     setView(View.Dashboard);
     completeOnboarding();
   };
@@ -117,7 +214,7 @@ export default function OnboardingPanel() {
         {/* Main content */}
         <div className="space-y-6 animate-in fade-in duration-500">
           {/* Quick Tour Card */}
-          <section className="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/60 dark:border-slate-700/50 space-y-4 transition-transform hover:scale-[1.02]">
+          <section className="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/60 dark:border-slate-700/50 space-y-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-md focus-within:ring-2 focus-within:ring-inkwell-navy focus-within:ring-offset-2 dark:focus-within:ring-inkwell-gold">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-12 h-12 bg-inkwell-navy/10 dark:bg-inkwell-navy/20 rounded-xl flex items-center justify-center">
                 <Clock className="w-6 h-6 text-inkwell-navy dark:text-inkwell-gold" />
@@ -146,7 +243,7 @@ export default function OnboardingPanel() {
                 </ul>
                 <Button
                   onClick={handleStartTour}
-                  className="bg-inkwell-navy hover:bg-inkwell-navy/90 text-white w-full sm:w-auto"
+                  className="bg-inkwell-navy hover:bg-inkwell-navy/90 text-white w-full sm:w-auto focus-visible:ring-2 focus-visible:ring-inkwell-navy focus-visible:ring-offset-2 transition-all"
                 >
                   Start Tour
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -156,7 +253,7 @@ export default function OnboardingPanel() {
           </section>
 
           {/* Explore at Your Own Pace Card */}
-          <section className="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/60 dark:border-slate-700/50 space-y-4 transition-transform hover:scale-[1.02]">
+          <section className="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/60 dark:border-slate-700/50 space-y-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-md focus-within:ring-2 focus-within:ring-inkwell-gold focus-within:ring-offset-2 dark:focus-within:ring-inkwell-gold">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-12 h-12 bg-inkwell-gold/10 dark:bg-inkwell-gold/20 rounded-xl flex items-center justify-center">
                 <BookOpen className="w-6 h-6 text-inkwell-gold dark:text-inkwell-gold" />
@@ -186,7 +283,7 @@ export default function OnboardingPanel() {
                 <Button
                   variant="outline"
                   onClick={handleSkipTour}
-                  className="border-slate-300 dark:border-slate-600 w-full sm:w-auto"
+                  className="border-slate-300 dark:border-slate-600 w-full sm:w-auto focus-visible:ring-2 focus-visible:ring-inkwell-gold focus-visible:ring-offset-2 transition-all"
                 >
                   Go to Dashboard
                 </Button>

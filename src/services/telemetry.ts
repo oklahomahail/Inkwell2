@@ -9,6 +9,8 @@ export type TelemetryEvent =
   | 'onboarding.started'
   | 'onboarding.completed'
   | 'onboarding.failed'
+  | 'onboarding.skipped'
+  | 'onboarding.panel_viewed'
   | 'onboarding.welcome.created'
   | 'onboarding.welcome.deleted'
   | 'onboarding.welcome.skipped'
