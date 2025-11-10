@@ -227,6 +227,38 @@ describe('Welcome Project', () => {
       expect(projectId).toBeNull();
     });
 
+    it('should create when projects exist if force=true', async () => {
+      // Add an existing project
+      mockProjects.push({
+        id: 'existing-project',
+        name: 'Existing Project',
+        description: '',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        chapters: [],
+        characters: [],
+        plotNotes: [],
+        worldBuilding: [],
+        sessions: [],
+      });
+
+      const projectId = await ensureWelcomeProject(true);
+      expect(projectId).toBeTruthy();
+      expect(mockProjects).toHaveLength(2); // Existing project + welcome project
+      expect(mockProjects[1].name).toBe('Welcome to Inkwell');
+    });
+
+    it('should create with force=true even if tour has been seen', async () => {
+      // Mark tour as seen
+      localStorage.setItem(__testKeys.HAS_SEEN_TOUR_KEY, 'true');
+
+      // Force mode should still create the project
+      const projectId = await ensureWelcomeProject(true);
+      expect(projectId).toBeTruthy();
+      expect(mockProjects).toHaveLength(1);
+      expect(mockProjects[0].name).toBe('Welcome to Inkwell');
+    });
+
     it.skip('should handle chapter creation errors gracefully', async () => {
       mockChaptersService.create.mockRejectedValueOnce(new Error('Chapter creation failed'));
 

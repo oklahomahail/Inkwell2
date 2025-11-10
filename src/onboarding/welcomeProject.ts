@@ -83,9 +83,16 @@ export async function shouldCreateWelcomeProject(): Promise<boolean> {
 /**
  * Ensure welcome project exists (idempotent)
  * Returns the project ID if created/exists, null otherwise
+ *
+ * @param force - If true, bypasses the "no projects exist" check, allowing tour creation even with existing projects
  */
-export async function ensureWelcomeProject(): Promise<string | null> {
-  if (!(await shouldCreateWelcomeProject())) {
+export async function ensureWelcomeProject(force = false): Promise<string | null> {
+  if (!force && !(await shouldCreateWelcomeProject())) {
+    return null;
+  }
+
+  // If force mode, still check if feature is enabled
+  if (force && !IS_ENABLED) {
     return null;
   }
 

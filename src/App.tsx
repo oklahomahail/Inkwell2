@@ -341,9 +341,9 @@ function ProfileAppShell() {
           // Ignore telemetry errors
         }
 
-        // Create welcome project if needed
+        // Create welcome project if needed (force=true since user explicitly requested tour)
         const { ensureWelcomeProject } = await import('./onboarding/welcomeProject');
-        const projectId = await ensureWelcomeProject();
+        const projectId = await ensureWelcomeProject(true);
         devLog.log('[App] Welcome project created:', projectId);
 
         // CRITICAL: Set the welcome project as current project
