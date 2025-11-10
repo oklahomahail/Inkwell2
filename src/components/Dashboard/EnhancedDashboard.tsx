@@ -41,7 +41,7 @@ const EnhancedDashboard: React.FC = () => {
     try {
       const newProject = {
         id: `project-${Date.now()}`,
-        name: `New Story ${state.projects.length + 1}`,
+        name: `New Story ${realProjects.length + 1}`,
         description: 'A new fiction project',
         content: '',
         createdAt: Date.now(),
@@ -124,7 +124,10 @@ const EnhancedDashboard: React.FC = () => {
   ];
 
   // If no projects exist, show onboarding
-  if (state.projects.length === 0) {
+  // Filter out demo projects for display
+  const realProjects = state.projects.filter((p) => !p.isDemo);
+
+  if (realProjects.length === 0) {
     return (
       <div className="enhanced-dashboard fade-in" data-tour="dashboard">
         <div className="max-w-4xl mx-auto text-center py-16">
@@ -389,7 +392,7 @@ const EnhancedDashboard: React.FC = () => {
       </div>
 
       {/* Recent Projects */}
-      {state.projects.length > 1 && (
+      {state.projects.filter((p) => !p.isDemo).length > 1 && (
         <div className="mb-8" data-tour="projects">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
@@ -399,7 +402,7 @@ const EnhancedDashboard: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {state.projects
-              .filter((project) => project.id !== currentProject?.id)
+              .filter((project) => !project.isDemo && project.id !== currentProject?.id)
               .slice(0, 4)
               .map((project) => (
                 <div

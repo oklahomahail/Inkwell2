@@ -119,6 +119,7 @@ export async function ensureWelcomeProject(force = false): Promise<string | null
       description:
         "A guided introduction to Inkwell's features. Delete this project when you're ready to start your own.",
       genre: 'Tutorial',
+      isDemo: true, // Exclude from analytics
       createdAt: now,
       updatedAt: now,
       currentWordCount: 0,

@@ -170,6 +170,8 @@ export interface Project {
   currentChapterId?: string;
   // Onboarding mode (v1.3.0+)
   creationMode?: 'writing' | 'planning';
+  // Demo/Tutorial flag (v1.3.0+) - excludes from analytics
+  isDemo?: boolean;
   // Legacy/compatibility fields (for migration period)
   content?: string; // Legacy monolithic content field (deprecated - use chapters)
   chapters?: Chapter[]; // Can be present but use EnhancedProject for full typing

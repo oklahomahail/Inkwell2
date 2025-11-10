@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 
 import { InkwellFeather } from '@/components/icons/InkwellFeather';
 import BookBuilderModal from '@/components/Sections/BookBuilderModal';
+import { Logo } from '@/components/ui/Logo';
 import { useAppContext } from '@/context/AppContext';
 import { useSections } from '@/hooks/useSections';
 import { useUI } from '@/hooks/useUI';
@@ -42,7 +43,7 @@ export const Sidebar: React.FC = () => {
       <div className="p-4 flex items-center justify-center" data-spotlight-id="sidebar.logo">
         {/* Brand Logo */}
         {sidebarCollapsed ? (
-          <img src="/favicon.svg" alt="Inkwell" className="h-8 w-8 shrink-0" />
+          <Logo size={32} className="shrink-0" />
         ) : (
           <img
             src="/brand/inkwell-logo-primary.svg"

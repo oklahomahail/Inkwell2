@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 
 import { useTourContext } from '@/components/Tour/TourProvider';
 import { Button } from '@/components/ui/Button';
+import { Logo } from '@/components/ui/Logo';
 import { useAppContext, View } from '@/context/AppContext';
 import { useOnboardingGate } from '@/hooks/useOnboardingGate';
 import devLog from '@/utils/devLog';
@@ -197,11 +198,7 @@ export default function OnboardingPanel() {
       <div className="max-w-3xl mx-auto py-16 px-6 space-y-10">
         {/* Heading */}
         <div className="text-center space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <img
-            src="/inkwell-icon.svg"
-            alt="Inkwell"
-            className="w-16 h-16 mx-auto mb-2 opacity-90 drop-shadow-sm"
-          />
+          <Logo size={64} className="mx-auto mb-2 opacity-90 drop-shadow-sm" />
           <h1 className="text-3xl sm:text-4xl font-semibold text-slate-900 dark:text-white">
             Welcome to Inkwell
           </h1>
