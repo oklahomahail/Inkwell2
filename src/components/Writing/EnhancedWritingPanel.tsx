@@ -179,6 +179,11 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
   } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Session tracking refs
+  const sessionStarted = useRef<boolean>(false);
+  const sessionStartTime = useRef<Date | null>(null);
+  const sessionStartWordCount = useRef<number>(0);
+
   // Section management with hybrid sync
   const {
     sections,
@@ -243,8 +248,95 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]); // Only run when content changes, not when activeId changes
 
+  // Writing session tracking
+  useEffect(() => {
+    if (!currentProject) return;
+
+    const projectId = currentProject.id;
+
+    // Session saving logic
+    const saveSession = () => {
+      if (!sessionStarted.current || !projectId) return;
+
+      const today = new Date().toISOString().split('T')[0] || '';
+      if (!today) return;
+
+      const currentWordCount = wordCount;
+      const wordsWritten = Math.max(0, currentWordCount - sessionStartWordCount.current);
+
+      if (wordsWritten === 0) return; // Don't save if no words written
+
+      const duration = sessionStartTime.current
+        ? Math.round((new Date().getTime() - sessionStartTime.current.getTime()) / 60000)
+        : 0;
+
+      // Load existing sessions
+      const sessionsKey = `sessions-${projectId}`;
+      const existingSessions: Array<{
+        date: string;
+        wordCount: number;
+        duration?: number;
+        startWords?: number;
+        endWords?: number;
+      }> = JSON.parse(localStorage.getItem(sessionsKey) || '[]');
+
+      // Find or create today's session
+      const todaySessionIndex = existingSessions.findIndex((s) => s.date === today);
+
+      if (todaySessionIndex >= 0) {
+        // Update existing session
+        const existingSession = existingSessions[todaySessionIndex];
+        if (existingSession) {
+          existingSessions[todaySessionIndex] = {
+            date: today,
+            wordCount: Math.max(existingSession.wordCount, wordsWritten),
+            duration: Math.max(existingSession.duration || 0, duration),
+            startWords: sessionStartWordCount.current,
+            endWords: currentWordCount,
+          };
+        }
+      } else {
+        // Create new session
+        existingSessions.push({
+          date: today,
+          wordCount: wordsWritten,
+          duration,
+          startWords: sessionStartWordCount.current,
+          endWords: currentWordCount,
+        });
+      }
+
+      // Save sessions to localStorage
+      localStorage.setItem(sessionsKey, JSON.stringify(existingSessions));
+    };
+
+    // Save session periodically (every 10 seconds)
+    const saveInterval = setInterval(saveSession, 10000);
+
+    // Save session on unmount/page unload
+    const handleBeforeUnload = () => {
+      saveSession();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearInterval(saveInterval);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      saveSession(); // Save on unmount
+    };
+  }, [currentProject, wordCount]);
+
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
+    const newContent = e.target.value;
+    setContent(newContent);
+
+    // Mark session as started on first content change
+    if (!sessionStarted.current && currentProject) {
+      sessionStarted.current = true;
+      sessionStartTime.current = new Date();
+      sessionStartWordCount.current = wordCount;
+    }
   };
 
   // Section navigation (sorted by order)
