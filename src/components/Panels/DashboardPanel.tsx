@@ -7,6 +7,7 @@ import Welcome from '@/components/Dashboard/Welcome';
 import { useAppContext } from '@/context/AppContext';
 import { useChapterCount, useLastEditedChapter } from '@/context/ChaptersContext';
 import { useAutostartSpotlight } from '@/hooks/useAutostartSpotlight';
+import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 import { useUI } from '@/hooks/useUI';
 
 // Helper to format relative time
@@ -29,6 +30,9 @@ const DashboardPanel: React.FC = () => {
   // Chapter statistics (with safe fallback for undefined projectId)
   const chapterCount = useChapterCount(currentProject?.id ?? '');
   const lastEditedChapter = useLastEditedChapter(currentProject?.id ?? '');
+
+  // Get comprehensive analytics (session data + chapter totals fallback)
+  const analytics = useProjectAnalytics(currentProject?.id ?? '');
 
   return (
     <div className="space-y-8" data-tour="dashboard">
@@ -74,9 +78,9 @@ const DashboardPanel: React.FC = () => {
             <div className="flex items-center gap-3">
               <FileText className="w-5 h-5 text-blue-500" />
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Word Count</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total Words</p>
                 <p className="font-semibold dark:text-white">
-                  {currentProject.content?.split(' ').length || 0}
+                  {analytics.chapters.chapterWords.toLocaleString()}
                 </p>
               </div>
             </div>
@@ -90,18 +94,16 @@ const DashboardPanel: React.FC = () => {
             <div className="flex items-center gap-3">
               <Clock className="w-5 h-5 text-green-500" />
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Characters</p>
-                <p className="font-semibold dark:text-white">
-                  {currentProject.characters?.length || 0}
-                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Writing Days</p>
+                <p className="font-semibold dark:text-white">{analytics.totals.daysWithWriting}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <BarChart3 className="w-5 h-5 text-purple-500" />
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Last Updated</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Daily Average</p>
                 <p className="font-semibold dark:text-white">
-                  {new Date(currentProject.updatedAt).toLocaleDateString()}
+                  {analytics.totals.dailyAvg > 0 ? analytics.totals.dailyAvg.toLocaleString() : '—'}
                 </p>
               </div>
             </div>
