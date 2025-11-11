@@ -29,6 +29,7 @@ const EXPECTED_ERROR_PATTERNS = [
   /\[WelcomeProject\] Error creating welcome project:/,
   /\[WelcomeProject\] Error deleting welcome project:/,
   /\[WelcomeProject\] Error reconciling pointer:/,
+  /\[sessionUtils\] Error cleaning sessions:/,
 ];
 
 function isExpectedError(message: string): boolean {
