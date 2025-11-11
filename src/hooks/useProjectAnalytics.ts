@@ -35,6 +35,7 @@ interface ProjectAnalytics {
   };
   notice?: string;
   sessions: WritingSession[];
+  lastUpdated: Date;
 }
 
 /**
@@ -133,6 +134,7 @@ export function useProjectAnalytics(projectId: string): ProjectAnalytics {
       },
       notice,
       sessions,
+      lastUpdated: new Date(),
     };
   }, [sessions, chapterStats]);
 }

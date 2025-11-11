@@ -1,6 +1,14 @@
 // src/components/Panels/DashboardPanel.tsx - Fixed imports
-import { PlusCircle, FileText, Clock, BarChart3, BookOpen, Download } from 'lucide-react';
-import React from 'react';
+import {
+  PlusCircle,
+  FileText,
+  Clock,
+  BarChart3,
+  BookOpen,
+  Download,
+  RefreshCw,
+} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 import ExportReadyBadge from '@/components/Badges/ExportReadyBadge';
 import Welcome from '@/components/Dashboard/Welcome';
@@ -23,6 +31,7 @@ const timeAgo = (isoString: string): string => {
 const DashboardPanel: React.FC = () => {
   const { state, currentProject, setCurrentProjectId } = useAppContext();
   const { openNewProjectDialog } = useUI();
+  const [lastSyncTime, setLastSyncTime] = useState<Date>(new Date());
 
   // Auto-start Spotlight Tour for first-time users
   useAutostartSpotlight();
@@ -33,6 +42,11 @@ const DashboardPanel: React.FC = () => {
 
   // Get comprehensive analytics (session data + chapter totals fallback)
   const analytics = useProjectAnalytics(currentProject?.id ?? '');
+
+  // Auto-refresh analytics when chapter count changes (after import/delete)
+  useEffect(() => {
+    setLastSyncTime(new Date());
+  }, [chapterCount, currentProject?.id]);
 
   return (
     <div className="space-y-8" data-tour="dashboard">
@@ -74,6 +88,17 @@ const DashboardPanel: React.FC = () => {
               }}
             />
           </div>
+          {/* Data Freshness Indicator */}
+          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-3">
+            <RefreshCw className="w-3 h-3" />
+            <span>
+              Last synced:{' '}
+              {timeAgo(lastSyncTime.toISOString()) === '1 min ago'
+                ? 'just now'
+                : timeAgo(lastSyncTime.toISOString())}
+            </span>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="flex items-center gap-3">
               <FileText className="w-5 h-5 text-blue-500" />
@@ -95,16 +120,30 @@ const DashboardPanel: React.FC = () => {
               <Clock className="w-5 h-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Writing Days</p>
-                <p className="font-semibold dark:text-white">{analytics.totals.daysWithWriting}</p>
+                {analytics.totals.daysWithWriting === 0 ? (
+                  <p className="text-xs text-gray-400 dark:text-gray-500 italic">
+                    Start writing to unlock trends
+                  </p>
+                ) : (
+                  <p className="font-semibold dark:text-white">
+                    {analytics.totals.daysWithWriting}
+                  </p>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-3">
               <BarChart3 className="w-5 h-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Daily Average</p>
-                <p className="font-semibold dark:text-white">
-                  {analytics.totals.dailyAvg > 0 ? analytics.totals.dailyAvg.toLocaleString() : '—'}
-                </p>
+                {analytics.totals.dailyAvg === 0 ? (
+                  <p className="text-xs text-gray-400 dark:text-gray-500 italic">
+                    Start writing to unlock trends
+                  </p>
+                ) : (
+                  <p className="font-semibold dark:text-white">
+                    {analytics.totals.dailyAvg.toLocaleString()}
+                  </p>
+                )}
               </div>
             </div>
           </div>
