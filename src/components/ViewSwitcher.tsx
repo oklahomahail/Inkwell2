@@ -1,4 +1,4 @@
-// src/components/ViewSwitcher.tsx - Fixed
+// src/components/ViewSwitcher.tsx - Enhanced with Page Transitions
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 
 import { useAppContext, View } from '@/context/AppContext';
@@ -16,6 +16,7 @@ import { FeatureErrorBoundary } from './ErrorBoundary';
 import { RecoveryErrorBoundary } from './ErrorBoundary/RecoveryErrorBoundary';
 import { TimelinePanel } from './Panels';
 import OnboardingPanel from './Panels/OnboardingPanel';
+import { ViewTransition } from './Transitions/ViewTransition';
 import StoryPlanningView from './Views/StoryPlanningView';
 import EnhancedWritingPanel from './Writing/EnhancedWritingPanel';
 
@@ -89,152 +90,162 @@ const ViewSwitcher: React.FC = () => {
     }
   }, [currentView, recordFeatureUse]);
 
-  switch (currentView) {
-    case View.Dashboard:
-      return (
-        <RecoveryErrorBoundary panelName="Dashboard">
+  // Helper to render content with page turn transition
+  const renderView = () => {
+    switch (currentView) {
+      case View.Dashboard:
+        return (
+          <RecoveryErrorBoundary panelName="Dashboard">
+            <FeatureErrorBoundary featureName="Dashboard">
+              <EnhancedDashboard />
+            </FeatureErrorBoundary>
+          </RecoveryErrorBoundary>
+        );
+      case View.Writing:
+        return (
+          <RecoveryErrorBoundary panelName="Editor">
+            <FeatureErrorBoundary featureName="Writing Editor">
+              <EnhancedWritingPanel />
+            </FeatureErrorBoundary>
+          </RecoveryErrorBoundary>
+        );
+      case View.Timeline:
+        return (
+          <FeatureErrorBoundary featureName="Timeline">
+            <TimelinePanel />
+          </FeatureErrorBoundary>
+        );
+      case View.Analysis:
+        return (
+          <FeatureErrorBoundary featureName="Analytics">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">Loading Analytics...</p>
+                </div>
+              }
+            >
+              <AnalyticsPanel />
+            </Suspense>
+          </FeatureErrorBoundary>
+        );
+      case View.Planning:
+        return (
+          <FeatureErrorBoundary featureName="Story Planning">
+            <StoryPlanningView />
+          </FeatureErrorBoundary>
+        );
+      case View.PlotBoards:
+        return currentProject ? (
+          <FeatureErrorBoundary featureName="Plot Boards">
+            <PlotBoards projectId={currentProject.id} />
+          </FeatureErrorBoundary>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">Please select a project to use Plot Boards</p>
+          </div>
+        );
+      case View.Plot:
+        return currentProject ? (
+          <FeatureErrorBoundary featureName="Plot Analysis">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">Loading Plot Analysis...</p>
+                </div>
+              }
+            >
+              <PlotAnalysisPanel
+                project={currentProject}
+                onOpenChapter={(_chapterIndex) => {
+                  // Navigate to Writing view - chapter selection would need ChapterContext integration
+                  // For now, just switch to writing view
+                  // TODO: Implement setActiveChapter(chapterIndex) via ChapterContext
+                  window.location.hash = 'writing';
+                }}
+              />
+            </Suspense>
+          </FeatureErrorBoundary>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">Please select a project to analyze plot structure</p>
+          </div>
+        );
+      case View.Settings:
+        return (
+          <FeatureErrorBoundary featureName="Settings">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">Loading Settings...</p>
+                </div>
+              }
+            >
+              <SettingsPanel />
+            </Suspense>
+          </FeatureErrorBoundary>
+        );
+      case View.Export:
+        return currentProject ? (
+          <FeatureErrorBoundary featureName="Export Dashboard">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">Loading Export Dashboard...</p>
+                </div>
+              }
+            >
+              <ExportDashboard
+                projectId={currentProject.id}
+                projectName={currentProject.name}
+                chapters={chapters}
+              />
+            </Suspense>
+          </FeatureErrorBoundary>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">Please select a project to view export dashboard</p>
+          </div>
+        );
+      case View.Onboarding:
+        return (
+          <FeatureErrorBoundary featureName="Onboarding">
+            <OnboardingPanel />
+          </FeatureErrorBoundary>
+        );
+      case View.Formatting:
+        return currentProject ? (
+          <FeatureErrorBoundary featureName="Document Formatting">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">Loading Formatting...</p>
+                </div>
+              }
+            >
+              <FormattingPanel />
+            </Suspense>
+          </FeatureErrorBoundary>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">Please select a project to configure formatting</p>
+          </div>
+        );
+      default:
+        return (
           <FeatureErrorBoundary featureName="Dashboard">
             <EnhancedDashboard />
           </FeatureErrorBoundary>
-        </RecoveryErrorBoundary>
-      );
-    case View.Writing:
-      return (
-        <RecoveryErrorBoundary panelName="Editor">
-          <FeatureErrorBoundary featureName="Writing Editor">
-            <EnhancedWritingPanel />
-          </FeatureErrorBoundary>
-        </RecoveryErrorBoundary>
-      );
-    case View.Timeline:
-      return (
-        <FeatureErrorBoundary featureName="Timeline">
-          <TimelinePanel />
-        </FeatureErrorBoundary>
-      );
-    case View.Analysis:
-      return (
-        <FeatureErrorBoundary featureName="Analytics">
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500">Loading Analytics...</p>
-              </div>
-            }
-          >
-            <AnalyticsPanel />
-          </Suspense>
-        </FeatureErrorBoundary>
-      );
-    case View.Planning:
-      return (
-        <FeatureErrorBoundary featureName="Story Planning">
-          <StoryPlanningView />
-        </FeatureErrorBoundary>
-      );
-    case View.PlotBoards:
-      return currentProject ? (
-        <FeatureErrorBoundary featureName="Plot Boards">
-          <PlotBoards projectId={currentProject.id} />
-        </FeatureErrorBoundary>
-      ) : (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-gray-500">Please select a project to use Plot Boards</p>
-        </div>
-      );
-    case View.Plot:
-      return currentProject ? (
-        <FeatureErrorBoundary featureName="Plot Analysis">
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500">Loading Plot Analysis...</p>
-              </div>
-            }
-          >
-            <PlotAnalysisPanel
-              project={currentProject}
-              onOpenChapter={(_chapterIndex) => {
-                // Navigate to Writing view - chapter selection would need ChapterContext integration
-                // For now, just switch to writing view
-                // TODO: Implement setActiveChapter(chapterIndex) via ChapterContext
-                window.location.hash = 'writing';
-              }}
-            />
-          </Suspense>
-        </FeatureErrorBoundary>
-      ) : (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-gray-500">Please select a project to analyze plot structure</p>
-        </div>
-      );
-    case View.Settings:
-      return (
-        <FeatureErrorBoundary featureName="Settings">
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500">Loading Settings...</p>
-              </div>
-            }
-          >
-            <SettingsPanel />
-          </Suspense>
-        </FeatureErrorBoundary>
-      );
-    case View.Export:
-      return currentProject ? (
-        <FeatureErrorBoundary featureName="Export Dashboard">
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500">Loading Export Dashboard...</p>
-              </div>
-            }
-          >
-            <ExportDashboard
-              projectId={currentProject.id}
-              projectName={currentProject.name}
-              chapters={chapters}
-            />
-          </Suspense>
-        </FeatureErrorBoundary>
-      ) : (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-gray-500">Please select a project to view export dashboard</p>
-        </div>
-      );
-    case View.Onboarding:
-      return (
-        <FeatureErrorBoundary featureName="Onboarding">
-          <OnboardingPanel />
-        </FeatureErrorBoundary>
-      );
-    case View.Formatting:
-      return currentProject ? (
-        <FeatureErrorBoundary featureName="Document Formatting">
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500">Loading Formatting...</p>
-              </div>
-            }
-          >
-            <FormattingPanel />
-          </Suspense>
-        </FeatureErrorBoundary>
-      ) : (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-gray-500">Please select a project to configure formatting</p>
-        </div>
-      );
-    default:
-      return (
-        <FeatureErrorBoundary featureName="Dashboard">
-          <EnhancedDashboard />
-        </FeatureErrorBoundary>
-      );
-  }
+        );
+    }
+  };
+
+  // Wrap view with page turn transition
+  return (
+    <ViewTransition viewKey={currentView} variant="pageTurn" duration={0.4}>
+      {renderView()}
+    </ViewTransition>
+  );
 };
 
 export default ViewSwitcher;
