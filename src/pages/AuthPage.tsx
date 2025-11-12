@@ -81,7 +81,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
       <div className="w-full max-w-md">
         <div className="flex justify-center">
           <img
-            src="/brand/3.svg"
+            src="/brand/inkwell-logo-primary.svg"
             alt="Inkwell"
             className="h-16 w-auto"
             onError={(e) => {
@@ -109,13 +109,6 @@ export default function AuthPage({ mode }: AuthPageProps) {
             }}
           />
         </div>
-        <h2
-          className={`mt-6 text-center text-3xl font-bold tracking-tight inline-flex items-center ${chrome.headerAccent}`}
-          style={{ color: 'white' }}
-        >
-          {chrome.title}
-          {chrome.badge}
-        </h2>
         <p className="mt-4 text-center text-lg text-white/85">{chrome.subtitle}</p>
 
         <div
