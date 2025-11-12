@@ -5,28 +5,42 @@ import React, { useMemo, useState } from 'react';
 import PhraseHygieneWidget from '@/components/Analytics/PhraseHygieneWidget';
 import PerformanceChart from '@/components/PerformanceChart';
 import { useAppContext } from '@/context/AppContext';
+import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 
 type Session = {
   startTime?: string;
+  date?: string;
   wordCount?: number;
   wordsAdded?: number;
   focusTime?: number;
   dateLabel?: string;
   productivity?: number;
+  duration?: number;
+  startWords?: number;
+  endWords?: number;
 };
 
 export default function WritingAnalyticsView() {
   const { currentProject } = useAppContext();
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
 
-  // Read from a defensively-typed object so we don't rely on Project having `sessions`
-  const proj: any = currentProject ?? {};
-  const projectName: string = typeof proj.name === 'string' ? proj.name : 'Project';
+  const projectName: string = currentProject?.name ?? 'Project';
 
-  // Stabilize sessions to prevent downstream useMemo hooks from re-computing unnecessarily
+  // Use the proper analytics hook that reads from localStorage
+  const analytics = useProjectAnalytics(currentProject?.id ?? '');
+
+  // Convert analytics sessions to the expected format
   const sessions: Session[] = useMemo(() => {
-    return Array.isArray(proj.sessions) ? (proj.sessions as Session[]) : [];
-  }, [proj.sessions]);
+    return analytics.sessions.map((s) => ({
+      startTime: s.startedAt || s.date,
+      date: s.date,
+      wordCount: s.wordCount,
+      wordsAdded: s.wordCount,
+      duration: s.duration,
+      startWords: s.startWords,
+      endWords: s.endWords,
+    }));
+  }, [analytics.sessions]);
 
   // Daily trend rows for primary chart
   const trendRows = useMemo(() => {
@@ -69,7 +83,10 @@ export default function WritingAnalyticsView() {
     }
   })();
 
-  const dailyGoal = typeof proj.dailyGoal === 'number' ? proj.dailyGoal : 500;
+  const dailyGoal =
+    typeof (currentProject as any)?.dailyGoal === 'number'
+      ? (currentProject as any).dailyGoal
+      : 500;
   const dailyGoalCompletion = Math.max(
     0,
     Math.min(100, Math.round((todayWords / dailyGoal) * 100)),
