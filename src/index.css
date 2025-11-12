@@ -207,23 +207,24 @@
     border-color: hsl(var(--border-subtle));
   }
 
-  /* Nav items */
+  /* Nav items - Sophisticated Simplicity */
   .ink-nav-item {
-    @apply flex items-center gap-3 rounded-xl px-3 py-2;
-
-    color: hsl(var(--text-2));
+    @apply flex items-center gap-3 rounded-button px-3 py-2;
+    @apply font-sans text-label;
+    @apply text-inkwell-ink/70 dark:text-inkwell-dark-muted;
+    @apply transition-all duration-200;
   }
 
   .ink-nav-item:hover {
-    background-color: hsl(var(--ink-50));
-    color: hsl(var(--ink-700));
+    @apply bg-inkwell-panel/30 dark:bg-inkwell-dark-elevated;
+    @apply text-inkwell-ink dark:text-inkwell-dark-text;
   }
 
   .ink-nav-item--active {
     @apply font-medium;
-
-    background-color: hsl(var(--ink-50));
-    color: hsl(var(--ink-700));
+    @apply bg-inkwell-gold/10 dark:bg-inkwell-gold-light/10;
+    @apply text-inkwell-gold dark:text-inkwell-gold-light;
+    @apply shadow-soft;
   }
 
   .ink-nav-icon {

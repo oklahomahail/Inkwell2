@@ -359,8 +359,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
           className={cn(
             'sidebar ink-sidebar',
             'fixed left-0 top-0 h-full z-40',
-            'transition-all duration-300 ease-in-out',
+            'bg-white dark:bg-inkwell-dark-surface',
+            'border-r border-inkwell-panel/30 dark:border-inkwell-dark-elevated',
+            'transition-all duration-200 ease-elegant',
             'flex flex-col',
+            'shadow-soft',
             // Desktop behavior
             !isMobile && (sidebarCollapsed ? 'w-16' : 'w-64'),
             // Mobile behavior - slide in/out
@@ -371,8 +374,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
           {/* Sidebar Header */}
           <div
             className={cn(
-              'sidebar-header p-4 border-b border-slate-200 dark:border-slate-700',
-              'flex items-center transition-all duration-300',
+              'sidebar-header p-4 border-b border-inkwell-panel/30 dark:border-inkwell-dark-elevated',
+              'flex items-center transition-all duration-200',
               sidebarCollapsed ? 'flex-col gap-2 justify-center' : 'flex-row justify-between',
             )}
           >
@@ -392,10 +395,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
               </div>
               {!sidebarCollapsed && (
                 <div className="flex flex-col min-w-0 flex-1">
-                  <h1 className="text-heading-sm text-text-1 font-semibold truncate">
+                  <h1 className="text-heading-sm font-serif text-inkwell-ink dark:text-inkwell-dark-text font-semibold truncate">
                     {BRAND_NAME}
                   </h1>
-                  <p className="text-caption text-text-2 truncate">
+                  <p className="text-caption text-inkwell-ink/60 dark:text-inkwell-dark-muted truncate">
                     {currentProject?.name || 'No project'}
                   </p>
                 </div>
@@ -415,10 +418,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                 'btn-ghost btn-sm',
                 'w-9 h-9 p-0 flex-shrink-0',
                 'flex items-center justify-center',
-                'hover:bg-slate-100 dark:hover:bg-slate-700',
+                'text-inkwell-ink/60 dark:text-inkwell-dark-muted',
+                'hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated',
                 'transition-all duration-200',
-                'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800',
-                'rounded-md',
+                'focus:outline-none focus:shadow-focus',
+                'rounded-button',
               )}
               aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               aria-expanded={!sidebarCollapsed}
@@ -440,17 +444,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                 onClick={openPalette}
                 className={cn(
                   'w-full flex items-center gap-3',
-                  'px-3 py-2 text-sm text-slate-600 dark:text-slate-400',
-                  'bg-slate-50 dark:bg-slate-700/50',
-                  'border border-slate-200 dark:border-slate-600',
-                  'rounded-md hover:bg-slate-100 dark:hover:bg-slate-700',
-                  'transition-colors focus-ring',
+                  'px-3 py-2 text-body-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted',
+                  'bg-inkwell-panel/30 dark:bg-inkwell-dark-elevated/50',
+                  'border border-inkwell-panel/50 dark:border-inkwell-dark-elevated',
+                  'rounded-button hover:bg-inkwell-panel/50 dark:hover:bg-inkwell-dark-elevated',
+                  'transition-all duration-200 focus:shadow-focus',
                 )}
                 aria-label="Open command palette"
               >
                 <Search className="w-4 h-4" />
-                <span className="flex-1 text-left">Search or command...</span>
-                <kbd className="px-1.5 py-0.5 text-xs font-mono bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded">
+                <span className="flex-1 text-left font-sans">Search or command...</span>
+                <kbd className="px-1.5 py-0.5 text-xs font-mono bg-inkwell-parchment dark:bg-inkwell-dark-bg border border-inkwell-panel dark:border-inkwell-dark-elevated rounded">
                   ⌘K
                 </kbd>
               </button>
@@ -484,8 +488,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                     />
                     {!sidebarCollapsed && (
                       <>
-                        <span className="flex-1 text-left">{item.label}</span>
-                        <kbd className="text-xs text-slate-400 dark:text-slate-500 font-mono">
+                        <span className="flex-1 text-left font-sans">{item.label}</span>
+                        <kbd className="text-caption text-inkwell-ink/40 dark:text-inkwell-dark-muted/60 font-mono">
                           {item.shortcut}
                         </kbd>
                       </>
@@ -498,18 +502,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
           {/* Quick Actions */}
           {!sidebarCollapsed && (
-            <div className="p-4 border-t border-subtle">
+            <div className="p-4 border-t border-inkwell-panel/30 dark:border-inkwell-dark-elevated">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={toggleDarkMode}
-                    className="flex-1 btn btn-ghost btn-sm"
+                    className="flex-1 btn btn-ghost btn-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated transition-all duration-200"
                     aria-label="Toggle dark mode"
                   >
                     {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                    {isDarkMode ? 'Light' : 'Dark'}
+                    <span className="font-sans text-label">{isDarkMode ? 'Light' : 'Dark'}</span>
                   </button>
-                  <button className="btn btn-ghost btn-sm p-2" aria-label="Notifications">
+                  <button
+                    className="btn btn-ghost btn-sm p-2 text-inkwell-ink/70 dark:text-inkwell-dark-muted hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated transition-all duration-200"
+                    aria-label="Notifications"
+                  >
                     <Bell className="w-4 h-4" />
                   </button>
                 </div>
@@ -519,10 +526,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
           {/* Collapsed mode quick actions */}
           {sidebarCollapsed && (
-            <div className="p-2 border-t border-subtle space-y-2">
+            <div className="p-2 border-t border-inkwell-panel/30 dark:border-inkwell-dark-elevated space-y-2">
               <button
                 onClick={toggleDarkMode}
-                className="w-full btn btn-ghost btn-sm p-2"
+                className="w-full btn btn-ghost btn-sm p-2 text-inkwell-ink/70 dark:text-inkwell-dark-muted hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated transition-all duration-200"
                 title="Toggle dark mode"
               >
                 {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -537,8 +544,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         data-tour-id="dashboard"
         className={cn(
           'main-content flex-1 flex flex-col relative',
-          'min-h-screen transition-all duration-300',
-          'bg-slate-50 dark:bg-slate-900',
+          'min-h-screen transition-all duration-200',
+          'bg-inkwell-canvas dark:bg-inkwell-dark-bg',
           'z-40', // Above decorative layers, below tour (10000)
           // Desktop spacing
           !isMobile && (sidebarCollapsed ? 'ml-16' : 'ml-64'),
@@ -548,7 +555,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       >
         {/* Top Bar - only show on non-auth routes */}
         {!isAuthRoute && (
-          <header className="Topbar bg-white border-b border-ink-500 sticky top-0 z-30 backdrop-blur-sm">
+          <header className="Topbar bg-white dark:bg-inkwell-dark-surface border-b border-inkwell-panel/30 dark:border-inkwell-dark-elevated sticky top-0 z-30 backdrop-blur-sm shadow-soft">
             <div className="px-4 md:px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -556,19 +563,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                   {isMobile && (
                     <button
                       onClick={toggleSidebar}
-                      className="btn btn-ghost btn-sm p-2 md:hidden"
+                      className="btn btn-ghost btn-sm p-2 md:hidden text-inkwell-ink/70 dark:text-inkwell-dark-muted hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated transition-all duration-200"
                       aria-label="Toggle navigation menu"
                     >
                       <Menu className="w-5 h-5" />
                     </button>
                   )}
-                  <h2 className="text-heading-lg text-slate-900 dark:text-white truncate">
+                  <h2 className="text-heading-lg font-serif text-inkwell-ink dark:text-inkwell-dark-text truncate">
                     {navigationItems.find((item) => item.view === state.view)?.label || 'Dashboard'}
                   </h2>
                   {currentProject && (
-                    <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-slate-600 dark:text-slate-300">
+                    <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-inkwell-gold/10 dark:bg-inkwell-gold-light/10 border border-inkwell-gold/20 dark:border-inkwell-gold-light/20 rounded-full">
+                      <div className="w-2 h-2 bg-inkwell-success rounded-full animate-pulse-gold"></div>
+                      <span className="text-body-sm font-medium text-inkwell-gold dark:text-inkwell-gold-light">
                         {currentProject.name}
                       </span>
                     </div>
@@ -579,7 +586,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={openPalette}
-                      className="btn btn-ghost btn-sm"
+                      className="btn btn-ghost btn-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated hover:text-inkwell-ink dark:hover:text-inkwell-dark-text transition-all duration-200"
                       aria-label="Open command palette (⌘K)"
                       title="Command Palette (⌘K)"
                     >
@@ -587,7 +594,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                     </button>
                     <button
                       onClick={handleOpenSearch}
-                      className="btn btn-ghost btn-sm"
+                      className="btn btn-ghost btn-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated hover:text-inkwell-ink dark:hover:text-inkwell-dark-text transition-all duration-200"
                       aria-label="Search (⌘⇧F)"
                       title="Search (⌘⇧F)"
                     >
@@ -595,7 +602,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                     </button>
                     <button
                       onClick={handleOpenNotifications}
-                      className="btn btn-ghost btn-sm"
+                      className="btn btn-ghost btn-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated hover:text-inkwell-ink dark:hover:text-inkwell-dark-text transition-all duration-200"
                       aria-label="Notifications"
                       title="Notifications"
                     >
@@ -604,7 +611,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                     {/* Settings Button */}
                     <button
                       onClick={handleOpenSettings}
-                      className="btn btn-ghost btn-sm"
+                      className="btn btn-ghost btn-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated hover:text-inkwell-ink dark:hover:text-inkwell-dark-text transition-all duration-200"
                       aria-label="Settings (⌘,)"
                       title="Settings (⌘,)"
                     >
@@ -615,7 +622,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                       <button
                         data-tour-id="export-open"
                         onClick={handleExport}
-                        className="btn btn-ghost btn-sm"
+                        className="btn btn-ghost btn-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated hover:text-inkwell-ink dark:hover:text-inkwell-dark-text transition-all duration-200"
                         aria-label="Export (⌘E)"
                         title="Export Project (⌘E)"
                       >
@@ -637,7 +644,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
                     {/* Help Button */}
                     <button
                       onClick={handleOpenHelp}
-                      className="btn btn-ghost btn-sm"
+                      className="btn btn-ghost btn-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated hover:text-inkwell-ink dark:hover:text-inkwell-dark-text transition-all duration-200"
                       aria-label="Help (?)"
                       title="Help & Support (?)"
                     >
