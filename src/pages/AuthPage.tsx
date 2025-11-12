@@ -83,11 +83,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
         <div className="w-full max-w-md">
           {/* White Header Bar with Logo */}
           <div className="bg-white py-6 shadow-sm flex justify-center mb-8 -mx-4 px-4">
-            <img
-              src="/brand/inkwell-logo-primary.svg"
-              alt="Inkwell"
-              className="h-16 md:h-20 w-auto"
-            />
+            <img src="/brand/3.svg" alt="Inkwell" className="h-24 md:h-30 w-auto" />
           </div>
 
           <p className="text-center text-lg text-white/85">{chrome.subtitle}</p>
