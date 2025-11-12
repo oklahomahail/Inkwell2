@@ -40,6 +40,33 @@ vi.mock('@/hooks/useTourStartupFromUrl', () => ({
   useTourStartupFromUrl: vi.fn(),
 }));
 
+// Mock useProjectAnalytics hook
+vi.mock('@/hooks/useProjectAnalytics', () => ({
+  useProjectAnalytics: vi.fn(() => ({
+    totals: {
+      totalWords: 0,
+      daysWithWriting: 0,
+      dailyAvg: 0,
+      streak: 0,
+    },
+    chapters: {
+      chapterCount: 0,
+      chapterWords: 0,
+      avgWordsPerChapter: 0,
+    },
+    sessions: [],
+  })),
+}));
+
+// Mock useChapterCount hook
+vi.mock('@/context/ChaptersContext', async () => {
+  const actual = await vi.importActual('@/context/ChaptersContext');
+  return {
+    ...actual,
+    useChapterCount: vi.fn(() => 0),
+  };
+});
+
 describe('EnhancedDashboard Component', () => {
   const mockProject = {
     id: 'test-project',
@@ -159,13 +186,34 @@ describe('EnhancedDashboard Component', () => {
     });
   });*/
 
-  it('displays correct project metrics', () => {
+  it('displays correct project metrics', async () => {
     const projectWithContent = {
       ...mockProject,
       content: 'This is a test content with more than one word',
       chapters: [{ id: '1', title: 'Chapter 1' }],
       characters: [{ id: '1', name: 'Character 1' }],
     };
+
+    // Mock the analytics to return 10 words and 1 chapter
+    const useProjectAnalyticsModule = await import('@/hooks/useProjectAnalytics');
+    vi.mocked(useProjectAnalyticsModule.useProjectAnalytics).mockReturnValue({
+      totals: {
+        totalWords: 10,
+        daysWithWriting: 0,
+        dailyAvg: 0,
+        streak: 0,
+      },
+      chapters: {
+        chapterCount: 1,
+        chapterWords: 10,
+        avgWordsPerChapter: 10,
+      },
+      sessions: [],
+    });
+
+    // Mock chapter count
+    const ChaptersContextModule = await import('@/context/ChaptersContext');
+    vi.mocked(ChaptersContextModule.useChapterCount).mockReturnValue(1);
 
     mockContext.state = {
       view: 'Dashboard',

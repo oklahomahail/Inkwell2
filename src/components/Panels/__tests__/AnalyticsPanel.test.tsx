@@ -354,6 +354,24 @@ describe('AnalyticsPanel - Live Sync', () => {
 
   describe('View Mode Toggle', () => {
     it('should show simple view by default when no enhanced analytics', async () => {
+      // Mock empty analytics data
+      const useProjectAnalyticsModule = await import('@/hooks/useProjectAnalytics');
+      vi.mocked(useProjectAnalyticsModule.useProjectAnalytics).mockReturnValue({
+        totals: {
+          totalWords: 0,
+          daysWithWriting: 0,
+          dailyAvg: 0,
+          streak: 0,
+        },
+        chapters: {
+          chapterCount: 0,
+          chapterWords: 0,
+          avgWordsPerChapter: 0,
+        },
+        sessions: [],
+        notice: undefined,
+      });
+
       // Re-import to get fresh mocks
       const AppContextModule = await import('@/context/AppContext');
       vi.mocked(AppContextModule.useAppContext).mockReturnValue({
