@@ -75,79 +75,57 @@ export default function AuthPage({ mode }: AuthPageProps) {
 
   return (
     <div
-      className="min-h-screen bg-[#13294B] text-white grid place-items-center isolate py-12 px-4"
+      className="min-h-screen bg-[#13294B] text-white isolate"
       style={{ backgroundColor: '#13294B', color: 'white' }}
     >
-      <div className="w-full max-w-md">
-        <div className="flex justify-center">
-          <img
-            src="/brand/inkwell-logo-primary.svg"
-            alt="Inkwell"
-            className="h-16 w-auto"
-            onError={(e) => {
-              const img = e.currentTarget as HTMLImageElement | null;
-              if (!img) return;
+      {/* Main Content */}
+      <div className="grid place-items-center py-12 px-4">
+        <div className="w-full max-w-md">
+          {/* White Header Bar with Logo */}
+          <div className="bg-white py-6 shadow-sm flex justify-center mb-8 -mx-4 px-4">
+            <img src="/brand/3.svg" alt="Inkwell" className="h-16 md:h-20 w-auto" />
+          </div>
 
-              // Stop loops
-              img.onerror = null;
+          <p className="text-center text-lg text-white/85">{chrome.subtitle}</p>
 
-              // Try fallback src if not already tried
-              if (img.dataset.fallbackApplied !== '1') {
-                img.dataset.fallbackApplied = '1';
-                img.src = '/brand/1.svg';
-                return;
-              }
-
-              // Final text fallback when both images fail
-              const parent = img.parentElement;
-              if (parent) {
-                parent.innerHTML = `<span class="text-3xl font-serif font-bold text-[#D4A537]">Inkwell</span>`;
-              } else {
-                // As absolute fallback, hide the broken image
-                img.style.display = 'none';
-              }
+          <div
+            className="mt-8 rounded-lg shadow-xl p-8 relative overflow-hidden border-t-4"
+            style={{
+              backgroundColor: 'white',
+              color: '#1e293b',
+              borderColor: '#D4AF37',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             }}
-          />
-        </div>
-        <p className="mt-4 text-center text-lg text-white/85">{chrome.subtitle}</p>
-
-        <div
-          className="mt-8 rounded-lg shadow-xl p-8 relative overflow-hidden border-t-4"
-          style={{
-            backgroundColor: 'white',
-            color: '#1e293b',
-            borderColor: '#D4AF37',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-          }}
-        >
-          {notice && (
-            <div
-              className="mb-6 p-4 rounded-md flex items-center"
-              style={{ backgroundColor: '#ecfdf5', color: '#047857' }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-2 flex-shrink-0"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+          >
+            {notice && (
+              <div
+                className="mb-6 p-4 rounded-md flex items-center"
+                style={{ backgroundColor: '#ecfdf5', color: '#047857' }}
               >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <p className="text-sm font-medium">{notice}</p>
-            </div>
-          )}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2 flex-shrink-0"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <p className="text-sm font-medium">{notice}</p>
+              </div>
+            )}
 
-          <AuthForm
-            mode={mode}
-            redirect={desiredRedirect}
-            primaryCtaLabel={chrome.primaryCtaLabel}
-          />
+            <AuthForm
+              mode={mode}
+              redirect={desiredRedirect}
+              primaryCtaLabel={chrome.primaryCtaLabel}
+            />
 
-          <AuthFooter mode={mode === 'signin' ? 'signin' : 'signup'} redirect={desiredRedirect} />
+            <AuthFooter mode={mode === 'signin' ? 'signin' : 'signup'} redirect={desiredRedirect} />
+          </div>
         </div>
       </div>
     </div>
