@@ -12,7 +12,7 @@ export type PhraseHygieneWidgetProps = {
 };
 
 import { AlertTriangle, Ban, TrendingUp, RefreshCw } from 'lucide-react';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
@@ -30,6 +30,17 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
   const [lastAnalyzed, setLastAnalyzed] = useState<Date | null>(null);
   const [totalWords, setTotalWords] = useState(0);
 
+  // Auto-analyze when project changes
+  useEffect(() => {
+    if (currentProject) {
+      analyzeProject();
+    } else {
+      setOffenders([]);
+      setLastAnalyzed(null);
+      setTotalWords(0);
+    }
+  }, [currentProject]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const analyzeProject = useCallback(async () => {
     if (!currentProject) return;
     setIsAnalyzing(true);
@@ -42,7 +53,7 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
       if (!allContent.trim()) {
         setOffenders([]);
         setTotalWords(0);
-        showToast('No content found to analyze', 'warning');
+        // Don't show toast on auto-analysis, only on manual refresh
         return;
       }
 
