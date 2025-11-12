@@ -178,7 +178,7 @@ export async function getStorageHealth(): Promise<StorageHealth> {
   }
 
   if (!dbExists && hasIDB()) {
-    warnings.push('Database not yet initialized');
+    warnings.push('Database initializing... refresh if this persists');
   }
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'unknown';

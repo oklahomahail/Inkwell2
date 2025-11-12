@@ -102,7 +102,7 @@ describe('storageHealth utilities', () => {
 
       expect(health.dbExists).toBe(false);
       // DB not existing doesn't make it unhealthy, just adds a warning
-      expect(health.warnings).toContain('Database not yet initialized');
+      expect(health.warnings).toContain('Database initializing... refresh if this persists');
     });
 
     it('should handle null quota information', async () => {
