@@ -8,7 +8,7 @@
  * - Manual sync button with loading state
  */
 
-import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import React from 'react';
 
 interface RealtimeStatusProps {
@@ -47,17 +47,6 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
       className="flex items-center gap-3 px-3 py-2 bg-slate-900 border-l border-slate-800"
       data-tour="realtime-status"
     >
-      {/* Live Update Flash */}
-      {liveUpdate && (
-        <div className="flex items-center gap-1.5 text-xs text-emerald-400 animate-pulse">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-          </span>
-          <span className="font-medium">Live update</span>
-        </div>
-      )}
-
       {/* Connection Status */}
       <div
         className={`flex items-center gap-1.5 text-xs transition-colors ${
@@ -65,11 +54,21 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
         }`}
         title={
           connected
-            ? `Realtime connected${lastSynced ? ` • Last synced: ${formatLastSynced(lastSynced)}` : ''}`
-            : 'Realtime disconnected • Working offline'
+            ? `Connected${lastSynced ? ` • Last synced: ${formatLastSynced(lastSynced)}` : ''}`
+            : 'Disconnected • Working offline'
         }
       >
-        {connected ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
+        {/* Status indicator dot with pulse animation when live update received */}
+        <span className="relative flex h-2.5 w-2.5">
+          {liveUpdate && connected && (
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+          )}
+          <span
+            className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
+              connected ? 'bg-emerald-500' : 'bg-slate-500'
+            }`}
+          />
+        </span>
         <span className="font-medium">{connected ? 'Live' : 'Offline'}</span>
       </div>
 
