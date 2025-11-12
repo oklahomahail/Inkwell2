@@ -24,26 +24,26 @@ vi.mock('@/utils/navigate', () => ({
 import AuthPage from '../AuthPage';
 
 describe('AuthPage', () => {
-  it('renders sign-in page with correct title and button', () => {
+  it('renders sign-in page with correct subtitle and button', () => {
     render(
       <MemoryRouter>
         <AuthPage mode="signin" />
       </MemoryRouter>,
     );
 
-    expect(screen.getAllByText('Sign in to Inkwell').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Because Great Stories Deserve Great Tools')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
     expect(screen.queryByText(/confirm password/i)).not.toBeInTheDocument();
   });
 
-  it('renders sign-up page with correct title, button, and confirm field', () => {
+  it('renders sign-up page with correct subtitle, button, and confirm field', () => {
     render(
       <MemoryRouter>
         <AuthPage mode="signup" />
       </MemoryRouter>,
     );
 
-    expect(screen.getAllByText('Create your Inkwell account').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Because Great Stories Deserve Great Tools')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
   });
