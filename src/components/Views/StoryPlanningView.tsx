@@ -1,11 +1,20 @@
 // src/components/Views/StoryPlanningView.tsx - Enhanced with Story Architect Flow
-import { BookOpen, Users, Map, FileText, BarChart3, Wand2 } from 'lucide-react';
+import { BookOpen, Users, Map, FileText, BarChart3, Wand2, Settings } from 'lucide-react';
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 
+import { useAiSettings } from '@/context/AiSettingsContext';
+import { useAppContext, View } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
+import {
+  hasUserApiKey,
+  isFeatureAvailable,
+  getFeatureBadgeStatus,
+  type AiFeatureConfig,
+} from '@/utils/aiFeatureClassification';
 import { triggerStoryPlanningOpen, triggerWorldBuildingVisited } from '@/utils/tourTriggers';
 
 import { type GeneratedOutline } from '../../services/storyArchitectService';
+import { AiFeatureBadge, AiFeatureLegend } from '../Planning/AiFeatureBadge';
 import BeatSheetPlanner from '../Planning/BeatSheetPlanner';
 import CharacterManager from '../Planning/CharacterManager';
 import { StoryArchitectFlow } from '../Planning/StoryArchitectFlow';
@@ -134,66 +143,146 @@ const StoryPlanningView: React.FC = () => {
   );
 };
 
-// Enhanced Overview Tab with Story Architect integration
+// Enhanced Overview Tab with Story Architect integration and AI status badges
 const OverviewTab: React.FC<{
   onNavigateToTab: (_tab: PlanningTab) => void;
   onOpenArchitectFlow: () => void;
 }> = ({ onNavigateToTab, onOpenArchitectFlow }) => {
+  const { settings } = useAiSettings();
+  const { setView } = useAppContext();
+  const { showToast } = useToast();
+
+  // Check if user has API key configured
+  const [userHasApiKey, setUserHasApiKey] = useState(() => hasUserApiKey(settings));
+
+  // Listen for storage changes to update badge status in real-time
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setUserHasApiKey(hasUserApiKey(settings));
+    };
+
+    // Listen for localStorage changes from other tabs/windows
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also re-check when settings change in current tab
+    setUserHasApiKey(hasUserApiKey(settings));
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [settings]);
+
+  // Define AI features with their requirements
+  const aiFeatures: AiFeatureConfig[] = [
+    {
+      title: 'AI Story Architect',
+      description:
+        'Generate a complete story outline with chapters, scenes, and characters from just your premise. Perfect for getting started or breaking through planning blocks.',
+      mode: 'free',
+      actionLabel: 'Generate Story Outline',
+      onClick: onOpenArchitectFlow,
+    },
+    {
+      title: 'Story Health',
+      description:
+        'Get professional insights on your story structure, pacing, and character development with AI-powered analysis.',
+      mode: 'apiKey',
+      actionLabel: 'View Story Health Dashboard',
+      onClick: () => onNavigateToTab('health'),
+    },
+  ];
+
+  const handleLockedFeatureClick = (feature: AiFeatureConfig) => {
+    if (!isFeatureAvailable(feature.mode, settings)) {
+      showToast('This feature requires an API key. Configure one in Settings to unlock.', 'info');
+      // Optionally navigate to settings after a delay
+      setTimeout(() => setView(View.Settings), 2000);
+    } else if (feature.onClick) {
+      feature.onClick();
+    }
+  };
+
+  const handleConfigureApiKey = () => {
+    setView(View.Settings);
+  };
+
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Story Planning</h1>
 
+        {/* AI Features Legend */}
+        <AiFeatureLegend hasKey={userHasApiKey} />
+
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Quick Start - Enhanced */}
+          {/* Quick Start - Enhanced with AI Status */}
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Quick Start</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              AI-Powered Planning
+            </h2>
 
             <div className="space-y-4">
-              {/* NEW: Story Architect card */}
-              <div className="p-4 border border-purple-200 dark:border-purple-600 rounded-lg bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20">
-                <h3 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                  <Wand2 className="w-5 h-5 text-purple-600" />
-                  AI Story Architect
-                  <span className="text-xs bg-purple-200 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 px-2 py-0.5 rounded-full">
-                    ✨ New
-                  </span>
-                </h3>
-                <p className="text-gray-700 dark:text-gray-300 text-sm mb-4">
-                  Generate a complete story outline with chapters, _scenes, and characters from just
-                  your premise. Perfect for getting started or breaking through planning blocks.
-                </p>
-                <button
-                  onClick={onOpenArchitectFlow}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md font-medium transition-colors"
-                >
-                  <Wand2 className="w-4 h-4" />
-                  Generate Story Outline
-                </button>
-              </div>
+              {/* AI Features with status badges */}
+              {aiFeatures.map((feature) => {
+                const badgeStatus = getFeatureBadgeStatus(feature.mode, settings);
+                const isLocked = badgeStatus === 'locked';
 
-              {/* Story Health card */}
-              <div className="p-4 border border-purple-200 dark:border-purple-600 rounded-lg bg-purple-50 dark:bg-purple-900/20">
-                <h3 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-purple-600" />
-                  Check Your Story Health
-                  <span className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-0.5 rounded-full">
-                    New
-                  </span>
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                  Get professional insights on your story's structure, _pacing, and character
-                  development.
-                </p>
-                <button
-                  onClick={() => onNavigateToTab('health')}
-                  className="text-purple-600 dark:text-purple-400 text-sm hover:underline font-medium"
-                >
-                  View Story Health Dashboard →
-                </button>
-              </div>
+                return (
+                  <div
+                    key={feature.title}
+                    className={`p-4 border rounded-lg transition-all duration-300 ${
+                      isLocked
+                        ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 opacity-90'
+                        : 'border-purple-200 dark:border-purple-600 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        <Wand2
+                          className={`w-5 h-5 ${isLocked ? 'text-gray-400' : 'text-purple-600'}`}
+                        />
+                        {feature.title}
+                      </h3>
+                      <AiFeatureBadge status={badgeStatus} />
+                    </div>
 
-              <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                    <p
+                      className={`text-sm mb-4 ${isLocked ? 'text-gray-500 dark:text-gray-400' : 'text-gray-700 dark:text-gray-300'}`}
+                    >
+                      {feature.description}
+                    </p>
+
+                    {isLocked ? (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleConfigureApiKey}
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors text-sm"
+                        >
+                          <Settings className="w-4 h-4" />
+                          Configure API Key
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleLockedFeatureClick(feature)}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md font-medium transition-colors"
+                      >
+                        <Wand2 className="w-4 h-4" />
+                        {feature.actionLabel}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Traditional Planning Tools */}
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mt-8">
+              Manual Planning Tools
+            </h2>
+
+            <div className="space-y-4">
+              <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900">
                 <h3 className="font-medium text-gray-900 dark:text-white mb-2">
                   1. Create Your Beat Sheet
                 </h3>
@@ -209,7 +298,7 @@ const OverviewTab: React.FC<{
                 </button>
               </div>
 
-              <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+              <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900">
                 <h3 className="font-medium text-gray-900 dark:text-white mb-2">
                   2. Develop Your Characters
                 </h3>
@@ -224,7 +313,7 @@ const OverviewTab: React.FC<{
                 </button>
               </div>
 
-              <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+              <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900">
                 <h3 className="font-medium text-gray-900 dark:text-white mb-2">
                   3. Build Your World
                 </h3>
