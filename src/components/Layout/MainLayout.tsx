@@ -25,6 +25,7 @@ import { ALT_TAGLINE } from '@/constants/branding';
 import { useAppContext, View } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useCommandPalette } from '@/context/CommandPaletteContext';
+import { FormattingProvider } from '@/context/FormattingContext';
 import { ExportModal } from '@/features/export/ExportModal';
 import { useUI } from '@/hooks/useUI';
 import { cn } from '@/lib/utils';
@@ -691,7 +692,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
         {/* Page Content */}
         <div className="p-6 flex-1">
-          <div className="max-w-7xl mx-auto">{children}</div>
+          <div className="max-w-7xl mx-auto">
+            {currentProject ? (
+              <FormattingProvider projectId={currentProject.id}>{children}</FormattingProvider>
+            ) : (
+              children
+            )}
+          </div>
         </div>
 
         {/* Footer */}

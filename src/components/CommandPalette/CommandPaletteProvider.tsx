@@ -303,6 +303,14 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         action: () => setView(View.Analysis),
       },
       {
+        id: 'nav-formatting',
+        label: 'Go to Formatting',
+        description: 'Configure document typography and layout',
+        category: 'navigation',
+        action: () => setView(View.Formatting),
+        condition: () => !!currentProject,
+      },
+      {
         id: 'nav-settings',
         label: 'Go to Settings',
         description: 'Configure application settings',

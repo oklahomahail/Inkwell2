@@ -27,6 +27,7 @@ export const Sidebar: React.FC = () => {
     { key: 'planning', label: 'Planning', icon: 'planning' },
     { key: 'timeline', label: 'Timeline', icon: 'timeline' },
     { key: 'analytics', label: 'Analytics', icon: 'analytics' },
+    { key: 'formatting', label: 'Formatting', icon: 'type' }, // v0.10.0 - Document Formatting
     { key: 'settings', label: 'Settings', icon: 'settings' },
   ];
 
