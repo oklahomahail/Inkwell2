@@ -73,9 +73,9 @@ const StoryPlanningView: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
+    <div className="h-full flex flex-col bg-inkwell-canvas dark:bg-inkwell-dark-bg">
       {/* Enhanced Header with Story Architect Button */}
-      <div className="border-b border-gray-200 dark:border-gray-600">
+      <div className="border-b border-inkwell-panel dark:border-inkwell-dark-elevated">
         <div className="flex items-center justify-between px-6 py-4">
           <nav className="flex space-x-8" aria-label="Planning tabs">
             {tabs.map((tab) => {
@@ -93,18 +93,18 @@ const StoryPlanningView: React.FC = () => {
                   }}
                   data-tour={`planner-tab-${tab.id}`}
                   className={`
-                    flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors
+                    flex items-center space-x-2 py-2 px-1 border-b-2 font-sans text-label transition-all duration-200
                     ${
                       isActive
-                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+                        ? 'border-inkwell-gold text-inkwell-focus dark:text-inkwell-gold-light'
+                        : 'border-transparent text-inkwell-ink/60 dark:text-inkwell-dark-muted hover:text-inkwell-ink dark:hover:text-inkwell-dark-text hover:border-inkwell-panel dark:hover:border-inkwell-dark-elevated'
                     }
                   `}
                 >
                   <IconComponent className="w-5 h-5" />
                   <span>{tab.label}</span>
                   {tab.id === 'health' && (
-                    <span className="ml-1 px-2 py-0.5 text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full">
+                    <span className="ml-1 px-2 py-0.5 text-caption bg-inkwell-gold/10 text-inkwell-gold dark:bg-inkwell-gold-light/20 dark:text-inkwell-gold-light rounded-full font-medium">
                       New
                     </span>
                   )}
@@ -116,7 +116,7 @@ const StoryPlanningView: React.FC = () => {
           {/* Story Architect Button */}
           <button
             onClick={() => setShowArchitectFlow(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-inkwell-gold to-inkwell-gold-600 hover:from-inkwell-gold-600 hover:to-inkwell-gold-700 text-white rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-elevated focus:shadow-focus"
           >
             <Wand2 className="w-4 h-4" />
             Story Architect
@@ -171,43 +171,45 @@ const OverviewTab: React.FC<{
   };
 
   return (
-    <div className="h-full overflow-y-auto p-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="h-full overflow-y-auto p-8 bg-gradient-to-b from-inkwell-canvas to-inkwell-parchment dark:from-inkwell-dark-bg dark:to-inkwell-dark-surface">
       <div className="max-w-3xl mx-auto space-y-8">
         {/* HEADER */}
         <header className="text-center mb-6">
-          <h1 className="text-3xl font-semibold text-gray-800 dark:text-gray-100">
+          <h1 className="text-heading-xl font-serif text-inkwell-ink dark:text-inkwell-dark-text">
             Plan Your Story
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-3 max-w-2xl mx-auto">
+          <p className="text-body text-inkwell-ink/70 dark:text-inkwell-dark-muted mt-3 max-w-2xl mx-auto">
             Transform your ideas into a complete story blueprint. Start broad, then refine each
             layer — plot, characters, and world.
           </p>
         </header>
 
         {/* BLOCK 1 – AI STORY ARCHITECT */}
-        <section className="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 shadow-sm hover:shadow-md transition-all">
+        <section className="p-6 rounded-card border border-inkwell-panel/30 dark:border-inkwell-dark-elevated bg-white/80 dark:bg-inkwell-dark-surface/80 shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-3">
-              <Wand2 className="text-amber-500 w-5 h-5 flex-shrink-0" />
-              <h2 className="font-semibold text-gray-800 dark:text-gray-100">AI Story Architect</h2>
+              <Wand2 className="text-inkwell-gold w-5 h-5 flex-shrink-0" />
+              <h2 className="text-heading-sm font-serif text-inkwell-ink dark:text-inkwell-dark-text">
+                AI Story Architect
+              </h2>
             </div>
             <AiFeatureBadge status="free" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          <p className="text-body-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted mb-4">
             Generate a complete story outline with chapters, scenes, and characters from your
             premise — perfect for getting started or breaking through planning blocks.
           </p>
           <div className="flex gap-3">
             <button
               onClick={onOpenArchitectFlow}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-inkwell-gold to-inkwell-gold-600 hover:from-inkwell-gold-600 hover:to-inkwell-gold-700 text-white rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-elevated focus:shadow-focus"
             >
               <Wand2 className="w-4 h-4" />
               Generate Outline with AI
             </button>
             <button
               onClick={() => onNavigateToTab('beats')}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="flex-1 px-4 py-2 border border-inkwell-panel dark:border-inkwell-dark-elevated text-inkwell-ink dark:text-inkwell-dark-text rounded-button font-medium hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated transition-all duration-200"
             >
               Start Outline Manually
             </button>
@@ -215,51 +217,57 @@ const OverviewTab: React.FC<{
         </section>
 
         {/* BLOCK 2 – BEAT SHEET */}
-        <section className="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 shadow-sm hover:shadow-md transition-all">
+        <section className="p-6 rounded-card border border-inkwell-panel/30 dark:border-inkwell-dark-elevated bg-white/80 dark:bg-inkwell-dark-surface/80 shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in">
           <div className="flex items-center gap-3 mb-3">
-            <BookOpen className="text-sky-500 w-5 h-5 flex-shrink-0" />
-            <h2 className="font-semibold text-gray-800 dark:text-gray-100">Beat Sheet</h2>
+            <BookOpen className="text-inkwell-focus w-5 h-5 flex-shrink-0" />
+            <h2 className="text-heading-sm font-serif text-inkwell-ink dark:text-inkwell-dark-text">
+              Beat Sheet
+            </h2>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          <p className="text-body-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted mb-4">
             Structure your story using classic templates like the Three-Act Structure or Save the
             Cat! framework.
           </p>
           <button
             onClick={() => onNavigateToTab('beats')}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-inkwell-focus hover:bg-inkwell-navy text-white rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-elevated"
           >
             Open Beat Sheet →
           </button>
         </section>
 
         {/* BLOCK 3 – CHARACTERS */}
-        <section className="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 shadow-sm hover:shadow-md transition-all">
+        <section className="p-6 rounded-card border border-inkwell-panel/30 dark:border-inkwell-dark-elevated bg-white/80 dark:bg-inkwell-dark-surface/80 shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in">
           <div className="flex items-center gap-3 mb-3">
-            <Users className="text-rose-500 w-5 h-5 flex-shrink-0" />
-            <h2 className="font-semibold text-gray-800 dark:text-gray-100">Characters</h2>
+            <Users className="text-inkwell-error w-5 h-5 flex-shrink-0" />
+            <h2 className="text-heading-sm font-serif text-inkwell-ink dark:text-inkwell-dark-text">
+              Characters
+            </h2>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          <p className="text-body-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted mb-4">
             Create detailed character profiles with motivations, conflicts, and arcs. Track growth
             and relationships.
           </p>
           <button
             onClick={() => onNavigateToTab('characters')}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-inkwell-error hover:bg-red-700 text-white rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-elevated"
           >
             Manage Characters →
           </button>
         </section>
 
         {/* BLOCK 4 – STORY HEALTH */}
-        <section className="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 shadow-sm hover:shadow-md transition-all">
+        <section className="p-6 rounded-card border border-inkwell-panel/30 dark:border-inkwell-dark-elevated bg-white/80 dark:bg-inkwell-dark-surface/80 shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-3">
-              <BarChart3 className="text-emerald-500 w-5 h-5 flex-shrink-0" />
-              <h2 className="font-semibold text-gray-800 dark:text-gray-100">Story Health</h2>
+              <BarChart3 className="text-inkwell-success w-5 h-5 flex-shrink-0" />
+              <h2 className="text-heading-sm font-serif text-inkwell-ink dark:text-inkwell-dark-text">
+                Story Health
+              </h2>
             </div>
             <AiFeatureBadge status={getFeatureBadgeStatus('apiKey', settings)} />
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          <p className="text-body-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted mb-4">
             Get professional AI insights on structure, pacing, and character balance to fine-tune
             your manuscript.
           </p>
@@ -267,14 +275,14 @@ const OverviewTab: React.FC<{
             {userHasApiKey ? (
               <button
                 onClick={() => onNavigateToTab('health')}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-inkwell-success hover:bg-green-700 text-white rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-elevated"
               >
                 Analyze Story →
               </button>
             ) : (
               <button
                 onClick={handleConfigureApiKey}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-inkwell-focus hover:bg-inkwell-navy text-white rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-elevated"
               >
                 <Settings className="w-4 h-4" />
                 Configure API Key →
@@ -284,29 +292,31 @@ const OverviewTab: React.FC<{
         </section>
 
         {/* BLOCK 5 – WORLD BUILDING */}
-        <section className="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 shadow-sm hover:shadow-md transition-all">
+        <section className="p-6 rounded-card border border-inkwell-panel/30 dark:border-inkwell-dark-elevated bg-white/80 dark:bg-inkwell-dark-surface/80 shadow-card hover:shadow-elevated transition-all duration-200 animate-fade-in">
           <div className="flex items-center gap-3 mb-3">
-            <Map className="text-indigo-500 w-5 h-5 flex-shrink-0" />
-            <h2 className="font-semibold text-gray-800 dark:text-gray-100">World Building</h2>
+            <Map className="text-purple-600 w-5 h-5 flex-shrink-0" />
+            <h2 className="text-heading-sm font-serif text-inkwell-ink dark:text-inkwell-dark-text">
+              World Building
+            </h2>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          <p className="text-body-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted mb-4">
             Define your settings, history, and world logic to make your story universe consistent
             and immersive.
           </p>
           <button
             onClick={() => onNavigateToTab('world')}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-elevated"
           >
             Start World Building →
           </button>
         </section>
 
         {/* FOOTER / TIPS */}
-        <footer className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <h3 className="font-medium text-gray-700 dark:text-gray-200 mb-3 text-sm">
+        <footer className="mt-8 pt-6 border-t border-inkwell-panel/50 dark:border-inkwell-dark-elevated">
+          <h3 className="text-label font-serif text-inkwell-ink dark:text-inkwell-dark-text mb-3">
             Planning Tips
           </h3>
-          <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-disc pl-5">
+          <ul className="text-body-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted space-y-2 list-disc pl-5">
             <li>Every scene should advance the plot or develop a character</li>
             <li>Plant setups early for satisfying payoffs</li>
             <li>Balance pacing — mix action, reflection, and dialogue</li>
@@ -318,10 +328,10 @@ const OverviewTab: React.FC<{
   );
 };
 
-// Story Health Tab Component (unchanged)
+// Story Health Tab Component
 const StoryHealthTab: React.FC = () => {
   return (
-    <div className="h-full overflow-y-auto p-6">
+    <div className="h-full overflow-y-auto p-6 bg-inkwell-canvas dark:bg-inkwell-dark-bg">
       <div className="max-w-7xl mx-auto">
         <StoryStructureVisualizer />
       </div>
@@ -334,10 +344,10 @@ const WorldBuildingTab: React.FC = () => {
   return (
     <Suspense
       fallback={
-        <div className="h-full flex items-center justify-center">
-          <div className="text-center text-gray-500 dark:text-gray-400">
-            <Map className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-            <p className="text-sm">Loading World Building...</p>
+        <div className="h-full flex items-center justify-center bg-inkwell-canvas dark:bg-inkwell-dark-bg">
+          <div className="text-center text-inkwell-ink/60 dark:text-inkwell-dark-muted">
+            <Map className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse text-purple-600 dark:text-purple-400" />
+            <p className="text-body-sm">Loading World Building...</p>
           </div>
         </div>
       }
