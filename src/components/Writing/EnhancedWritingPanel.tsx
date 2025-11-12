@@ -38,6 +38,7 @@ import { useAppContext, View } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
 import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 import { useSections } from '@/hooks/useSections';
+import { Chapters } from '@/services/chaptersService';
 import { SECTION_TYPE_META } from '@/types/section';
 
 interface EnhancedWritingPanelProps {
@@ -293,8 +294,9 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
       const today = new Date().toISOString().split('T')[0] || '';
       if (!today) return;
 
-      const currentWordCount = wordCount;
-      const wordsWritten = Math.max(0, currentWordCount - sessionStartWordCount.current);
+      // Calculate total project word count from all sections
+      const totalProjectWords = sections.reduce((sum, s) => sum + (s.wordCount || 0), 0);
+      const wordsWritten = Math.max(0, totalProjectWords - sessionStartWordCount.current);
 
       if (wordsWritten === 0) return; // Don't save if no words written
 
@@ -324,7 +326,7 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
             wordCount: Math.max(existingSession.wordCount, wordsWritten),
             duration: Math.max(existingSession.duration || 0, duration),
             startWords: sessionStartWordCount.current,
-            endWords: currentWordCount,
+            endWords: totalProjectWords,
           };
         }
       } else {
@@ -334,7 +336,7 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
           wordCount: wordsWritten,
           duration,
           startWords: sessionStartWordCount.current,
-          endWords: currentWordCount,
+          endWords: totalProjectWords,
         });
       }
 
@@ -357,7 +359,7 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
       window.removeEventListener('beforeunload', handleBeforeUnload);
       saveSession(); // Save on unmount
     };
-  }, [currentProject, wordCount]);
+  }, [currentProject, sections]);
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = e.target.value;
@@ -367,7 +369,9 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     if (!sessionStarted.current && currentProject) {
       sessionStarted.current = true;
       sessionStartTime.current = new Date();
-      sessionStartWordCount.current = wordCount;
+      // Record total project word count at session start
+      const totalProjectWords = sections.reduce((sum, s) => sum + (s.wordCount || 0), 0);
+      sessionStartWordCount.current = totalProjectWords;
     }
   };
 
@@ -438,23 +442,39 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
 
       // CRITICAL: Save current section content before creating new one
       if (activeId && content) {
-        await updateSectionContent(activeId, content);
-        // Wait for the debounced save to complete
-        await new Promise((resolve) => setTimeout(resolve, 700));
+        // Force immediate save by calling the debounced function AND Chapters.saveDoc directly
+        updateSectionContent(activeId, content);
+
+        // Also save directly to ensure it's persisted immediately
+        try {
+          const chapter = await Chapters.get(activeId);
+          const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+          await Chapters.saveDoc({
+            id: activeId,
+            content,
+            version: chapter.version + 1,
+            scenes: chapter.scenes,
+          });
+          await Chapters.updateMeta({ id: activeId, wordCount } as any);
+        } catch (err) {
+          console.warn(
+            '[EnhancedWritingPanel] Direct save failed, relying on debounced save:',
+            err,
+          );
+        }
+
+        // Wait a bit longer to ensure save completes
+        await new Promise((resolve) => setTimeout(resolve, 800));
       }
 
-      // Set flag to prevent content overwrite during new section initialization
-      isInitializingNewSection.current = true;
-      await createSection('New Section', 'chapter');
+      // Clear content state to prevent it from being written to new section
+      setContent('');
 
-      // Reset flag after a delay to allow section to be fully initialized
-      setTimeout(() => {
-        isInitializingNewSection.current = false;
-      }, 1000);
+      // Create new section
+      await createSection('New Section', 'chapter');
     } catch (error) {
       console.error('[EnhancedWritingPanel] Failed to create section:', error);
-      isInitializingNewSection.current = false; // Reset on error
-      // TODO: Show user-friendly error toast
+      showToast('Failed to create section', 'error');
     } finally {
       setIsCreatingSection(false);
     }
