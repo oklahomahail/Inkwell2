@@ -5,12 +5,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useAiSettings } from '@/context/AiSettingsContext';
 import { useAppContext, View } from '@/context/AppContext';
 import { useToast } from '@/context/toast';
-import {
-  hasUserApiKey,
-  isFeatureAvailable,
-  getFeatureBadgeStatus,
-  type AiFeatureConfig,
-} from '@/utils/aiFeatureClassification';
+import { hasUserApiKey, getFeatureBadgeStatus } from '@/utils/aiFeatureClassification';
 import { triggerStoryPlanningOpen, triggerWorldBuildingVisited } from '@/utils/tourTriggers';
 
 import { type GeneratedOutline } from '../../services/storyArchitectService';
@@ -150,7 +145,6 @@ const OverviewTab: React.FC<{
 }> = ({ onNavigateToTab, onOpenArchitectFlow }) => {
   const { settings } = useAiSettings();
   const { setView } = useAppContext();
-  const { showToast } = useToast();
 
   // Check if user has API key configured
   const [userHasApiKey, setUserHasApiKey] = useState(() => hasUserApiKey(settings));
@@ -171,36 +165,6 @@ const OverviewTab: React.FC<{
       window.removeEventListener('storage', handleStorageChange);
     };
   }, [settings]);
-
-  // Define AI features with their requirements
-  const aiFeatures: AiFeatureConfig[] = [
-    {
-      title: 'AI Story Architect',
-      description:
-        'Generate a complete story outline with chapters, scenes, and characters from just your premise. Perfect for getting started or breaking through planning blocks.',
-      mode: 'free',
-      actionLabel: 'Generate Story Outline',
-      onClick: onOpenArchitectFlow,
-    },
-    {
-      title: 'Story Health',
-      description:
-        'Get professional insights on your story structure, pacing, and character development with AI-powered analysis.',
-      mode: 'apiKey',
-      actionLabel: 'View Story Health Dashboard',
-      onClick: () => onNavigateToTab('health'),
-    },
-  ];
-
-  const handleLockedFeatureClick = (feature: AiFeatureConfig) => {
-    if (!isFeatureAvailable(feature.mode, settings)) {
-      showToast('This feature requires an API key. Configure one in Settings to unlock.', 'info');
-      // Optionally navigate to settings after a delay
-      setTimeout(() => setView(View.Settings), 2000);
-    } else if (feature.onClick) {
-      feature.onClick();
-    }
-  };
 
   const handleConfigureApiKey = () => {
     setView(View.Settings);

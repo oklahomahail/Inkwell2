@@ -107,7 +107,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
   // ✅ ALL hooks must be called unconditionally, before any returns
   const { state, dispatch } = useAppContext();
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
   const { newProjectDialogOpen, closeNewProjectDialog } = useUI();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(state.theme === 'dark');
