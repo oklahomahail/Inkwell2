@@ -82,8 +82,20 @@ export default function AuthPage({ mode }: AuthPageProps) {
       <div className="grid place-items-center py-12 px-4">
         <div className="w-full max-w-md">
           {/* White Header Bar with Logo */}
-          <div className="bg-white py-6 shadow-sm flex justify-center mb-8 -mx-4 px-4">
-            <img src="/brand/3.svg" alt="Inkwell" className="h-24 md:h-30 w-auto" />
+          <div
+            className="relative bg-white py-6 shadow-sm flex justify-center mb-8 -mx-4 px-4"
+            style={{
+              backgroundImage:
+                'linear-gradient(to bottom, rgba(212,175,55,0.35) 0.5rem, white 0.5rem)',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '100% 100%',
+            }}
+          >
+            <img
+              src="/brand/3.svg"
+              alt="Inkwell"
+              className="h-32 md:h-36 w-auto transition-transform duration-300 hover:drop-shadow-[0_0_3px_rgba(212,175,55,0.4)]"
+            />
           </div>
 
           <p className="text-center text-lg text-white/85">{chrome.subtitle}</p>
