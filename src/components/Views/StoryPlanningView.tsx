@@ -172,13 +172,13 @@ const OverviewTab: React.FC<{
 
   return (
     <div className="h-full overflow-y-auto p-8 bg-gradient-to-b from-inkwell-canvas to-inkwell-parchment dark:from-inkwell-dark-bg dark:to-inkwell-dark-surface">
-      <div className="max-w-3xl mx-auto space-y-8">
+      <div className="max-w-3xl mx-auto space-y-10">
         {/* HEADER */}
-        <header className="text-center mb-6">
+        <header className="text-center mb-8">
           <h1 className="text-heading-xl font-serif text-inkwell-ink dark:text-inkwell-dark-text">
             Plan Your Story
           </h1>
-          <p className="text-body text-inkwell-ink/70 dark:text-inkwell-dark-muted mt-3 max-w-2xl mx-auto">
+          <p className="text-body text-inkwell-ink/70 dark:text-inkwell-dark-muted mt-4 max-w-2xl mx-auto">
             Transform your ideas into a complete story blueprint. Start broad, then refine each
             layer — plot, characters, and world.
           </p>

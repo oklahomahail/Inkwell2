@@ -126,7 +126,10 @@
   }
 
   /* Dark Mode - Refined for Literary Warmth */
-  .dark {
+
+  /* Support both .dark class (for backwards compatibility) and [data-theme="dark"] */
+  .dark,
+  :root[data-theme='dark'] {
     /* Primary Brand (dark mode) */
     --inkwell-gold: #e6c766; /* Brighter gold for contrast */
     --inkwell-gold-hover: #f0d98e;
@@ -729,6 +732,187 @@ h6 {
 
 .dark .enhanced-writing-panel.fullscreen {
   background-color: hsl(var(--surface-0));
+}
+
+/* ============================================================================
+   CSS CUSTOM PROPERTY UTILITIES - "Sophisticated Simplicity" v2
+   ============================================================================
+   Theme-aware utility classes using CSS custom properties for maintainability.
+   Reduces Tailwind class bloat by leveraging semantic design tokens.
+*/
+
+/* Background Utilities */
+.bg-theme-canvas {
+  background-color: var(--bg-canvas);
+}
+
+.bg-theme-panel {
+  background-color: var(--bg-panel);
+}
+
+.bg-theme-parchment {
+  background-color: var(--bg-parchment);
+}
+
+.bg-theme-paper {
+  background-color: var(--bg-paper);
+}
+
+/* Text Utilities */
+.text-theme-primary {
+  color: var(--text-primary);
+}
+
+.text-theme-secondary {
+  color: var(--text-secondary);
+}
+
+.text-theme-muted {
+  color: var(--text-muted);
+}
+
+.text-theme-inverse {
+  color: var(--text-inverse);
+}
+
+/* Border Utilities */
+.border-theme-subtle {
+  border-color: var(--border-subtle);
+}
+
+.border-theme-default {
+  border-color: var(--border-default);
+}
+
+/* Shadow Utilities */
+.shadow-theme-soft {
+  box-shadow: var(--shadow-soft);
+}
+
+.shadow-theme-card {
+  box-shadow: var(--shadow-card);
+}
+
+.shadow-theme-elevated {
+  box-shadow: var(--shadow-elevated);
+}
+
+.shadow-theme-focus {
+  box-shadow: var(--shadow-focus);
+}
+
+.shadow-theme-gold {
+  box-shadow: var(--shadow-gold);
+}
+
+/* Gold Accent Utilities */
+.text-gold {
+  color: var(--inkwell-gold);
+}
+
+.bg-gold {
+  background-color: var(--inkwell-gold);
+}
+
+.border-gold {
+  border-color: var(--inkwell-gold);
+}
+
+.bg-gold-hover:hover {
+  background-color: var(--inkwell-gold-hover);
+}
+
+/* Sophisticated Card Component */
+.card-theme {
+  background-color: var(--bg-paper);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-theme:hover {
+  box-shadow: var(--shadow-elevated);
+}
+
+/* Button Base with Theme Tokens */
+.btn-theme-primary {
+  background: linear-gradient(to right, var(--inkwell-gold), #b8860b);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-card);
+}
+
+.btn-theme-primary:hover {
+  background: linear-gradient(to right, #b8860b, #8c6b12);
+  box-shadow: var(--shadow-elevated);
+}
+
+.btn-theme-primary:focus {
+  box-shadow: var(--shadow-focus);
+}
+
+/* ============================================================================
+   MICRO-MOTION LIBRARY - Ink-Themed Animations v2
+   ============================================================================
+   Contextual feedback animations that feel literary and sophisticated.
+   Use sparingly for maximum impact - "tools that disappear in flow".
+*/
+
+/* Ink Ripple - For save/submit feedback */
+.ink-ripple-effect {
+  animation: inkRipple 800ms ease-out;
+}
+
+/* Shimmer - For AI completion/loading states */
+.ink-shimmer-effect {
+  background: linear-gradient(90deg, transparent 0%, rgb(212 175 55 / 15%) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: inkShimmer 2000ms ease-in-out infinite;
+}
+
+/* Flow - For background ambient animations */
+.ink-flow-effect {
+  background: linear-gradient(
+    -45deg,
+    var(--bg-canvas) 0%,
+    var(--bg-parchment) 50%,
+    var(--bg-canvas) 100%
+  );
+  background-size: 200% 200%;
+  animation: inkFlow 1500ms ease-in-out;
+}
+
+/* Gold Glow - For highlighting important elements */
+.gold-glow-effect {
+  animation: goldGlow 1200ms ease-in-out infinite;
+}
+
+/* Subtle Bounce - For interactive feedback */
+.subtle-bounce-effect {
+  animation: subtleBounce 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Save Pulse - For autosave indicator */
+.save-pulse-effect {
+  animation: savePulse 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Contextual Animation Triggers */
+.on-save {
+  @apply ink-ripple-effect;
+}
+
+.ai-loading {
+  @apply ink-shimmer-effect;
+}
+
+.highlight-gold {
+  @apply gold-glow-effect;
 }
 
 /* ============================================================================

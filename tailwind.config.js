@@ -94,17 +94,17 @@ theme: {
         'mono': ['JetBrains Mono', 'ui-monospace', 'monospace'],         // Code/technical
       },
       fontSize: {
-        // Refined type scale for literary hierarchy
-        'display': ['3rem', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '600' }],
-        'heading-xl': ['2.25rem', { lineHeight: '1.2', letterSpacing: '-0.01em', fontWeight: '600' }],
-        'heading-lg': ['1.875rem', { lineHeight: '1.25', letterSpacing: '-0.01em', fontWeight: '600' }],
-        'heading-md': ['1.5rem', { lineHeight: '1.3', fontWeight: '500' }],
-        'heading-sm': ['1.25rem', { lineHeight: '1.4', fontWeight: '500' }],
-        'body-lg': ['1.125rem', { lineHeight: '1.6', fontWeight: '400' }],
-        'body': ['1rem', { lineHeight: '1.6', fontWeight: '400' }],
-        'body-sm': ['0.875rem', { lineHeight: '1.5', fontWeight: '400' }],
-        'label': ['0.875rem', { lineHeight: '1.4', fontWeight: '500' }],
-        'caption': ['0.75rem', { lineHeight: '1.4', fontWeight: '400' }],
+        // Refined type scale for literary hierarchy - Enhanced spaciousness (v2)
+        'display': ['3rem', { lineHeight: '1.7', letterSpacing: '-0.02em', fontWeight: '600' }],
+        'heading-xl': ['2.25rem', { lineHeight: '1.65', letterSpacing: '-0.01em', fontWeight: '600' }],
+        'heading-lg': ['1.875rem', { lineHeight: '1.65', letterSpacing: '-0.01em', fontWeight: '600' }],
+        'heading-md': ['1.5rem', { lineHeight: '1.6', fontWeight: '500' }],
+        'heading-sm': ['1.25rem', { lineHeight: '1.6', fontWeight: '500' }],
+        'body-lg': ['1.125rem', { lineHeight: '1.7', fontWeight: '400' }],
+        'body': ['1rem', { lineHeight: '1.7', fontWeight: '400' }],
+        'body-sm': ['0.875rem', { lineHeight: '1.65', fontWeight: '400' }],
+        'label': ['0.875rem', { lineHeight: '1.5', fontWeight: '500' }],
+        'caption': ['0.75rem', { lineHeight: '1.5', fontWeight: '400' }],
       },
       borderRadius: {
         xl: '1rem',
@@ -134,6 +134,14 @@ theme: {
         'fade-in': 'fadeIn 150ms ease-elegant',
         'slide-up': 'slideUp 200ms ease-elegant',
         'pulse-gold': 'pulseGold 600ms ease-elegant',
+
+        // Micro-motion library - Ink-themed animations v2
+        'ink-ripple': 'inkRipple 800ms ease-out',
+        'ink-shimmer': 'inkShimmer 2000ms ease-in-out',
+        'ink-flow': 'inkFlow 1500ms ease-in-out',
+        'gold-glow': 'goldGlow 1200ms ease-in-out infinite',
+        'subtle-bounce': 'subtleBounce 400ms ease-elegant',
+        'save-pulse': 'savePulse 600ms ease-elegant',
       },
       keyframes: {
         fadeIn: {
@@ -147,6 +155,71 @@ theme: {
         pulseGold: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.6' },
+        },
+
+        // Micro-motion library keyframes
+        inkRipple: {
+          '0%': {
+            transform: 'scale(0.95)',
+            boxShadow: '0 0 0 0 rgba(212, 175, 55, 0.4)',
+          },
+          '50%': {
+            transform: 'scale(1)',
+            boxShadow: '0 0 0 8px rgba(212, 175, 55, 0)',
+          },
+          '100%': {
+            transform: 'scale(1)',
+            boxShadow: '0 0 0 0 rgba(212, 175, 55, 0)',
+          },
+        },
+        inkShimmer: {
+          '0%': {
+            backgroundPosition: '-200% center',
+          },
+          '100%': {
+            backgroundPosition: '200% center',
+          },
+        },
+        inkFlow: {
+          '0%': {
+            backgroundPosition: '0% 50%',
+          },
+          '50%': {
+            backgroundPosition: '100% 50%',
+          },
+          '100%': {
+            backgroundPosition: '0% 50%',
+          },
+        },
+        goldGlow: {
+          '0%, 100%': {
+            boxShadow: '0 0 12px rgba(212, 175, 55, 0.2)',
+          },
+          '50%': {
+            boxShadow: '0 0 20px rgba(212, 175, 55, 0.4)',
+          },
+        },
+        subtleBounce: {
+          '0%, 100%': {
+            transform: 'translateY(0)',
+          },
+          '50%': {
+            transform: 'translateY(-4px)',
+          },
+        },
+        savePulse: {
+          '0%': {
+            opacity: '0.8',
+            transform: 'scale(0.98)',
+          },
+          '50%': {
+            opacity: '1',
+            transform: 'scale(1)',
+          },
+          '100%': {
+            opacity: '0.8',
+            transform: 'scale(0.98)',
+          },
         },
       },
       zIndex: {
