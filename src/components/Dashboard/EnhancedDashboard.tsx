@@ -7,6 +7,8 @@ import type { InkwellIconName } from '@/components/icons/InkwellFeather';
 import StatusChip from '@/components/Storage/StatusChip';
 import { StorageHealthWidget } from '@/components/Storage/StorageHealthWidget';
 import { useAppContext, View } from '@/context/AppContext';
+import { useChapterCount } from '@/context/ChaptersContext';
+import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 import { useTourStartupFromUrl } from '@/hooks/useTourStartupFromUrl';
 import { useUI } from '@/hooks/useUI';
 import { triggerOnProjectCreated } from '@/utils/tourTriggers';
@@ -15,6 +17,10 @@ const EnhancedDashboard: React.FC = () => {
   const { state, currentProject, addProject, setCurrentProjectId, dispatch } = useAppContext();
   const { openNewProjectDialog } = useUI();
   const [storageModalOpen, setStorageModalOpen] = useState(false);
+
+  // Get real project analytics and chapter data
+  const analytics = useProjectAnalytics(currentProject?.id ?? '');
+  const chapterCount = useChapterCount(currentProject?.id ?? '');
 
   // Check for tour=start in URL and trigger tour if found
   useTourStartupFromUrl();
@@ -75,8 +81,15 @@ const EnhancedDashboard: React.FC = () => {
     });
   };
 
-  const getProjectWordCount = (project: any) => {
-    if (!project.content) return 0;
+  const getProjectWordCount = (projectId: string) => {
+    // Use chapter-based word count from analytics
+    if (projectId === currentProject?.id) {
+      return analytics.chapters.chapterWords;
+    }
+    // For other projects, we'd need to fetch their analytics separately
+    // For now, fall back to the old content field if available
+    const project = state.projects.find(p => p.id === projectId);
+    if (!project?.content) return 0;
     return project.content.split(' ').filter((word: string) => word.length > 0).length;
   };
 
@@ -316,7 +329,7 @@ const EnhancedDashboard: React.FC = () => {
                   <div className="flex items-center gap-4 text-xs text-slate-500">
                     <span>Last updated {getDaysAgo(currentProject.updatedAt)}</span>
                     <span>•</span>
-                    <span>{getProjectWordCount(currentProject)} words</span>
+                    <span>{getProjectWordCount(currentProject.id)} words</span>
                   </div>
                 </div>
               </div>
@@ -330,13 +343,13 @@ const EnhancedDashboard: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
               <div className="text-center">
                 <div className="text-xl font-semibold text-slate-900 dark:text-white mb-1">
-                  {getProjectWordCount(currentProject).toLocaleString()}
+                  {analytics.chapters.chapterWords.toLocaleString()}
                 </div>
                 <div className="text-xs text-slate-500">Total Words</div>
               </div>
               <div className="text-center">
                 <div className="text-xl font-semibold text-slate-900 dark:text-white mb-1">
-                  {currentProject.chapters?.length || 0}
+                  {chapterCount}
                 </div>
                 <div className="text-xs text-slate-500">Chapters</div>
               </div>
@@ -347,8 +360,10 @@ const EnhancedDashboard: React.FC = () => {
                 <div className="text-xs text-slate-500">Characters</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-semibold text-green-600 dark:text-green-400 mb-1">
-                  85%
+                <div className="text-xl font-semibold text-slate-900 dark:text-white mb-1">
+                  {analytics.chapters.avgWordsPerChapter > 0
+                    ? Math.round((analytics.chapters.chapterWords / (analytics.chapters.avgWordsPerChapter * chapterCount || 1)) * 100)
+                    : 0}%
                 </div>
                 <div className="text-xs text-slate-500">Progress</div>
               </div>
@@ -428,7 +443,7 @@ const EnhancedDashboard: React.FC = () => {
                     </div>
                     <div className="flex items-center justify-between text-xs text-slate-500">
                       <span>{formatDate(project.updatedAt)}</span>
-                      <span>{getProjectWordCount(project)} words</span>
+                      <span>{getProjectWordCount(project.id)} words</span>
                     </div>
                   </div>
                 </div>
@@ -453,8 +468,12 @@ const EnhancedDashboard: React.FC = () => {
               </div>
             </div>
             <div className="text-center py-4">
-              <div className="text-4xl font-bold text-orange-600 dark:text-orange-400 mb-2">7</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">Days in a row</div>
+              <div className="text-4xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+                {analytics.totals.streak}
+              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                {analytics.totals.streak === 1 ? 'Day' : 'Days'} in a row
+              </div>
             </div>
           </div>
         </div>
@@ -479,16 +498,31 @@ const EnhancedDashboard: React.FC = () => {
               </div>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Progress</span>
-                <span className="font-medium text-slate-900 dark:text-white">
-                  750 / 1,000 words
-                </span>
-              </div>
-              <div className="progress">
-                <div className="progress-bar" style={{ width: '75%' }} />
-              </div>
-              <p className="text-xs text-green-600 dark:text-green-400">250 words to go!</p>
+              {analytics.totals.dailyAvg > 0 ? (
+                <>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-600 dark:text-slate-400">Daily Average</span>
+                    <span className="font-medium text-slate-900 dark:text-white">
+                      {analytics.totals.dailyAvg.toLocaleString()} words
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-600 dark:text-slate-400">Writing Days</span>
+                    <span className="font-medium text-slate-900 dark:text-white">
+                      {analytics.totals.daysWithWriting}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Based on your writing sessions
+                  </p>
+                </>
+              ) : (
+                <div className="text-center py-2">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Start writing to track your daily progress
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

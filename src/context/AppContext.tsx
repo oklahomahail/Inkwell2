@@ -27,6 +27,7 @@ export enum View {
   Analytics = 'Analytics', // keeping as-is to avoid breaking callers
   Export = 'export', // v0.7.0 - Export Dashboard
   Onboarding = 'onboarding', // v1.3.0 - Onboarding Panel
+  Formatting = 'formatting', // v0.10.0 - Document Formatting
 }
 
 // Re-export Project type for backward compatibility

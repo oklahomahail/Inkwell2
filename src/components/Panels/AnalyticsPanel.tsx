@@ -50,8 +50,13 @@ const AnalyticsPanel: React.FC = () => {
     triggerAnalyticsVisited();
   }, []);
 
-  // If we have a current project with enhanced analytics, use the advanced view
-  const hasEnhancedAnalytics = currentProject && 'sessions' in currentProject;
+  // Check if we have real analytics data (chapters or sessions)
+  // Instead of checking for 'sessions' property on project object (which doesn't exist)
+  const hasEnhancedAnalytics =
+    currentProject &&
+    (analytics.chapters.chapterWords > 0 ||
+      analytics.sessions.length > 0 ||
+      analytics.totals.daysWithWriting > 0);
 
   // Simple Analytics View (enhanced with chapter integration)
   const SimpleAnalyticsView = () => {

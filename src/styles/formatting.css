@@ -1,0 +1,177 @@
+/**
+ * Project Formatting Styles (v0.10.0+)
+ *
+ * CSS variables and base styles for project-level typography and layout.
+ * Variables are set dynamically by FormattingContext.applyToElement()
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CSS Variable Definitions
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root,
+.inkwell-project-scope {
+  /* Base Typography */
+  --ink-font-family: 'Literata', serif;
+  --ink-font-size: 1rem;
+  --ink-line-height: 1.6;
+  --ink-para-spacing: 0.8rem;
+  --ink-first-indent: 1.25rem;
+
+  /* Page Layout (for preview/print) */
+  --ink-margin-top: 3rem;
+  --ink-margin-right: 2rem;
+  --ink-margin-bottom: 3rem;
+  --ink-margin-left: 2rem;
+  --ink-page-width: 48rem;
+  --ink-page-height: 68rem;
+
+  /* Chapter Headers */
+  --ink-ch-font: var(--ink-font-family);
+  --ink-ch-size: 1.75rem;
+  --ink-ch-weight: 700;
+  --ink-ch-space-above: 1.5rem;
+  --ink-ch-space-below: 0.75rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Content Scoping
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Apply formatting to editor and preview content containers
+ * Add .inkwell-project-scope to your top-level container to enable
+ */
+.inkwell-project-scope .editor-content,
+.inkwell-project-scope .preview-content {
+  font-family: var(--ink-font-family);
+  font-size: var(--ink-font-size);
+  line-height: var(--ink-line-height);
+}
+
+/**
+ * Paragraph styling with spacing and optional first-line indent
+ */
+.inkwell-project-scope .editor-content p,
+.inkwell-project-scope .preview-content p {
+  margin: 0 0 var(--ink-para-spacing) 0;
+}
+
+/* Traditional book-style first-line indent */
+.inkwell-project-scope.indent-enabled .editor-content p,
+.inkwell-project-scope.indent-enabled .preview-content p {
+  text-indent: var(--ink-first-indent);
+}
+
+/* No indent on first paragraph after header */
+.inkwell-project-scope .editor-content .inkwell-ch + p,
+.inkwell-project-scope .preview-content .inkwell-ch + p {
+  text-indent: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Chapter Headers
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.inkwell-ch {
+  font-family: var(--ink-ch-font);
+  font-size: var(--ink-ch-size);
+  font-weight: var(--ink-ch-weight);
+  margin-top: var(--ink-ch-space-above);
+  margin-bottom: var(--ink-ch-space-below);
+  line-height: 1.2;
+}
+
+/* Alignment utilities */
+.inkwell-ch.text-left {
+  text-align: left;
+}
+
+.inkwell-ch.text-center {
+  text-align: center;
+}
+
+.inkwell-ch.text-right {
+  text-align: right;
+}
+
+/* Optional divider after chapter header */
+.inkwell-ch-divider {
+  margin: 1rem auto;
+  border: none;
+  border-top: 1px solid currentColor;
+  opacity: 0.3;
+  width: 33%;
+}
+
+.inkwell-ch-divider.ornament {
+  border: none;
+  text-align: center;
+  opacity: 0.5;
+}
+
+.inkwell-ch-divider.ornament::before {
+  content: '❦';
+  font-size: 1.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Print/Export Preview Layout
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Page container for print preview
+ * Uses formatting margins and page dimensions
+ */
+.inkwell-page-preview {
+  max-width: var(--ink-page-width);
+  min-height: var(--ink-page-height);
+  margin: 0 auto;
+  padding: var(--ink-margin-top) var(--ink-margin-right) var(--ink-margin-bottom)
+    var(--ink-margin-left);
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media print {
+  .inkwell-page-preview {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+  }
+
+  /* Hide non-content elements */
+  .inkwell-formatting-controls,
+  .inkwell-ui-panel {
+    display: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Font Loading & Fallbacks
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Font-face declarations for offline support
+ * Add your font files to public/fonts/ and uncomment as needed
+ */
+
+/*
+@font-face {
+  font-family: 'Literata';
+  src: url('/fonts/Literata-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Literata';
+  src: url('/fonts/Literata-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
+/* Fallback stacks are defined in src/types/formatting.ts */

@@ -31,6 +31,9 @@ const PlotAnalysisPanel = lazy(() =>
 // Lazy-load Export Dashboard (v0.7.0)
 const ExportDashboard = lazy(() => import('@/components/Dashboard/ExportDashboard'));
 
+// Lazy-load Formatting Panel (v0.10.0)
+const FormattingPanel = lazy(() => import('@/components/Panels/FormattingPanel'));
+
 const ViewSwitcher: React.FC = () => {
   const { state, currentProject, updateProject } = useAppContext();
   const { recordFeatureUse } = useFeatureDiscovery();
@@ -206,6 +209,24 @@ const ViewSwitcher: React.FC = () => {
         <FeatureErrorBoundary featureName="Onboarding">
           <OnboardingPanel />
         </FeatureErrorBoundary>
+      );
+    case View.Formatting:
+      return currentProject ? (
+        <FeatureErrorBoundary featureName="Document Formatting">
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-500">Loading Formatting...</p>
+              </div>
+            }
+          >
+            <FormattingPanel />
+          </Suspense>
+        </FeatureErrorBoundary>
+      ) : (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500">Please select a project to configure formatting</p>
+        </div>
       );
     default:
       return (

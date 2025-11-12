@@ -31,6 +31,7 @@ export default defineConfig({
       'src/domain/**/*.{test,spec}.ts', // domain layer tests
       'src/types/**/*.{test,spec}.ts', // type helpers and utilities
       'src/ai/**/*.{test,spec}.ts', // AI provider tests
+      'src/lib/**/*.{test,spec}.ts', // v0.10.0 lib utilities tests
     ],
     coverage: {
       enabled: true,
