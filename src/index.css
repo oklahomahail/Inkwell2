@@ -547,7 +547,9 @@ h6 {
   }
 
   .text-inkwell-gold {
-    @apply text-inkwell-gold font-serif font-semibold;
+    color: #d4af37;
+    font-family: var(--font-serif);
+    font-weight: 600;
   }
 
   /* Legacy Inkwell Button Styles (for backward compatibility) */
