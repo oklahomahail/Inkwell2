@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
+import { ChaptersProvider } from '@/context/ChaptersContext';
 import { UIProvider } from '../../hooks/useUI';
 
 import EnhancedDashboard from './EnhancedDashboard';
@@ -55,9 +56,11 @@ describe('EnhancedDashboard Component', () => {
   const renderDashboard = () => {
     return render(
       <MemoryRouter>
-        <UIProvider>
-          <EnhancedDashboard />
-        </UIProvider>
+        <ChaptersProvider>
+          <UIProvider>
+            <EnhancedDashboard />
+          </UIProvider>
+        </ChaptersProvider>
       </MemoryRouter>,
     );
   };

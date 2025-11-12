@@ -6,7 +6,7 @@ import {
   syncLastProfileToUserMetadata,
 } from '../profileMemory';
 
-const KEY = 'inkwell:profile-memory';
+const KEY = 'inkwell:lastProfileId';
 
 describe('profileMemory', () => {
   const store: Record<string, string> = {};
@@ -32,17 +32,22 @@ describe('profileMemory', () => {
     expect(getRememberedProfileId()).toBeNull();
   });
 
-  it('persists and retrieves structured data', () => {
-    const data = { lastProfileId: 'p1', recent: ['p1'] };
-    rememberProfileId(data);
-    expect(JSON.parse((localStorage.setItem as any).mock.calls[0][1])).toEqual(data);
-    expect(getRememberedProfileId()).toEqual(data);
+  it('persists and retrieves profile ID', () => {
+    const profileId = 'profile-123';
+    rememberProfileId(profileId);
+    expect(localStorage.setItem).toHaveBeenCalledWith(KEY, profileId);
+    expect(getRememberedProfileId()).toEqual(profileId);
   });
 
-  it('clears memory', () => {
-    rememberProfileId({ lastProfileId: 'x', recent: [] });
-    syncLastProfileToUserMetadata('profile-123');
-    expect(localStorage.removeItem).toHaveBeenCalledWith(KEY);
-    expect(getRememberedProfileId()).toBeNull();
+  it('syncs to user metadata without removing from localStorage', async () => {
+    const profileId = 'profile-456';
+    rememberProfileId(profileId);
+
+    // syncLastProfileToUserMetadata doesn't remove from localStorage
+    // It only syncs to Supabase user metadata
+    await syncLastProfileToUserMetadata(profileId);
+
+    // Profile ID should still be in localStorage
+    expect(getRememberedProfileId()).toEqual(profileId);
   });
 });

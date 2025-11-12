@@ -4,6 +4,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { ChapterMeta } from '@/types/writing';
+import { ChaptersProvider } from '@/context/ChaptersContext';
 
 const mockDispatch = vi.fn();
 const mockChaptersList = vi.fn();
@@ -19,14 +20,18 @@ vi.mock('@/context/AppContext', () => ({
   })),
 }));
 
-vi.mock('@/context/ChaptersContext', () => ({
-  useChapters: vi.fn(() => ({
-    dispatch: mockDispatch,
-    state: { byId: {}, byProject: {} },
-    getChapterList: vi.fn(() => []),
-    getActiveChapter: vi.fn(),
-  })),
-}));
+vi.mock('@/context/ChaptersContext', async () => {
+  const actual = await vi.importActual('@/context/ChaptersContext');
+  return {
+    ...actual,
+    useChapters: vi.fn(() => ({
+      dispatch: mockDispatch,
+      state: { byId: {}, byProject: {} },
+      getChapterList: vi.fn(() => []),
+      getActiveChapter: vi.fn(),
+    })),
+  };
+});
 
 vi.mock('@/hooks/useProjectAnalytics', () => ({
   useProjectAnalytics: mockUseProjectAnalytics,
@@ -48,6 +53,11 @@ vi.mock('@/services/chaptersService', () => ({
 
 // Import after mocks
 const { default: AnalyticsPanel } = await import('../AnalyticsPanel');
+
+// Helper to render with ChaptersProvider
+const renderWithProvider = (ui: React.ReactElement) => {
+  return render(<ChaptersProvider>{ui}</ChaptersProvider>);
+};
 
 describe('AnalyticsPanel - Live Sync', () => {
   beforeEach(() => {
@@ -107,7 +117,7 @@ describe('AnalyticsPanel - Live Sync', () => {
 
   describe('Initial Load', () => {
     it('should load chapters on mount', async () => {
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       await waitFor(() => {
         expect(mockChaptersList).toHaveBeenCalledWith('test-project');
@@ -115,7 +125,7 @@ describe('AnalyticsPanel - Live Sync', () => {
     });
 
     it('should dispatch LOAD_FOR_PROJECT with correct payload', async () => {
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       await waitFor(() => {
         expect(mockDispatch).toHaveBeenCalledWith({
@@ -140,7 +150,7 @@ describe('AnalyticsPanel - Live Sync', () => {
         dispatch: vi.fn(),
       });
 
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       expect(mockChaptersList).not.toHaveBeenCalled();
     });
@@ -149,7 +159,7 @@ describe('AnalyticsPanel - Live Sync', () => {
   describe('Polling Interval', () => {
     it.skip('should poll chapters every 3 seconds', async () => {
       // TODO: Fix timing-based test
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       // Just verify initial load happens
       await waitFor(
@@ -165,7 +175,7 @@ describe('AnalyticsPanel - Live Sync', () => {
 
     it.skip('should clear interval on unmount', async () => {
       // TODO: Fix timing-based test
-      const { unmount } = render(<AnalyticsPanel />);
+      const { unmount } = renderWithProvider(<AnalyticsPanel />);
 
       // Wait for initial load
       await waitFor(
@@ -182,7 +192,7 @@ describe('AnalyticsPanel - Live Sync', () => {
 
     it.skip('should dispatch on each poll', async () => {
       // TODO: Fix timing-based test
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       // Just verify dispatch is called
       await waitFor(
@@ -208,7 +218,7 @@ describe('AnalyticsPanel - Live Sync', () => {
       mockChaptersList.mockClear();
       mockChaptersList.mockRejectedValue(new Error('IndexedDB error'));
 
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       // Wait for the error to be logged
       await waitFor(
@@ -232,7 +242,7 @@ describe('AnalyticsPanel - Live Sync', () => {
 
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       // Wait for some time for any errors to occur
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -250,7 +260,7 @@ describe('AnalyticsPanel - Live Sync', () => {
 
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       // Wait for error to be logged
       await waitFor(
@@ -269,28 +279,28 @@ describe('AnalyticsPanel - Live Sync', () => {
 
   describe('UI Rendering', () => {
     it('should render total words correctly', () => {
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       expect(screen.getAllByText('1,500')[0]).toBeInTheDocument();
       expect(screen.getByText('Total Words')).toBeInTheDocument();
     });
 
     it('should render writing days', () => {
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       expect(screen.getByText('5')).toBeInTheDocument();
       expect(screen.getByText('Writing Days')).toBeInTheDocument();
     });
 
     it('should render daily average', () => {
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       expect(screen.getByText('300')).toBeInTheDocument();
       expect(screen.getByText('Daily Average')).toBeInTheDocument();
     });
 
     it('should render streak with plural days', () => {
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       expect(screen.getByText('3 days')).toBeInTheDocument();
       expect(screen.getByText('Streak')).toBeInTheDocument();
@@ -313,13 +323,13 @@ describe('AnalyticsPanel - Live Sync', () => {
         sessions: [],
       });
 
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       expect(screen.getByText('1 day')).toBeInTheDocument();
     });
 
     it('should render chapter statistics', () => {
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       expect(screen.getByText('Chapter Statistics')).toBeInTheDocument();
       expect(screen.getAllByText('3')[0]).toBeInTheDocument(); // chapter count
@@ -328,14 +338,14 @@ describe('AnalyticsPanel - Live Sync', () => {
     });
 
     it('should render longest chapter info', () => {
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       expect(screen.getByText('Chapter 1')).toBeInTheDocument();
       expect(screen.getByText('800 words')).toBeInTheDocument();
     });
 
     it('should not show tour completion card', () => {
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       expect(screen.queryByText(/Tour Engagement/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/Completion rate/i)).not.toBeInTheDocument();
@@ -352,7 +362,7 @@ describe('AnalyticsPanel - Live Sync', () => {
         dispatch: vi.fn(),
       });
 
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       expect(screen.getByText(/Writing Analytics/i)).toBeInTheDocument();
       expect(screen.queryByText(/Advanced Analytics View/i)).not.toBeInTheDocument();
@@ -371,7 +381,7 @@ describe('AnalyticsPanel - Live Sync', () => {
         dispatch: vi.fn(),
       });
 
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       expect(screen.getByText(/Advanced Analytics View/i)).toBeInTheDocument();
     });
@@ -379,7 +389,7 @@ describe('AnalyticsPanel - Live Sync', () => {
 
   describe('Project Change', () => {
     it('should reload chapters when project changes', async () => {
-      const { rerender } = render(<AnalyticsPanel />);
+      const { rerender } = renderWithProvider(<AnalyticsPanel />);
 
       await waitFor(() => {
         expect(mockChaptersList).toHaveBeenCalledWith('test-project');
@@ -393,7 +403,11 @@ describe('AnalyticsPanel - Live Sync', () => {
         dispatch: vi.fn(),
       });
 
-      rerender(<AnalyticsPanel />);
+      rerender(
+        <ChaptersProvider>
+          <AnalyticsPanel />
+        </ChaptersProvider>,
+      );
 
       await waitFor(
         () => {
@@ -409,7 +423,7 @@ describe('AnalyticsPanel - Live Sync', () => {
       const tourTriggersModule = await import('@/utils/tourTriggers');
       const mockTrigger = vi.mocked(tourTriggersModule.triggerAnalyticsVisited);
 
-      render(<AnalyticsPanel />);
+      renderWithProvider(<AnalyticsPanel />);
 
       expect(mockTrigger).toHaveBeenCalled();
     });

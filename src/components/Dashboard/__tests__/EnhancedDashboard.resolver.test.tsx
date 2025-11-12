@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { default as EnhancedDashboard } from '../../../components/Dashboard/EnhancedDashboard';
 import { View } from '../../../context/AppContext';
+import { ChaptersProvider } from '../../../context/ChaptersContext';
 import { useTourStartupFromUrl } from '../../../hooks/useTourStartupFromUrl';
 import { useGo } from '../../../utils/navigate';
 
@@ -48,6 +49,15 @@ vi.mock('../../../context/AppContext', () => ({
 
 // Import component after mocks
 
+// Helper to render with ChaptersProvider
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(
+    <MemoryRouter>
+      <ChaptersProvider>{ui}</ChaptersProvider>
+    </MemoryRouter>,
+  );
+};
+
 describe('EnhancedDashboard - Project Navigation & Creation', () => {
   const go = vi.fn();
   beforeEach(() => {
@@ -71,11 +81,7 @@ describe('EnhancedDashboard - Project Navigation & Creation', () => {
       },
     ];
 
-    render(
-      <MemoryRouter>
-        <EnhancedDashboard />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<EnhancedDashboard />);
 
     // The dashboard should be displayed
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
@@ -85,11 +91,7 @@ describe('EnhancedDashboard - Project Navigation & Creation', () => {
     // Reset projects
     useAppContextMock.state.projects = [];
 
-    const { getByText } = render(
-      <MemoryRouter>
-        <EnhancedDashboard />
-      </MemoryRouter>,
-    );
+    const { getByText } = renderWithProviders(<EnhancedDashboard />);
 
     // Click the "Create Your First Project" button that appears when no projects exist
     const createButton = getByText(/Create Your First Project/i);
@@ -107,7 +109,9 @@ describe('EnhancedDashboard - Project Navigation & Creation', () => {
   it('checks URL for tour=start parameter', () => {
     render(
       <MemoryRouter initialEntries={['/dashboard?tour=start']}>
-        <EnhancedDashboard />
+        <ChaptersProvider>
+          <EnhancedDashboard />
+        </ChaptersProvider>
       </MemoryRouter>,
     );
 
@@ -119,11 +123,7 @@ describe('EnhancedDashboard - Project Navigation & Creation', () => {
     // Reset projects
     useAppContextMock.state.projects = [];
 
-    const { getByText } = render(
-      <MemoryRouter>
-        <EnhancedDashboard />
-      </MemoryRouter>,
-    );
+    const { getByText } = renderWithProviders(<EnhancedDashboard />);
 
     // When no projects exist, the UI shows "Create Your First Project" button
     const createButton = getByText(/Create Your First Project/i);
@@ -160,11 +160,7 @@ describe('EnhancedDashboard - Project Navigation & Creation', () => {
     useAppContextMock.currentProject = null;
     useAppContextMock.state.currentProjectId = null;
 
-    render(
-      <MemoryRouter>
-        <EnhancedDashboard />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<EnhancedDashboard />);
 
     // Find the card that contains the project name
     const projectCard = screen.getByText('Test Project 1').closest('.card-interactive');
@@ -199,11 +195,7 @@ describe('EnhancedDashboard - Project Navigation & Creation', () => {
       updatedAt: Date.now(),
     };
 
-    render(
-      <MemoryRouter>
-        <EnhancedDashboard />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<EnhancedDashboard />);
 
     // Today's project should show "Today"
     // Use getAllByText since "Today" appears in multiple places
@@ -237,11 +229,7 @@ describe('EnhancedDashboard - Project Navigation & Creation', () => {
       updatedAt: Date.now(),
     };
 
-    render(
-      <MemoryRouter>
-        <EnhancedDashboard />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<EnhancedDashboard />);
 
     // Should display 0 words - need to use a more specific selector
     const wordCountElements = screen.getAllByText(/0/);
@@ -271,11 +259,7 @@ describe('EnhancedDashboard - Project Navigation & Creation', () => {
     useAppContextMock.currentProject = null;
     useAppContextMock.state.currentProjectId = null;
 
-    render(
-      <MemoryRouter>
-        <EnhancedDashboard />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<EnhancedDashboard />);
 
     // Find the Continue Writing quick action button (which should be disabled when no project is selected)
     const buttons = screen.getAllByRole('button');
