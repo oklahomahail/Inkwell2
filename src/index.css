@@ -547,9 +547,7 @@ h6 {
   }
 
   .text-inkwell-gold {
-    color: theme('colors.inkwell.gold');
-    font-family: theme('fontFamily.serif');
-    font-weight: theme('fontWeight.semibold');
+    @apply text-inkwell-gold font-serif font-semibold;
   }
 
   /* Legacy Inkwell Button Styles (for backward compatibility) */
@@ -632,6 +630,23 @@ h6 {
   animation: ink-fill 2s ease-in-out infinite;
   background: linear-gradient(180deg, #5b8cff 0%, transparent 100%);
   background-size: 100% 200%;
+}
+
+/* Writing Panel Fullscreen Mode */
+.enhanced-writing-panel.fullscreen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background-color: var(--ink-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dark .enhanced-writing-panel.fullscreen {
+  background-color: hsl(var(--surface-0));
 }
 
 /* ============================================================================

@@ -207,6 +207,25 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
 
   // Track previous activeId to save content before switching
   const prevActiveIdRef = useRef<string | null>(null);
+  // Flag to track if we're initializing a new section (to prevent content overwrite)
+  const isInitializingNewSection = useRef(false);
+
+  // Auto-create initial section when panel mounts with no sections
+  useEffect(() => {
+    if (sections.length === 0 && !activeId && !isCreatingSection) {
+      (async () => {
+        try {
+          isInitializingNewSection.current = true;
+          await createSection('Chapter 1', 'chapter');
+        } finally {
+          // Reset flag after a short delay to allow the section to be fully initialized
+          setTimeout(() => {
+            isInitializingNewSection.current = false;
+          }, 1000);
+        }
+      })();
+    }
+  }, [sections.length, activeId, isCreatingSection, createSection]);
 
   // Load active section content
   useEffect(() => {
@@ -221,7 +240,20 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
       // Load new section content
       const section = await getActiveSection();
       if (section) {
-        setContent(section.content || '');
+        // CRITICAL: Don't overwrite content if user has already started typing
+        // This prevents the race condition where:
+        // 1. User creates new section or types in empty panel
+        // 2. Section becomes active
+        // 3. User types content (updates local state)
+        // 4. This effect loads empty content from DB, overwriting user input
+        if (isInitializingNewSection.current && content) {
+          // User has typed content during initialization - preserve it
+          // and save it to the new section immediately
+          updateSectionContent(activeId, content);
+        } else {
+          // Normal case: load content from DB
+          setContent(section.content || '');
+        }
       }
 
       // Update the previous ID ref
@@ -411,9 +443,17 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
         await new Promise((resolve) => setTimeout(resolve, 700));
       }
 
+      // Set flag to prevent content overwrite during new section initialization
+      isInitializingNewSection.current = true;
       await createSection('New Section', 'chapter');
+
+      // Reset flag after a delay to allow section to be fully initialized
+      setTimeout(() => {
+        isInitializingNewSection.current = false;
+      }, 1000);
     } catch (error) {
       console.error('[EnhancedWritingPanel] Failed to create section:', error);
+      isInitializingNewSection.current = false; // Reset on error
       // TODO: Show user-friendly error toast
     } finally {
       setIsCreatingSection(false);
