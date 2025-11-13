@@ -20,6 +20,8 @@ import { waitForRoot } from './utils/dom/waitForRoot';
 // Initialize storage persistence and monitoring
 import { warnIfDifferentOrigin } from './utils/storage/originGuard';
 import { ensurePersistentStorage } from './utils/storage/persistence';
+// Initialize localStorage to IndexedDB migration
+import './services/projectsMigration';
 // Initialize analytics
 // Initialize telemetry
 
@@ -60,9 +62,15 @@ window.addEventListener('beforeunload', () => {
   analyticsService.endSession();
   // Close IndexedDB connections to prevent leaks
   Chapters.close();
-  // Cleanup autosave worker
+  import('@/services/projectsDB').then(({ ProjectsDB }) => {
+    ProjectsDB.close();
+  });
+  // Cleanup workers
   import('@/services/autosaveWorkerService').then(({ autosaveWorker }) => {
     autosaveWorker.destroy();
+  });
+  import('@/services/searchService').then(({ SearchService }) => {
+    SearchService.destroy();
   });
 });
 document.addEventListener('visibilitychange', () => {

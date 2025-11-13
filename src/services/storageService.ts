@@ -6,6 +6,8 @@ import { type Scene, type Chapter as WritingChapter } from '@/types/writing';
 import devLog from '@/utils/devLog';
 
 import { analyticsService } from './analytics';
+import { ProjectsDB } from './projectsDB';
+import { SearchService } from './searchService';
 
 export class EnhancedStorageService {
   private static PROJECTS_KEY = 'inkwell_enhanced_projects';
@@ -22,7 +24,25 @@ export class EnhancedStorageService {
       const isNew = idx < 0;
       if (idx >= 0) projects[idx] = updated;
       else projects.push(updated);
+
+      // Write to localStorage (synchronous)
       localStorage.setItem(this.PROJECTS_KEY, JSON.stringify(projects));
+
+      // Also write to IndexedDB (async, non-blocking)
+      ProjectsDB.saveProject(updated).catch((error) => {
+        devLog.warn('[StorageService] IndexedDB save failed, localStorage still updated:', error);
+      });
+
+      // Update search index (async, non-blocking)
+      SearchService.updateProject({
+        id: updated.id,
+        name: updated.name,
+        description: updated.description || '',
+        genre: updated.genre || '',
+        content: (updated as any).recentContent || '',
+      }).catch((error) => {
+        devLog.warn('[StorageService] Search index update failed:', error);
+      });
 
       const latency = performance.now() - startTime;
       const dataSize = new Blob([JSON.stringify(updated)]).size;
