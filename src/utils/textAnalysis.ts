@@ -1,5 +1,5 @@
 // src/utils/textAnalysis.ts
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 import type { PhraseAnalysisRequest, PhraseAnalysisResponse } from '@/workers/phraseWorker';
 
 export interface TextStats {
@@ -66,12 +66,19 @@ class PhraseAnalysisService {
     }
 
     const hygieneSettings = this.getSettings(projectId);
-    const _finalSettings = { ...hygieneSettings, ...settings };
+    const finalSettings = { ...hygieneSettings, ...settings };
 
     const request: PhraseAnalysisRequest = {
+      type: 'analyze',
       text,
       projectId,
-    } as any;
+      options: {
+        ngramSizes: finalSettings.ngramSizes,
+        minOccurrences: finalSettings.minOccurrences,
+        stopWords: finalSettings.stopWords,
+        customStoplist: finalSettings.customStoplist,
+      },
+    };
 
     return new Promise((resolve, reject) => {
       if (!this.worker) {
