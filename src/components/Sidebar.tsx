@@ -1,15 +1,20 @@
 // File: src/components/Sidebar.tsx
 import { ChevronDown, ChevronRight, Plus, Settings2 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { InkwellFeather } from '@/components/icons/InkwellFeather';
 import BookBuilderModal from '@/components/Sections/BookBuilderModal';
 import { Logo } from '@/components/ui/Logo';
+import {
+  VirtualizedSectionList,
+  useSectionKeyboardNavigation,
+} from '@/components/Writing/VirtualizedSectionList';
 import { useAppContext } from '@/context/AppContext';
 import { useSections } from '@/hooks/useSections';
 import { useUI } from '@/hooks/useUI';
 import { getSectionIcon, getSectionIconColor } from '@/lib/sectionIcons';
 import { cn } from '@/lib/utils';
+import type { Section } from '@/types/section';
 
 export const Sidebar: React.FC = () => {
   const { sidebarCollapsed, toggleSidebar } = useUI();
@@ -20,6 +25,48 @@ export const Sidebar: React.FC = () => {
 
   // Get sections for the current project
   const { sections, activeId, setActive, createSection } = useSections(currentProject?.id || '');
+
+  // Enable keyboard navigation for sections
+  const handleSetActive = useCallback(
+    (sectionId: string) => {
+      setActive(sectionId);
+      setView('writing' as any);
+    },
+    [setActive, setView],
+  );
+
+  useSectionKeyboardNavigation(sections, activeId, handleSetActive);
+
+  // Render individual section item
+  const renderSectionItem = useCallback(
+    (section: Section) => {
+      const SectionIcon = getSectionIcon(section.type);
+      const iconColor = getSectionIconColor(section.type);
+
+      return (
+        <button
+          key={section.id}
+          onClick={() => handleSetActive(section.id)}
+          className={cn(
+            'flex items-center gap-2 w-full text-left px-2 py-1.5 rounded text-sm transition-colors group',
+            section.id === activeId
+              ? 'bg-primary-500 text-white font-medium'
+              : 'text-slate-300 hover:bg-slate-800 hover:text-white',
+          )}
+          title={section.title}
+        >
+          <SectionIcon
+            className={cn(
+              'w-3 h-3 flex-shrink-0',
+              section.id === activeId ? 'text-white' : iconColor,
+            )}
+          />
+          <span className="truncate flex-1">{section.title}</span>
+        </button>
+      );
+    },
+    [activeId, handleSetActive],
+  );
 
   const navItems = [
     { key: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -102,41 +149,19 @@ export const Sidebar: React.FC = () => {
 
             {/* Section list under Writing tab */}
             {key === 'writing' && !sidebarCollapsed && sectionsExpanded && (
-              <div className="ml-6 mt-1 space-y-1">
+              <div className="ml-6 mt-1">
                 {sections.length === 0 ? (
                   <div className="text-xs text-slate-500 px-2 py-1">No sections yet</div>
                 ) : (
-                  sections
-                    .sort((a, b) => a.order - b.order)
-                    .map((section) => {
-                      const SectionIcon = getSectionIcon(section.type);
-                      const iconColor = getSectionIconColor(section.type);
-
-                      return (
-                        <button
-                          key={section.id}
-                          onClick={() => {
-                            setActive(section.id);
-                            setView('writing' as any);
-                          }}
-                          className={cn(
-                            'flex items-center gap-2 w-full text-left px-2 py-1.5 rounded text-sm transition-colors group',
-                            section.id === activeId
-                              ? 'bg-primary-500 text-white font-medium'
-                              : 'text-slate-300 hover:bg-slate-800 hover:text-white',
-                          )}
-                          title={section.title}
-                        >
-                          <SectionIcon
-                            className={cn(
-                              'w-3 h-3 flex-shrink-0',
-                              section.id === activeId ? 'text-white' : iconColor,
-                            )}
-                          />
-                          <span className="truncate flex-1">{section.title}</span>
-                        </button>
-                      );
-                    })
+                  <VirtualizedSectionList
+                    sections={sections}
+                    activeId={activeId}
+                    renderItem={renderSectionItem}
+                    itemHeight={36} // Matches py-1.5 + text size
+                    virtualizationThreshold={50}
+                    className="space-y-1 max-h-[calc(100vh-400px)] pr-2"
+                    onActiveChange={handleSetActive}
+                  />
                 )}
 
                 {/* Section Management Actions */}

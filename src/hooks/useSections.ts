@@ -396,6 +396,7 @@ export function useSections(projectId: string) {
 
   /**
    * Update section content (debounced)
+   * Now uses Web Worker for content preparation to prevent UI freezes
    */
   const updateContent = useMemo(
     () =>
@@ -404,13 +405,17 @@ export function useSections(projectId: string) {
           // Get current version
           const chapter = await Chapters.get(id);
 
-          // Update content
-          await Chapters.saveDoc({
+          // Prepare document in Web Worker (offloads sanitization, checksum, scene extraction)
+          const { autosaveWorker } = await import('@/services/autosaveWorkerService');
+          const preparedDoc = await autosaveWorker.prepareDocument(
             id,
             content,
-            version: chapter.version + 1,
-            scenes: chapter.scenes,
-          });
+            chapter.version + 1,
+            chapter.scenes,
+          );
+
+          // Save to IndexedDB (must stay on main thread)
+          await Chapters.saveDoc(preparedDoc);
 
           // Calculate and update word count
           const wordCount = content.trim().split(/\s+/).filter(Boolean).length;

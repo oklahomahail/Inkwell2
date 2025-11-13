@@ -60,6 +60,10 @@ window.addEventListener('beforeunload', () => {
   analyticsService.endSession();
   // Close IndexedDB connections to prevent leaks
   Chapters.close();
+  // Cleanup autosave worker
+  import('@/services/autosaveWorkerService').then(({ autosaveWorker }) => {
+    autosaveWorker.destroy();
+  });
 });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
