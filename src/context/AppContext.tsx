@@ -259,11 +259,15 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       const storedProjectId = localStorage.getItem(PROJECT_ID_KEY);
       if (storedProjectId) {
         // Validate the stored project ID format
-        const isValidFormat =
-          storedProjectId.startsWith('proj_welcome_') || // Welcome project format
+        const isUUID =
           /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
             storedProjectId,
-          ); // UUID format
+          );
+        const isWelcomeProject = storedProjectId.startsWith('proj_welcome_');
+        const isLegacyFormat =
+          storedProjectId.startsWith('project-') && /^project-\d+$/.test(storedProjectId);
+
+        const isValidFormat = isUUID || isWelcomeProject || isLegacyFormat;
 
         if (isValidFormat) {
           dispatch({ type: 'SET_CURRENT_PROJECT', payload: storedProjectId });

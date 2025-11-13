@@ -49,10 +49,11 @@ export class AutosaveWorkerService {
 
   /**
    * Initialize Web Worker
+   * Uses fixed path in public/ to avoid Vite hash-based chunking issues
    */
   private initWorker(): void {
     try {
-      this.worker = new Worker(new URL('@/workers/autosaveWorker.ts', import.meta.url), {
+      this.worker = new Worker('/workers/autosaveWorker.js', {
         type: 'module',
       });
 

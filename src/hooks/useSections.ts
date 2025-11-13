@@ -57,14 +57,15 @@ export function useSections(projectId: string) {
       return false;
     }
 
-    // Valid formats: UUID or proj_welcome_* pattern
+    // Valid formats: UUID, proj_welcome_*, or legacy project-{timestamp}
     const isUUID =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(projectId);
     const isWelcomeProject = projectId.startsWith('proj_welcome_');
+    const isLegacyFormat = projectId.startsWith('project-') && /^project-\d+$/.test(projectId);
 
-    if (!isUUID && !isWelcomeProject) {
+    if (!isUUID && !isWelcomeProject && !isLegacyFormat) {
       console.error(
-        `[useSections] Invalid projectId format: "${projectId}". Expected UUID or proj_welcome_* pattern.`,
+        `[useSections] Invalid projectId format: "${projectId}". Expected UUID, proj_welcome_*, or project-{timestamp} pattern.`,
       );
       return false;
     }
