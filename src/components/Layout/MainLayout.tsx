@@ -17,6 +17,7 @@ import {
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { InkDotFlourish } from '@/components/Brand/InkDotFlourish';
 import Logo from '@/components/Logo';
 import NewProjectDialog from '@/components/Projects/NewProjectDialog';
 import { StorageStatusIndicator } from '@/components/Storage/StorageStatusIndicator';
@@ -395,9 +396,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
               </div>
               {!sidebarCollapsed && (
                 <div className="flex flex-col min-w-0 flex-1">
-                  <h1 className="text-heading-sm font-serif text-inkwell-ink dark:text-inkwell-dark-text font-semibold truncate">
-                    {BRAND_NAME}
-                  </h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-heading-sm font-serif text-inkwell-ink dark:text-inkwell-dark-text font-semibold truncate">
+                      {BRAND_NAME}
+                    </h1>
+                    <InkDotFlourish size="sm" variant="gold" animate={false} />
+                  </div>
                   <p className="text-caption text-inkwell-ink/60 dark:text-inkwell-dark-muted truncate">
                     {currentProject?.name || 'No project'}
                   </p>
