@@ -7,12 +7,39 @@ class WorkerMock {
   onmessage: ((event: MessageEvent) => void) | null = null;
   onerror: ((event: ErrorEvent) => void) | null = null;
 
+  // Allow tests to control worker behavior
+  static shouldAutoError = true;
+  static mockResponse: any = null;
+
   constructor(stringUrl: string | URL) {
     this.url = typeof stringUrl === 'string' ? stringUrl : stringUrl.toString();
+
+    // Simulate worker initialization failure in test environment (if enabled)
+    // This ensures services fall back to main thread immediately
+    if (WorkerMock.shouldAutoError) {
+      setTimeout(() => {
+        if (this.onerror) {
+          const errorEvent = new ErrorEvent('error', {
+            message: 'Worker not supported in test environment',
+          });
+          this.onerror(errorEvent);
+        }
+      }, 0);
+    }
   }
 
-  postMessage(_message: unknown) {
-    // Mock implementation - does nothing in tests
+  postMessage(message: unknown) {
+    // If mock response is configured, simulate worker response
+    if (WorkerMock.mockResponse && this.onmessage) {
+      setTimeout(() => {
+        if (this.onmessage) {
+          const event = new MessageEvent('message', {
+            data: WorkerMock.mockResponse(message),
+          });
+          this.onmessage(event);
+        }
+      }, 0);
+    }
   }
 
   terminate() {
@@ -66,6 +93,7 @@ const EXPECTED_ERROR_PATTERNS = [
   /\[sessionUtils\] Error cleaning sessions:/,
   /Failed to load formatting:/,
   /Failed to save formatting:/,
+  /\[AutosaveWorker\] Worker error:/,
 ];
 
 function isExpectedError(message: string): boolean {

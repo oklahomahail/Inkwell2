@@ -24,7 +24,7 @@ import type {
   WorkerResponse,
 } from '@/workers/autosaveWorker';
 
-class AutosaveWorkerService {
+export class AutosaveWorkerService {
   private static instance: AutosaveWorkerService | null = null;
   private worker: Worker | null = null;
   private pendingRequests = new Map<
@@ -32,7 +32,7 @@ class AutosaveWorkerService {
     { resolve: (response: AutosavePrepareResponse) => void; reject: (error: Error) => void }
   >();
 
-  private constructor() {
+  constructor() {
     this.initWorker();
     this.setupCleanup();
   }
@@ -81,6 +81,8 @@ class AutosaveWorkerService {
           pending.reject(new Error('Worker error'));
           this.pendingRequests.delete(id);
         }
+        // Disable worker for future requests to use main thread fallback
+        this.worker = null;
       };
     } catch (error) {
       console.error('[AutosaveWorker] Failed to initialize worker:', error);
@@ -137,11 +139,12 @@ class AutosaveWorkerService {
 
       this.worker!.postMessage(request);
 
-      // Timeout after 5 seconds
+      // Timeout after 5 seconds with fallback to main thread
       setTimeout(() => {
         if (this.pendingRequests.has(id)) {
           this.pendingRequests.delete(id);
-          reject(new Error('Worker timeout'));
+          console.warn('[AutosaveWorker] Worker timeout, falling back to main thread');
+          resolve(this.prepareDocumentMainThread(id, content, version, currentScenes));
         }
       }, 5000);
     });
