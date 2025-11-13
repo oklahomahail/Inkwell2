@@ -1,6 +1,40 @@
 import '@testing-library/jest-dom';
 import { beforeAll, afterAll } from 'vitest';
 
+// Mock Worker API for Node.js test environment
+class WorkerMock {
+  url: string;
+  onmessage: ((event: MessageEvent) => void) | null = null;
+  onerror: ((event: ErrorEvent) => void) | null = null;
+
+  constructor(stringUrl: string | URL) {
+    this.url = typeof stringUrl === 'string' ? stringUrl : stringUrl.toString();
+  }
+
+  postMessage(_message: unknown) {
+    // Mock implementation - does nothing in tests
+  }
+
+  terminate() {
+    // Mock implementation - does nothing in tests
+  }
+
+  addEventListener(_type: string, _listener: EventListenerOrEventListenerObject) {
+    // Mock implementation - does nothing in tests
+  }
+
+  removeEventListener(_type: string, _listener: EventListenerOrEventListenerObject) {
+    // Mock implementation - does nothing in tests
+  }
+
+  dispatchEvent(_event: Event): boolean {
+    return true;
+  }
+}
+
+// Add Worker to global scope for tests
+(globalThis as any).Worker = WorkerMock;
+
 // Fail tests on console.error to catch regressions early.
 // But allow expected errors from error handling tests.
 const originalError = console.error;
