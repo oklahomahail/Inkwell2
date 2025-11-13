@@ -254,6 +254,574 @@ The design system was implemented in five coordinated phases:
 
 ---
 
+## Whitespace Principles
+
+**Philosophy:** Generous space creates breathing room for thought.
+
+Writing applications thrive on rhythm and restraint. Every gap should feel intentional, not accidental.
+
+### Vertical Rhythm
+
+```css
+/* Major section padding */
+section-header: 40-60px     /* Page/view headers */
+section-content: 24px        /* Between major blocks */
+
+/* Content rhythm */
+paragraph-gap: 24px          /* Between paragraphs */
+list-item-gap: 16px          /* List items, form fields */
+micro-rhythm: 8-12px         /* Inline elements, labels */
+```
+
+### Horizontal Constraints
+
+```css
+/* Reading columns */
+max-reading-width: 680px     /* Optimal line length (65-75 chars) */
+max-content-width: 1200px    /* Dashboard/grid layouts */
+sidebar-width: 256px         /* Navigation (collapsed: 64px) */
+
+/* Margins */
+page-margin: 24-48px         /* Responsive page edges */
+card-padding: 24px           /* Internal card spacing */
+```
+
+### Focus Mode Space Rules
+
+When writers enter Focus Mode, space becomes sacred:
+
+- **Background:** Softer canvas (`inkwell-canvas` with 95% opacity)
+- **Chrome:** Minimal toolbar only
+- **Margins:** 20% left/right on large screens
+- **Line spacing:** Increased to 1.8 (vs 1.7 standard)
+- **No flourishes:** Zero decorative elements
+- **No motion:** Instant transitions only
+
+**Implementation:**
+
+```tsx
+// Focus Mode layout wrapper
+<div className="max-w-[680px] mx-auto px-12 py-16 min-h-screen bg-inkwell-canvas/95">
+  {/* Writing content */}
+</div>
+```
+
+---
+
+## Interaction States System
+
+**Principle:** Every interactive element follows a predictable state progression.
+
+Consistency in interaction builds trust. Users should never wonder "is this clickable?"
+
+### Buttons
+
+**Primary (Gold Gradient):**
+
+```tsx
+// Base state
+className="bg-gradient-to-r from-inkwell-gold to-inkwell-gold-600
+           text-white shadow-card"
+
+// Hover → 3% elevation + color deepen
+className="hover:from-inkwell-gold-600 hover:to-inkwell-gold-700
+           hover:shadow-elevated transition-all duration-200"
+
+// Active → 97% scale + reduced shadow
+className="active:scale-[0.97] active:shadow-soft"
+
+// Focus → Gold ring
+className="focus:shadow-focus focus:outline-none"
+
+// Disabled → 50% opacity, no pointer events
+className="disabled:opacity-50 disabled:cursor-not-allowed"
+```
+
+**Secondary (Outline):**
+
+```tsx
+className="border border-inkwell-panel dark:border-inkwell-dark-elevated
+           text-inkwell-ink dark:text-inkwell-dark-text
+           hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated
+           active:scale-[0.98]
+           focus:shadow-focus
+           disabled:opacity-50"
+```
+
+**Ghost (Minimal):**
+
+```tsx
+className="text-inkwell-ink/70 dark:text-inkwell-dark-muted
+           hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated
+           hover:text-inkwell-ink dark:hover:text-inkwell-dark-text
+           active:scale-[0.98]
+           focus:shadow-focus"
+```
+
+### Input Fields
+
+```tsx
+// Base state
+className="border border-inkwell-panel/50 dark:border-inkwell-dark-elevated
+           bg-white dark:bg-inkwell-dark-surface
+           text-inkwell-ink dark:text-inkwell-dark-text"
+
+// Hover → Subtle border change
+className="hover:border-inkwell-panel dark:hover:border-inkwell-dark-elevated/80"
+
+// Focus → Gold ring + ink-ripple animation
+className="focus:border-inkwell-gold focus:shadow-focus focus:outline-none
+           animate-ink-ripple"
+
+// Error state
+className="border-inkwell-error focus:shadow-[0_0_0_3px_rgba(211,95,95,0.15)]"
+```
+
+### Cards
+
+```tsx
+// Base state
+className="bg-white dark:bg-inkwell-dark-surface
+           border border-inkwell-panel/30 dark:border-inkwell-dark-elevated
+           rounded-card shadow-soft"
+
+// Hover → Elevated shadow (for interactive cards)
+className="hover:shadow-elevated transition-all duration-200"
+
+// Active/Selected state
+className="border-inkwell-gold dark:border-inkwell-gold-light shadow-gold"
+```
+
+### Links
+
+```tsx
+// Base state
+className="text-inkwell-focus dark:text-inkwell-gold-light
+           underline decoration-inkwell-focus/30"
+
+// Hover → Solid underline
+className="hover:decoration-inkwell-focus dark:hover:decoration-inkwell-gold-light"
+
+// Visited (optional for external links)
+className="visited:text-purple-600 dark:visited:text-purple-400"
+```
+
+---
+
+## Composition System
+
+**Principle:** Consistent layout primitives eliminate one-off spacing decisions.
+
+These three primitives cover 95% of layout needs.
+
+### 1. Section
+
+Page-level wrapper with consistent padding and max-width.
+
+**Usage:**
+
+```tsx
+<section className="section-standard">
+  <h1 className="section-header">Planning</h1>
+  <div className="section-content">{/* cards, grids, etc */}</div>
+</section>
+```
+
+**Implementation:**
+
+```css
+/* Standard section (dashboard content) */
+.section-standard {
+  @apply px-6 py-8 max-w-7xl mx-auto;
+}
+
+/* Reading section (focus on content) */
+.section-reading {
+  @apply px-8 py-12 max-w-[680px] mx-auto;
+}
+
+/* Wide section (tables, grids) */
+.section-wide {
+  @apply px-6 py-8 max-w-screen-2xl mx-auto;
+}
+
+.section-header {
+  @apply text-heading-xl font-serif text-inkwell-ink dark:text-inkwell-dark-text mb-6;
+}
+
+.section-content {
+  @apply space-y-6; /* 24px vertical rhythm */
+}
+```
+
+### 2. Stack
+
+Vertical spacing with consistent gaps. Replaces manual margin classes.
+
+**Usage:**
+
+```tsx
+<div className="stack-md">
+  <Card />
+  <Card />
+  <Card />
+</div>
+```
+
+**Implementation:**
+
+```css
+.stack-sm {
+  @apply flex flex-col gap-2; /* 8px - tight spacing */
+}
+.stack-md {
+  @apply flex flex-col gap-4; /* 16px - standard spacing */
+}
+.stack-lg {
+  @apply flex flex-col gap-6; /* 24px - generous spacing */
+}
+.stack-xl {
+  @apply flex flex-col gap-10; /* 40px - section separation */
+}
+```
+
+### 3. Cluster
+
+Inline grouping for tags, badges, icons with automatic wrapping.
+
+**Usage:**
+
+```tsx
+<div className="cluster-sm">
+  <Badge>Fiction</Badge>
+  <Badge>Draft</Badge>
+  <Badge>50k words</Badge>
+</div>
+```
+
+**Implementation:**
+
+```css
+.cluster-sm {
+  @apply flex flex-wrap items-center gap-2; /* 8px */
+}
+.cluster-md {
+  @apply flex flex-wrap items-center gap-3; /* 12px */
+}
+.cluster-lg {
+  @apply flex flex-wrap items-center gap-4; /* 16px */
+}
+```
+
+---
+
+## Before/After Transformation Examples
+
+**Principle:** Show, don't just tell.
+
+### Example 1: Empty State
+
+**Before (Generic Tailwind):**
+
+```tsx
+<div className="bg-gray-100 p-8 rounded text-center">
+  <svg className="w-12 h-12 mx-auto text-gray-400" />
+  <h3 className="text-xl font-bold mt-4">No chapters</h3>
+  <p className="text-gray-600">Get started by creating one</p>
+  <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Create</button>
+</div>
+```
+
+**After (Sophisticated Simplicity):**
+
+```tsx
+<LiteraryEmptyState
+  icon={BookOpen}
+  title="No chapters yet"
+  description="Every story begins with a single chapter"
+  action={{ label: 'Begin Your First Chapter', onClick: handleCreate }}
+  iconColor="gold"
+  showFlourish={true}
+/>
+```
+
+**Visual Changes:**
+
+- Background: Gray → Warm gradient (canvas → parchment)
+- Icon: Generic gray → Gold in circular background
+- Typography: Bold sans → Elegant serif
+- Button: Blue → Gold gradient with shadow
+- Flourish: None → InkDotFlourish + InkUnderline
+- Animation: None → Staggered fade-in (300ms cascade)
+
+### Example 2: Navigation Button
+
+**Before:**
+
+```tsx
+<button className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Writing</button>
+```
+
+**After:**
+
+```tsx
+<button
+  className="flex items-center gap-2 px-3 py-2
+             text-inkwell-ink/60 dark:text-inkwell-dark-muted
+             hover:bg-inkwell-panel/30 dark:hover:bg-inkwell-dark-elevated
+             hover:text-inkwell-ink dark:hover:text-inkwell-dark-text
+             border-l-2 border-transparent hover:border-inkwell-gold
+             transition-all duration-200 ease-elegant
+             rounded-button"
+>
+  <PenTool className="w-4 h-4" />
+  <span className="font-sans text-label">Writing</span>
+</button>
+```
+
+**Visual Changes:**
+
+- Color: Gray → Warm ink/muted tones
+- Hover: Flat color change → Multi-property transition
+- Border: None → Left gold accent on hover
+- Typography: Default → Refined label scale
+- Timing: Instant → 200ms elegant easing
+- Icon: None → Semantic icon pairing
+
+### Example 3: View Transition
+
+**Before:**
+
+```tsx
+{
+  currentView === 'planning' && <PlanningView />;
+}
+{
+  currentView === 'writing' && <WritingView />;
+}
+```
+
+**After:**
+
+```tsx
+<ViewTransition viewKey={currentView} variant="pageTurn" duration={0.4}>
+  {renderCurrentView()}
+</ViewTransition>
+```
+
+**Experience Changes:**
+
+- Transition: Instant cut → Book-like page turn
+- Timing: 0ms → 400ms confident motion
+- Easing: None → Cubic bezier "ease-elegant"
+- Depth: Flat → 3D perspective transform
+
+---
+
+## Voice & Tone for Microcopy
+
+**Principle:** The UI should speak like a patient writing coach, not a technical manual.
+
+### Tone Characteristics
+
+- **Calm:** Never urgent or alarming
+- **Literate:** Metaphorical, narrative cues
+- **Understated:** Confident without fanfare
+- **Supportive:** Encouraging, not critical
+
+### Word Choices
+
+**✅ Preferred:**
+
+- "Begin your first chapter"
+- "Craft your story"
+- "Polish your manuscript"
+- "Saved automatically"
+- "Your writing is safe"
+
+**❌ Avoid:**
+
+- "Click here to start"
+- "Create new document"
+- "Optimize content"
+- "Sync successful"
+- "Data persisted"
+
+### Error Messaging
+
+**Technical errors → Supportive guidance:**
+
+```diff
+- Error: Failed to save chapter
++ We couldn't save your work just now. Check your connection and try again.
+
+- Invalid input
++ This field needs a story title (at least 3 characters)
+
+- Server error 500
++ Something unexpected happened. Your work is safe locally — we'll sync when we can.
+```
+
+### Punctuation Rules
+
+- **Periods:** Minimal. Use for complete sentences only
+- **Exclamation marks:** Rare. Reserve for genuine achievements
+- **Ellipsis:** Sparingly. Only for loading states ("Saving...")
+- **Em dashes:** Preferred over parentheses for asides
+
+### Empty State Microcopy
+
+Always follow the structure:
+
+1. **Title:** What's missing (3-5 words)
+2. **Description:** Why it matters + gentle nudge (8-12 words)
+3. **Action:** Narrative verb phrase
+
+**Examples:**
+
+```tsx
+<LiteraryEmptyState
+  title="No chapters yet"
+  description="Every story begins with a single chapter"
+  action={{ label: 'Begin Your First Chapter' }}
+/>
+
+<LiteraryEmptyState
+  title="Your notebook is empty"
+  description="Capture ideas, outlines, and inspiration as you write"
+  action={{ label: 'Add Your First Note' }}
+/>
+```
+
+---
+
+## The Writer's Palette
+
+**Principle:** Color tells emotional stories.
+
+Our palette evokes classic literary tools — ink, parchment, bookbinding, fountain pens.
+
+### Palette Story
+
+| Color                | Hex       | Metaphor           | Usage                         |
+| -------------------- | --------- | ------------------ | ----------------------------- |
+| **Ink Blue**         | `#2C5F8D` | Fountain pen ink   | Links, active states, focus   |
+| **Tanned Parchment** | `#FAF9F6` | Aged paper         | Elevated surfaces, cards      |
+| **Warm Gold**        | `#D4AF37` | Bookbinding foil   | Accents, progress, completion |
+| **Antique Rose**     | `#D35F5F` | Editor's red pen   | Errors, warnings (gentle)     |
+| **Forest Green**     | `#3BA87C` | Success, approval  | Confirmations, achievements   |
+| **Deep Navy**        | `#13294B` | Leather book cover | Primary brand, headers        |
+| **Charcoal Ink**     | `#1C1C1C` | Writing on paper   | Primary text                  |
+| **Ivory Canvas**     | `#FDFBF7` | Fresh manuscript   | Main background               |
+
+### Emotional Mapping
+
+- **Calm, focused:** Canvas + Ink + Parchment
+- **Achievement:** Gold accents + success green
+- **Guidance:** Ink blue highlights
+- **Caution:** Antique rose (never harsh red)
+- **Brand presence:** Navy + Gold combination
+
+---
+
+## Design System Archetypes
+
+**Principle:** Four canonical layouts cover all major use cases.
+
+Every screen in Inkwell fits one of these patterns.
+
+### 1. Dashboard Grid
+
+**Use Case:** Planning panel, project overview, analytics
+
+**Structure:**
+
+```tsx
+<div className="section-standard">
+  <header className="section-header">
+    <h1>Story Planning</h1>
+  </header>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <Card />
+    <Card />
+    <Card />
+  </div>
+</div>
+```
+
+**Characteristics:**
+
+- Responsive grid (1/2/3 columns)
+- 24px gaps between cards
+- Each card: shadow-soft, hover:shadow-elevated
+- Max width: 1400px
+
+### 2. Two-Column Workspace
+
+**Use Case:** Writing view with side panel, settings with preview
+
+**Structure:**
+
+```tsx
+<div className="flex h-screen">
+  <aside className="w-64 border-r border-inkwell-panel/30">{/* Chapters, outline */}</aside>
+  <main className="flex-1 max-w-[680px] mx-auto px-8 py-12">{/* Editor */}</main>
+</div>
+```
+
+**Characteristics:**
+
+- Fixed sidebar (256px)
+- Main content: reading-optimal width (680px)
+- Clean divider (subtle border)
+
+### 3. Document Editor Layout
+
+**Use Case:** Writing panel, manuscript editing
+
+**Structure:**
+
+```tsx
+<div className="section-reading">
+  <div className="prose prose-lg max-w-none">{/* Rich text editor / content */}</div>
+</div>
+```
+
+**Characteristics:**
+
+- Centered, max 680px width
+- Generous padding (32px+)
+- No sidebar (immersive)
+- Optional floating toolbar
+
+### 4. Modal Workflow
+
+**Use Case:** Onboarding, dialogs, forms
+
+**Structure:**
+
+```tsx
+<ViewTransition viewKey="modal" variant="slideUp">
+  <div className="fixed inset-0 z-modal bg-inkwell-ink/30 backdrop-blur-sm">
+    <div className="flex items-center justify-center min-h-screen p-4">
+      <div className="bg-white dark:bg-inkwell-dark-surface rounded-card shadow-elevated max-w-md w-full p-8">
+        <h2 className="text-heading-lg font-serif mb-4">Create New Project</h2>
+        <form className="stack-md">{/* Form fields */}</form>
+      </div>
+    </div>
+  </div>
+</ViewTransition>
+```
+
+**Characteristics:**
+
+- Backdrop blur + dark overlay
+- Centered modal (max 448px width)
+- SlideUp transition
+- Stack-md for form fields
+
+---
+
 ## Design Tokens
 
 ### Colors
