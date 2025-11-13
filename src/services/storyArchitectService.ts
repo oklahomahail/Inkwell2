@@ -1,6 +1,6 @@
 // @ts-nocheck
 // src/services/storyArchitectService.ts - UPDATED WITH REAL API
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 
 import claudeService from './claudeService';
 
@@ -276,23 +276,34 @@ Please respond with a JSON object containing a complete story outline. Use this 
 Your entire response must be valid JSON only. Do not include any text outside the JSON structure.`;
   }
 
-  async generateOutline(premise: StoryPremise): Promise<GeneratedOutline> {
+  async generateOutline(
+    premise: StoryPremise,
+    mode: 'free' | 'byok' = 'byok',
+  ): Promise<GeneratedOutline> {
     try {
-      devLog.debug(
-        '🎯 Story Architect: Generating outline with real Claude API for:',
-        premise.title,
-      );
-
-      // Validate Claude service is configured
-      if (!claudeService.isConfigured()) {
-        throw new Error('Claude API key not configured. Please check your settings.');
-      }
+      devLog.debug('🎯 Story Architect: Generating outline in', mode, 'mode for:', premise.title);
 
       // Build the comprehensive prompt
       const prompt = this.getPrompt(premise);
 
-      // 🔧 Use the new dedicated story generation method
-      const claudeResponse = await claudeService.generateStoryOutline(prompt);
+      let claudeResponse: string;
+
+      if (mode === 'free') {
+        // Use platform AI (no API key required)
+        const { platformAiService } = await import('./platformAiService');
+        claudeResponse = await platformAiService.generateStoryOutline(prompt);
+      } else {
+        // Use user's personal Claude API key (BYOK)
+        const { claudeService } = await import('./claudeService');
+
+        // Validate Claude service is configured
+        if (!claudeService.isConfigured()) {
+          throw new Error('Claude API key not configured. Please check your settings.');
+        }
+
+        // Use the dedicated story generation method
+        claudeResponse = await claudeService.generateStoryOutline(prompt);
+      }
 
       if (!claudeResponse || !claudeResponse.trim()) {
         throw new Error('Empty response from AI service');

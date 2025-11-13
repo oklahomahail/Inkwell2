@@ -132,6 +132,7 @@ const StoryPlanningView: React.FC = () => {
         <StoryArchitectFlow
           onComplete={handleStoryArchitectComplete}
           onClose={() => setShowArchitectFlow(false)}
+          mode="free"
         />
       )}
     </div>

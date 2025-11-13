@@ -29,6 +29,11 @@ interface StoryArchitectFlowProps {
   onComplete?: (_outline: GeneratedOutline) => void;
   onClose?: () => void;
   initialProject?: any;
+  /**
+   * Feature mode: 'free' uses platform AI (no API key required),
+   * 'byok' uses user's personal Claude API key
+   */
+  mode?: 'free' | 'byok';
 }
 
 type FlowStep = 'premise' | 'options' | 'generating' | 'review' | 'integration';
@@ -133,6 +138,7 @@ export const StoryArchitectFlow: React.FC<StoryArchitectFlowProps> = ({
   onComplete,
   onClose,
   initialProject,
+  mode = 'byok', // Default to BYOK for backward compatibility
 }) => {
   const { currentProject, updateProject } = useAppContext();
   const { showToast } = useToast();
@@ -172,8 +178,10 @@ export const StoryArchitectFlow: React.FC<StoryArchitectFlowProps> = ({
   });
 
   // Check if Story Architect is available
-  const isAvailable = storyArchitectService.isAvailable();
-  const setupMessage = storyArchitectService.getSetupMessage();
+  // In 'free' mode, we use platform AI (always available)
+  // In 'byok' mode, we require user's API key
+  const isAvailable = mode === 'free' ? true : storyArchitectService.isAvailable();
+  const setupMessage = mode === 'free' ? '' : storyArchitectService.getSetupMessage();
 
   // Validate premise step
   const isPremiseValid = useCallback(() => {
@@ -218,7 +226,7 @@ export const StoryArchitectFlow: React.FC<StoryArchitectFlowProps> = ({
     }, 1000);
 
     try {
-      const outline = await storyArchitectService.generateOutline(premise);
+      const outline = await storyArchitectService.generateOutline(premise, mode);
 
       clearInterval(progressInterval);
       setGenerateProgress(100);
@@ -242,7 +250,7 @@ export const StoryArchitectFlow: React.FC<StoryArchitectFlowProps> = ({
 
       console.error('Story generation error:', error);
     }
-  }, [premise, isPremiseValid, showToast]);
+  }, [premise, isPremiseValid, showToast, mode]);
 
   // Handle integration with project and timeline
   const handleIntegration = useCallback(async () => {
