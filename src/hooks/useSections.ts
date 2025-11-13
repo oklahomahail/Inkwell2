@@ -14,7 +14,7 @@
  * - Section types: Supports chapters, prologues, epilogues, and more
  */
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Chapters } from '@/services/chaptersService';
@@ -84,6 +84,10 @@ export function useSections(projectId: string) {
   const [realtimeConnected, setRealtimeConnected] = useState(false);
   const [liveUpdateReceived, setLiveUpdateReceived] = useState(false);
 
+  // Lazy loading state
+  const contentCache = useRef<Map<string, { content: string; timestamp: number }>>(new Map());
+  const [loadingContent, setLoadingContent] = useState<Set<string>>(new Set());
+
   /**
    * Convert chapter data to section format
    */
@@ -127,16 +131,18 @@ export function useSections(projectId: string) {
    * Manual sync (push + pull)
    */
   const syncNow = useCallback(async () => {
-    if (syncing) {
-      return;
-    }
-
     // Skip syncing demo projects
     if (projectId.startsWith('proj_welcome_')) {
       return;
     }
 
-    setSyncing(true);
+    setSyncing((prevSyncing) => {
+      if (prevSyncing) {
+        return prevSyncing; // Already syncing
+      }
+      return true;
+    });
+
     try {
       await syncChapters(projectId);
       const refreshed = await Chapters.list(projectId);
@@ -147,7 +153,7 @@ export function useSections(projectId: string) {
     } finally {
       setSyncing(false);
     }
-  }, [syncing, projectId, chapterToSection]);
+  }, [projectId, chapterToSection]);
 
   /**
    * Load sections on mount
@@ -262,11 +268,15 @@ export function useSections(projectId: string) {
    */
   const createSection = useCallback(
     async (title = 'Untitled Section', type: SectionType = 'chapter') => {
+      // Get current sections to determine order
+      const currentSections = await Chapters.list(projectId);
+      const order = currentSections.length;
+
       const newSection: Section = {
         id: uuidv4(), // Use UUID for Supabase compatibility
         title,
         type,
-        order: sections.length,
+        order,
         content: '',
         createdAt: new Date().toISOString(),
       };
@@ -284,7 +294,7 @@ export function useSections(projectId: string) {
 
       return newSection;
     },
-    [projectId, sections.length, sectionToChapter, chapterToSection],
+    [projectId, sectionToChapter, chapterToSection],
   );
 
   /**
@@ -326,46 +336,58 @@ export function useSections(projectId: string) {
   const deleteSection = useCallback(
     async (id: string) => {
       await Chapters.remove(id);
-      setSections((prev) => prev.filter((s) => s.id !== id));
 
-      if (id === activeId) {
-        const remaining = sections.filter((s) => s.id !== id);
-        const newActiveId = remaining.length > 0 && remaining[0] ? remaining[0].id : null;
-        setActiveId(newActiveId);
+      // Update sections state and capture the new state
+      let newActiveId: string | null = null;
+      setSections((prev) => {
+        const filtered = prev.filter((s) => s.id !== id);
 
-        if (newActiveId) {
-          localStorage.setItem(`lastSection-${projectId}`, newActiveId);
-        } else {
-          localStorage.removeItem(`lastSection-${projectId}`);
-        }
-      }
+        // Calculate new active ID if we're deleting the active section
+        setActiveId((currentActiveId) => {
+          if (id === currentActiveId) {
+            newActiveId = filtered.length > 0 && filtered[0] ? filtered[0].id : null;
+            if (newActiveId) {
+              localStorage.setItem(`lastSection-${projectId}`, newActiveId);
+            } else {
+              localStorage.removeItem(`lastSection-${projectId}`);
+            }
+            return newActiveId;
+          }
+          return currentActiveId;
+        });
+
+        return filtered;
+      });
     },
-    [activeId, sections, projectId],
+    [projectId],
   );
 
   /**
    * Reorder sections
    */
-  const reorderSections = useCallback(
-    async (fromIndex: number, toIndex: number) => {
-      const reordered = [...sections];
+  const reorderSections = useCallback(async (fromIndex: number, toIndex: number) => {
+    setSections((prev) => {
+      const reordered = [...prev];
       const [moved] = reordered.splice(fromIndex, 1);
-      if (!moved) return;
+      if (!moved) return prev;
 
       reordered.splice(toIndex, 0, moved);
 
       // Update order indices
       const updated = reordered.map((s, i) => ({ ...s, order: i }));
 
-      // Update local IndexedDB
-      for (const section of updated) {
-        await Chapters.updateMeta({ id: section.id, index: section.order } as any);
-      }
+      // Update local IndexedDB (async, but don't await in setState)
+      Promise.all(
+        updated.map((section) =>
+          Chapters.updateMeta({ id: section.id, index: section.order } as any),
+        ),
+      ).catch((error) => {
+        console.error('[useSections] Failed to update section order in IndexedDB:', error);
+      });
 
-      setSections(updated);
-    },
-    [sections],
-  );
+      return updated;
+    });
+  }, []);
 
   /**
    * Apply a new section order (used by AI suggestions)
@@ -374,9 +396,11 @@ export function useSections(projectId: string) {
     const updated = newOrder.map((s, i) => ({ ...s, order: i }));
 
     // Update local IndexedDB
-    for (const section of updated) {
-      await Chapters.updateMeta({ id: section.id, index: section.order } as any);
-    }
+    await Promise.all(
+      updated.map((section) =>
+        Chapters.updateMeta({ id: section.id, index: section.order } as any),
+      ),
+    );
 
     setSections(updated);
   }, []);
@@ -386,12 +410,13 @@ export function useSections(projectId: string) {
    */
   const duplicateSection = useCallback(
     async (id: string) => {
-      const original = sections.find((s) => s.id === id);
+      // Fetch the original section directly from IndexedDB
+      const original = await Chapters.get(id);
       if (!original) return null;
 
-      return createSection(`${original.title} (Copy)`, original.type);
+      return createSection(`${original.title} (Copy)`, original.type as SectionType);
     },
-    [sections, createSection],
+    [createSection],
   );
 
   /**
@@ -421,6 +446,9 @@ export function useSections(projectId: string) {
           const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
           await Chapters.updateMeta({ id, wordCount } as any);
 
+          // Update cache with new content
+          contentCache.current.set(id, { content, timestamp: Date.now() });
+
           setSections((prev) =>
             prev.map((s) =>
               s.id === id ? { ...s, wordCount, updatedAt: new Date().toISOString() } : s,
@@ -439,13 +467,88 @@ export function useSections(projectId: string) {
   );
 
   /**
+   * Lazy load section content by ID
+   * Uses cache to avoid redundant IndexedDB reads
+   */
+  const loadSectionContent = useCallback(
+    async (id: string): Promise<string> => {
+      // Check cache first (5 minute TTL)
+      const cached = contentCache.current.get(id);
+      const now = Date.now();
+      if (cached && now - cached.timestamp < 5 * 60 * 1000) {
+        return cached.content;
+      }
+
+      // Prevent duplicate loading requests
+      if (loadingContent.has(id)) {
+        // Wait for the existing request to complete
+        return new Promise((resolve) => {
+          const checkInterval = setInterval(() => {
+            const cachedAfterWait = contentCache.current.get(id);
+            if (cachedAfterWait) {
+              clearInterval(checkInterval);
+              resolve(cachedAfterWait.content);
+            }
+          }, 50);
+
+          // Timeout after 10 seconds
+          setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve('');
+          }, 10000);
+        });
+      }
+
+      // Mark as loading
+      setLoadingContent((prev) => new Set(prev).add(id));
+
+      try {
+        const chapter = await Chapters.get(id);
+        const content = chapter.content || '';
+
+        // Update cache
+        contentCache.current.set(id, { content, timestamp: now });
+
+        return content;
+      } catch (error) {
+        console.error(`[useSections] Failed to load content for section ${id}:`, error);
+        return '';
+      } finally {
+        // Mark as done loading
+        setLoadingContent((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      }
+    },
+    [loadingContent],
+  );
+
+  /**
    * Get active section (full content)
+   * Uses lazy loading with cache
    */
   const getActiveSection = useCallback(async (): Promise<Section | null> => {
     if (!activeId) return null;
+
     try {
-      const chapter = await Chapters.get(activeId);
-      return chapterToSection(chapter);
+      // Get metadata from state (already loaded)
+      const sectionMeta = sections.find((s) => s.id === activeId);
+      if (!sectionMeta) {
+        console.error(`[useSections] Active section ${activeId} not found in state`);
+        setActiveId(null);
+        localStorage.removeItem(`lastSection-${projectId}`);
+        return null;
+      }
+
+      // Lazy load content
+      const content = await loadSectionContent(activeId);
+
+      return {
+        ...sectionMeta,
+        content,
+      };
     } catch (error) {
       console.error('[useSections] Failed to get active section:', error);
       // Clear invalid active ID
@@ -455,18 +558,55 @@ export function useSections(projectId: string) {
       }
       return null;
     }
-  }, [activeId, chapterToSection, projectId]);
+  }, [activeId, sections, projectId, loadSectionContent]);
 
   /**
    * Set active section
+   * Prefetches content when changing active section
    */
   const setActive = useCallback(
     (id: string) => {
       setActiveId(id);
       localStorage.setItem(`lastSection-${projectId}`, id);
+
+      // Prefetch content in the background
+      loadSectionContent(id).catch((error) => {
+        console.error(`[useSections] Failed to prefetch content for section ${id}:`, error);
+      });
     },
-    [projectId],
+    [projectId, loadSectionContent],
   );
+
+  /**
+   * Prefetch multiple section contents (for performance)
+   * Useful for preloading adjacent sections
+   */
+  const prefetchSections = useCallback(
+    async (ids: string[]) => {
+      const prefetchPromises = ids.map((id) =>
+        loadSectionContent(id).catch((error) => {
+          console.error(`[useSections] Failed to prefetch section ${id}:`, error);
+        }),
+      );
+
+      await Promise.allSettled(prefetchPromises);
+    },
+    [loadSectionContent],
+  );
+
+  /**
+   * Clear content cache (useful for memory management)
+   */
+  const clearContentCache = useCallback(() => {
+    contentCache.current.clear();
+  }, []);
+
+  /**
+   * Invalidate cache for specific section
+   */
+  const invalidateSectionCache = useCallback((id: string) => {
+    contentCache.current.delete(id);
+  }, []);
 
   /**
    * Get sections by type
@@ -504,6 +644,32 @@ export function useSections(projectId: string) {
     [sections],
   );
 
+  /**
+   * Prefetch adjacent sections when active section changes
+   * Improves perceived performance when navigating between sections
+   */
+  useEffect(() => {
+    if (!activeId || !isValidProjectId || ordered.length === 0) return;
+
+    const currentIndex = ordered.findIndex((s) => s.id === activeId);
+    if (currentIndex === -1) return;
+
+    // Prefetch next and previous sections
+    const adjacentIds: string[] = [];
+    const prevSection = ordered[currentIndex - 1];
+    if (currentIndex > 0 && prevSection) {
+      adjacentIds.push(prevSection.id);
+    }
+    const nextSection = ordered[currentIndex + 1];
+    if (currentIndex < ordered.length - 1 && nextSection) {
+      adjacentIds.push(nextSection.id);
+    }
+
+    if (adjacentIds.length > 0) {
+      prefetchSections(adjacentIds);
+    }
+  }, [activeId, ordered, isValidProjectId, prefetchSections]);
+
   return {
     // Core state
     sections,
@@ -536,5 +702,12 @@ export function useSections(projectId: string) {
     // Realtime state
     realtimeConnected,
     liveUpdateReceived,
+
+    // Lazy loading
+    loadSectionContent,
+    prefetchSections,
+    clearContentCache,
+    invalidateSectionCache,
+    isLoadingContent: (id: string) => loadingContent.has(id),
   };
 }

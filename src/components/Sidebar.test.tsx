@@ -47,6 +47,29 @@ vi.mock('@/hooks/useUI', async (importOriginal) => {
   return { ...actual };
 });
 
+// Mock useSections hook to prevent infinite loops with invalid projectId
+vi.mock('@/hooks/useSections', () => ({
+  useSections: vi.fn(() => ({
+    sections: [],
+    ordered: [],
+    activeId: null,
+    setActive: vi.fn(),
+    createSection: vi.fn(),
+    updateSection: vi.fn(),
+    deleteSection: vi.fn(),
+    duplicateSection: vi.fn(),
+    reorderSections: vi.fn(),
+    updateContent: vi.fn(),
+    syncing: false,
+    lastSynced: null,
+    syncNow: vi.fn(),
+    realtimeConnected: false,
+    liveUpdateReceived: false,
+    loadingContent: new Set(),
+    getContent: vi.fn(),
+  })),
+}));
+
 describe('Sidebar Component', () => {
   const renderWithProviders = (opts?: {
     appView?: View;

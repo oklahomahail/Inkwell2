@@ -78,6 +78,7 @@ export interface ChapterMeta {
   tags?: string[];
   createdAt: string;
   updatedAt: string;
+  type?: string; // section type (chapter, prologue, epilogue, etc.) for section support
 }
 
 /**
