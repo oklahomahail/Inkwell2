@@ -42,7 +42,7 @@ export function isValidProjectId(projectId: string): boolean {
   if (projectId.startsWith('proj_welcome_')) {
     // Ensure the format is proj_welcome_{timestamp}
     const parts = projectId.split('_');
-    if (parts.length === 3 && !isNaN(Number(parts[2]))) {
+    if (parts.length === 3 && parts[2] && /^\d+$/.test(parts[2])) {
       return true;
     }
   }

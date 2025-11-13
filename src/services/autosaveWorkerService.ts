@@ -22,7 +22,7 @@ import type {
   AutosaveRequest,
   AutosavePrepareResponse,
   WorkerResponse,
-} from '@/workers/autosaveWorker';
+} from '@/types/autosaveWorker';
 
 export class AutosaveWorkerService {
   private static instance: AutosaveWorkerService | null = null;

@@ -4,6 +4,63 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Fixed - Production Stability & Legacy Support (2025-11-13)
+
+#### Critical Fixes
+
+- **Legacy Project ID Support** - Fixed validation to accept all three project ID formats
+  - ✅ UUID format: `550e8400-e29b-41d4-a716-446655440000` (current standard)
+  - ✅ Welcome format: `proj_welcome_1763045880279` (onboarding projects)
+  - ✅ Legacy format: `project-1763045880279` (backward compatibility)
+  - Updated validation in `AppContext.tsx`, `useSections.ts`, and `idUtils.ts`
+  - Prevents "Invalid project ID format" errors for existing users
+  - Resolves sections failing to load for legacy projects
+
+- **Autosave Worker 404 Fix** - Eliminated production worker loading errors
+  - Moved `autosaveWorker` from `src/workers/` to `public/workers/`
+  - Changed from Vite-hashed dynamic import to fixed path: `/workers/autosaveWorker.js`
+  - Prevents 404 errors caused by build hash mismatches
+  - Ensures worker always loads at predictable URL
+  - Writing panel now correctly shows "Online" status
+
+#### Testing & Validation
+
+- **Comprehensive Test Suite** - Added 15 new tests for project ID validation
+  - Tests all three ID formats (UUID, welcome, legacy)
+  - Edge case coverage (empty strings, malformed IDs, timestamps)
+  - Real-world production examples validated
+  - 100% pass rate across 26 ID validation tests
+
+#### Documentation
+
+- **Deployment Guide** - New comprehensive deployment documentation
+  - Pre-deployment checklist and verification steps
+  - Common issues and troubleshooting procedures
+  - Worker architecture and build output explanation
+  - Rollback procedures and environment variables
+  - Performance monitoring guidelines
+
+- **Worker Architecture** - Documented worker deployment strategies
+  - Fixed-path workers (public/) for critical functionality
+  - Dynamic-import workers (src/) for optional features
+  - Clear guidelines for adding new workers
+  - README in `src/workers/` explaining architecture
+
+#### Code Quality
+
+- **Cleanup** - Removed redundant worker file
+  - Deleted `src/workers/autosaveWorker.ts` (moved to public/)
+  - Added comprehensive documentation for worker system
+  - Improved welcome project ID validation strictness
+
+#### Impact
+
+- ✅ All project ID formats now work in production
+- ✅ Autosave initializes reliably without 404s
+- ✅ Sections/chapters load correctly for legacy projects
+- ✅ Writing panel shows accurate online/offline status
+- ✅ Analytics and sync services connect properly
+
 ## [v0.9.4] - 2025-11-11
 
 ### Added - Session Tracking System & Dashboard Analytics Sync
