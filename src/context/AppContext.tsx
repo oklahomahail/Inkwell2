@@ -254,11 +254,35 @@ function AppProviderInner({ children }: { children: ReactNode }) {
       devLog.warn('Failed to parse projects from localStorage:', error);
     }
 
-    // Load current project ID
+    // Load current project ID with validation
     try {
       const storedProjectId = localStorage.getItem(PROJECT_ID_KEY);
       if (storedProjectId) {
-        dispatch({ type: 'SET_CURRENT_PROJECT', payload: storedProjectId });
+        // Validate the stored project ID format
+        const isValidFormat =
+          storedProjectId.startsWith('proj_welcome_') || // Welcome project format
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+            storedProjectId,
+          ); // UUID format
+
+        if (isValidFormat) {
+          dispatch({ type: 'SET_CURRENT_PROJECT', payload: storedProjectId });
+        } else {
+          // Clear corrupted project ID
+          devLog.error(
+            `[AppContext] Invalid project ID format detected: "${storedProjectId}". Clearing corrupted data.`,
+          );
+          localStorage.removeItem(PROJECT_ID_KEY);
+
+          // Also clean up any related corrupted data
+          const keysToCheck = Object.keys(localStorage);
+          keysToCheck.forEach((key) => {
+            if (key.startsWith('lastSection-') && key.includes(storedProjectId)) {
+              localStorage.removeItem(key);
+              devLog.warn(`[AppContext] Removed corrupted key: ${key}`);
+            }
+          });
+        }
       }
     } catch (error) {
       devLog.warn('Failed to load current project ID from localStorage:', error);

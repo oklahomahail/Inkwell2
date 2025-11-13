@@ -37,7 +37,7 @@ export default function NewProjectDialog({ open, onOpenChange }: NewProjectDialo
   async function handleCreate() {
     const projectName = name.trim() || 'Untitled Project';
     const project = {
-      id: `project-${Date.now()}`,
+      id: crypto.randomUUID(), // Use UUID for sync compatibility
       name: projectName,
       description: description.trim(),
       content: '',

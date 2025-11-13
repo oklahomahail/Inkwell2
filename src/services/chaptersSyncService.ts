@@ -23,9 +23,19 @@ import { Chapters } from './chaptersService';
  * Uses upsert to handle both inserts and updates.
  */
 export async function pushLocalChanges(projectId: string): Promise<void> {
-  // Skip projects with invalid UUIDs (demo projects, local-only projects, etc.)
+  // Skip projects with invalid UUIDs (demo projects, legacy local projects, etc.)
   if (!isValidUUID(projectId)) {
-    console.warn(`[Sync] Skipping project ${projectId} (not a valid UUID)`);
+    // Intentional debug logging for sync behavior tracking
+    // Legacy format project-{timestamp} - skip sync but don't spam logs
+    if (projectId.startsWith('project-')) {
+      // eslint-disable-next-line no-console
+      console.debug(`[Sync] Skipping legacy local project ${projectId} (no cloud sync)`);
+    } else if (projectId.startsWith('proj_welcome_')) {
+      // eslint-disable-next-line no-console
+      console.debug(`[Sync] Skipping welcome project ${projectId} (no cloud sync)`);
+    } else {
+      console.warn(`[Sync] Skipping project ${projectId} (not a valid UUID)`);
+    }
     return;
   }
 
@@ -80,9 +90,19 @@ export async function pushLocalChanges(projectId: string): Promise<void> {
  * Updates local IndexedDB cache.
  */
 export async function pullRemoteChanges(projectId: string): Promise<ChapterMeta[]> {
-  // Skip projects with invalid UUIDs (demo projects, local-only projects, etc.)
+  // Skip projects with invalid UUIDs (demo projects, legacy local projects, etc.)
   if (!isValidUUID(projectId)) {
-    console.warn(`[Sync] Skipping project ${projectId} (not a valid UUID)`);
+    // Intentional debug logging for sync behavior tracking
+    // Legacy format project-{timestamp} - skip sync but don't spam logs
+    if (projectId.startsWith('project-')) {
+      // eslint-disable-next-line no-console
+      console.debug(`[Sync] Skipping legacy local project ${projectId} (no cloud sync)`);
+    } else if (projectId.startsWith('proj_welcome_')) {
+      // eslint-disable-next-line no-console
+      console.debug(`[Sync] Skipping welcome project ${projectId} (no cloud sync)`);
+    } else {
+      console.warn(`[Sync] Skipping project ${projectId} (not a valid UUID)`);
+    }
     return [];
   }
 
@@ -175,11 +195,25 @@ export function subscribeToChapterChanges(
   projectId: string,
   onChange: (chapterId?: string) => void,
 ): () => void {
-  // Skip projects with invalid UUIDs (demo projects, local-only projects, etc.)
+  // Skip projects with invalid UUIDs (demo projects, legacy local projects, etc.)
   if (!isValidUUID(projectId)) {
-    console.warn(
-      `[Sync] Skipping realtime subscription for project ${projectId} (not a valid UUID)`,
-    );
+    // Intentional debug logging for sync behavior tracking
+    // Legacy format project-{timestamp} - skip sync but don't spam logs
+    if (projectId.startsWith('project-')) {
+      // eslint-disable-next-line no-console
+      console.debug(
+        `[Sync] Skipping realtime subscription for legacy local project ${projectId} (no cloud sync)`,
+      );
+    } else if (projectId.startsWith('proj_welcome_')) {
+      // eslint-disable-next-line no-console
+      console.debug(
+        `[Sync] Skipping realtime subscription for welcome project ${projectId} (no cloud sync)`,
+      );
+    } else {
+      console.warn(
+        `[Sync] Skipping realtime subscription for project ${projectId} (not a valid UUID)`,
+      );
+    }
     return () => {}; // Return no-op unsubscribe function
   }
 

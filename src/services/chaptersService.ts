@@ -553,6 +553,28 @@ class ChaptersService {
     const chapters = await Promise.all(metas.map((m) => this.get(m.id)));
     return chapters;
   }
+
+  /**
+   * Close IndexedDB connection
+   * Should be called on app unmount to prevent connection leaks
+   */
+  close(): void {
+    if (this.db) {
+      // Intentional log for connection lifecycle tracking
+      // eslint-disable-next-line no-console
+      console.log('[ChaptersService] Closing IndexedDB connection');
+      this.db.close();
+      this.db = null;
+      this.initPromise = null;
+    }
+  }
+
+  /**
+   * Check if database is currently connected
+   */
+  isConnected(): boolean {
+    return this.db !== null;
+  }
 }
 
 // Export singleton instance

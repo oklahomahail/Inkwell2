@@ -50,6 +50,28 @@ const debounce = (fn: Function, delay = 500) => {
 };
 
 export function useSections(projectId: string) {
+  // Validate projectId format before proceeding
+  const isValidProjectId = useMemo(() => {
+    if (!projectId || typeof projectId !== 'string') {
+      console.error('[useSections] Invalid projectId: not a string', projectId);
+      return false;
+    }
+
+    // Valid formats: UUID or proj_welcome_* pattern
+    const isUUID =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(projectId);
+    const isWelcomeProject = projectId.startsWith('proj_welcome_');
+
+    if (!isUUID && !isWelcomeProject) {
+      console.error(
+        `[useSections] Invalid projectId format: "${projectId}". Expected UUID or proj_welcome_* pattern.`,
+      );
+      return false;
+    }
+
+    return true;
+  }, [projectId]);
+
   // Core state
   const [sections, setSections] = useState<Section[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -131,6 +153,12 @@ export function useSections(projectId: string) {
    * Load sections on mount
    */
   useEffect(() => {
+    // Prevent infinite loops with invalid projectIds
+    if (!isValidProjectId) {
+      console.error('[useSections] Skipping load effect due to invalid projectId:', projectId);
+      return;
+    }
+
     (async () => {
       // Run automatic migration first
       await autoMigrate(projectId);
@@ -164,12 +192,17 @@ export function useSections(projectId: string) {
         }
       }
     })();
-  }, [projectId, chapterToSection]);
+  }, [projectId, chapterToSection, isValidProjectId]);
 
   /**
    * Auto-sync every 3 minutes
    */
   useEffect(() => {
+    // Prevent infinite loops with invalid projectIds
+    if (!isValidProjectId) {
+      return;
+    }
+
     const interval = setInterval(
       () => {
         syncNow();
@@ -178,24 +211,34 @@ export function useSections(projectId: string) {
     );
 
     return () => clearInterval(interval);
-  }, [syncNow]);
+  }, [syncNow, isValidProjectId]);
 
   /**
    * Sync on network reconnect
    */
   useEffect(() => {
+    // Prevent infinite loops with invalid projectIds
+    if (!isValidProjectId) {
+      return;
+    }
+
     const handleOnline = () => {
       syncNow();
     };
 
     window.addEventListener('online', handleOnline);
     return () => window.removeEventListener('online', handleOnline);
-  }, [syncNow]);
+  }, [syncNow, isValidProjectId]);
 
   /**
    * Subscribe to realtime changes
    */
   useEffect(() => {
+    // Prevent infinite loops with invalid projectIds
+    if (!isValidProjectId) {
+      return;
+    }
+
     setRealtimeConnected(true);
 
     const unsubscribe = subscribeToChapterChanges(projectId, async (_chapterId) => {
@@ -212,7 +255,7 @@ export function useSections(projectId: string) {
       setRealtimeConnected(false);
       unsubscribe();
     };
-  }, [projectId, chapterToSection]);
+  }, [projectId, chapterToSection, isValidProjectId]);
 
   /**
    * Create section

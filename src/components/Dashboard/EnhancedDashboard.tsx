@@ -11,6 +11,7 @@ import { useChapterCount } from '@/context/ChaptersContext';
 import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 import { useTourStartupFromUrl } from '@/hooks/useTourStartupFromUrl';
 import { useUI } from '@/hooks/useUI';
+import { Chapters } from '@/services/chaptersService';
 import { triggerOnProjectCreated } from '@/utils/tourTriggers';
 
 const EnhancedDashboard: React.FC = () => {
@@ -22,8 +23,37 @@ const EnhancedDashboard: React.FC = () => {
   const analytics = useProjectAnalytics(currentProject?.id ?? '');
   const chapterCount = useChapterCount(currentProject?.id ?? '');
 
+  // Cache word counts for all projects
+  const [projectWordCounts, setProjectWordCounts] = useState<Record<string, number>>({});
+
   // Check for tour=start in URL and trigger tour if found
   useTourStartupFromUrl();
+
+  // Load word counts for all projects
+  useEffect(() => {
+    const loadProjectWordCounts = async () => {
+      const counts: Record<string, number> = {};
+
+      // Load word counts for all projects concurrently
+      await Promise.all(
+        state.projects.map(async (project) => {
+          try {
+            const wordCount = await Chapters.getTotalWordCount(project.id);
+            counts[project.id] = wordCount;
+          } catch (error) {
+            console.warn(`Failed to load word count for project ${project.id}:`, error);
+            counts[project.id] = 0;
+          }
+        }),
+      );
+
+      setProjectWordCounts(counts);
+    };
+
+    if (state.projects.length > 0) {
+      loadProjectWordCounts();
+    }
+  }, [state.projects]);
 
   // Handle URL parameter and keyboard shortcut for storage modal
   useEffect(() => {
@@ -46,7 +76,7 @@ const EnhancedDashboard: React.FC = () => {
   const _createNewProject = async () => {
     try {
       const newProject = {
-        id: `project-${Date.now()}`,
+        id: crypto.randomUUID(), // Use UUID for sync compatibility
         name: `New Story ${realProjects.length + 1}`,
         description: 'A new fiction project',
         content: '',
@@ -82,15 +112,12 @@ const EnhancedDashboard: React.FC = () => {
   };
 
   const getProjectWordCount = (projectId: string) => {
-    // Use chapter-based word count from analytics
+    // Use chapter-based word count from analytics for current project (most up-to-date)
     if (projectId === currentProject?.id) {
       return analytics.chapters.chapterWords;
     }
-    // For other projects, we'd need to fetch their analytics separately
-    // For now, fall back to the old content field if available
-    const project = state.projects.find(p => p.id === projectId);
-    if (!project?.content) return 0;
-    return project.content.split(' ').filter((word: string) => word.length > 0).length;
+    // Use cached word counts from chapters for other projects
+    return projectWordCounts[projectId] ?? 0;
   };
 
   const getDaysAgo = (timestamp: number) => {
@@ -362,8 +389,13 @@ const EnhancedDashboard: React.FC = () => {
               <div className="text-center">
                 <div className="text-xl font-semibold text-slate-900 dark:text-white mb-1">
                   {analytics.chapters.avgWordsPerChapter > 0
-                    ? Math.round((analytics.chapters.chapterWords / (analytics.chapters.avgWordsPerChapter * chapterCount || 1)) * 100)
-                    : 0}%
+                    ? Math.round(
+                        (analytics.chapters.chapterWords /
+                          (analytics.chapters.avgWordsPerChapter * chapterCount || 1)) *
+                          100,
+                      )
+                    : 0}
+                  %
                 </div>
                 <div className="text-xs text-slate-500">Progress</div>
               </div>

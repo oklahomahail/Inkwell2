@@ -14,6 +14,7 @@ import { initGlobalErrorHandlers } from './boot/globalErrors';
 import './index.css';
 import './utils/flags';
 import { analyticsService } from './services/analytics';
+import { Chapters } from './services/chaptersService';
 import { emitSessionEnd, emitSessionStart } from './services/telemetry';
 import { waitForRoot } from './utils/dom/waitForRoot';
 // Initialize storage persistence and monitoring
@@ -57,6 +58,8 @@ emitSessionStart();
 window.addEventListener('beforeunload', () => {
   emitSessionEnd('unload');
   analyticsService.endSession();
+  // Close IndexedDB connections to prevent leaks
+  Chapters.close();
 });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {

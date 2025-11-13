@@ -150,7 +150,7 @@ class PhraseAnalyzer {
 
   analyzeText(request: PhraseAnalysisRequest): PhraseAnalysisResponse {
     const startTime = performance.now();
-    const { text, projectId, options } = request;
+    const { text, options } = request;
 
     const words = this.tokenize(text);
     const allPhrases: Array<{
@@ -403,6 +403,55 @@ class PhraseAnalyzer {
     if (frequency > 1) return 'medium';
     return 'low';
   }
+
+  /**
+   * Clear cached index for a specific project
+   * Prevents memory leaks when projects are deleted or updated
+   */
+  clearProjectCache(projectId: string): void {
+    this.indexes.delete(projectId);
+    // Intentional log for cache lifecycle tracking
+    // eslint-disable-next-line no-console
+    console.log(`[PhraseWorker] Cleared cache for project: ${projectId}`);
+  }
+
+  /**
+   * Clear all cached indexes
+   * Use when switching users or resetting application state
+   */
+  clearAllCache(): void {
+    const count = this.indexes.size;
+    this.indexes.clear();
+    // Intentional log for cache lifecycle tracking
+    // eslint-disable-next-line no-console
+    console.log(`[PhraseWorker] Cleared all cached indexes (${count} projects)`);
+  }
+
+  /**
+   * Get cache statistics for monitoring memory usage
+   */
+  getCacheStats(): {
+    projectCount: number;
+    totalPhrases: number;
+    totalMemoryEstimate: number;
+  } {
+    let totalPhrases = 0;
+    let totalMemoryEstimate = 0;
+
+    for (const [_projectId, index] of this.indexes.entries()) {
+      const phraseCount = index.phrases.size;
+      totalPhrases += phraseCount;
+
+      // Rough memory estimate: 100 bytes per phrase entry (conservative)
+      totalMemoryEstimate += phraseCount * 100;
+    }
+
+    return {
+      projectCount: this.indexes.size,
+      totalPhrases,
+      totalMemoryEstimate, // bytes
+    };
+  }
 }
 
 // Worker context
@@ -423,6 +472,28 @@ self.addEventListener('message', (event) => {
     } else if (request.type === 'index-project') {
       const response = analyzer.indexProject(request);
       self.postMessage(response);
+    } else if (request.type === 'clear-cache') {
+      // Clear cached indexes for a specific project or all projects
+      if (request.projectId) {
+        analyzer.clearProjectCache(request.projectId);
+        self.postMessage({
+          type: 'cache-cleared',
+          projectId: request.projectId,
+        });
+      } else {
+        analyzer.clearAllCache();
+        self.postMessage({
+          type: 'cache-cleared',
+          projectId: 'all',
+        });
+      }
+    } else if (request.type === 'get-cache-stats') {
+      // Return cache statistics for monitoring
+      const stats = analyzer.getCacheStats();
+      self.postMessage({
+        type: 'cache-stats',
+        stats,
+      });
     } else {
       self.postMessage({
         type: 'error',
