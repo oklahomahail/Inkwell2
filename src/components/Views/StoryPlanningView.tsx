@@ -10,8 +10,8 @@ import { triggerStoryPlanningOpen, triggerWorldBuildingVisited } from '@/utils/t
 
 import { type GeneratedOutline } from '../../services/storyArchitectService';
 import { AiFeatureBadge } from '../Planning/AiFeatureBadge';
-import BeatSheetPlanner from '../Planning/BeatSheetPlanner';
 import CharacterManager from '../Planning/CharacterManager';
+import EnhancedBeatSheetPlanner from '../Planning/EnhancedBeatSheetPlanner';
 import { StoryArchitectFlow } from '../Planning/StoryArchitectFlow';
 import StoryStructureVisualizer from '../Planning/StoryStructureVisualizer';
 
@@ -57,7 +57,7 @@ const StoryPlanningView: React.FC = () => {
       case 'health':
         return <StoryHealthTab />;
       case 'beats':
-        return <BeatSheetPlanner />;
+        return <EnhancedBeatSheetPlanner />;
       case 'characters':
         return <CharacterManager />;
       case 'world':

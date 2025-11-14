@@ -63,7 +63,8 @@ async function initMainDatabase(): Promise<void> {
     request.onsuccess = () => {
       const db = request.result;
       devLog.log(`[DBInit] ${MAIN_DB_NAME} v${db.version} ready`);
-      db.close(); // Close connection - services will reopen as needed
+      // Don't close - keep connection open to prevent race conditions
+      // The connection will be reused by services or closed on app unload
       resolve();
     };
 

@@ -30,6 +30,7 @@ const DOC_STORE = 'chapter_docs';
 class ChaptersService {
   private db: IDBDatabase | null = null;
   private initPromise: Promise<void> | null = null;
+  private pendingTransactions = 0;
 
   /**
    * Initialize IndexedDB
@@ -77,6 +78,19 @@ class ChaptersService {
   }
 
   /**
+   * Track transaction lifecycle for safe shutdown
+   */
+  private trackTransaction(tx: IDBTransaction): void {
+    this.pendingTransactions++;
+    const cleanup = () => {
+      this.pendingTransactions--;
+    };
+    tx.addEventListener('complete', cleanup);
+    tx.addEventListener('error', cleanup);
+    tx.addEventListener('abort', cleanup);
+  }
+
+  /**
    * List all chapters for a project (sorted by index)
    * Deduplicates by ID to prevent duplicate chapter display
    */
@@ -85,6 +99,7 @@ class ChaptersService {
 
     return new Promise((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readonly');
+      this.trackTransaction(tx);
       const store = tx.objectStore(META_STORE);
       const index = store.index('projectId');
       const request = index.getAll(projectId);
@@ -117,6 +132,7 @@ class ChaptersService {
 
     const meta = await new Promise<ChapterMeta>((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readonly');
+      this.trackTransaction(tx);
       const request = tx.objectStore(META_STORE).get(id);
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
@@ -126,6 +142,7 @@ class ChaptersService {
 
     const doc = await new Promise<ChapterDoc>((resolve, reject) => {
       const tx = db.transaction(DOC_STORE, 'readonly');
+      this.trackTransaction(tx);
       const request = tx.objectStore(DOC_STORE).get(id);
       request.onsuccess = () => resolve(request.result || { id, content: '', version: 1 });
       request.onerror = () => reject(request.error);
@@ -147,6 +164,7 @@ class ChaptersService {
 
     return new Promise((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readonly');
+      this.trackTransaction(tx);
       const request = tx.objectStore(META_STORE).get(id);
       request.onsuccess = () => resolve(request.result || null);
       request.onerror = () => reject(request.error);
@@ -185,6 +203,8 @@ class ChaptersService {
     // Save metadata
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readwrite');
+      this.trackTransaction(tx);
+      this.trackTransaction(tx);
       const request = tx.objectStore(META_STORE).add(meta);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
@@ -224,6 +244,8 @@ class ChaptersService {
 
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readwrite');
+      this.trackTransaction(tx);
+      this.trackTransaction(tx);
       const request = tx.objectStore(META_STORE).put(updated);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
@@ -249,6 +271,8 @@ class ChaptersService {
 
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readwrite');
+      this.trackTransaction(tx);
+      this.trackTransaction(tx);
       const request = tx.objectStore(META_STORE).put(meta);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
@@ -266,6 +290,7 @@ class ChaptersService {
 
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(DOC_STORE, 'readwrite');
+      this.trackTransaction(tx);
       const request = tx.objectStore(DOC_STORE).put(doc);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
@@ -287,6 +312,7 @@ class ChaptersService {
   async reorder(projectId: string, orderedIds: string[]): Promise<void> {
     const db = await this.getDB();
     const tx = db.transaction(META_STORE, 'readwrite');
+    this.trackTransaction(tx);
     const store = tx.objectStore(META_STORE);
 
     const promises = orderedIds.map(async (id, newIndex) => {
@@ -325,6 +351,8 @@ class ChaptersService {
     // Delete metadata
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readwrite');
+      this.trackTransaction(tx);
+      this.trackTransaction(tx);
       const request = tx.objectStore(META_STORE).delete(id);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
@@ -333,6 +361,7 @@ class ChaptersService {
     // Delete document
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(DOC_STORE, 'readwrite');
+      this.trackTransaction(tx);
       const request = tx.objectStore(DOC_STORE).delete(id);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
@@ -580,6 +609,37 @@ class ChaptersService {
       this.db = null;
       this.initPromise = null;
     }
+  }
+
+  /**
+   * Close IndexedDB connection and wait for pending transactions
+   * Should be called on app unmount to prevent connection leaks
+   */
+  async closeAndWait(): Promise<void> {
+    if (!this.db) return;
+
+    // Intentional log for connection lifecycle tracking
+    // eslint-disable-next-line no-console
+    console.log(
+      '[ChaptersService] Closing IndexedDB connection (waiting for pending transactions)',
+    );
+
+    // Wait for all pending transactions to complete
+    const maxWaitTime = 5000; // 5 seconds max
+    const startTime = Date.now();
+    while (this.pendingTransactions > 0 && Date.now() - startTime < maxWaitTime) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
+    if (this.pendingTransactions > 0) {
+      console.warn(
+        `[ChaptersService] Closing with ${this.pendingTransactions} pending transactions after timeout`,
+      );
+    }
+
+    this.db.close();
+    this.db = null;
+    this.initPromise = null;
   }
 
   /**

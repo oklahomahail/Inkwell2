@@ -22,6 +22,7 @@ export default [
       'coverage/**',
       'verbose/**',
       'playwright-report/**',
+      'docs/sync/poc-suite/**',
       'pnpm-lock.yaml',
       'src/bench/**', // Migrated from .eslintignore
       'scripts/**', // All scripts (including .mjs)

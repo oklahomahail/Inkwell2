@@ -150,6 +150,19 @@ export interface WritingSession {
 }
 
 // ----------------------------------------
+// Story Template Types
+// ----------------------------------------
+
+/**
+ * Mapping between story template beats and chapters
+ */
+export interface ProjectBeatMapping {
+  templateId: string;
+  // beatId -> chapterId (or null if not mapped yet)
+  beatToChapter: Record<string, string | null>;
+}
+
+// ----------------------------------------
 // Project Types
 // ----------------------------------------
 
