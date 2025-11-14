@@ -1,6 +1,6 @@
 # Inkwell Platform Roadmap
 
-_Last updated: November 10, 2025_
+_Last updated: November 14, 2025_
 
 ## Vision
 
@@ -16,6 +16,18 @@ Inkwell is an **offline-first writing platform** for serious authors. The focus 
 **Live Demo:** https://inkwell-writing.vercel.app
 
 ### ✅ Recently Completed
+
+#### Inline Formatting Toolbar (November 14, 2025)
+
+- **Visual Typography Controls**: Font family, size, and line spacing controls directly in the Writing Panel
+- **Indentation Tools**: Increase/decrease first-line indent with visual buttons
+- **Scene Separator Insertion**: One-click insertion of scene breaks (`***`) with proper spacing
+- **Plain Text Preservation**: All formatting is visual-only, text remains plain for export compatibility
+- **Dark Mode Support**: Full dark mode styling for toolbar and controls
+- **Focus Mode Compatible**: Toolbar automatically hides in distraction-free focus mode
+- **7 Professional Fonts**: Inter, Source Sans 3, Literata, Merriweather, PT Serif, IBM Plex Serif, EB Garamond
+- **Project-Level Persistence**: Formatting settings saved per-project via FormattingContext
+- **Zero Schema Changes**: Uses existing formatting infrastructure, no database migrations required
 
 #### v0.9.2-beta - Production Reliability & UX Improvements (November 10, 2025)
 
@@ -194,6 +206,6 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md) for branching, commits, and PR chec
 
 ---
 
-**Last Updated**: November 10, 2025
+**Last Updated**: November 14, 2025
 **Maintainers**: @davehail
-**Status**: v0.9.2-beta released, v1.0.0 planning underway
+**Status**: v0.9.2-beta released, inline formatting added, v1.0.0 planning underway

@@ -47,6 +47,7 @@ If you encounter issues with authentication:
 ### Writing & Organization
 
 - **Chapter & Scene Tracker** - Organize long-form fiction with drag-and-drop reordering
+- **Inline Formatting Toolbar** - Visual typography controls (font, size, spacing, indent) right in the editor
 - **Character Profiles** - Bios, arcs, relationships, and character development tracking
 - **Clue Tracker** - Plant clues and map them to resolutions
 - **Timeline Conflict Checker** - Catch chronology errors
