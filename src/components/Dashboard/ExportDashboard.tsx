@@ -9,7 +9,7 @@
  * - Quick export actions
  */
 
-import { FileDown, FileText, File, Trash2 } from 'lucide-react';
+import { FileDown, FileText, File, Trash2, BookOpen } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { EXPORT_FORMAT } from '@/consts/writing';
@@ -174,6 +174,37 @@ export default function ExportDashboard({
     }
   }, [projectId, projectName, chapters, showToast, loadHistory]);
 
+  const handleExportEPUB = useCallback(async () => {
+    if (chapters.length === 0) {
+      showToast('No chapters to export', 'error');
+      return;
+    }
+
+    setExporting('epub');
+    try {
+      showToast('Preparing EPUB export...', 'info', 2000);
+      const result = await exportService.exportEPUBWithChapters(projectId, chapters, {
+        format: EXPORT_FORMAT.EPUB,
+        includeMetadata: true,
+        includeSynopsis: true,
+        customTitle: projectName,
+      });
+
+      if (result.success) {
+        showToast(`Downloaded ${result.filename}`, 'success', 4000);
+        // Reload history to show new export
+        await loadHistory();
+      } else {
+        showToast(result.error || 'EPUB export failed', 'error');
+      }
+    } catch (error) {
+      console.error('EPUB export error:', error);
+      showToast('Failed to export EPUB', 'error');
+    } finally {
+      setExporting(null);
+    }
+  }, [projectId, projectName, chapters, showToast, loadHistory]);
+
   const handleClearHistory = useCallback(async () => {
     if (!confirm('Clear all export history for this project? This cannot be undone.')) {
       return;
@@ -211,7 +242,7 @@ export default function ExportDashboard({
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <button
             onClick={handleExportPDF}
             disabled={exporting !== null || chapters.length === 0}
@@ -231,6 +262,17 @@ export default function ExportDashboard({
             <FileDown className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
             <span className="font-medium text-gray-900 dark:text-white">
               {exporting === 'docx' ? 'Exporting DOCX...' : 'Export DOCX'}
+            </span>
+          </button>
+
+          <button
+            onClick={handleExportEPUB}
+            disabled={exporting !== null || chapters.length === 0}
+            className="flex items-center justify-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+          >
+            <BookOpen className="w-5 h-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
+            <span className="font-medium text-gray-900 dark:text-white">
+              {exporting === 'epub' ? 'Exporting EPUB...' : 'Export EPUB'}
             </span>
           </button>
 

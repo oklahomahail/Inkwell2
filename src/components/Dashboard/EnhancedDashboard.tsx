@@ -280,7 +280,9 @@ const EnhancedDashboard: React.FC = () => {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
+          <p className="text-base text-slate-600 dark:text-slate-400">
+            Welcome back! Here's your writing overview and recent activity.
+          </p>
           <div className="flex items-center gap-3">
             <StatusChip onClick={() => setStorageModalOpen(true)} />
             <button
@@ -295,9 +297,6 @@ const EnhancedDashboard: React.FC = () => {
             </button>
           </div>
         </div>
-        <p className="text-base text-slate-600 dark:text-slate-400">
-          Welcome back! Here's your writing overview and recent activity.
-        </p>
       </div>
 
       {/* Storage Health Modal */}

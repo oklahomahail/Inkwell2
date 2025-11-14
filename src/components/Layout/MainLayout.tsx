@@ -13,6 +13,7 @@ import {
   Moon,
   Command,
   Kanban,
+  Download,
 } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -86,6 +87,14 @@ const baseNavigationItems = [
     view: View.Analysis,
     shortcut: '⌘5',
     description: 'Writing statistics and insights',
+  },
+  {
+    id: 'export',
+    label: 'Export',
+    icon: Download,
+    view: View.Export,
+    shortcut: '⌘E',
+    description: 'Export your manuscript in various formats (PDF, DOCX, EPUB)',
   },
   {
     id: 'settings',

@@ -13,6 +13,7 @@ export const CHAPTER_STATUS = {
 export const EXPORT_FORMAT = {
   PDF: 'pdf',
   DOCX: 'docx',
+  EPUB: 'epub',
   TXT: 'txt',
   HTML: 'html',
   MARKDOWN: 'markdown',

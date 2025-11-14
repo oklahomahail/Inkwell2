@@ -83,8 +83,10 @@ describe('EnhancedDashboard - Project Navigation & Creation', () => {
 
     renderWithProviders(<EnhancedDashboard />);
 
-    // The dashboard should be displayed
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    // The dashboard should be displayed (checking for welcome message instead of removed title)
+    expect(
+      screen.getByText("Welcome back! Here's your writing overview and recent activity."),
+    ).toBeInTheDocument();
   });
 
   it('creates a new project with default values', async () => {
