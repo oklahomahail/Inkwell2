@@ -49,6 +49,9 @@ export const createMockAppContextValue = (
     setAutoSaveSaving: vi.fn(),
     setAutoSaveSuccess: vi.fn(),
     setAutoSaveError: vi.fn(),
+    // Cloud sync methods (Phase 3)
+    updateCloudSyncState: vi.fn(),
+    triggerManualSync: vi.fn(async () => {}),
     claude: null as any,
     claudeActions: {
       sendMessage: vi.fn(async () => ''),

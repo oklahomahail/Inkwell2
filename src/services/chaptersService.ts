@@ -303,7 +303,44 @@ class ChaptersService {
         CacheKeys.chapterList(meta.projectId),
         CacheKeys.chapterDoc(doc.id),
       ]);
+
+      // Phase 3: Enqueue cloud sync (async, don't block save)
+      this.enqueueSyncOperation(doc.id, meta.projectId, doc).catch((error) => {
+        console.error('[Chapters] Failed to enqueue cloud sync:', error);
+      });
     }
+  }
+
+  /**
+   * Enqueue cloud sync operation (Phase 3)
+   * Non-blocking: Runs after IndexedDB save completes
+   */
+  private async enqueueSyncOperation(
+    chapterId: string,
+    projectId: string,
+    doc: ChapterDoc,
+  ): Promise<void> {
+    // Lazy import to avoid circular dependencies
+    const { syncQueue } = await import('@/sync/syncQueue');
+
+    // Get full chapter data for cloud sync
+    const meta = await this.getMeta(chapterId);
+    if (!meta) return;
+
+    // Construct payload for cloud upsert
+    const payload = {
+      id: chapterId,
+      project_id: projectId,
+      title: meta.title,
+      body: doc.content,
+      index_in_project: meta.index,
+      word_count: meta.wordCount,
+      status: meta.status || 'draft',
+      client_rev: (meta.client_rev || 0) + 1,
+    };
+
+    // Enqueue operation (non-blocking)
+    await syncQueue.enqueue('upsert', 'chapters', chapterId, projectId, payload);
   }
 
   /**

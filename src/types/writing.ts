@@ -79,6 +79,7 @@ export interface ChapterMeta {
   createdAt: string;
   updatedAt: string;
   type?: string; // section type (chapter, prologue, epilogue, etc.) for section support
+  client_rev?: number; // Phase 3: cloud sync revision number
 }
 
 /**
