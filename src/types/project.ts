@@ -150,6 +150,19 @@ export interface WritingSession {
 }
 
 // ----------------------------------------
+// Story Template Types
+// ----------------------------------------
+
+/**
+ * Mapping between story template beats and chapters
+ */
+export interface ProjectBeatMapping {
+  templateId: string;
+  // beatId -> chapterId (or null if not mapped yet)
+  beatToChapter: Record<string, string | null>;
+}
+
+// ----------------------------------------
 // Project Types
 // ----------------------------------------
 
@@ -172,6 +185,10 @@ export interface Project {
   creationMode?: 'writing' | 'planning';
   // Demo/Tutorial flag (v1.3.0+) - excludes from analytics
   isDemo?: boolean;
+  // Story template fields (v1.4.0+)
+  storyTemplateId?: string | null;
+  storyTemplateVersion?: string | null;
+  beatMapping?: ProjectBeatMapping;
   // Legacy/compatibility fields (for migration period)
   content?: string; // Legacy monolithic content field (deprecated - use chapters)
   chapters?: Chapter[]; // Can be present but use EnhancedProject for full typing
