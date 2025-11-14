@@ -32,6 +32,7 @@ export default defineConfig({
       'src/types/**/*.{test,spec}.ts', // type helpers and utilities
       'src/ai/**/*.{test,spec}.ts', // AI provider tests
       'src/lib/**/*.{test,spec}.ts', // v0.10.0 lib utilities tests
+      'src/sync/**/*.{test,spec}.ts', // v1.5.0 cloud sync tests
     ],
     coverage: {
       enabled: true,
@@ -126,6 +127,11 @@ export default defineConfig({
           lines: 65, // Current avg, target 80% by Phase 2
           functions: 30,
           branches: 70,
+        },
+        'src/sync/**': {
+          lines: 90, // Cloud sync critical - high coverage required
+          functions: 85,
+          branches: 85,
         },
       },
     },
