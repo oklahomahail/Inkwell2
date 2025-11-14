@@ -1,0 +1,182 @@
+name: Security Tests
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/tests/**'
+      - '.github/workflows/security-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/tests/**'
+  schedule:
+    # Run daily at 2 AM UTC to catch any drift
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  security-tests:
+    name: RLS Bypass Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase local
+        run: |
+          supabase start
+          echo "Supabase started successfully"
+
+      - name: Wait for Supabase to be ready
+        run: |
+          timeout 60s bash -c 'until curl -s http://localhost:54321 > /dev/null; do sleep 2; done'
+          echo "Supabase is ready"
+
+      - name: Run database migrations
+        run: |
+          supabase db reset --db-url postgresql://postgres:postgres@localhost:54322/postgres
+          echo "Migrations applied successfully"
+
+      - name: Get Supabase credentials
+        id: supabase-creds
+        run: |
+          ANON_KEY=$(supabase status | grep "anon key" | awk '{print $3}')
+          SERVICE_KEY=$(supabase status | grep "service_role key" | awk '{print $3}')
+          echo "::add-mask::$ANON_KEY"
+          echo "::add-mask::$SERVICE_KEY"
+          echo "SUPABASE_ANON_KEY=$ANON_KEY" >> $GITHUB_ENV
+          echo "SUPABASE_SERVICE_KEY=$SERVICE_KEY" >> $GITHUB_ENV
+
+      - name: Run security tests
+        env:
+          SUPABASE_URL: http://localhost:54321
+        run: |
+          pnpm test:security
+        timeout-minutes: 5
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-test-results
+          path: |
+            coverage/
+            reports/
+          retention-days: 30
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop
+
+      - name: Comment on PR with results
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ **Security tests failed!**\n\nRLS bypass vulnerabilities were detected. Please review the test results and fix the issues before merging.\n\n[View test results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})'
+            })
+
+      - name: Fail workflow if tests failed
+        if: failure()
+        run: |
+          echo "::error::Security tests failed! RLS bypass vulnerabilities detected."
+          echo "::error::Please review the test results and fix the security issues."
+          exit 1
+
+  security-audit-check:
+    name: Verify Security Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check security documentation exists
+        run: |
+          if [ ! -f "docs/SECURITY_AUDIT.md" ]; then
+            echo "::error::Security audit documentation missing!"
+            exit 1
+          fi
+          if [ ! -f "docs/SECURITY_HARDENING_CHECKLIST.md" ]; then
+            echo "::error::Security hardening checklist missing!"
+            exit 1
+          fi
+          if [ ! -f "docs/SECURITY_TESTING.md" ]; then
+            echo "::error::Security testing guide missing!"
+            exit 1
+          fi
+          echo "✅ All security documentation is present"
+
+      - name: Check for SECURITY DEFINER functions without auth checks
+        run: |
+          echo "Checking for potentially unsafe SECURITY DEFINER functions..."
+
+          # Look for SECURITY DEFINER functions in migrations
+          DEFINER_COUNT=$(grep -ri "security definer" supabase/migrations/ | wc -l)
+          echo "Found $DEFINER_COUNT SECURITY DEFINER functions"
+
+          if [ $DEFINER_COUNT -gt 0 ]; then
+            echo "::warning::Found $DEFINER_COUNT SECURITY DEFINER functions. Ensure they all have authorization checks."
+            grep -rn "security definer" supabase/migrations/ || true
+          fi
+
+      - name: Check for views without security_invoker
+        run: |
+          echo "Checking for views without explicit security_invoker..."
+
+          # Look for CREATE VIEW without security_invoker
+          UNSAFE_VIEWS=$(grep -ri "create.*view" supabase/migrations/ | grep -v "security_invoker" | grep -v "security invoker" | wc -l)
+
+          if [ $UNSAFE_VIEWS -gt 0 ]; then
+            echo "::error::Found $UNSAFE_VIEWS views without explicit security_invoker setting!"
+            echo "All views should use 'with (security_invoker = true)' to respect RLS."
+            grep -rn "create.*view" supabase/migrations/ | grep -v "security_invoker" | grep -v "security invoker" || true
+            exit 1
+          else
+            echo "✅ All views properly configured with security_invoker"
+          fi
+
+      - name: Check for tables without RLS
+        run: |
+          echo "Checking for tables that might be missing RLS..."
+
+          # Look for CREATE TABLE statements
+          TABLE_COUNT=$(grep -ri "create table" supabase/migrations/ | wc -l)
+          RLS_COUNT=$(grep -ri "enable row level security" supabase/migrations/ | wc -l)
+
+          echo "Found $TABLE_COUNT CREATE TABLE statements"
+          echo "Found $RLS_COUNT ENABLE ROW LEVEL SECURITY statements"
+
+          if [ $TABLE_COUNT -gt $RLS_COUNT ]; then
+            echo "::warning::Possible mismatch: $TABLE_COUNT tables vs $RLS_COUNT RLS statements"
+            echo "Please verify all tables have RLS enabled"
+          else
+            echo "✅ RLS statement count matches table count"
+          fi

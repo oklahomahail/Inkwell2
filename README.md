@@ -3,12 +3,13 @@
 > A focused, local-first writing studio for long-form fiction.
 
 [![CI](https://github.com/oklahomahail/Inkwell2/actions/workflows/ci.yml/badge.svg)](https://github.com/oklahomahail/Inkwell2/actions/workflows/ci.yml)
+[![Security](https://img.shields.io/badge/security-hardened-success?logo=security)](docs/security/index.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4?logo=prettier)](https://prettier.io/)
 [![Bundle Guard](https://img.shields.io/badge/bundle-guarded-success?logo=github)](https://github.com/oklahomahail/Inkwell2/blob/main/bundle-baseline.json)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[Docs](/docs/README.md) · [Roadmap](/docs/product/roadmap.md) · [Changelog](./CHANGELOG.md) · [Privacy](/docs/privacy.md) · [Onboarding](/docs/ONBOARDING.md)
+[Docs](/docs/README.md) · [Roadmap](/docs/product/roadmap.md) · [Changelog](./CHANGELOG.md) · [Privacy](/docs/privacy.md) · [Security](/docs/security/index.md) · [Onboarding](/docs/ONBOARDING.md)
 
 ---
 

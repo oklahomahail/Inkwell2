@@ -16,6 +16,10 @@ Welcome to the Inkwell documentation! This directory contains guides, technical 
 
 - **[Privacy & Telemetry](./privacy.md)** - What data is collected, opt-out instructions, transparency
 
+### Security
+
+- **[🔒 Security Hub](./security/index.md)** - Complete security documentation, audit reports, testing guides, and best practices
+
 ### Getting Started
 
 <!-- - **[Onboarding Guide](./ONBOARDING.md)** - Welcome project, product tours, quick start documentation -->
