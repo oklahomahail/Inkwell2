@@ -95,6 +95,8 @@ const EXPECTED_ERROR_PATTERNS = [
   /Failed to save formatting:/,
   /\[AutosaveWorker\] Worker error:/,
   /\[SearchService\] Worker error:/,
+  /\[Hydration\] Hydration failed:/,
+  /\[Hydration\] Table .* failed:/,
 ];
 
 function isExpectedError(message: string): boolean {
