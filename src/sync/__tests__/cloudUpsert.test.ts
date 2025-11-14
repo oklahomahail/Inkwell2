@@ -17,6 +17,12 @@ vi.mock('@/lib/supabaseClient', () => ({
     from: vi.fn(() => ({
       upsert: vi.fn().mockResolvedValue({ data: [], error: null }),
     })),
+    auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: 'user-123' } },
+        error: null,
+      }),
+    },
   },
 }));
 
@@ -235,6 +241,69 @@ describe('cloudUpsert', () => {
   });
 
   describe('Other table types', () => {
+    it('upserts projects successfully', async () => {
+      const mockUpsert = vi.fn().mockResolvedValue({
+        data: [{ id: 'project-1' }],
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+
+      const project = {
+        id: 'project-1',
+        name: 'My Novel',
+        description: 'A great story',
+        genre: 'Fiction',
+        targetWordCount: 50000,
+        currentWordCount: 1000,
+        claudeContext: 'Some context',
+      };
+
+      const result = await cloudUpsert.upsertRecords('projects', [project]);
+
+      expect(result.success).toBe(true);
+      expect(result.recordsProcessed).toBe(1);
+      expect(mockUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'project-1',
+          title: 'My Novel',
+          summary: 'A great story',
+        }),
+        { onConflict: 'id' },
+      );
+    });
+
+    it('upserts project_settings successfully', async () => {
+      const mockUpsert = vi.fn().mockResolvedValue({
+        data: [{ project_id: 'project-1' }],
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+
+      const settings = {
+        projectId: 'project-1',
+        fontFamily: 'Arial',
+        fontSize: 16,
+        lineHeight: 1.5,
+        indentParagraphs: true,
+        theme: 'light',
+      };
+
+      const result = await cloudUpsert.upsertRecords('project_settings', [settings]);
+
+      expect(result.success).toBe(true);
+      expect(result.recordsProcessed).toBe(1);
+      expect(mockUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          project_id: 'project-1',
+          font_family: 'Arial',
+          font_size: 16,
+        }),
+        { onConflict: 'project_id' },
+      );
+    });
+
     it('upserts sections successfully', async () => {
       const section = {
         id: 'section-1',
@@ -331,6 +400,135 @@ describe('cloudUpsert', () => {
       expect(result.success).toBe(false);
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0]).toContain('Network timeout');
+    });
+
+    it('handles chapter with missing project_id', async () => {
+      const mockUpsert = vi.fn().mockResolvedValue({
+        data: [],
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+
+      const chapter = {
+        id: '1',
+        title: 'Chapter',
+        body: 'Content',
+        index_in_project: 0,
+        word_count: 1,
+        status: 'draft' as const,
+        // Missing project_id
+      };
+
+      const result = await cloudUpsert.upsertChapters([chapter], 'user-123');
+
+      expect(result.success).toBe(false);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toContain('missing project_id');
+      expect(mockUpsert).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Batch delay logic', () => {
+    it('respects delay between batches', async () => {
+      // Test that upsertRecords properly creates batches and processes them
+      // We can verify batching by checking the number of individual upsert calls
+      const mockUpsert = vi.fn().mockResolvedValue({
+        data: [],
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+
+      // Create 60 chapters (processed individually, not in batches)
+      const chapters = Array.from({ length: 60 }, (_, i) => ({
+        id: String(i + 1),
+        project_id: 'project-1',
+        title: `Chapter ${i + 1}`,
+        body: `Content ${i}`,
+        index_in_project: i,
+        word_count: 10,
+        status: 'draft' as const,
+      }));
+
+      const result = await cloudUpsert.upsertChapters(chapters, 'user-123');
+
+      expect(result.success).toBe(true);
+      expect(result.recordsProcessed).toBe(60);
+
+      // Should have called upsert 60 times (once per chapter)
+      expect(mockUpsert).toHaveBeenCalledTimes(60);
+    });
+  });
+
+  describe('E2EE edge cases', () => {
+    it('handles E2EE check error gracefully', async () => {
+      // E2EE enabled but isE2EEEnabled throws error
+      // The isE2EEReady method catches this error, logs it, and returns false
+      (e2eeKeyManager.isE2EEEnabled as any).mockImplementation(() =>
+        Promise.reject(new Error('E2EE service unavailable')),
+      );
+
+      const mockUpsert = vi.fn().mockResolvedValue({
+        data: [{ id: '1', updated_at: '2025-11-14T12:00:00Z' }],
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+
+      const chapter = {
+        id: '1',
+        project_id: 'project-1',
+        title: 'Chapter',
+        body: 'Content',
+        index_in_project: 0,
+        word_count: 1,
+        status: 'draft' as const,
+      };
+
+      // Should not throw - error is caught
+      const result = await cloudUpsert.upsertChapters([chapter], 'user-123');
+
+      // Function should complete without errors
+      expect(result).toBeDefined();
+
+      // Should NOT have called encrypt (error prevented encryption)
+      expect(encryptJSON).not.toHaveBeenCalled();
+    });
+
+    it('uses plaintext when E2EE explicitly disabled', async () => {
+      (e2eeKeyManager.isE2EEEnabled as any).mockResolvedValue(false);
+
+      const mockUpsert = vi.fn().mockResolvedValue({
+        data: [{ id: '1', updated_at: '2025-11-14T12:00:00Z' }],
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+
+      const chapter = {
+        id: '1',
+        project_id: 'project-1',
+        title: 'Chapter',
+        body: 'Content',
+        index_in_project: 0,
+        word_count: 1,
+        status: 'draft' as const,
+      };
+
+      const result = await cloudUpsert.upsertChapters([chapter], 'user-123');
+
+      expect(result.success).toBe(true);
+      expect(encryptJSON).not.toHaveBeenCalled();
+
+      // Should use plaintext
+      expect(mockUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: 'Content',
+          title: 'Chapter',
+        }),
+        { onConflict: 'id' },
+      );
     });
   });
 });

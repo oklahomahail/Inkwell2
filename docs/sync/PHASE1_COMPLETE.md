@@ -396,4 +396,3 @@ To apply this to production:
 ---
 
 **Generated:** 2025-11-14
-**Author:** Claude Code

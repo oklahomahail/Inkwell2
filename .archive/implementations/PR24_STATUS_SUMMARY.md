@@ -465,4 +465,3 @@ If critical issues are found:
 
 _Last updated: 2025-10-30_
 _Document version: 1.0_
-_Author: Claude Code_

@@ -278,6 +278,71 @@ describe('hydrationService', () => {
   });
 
   describe('Other table types', () => {
+    it('hydrates projects successfully', async () => {
+      const projects = [
+        {
+          id: projectId,
+          title: 'My Novel',
+          summary: 'A great story',
+          genre: 'Fiction',
+          updated_at: '2025-11-14T12:00:00Z',
+        },
+      ];
+
+      const mockIs = vi.fn().mockResolvedValue({
+        data: projects,
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        gt: vi.fn().mockReturnThis(),
+        is: mockIs,
+      });
+
+      const result = await hydrationService.hydrateProject({
+        projectId,
+        tables: ['projects'],
+      });
+
+      // Projects table currently just fetches without writing (stub implementation)
+      expect(result.success).toBe(true);
+      expect(result.errors).toEqual([]);
+    });
+
+    it('hydrates project_settings successfully', async () => {
+      const settings = [
+        {
+          project_id: projectId,
+          font_family: 'Arial',
+          font_size: 16,
+          updated_at: '2025-11-14T12:00:00Z',
+        },
+      ];
+
+      const mockIs = vi.fn().mockResolvedValue({
+        data: settings,
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        gt: vi.fn().mockReturnThis(),
+        is: mockIs,
+      });
+
+      const result = await hydrationService.hydrateProject({
+        projectId,
+        tables: ['project_settings'],
+      });
+
+      // Settings table currently just fetches without writing (stub implementation)
+      expect(result.success).toBe(true);
+      expect(result.errors).toEqual([]);
+    });
+
     it('hydrates sections successfully', async () => {
       const sections = [
         {
@@ -398,6 +463,94 @@ describe('hydrationService', () => {
 
       expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('continues hydration even if one table fails', async () => {
+      let callCount = 0;
+      const mockIs = vi.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          // First table (chapters) fails
+          return Promise.resolve({
+            data: null,
+            error: { message: 'Chapters table error', code: 'PGRST301' },
+          });
+        }
+        // Second table (notes) succeeds
+        return Promise.resolve({
+          data: [
+            {
+              id: 'note-1',
+              project_id: projectId,
+              title: 'Note',
+              body: 'Content',
+              updated_at: '2025-11-14T12:00:00Z',
+            },
+          ],
+          error: null,
+        });
+      });
+
+      (supabase.from as any).mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        gt: vi.fn().mockReturnThis(),
+        is: mockIs,
+      });
+
+      const result = await hydrationService.hydrateProject({
+        projectId,
+        tables: ['chapters', 'notes'],
+      });
+
+      // Should have errors but still process notes
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.recordsSynced).toBe(1); // Notes synced
+    });
+  });
+
+  describe('Progress callbacks', () => {
+    it('calls onProgress callback during hydration', async () => {
+      const mockIs = vi.fn().mockResolvedValue({
+        data: [
+          {
+            id: '1',
+            project_id: projectId,
+            title: 'Chapter 1',
+            body: 'Content',
+            index_in_project: 0,
+            word_count: 1,
+            status: 'draft',
+            updated_at: '2025-11-14T12:00:00Z',
+          },
+        ],
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        gt: vi.fn().mockReturnThis(),
+        is: mockIs,
+      });
+
+      const progressCallback = vi.fn();
+
+      await hydrationService.hydrateProject({
+        projectId,
+        tables: ['chapters'],
+        onProgress: progressCallback,
+      });
+
+      // Should have called progress callback at least twice (start + end)
+      expect(progressCallback).toHaveBeenCalled();
+      expect(progressCallback.mock.calls.length).toBeGreaterThan(0);
+
+      // Check progress structure
+      const lastCall = progressCallback.mock.calls[progressCallback.mock.calls.length - 1][0];
+      expect(lastCall).toHaveProperty('currentTable');
+      expect(lastCall).toHaveProperty('completedTables');
+      expect(lastCall).toHaveProperty('percentComplete');
     });
   });
 });

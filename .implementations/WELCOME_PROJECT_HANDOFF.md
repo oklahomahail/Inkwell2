@@ -180,6 +180,5 @@ All events are PII-free with `sample: 1` payload:
 
 ---
 
-**Prepared by:** Claude Code
 **Review Status:** Ready for merge
 **Deployment Target:** v0.9.1 Beta (Week 2)

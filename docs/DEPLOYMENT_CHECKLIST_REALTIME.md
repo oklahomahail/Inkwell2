@@ -115,9 +115,7 @@ git commit -m "feat: add real-time chapter sync with Supabase
 - Add debounced autosave (600ms)
 - Background sync every 3 minutes
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
 ### Step 2: Push to Repository

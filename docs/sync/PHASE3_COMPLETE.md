@@ -485,4 +485,3 @@ function StatusBar() {
 ---
 
 **Generated:** 2025-11-14
-**Author:** Claude Code

@@ -1143,7 +1143,6 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 ## Credits
 
 **Design System:** "Sophisticated Simplicity" (2025)
-**Implementation:** Claude Code
 **Typography:** Source Serif Pro, Inter, JetBrains Mono
 **Animation:** Framer Motion v12.23.24
 

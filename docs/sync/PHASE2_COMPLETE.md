@@ -366,4 +366,3 @@ const result = await hydrationService.hydrateProject({
 ---
 
 **Generated:** 2025-11-14
-**Author:** Claude Code
