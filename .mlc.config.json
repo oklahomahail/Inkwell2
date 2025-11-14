@@ -28,7 +28,22 @@
       "pattern": "\\.test\\.ts$"
     },
     {
+      "pattern": "\\.test\\.ts#"
+    },
+    {
       "pattern": "\\.sql$"
+    },
+    {
+      "pattern": "\\.sql#L\\d+"
+    },
+    {
+      "pattern": "supabase/migrations/.+\\.sql"
+    },
+    {
+      "pattern": "^\\.\\./SECURITY"
+    },
+    {
+      "pattern": "^/SECURITY"
     }
   ],
   "replacementPatterns": [
