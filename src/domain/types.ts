@@ -122,6 +122,7 @@ export interface Project {
   characters: Character[];
   timelineEvents: TimelineEvent[];
   writingSessions: WritingSession[];
+  storyTemplateId?: string; // Reference to selected story template
   metadata: {
     totalWordCount: number;
     targetWordCount?: number;

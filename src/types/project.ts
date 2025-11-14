@@ -172,6 +172,10 @@ export interface Project {
   creationMode?: 'writing' | 'planning';
   // Demo/Tutorial flag (v1.3.0+) - excludes from analytics
   isDemo?: boolean;
+  // Story template system (v1.4.0+)
+  storyTemplateId?: string | null; // Reference to selected story template
+  storyTemplateVersion?: string; // Version of the template schema
+  beatMapping?: Record<string, string | null>; // Maps beat IDs to chapter IDs
   // Legacy/compatibility fields (for migration period)
   content?: string; // Legacy monolithic content field (deprecated - use chapters)
   chapters?: Chapter[]; // Can be present but use EnhancedProject for full typing
