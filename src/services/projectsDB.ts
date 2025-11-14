@@ -28,6 +28,7 @@ const STORE_NAME = 'projects';
 class ProjectsDBService {
   private db: IDBDatabase | null = null;
   private initPromise: Promise<IDBDatabase> | null = null;
+  private pendingTransactions = 0;
 
   /**
    * Initialize IndexedDB connection
@@ -78,6 +79,7 @@ class ProjectsDBService {
   async saveProject(project: EnhancedProject): Promise<void> {
     const db = await this.init();
     const tx = db.transaction(STORE_NAME, 'readwrite');
+    this.trackTransaction(tx);
     const store = tx.objectStore(STORE_NAME);
 
     return new Promise((resolve, reject) => {
@@ -102,6 +104,7 @@ class ProjectsDBService {
   async loadProject(projectId: string): Promise<EnhancedProject | null> {
     const db = await this.init();
     const tx = db.transaction(STORE_NAME, 'readonly');
+    this.trackTransaction(tx);
     const store = tx.objectStore(STORE_NAME);
 
     return new Promise((resolve, reject) => {
@@ -125,6 +128,7 @@ class ProjectsDBService {
   async loadAllProjects(): Promise<EnhancedProject[]> {
     const db = await this.init();
     const tx = db.transaction(STORE_NAME, 'readonly');
+    this.trackTransaction(tx);
     const store = tx.objectStore(STORE_NAME);
 
     return new Promise((resolve, reject) => {
@@ -148,6 +152,7 @@ class ProjectsDBService {
   async deleteProject(projectId: string): Promise<void> {
     const db = await this.init();
     const tx = db.transaction(STORE_NAME, 'readwrite');
+    this.trackTransaction(tx);
     const store = tx.objectStore(STORE_NAME);
 
     return new Promise((resolve, reject) => {
@@ -174,6 +179,7 @@ class ProjectsDBService {
   ): Promise<EnhancedProject[]> {
     const db = await this.init();
     const tx = db.transaction(STORE_NAME, 'readonly');
+    this.trackTransaction(tx);
     const store = tx.objectStore(STORE_NAME);
     const index = store.index(indexName);
 
@@ -198,6 +204,7 @@ class ProjectsDBService {
   async getCount(): Promise<number> {
     const db = await this.init();
     const tx = db.transaction(STORE_NAME, 'readonly');
+    this.trackTransaction(tx);
     const store = tx.objectStore(STORE_NAME);
 
     return new Promise((resolve, reject) => {
@@ -235,11 +242,52 @@ class ProjectsDBService {
   }
 
   /**
+   * Track transaction lifecycle for safe shutdown
+   */
+  private trackTransaction(tx: IDBTransaction): void {
+    this.pendingTransactions++;
+    const cleanup = () => {
+      this.pendingTransactions--;
+    };
+    tx.addEventListener('complete', cleanup);
+    tx.addEventListener('error', cleanup);
+    tx.addEventListener('abort', cleanup);
+  }
+
+  /**
+   * Close IndexedDB connection and wait for pending transactions
+   * Should be called on app unmount to prevent connection leaks
+   */
+  async closeAndWait(): Promise<void> {
+    if (!this.db) return;
+
+    devLog.debug('[ProjectsDB] Closing database connection (waiting for pending transactions)');
+
+    // Wait for all pending transactions to complete
+    const maxWaitTime = 5000; // 5 seconds max
+    const startTime = Date.now();
+    while (this.pendingTransactions > 0 && Date.now() - startTime < maxWaitTime) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
+    if (this.pendingTransactions > 0) {
+      devLog.warn(
+        `[ProjectsDB] Closing with ${this.pendingTransactions} pending transactions after timeout`
+      );
+    }
+
+    this.db.close();
+    this.db = null;
+    this.initPromise = null;
+  }
+
+  /**
    * Clear all projects (use with caution!)
    */
   async clearAll(): Promise<void> {
     const db = await this.init();
     const tx = db.transaction(STORE_NAME, 'readwrite');
+    this.trackTransaction(tx);
     const store = tx.objectStore(STORE_NAME);
 
     return new Promise((resolve, reject) => {

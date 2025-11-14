@@ -38,6 +38,7 @@ class SyncQueueService {
 
   private db: IDBDatabase | null = null;
   private initPromise: Promise<IDBDatabase> | null = null;
+  private pendingTransactions = 0;
 
   // In-memory queue for fast access
   private queue: Map<string, SyncOperation> = new Map();
@@ -129,6 +130,7 @@ class SyncQueueService {
     if (!this.db) throw new Error('Database not initialized');
 
     const tx = this.db.transaction(STORE_NAME, 'readonly');
+    this.trackTransaction(tx);
     const store = tx.objectStore(STORE_NAME);
 
     return new Promise((resolve, reject) => {
@@ -326,16 +328,15 @@ class SyncQueueService {
         op.lastAttemptAt = Date.now();
         await this.persistOperation(op);
 
-        // Simulate successful sync (Phase 2 will have actual cloud upsert)
-        devLog.debug('[SyncQueue] Processing operation (simulated)', {
+        // Execute cloud sync
+        devLog.debug('[SyncQueue] Processing operation', {
           id: op.id,
           table: op.table,
           recordId: op.recordId,
           attempt: op.attempts,
         });
 
-        // In Phase 2, replace this with actual cloudUpsert call
-        await this.simulateCloudSync(op);
+        await this.executeCloudSync(op);
 
         // Mark as success
         op.status = 'success';
@@ -371,15 +372,24 @@ class SyncQueueService {
   }
 
   /**
-   * Simulate cloud sync (placeholder for Phase 2)
-   * In Phase 2, this will be replaced with actual Supabase upsert
+   * Execute cloud sync operation
+   * Calls actual Supabase upsert
    */
-  private async simulateCloudSync(operation: SyncOperation): Promise<void> {
-    // Simulate network latency
-    await new Promise((resolve) => setTimeout(resolve, 50));
+  private async executeCloudSync(operation: SyncOperation): Promise<void> {
+    const { cloudUpsert } = await import('./cloudUpsert');
 
-    // In Phase 2, this will be:
-    // await cloudUpsert.upsertRecord(operation.table, operation.payload);
+    // Upsert single record
+    const result = await cloudUpsert.upsertRecords(operation.table, [operation.payload]);
+
+    if (!result.success) {
+      throw new Error(result.errors.join('; '));
+    }
+
+    devLog.debug('[SyncQueue] Cloud sync successful', {
+      operationId: operation.id,
+      table: operation.table,
+      recordId: operation.recordId,
+    });
   }
 
   /**
@@ -549,6 +559,46 @@ class SyncQueueService {
     if (navigator.onLine) {
       await this.processQueue();
     }
+  }
+
+  /**
+   * Track transaction lifecycle for safe shutdown
+   */
+  private trackTransaction(tx: IDBTransaction): void {
+    this.pendingTransactions++;
+    const cleanup = () => {
+      this.pendingTransactions--;
+    };
+    tx.addEventListener('complete', cleanup);
+    tx.addEventListener('error', cleanup);
+    tx.addEventListener('abort', cleanup);
+  }
+
+  /**
+   * Close IndexedDB connection and wait for pending transactions
+   * Should be called on app unmount to prevent connection leaks
+   */
+  async closeAndWait(): Promise<void> {
+    if (!this.db) return;
+
+    devLog.log('[SyncQueue] Closing database connection (waiting for pending transactions)');
+
+    // Wait for all pending transactions to complete
+    const maxWaitTime = 5000; // 5 seconds max
+    const startTime = Date.now();
+    while (this.pendingTransactions > 0 && Date.now() - startTime < maxWaitTime) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
+    if (this.pendingTransactions > 0) {
+      devLog.warn(
+        `[SyncQueue] Closing with ${this.pendingTransactions} pending transactions after timeout`
+      );
+    }
+
+    this.db.close();
+    this.db = null;
+    this.initPromise = null;
   }
 }
 
