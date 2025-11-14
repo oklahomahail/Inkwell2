@@ -17,17 +17,27 @@ Inkwell is an **offline-first writing platform** for serious authors. The focus 
 
 ### ✅ Recently Completed
 
-#### Inline Formatting Toolbar (November 14, 2025)
+#### Recent Improvements (November 11-14, 2025)
 
-- **Visual Typography Controls**: Font family, size, and line spacing controls directly in the Writing Panel
-- **Indentation Tools**: Increase/decrease first-line indent with visual buttons
-- **Scene Separator Insertion**: One-click insertion of scene breaks (`***`) with proper spacing
-- **Plain Text Preservation**: All formatting is visual-only, text remains plain for export compatibility
-- **Dark Mode Support**: Full dark mode styling for toolbar and controls
-- **Focus Mode Compatible**: Toolbar automatically hides in distraction-free focus mode
-- **7 Professional Fonts**: Inter, Source Sans 3, Literata, Merriweather, PT Serif, IBM Plex Serif, EB Garamond
-- **Project-Level Persistence**: Formatting settings saved per-project via FormattingContext
-- **Zero Schema Changes**: Uses existing formatting infrastructure, no database migrations required
+**Inline Formatting Toolbar** (November 14)
+
+- Visual typography controls: Font family, size, and line spacing directly in Writing Panel
+- Indentation tools with increase/decrease buttons
+- One-click scene separator insertion (`***`) with proper spacing
+- Plain text preservation - all formatting is visual-only for export compatibility
+- 7 professional fonts available
+- Project-level persistence via FormattingContext
+- Full dark mode support, auto-hides in focus mode
+
+**Bug Fixes & Polish** (November 11-13)
+
+- Fixed Writing Panel duplicated chapters and navigation errors
+- Improved export visibility with enhanced EPUB format support
+- Enhanced AI mode selector with clear visual states
+- Removed numeric keyboard shortcuts from panel navigation for better UX
+- Enhanced link checker to ignore SQL file line anchors
+- Comprehensive security audit with RLS policy fixes
+- Fixed CI/CD failures for security, tests, and documentation
 
 #### v0.9.2-beta - Production Reliability & UX Improvements (November 10, 2025)
 
