@@ -17,6 +17,18 @@
     },
     {
       "pattern": "^https://github\\.com/oklahomahail/Inkwell2/discussions"
+    },
+    {
+      "pattern": "^\\.\\./supabase/"
+    },
+    {
+      "pattern": "^\\.\\./\\.github/"
+    },
+    {
+      "pattern": "\\.test\\.ts$"
+    },
+    {
+      "pattern": "\\.sql$"
     }
   ],
   "replacementPatterns": [

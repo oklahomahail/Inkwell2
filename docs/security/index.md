@@ -494,7 +494,7 @@ Create a test migration with a new table, following the template and running all
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/)
-- [Security by Design Principles](https://owasp.org/www-project-security-by-design-principles/)
+- [Security by Design](https://cheatsheetseries.owasp.org/cheatsheets/Secure_Product_Design_Cheat_Sheet.html)
 
 ---
 
