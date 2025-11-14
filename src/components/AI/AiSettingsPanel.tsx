@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useAiSettings } from '@/context/AiSettingsContext';
 import type { AiModel, AiProvider } from '@/types/ai';
@@ -35,29 +35,51 @@ export default function AiSettingsPanel() {
 
   return (
     <div className="space-y-6">
+      {/* How AI Mode Works - Info Section (moved to top) */}
+      <section className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-6">
+        <h4 className="font-semibold text-blue-600 dark:text-blue-400">How AI Mode Works</h4>
+        <ul className="mt-3 space-y-2 text-sm text-blue-700 dark:text-blue-300">
+          <li>
+            <strong>Simple Mode:</strong> Quick AI suggestions powered by Inkwell with rate limits.
+            Perfect for getting started.
+          </li>
+          <li>
+            <strong>Power Mode:</strong> Use your own API key for unlimited access and advanced
+            features. You control the costs.
+          </li>
+          <li>
+            <strong>Security:</strong> Custom API keys are stored locally in your browser and never
+            transmitted to Inkwell servers.
+          </li>
+        </ul>
+      </section>
+
       {/* AI Mode Section */}
       <section className="rounded-2xl border border-inkwell-border bg-inkwell-surface p-6">
         <h3 className="text-lg font-semibold text-inkwell-text">AI Mode</h3>
         <p className="mt-2 text-sm text-inkwell-muted">
-          Inkwell includes a built-in AI companion for quick ideas and edits. Want deeper creative
-          assistance? Connect your own Claude key for unlimited power.
+          Currently using{' '}
+          <span className="font-semibold text-inkwell-text">
+            {settings.mode === 'simple' ? 'Simple Mode' : 'Power Mode'}
+          </span>
+          . Switch modes below to change your AI configuration.
         </p>
         <div className="mt-4 flex gap-3">
           <button
-            className={`rounded-lg border px-4 py-2 transition-colors ${
+            className={`rounded-lg border px-4 py-2 font-medium transition-colors ${
               settings.mode === 'simple'
-                ? 'border-inkwell-accent bg-inkwell-accent text-white'
-                : 'border-inkwell-border bg-inkwell-card text-inkwell-text hover:border-inkwell-accent'
+                ? 'border-blue-700 bg-blue-600 text-white shadow-sm'
+                : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-blue-500 hover:bg-gray-600'
             }`}
             onClick={() => setMode('simple')}
           >
             Simple Mode
           </button>
           <button
-            className={`rounded-lg border px-4 py-2 transition-colors ${
+            className={`rounded-lg border px-4 py-2 font-medium transition-colors ${
               settings.mode === 'custom'
-                ? 'border-inkwell-accent bg-inkwell-accent text-white'
-                : 'border-inkwell-border bg-inkwell-card text-inkwell-text hover:border-inkwell-accent'
+                ? 'border-blue-700 bg-blue-600 text-white shadow-sm'
+                : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-blue-500 hover:bg-gray-600'
             }`}
             onClick={() => setMode('custom')}
           >
@@ -170,25 +192,6 @@ export default function AiSettingsPanel() {
             </button>
           </div>
         </div>
-      </section>
-
-      {/* Info Section */}
-      <section className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-6">
-        <h4 className="font-semibold text-blue-600 dark:text-blue-400">How AI Mode Works</h4>
-        <ul className="mt-3 space-y-2 text-sm text-blue-700 dark:text-blue-300">
-          <li>
-            <strong>Simple Mode:</strong> Quick AI suggestions powered by Inkwell with rate limits.
-            Perfect for getting started.
-          </li>
-          <li>
-            <strong>Power Mode:</strong> Use your own API key for unlimited access and advanced
-            features. You control the costs.
-          </li>
-          <li>
-            <strong>Security:</strong> Custom API keys are stored locally in your browser and never
-            transmitted to Inkwell servers.
-          </li>
-        </ul>
       </section>
     </div>
   );
