@@ -99,7 +99,7 @@
 .inkwell-ch-divider {
   margin: 1rem auto;
   border: none;
-  border-top: 1px solid currentColor;
+  border-top: 1px solid currentcolor;
   opacity: 0.3;
   width: 33%;
 }
@@ -130,7 +130,7 @@
   padding: var(--ink-margin-top) var(--ink-margin-right) var(--ink-margin-bottom)
     var(--ink-margin-left);
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 }
 
 @media print {
@@ -175,3 +175,27 @@
 */
 
 /* Fallback stacks are defined in src/types/formatting.ts */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Writing Editor Enhancements
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * First-line indent for textarea content
+ * Note: This is applied via inline styles in the component
+ */
+.writing-editor.indent-enabled {
+  text-indent: var(--ink-first-indent, 1.25rem);
+}
+
+/**
+ * Scene separator styling
+ * Automatically style lines that contain only asterisks or similar separators
+ */
+.writing-editor::after {
+  content: '';
+
+  /* This is a placeholder for potential future enhancement */
+
+  /* Scene separators are plain text in the textarea for now */
+}

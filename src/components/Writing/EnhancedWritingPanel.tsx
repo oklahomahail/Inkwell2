@@ -34,7 +34,9 @@ import AISuggestionBox from '@/components/AI/AISuggestionBox';
 import { RealtimeStatus } from '@/components/Chapters/RealtimeStatus';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Logo } from '@/components/ui/Logo';
+import { InlineFormattingToolbar } from '@/components/Writing/InlineFormattingToolbar';
 import { useAppContext, View } from '@/context/AppContext';
+import { FormattingProvider, useFormatting } from '@/context/FormattingContext';
 import { useToast } from '@/context/toast';
 import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 import { useSections } from '@/hooks/useSections';
@@ -160,9 +162,11 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
   );
 };
 
-const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }) => {
+// Inner component that uses FormattingContext
+const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ className }) => {
   const { state: _state, currentProject, dispatch } = useAppContext();
   const { showToast } = useToast();
+  const { formatting } = useFormatting();
   const [content, setContent] = useState('');
   const [wordCount, setWordCount] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -668,6 +672,31 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
     textarea.focus();
   }, []);
 
+  // Handle scene separator insertion
+  const handleInsertSceneSeparator = useCallback(() => {
+    if (!textareaRef.current) return;
+
+    const textarea = textareaRef.current;
+    const start = textarea.selectionStart;
+    const value = textarea.value;
+
+    // Scene separator with proper spacing
+    const separator = '\n\n***\n\n';
+
+    const newValue = value.substring(0, start) + separator + value.substring(start);
+    const newCursorPos = start + separator.length;
+
+    setContent(newValue);
+
+    // Update textarea and trigger change event for autosave
+    textarea.value = newValue;
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+    textarea.focus();
+
+    // Trigger input event for autosave
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  }, []);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -970,46 +999,61 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
         )}
 
         {/* Writing Area */}
-        <div
-          className={`writing-area flex-1 ${focusMode ? 'p-8 max-w-4xl mx-auto' : 'p-6'} overflow-auto`}
-        >
-          <div className="relative">
-            <textarea
-              ref={textareaRef}
-              value={content}
-              onChange={handleContentChange}
-              placeholder={
-                focusMode
-                  ? 'Begin your story...'
-                  : `Start writing "${currentProject.name}"...\n\nTip: Press Ctrl+S to save manually, or just keep writing - we'll save automatically.`
-              }
-              data-tour="editor"
-              className={`
-                writing-editor w-full resize-none border-none outline-none
-                ${
-                  focusMode
-                    ? 'text-lg leading-relaxed min-h-[600px] bg-transparent'
-                    : 'text-base leading-normal min-h-[500px] bg-white dark:bg-slate-800'
-                }
-                text-slate-900 dark:text-slate-100
-                placeholder:text-slate-400 dark:placeholder:text-slate-500
-                ${focusMode ? '' : 'rounded-lg border border-slate-200 dark:border-slate-700 p-6'}
-                transition-all duration-200
-                focus:ring-0 focus:border-primary-300 dark:focus:border-primary-600
-              `}
-              autoFocus
-            />
+        <div className={`writing-area flex-1 flex flex-col overflow-hidden`}>
+          {/* Inline Formatting Toolbar */}
+          {!focusMode && (
+            <InlineFormattingToolbar onInsertSceneSeparator={handleInsertSceneSeparator} />
+          )}
 
-            {/* Focus Mode Overlay Stats */}
-            {focusMode && showStats && (
-              <div className="absolute bottom-4 right-4 bg-slate-900/80 dark:bg-slate-100/80 text-white dark:text-slate-900 px-3 py-2 rounded-lg backdrop-blur-sm">
-                <div className="flex items-center gap-4 text-sm">
-                  <span>{wordCount} words</span>
-                  <span>•</span>
-                  <span>{getReadingTime()}m read</span>
+          <div className={`flex-1 ${focusMode ? 'p-8 max-w-4xl mx-auto' : 'p-6'} overflow-auto`}>
+            <div className="relative">
+              <textarea
+                ref={textareaRef}
+                value={content}
+                onChange={handleContentChange}
+                placeholder={
+                  focusMode
+                    ? 'Begin your story...'
+                    : `Start writing "${currentProject.name}"...\n\nTip: Press Ctrl+S to save manually, or just keep writing - we'll save automatically.`
+                }
+                data-tour="editor"
+                style={{
+                  fontFamily: formatting.fontFamily,
+                  fontSize: `${formatting.fontSize}rem`,
+                  lineHeight: formatting.lineHeight,
+                  textIndent: formatting.firstLineIndent ? `${formatting.firstLineIndent}rem` : '0',
+                  paddingLeft: formatting.firstLineIndent
+                    ? `${formatting.firstLineIndent}rem`
+                    : undefined,
+                }}
+                className={`
+                  writing-editor w-full resize-none border-none outline-none
+                  ${
+                    focusMode
+                      ? 'min-h-[600px] bg-transparent'
+                      : 'min-h-[500px] bg-white dark:bg-slate-800'
+                  }
+                  text-slate-900 dark:text-slate-100
+                  placeholder:text-slate-400 dark:placeholder:text-slate-500
+                  ${focusMode ? '' : 'rounded-lg border border-slate-200 dark:border-slate-700 p-6'}
+                  transition-all duration-200
+                  focus:ring-0 focus:border-primary-300 dark:focus:border-primary-600
+                  ${formatting.firstLineIndent && formatting.firstLineIndent > 0 ? 'indent-enabled' : ''}
+                `}
+                autoFocus
+              />
+
+              {/* Focus Mode Overlay Stats */}
+              {focusMode && showStats && (
+                <div className="absolute bottom-4 right-4 bg-slate-900/80 dark:bg-slate-100/80 text-white dark:text-slate-900 px-3 py-2 rounded-lg backdrop-blur-sm">
+                  <div className="flex items-center gap-4 text-sm">
+                    <span>{wordCount} words</span>
+                    <span>•</span>
+                    <span>{getReadingTime()}m read</span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -1047,6 +1091,23 @@ const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = ({ className }
         onCancel={handleCancelDelete}
       />
     </div>
+  );
+};
+
+// Wrapper component that provides FormattingContext
+const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = (props) => {
+  const { currentProject } = useAppContext();
+
+  // If no project, render inner component directly (it handles the no-project state)
+  if (!currentProject) {
+    return <EnhancedWritingPanelInner {...props} />;
+  }
+
+  // Wrap with FormattingProvider for projects
+  return (
+    <FormattingProvider projectId={currentProject.id}>
+      <EnhancedWritingPanelInner {...props} />
+    </FormattingProvider>
   );
 };
 
