@@ -127,6 +127,17 @@ describe('AppContext', () => {
       // UI-only state (v1.3.0+)
       activeSectionId: null,
       creationMode: null,
+      // Cloud sync state (Phase 3)
+      cloudSync: {
+        status: 'offline',
+        isSyncing: false,
+        pendingOperations: 0,
+        lastSyncAt: null,
+        lastError: null,
+        isOnline: true,
+        isAuthenticated: false,
+        realtimeStatus: 'disconnected',
+      },
     });
   });
 
