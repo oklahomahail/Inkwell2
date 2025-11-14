@@ -13,19 +13,13 @@
  */
 
 import { supabase } from '@/lib/supabaseClient';
-import type {
-  SyncTable,
-  HydrationRequest,
-  HydrationResult,
-  HydrationProgress,
-  MergeConflict,
-} from './types';
-import { lwwMerge, batchMerge } from './cloudMerge';
-import { projectsDB } from '@/services/projectsDB';
-import devLog from '@/utils/devLog';
 import { decryptJSON } from '@/services/cryptoService';
 import { e2eeKeyManager } from '@/services/e2eeKeyManager';
+import { ProjectsDB } from '@/services/projectsDB';
 import type { EnhancedProject } from '@/types/project';
+import devLog from '@/utils/devLog';
+
+import type { SyncTable, HydrationRequest, HydrationResult, MergeConflict } from './types';
 
 /**
  * Hydration Service
@@ -100,7 +94,7 @@ class HydrationService {
       const duration = performance.now() - startTime;
 
       onProgress?.({
-        currentTable: tables[tables.length - 1],
+        currentTable: tables[tables.length - 1] || 'projects',
         completedTables: tables,
         recordsFetched: recordsSynced,
         recordsWritten: recordsSynced,
@@ -138,7 +132,7 @@ class HydrationService {
   private async hydrateTable(
     table: SyncTable,
     projectId: string,
-    since?: number
+    since?: number,
   ): Promise<{
     fetched: number;
     written: number;
@@ -220,7 +214,7 @@ class HydrationService {
    */
   private async hydrateChapters(
     cloudRecords: any[],
-    projectId: string
+    projectId: string,
   ): Promise<{
     written: number;
     conflicts: MergeConflict[];
@@ -301,7 +295,7 @@ class HydrationService {
       }
 
       // Try to load from local
-      const localProject = await projectsDB.loadProject(projectId);
+      const localProject = await ProjectsDB.loadProject(projectId);
 
       if (cloudProject && localProject) {
         // Both exist - compare timestamps
@@ -311,7 +305,7 @@ class HydrationService {
         if (cloudUpdated > localUpdated) {
           devLog.log('[Hydration] Cloud is newer, hydrating from cloud');
           await this.hydrateProject({ projectId });
-          const updated = await projectsDB.loadProject(projectId);
+          const updated = await ProjectsDB.loadProject(projectId);
           return { source: 'cloud', project: updated };
         } else {
           devLog.log('[Hydration] Local is newer, using local');
@@ -321,7 +315,7 @@ class HydrationService {
         // Cloud only - hydrate
         devLog.log('[Hydration] Found in cloud, hydrating');
         await this.hydrateProject({ projectId });
-        const updated = await projectsDB.loadProject(projectId);
+        const updated = await ProjectsDB.loadProject(projectId);
         return { source: 'cloud', project: updated };
       } else if (localProject) {
         // Local only - will be pushed to cloud on next save
@@ -346,7 +340,7 @@ class HydrationService {
     source: 'local' | 'none';
     project: EnhancedProject | null;
   }> {
-    const project = await projectsDB.loadProject(projectId);
+    const project = await ProjectsDB.loadProject(projectId);
     if (project) {
       return { source: 'local', project };
     } else {

@@ -59,18 +59,22 @@ emitSessionStart();
 // Emit session.end on page unload or visibility change to hidden
 window.addEventListener('beforeunload', () => {
   emitSessionEnd('unload');
-  analyticsService.endSession();
+
   // Close IndexedDB connections to prevent leaks
-  Chapters.close();
-  import('@/services/projectsDB').then(({ ProjectsDB }) => {
-    ProjectsDB.close();
-  });
-  // Cleanup workers
-  import('@/services/autosaveWorkerService').then(({ autosaveWorker }) => {
-    autosaveWorker.destroy();
-  });
-  import('@/services/searchService').then(({ SearchService }) => {
-    SearchService.destroy();
+  // Note: beforeunload handlers should be synchronous, but we do our best
+  // to wait for pending transactions before closing
+  Promise.all([
+    analyticsService.endSession(),
+    Chapters.closeAndWait(),
+    import('@/services/projectsDB').then(({ ProjectsDB }) => ProjectsDB.closeAndWait()),
+    import('@/sync/syncQueue').then(({ syncQueue }) => syncQueue.closeAndWait()),
+    // Cleanup workers
+    import('@/services/autosaveWorkerService').then(({ autosaveWorker }) =>
+      autosaveWorker.destroy(),
+    ),
+    import('@/services/searchService').then(({ SearchService }) => SearchService.destroy()),
+  ]).catch((error) => {
+    console.error('[App] Error during cleanup:', error);
   });
 });
 document.addEventListener('visibilitychange', () => {

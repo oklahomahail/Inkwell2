@@ -12,11 +12,14 @@
  */
 
 import { supabase } from '@/lib/supabaseClient';
-import type { SyncTable, BatchConfig, DEFAULT_BATCH_CONFIG } from './types';
-import devLog from '@/utils/devLog';
 import { encryptJSON } from '@/services/cryptoService';
 import { e2eeKeyManager } from '@/services/e2eeKeyManager';
 import type { EncryptResult } from '@/types/crypto';
+import devLog from '@/utils/devLog';
+
+import { DEFAULT_BATCH_CONFIG } from './types';
+
+import type { SyncTable, BatchConfig } from './types';
 
 /**
  * Upsert result for a single table operation
@@ -58,16 +61,19 @@ class CloudUpsertService {
       // Process in batches
       const batches = this.createBatches(records, this.batchConfig.maxBatchSize);
 
-      devLog.log(`[CloudUpsert] Upserting ${records.length} records to ${table} in ${batches.length} batches`);
+      devLog.log(
+        `[CloudUpsert] Upserting ${records.length} records to ${table} in ${batches.length} batches`,
+      );
 
       for (let i = 0; i < batches.length; i++) {
         const batch = batches[i];
+        if (!batch) continue;
 
         try {
           // Table-specific upsert logic
           const result = await this.upsertBatch(table, batch, user.id);
           recordsProcessed += result.recordsProcessed;
-          errors.push(...result.errors);
+          errors.push(...(result.errors || []));
 
           // Delay between batches to avoid rate limiting
           if (i < batches.length - 1) {
@@ -82,7 +88,9 @@ class CloudUpsertService {
 
       const duration = performance.now() - startTime;
 
-      devLog.log(`[CloudUpsert] Complete: ${recordsProcessed}/${records.length} records in ${duration.toFixed(0)}ms`);
+      devLog.log(
+        `[CloudUpsert] Complete: ${recordsProcessed}/${records.length} records in ${duration.toFixed(0)}ms`,
+      );
 
       return {
         success: errors.length === 0,
@@ -109,7 +117,7 @@ class CloudUpsertService {
   private async upsertBatch(
     table: SyncTable,
     records: any[],
-    userId: string
+    userId: string,
   ): Promise<UpsertResult> {
     const errors: string[] = [];
     let recordsProcessed = 0;
@@ -456,11 +464,7 @@ class CloudUpsertService {
   /**
    * Encrypt chapter for E2EE project
    */
-  private async encryptChapter(
-    record: any,
-    projectId: string,
-    userId: string
-  ): Promise<any> {
+  private async encryptChapter(record: any, projectId: string, userId: string): Promise<any> {
     const dek = e2eeKeyManager.getDEK(projectId);
 
     const contentToEncrypt = {

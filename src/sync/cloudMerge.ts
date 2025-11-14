@@ -8,8 +8,9 @@
  * All POC tests passed before production use.
  */
 
-import type { CloudRecord, LocalRecord, MergeResult, MergeDecision } from './types';
 import devLog from '@/utils/devLog';
+
+import type { CloudRecord, LocalRecord, MergeResult } from './types';
 
 /**
  * Last Write Wins merge algorithm
@@ -147,7 +148,7 @@ export function lwwMerge(local: LocalRecord, cloud: CloudRecord): MergeResult {
  */
 export function batchMerge(
   localRecords: LocalRecord[],
-  cloudRecords: CloudRecord[]
+  cloudRecords: CloudRecord[],
 ): MergeResult[] {
   const cloudMap = new Map(cloudRecords.map((r) => [r.id, r]));
   const results: MergeResult[] = [];
@@ -242,10 +243,20 @@ export function simpleHash(content: string): string {
  * @returns Hash string
  */
 export function hashRecord(record: any, fields?: string[]): string {
-  const fieldsToHash = fields || Object.keys(record).filter(
-    (key) =>
-      !['id', 'created_at', 'updated_at', 'deleted_at', 'client_rev', 'client_hash', 'last_synced_at'].includes(key)
-  );
+  const fieldsToHash =
+    fields ||
+    Object.keys(record).filter(
+      (key) =>
+        ![
+          'id',
+          'created_at',
+          'updated_at',
+          'deleted_at',
+          'client_rev',
+          'client_hash',
+          'last_synced_at',
+        ].includes(key),
+    );
 
   const content = fieldsToHash
     .sort() // Consistent ordering

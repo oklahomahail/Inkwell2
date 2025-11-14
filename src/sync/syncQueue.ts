@@ -14,16 +14,17 @@
  * - Automatic recovery on service init
  */
 
+import devLog from '@/utils/devLog';
+
+import { DEFAULT_RETRY_CONFIG } from './types';
+
 import type {
   SyncOperation,
   SyncOperationType,
   SyncTable,
   SyncQueueStats,
-  SyncStatus,
   RetryConfig,
-  DEFAULT_RETRY_CONFIG,
 } from './types';
-import devLog from '@/utils/devLog';
 
 const DB_NAME = 'inkwell-sync-queue';
 const DB_VERSION = 1;
@@ -173,7 +174,7 @@ class SyncQueueService {
     recordId: string,
     projectId: string,
     payload: any,
-    priority: number = 0
+    priority: number = 0,
   ): Promise<string> {
     await this.init();
 
@@ -409,6 +410,7 @@ class SyncQueueService {
     if (!this.db) throw new Error('Database not initialized');
 
     const tx = this.db.transaction(STORE_NAME, 'readwrite');
+    this.trackTransaction(tx);
     const store = tx.objectStore(STORE_NAME);
 
     return new Promise((resolve, reject) => {
@@ -429,6 +431,7 @@ class SyncQueueService {
     if (!this.db) throw new Error('Database not initialized');
 
     const tx = this.db.transaction(STORE_NAME, 'readwrite');
+    this.trackTransaction(tx);
     const store = tx.objectStore(STORE_NAME);
 
     return new Promise((resolve, reject) => {
@@ -449,7 +452,8 @@ class SyncQueueService {
     const ops = Array.from(this.queue.values());
 
     const pending = ops.filter((op) => op.status === 'pending');
-    const oldestPending = pending.length > 0 ? Math.min(...pending.map((op) => op.createdAt)) : null;
+    const oldestPending =
+      pending.length > 0 ? Math.min(...pending.map((op) => op.createdAt)) : null;
 
     return {
       total: ops.length,
@@ -592,7 +596,7 @@ class SyncQueueService {
 
     if (this.pendingTransactions > 0) {
       devLog.warn(
-        `[SyncQueue] Closing with ${this.pendingTransactions} pending transactions after timeout`
+        `[SyncQueue] Closing with ${this.pendingTransactions} pending transactions after timeout`,
       );
     }
 
