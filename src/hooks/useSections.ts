@@ -91,19 +91,31 @@ export function useSections(projectId: string) {
 
   /**
    * Convert chapter data to section format
+   * Only processes chapters that belong to the current project
    */
-  const chapterToSection = useCallback((chapter: any): Section => {
-    return {
-      id: chapter.id,
-      title: chapter.title,
-      type: (chapter.type as SectionType) || 'chapter', // Default to chapter if no type
-      order: chapter.index,
-      content: chapter.content || '',
-      createdAt: chapter.createdAt,
-      updatedAt: chapter.updatedAt,
-      wordCount: chapter.wordCount,
-    };
-  }, []);
+  const chapterToSection = useCallback(
+    (chapter: any): Section | null => {
+      // Filter out chapters that don't belong to this project
+      if (chapter.projectId !== projectId) {
+        console.warn(
+          `[useSections] Skipping chapter ${chapter.id} - belongs to project ${chapter.projectId}, expected ${projectId}`,
+        );
+        return null;
+      }
+
+      return {
+        id: chapter.id,
+        title: chapter.title,
+        type: (chapter.type as SectionType) || 'chapter', // Default to chapter if no type
+        order: chapter.index,
+        content: chapter.content || '',
+        createdAt: chapter.createdAt,
+        updatedAt: chapter.updatedAt,
+        wordCount: chapter.wordCount,
+      };
+    },
+    [projectId],
+  );
 
   /**
    * Convert section to chapter data format for storage
@@ -147,7 +159,7 @@ export function useSections(projectId: string) {
     try {
       await syncChapters(projectId);
       const refreshed = await Chapters.list(projectId);
-      setSections(refreshed.map(chapterToSection));
+      setSections(refreshed.map(chapterToSection).filter((s): s is Section => s !== null));
       setLastSynced(new Date());
     } catch (error) {
       console.error('[useSections] Sync failed:', error);
@@ -172,7 +184,7 @@ export function useSections(projectId: string) {
 
       // Load from local IndexedDB first
       const local = await Chapters.list(projectId);
-      const sectionsData = local.map(chapterToSection);
+      const sectionsData = local.map(chapterToSection).filter((s): s is Section => s !== null);
       setSections(sectionsData);
 
       // Restore last active section
@@ -193,7 +205,7 @@ export function useSections(projectId: string) {
         try {
           await pullRemoteChanges(projectId);
           const refreshed = await Chapters.list(projectId);
-          setSections(refreshed.map(chapterToSection));
+          setSections(refreshed.map(chapterToSection).filter((s): s is Section => s !== null));
         } catch (error) {
           console.error('[useSections] Failed to pull remote changes:', error);
         }
@@ -251,7 +263,7 @@ export function useSections(projectId: string) {
     const unsubscribe = subscribeToChapterChanges(projectId, async (_chapterId) => {
       // Refresh sections from IndexedDB (already updated by sync service)
       const refreshed = await Chapters.list(projectId);
-      setSections(refreshed.map(chapterToSection));
+      setSections(refreshed.map(chapterToSection).filter((s): s is Section => s !== null));
 
       // Show visual indicator
       setLiveUpdateReceived(true);
@@ -287,7 +299,7 @@ export function useSections(projectId: string) {
       await Chapters.create(chapterData);
 
       const refreshed = await Chapters.list(projectId);
-      setSections(refreshed.map(chapterToSection));
+      setSections(refreshed.map(chapterToSection).filter((s): s is Section => s !== null));
       setActiveId(newSection.id);
 
       // Persist active section

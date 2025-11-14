@@ -78,6 +78,7 @@ class ChaptersService {
 
   /**
    * List all chapters for a project (sorted by index)
+   * Deduplicates by ID to prevent duplicate chapter display
    */
   async list(projectId: string): Promise<ChapterMeta[]> {
     const db = await this.getDB();
@@ -89,7 +90,19 @@ class ChaptersService {
       const request = index.getAll(projectId);
 
       request.onsuccess = () => {
-        const chapters = (request.result as ChapterMeta[]).sort((a, b) => a.index - b.index);
+        const allChapters = request.result as ChapterMeta[];
+
+        // Deduplicate by ID - keep only the most recent version of each chapter
+        const deduped = new Map<string, ChapterMeta>();
+        for (const chapter of allChapters) {
+          const existing = deduped.get(chapter.id);
+          if (!existing || new Date(chapter.updatedAt) > new Date(existing.updatedAt)) {
+            deduped.set(chapter.id, chapter);
+          }
+        }
+
+        // Sort by index
+        const chapters = Array.from(deduped.values()).sort((a, b) => a.index - b.index);
         resolve(chapters);
       };
       request.onerror = () => reject(request.error);
