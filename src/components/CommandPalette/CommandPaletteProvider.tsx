@@ -275,7 +275,6 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         label: 'Go to Dashboard',
         description: 'View project overview and statistics',
         category: 'navigation',
-        shortcut: '⌘1',
         action: () => setView(View.Dashboard),
       },
       {
@@ -283,7 +282,6 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         label: 'Go to Writing',
         description: 'Open the writing editor',
         category: 'navigation',
-        shortcut: '⌘2',
         action: () => setView(View.Writing),
       },
       {
@@ -291,7 +289,6 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         label: 'Go to Timeline',
         description: 'View story timeline and structure',
         category: 'navigation',
-        shortcut: '⌘3',
         action: () => setView(View.Timeline),
       },
       {
@@ -299,7 +296,6 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
         label: 'Go to Analysis',
         description: 'View writing analytics and insights',
         category: 'navigation',
-        shortcut: '⌘4',
         action: () => setView(View.Analysis),
       },
       {
@@ -498,14 +494,13 @@ export const CommandPaletteProvider: React.FC<{ children: ReactNode }> = ({ chil
           alert(
             [
               '⌘K - Command Palette',
-              '⌘1 - Dashboard',
-              '⌘2 - Writing',
-              '⌘3 - Timeline',
-              '⌘4 - Analysis',
+              '⌘E - Export',
               '⌘, - Settings',
               '⌘S - Save All',
               '⌘⇧E - Export Dialog',
               '⌘⇧F - Focus Mode',
+              '',
+              'Tip: Use ⌘K to quickly navigate to any panel',
             ].join('\n'),
           ),
       },

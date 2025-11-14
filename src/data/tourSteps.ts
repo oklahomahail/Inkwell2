@@ -97,7 +97,7 @@ export const defaultTourSteps: TourStep[] = [
     selector: '[data-tour="dashboard"]',
     title: 'Keyboard Shortcuts',
     content:
-      'Speed up your workflow with shortcuts: ⌘K for command palette, ⌘1-5 for quick view switching, and ⌘S to save.',
+      'Speed up your workflow with shortcuts: ⌘K for command palette (quick navigation), ⌘E for export, ⌘, for settings, and ⌘S to save.',
     placement: 'bottom',
   },
   {

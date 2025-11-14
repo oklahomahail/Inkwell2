@@ -53,7 +53,6 @@ const baseNavigationItems = [
     label: 'Dashboard',
     icon: Home,
     view: View.Dashboard,
-    shortcut: '⌘1',
     description: 'Overview and project management',
   },
   {
@@ -61,7 +60,6 @@ const baseNavigationItems = [
     label: 'Writing',
     icon: PenTool,
     view: View.Writing,
-    shortcut: '⌘2',
     description: 'Text editor and writing tools',
   },
   {
@@ -69,7 +67,6 @@ const baseNavigationItems = [
     label: 'Planning',
     icon: BookOpen,
     view: View.Planning,
-    shortcut: '⌘3',
     description: 'Story structure and outlines',
   },
   {
@@ -77,7 +74,6 @@ const baseNavigationItems = [
     label: 'Timeline',
     icon: Clock,
     view: View.Timeline,
-    shortcut: '⌘4',
     description: 'Project timeline and milestones',
   },
   {
@@ -85,7 +81,6 @@ const baseNavigationItems = [
     label: 'Analytics',
     icon: BarChart3,
     view: View.Analysis,
-    shortcut: '⌘5',
     description: 'Writing statistics and insights',
   },
   {
@@ -147,17 +142,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         label: 'Plot Boards',
         icon: Kanban,
         view: View.PlotBoards,
-        shortcut: '⌘6',
         description: 'Kanban-style plot and scene organization (Experimental)',
       };
 
       items.splice(planningIndex + 1, 0, plotBoardsItem);
-
-      // Update shortcut numbers for items after Plot Boards
-      items.forEach((item, _index) => {
-        if (item.id === 'timeline') item.shortcut = '⌘7';
-        else if (item.id === 'analytics') item.shortcut = '⌘8';
-      });
     }
 
     return items;
