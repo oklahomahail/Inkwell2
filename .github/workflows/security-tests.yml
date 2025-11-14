@@ -30,7 +30,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.12.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -151,13 +151,46 @@ jobs:
         run: |
           echo "Checking for views without explicit security_invoker..."
 
-          # Look for CREATE VIEW without security_invoker
-          UNSAFE_VIEWS=$(grep -ri "create.*view" supabase/migrations/ | grep -v "security_invoker" | grep -v "security invoker" | wc -l)
+          # Look for CREATE VIEW without security_invoker (check current line and next 2 lines)
+          # This handles multi-line view definitions like:
+          # create view public.foo
+          # with (security_invoker = true) as
+          UNSAFE_VIEWS=0
+          while IFS= read -r file; do
+            if [ -f "$file" ] && [[ "$file" == *.sql ]]; then
+              # Skip template and markdown files
+              if [[ "$file" == *"template"* ]] || [[ "$file" == *.md ]]; then
+                continue
+              fi
+
+              # Find CREATE VIEW statements and check context (ignore comments)
+              while IFS= read -r line_num; do
+                # Get the CREATE VIEW line and the next 2 lines
+                view_line=$(sed -n "${line_num}p" "$file")
+
+                # Skip if this is a comment
+                if echo "$view_line" | grep -q "^[[:space:]]*--"; then
+                  continue
+                fi
+
+                next_line=$(sed -n "$((line_num + 1))p" "$file")
+                next_line_2=$(sed -n "$((line_num + 2))p" "$file")
+
+                # Check if any of the 3 lines contains security_invoker
+                if ! echo "$view_line" | grep -qi "security_invoker" && \
+                   ! echo "$next_line" | grep -qi "security_invoker" && \
+                   ! echo "$next_line_2" | grep -qi "security_invoker"; then
+                  echo "::error::Unsafe view found in $file:$line_num"
+                  echo "$view_line"
+                  UNSAFE_VIEWS=$((UNSAFE_VIEWS + 1))
+                fi
+              done < <(grep -in "create.*view" "$file" | grep -v "^[[:space:]]*--" | cut -d: -f1)
+            fi
+          done < <(find supabase/migrations -name "*.sql" -o -name "*.md")
 
           if [ $UNSAFE_VIEWS -gt 0 ]; then
             echo "::error::Found $UNSAFE_VIEWS views without explicit security_invoker setting!"
             echo "All views should use 'with (security_invoker = true)' to respect RLS."
-            grep -rn "create.*view" supabase/migrations/ | grep -v "security_invoker" | grep -v "security invoker" || true
             exit 1
           else
             echo "✅ All views properly configured with security_invoker"

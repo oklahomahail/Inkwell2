@@ -504,6 +504,20 @@ class SyncQueueService {
   }
 
   /**
+   * Add a listener for sync state changes
+   */
+  addListener(callback: (stats: SyncQueueStats) => void): void {
+    this.stateListeners.add(callback);
+  }
+
+  /**
+   * Remove a listener
+   */
+  removeListener(callback: (stats: SyncQueueStats) => void): void {
+    this.stateListeners.delete(callback);
+  }
+
+  /**
    * Notify all listeners of state change
    */
   private notifyListeners(): void {

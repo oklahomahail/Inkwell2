@@ -51,6 +51,17 @@ export interface AppState {
   // UI-only state (v1.3.0+)
   activeSectionId: string | null;
   creationMode: 'blank' | 'import' | 'template' | null;
+  // Cloud sync state (v1.5.0 Phase 3)
+  cloudSync: {
+    status: 'online' | 'syncing' | 'offline' | 'error';
+    isSyncing: boolean;
+    pendingOperations: number;
+    lastSyncAt: number | null;
+    lastError: string | null;
+    isOnline: boolean;
+    isAuthenticated: boolean;
+    realtimeStatus: 'connecting' | 'connected' | 'disconnected' | 'error';
+  };
 }
 
 // ===== ACTIONS =====
@@ -68,7 +79,8 @@ type AppAction =
   | { type: 'SET_AUTO_SAVE_SUCCESS'; payload: Date }
   | { type: 'SET_AUTO_SAVE_ERROR'; payload: string | null }
   | { type: 'SET_ACTIVE_SECTION'; payload: string | null }
-  | { type: 'SET_CREATION_MODE'; payload: 'blank' | 'import' | 'template' | null };
+  | { type: 'SET_CREATION_MODE'; payload: 'blank' | 'import' | 'template' | null }
+  | { type: 'UPDATE_CLOUD_SYNC'; payload: Partial<AppState['cloudSync']> };
 
 // ===== INITIAL STATE =====
 export const initialState: AppState = {
@@ -87,6 +99,17 @@ export const initialState: AppState = {
   // UI-only state
   activeSectionId: null,
   creationMode: null,
+  // Cloud sync state (Phase 3)
+  cloudSync: {
+    status: 'offline',
+    isSyncing: false,
+    pendingOperations: 0,
+    lastSyncAt: null,
+    lastError: null,
+    isOnline: typeof navigator !== 'undefined' ? navigator.onLine : false,
+    isAuthenticated: false,
+    realtimeStatus: 'disconnected',
+  },
 };
 
 // ===== REDUCER =====
@@ -152,6 +175,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'SET_CREATION_MODE':
       return { ...state, creationMode: action.payload };
 
+    case 'UPDATE_CLOUD_SYNC':
+      return {
+        ...state,
+        cloudSync: { ...state.cloudSync, ...action.payload },
+      };
+
     default:
       return state;
   }
@@ -182,6 +211,9 @@ export interface AppContextValue {
   setAutoSaveSaving: (_saving: boolean) => void;
   setAutoSaveSuccess: (_date: Date) => void;
   setAutoSaveError: (_error: string | null) => void;
+  // Cloud sync methods (v1.5.0 Phase 3)
+  updateCloudSyncState: (_state: Partial<AppState['cloudSync']>) => void;
+  triggerManualSync: () => Promise<void>;
   claude: ReturnType<typeof useClaude>['claude'];
   claudeActions: {
     sendMessage: (_message: string) => Promise<string>;
@@ -390,6 +422,94 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     }
   }, [state.theme]);
 
+  // Initialize cloud sync monitoring (Phase 3)
+  useEffect(() => {
+    let mounted = true;
+
+    const initCloudSync = async () => {
+      try {
+        // Lazy import to avoid circular dependencies
+        const { syncQueue } = await import('@/sync/syncQueue');
+        const { realtimeService } = await import('@/sync/realtimeService');
+        const { supabase } = await import('@/lib/supabaseClient');
+
+        // Initialize sync queue
+        await syncQueue.init();
+
+        // Check auth status
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!mounted) return;
+
+        dispatch({
+          type: 'UPDATE_CLOUD_SYNC',
+          payload: {
+            isAuthenticated: !!user,
+            isOnline: navigator.onLine,
+          },
+        });
+
+        // Add sync queue listener
+        const updateSyncState = () => {
+          if (!mounted) return;
+          const stats = syncQueue.getStats();
+          const realtimeStatus = realtimeService.getStatus();
+
+          dispatch({
+            type: 'UPDATE_CLOUD_SYNC',
+            payload: {
+              pendingOperations: stats.pending + stats.syncing,
+              isSyncing: stats.syncing > 0,
+              status: stats.syncing > 0 ? 'syncing' : stats.pending > 0 ? 'online' : 'online',
+              realtimeStatus,
+            },
+          });
+        };
+
+        syncQueue.addListener(updateSyncState);
+
+        // Monitor online/offline
+        const handleOnline = () => {
+          if (!mounted) return;
+          dispatch({
+            type: 'UPDATE_CLOUD_SYNC',
+            payload: { isOnline: true },
+          });
+        };
+
+        const handleOffline = () => {
+          if (!mounted) return;
+          dispatch({
+            type: 'UPDATE_CLOUD_SYNC',
+            payload: { isOnline: false, status: 'offline' },
+          });
+        };
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        // Cleanup
+        return () => {
+          mounted = false;
+          syncQueue.removeListener(updateSyncState);
+          window.removeEventListener('online', handleOnline);
+          window.removeEventListener('offline', handleOffline);
+        };
+      } catch (error) {
+        devLog.error('[AppContext] Failed to initialize cloud sync:', error);
+        return undefined;
+      }
+    };
+
+    const cleanup = initCloudSync();
+
+    return () => {
+      cleanup.then((cleanupFn) => cleanupFn?.());
+    };
+  }, []);
+
   const currentProject = useMemo(
     () => state.projects.find((p) => p.id === state.currentProjectId) || null,
     [state.projects, state.currentProjectId],
@@ -442,6 +562,14 @@ function AppProviderInner({ children }: { children: ReactNode }) {
     setAutoSaveSaving: (_saving) => dispatch({ type: 'SET_AUTO_SAVE_SAVING', payload: _saving }),
     setAutoSaveSuccess: (_date) => dispatch({ type: 'SET_AUTO_SAVE_SUCCESS', payload: _date }),
     setAutoSaveError: (_error) => dispatch({ type: 'SET_AUTO_SAVE_ERROR', payload: _error }),
+
+    // Cloud sync (Phase 3)
+    updateCloudSyncState: (_state) => dispatch({ type: 'UPDATE_CLOUD_SYNC', payload: _state }),
+    triggerManualSync: async () => {
+      // Lazy import to avoid circular dependencies
+      const { syncQueue } = await import('@/sync/syncQueue');
+      await syncQueue.processQueue();
+    },
 
     // Claude
     claude: claudeContext.claude,

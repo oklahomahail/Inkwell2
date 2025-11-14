@@ -3,16 +3,20 @@
 -- RPC provides safe soft-delete operation
 
 -- Active views (exclude soft-deleted rows)
-create or replace view public.projects_active as
+create or replace view public.projects_active
+with (security_invoker = true) as
   select * from public.projects where deleted_at is null;
 
-create or replace view public.chapters_active as
+create or replace view public.chapters_active
+with (security_invoker = true) as
   select * from public.chapters where deleted_at is null;
 
-create or replace view public.characters_active as
+create or replace view public.characters_active
+with (security_invoker = true) as
   select * from public.characters where deleted_at is null;
 
-create or replace view public.notes_active as
+create or replace view public.notes_active
+with (security_invoker = true) as
   select * from public.notes where deleted_at is null;
 
 -- RPC for safe soft delete
