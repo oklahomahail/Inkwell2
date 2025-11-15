@@ -1,10 +1,21 @@
 // src/components/Analytics/WritingAnalyticsView.tsx
-import { TrendingUp, Calendar, Target, Clock, BookOpen, Award, Edit3 } from 'lucide-react';
+import {
+  TrendingUp,
+  Calendar,
+  Target,
+  Clock,
+  BookOpen,
+  Award,
+  Edit3,
+  FileJson,
+  FileText,
+} from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 
 import PhraseHygieneWidget from '@/components/Analytics/PhraseHygieneWidget';
 import PerformanceChart from '@/components/PerformanceChart';
 import { useAppContext } from '@/context/AppContext';
+import { downloadAnalyticsJSON, downloadAnalyticsCSV } from '@/dev/analyticsExport';
 import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 
 type Session = {
@@ -143,15 +154,34 @@ export default function WritingAnalyticsView() {
           <h1 className="text-xl font-semibold">Writing analytics</h1>
           <p className="text-sm text-slate-500">Insights for "{projectName}"</p>
         </div>
-        <select
-          value={timeRange}
-          onChange={(e) => setTimeRange(e.target.value as any)}
-          className="border rounded px-2 py-1 text-sm"
-        >
-          <option value="week">Last week</option>
-          <option value="month">Last month</option>
-          <option value="year">Last year</option>
-        </select>
+        <div className="flex items-center gap-2">
+          {/* Export Buttons */}
+          <button
+            onClick={() => downloadAnalyticsJSON()}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            title="Export analytics as JSON"
+          >
+            <FileJson className="w-4 h-4" />
+            <span className="hidden sm:inline">Export JSON</span>
+          </button>
+          <button
+            onClick={() => downloadAnalyticsCSV('events')}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+            title="Export events as CSV"
+          >
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </button>
+          <select
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value as any)}
+            className="border rounded px-2 py-1 text-sm"
+          >
+            <option value="week">Last week</option>
+            <option value="month">Last month</option>
+            <option value="year">Last year</option>
+          </select>
+        </div>
       </div>
 
       {/* Key metrics */}

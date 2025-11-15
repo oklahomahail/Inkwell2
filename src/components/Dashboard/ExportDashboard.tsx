@@ -230,6 +230,11 @@ export default function ExportDashboard({
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Track export history and analytics for {projectName}
             </p>
+            {chapters.length === 0 && (
+              <p className="text-sm text-orange-600 dark:text-orange-400 mt-1">
+                ⚠️ No chapters found. Create chapters in the Writing Panel to enable exports.
+              </p>
+            )}
           </div>
           {onClose && (
             <button
@@ -247,6 +252,7 @@ export default function ExportDashboard({
             onClick={handleExportPDF}
             disabled={exporting !== null || chapters.length === 0}
             className="flex items-center justify-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+            title={chapters.length === 0 ? 'No chapters available to export' : 'Export as PDF'}
           >
             <FileText className="w-5 h-5 text-red-600 dark:text-red-400 group-hover:scale-110 transition-transform" />
             <span className="font-medium text-gray-900 dark:text-white">

@@ -15,7 +15,9 @@ import { AlertTriangle, Ban, TrendingUp, RefreshCw } from 'lucide-react';
 import React, { useState, useCallback, useEffect } from 'react';
 
 import { useAppContext } from '@/context/AppContext';
+import { useChapters } from '@/context/ChaptersContext';
 import { useToast } from '@/context/toast';
+import { Chapters } from '@/services/chaptersService';
 import { phraseAnalysisService } from '@/utils/textAnalysis';
 
 export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
@@ -24,13 +26,14 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
   maxItems = 10,
 }) => {
   const { currentProject } = useAppContext();
+  const { state: chaptersState } = useChapters();
   const { showToast } = useToast();
   const [offenders, setOffenders] = useState<PhraseOffender[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [lastAnalyzed, setLastAnalyzed] = useState<Date | null>(null);
   const [totalWords, setTotalWords] = useState(0);
 
-  // Auto-analyze when project changes
+  // Auto-analyze when project changes or chapters update
   useEffect(() => {
     if (currentProject) {
       analyzeProject();
@@ -39,16 +42,24 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
       setLastAnalyzed(null);
       setTotalWords(0);
     }
-  }, [currentProject]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentProject, chaptersState.byId, chaptersState.byProject]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const analyzeProject = useCallback(async () => {
     if (!currentProject) return;
     setIsAnalyzing(true);
 
     try {
-      // Get all chapter content
-      const allContent =
-        currentProject.chapters?.map((chapter: any) => chapter.content || '').join(' ') || '';
+      // Get all chapter content from ChaptersContext (live data)
+      const projectId = currentProject.id;
+      const chapterIds = chaptersState.byProject[projectId] || [];
+
+      // Load full chapter content from IndexedDB
+      const chapters = await Promise.all(chapterIds.map((id) => Chapters.get(id)));
+
+      const allContent = chapters
+        .filter((ch) => ch !== null)
+        .map((ch) => ch!.content || '')
+        .join(' ');
 
       if (!allContent.trim()) {
         setOffenders([]);
@@ -87,7 +98,7 @@ export const PhraseHygieneWidget: React.FC<PhraseHygieneWidgetProps> = ({
     } finally {
       setIsAnalyzing(false);
     }
-  }, [currentProject, showToast, maxItems]);
+  }, [currentProject, chaptersState.byProject, showToast, maxItems]);
 
   const addToStoplist = (targetPhrase: string) => {
     if (!currentProject) return;
