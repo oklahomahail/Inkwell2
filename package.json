@@ -107,7 +107,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@hello-pangea/dnd": "^18.0.1",
-    "@sentry/react": "^10.19.0",
+    "@sentry/react": "^10.21.0",
     "@supabase/supabase-js": "^2.75.1",
     "@tanstack/react-virtual": "^3.13.12",
     "@tiptap/core": "^3.2.0",
@@ -140,6 +140,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
     "@playwright/test": "^1.56.1",
+    "@sentry/vite-plugin": "^4.6.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
