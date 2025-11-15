@@ -58,7 +58,7 @@ export interface StorageHealth {
 
 export const DB_NAME = 'inkwell_v1';
 export const DB_VERSION = 3;
-const EXPECTED_PROD_ORIGIN = 'https://inkwell.leadwithnexus.com';
+const EXPECTED_PROD_ORIGIN = 'https://writewithinkwell.com';
 
 /**
  * Check whether an IndexedDB database exists.
