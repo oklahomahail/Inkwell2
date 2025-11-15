@@ -86,3 +86,6 @@ supabase/.temp/
 
 .env*
 reports/*.clean.txt
+
+# Sentry Config File
+.env.sentry-build-plugin
