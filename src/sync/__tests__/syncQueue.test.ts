@@ -321,21 +321,66 @@ describe('syncQueue', () => {
 
       await syncQueue.init();
 
-      // Create a failed operation by setting it manually
-      await syncQueue.enqueue('upsert', 'chapters', 'chapter-fail', 'project-1', {
+      // Create an operation
+      const opId = await syncQueue.enqueue('upsert', 'chapters', 'chapter-fail', 'project-1', {
         title: 'Failed Chapter',
       });
 
-      // Manually mark it as failed (simulate a failed sync)
-      const stats1 = syncQueue.getStats();
-      const pendingBefore = stats1.pending;
+      // Manually mark it as failed by accessing internal state
+      const operation = (syncQueue as any).queue.get(opId);
+      if (operation) {
+        operation.status = 'failed';
+        operation.error = 'Simulated failure';
+        operation.attempts = 3;
+        await (syncQueue as any).persistOperation(operation);
+      }
 
-      // Call retryFailed
+      const statsBefore = syncQueue.getStats();
+      expect(statsBefore.failed).toBe(1);
+
+      // Call retryFailed - this should reset the failed operation to pending
       await syncQueue.retryFailed();
 
-      // Stats should show operation back in pending
-      const stats2 = syncQueue.getStats();
-      expect(stats2.pending).toBeGreaterThanOrEqual(0);
+      // Stats should show operation back in pending with reset attempts
+      const statsAfter = syncQueue.getStats();
+      expect(statsAfter.failed).toBe(0);
+      expect(statsAfter.pending).toBeGreaterThan(0);
+
+      // Verify the operation was reset
+      const retriedOp = (syncQueue as any).queue.get(opId);
+      expect(retriedOp.status).toBe('pending');
+      expect(retriedOp.attempts).toBe(0);
+      expect(retriedOp.error).toBeNull();
+    });
+
+    it('processes queue after retry when online', async () => {
+      // Set online
+      Object.defineProperty(navigator, 'onLine', {
+        writable: true,
+        value: true,
+      });
+
+      await syncQueue.init();
+
+      // Create a failed operation
+      const opId = await syncQueue.enqueue('upsert', 'chapters', 'chapter-retry', 'project-1', {
+        title: 'Retry Chapter',
+      });
+
+      const operation = (syncQueue as any).queue.get(opId);
+      if (operation) {
+        operation.status = 'failed';
+        operation.error = 'Network error';
+      }
+
+      // Spy on processQueue
+      const processQueueSpy = vi.spyOn(syncQueue as any, 'processQueue');
+
+      // Call retryFailed - should trigger processQueue since we're online
+      await syncQueue.retryFailed();
+
+      // Verify processQueue was called
+      expect(processQueueSpy).toHaveBeenCalled();
     });
   });
 

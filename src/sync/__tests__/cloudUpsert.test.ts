@@ -491,6 +491,39 @@ describe('cloudUpsert', () => {
   });
 
   describe('E2EE edge cases', () => {
+    it('uses plaintext when E2EE enabled but project is locked', async () => {
+      // E2EE is enabled but project is locked (no DEK available)
+      (e2eeKeyManager.isE2EEEnabled as any).mockResolvedValue(true);
+      (e2eeKeyManager.isUnlocked as any).mockReturnValue(false); // Locked!
+
+      const mockUpsert = vi.fn().mockResolvedValue({
+        data: [{ id: '1', updated_at: '2025-11-14T12:00:00Z' }],
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+
+      const chapter = {
+        id: '1',
+        project_id: 'project-1',
+        title: 'Chapter Title',
+        body: 'Chapter Content',
+        index_in_project: 0,
+        word_count: 2,
+        status: 'draft' as const,
+      };
+
+      const result = await cloudUpsert.upsertChapters([chapter], 'user-123');
+
+      expect(result.success).toBe(true);
+
+      // Should have used plaintext (not encrypted) because project is locked
+      const upsertCall = mockUpsert.mock.calls[0][0];
+      expect(upsertCall.title).toBe('Chapter Title'); // Not '[Encrypted]'
+      expect(upsertCall.body).toBe('Chapter Content'); // Not empty
+      expect(upsertCall.encrypted_content).toBeUndefined(); // Not encrypted
+    });
+
     it('handles E2EE check error gracefully', async () => {
       // E2EE enabled but isE2EEEnabled throws error
       // The isE2EEReady method catches this error, logs it, and returns false
