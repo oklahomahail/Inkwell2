@@ -474,13 +474,19 @@ class CloudUpsertService {
       }
 
       // Check if project already exists in Supabase
-      const { data: existing } = await supabase
+      const { data: existing, error: selectError } = await supabase
         .from('projects')
         .select('id')
         .eq('id', projectId)
         .maybeSingle();
 
-      if (existing) {
+      // If SELECT fails with 500 error, try INSERT anyway (it will fail with 409 if exists)
+      if (selectError) {
+        devLog.warn(
+          `[CloudUpsert] Failed to check if project ${projectId} exists (${selectError.code}). Will attempt insert.`,
+        );
+        // Don't return false - continue to INSERT attempt below
+      } else if (existing) {
         return true; // Project already exists
       }
 
@@ -520,6 +526,15 @@ class CloudUpsertService {
       });
 
       if (error) {
+        // 409 Conflict means the project already exists (race condition or SELECT failed)
+        // This is actually a success case - the project is in the cloud
+        if (error.code === '23505') {
+          devLog.log(
+            `[CloudUpsert] Project ${projectId} already exists in cloud (detected via insert conflict)`,
+          );
+          return true;
+        }
+
         devLog.error(`[CloudUpsert] Failed to create project ${projectId} in cloud:`, error);
         return false;
       }
