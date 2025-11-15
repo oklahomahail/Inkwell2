@@ -558,6 +558,40 @@ describe('cloudUpsert', () => {
       expect(encryptJSON).not.toHaveBeenCalled();
     });
 
+    it('handles E2EE encryption failure gracefully (corrupted key)', async () => {
+      // E2EE is enabled and unlocked, but encryption fails (corrupted DEK)
+      (e2eeKeyManager.isE2EEEnabled as any).mockResolvedValue(true);
+      (e2eeKeyManager.isUnlocked as any).mockReturnValue(true);
+      (e2eeKeyManager.getDEK as any).mockReturnValue(new Uint8Array(32)); // Valid-looking but corrupted
+
+      // Encryption fails due to corrupted key
+      (encryptJSON as any).mockRejectedValue(new Error('Encryption failed: invalid key'));
+
+      const mockUpsert = vi.fn().mockResolvedValue({
+        data: null,
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+
+      const chapter = {
+        id: '1',
+        project_id: 'project-1',
+        title: 'Test Chapter',
+        body: 'Test content',
+        index_in_project: 0,
+        word_count: 2,
+        status: 'draft' as const,
+      };
+
+      const result = await cloudUpsert.upsertChapters([chapter], 'user-123');
+
+      // Should handle gracefully with clear error
+      expect(result.success).toBe(false);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toContain('Encryption failed');
+    });
+
     it('uses plaintext when E2EE explicitly disabled', async () => {
       (e2eeKeyManager.isE2EEEnabled as any).mockResolvedValue(false);
 
