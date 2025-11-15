@@ -89,6 +89,9 @@ export function useSections(projectId: string) {
   const contentCache = useRef<Map<string, { content: string; timestamp: number }>>(new Map());
   const [loadingContent, setLoadingContent] = useState<Set<string>>(new Set());
 
+  // Track if we're making local changes to prevent realtime refresh loops
+  const isLocalChange = useRef(false);
+
   /**
    * Convert chapter data to section format
    * Only processes chapters that belong to the current project
@@ -116,6 +119,22 @@ export function useSections(projectId: string) {
     },
     [projectId],
   );
+
+  /**
+   * Deduplicate and sort sections by order
+   */
+  const deduplicateSections = useCallback((sections: Section[]): Section[] => {
+    const seen = new Map<string, Section>();
+
+    for (const section of sections) {
+      const existing = seen.get(section.id);
+      if (!existing || new Date(section.updatedAt || 0) > new Date(existing.updatedAt || 0)) {
+        seen.set(section.id, section);
+      }
+    }
+
+    return Array.from(seen.values()).sort((a, b) => a.order - b.order);
+  }, []);
 
   /**
    * Convert section to chapter data format for storage
@@ -159,14 +178,17 @@ export function useSections(projectId: string) {
     try {
       await syncChapters(projectId);
       const refreshed = await Chapters.list(projectId);
-      setSections(refreshed.map(chapterToSection).filter((s): s is Section => s !== null));
+      const mappedSections = refreshed
+        .map(chapterToSection)
+        .filter((s): s is Section => s !== null);
+      setSections(deduplicateSections(mappedSections));
       setLastSynced(new Date());
     } catch (error) {
       console.error('[useSections] Sync failed:', error);
     } finally {
       setSyncing(false);
     }
-  }, [projectId, chapterToSection]);
+  }, [projectId, chapterToSection, deduplicateSections]);
 
   /**
    * Load sections on mount
@@ -185,7 +207,7 @@ export function useSections(projectId: string) {
       // Load from local IndexedDB first
       const local = await Chapters.list(projectId);
       const sectionsData = local.map(chapterToSection).filter((s): s is Section => s !== null);
-      setSections(sectionsData);
+      setSections(deduplicateSections(sectionsData));
 
       // Restore last active section
       const lastActive = localStorage.getItem(`lastSection-${projectId}`);
@@ -205,13 +227,16 @@ export function useSections(projectId: string) {
         try {
           await pullRemoteChanges(projectId);
           const refreshed = await Chapters.list(projectId);
-          setSections(refreshed.map(chapterToSection).filter((s): s is Section => s !== null));
+          const mappedSections = refreshed
+            .map(chapterToSection)
+            .filter((s): s is Section => s !== null);
+          setSections(deduplicateSections(mappedSections));
         } catch (error) {
           console.error('[useSections] Failed to pull remote changes:', error);
         }
       }
     })();
-  }, [projectId, chapterToSection, isValidProjectId]);
+  }, [projectId, chapterToSection, isValidProjectId, deduplicateSections]);
 
   /**
    * Auto-sync every 3 minutes
@@ -261,9 +286,20 @@ export function useSections(projectId: string) {
     setRealtimeConnected(true);
 
     const unsubscribe = subscribeToChapterChanges(projectId, async (_chapterId) => {
+      // Skip refresh if this is a local change to prevent loops
+      if (isLocalChange.current) {
+        // eslint-disable-next-line no-console
+        console.debug('[useSections] Skipping realtime refresh - local change');
+        isLocalChange.current = false;
+        return;
+      }
+
       // Refresh sections from IndexedDB (already updated by sync service)
       const refreshed = await Chapters.list(projectId);
-      setSections(refreshed.map(chapterToSection).filter((s): s is Section => s !== null));
+      const mappedSections = refreshed
+        .map(chapterToSection)
+        .filter((s): s is Section => s !== null);
+      setSections(deduplicateSections(mappedSections));
 
       // Show visual indicator
       setLiveUpdateReceived(true);
@@ -274,7 +310,7 @@ export function useSections(projectId: string) {
       setRealtimeConnected(false);
       unsubscribe();
     };
-  }, [projectId, chapterToSection, isValidProjectId]);
+  }, [projectId, chapterToSection, isValidProjectId, deduplicateSections]);
 
   /**
    * Create section
@@ -294,12 +330,18 @@ export function useSections(projectId: string) {
         createdAt: new Date().toISOString(),
       };
 
+      // Mark as local change to prevent realtime loop
+      isLocalChange.current = true;
+
       // Convert to chapter format for storage
       const chapterData = sectionToChapter(newSection);
       await Chapters.create(chapterData);
 
       const refreshed = await Chapters.list(projectId);
-      setSections(refreshed.map(chapterToSection).filter((s): s is Section => s !== null));
+      const mappedSections = refreshed
+        .map(chapterToSection)
+        .filter((s): s is Section => s !== null);
+      setSections(deduplicateSections(mappedSections));
       setActiveId(newSection.id);
 
       // Persist active section
@@ -307,13 +349,16 @@ export function useSections(projectId: string) {
 
       return newSection;
     },
-    [projectId, sectionToChapter, chapterToSection],
+    [projectId, sectionToChapter, chapterToSection, deduplicateSections],
   );
 
   /**
    * Update section (title, type, etc.)
    */
   const updateSection = useCallback(async (id: string, updates: Partial<Section>) => {
+    // Mark as local change
+    isLocalChange.current = true;
+
     await Chapters.updateMeta({ id, ...updates } as any);
 
     setSections((prev) =>
@@ -348,6 +393,9 @@ export function useSections(projectId: string) {
    */
   const deleteSection = useCallback(
     async (id: string) => {
+      // Mark as local change
+      isLocalChange.current = true;
+
       await Chapters.remove(id);
 
       // Update sections state and capture the new state
@@ -379,6 +427,9 @@ export function useSections(projectId: string) {
    * Reorder sections
    */
   const reorderSections = useCallback(async (fromIndex: number, toIndex: number) => {
+    // Mark as local change
+    isLocalChange.current = true;
+
     setSections((prev) => {
       const reordered = [...prev];
       const [moved] = reordered.splice(fromIndex, 1);

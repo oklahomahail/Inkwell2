@@ -219,6 +219,13 @@ class CloudUpsertService {
           continue;
         }
 
+        // Ensure parent project exists in cloud before syncing chapter
+        const projectExists = await this.ensureProjectExists(projectId, userId);
+        if (!projectExists) {
+          errors.push(`Chapter ${record.id}: parent project ${projectId} does not exist in cloud`);
+          continue;
+        }
+
         // Check if E2EE is enabled and unlocked
         const e2eeReady = await this.isE2EEReady(projectId);
         let payload: any;
@@ -441,6 +448,60 @@ class CloudUpsertService {
   }
 
   /**
+   * Ensure project exists in Supabase (fetch from local and upsert if needed)
+   * Returns true if project exists or was created, false otherwise
+   */
+  private async ensureProjectExists(projectId: string, userId: string): Promise<boolean> {
+    try {
+      // Check if project already exists in Supabase
+      const { data: existing } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('id', projectId)
+        .maybeSingle();
+
+      if (existing) {
+        return true; // Project already exists
+      }
+
+      // Project doesn't exist - fetch from local IndexedDB and create in cloud
+      devLog.log(`[CloudUpsert] Project ${projectId} not in cloud, fetching from local...`);
+
+      const { ProjectsDB } = await import('@/services/projectsDB');
+      const localProject = await ProjectsDB.loadProject(projectId);
+
+      if (!localProject) {
+        devLog.error(`[CloudUpsert] Project ${projectId} not found in local storage`);
+        return false;
+      }
+
+      // Create project in Supabase
+      const { error } = await supabase.from('projects').insert({
+        id: localProject.id,
+        name: localProject.name,
+        owner_id: userId,
+        genre: localProject.genre,
+        target_word_count: localProject.targetWordCount,
+        current_word_count: localProject.currentWordCount,
+        is_demo: localProject.isDemo || false,
+        created_at: new Date(localProject.createdAt).toISOString(),
+        updated_at: new Date(localProject.updatedAt || localProject.createdAt).toISOString(),
+      });
+
+      if (error) {
+        devLog.error(`[CloudUpsert] Failed to create project ${projectId} in cloud:`, error);
+        return false;
+      }
+
+      devLog.log(`[CloudUpsert] Created project ${projectId} in cloud`);
+      return true;
+    } catch (error) {
+      devLog.error(`[CloudUpsert] Error ensuring project exists:`, error);
+      return false;
+    }
+  }
+
+  /**
    * Check if E2EE is enabled and unlocked for a project
    */
   private async isE2EEReady(projectId: string): Promise<boolean> {
@@ -464,7 +525,7 @@ class CloudUpsertService {
   /**
    * Encrypt chapter for E2EE project
    */
-  private async encryptChapter(record: any, projectId: string, userId: string): Promise<any> {
+  private async encryptChapter(record: any, projectId: string, _userId: string): Promise<any> {
     const dek = e2eeKeyManager.getDEK(projectId);
 
     const contentToEncrypt = {
@@ -481,7 +542,10 @@ class CloudUpsertService {
       project_id: projectId,
       title: '[Encrypted]',
       body: '',
-      encrypted_content: encrypted,
+      // Map encrypted_content object to separate DB columns
+      content_ciphertext: encrypted.ciphertext,
+      content_nonce: encrypted.nonce,
+      crypto_version: 1,
       index_in_project: record.order ?? record.index_in_project ?? 0,
       status: record.status,
       word_count: record.wordCount,

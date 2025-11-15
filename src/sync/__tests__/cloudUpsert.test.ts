@@ -16,6 +16,12 @@ vi.mock('@/lib/supabaseClient', () => ({
   supabase: {
     from: vi.fn(() => ({
       upsert: vi.fn().mockResolvedValue({ data: [], error: null }),
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          maybeSingle: vi.fn().mockResolvedValue({ data: { id: 'project-1' }, error: null }),
+        }),
+      }),
+      insert: vi.fn().mockResolvedValue({ data: [], error: null }),
     })),
     auth: {
       getUser: vi.fn().mockResolvedValue({
@@ -43,10 +49,34 @@ vi.mock('@/services/cryptoService', () => ({
   isoNow: () => '2025-11-14T12:00:00.000Z',
 }));
 
+vi.mock('@/services/projectsDB', () => ({
+  ProjectsDB: {
+    loadProject: vi.fn().mockResolvedValue({
+      id: 'project-1',
+      name: 'Test Project',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }),
+  },
+}));
+
 import { supabase } from '@/lib/supabaseClient';
 import { e2eeKeyManager } from '@/services/e2eeKeyManager';
 import { encryptJSON } from '@/services/cryptoService';
 import { cloudUpsert } from '@/sync/cloudUpsert';
+
+// Helper to create full Supabase mock with all required chains
+function createSupabaseMock(upsertMock: any) {
+  return {
+    upsert: upsertMock,
+    select: vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        maybeSingle: vi.fn().mockResolvedValue({ data: { id: 'project-1' }, error: null }),
+      }),
+    }),
+    insert: vi.fn().mockResolvedValue({ data: [], error: null }),
+  };
+}
 
 describe('cloudUpsert', () => {
   beforeEach(() => {
@@ -56,6 +86,12 @@ describe('cloudUpsert', () => {
     (e2eeKeyManager.getDEK as any).mockReturnValue(null);
     (supabase.from as any).mockReturnValue({
       upsert: vi.fn().mockResolvedValue({ data: [], error: null }),
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          maybeSingle: vi.fn().mockResolvedValue({ data: { id: 'project-1' }, error: null }),
+        }),
+      }),
+      insert: vi.fn().mockResolvedValue({ data: [], error: null }),
     });
   });
 
@@ -84,7 +120,15 @@ describe('cloudUpsert', () => {
         error: null,
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue({
+        upsert: mockUpsert,
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValue({ data: { id: 'project-1' }, error: null }),
+          }),
+        }),
+        insert: vi.fn().mockResolvedValue({ data: [], error: null }),
+      });
 
       const chapter = {
         id: '1',
@@ -122,7 +166,7 @@ describe('cloudUpsert', () => {
         error: null,
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       // Create 120 chapters
       const chapters = Array.from({ length: 120 }, (_, i) => ({
@@ -158,7 +202,7 @@ describe('cloudUpsert', () => {
         error: null,
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       const chapter = {
         id: '1',
@@ -185,12 +229,14 @@ describe('cloudUpsert', () => {
         expect.any(Uint8Array),
       );
 
-      // Should upsert with encrypted fields
+      // Should upsert with encrypted fields (using separate columns)
       expect(mockUpsert).toHaveBeenCalledWith(
         expect.objectContaining({
           id: '1',
           project_id: 'project-1',
-          encrypted_content: { ciphertext: 'encrypted-body', nonce: 'nonce-123' },
+          content_ciphertext: 'encrypted-body',
+          content_nonce: 'nonce-123',
+          crypto_version: 1,
           title: '[Encrypted]',
           body: '',
         }),
@@ -208,7 +254,7 @@ describe('cloudUpsert', () => {
         error: null,
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       const chapter = {
         id: '1',
@@ -247,7 +293,7 @@ describe('cloudUpsert', () => {
         error: null,
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       const project = {
         id: 'project-1',
@@ -279,7 +325,7 @@ describe('cloudUpsert', () => {
         error: null,
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       const settings = {
         projectId: 'project-1',
@@ -307,7 +353,7 @@ describe('cloudUpsert', () => {
     it('handles project_settings upsert exception', async () => {
       const mockUpsert = vi.fn().mockRejectedValue(new Error('Database error'));
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       const settings = {
         projectId: 'project-1',
@@ -379,7 +425,7 @@ describe('cloudUpsert', () => {
         },
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       const chapter = {
         id: '1',
@@ -401,7 +447,7 @@ describe('cloudUpsert', () => {
     it('handles rejected upsert call (network error)', async () => {
       const mockUpsert = vi.fn().mockRejectedValue(new Error('Network timeout'));
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       const chapter = {
         id: '1',
@@ -426,7 +472,7 @@ describe('cloudUpsert', () => {
         error: null,
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       const chapter = {
         id: '1',
@@ -456,7 +502,7 @@ describe('cloudUpsert', () => {
         error: null,
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       // Create 60 chapters (processed individually, not in batches)
       const chapters = Array.from({ length: 60 }, (_, i) => ({
@@ -515,7 +561,7 @@ describe('cloudUpsert', () => {
           }
         });
 
-        (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+        (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
         const chapters = [
           {
@@ -580,7 +626,7 @@ describe('cloudUpsert', () => {
           });
         });
 
-        (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+        (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
         const chapters = [
           {
@@ -635,7 +681,7 @@ describe('cloudUpsert', () => {
           ], // But errors array is populated
         });
 
-        (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+        (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
         const chapter = {
           id: '1',
@@ -685,9 +731,8 @@ describe('cloudUpsert', () => {
               upsert: vi.fn().mockRejectedValue(new Error('Network timeout')),
             };
           }
-          return {
-            upsert: vi.fn().mockResolvedValue({ data: [], error: null }),
-          };
+          // Default successful response with full mock chain
+          return createSupabaseMock(vi.fn().mockResolvedValue({ data: [], error: null }));
         });
 
         // Test chapters (should succeed)
@@ -756,7 +801,7 @@ describe('cloudUpsert', () => {
         error: null,
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       const chapter = {
         id: '1',
@@ -791,7 +836,7 @@ describe('cloudUpsert', () => {
         error: null,
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       const chapter = {
         id: '1',
@@ -827,7 +872,7 @@ describe('cloudUpsert', () => {
         error: null,
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       const chapter = {
         id: '1',
@@ -855,7 +900,7 @@ describe('cloudUpsert', () => {
         error: null,
       });
 
-      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+      (supabase.from as any).mockReturnValue(createSupabaseMock(mockUpsert));
 
       const chapter = {
         id: '1',
