@@ -1,7 +1,9 @@
+import { fileURLToPath, URL } from 'node:url';
+
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 /// <reference types="vite/client" />
 
 // vite.config.ts
-import { fileURLToPath, URL } from 'node:url';
 
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -92,6 +94,9 @@ export default defineConfig({
                 '*.webmanifest',
               ],
               navigateFallback: '/index.html',
+              // Force immediate activation of new service workers
+              skipWaiting: true,
+              clientsClaim: true,
               runtimeCaching: [
                 // Cache the editor shell and core assets
                 {
@@ -233,6 +238,10 @@ export default defineConfig({
             },
           }),
         ]),
+    sentryVitePlugin({
+      org: 'nexus-partners',
+      project: 'inkwell',
+    }),
   ],
 
   resolve: {
