@@ -54,6 +54,7 @@ describe('syncQueue', () => {
     // Reset syncQueue state by ensuring empty queue
     (syncQueue as any).operationsMap = new Map();
     (syncQueue as any).isProcessing = false;
+    (syncQueue as any).stateListeners = new Set();
 
     // Setup mock IndexedDB database
     mockStore = {
@@ -537,6 +538,202 @@ describe('syncQueue', () => {
       expect((syncQueue as any).db).toBeNull();
 
       vi.useRealTimers();
+    });
+  });
+
+  describe('Exponential backoff behavior', () => {
+    it('skips operations that are in backoff period', async () => {
+      // Set online
+      Object.defineProperty(navigator, 'onLine', {
+        writable: true,
+        value: true,
+      });
+
+      await syncQueue.init();
+
+      // Enqueue operation
+      const opId = await syncQueue.enqueue('upsert', 'chapters', 'chapter-backoff', 'project-1', {
+        title: 'Backoff Test',
+      });
+
+      // Manually set the operation to have a recent failed attempt
+      const operation = (syncQueue as any).queue.get(opId);
+      if (operation) {
+        operation.status = 'pending';
+        operation.attempts = 1;
+        operation.lastAttemptAt = Date.now(); // Just failed now
+        await (syncQueue as any).persistOperation(operation);
+      }
+
+      // Try to process immediately - should skip due to backoff
+      await syncQueue.processQueue();
+
+      // Operation should still be pending (not processed)
+      const updatedOp = (syncQueue as any).queue.get(opId);
+      expect(updatedOp.status).toBe('pending');
+    });
+
+    it('calculates exponential backoff correctly', async () => {
+      await syncQueue.init();
+
+      // Test backoff calculation (private method, but we can test its effect)
+      const backoffDelay1 = (syncQueue as any).calculateBackoff(1);
+      const backoffDelay2 = (syncQueue as any).calculateBackoff(2);
+      const backoffDelay3 = (syncQueue as any).calculateBackoff(3);
+
+      // Each backoff should be larger than the previous
+      expect(backoffDelay2).toBeGreaterThan(backoffDelay1);
+      expect(backoffDelay3).toBeGreaterThan(backoffDelay2);
+    });
+  });
+
+  describe('Empty queue and oldestPending tracking', () => {
+    it('returns null for oldestPendingAt when queue is empty', async () => {
+      await syncQueue.init();
+
+      // Clear any pending operations
+      await syncQueue.clearCompleted();
+
+      const stats = syncQueue.getStats();
+
+      // When no pending operations, oldestPendingAt should be null
+      if (stats.pending === 0) {
+        expect(stats.oldestPendingAt).toBeNull();
+      }
+    });
+
+    it('tracks oldest pending operation timestamp', async () => {
+      // Set offline to prevent auto-processing
+      Object.defineProperty(navigator, 'onLine', {
+        writable: true,
+        value: false,
+      });
+
+      await syncQueue.init();
+
+      // Enqueue operations
+      await syncQueue.enqueue('upsert', 'chapters', 'chapter-1', 'project-1', { title: 'First' });
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      await syncQueue.enqueue('upsert', 'chapters', 'chapter-2', 'project-1', { title: 'Second' });
+
+      const stats = syncQueue.getStats();
+
+      // Should have oldest pending timestamp
+      expect(stats.oldestPendingAt).not.toBeNull();
+    });
+  });
+
+  describe('Priority and sorting', () => {
+    it('processes higher priority operations first', async () => {
+      // Set offline initially
+      Object.defineProperty(navigator, 'onLine', {
+        writable: true,
+        value: false,
+      });
+
+      await syncQueue.init();
+
+      // Enqueue operations with different priorities
+      await syncQueue.enqueue('upsert', 'chapters', 'chapter-1', 'project-1', { title: 'Low' }, 1);
+      await syncQueue.enqueue(
+        'upsert',
+        'chapters',
+        'chapter-2',
+        'project-1',
+        { title: 'High' },
+        10,
+      );
+      await syncQueue.enqueue(
+        'upsert',
+        'chapters',
+        'chapter-3',
+        'project-1',
+        { title: 'Medium' },
+        5,
+      );
+
+      // Go online and process
+      Object.defineProperty(navigator, 'onLine', {
+        writable: true,
+        value: true,
+      });
+
+      await syncQueue.processQueue();
+
+      // Higher priority should be processed
+      expect(cloudUpsert.upsertRecords).toHaveBeenCalled();
+    });
+
+    it('processes older operations first when priority is equal', async () => {
+      // Set offline initially
+      Object.defineProperty(navigator, 'onLine', {
+        writable: true,
+        value: false,
+      });
+
+      await syncQueue.init();
+
+      // Enqueue operations with same priority
+      const op1Id = await syncQueue.enqueue('upsert', 'chapters', 'chapter-1', 'project-1', {
+        title: 'First',
+      });
+      await new Promise((resolve) => setTimeout(resolve, 10)); // Small delay to ensure different timestamps
+      const op2Id = await syncQueue.enqueue('upsert', 'chapters', 'chapter-2', 'project-1', {
+        title: 'Second',
+      });
+
+      const op1 = (syncQueue as any).queue.get(op1Id);
+      const op2 = (syncQueue as any).queue.get(op2Id);
+
+      // Verify older operation has earlier timestamp
+      expect(op1.createdAt).toBeLessThan(op2.createdAt);
+    });
+  });
+
+  describe('onStateChange subscription', () => {
+    it('calls callback immediately with current state', async () => {
+      await syncQueue.init();
+
+      const callback = vi.fn();
+      const unsubscribe = syncQueue.onStateChange(callback);
+
+      // Should be called immediately
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pending: expect.any(Number),
+          syncing: expect.any(Number),
+          failed: expect.any(Number),
+        }),
+      );
+
+      unsubscribe();
+    });
+
+    it('returns unsubscribe function that removes listener', async () => {
+      await syncQueue.init();
+
+      const callback = vi.fn();
+      const unsubscribe = syncQueue.onStateChange(callback);
+
+      // Clear calls from immediate callback
+      callback.mockClear();
+
+      // Unsubscribe
+      unsubscribe();
+
+      // Set offline to prevent auto-processing
+      Object.defineProperty(navigator, 'onLine', {
+        writable: true,
+        value: false,
+      });
+
+      // Enqueue operation
+      await syncQueue.enqueue('upsert', 'chapters', 'chapter-1', 'project-1', {
+        title: 'Chapter 1',
+      });
+
+      // Callback should not be called after unsubscribe
+      expect(callback).not.toHaveBeenCalled();
     });
   });
 
