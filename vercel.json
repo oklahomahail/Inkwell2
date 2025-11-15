@@ -11,6 +11,17 @@
           "value": "inkwell.leadwithnexus.com"
         }
       ]
+    },
+    {
+      "source": "/:path*",
+      "destination": "https://writewithinkwell.com/:path*",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.writewithinkwell.com"
+        }
+      ]
     }
   ],
   "rewrites": [
