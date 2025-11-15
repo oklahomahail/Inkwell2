@@ -6,6 +6,7 @@ import {
   ChartColumn,
   Settings,
   ChevronLeft,
+  ChevronRight,
   ArrowRight,
   MoreHorizontal,
   ListChecks,
@@ -16,6 +17,7 @@ import {
   Check,
   Save as SaveIcon,
   X,
+  Type,
 } from 'lucide-react';
 import React from 'react';
 
@@ -69,8 +71,10 @@ export const INKWELL_ICONS = {
 
   // misc used across tests
   'chevron-left': ChevronLeft,
+  'chevron-right': ChevronRight,
   'arrow-right': ArrowRight,
   'more-horizontal': MoreHorizontal,
+  type: Type,
 
   // UI actions expected by registry tests
   add: Plus,
