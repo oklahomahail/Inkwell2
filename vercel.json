@@ -3,7 +3,7 @@
   "redirects": [
     {
       "source": "/:path*",
-      "destination": "https://writewithinkwell.com/:path*",
+      "destination": "https://www.writewithinkwell.com/:path*",
       "permanent": true,
       "has": [
         {
@@ -14,12 +14,12 @@
     },
     {
       "source": "/:path*",
-      "destination": "https://writewithinkwell.com/:path*",
+      "destination": "https://www.writewithinkwell.com/:path*",
       "permanent": true,
       "has": [
         {
           "type": "host",
-          "value": "www.writewithinkwell.com"
+          "value": "writewithinkwell.com"
         }
       ]
     }
