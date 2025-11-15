@@ -29,8 +29,16 @@ export default function middleware(request: Request) {
     return; // pass through - no middleware processing
   }
 
-  // Host-based redirect for inkwell.leadwithnexus.com
-  if (hostname === 'inkwell.leadwithnexus.com' && pathname === '/') {
+  // Host-based redirect: migrate from old domain to new domain
+  // During transition period, redirect old domain to new domain
+  if (hostname === 'inkwell.leadwithnexus.com') {
+    const newUrl = new URL(request.url);
+    newUrl.hostname = 'writewithinkwell.com';
+    return Response.redirect(newUrl.href, 301); // Permanent redirect
+  }
+
+  // Redirect root to sign-in for new domain
+  if (hostname === 'writewithinkwell.com' && pathname === '/') {
     return Response.redirect(new URL('/sign-in', request.url), 308);
   }
 

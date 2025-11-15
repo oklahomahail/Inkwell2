@@ -6,26 +6,26 @@
 
   <!-- Homepage -->
   <url>
-    <loc>https://inkwell.leadwithnexus.com/</loc>
+    <loc>https://writewithinkwell.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <lastmod>2024-01-01</lastmod>
+    <lastmod>2025-11-15</lastmod>
   </url>
 
   <!-- Profile selection page -->
   <url>
-    <loc>https://inkwell.leadwithnexus.com/profiles</loc>
+    <loc>https://writewithinkwell.com/profiles</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2024-01-01</lastmod>
+    <lastmod>2025-11-15</lastmod>
   </url>
 
   <!-- Login page -->
   <url>
-    <loc>https://inkwell.leadwithnexus.com/login</loc>
+    <loc>https://writewithinkwell.com/login</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
-    <lastmod>2024-01-01</lastmod>
+    <lastmod>2025-11-15</lastmod>
   </url>
 
 </urlset>

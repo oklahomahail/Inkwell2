@@ -145,7 +145,7 @@ export default defineConfig({
               // Ensure core application assets are precached
               // NOTE: site.webmanifest is explicitly added here with matching path to VitePWA's output
               additionalManifestEntries: [
-                { url: '/', revision: `v2025-11-08-brand-${Date.now().toString()}` },
+                { url: '/', revision: `v2025-11-15-migration-${Date.now().toString()}` },
               ],
             },
             includeAssets: [

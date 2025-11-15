@@ -1,5 +1,5 @@
 # Robots.txt for Inkwell
-# https://inkwell.leadwithnexus.com/robots.txt
+# https://writewithinkwell.com/robots.txt
 
 User-agent: *
 Allow: /
@@ -22,7 +22,7 @@ Disallow: /dashboard/
 Disallow: /settings/
 
 # Sitemap location
-Sitemap: https://inkwell.leadwithnexus.com/sitemap.xml
+Sitemap: https://writewithinkwell.com/sitemap.xml
 
 # Rate limiting for aggressive crawlers
 Crawl-delay: 1

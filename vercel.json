@@ -1,5 +1,18 @@
 {
   "version": 2,
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://writewithinkwell.com/:path*",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "inkwell.leadwithnexus.com"
+        }
+      ]
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!_next/|assets/|brand/|icons/|logo/|.*\\..*).*)",

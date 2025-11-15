@@ -35,7 +35,8 @@
 After deployment completes, verify:
 
 1. **Application Loads**
-   - Visit: https://inkwell.leadwithnexus.com
+   - Visit: https://writewithinkwell.com
+   - Legacy domain: https://inkwell.leadwithnexus.com (redirects to new domain)
    - Check for JavaScript errors in console (F12)
    - Verify service worker registration
 

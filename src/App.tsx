@@ -7,6 +7,7 @@ import { log } from '@/utils/logger';
 
 // Core UI components (needed immediately)
 import ClaudeErrorBoundary from './components/ClaudeErrorBoundary';
+import { DomainMigrationBanner } from './components/DomainMigrationBanner';
 import HealthCheck from './components/HealthCheck';
 import MainLayout from './components/Layout/MainLayout';
 import { PWAInstallButton, PWAUpdateNotification } from './components/PWA';
@@ -163,6 +164,9 @@ function AppShell() {
 
   return (
     <>
+      {/* Domain migration banner - only shows on legacy domain */}
+      <DomainMigrationBanner />
+
       <header className="flex justify-between items-center p-4 border-b">
         <div className="flex items-center gap-4">
           {!user ? (

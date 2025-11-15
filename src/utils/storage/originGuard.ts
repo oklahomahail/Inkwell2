@@ -1,11 +1,12 @@
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 /**
  * Origin Guard Utilities
  * Detects when app is running on unexpected origins (preview URLs, etc.)
  * This helps identify why data might be missing - different origins have different storage
  */
 
-const EXPECTED_PROD_ORIGIN = 'https://inkwell.leadwithnexus.com';
+const EXPECTED_PROD_ORIGIN = 'https://writewithinkwell.com';
+const LEGACY_PROD_ORIGIN = 'https://inkwell.leadwithnexus.com'; // Support during migration period
 const EXPECTED_DEV_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173'];
 
 export interface OriginInfo {
@@ -23,7 +24,7 @@ export interface OriginInfo {
  */
 export function getOriginInfo(): OriginInfo {
   const current = window.location.origin;
-  const isProduction = current === EXPECTED_PROD_ORIGIN;
+  const isProduction = current === EXPECTED_PROD_ORIGIN || current === LEGACY_PROD_ORIGIN;
   const isDevelopment = EXPECTED_DEV_ORIGINS.includes(current);
   const isPreview = current.includes('vercel.app') || current.includes('preview');
   const isUnexpected = import.meta.env.PROD && !isProduction;
