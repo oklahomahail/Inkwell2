@@ -1098,14 +1098,9 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
 const EnhancedWritingPanel: React.FC<EnhancedWritingPanelProps> = (props) => {
   const { currentProject } = useAppContext();
 
-  // If no project, render inner component directly (it handles the no-project state)
-  if (!currentProject) {
-    return <EnhancedWritingPanelInner {...props} />;
-  }
-
-  // Wrap with FormattingProvider for projects
+  // Always wrap with FormattingProvider (uses null projectId if no project)
   return (
-    <FormattingProvider projectId={currentProject.id}>
+    <FormattingProvider projectId={currentProject?.id ?? null}>
       <EnhancedWritingPanelInner {...props} />
     </FormattingProvider>
   );

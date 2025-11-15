@@ -28,7 +28,10 @@ const STORAGE_PREFIX = 'inkwell:project:formatting';
 /**
  * Load formatting configuration from localStorage
  */
-async function loadFormatting(projectId: string): Promise<ProjectFormatting | null> {
+async function loadFormatting(projectId: string | null): Promise<ProjectFormatting | null> {
+  // Return null if no projectId (use defaults)
+  if (!projectId) return null;
+
   try {
     const key = `${STORAGE_PREFIX}:${projectId}`;
     const raw = localStorage.getItem(key);
@@ -52,7 +55,10 @@ async function loadFormatting(projectId: string): Promise<ProjectFormatting | nu
 /**
  * Save formatting configuration to localStorage
  */
-async function saveFormatting(projectId: string, data: ProjectFormatting): Promise<void> {
+async function saveFormatting(projectId: string | null, data: ProjectFormatting): Promise<void> {
+  // Don't save if no projectId
+  if (!projectId) return;
+
   try {
     const key = `${STORAGE_PREFIX}:${projectId}`;
     localStorage.setItem(key, JSON.stringify(data));
@@ -80,7 +86,7 @@ const FormattingContext = createContext<FormattingContextValue | null>(null);
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface FormattingProviderProps {
-  projectId: string;
+  projectId: string | null;
   children: ReactNode;
 }
 
@@ -190,7 +196,7 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({ projectI
       el.style.setProperty('--ink-ch-space-above', `${ch.spacingAbove ?? 1.5}rem`);
       el.style.setProperty('--ink-ch-space-below', `${ch.spacingBelow ?? 0.75}rem`);
     },
-    [formatting]
+    [formatting],
   );
 
   const value = useMemo<FormattingContextValue>(
@@ -201,7 +207,7 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({ projectI
       resetFormatting,
       applyToElement,
     }),
-    [formatting, loaded, setFormatting, resetFormatting, applyToElement]
+    [formatting, loaded, setFormatting, resetFormatting, applyToElement],
   );
 
   return <FormattingContext.Provider value={value}>{children}</FormattingContext.Provider>;
