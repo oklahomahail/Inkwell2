@@ -304,6 +304,24 @@ describe('cloudUpsert', () => {
       );
     });
 
+    it('handles project_settings upsert exception', async () => {
+      const mockUpsert = vi.fn().mockRejectedValue(new Error('Database error'));
+
+      (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+
+      const settings = {
+        projectId: 'project-1',
+        fontFamily: 'Arial',
+      };
+
+      const result = await cloudUpsert.upsertRecords('project_settings', [settings]);
+
+      expect(result.success).toBe(false);
+      expect(result.recordsProcessed).toBe(0);
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors[0]).toContain('Database error');
+    });
+
     it('upserts sections successfully', async () => {
       const section = {
         id: 'section-1',
@@ -458,6 +476,17 @@ describe('cloudUpsert', () => {
 
       // Should have called upsert 60 times (once per chapter)
       expect(mockUpsert).toHaveBeenCalledTimes(60);
+    });
+  });
+
+  describe('Unknown table handling', () => {
+    it('handles unknown table type with error', async () => {
+      const result = await cloudUpsert.upsertRecords('unknown_table' as any, [{ id: 'test-1' }]);
+
+      expect(result.success).toBe(false);
+      expect(result.recordsProcessed).toBe(0);
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors[0]).toContain('Unknown table');
     });
   });
 

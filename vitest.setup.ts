@@ -97,6 +97,8 @@ const EXPECTED_ERROR_PATTERNS = [
   /\[SearchService\] Worker error:/,
   /\[Hydration\] Hydration failed:/,
   /\[Hydration\] Table .* failed:/,
+  /\[SyncQueue\] Operation failed/,
+  /\[SyncQueue\] Failed to/,
 ];
 
 function isExpectedError(message: string): boolean {

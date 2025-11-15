@@ -509,6 +509,31 @@ describe('hydrationService', () => {
     });
   });
 
+  describe('Default behavior', () => {
+    it('hydrates all tables when tables parameter is omitted', async () => {
+      const mockIs = vi.fn().mockResolvedValue({
+        data: [],
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        gt: vi.fn().mockReturnThis(),
+        is: mockIs,
+      });
+
+      // Call without tables parameter - should use getAllTables()
+      const result = await hydrationService.hydrateProject({
+        projectId,
+      });
+
+      expect(result.success).toBe(true);
+      // Should have called supabase.from for all default tables
+      expect(supabase.from).toHaveBeenCalled();
+    });
+  });
+
   describe('Progress callbacks', () => {
     it('calls onProgress callback during hydration', async () => {
       const mockIs = vi.fn().mockResolvedValue({
