@@ -57,6 +57,14 @@ export function useSections(projectId: string) {
       return false;
     }
 
+    // Check for query string junk (corrupted IDs from bad storage)
+    if (projectId.includes('?') || projectId.includes('&') || projectId.includes('=')) {
+      console.error(
+        `[useSections] Invalid projectId contains query string characters: "${projectId}". Likely corrupted storage.`,
+      );
+      return false;
+    }
+
     // Valid formats: UUID, proj_welcome_*, or legacy project-{timestamp}
     const isUUID =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(projectId);

@@ -259,6 +259,12 @@ export function useAppContext(): AppContextValue {
 
 export function useCurrentProject() {
   const { state } = useAppContext();
+
+  // Guard: ensure currentProjectId is a valid string
+  if (typeof state.currentProjectId !== 'string' || !state.currentProjectId) {
+    return { project: null };
+  }
+
   const project = state.projects.find((p: any) => p.id === state.currentProjectId) || null;
   return { project };
 }

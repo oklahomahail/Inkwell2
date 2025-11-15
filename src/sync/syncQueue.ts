@@ -178,6 +178,28 @@ class SyncQueueService {
   ): Promise<string> {
     await this.init();
 
+    // Guard: validate projectId to prevent corrupted sync operations
+    if (!projectId || typeof projectId !== 'string') {
+      devLog.error('[SyncQueue] Skipping operation - invalid projectId', {
+        projectId,
+        type,
+        table,
+        recordId,
+      });
+      throw new Error(`Invalid projectId for sync operation: ${projectId}`);
+    }
+
+    // Additional check for corrupted IDs with query string junk
+    if (projectId.includes('?') || projectId.includes('&') || projectId.includes('=')) {
+      devLog.error('[SyncQueue] Skipping operation - projectId contains query string junk', {
+        projectId,
+        type,
+        table,
+        recordId,
+      });
+      throw new Error(`Corrupted projectId detected: ${projectId}`);
+    }
+
     // Check for existing operation for this record
     const existingKey = `${table}:${recordId}`;
     let operation: SyncOperation | undefined;
