@@ -99,6 +99,7 @@ const EXPECTED_ERROR_PATTERNS = [
   /\[Hydration\] Table .* failed:/,
   /\[SyncQueue\] Operation failed/,
   /\[SyncQueue\] Failed to/,
+  /\[Hydration\] Bootstrap failed:/,
 ];
 
 function isExpectedError(message: string): boolean {

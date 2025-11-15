@@ -123,6 +123,7 @@ describe('syncQueue', () => {
       transaction: vi.fn(() => mockTransaction),
       createObjectStore: vi.fn(() => mockUpgradeStore),
       objectStoreNames: { contains: vi.fn(() => false) },
+      close: vi.fn(),
     };
 
     mockIDB.open.mockImplementation(() => {
@@ -379,6 +380,118 @@ describe('syncQueue', () => {
 
       // Listener should not be called after removal
       expect(listener).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('closeAndWait - Shutdown primitive', () => {
+    it('waits for pending transactions to complete before closing', async () => {
+      vi.useFakeTimers();
+
+      // Manually set up the db state without calling init()
+      (syncQueue as any).db = { close: vi.fn() };
+      (syncQueue as any).pendingTransactions = 2;
+
+      // Start closeAndWait
+      const closePromise = syncQueue.closeAndWait();
+
+      // Advance time slightly (not enough to complete)
+      await vi.advanceTimersByTimeAsync(50);
+
+      // Verify database still open
+      expect((syncQueue as any).db).not.toBeNull();
+
+      // Complete the transactions
+      (syncQueue as any).pendingTransactions = 0;
+
+      // Advance time to allow polling to detect completion
+      await vi.advanceTimersByTimeAsync(20);
+
+      // Wait for close to complete
+      await closePromise;
+
+      // Verify database closed
+      expect((syncQueue as any).db).toBeNull();
+
+      vi.useRealTimers();
+    });
+
+    it('times out after 5 seconds if transactions do not complete', async () => {
+      vi.useFakeTimers();
+
+      // Manually set up the db state without calling init()
+      (syncQueue as any).db = { close: vi.fn() };
+      (syncQueue as any).pendingTransactions = 5;
+
+      // Start closeAndWait
+      const closePromise = syncQueue.closeAndWait();
+
+      // Advance time past timeout (5 seconds)
+      await vi.advanceTimersByTimeAsync(5000);
+
+      // Wait for close to complete
+      await closePromise;
+
+      // Should have closed despite pending transactions
+      expect((syncQueue as any).db).toBeNull();
+
+      vi.useRealTimers();
+    });
+
+    it('does nothing if database is not initialized', async () => {
+      // Ensure db is null
+      (syncQueue as any).db = null;
+
+      // Should not throw
+      await expect(syncQueue.closeAndWait()).resolves.toBeUndefined();
+    });
+
+    it('closes database connection when called', async () => {
+      vi.useFakeTimers();
+
+      // Manually set up the db state without calling init()
+      const mockDb = { close: vi.fn() };
+      (syncQueue as any).db = mockDb;
+      (syncQueue as any).pendingTransactions = 0;
+
+      // No pending transactions - should close immediately
+      await syncQueue.closeAndWait();
+
+      // Verify database closed
+      expect((syncQueue as any).db).toBeNull();
+      expect(mockDb.close).toHaveBeenCalled();
+
+      vi.useRealTimers();
+    });
+
+    it('prevents race conditions by checking pendingTransactions in loop', async () => {
+      vi.useFakeTimers();
+
+      // Manually set up the db state without calling init()
+      (syncQueue as any).db = { close: vi.fn() };
+      (syncQueue as any).pendingTransactions = 3;
+
+      // Start closeAndWait
+      const closePromise = syncQueue.closeAndWait();
+
+      // Advance time and simulate gradual transaction completion
+      await vi.advanceTimersByTimeAsync(15); // First poll
+      (syncQueue as any).pendingTransactions = 2; // One completed
+
+      await vi.advanceTimersByTimeAsync(15); // Second poll
+      (syncQueue as any).pendingTransactions = 1; // Another completed
+
+      await vi.advanceTimersByTimeAsync(15); // Third poll
+      (syncQueue as any).pendingTransactions = 0; // All completed
+
+      await vi.advanceTimersByTimeAsync(15); // Final poll detects completion
+
+      // Wait for close to complete
+      await closePromise;
+
+      // All transactions should have been waited for
+      expect((syncQueue as any).db).toBeNull();
+
+      vi.useRealTimers();
     });
   });
 });

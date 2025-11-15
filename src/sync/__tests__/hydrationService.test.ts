@@ -578,4 +578,280 @@ describe('hydrationService', () => {
       expect(lastCall).toHaveProperty('percentComplete');
     });
   });
+
+  describe('bootstrapProject', () => {
+    it('returns cloud source when cloud project is newer than local', async () => {
+      const cloudProject = {
+        id: projectId,
+        title: 'Cloud Version',
+        updated_at: '2025-11-14T12:00:00Z',
+      };
+
+      const localProject = {
+        id: projectId,
+        name: 'Local Version',
+        updatedAt: new Date('2025-11-14T11:00:00Z').getTime(), // 1 hour older
+      };
+
+      // Mock cloud project fetch - need to create separate mock chains
+      const mockSingleChain = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: cloudProject,
+          error: null,
+        }),
+      };
+
+      const mockHydrationChain = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        gt: vi.fn().mockReturnThis(),
+        is: vi.fn().mockResolvedValue({ data: [], error: null }),
+      };
+
+      // Mock supabase.from to return different chains based on call
+      let callCount = 0;
+      (supabase.from as any).mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return mockSingleChain; // For projects fetch
+        } else {
+          return mockHydrationChain; // For hydration
+        }
+      });
+
+      // Mock local project load
+      const { ProjectsDB } = await import('@/services/projectsDB');
+      (ProjectsDB.loadProject as any)
+        .mockResolvedValueOnce(localProject) // First call: comparison
+        .mockResolvedValueOnce({ ...localProject, name: 'Cloud Version' }); // Second call: after hydration
+
+      const result = await hydrationService.bootstrapProject(projectId);
+
+      expect(result.source).toBe('cloud');
+      expect(result.project).toBeDefined();
+      expect(result.project?.name).toBe('Cloud Version');
+    });
+
+    it('returns local source when local project is newer than cloud', async () => {
+      const cloudProject = {
+        id: projectId,
+        title: 'Cloud Version',
+        updated_at: '2025-11-14T11:00:00Z', // Older
+      };
+
+      const localProject = {
+        id: projectId,
+        name: 'Local Version',
+        updatedAt: new Date('2025-11-14T12:00:00Z').getTime(), // Newer
+      };
+
+      // Mock cloud project fetch
+      const mockSingle = vi.fn().mockResolvedValue({
+        data: cloudProject,
+        error: null,
+      });
+
+      (supabase.from as any).mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: mockSingle,
+      });
+
+      // Mock local project load
+      const { ProjectsDB } = await import('@/services/projectsDB');
+      (ProjectsDB.loadProject as any).mockResolvedValue(localProject);
+
+      const result = await hydrationService.bootstrapProject(projectId);
+
+      expect(result.source).toBe('local');
+      expect(result.project).toBeDefined();
+      expect(result.project?.name).toBe('Local Version');
+    });
+
+    it('returns cloud source when project exists only in cloud', async () => {
+      const cloudProject = {
+        id: projectId,
+        title: 'Cloud Only',
+        updated_at: '2025-11-14T12:00:00Z',
+      };
+
+      // Mock cloud project fetch - need to create separate mock chains
+      const mockSingleChain = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: cloudProject,
+          error: null,
+        }),
+      };
+
+      const mockHydrationChain = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        gt: vi.fn().mockReturnThis(),
+        is: vi.fn().mockResolvedValue({ data: [], error: null }),
+      };
+
+      // Mock supabase.from to return different chains based on call
+      let callCount = 0;
+      (supabase.from as any).mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return mockSingleChain; // For projects fetch
+        } else {
+          return mockHydrationChain; // For hydration
+        }
+      });
+
+      // Mock local project load (not found)
+      const { ProjectsDB } = await import('@/services/projectsDB');
+      (ProjectsDB.loadProject as any)
+        .mockResolvedValueOnce(null) // First call: comparison
+        .mockResolvedValueOnce({ id: projectId, name: 'Cloud Only' }); // Second call: after hydration
+
+      const result = await hydrationService.bootstrapProject(projectId);
+
+      expect(result.source).toBe('cloud');
+      expect(result.project).toBeDefined();
+    });
+
+    it('returns local source when project exists only locally', async () => {
+      const localProject = {
+        id: projectId,
+        name: 'Local Only',
+        updatedAt: Date.now(),
+      };
+
+      // Mock cloud project fetch (not found)
+      const mockSingle = vi.fn().mockResolvedValue({
+        data: null,
+        error: { code: 'PGRST116' }, // Not found error
+      });
+
+      (supabase.from as any).mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: mockSingle,
+      });
+
+      // Mock local project load
+      const { ProjectsDB } = await import('@/services/projectsDB');
+      (ProjectsDB.loadProject as any).mockResolvedValue(localProject);
+
+      const result = await hydrationService.bootstrapProject(projectId);
+
+      expect(result.source).toBe('local');
+      expect(result.project).toBeDefined();
+      expect(result.project?.name).toBe('Local Only');
+    });
+
+    it('returns none source when project does not exist anywhere', async () => {
+      // Mock cloud project fetch (not found)
+      const mockSingle = vi.fn().mockResolvedValue({
+        data: null,
+        error: { code: 'PGRST116' }, // Not found error
+      });
+
+      (supabase.from as any).mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: mockSingle,
+      });
+
+      // Mock local project load (not found)
+      const { ProjectsDB } = await import('@/services/projectsDB');
+      (ProjectsDB.loadProject as any).mockResolvedValue(null);
+
+      const result = await hydrationService.bootstrapProject(projectId);
+
+      expect(result.source).toBe('none');
+      expect(result.project).toBeNull();
+    });
+
+    it('falls back to local when not authenticated', async () => {
+      // Mock unauthenticated state
+      (supabase.auth.getUser as any).mockResolvedValueOnce({
+        data: { user: null },
+        error: null,
+      });
+
+      const localProject = {
+        id: projectId,
+        name: 'Local Fallback',
+        updatedAt: Date.now(),
+      };
+
+      // Mock local project load
+      const { ProjectsDB } = await import('@/services/projectsDB');
+      (ProjectsDB.loadProject as any).mockResolvedValue(localProject);
+
+      const result = await hydrationService.bootstrapProject(projectId);
+
+      expect(result.source).toBe('local');
+      expect(result.project).toBeDefined();
+      // Should NOT have called supabase.from (skipped cloud check)
+      expect(supabase.from).not.toHaveBeenCalledWith('projects');
+    });
+
+    it('falls back to local when cloud fetch fails with non-PGRST116 error', async () => {
+      // Mock cloud fetch failure
+      const mockSingle = vi.fn().mockResolvedValue({
+        data: null,
+        error: {
+          code: 'PGRST500',
+          message: 'Database connection failed',
+        },
+      });
+
+      (supabase.from as any).mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: mockSingle,
+      });
+
+      const localProject = {
+        id: projectId,
+        name: 'Local Fallback',
+        updatedAt: Date.now(),
+      };
+
+      // Mock local project load
+      const { ProjectsDB } = await import('@/services/projectsDB');
+      (ProjectsDB.loadProject as any).mockResolvedValue(localProject);
+
+      const result = await hydrationService.bootstrapProject(projectId);
+
+      // Should fall back to local due to error
+      expect(result.source).toBe('local');
+      expect(result.project).toBeDefined();
+    });
+
+    it('returns none when bootstrap fails and no local project exists', async () => {
+      // Mock cloud fetch failure
+      const mockSingle = vi.fn().mockResolvedValue({
+        data: null,
+        error: {
+          code: 'PGRST500',
+          message: 'Database connection failed',
+        },
+      });
+
+      (supabase.from as any).mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: mockSingle,
+      });
+
+      // Mock local project load (not found)
+      const { ProjectsDB } = await import('@/services/projectsDB');
+      (ProjectsDB.loadProject as any).mockResolvedValue(null);
+
+      const result = await hydrationService.bootstrapProject(projectId);
+
+      expect(result.source).toBe('none');
+      expect(result.project).toBeNull();
+    });
+  });
 });
