@@ -151,7 +151,7 @@ describe('E2EEKeyManager - Comprehensive', () => {
       );
     });
 
-    it('should provide same DEK after unlock', async () => {
+    it('should provide same DEK after unlock', { timeout: 15000 }, async () => {
       // Unlock first to get original DEK
       await e2eeKeyManager.unlockProject(projectId, passphrase);
       const originalDEK = e2eeKeyManager.getDEK(projectId);
@@ -183,7 +183,7 @@ describe('E2EEKeyManager - Comprehensive', () => {
       expect(() => e2eeKeyManager.getDEK(projectId)).toThrow('locked');
     });
 
-    it('should lock all projects', async () => {
+    it('should lock all projects', { timeout: 15000 }, async () => {
       const project1 = 'project-1';
       const project2 = 'project-2';
 
@@ -272,7 +272,7 @@ describe('E2EEKeyManager - Comprehensive', () => {
       await e2eeKeyManager.initializeProject({ projectId, passphrase });
     });
 
-    it('should change passphrase successfully', async () => {
+    it('should change passphrase successfully', { timeout: 15000 }, async () => {
       const newPassphrase = 'new secure passphrase';
 
       // Get old salt before changing

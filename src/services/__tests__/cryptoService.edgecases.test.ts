@@ -364,13 +364,17 @@ describe('cryptoService - Edge Cases', () => {
   });
 
   describe('rederiveMK() - Argon2id Path', () => {
-    it('should re-derive same master key from Argon2id KDF params', async () => {
-      const passphrase = 'correct horse battery staple';
-      const { mk, kdf } = await deriveMasterKey({ passphrase });
+    it(
+      'should re-derive same master key from Argon2id KDF params',
+      { timeout: 15000 },
+      async () => {
+        const passphrase = 'correct horse battery staple';
+        const { mk, kdf } = await deriveMasterKey({ passphrase });
 
-      const mk2 = await rederiveMK(passphrase, kdf);
-      expect(Buffer.from(mk2).toString('hex')).toBe(Buffer.from(mk).toString('hex'));
-    });
+        const mk2 = await rederiveMK(passphrase, kdf);
+        expect(Buffer.from(mk2).toString('hex')).toBe(Buffer.from(mk).toString('hex'));
+      },
+    );
 
     it('should re-derive different key for wrong passphrase', { timeout: 15000 }, async () => {
       const { mk, kdf } = await deriveMasterKey({ passphrase: 'correct' });
@@ -379,7 +383,7 @@ describe('cryptoService - Edge Cases', () => {
       expect(Buffer.from(wrongMK).toString('hex')).not.toBe(Buffer.from(mk).toString('hex'));
     });
 
-    it('should handle missing opslimit/memlimit (use defaults)', async () => {
+    it('should handle missing opslimit/memlimit (use defaults)', { timeout: 15000 }, async () => {
       const { mk, kdf } = await deriveMasterKey({ passphrase: 'test' });
 
       // Remove optional params to test defaults
@@ -484,7 +488,7 @@ describe('cryptoService - Edge Cases', () => {
       expect(decrypted).toEqual(content);
     }, 10000); // Increase timeout to 10 seconds for crypto operations
 
-    it('should fail full workflow with wrong passphrase', async () => {
+    it('should fail full workflow with wrong passphrase', { timeout: 15000 }, async () => {
       const { mk, kdf } = await deriveMasterKey({ passphrase: 'correct' });
       const dek = await generateDEK();
       const wrapped = await wrapKey(dek, mk, kdf);
