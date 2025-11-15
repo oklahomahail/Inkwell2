@@ -58,7 +58,8 @@ export interface StorageHealth {
 
 export const DB_NAME = 'inkwell_v1';
 export const DB_VERSION = 3;
-const EXPECTED_PROD_ORIGIN = 'https://writewithinkwell.com';
+const EXPECTED_PROD_ORIGIN = 'https://www.writewithinkwell.com'; // Canonical domain (www)
+const EXPECTED_APEX_ORIGIN = 'https://writewithinkwell.com'; // Redirects to www
 
 /**
  * Check whether an IndexedDB database exists.
@@ -182,7 +183,7 @@ export async function getStorageHealth(): Promise<StorageHealth> {
   }
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'unknown';
-  const isProduction = origin === EXPECTED_PROD_ORIGIN;
+  const isProduction = origin === EXPECTED_PROD_ORIGIN || origin === EXPECTED_APEX_ORIGIN;
 
   if (import.meta.env.PROD && !isProduction) {
     warnings.push(`Running on unexpected origin: ${origin}`);

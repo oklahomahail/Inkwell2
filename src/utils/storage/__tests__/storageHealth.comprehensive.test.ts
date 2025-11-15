@@ -311,12 +311,12 @@ describe('Storage Health - Comprehensive', () => {
   it('detects production environment', async () => {
     Object.defineProperty(window, 'location', {
       writable: true,
-      value: { origin: 'https://writewithinkwell.com' },
+      value: { origin: 'https://www.writewithinkwell.com' },
     });
 
     const health = await getStorageHealth();
 
-    expect(health.origin).toBe('https://writewithinkwell.com');
+    expect(health.origin).toBe('https://www.writewithinkwell.com');
     expect(health.isProduction).toBe(true);
   });
 

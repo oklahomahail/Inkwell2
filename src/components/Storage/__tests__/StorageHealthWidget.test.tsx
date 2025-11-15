@@ -40,7 +40,7 @@ describe('StorageHealthWidget', () => {
     percentUsed: 0.5,
     usageFormatted: '5.00 MB',
     quotaFormatted: '1.00 GB',
-    origin: 'https://writewithinkwell.com',
+    origin: 'https://www.writewithinkwell.com',
     isProduction: true,
     lastChecked: new Date().toISOString(),
     healthy: true,

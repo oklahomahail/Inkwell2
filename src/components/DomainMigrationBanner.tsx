@@ -44,10 +44,10 @@ export function DomainMigrationBanner() {
   };
 
   const handleMigrate = () => {
-    // Redirect to the new domain, preserving the current path
+    // Redirect to the new domain (www), preserving the current path
     const newUrl = window.location.href.replace(
       'inkwell.leadwithnexus.com',
-      'writewithinkwell.com',
+      'www.writewithinkwell.com',
     );
     window.location.href = newUrl;
   };
@@ -72,7 +72,7 @@ export function DomainMigrationBanner() {
             <div className="flex-1">
               <p className="text-sm sm:text-base font-medium">
                 <strong>We've moved!</strong> Inkwell is now at{' '}
-                <span className="font-semibold text-inkwell-gold">writewithinkwell.com</span>
+                <span className="font-semibold text-inkwell-gold">www.writewithinkwell.com</span>
               </p>
               <p className="text-xs sm:text-sm opacity-90 mt-1">
                 Update your bookmarks. Your data is safe and will migrate automatically.
