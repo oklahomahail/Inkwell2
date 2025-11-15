@@ -109,8 +109,8 @@ export async function ensureWelcomeProject(force = false): Promise<string | null
       localStorage.removeItem(WELCOME_PROJECT_ID_KEY);
     }
 
-    // Create the welcome project
-    const projectId = `proj_welcome_${Date.now()}`;
+    // Create the welcome project with a UUID (required for Supabase sync)
+    const projectId = crypto.randomUUID();
     const now = Date.now();
 
     const welcomeProject: EnhancedProject = {

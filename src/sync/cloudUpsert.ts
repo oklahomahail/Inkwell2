@@ -16,6 +16,7 @@ import { encryptJSON } from '@/services/cryptoService';
 import { e2eeKeyManager } from '@/services/e2eeKeyManager';
 import type { EncryptResult } from '@/types/crypto';
 import devLog from '@/utils/devLog';
+import { isValidUUID } from '@/utils/idUtils';
 
 import { DEFAULT_BATCH_CONFIG } from './types';
 
@@ -166,6 +167,17 @@ class CloudUpsertService {
 
     for (const record of records) {
       try {
+        // Validate project ID is a UUID
+        if (!isValidUUID(record.id)) {
+          devLog.warn(
+            `[CloudUpsert] Skipping project with invalid UUID: ${record.id}. Projects must use UUIDs for cloud sync.`,
+          );
+          errors.push(
+            `Project ${record.id}: Invalid ID format. Projects must use UUIDs for cloud sync.`,
+          );
+          continue;
+        }
+
         const payload = {
           id: record.id,
           owner_id: userId,
@@ -453,6 +465,14 @@ class CloudUpsertService {
    */
   private async ensureProjectExists(projectId: string, userId: string): Promise<boolean> {
     try {
+      // Validate project ID is a UUID before querying Supabase
+      if (!isValidUUID(projectId)) {
+        devLog.error(
+          `[CloudUpsert] Invalid project ID format: ${projectId}. Projects must use UUIDs for cloud sync.`,
+        );
+        return false;
+      }
+
       // Check if project already exists in Supabase
       const { data: existing } = await supabase
         .from('projects')
@@ -471,19 +491,30 @@ class CloudUpsertService {
       const localProject = await ProjectsDB.loadProject(projectId);
 
       if (!localProject) {
-        devLog.error(`[CloudUpsert] Project ${projectId} not found in local storage`);
+        devLog.error(
+          `[CloudUpsert] Project ${projectId} not found in local storage. This may be an orphaned sync operation.`,
+        );
+        devLog.warn(
+          `[CloudUpsert] Tip: Run cleanupOrphanedSyncOperations() from console to remove orphaned operations.`,
+        );
         return false;
       }
 
       // Create project in Supabase
       const { error } = await supabase.from('projects').insert({
         id: localProject.id,
-        name: localProject.name,
+        title: localProject.name, // Map 'name' to 'title' for Supabase
+        summary: localProject.description,
         owner_id: userId,
         genre: localProject.genre,
         target_word_count: localProject.targetWordCount,
         current_word_count: localProject.currentWordCount,
+        claude_context: localProject.claudeContext,
+        story_template_id: localProject.storyTemplateId,
+        story_template_version: localProject.storyTemplateVersion,
+        beat_mapping: localProject.beatMapping,
         is_demo: localProject.isDemo || false,
+        creation_mode: localProject.creationMode,
         created_at: new Date(localProject.createdAt).toISOString(),
         updated_at: new Date(localProject.updatedAt || localProject.createdAt).toISOString(),
       });

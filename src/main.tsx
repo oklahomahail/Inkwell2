@@ -22,6 +22,8 @@ import { warnIfDifferentOrigin } from './utils/storage/originGuard';
 import { ensurePersistentStorage } from './utils/storage/persistence';
 // Initialize localStorage to IndexedDB migration
 import './services/projectsMigration';
+// Initialize project ID UUID migration
+import './services/projectIdMigration';
 // Initialize analytics
 // Initialize telemetry
 
