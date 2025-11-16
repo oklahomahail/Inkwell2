@@ -16,6 +16,7 @@
 
 import devLog from '@/utils/devLog';
 
+import { cloudUpsert } from './cloudUpsert';
 import { isNonRetryableError, isOrphanedOperationError } from './errors';
 import { DEFAULT_RETRY_CONFIG } from './types';
 
@@ -435,7 +436,6 @@ class SyncQueueService {
     try {
       // Execute batch cloud sync
       const payloads = ops.map((op) => op.payload);
-      const { cloudUpsert } = await import('./cloudUpsert');
       const result = await cloudUpsert.upsertRecords(table, payloads);
 
       if (result.success) {
