@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useReducer, type ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+  useRef,
+  type ReactNode,
+} from 'react';
 
 import type { ChapterMeta } from '@/types/writing';
 
@@ -7,6 +14,15 @@ type State = {
   byProject: Record<string, string[]>; // ordered ids
   activeId?: string;
 };
+
+type ChapterChangeEvent = {
+  type: 'chapter-updated' | 'chapter-created' | 'chapter-deleted';
+  chapterId: string;
+  projectId: string;
+  timestamp: number;
+};
+
+type ChapterChangeListener = (event: ChapterChangeEvent) => void;
 
 type Action =
   | { type: 'LOAD_FOR_PROJECT'; payload: { projectId: string; chapters: ChapterMeta[] } }
@@ -123,12 +139,35 @@ type ChaptersContextValue = {
   getChapters: (projectId: string) => ChapterMeta[];
   getActiveChapter: () => ChapterMeta | undefined;
   getChapterCount: (projectId: string) => number;
+  // Event system for cross-panel sync
+  onChapterChange: (listener: ChapterChangeListener) => () => void;
+  emitChapterChange: (event: ChapterChangeEvent) => void;
 };
 
 const ChaptersContext = createContext<ChaptersContextValue | null>(null);
 
 export function ChaptersProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(chaptersReducer, initialState);
+  const listenersRef = useRef<Set<ChapterChangeListener>>(new Set());
+
+  // Subscribe to chapter changes
+  const onChapterChange = useCallback((listener: ChapterChangeListener) => {
+    listenersRef.current.add(listener);
+    return () => {
+      listenersRef.current.delete(listener);
+    };
+  }, []);
+
+  // Emit chapter change events
+  const emitChapterChange = useCallback((event: ChapterChangeEvent) => {
+    listenersRef.current.forEach((listener) => {
+      try {
+        listener(event);
+      } catch (error) {
+        console.error('[ChaptersContext] Error in chapter change listener:', error);
+      }
+    });
+  }, []);
 
   const value: ChaptersContextValue = {
     state,
@@ -139,6 +178,8 @@ export function ChaptersProvider({ children }: { children: ReactNode }) {
         .filter((c): c is ChapterMeta => !!c),
     getActiveChapter: () => (state.activeId ? state.byId[state.activeId] : undefined),
     getChapterCount: (projectId: string) => state.byProject[projectId]?.length ?? 0,
+    onChapterChange,
+    emitChapterChange,
   };
 
   return <ChaptersContext.Provider value={value}>{children}</ChaptersContext.Provider>;

@@ -41,6 +41,7 @@ import { useToast } from '@/context/toast';
 import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 import { useSections } from '@/hooks/useSections';
 import { Chapters } from '@/services/chaptersService';
+import { ChaptersWithEvents } from '@/services/chaptersServiceWithEvents';
 import { SECTION_TYPE_META } from '@/types/section';
 import devLog from '@/utils/devLog';
 
@@ -257,7 +258,8 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
       if (prevActiveIdRef.current && prevActiveIdRef.current !== activeId && content) {
         try {
           // Direct save bypassing debounce to prevent data loss
-          await Chapters.saveDoc({
+          // SPRINT 3: Use ChaptersWithEvents for real-time cross-panel sync
+          await ChaptersWithEvents.saveDoc({
             id: prevActiveIdRef.current,
             content,
             version: 1, // Version is managed by the service
@@ -271,7 +273,7 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
             .filter((word) => word.length > 0);
           const wordCount = words.length;
 
-          await Chapters.updateMeta({
+          await ChaptersWithEvents.updateMeta({
             id: prevActiveIdRef.current,
             wordCount,
           } as any);
@@ -503,13 +505,14 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
         try {
           const chapter = await Chapters.get(activeId);
           const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
-          await Chapters.saveDoc({
+          // SPRINT 3: Use ChaptersWithEvents for real-time cross-panel sync
+          await ChaptersWithEvents.saveDoc({
             id: activeId,
             content,
             version: chapter.version + 1,
             scenes: chapter.scenes,
           });
-          await Chapters.updateMeta({ id: activeId, wordCount } as any);
+          await ChaptersWithEvents.updateMeta({ id: activeId, wordCount } as any);
         } catch (err) {
           console.warn(
             '[EnhancedWritingPanel] Direct save failed, relying on debounced save:',
