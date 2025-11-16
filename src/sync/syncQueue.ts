@@ -17,9 +17,18 @@
 import devLog from '@/utils/devLog';
 
 import { cloudUpsert } from './cloudUpsert';
+import {
+  classifyError,
+  CircuitBreaker,
+  DeadLetterQueue,
+  ErrorRecoveryStats,
+  ExponentialBackoffStrategy,
+  RetryBudget,
+} from './errorRecovery';
 import { isNonRetryableError, isOrphanedOperationError } from './errors';
 import { DEFAULT_RETRY_CONFIG } from './types';
 
+import type { AttemptHistoryEntry, EnhancedSyncOperation } from './errorRecovery';
 import type {
   SyncOperation,
   SyncOperationType,
@@ -44,7 +53,7 @@ class SyncQueueService {
   private pendingTransactions = 0;
 
   // In-memory queue for fast access
-  private queue: Map<string, SyncOperation> = new Map();
+  private queue: Map<string, EnhancedSyncOperation> = new Map();
 
   // Deduplication index for O(1) lookup
   // Key: "${table}:${recordId}" -> Value: operation.id
@@ -65,6 +74,13 @@ class SyncQueueService {
 
   // Auto-cleanup interval for orphaned operations
   private cleanupInterval: ReturnType<typeof setInterval> | null = null;
+
+  // Enhanced Error Recovery
+  private retryStrategy = new ExponentialBackoffStrategy();
+  private circuitBreaker = new CircuitBreaker();
+  private retryBudget = new RetryBudget();
+  private deadLetterQueue = new DeadLetterQueue();
+  private recoveryStats = new ErrorRecoveryStats();
 
   private constructor() {
     this.setupOnlineListener();
@@ -160,12 +176,18 @@ class SyncQueueService {
             op.status = 'pending';
           }
 
-          this.queue.set(op.id, op);
+          // Ensure attemptHistory exists for enhanced operations
+          const enhancedOp: EnhancedSyncOperation = {
+            ...op,
+            attemptHistory: (op as any).attemptHistory || [],
+          };
+
+          this.queue.set(enhancedOp.id, enhancedOp);
 
           // Rebuild deduplication index for pending operations
-          if (op.status === 'pending') {
-            const dedupeKey = `${op.table}:${op.recordId}`;
-            this.deduplicationIndex.set(dedupeKey, op.id);
+          if (enhancedOp.status === 'pending') {
+            const dedupeKey = `${enhancedOp.table}:${enhancedOp.recordId}`;
+            this.deduplicationIndex.set(dedupeKey, enhancedOp.id);
           }
         }
 
@@ -224,7 +246,7 @@ class SyncQueueService {
     const dedupeKey = `${table}:${recordId}`;
     const existingOpId = this.deduplicationIndex.get(dedupeKey);
 
-    let operation: SyncOperation;
+    let operation: EnhancedSyncOperation;
 
     if (existingOpId) {
       const existing = this.queue.get(existingOpId);
@@ -258,7 +280,8 @@ class SyncQueueService {
           lastAttemptAt: null,
           error: null,
           priority,
-        };
+          attemptHistory: [],
+        } as EnhancedSyncOperation;
 
         this.queue.set(opId, operation);
         this.deduplicationIndex.set(dedupeKey, opId);
@@ -285,7 +308,8 @@ class SyncQueueService {
         lastAttemptAt: null,
         error: null,
         priority,
-      };
+        attemptHistory: [],
+      } as EnhancedSyncOperation;
 
       this.queue.set(opId, operation);
       this.deduplicationIndex.set(dedupeKey, opId);
@@ -367,7 +391,7 @@ class SyncQueueService {
     }
 
     // Filter out operations in backoff or max retry
-    const readyOps: SyncOperation[] = [];
+    const readyOps: EnhancedSyncOperation[] = [];
     for (const op of pendingOps) {
       // Check if should retry (exponential backoff)
       if (op.lastAttemptAt !== null) {
@@ -406,7 +430,7 @@ class SyncQueueService {
     }
 
     // Group operations by table for batch processing
-    const opsByTable = new Map<SyncTable, SyncOperation[]>();
+    const opsByTable = new Map<SyncTable, EnhancedSyncOperation[]>();
     for (const op of readyOps) {
       if (!opsByTable.has(op.table)) {
         opsByTable.set(op.table, []);
@@ -430,11 +454,28 @@ class SyncQueueService {
   /**
    * Process a batch of operations for a single table
    */
-  private async processBatch(table: SyncTable, ops: SyncOperation[]): Promise<void> {
+  private async processBatch(table: SyncTable, ops: EnhancedSyncOperation[]): Promise<void> {
     devLog.debug('[SyncQueue] Processing batch', {
       table,
       count: ops.length,
     });
+
+    // Record operation attempt
+    this.recoveryStats.recordOperation();
+
+    // Check circuit breaker
+    if (this.circuitBreaker.getState() === 'open') {
+      devLog.warn('[SyncQueue] Circuit breaker is OPEN, skipping batch');
+      this.recoveryStats.recordCircuitBreakerTrip();
+      return;
+    }
+
+    // Check retry budget
+    if (!this.retryBudget.canRetry()) {
+      devLog.warn('[SyncQueue] Retry budget exhausted, delaying batch');
+      this.recoveryStats.recordBudgetExhaustion();
+      return;
+    }
 
     // Mark all operations as syncing
     for (const op of ops) {
@@ -445,53 +486,73 @@ class SyncQueueService {
     }
 
     try {
-      // Execute batch cloud sync
-      const payloads = ops.map((op) => op.payload);
-      const result = await cloudUpsert.upsertRecords(table, payloads);
+      // Execute batch cloud sync through circuit breaker
+      await this.circuitBreaker.execute(async () => {
+        const payloads = ops.map((op) => op.payload);
+        const result = await cloudUpsert.upsertRecords(table, payloads);
 
-      if (result.success) {
-        // All operations succeeded - mark as success and remove
-        for (const op of ops) {
-          op.status = 'success';
-          op.error = null;
-          await this.persistOperation(op);
-
-          devLog.debug('[SyncQueue] Operation completed', {
-            id: op.id,
-          });
-
-          // Broadcast completion to other tabs
-          this.broadcastOperation('operation-completed', op);
-
-          // Remove from queue after successful sync
-          this.queue.delete(op.id);
-          await this.removeOperation(op.id);
+        if (!result.success) {
+          throw new Error(result.errors.join('; '));
         }
+      });
 
-        devLog.log('[SyncQueue] Batch completed successfully', {
-          table,
-          count: ops.length,
+      // Success! Mark all operations as completed
+      for (const op of ops) {
+        op.status = 'success';
+        op.error = null;
+        await this.persistOperation(op);
+
+        devLog.debug('[SyncQueue] Operation completed', {
+          id: op.id,
         });
-      } else {
-        // Batch failed - handle errors
-        throw new Error(result.errors.join('; '));
+
+        // Broadcast completion to other tabs
+        this.broadcastOperation('operation-completed', op);
+
+        // Remove from queue after successful sync
+        this.queue.delete(op.id);
+        await this.removeOperation(op.id);
       }
+
+      this.recoveryStats.recordSuccess();
+
+      devLog.log('[SyncQueue] Batch completed successfully', {
+        table,
+        count: ops.length,
+      });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+      // Classify the error
+      const classified = classifyError(error);
 
       devLog.error('[SyncQueue] Batch failed', {
         table,
         count: ops.length,
         error: errorMessage,
+        category: classified.category,
       });
 
       // Handle each operation in the failed batch
       for (const op of ops) {
-        // Check if this is a non-retryable error (e.g., orphaned operation)
-        if (isNonRetryableError(error)) {
+        // Add attempt to history
+        const attemptEntry: AttemptHistoryEntry = {
+          attempt: op.attempts,
+          error: errorMessage,
+          category: classified.category,
+          delay: 0, // Will be set if retry is scheduled
+          timestamp: Date.now(),
+        };
+
+        op.attemptHistory.push(attemptEntry);
+        op.errorCategory = classified.category;
+
+        // Check if error is retryable
+        if (!classified.isRetryable || isNonRetryableError(error)) {
           devLog.error('[SyncQueue] Non-retryable error - permanently failing operation', {
             id: op.id,
             error: errorMessage,
+            category: classified.category,
             attempt: op.attempts,
           });
 
@@ -500,8 +561,14 @@ class SyncQueueService {
           op.error = `[Non-retryable] ${errorMessage}`;
           await this.persistOperation(op);
 
+          // Add to dead letter queue
+          this.deadLetterQueue.add(op, classified, op.attemptHistory);
+
           // Broadcast failure to other tabs
           this.broadcastOperation('operation-failed', op, op.error);
+
+          // Record failure
+          this.recoveryStats.recordFailure(classified.category);
 
           // If it's an orphaned operation, also log cleanup instructions
           if (isOrphanedOperationError(error)) {
@@ -509,18 +576,59 @@ class SyncQueueService {
               `[SyncQueue] Orphaned operation detected. Run cleanupOrphanedSyncOperations() to clean up similar operations.`,
             );
           }
-        } else {
-          // Retryable error - mark as pending for retry
-          devLog.error('[SyncQueue] Operation failed (will retry)', {
+
+          continue;
+        }
+
+        // Check retry limit
+        if (op.attempts >= this.retryConfig.maxAttempts) {
+          devLog.error('[SyncQueue] Max retries exceeded', {
             id: op.id,
-            error: errorMessage,
-            attempt: op.attempts,
+            attempts: op.attempts,
+            maxAttempts: this.retryConfig.maxAttempts,
           });
 
-          op.status = 'pending'; // Will retry
-          op.error = errorMessage;
+          // Mark as permanently failed
+          op.status = 'failed';
+          op.error = `[Max retries] ${errorMessage}`;
           await this.persistOperation(op);
+
+          // Add to dead letter queue
+          this.deadLetterQueue.add(op, classified, op.attemptHistory);
+
+          // Broadcast failure
+          this.broadcastOperation('operation-failed', op, op.error);
+
+          // Record failure
+          this.recoveryStats.recordFailure(classified.category);
+
+          continue;
         }
+
+        // Calculate retry delay using enhanced strategy
+        const delay = this.retryStrategy.calculateDelay(op.attempts + 1, classified);
+
+        // Update attempt history with delay
+        attemptEntry.delay = delay;
+
+        // Record retry in budget
+        this.retryBudget.recordRetry();
+
+        // Record retry metrics
+        this.recoveryStats.recordRetry(delay);
+
+        // Mark as pending for retry
+        op.status = 'pending';
+        op.error = errorMessage;
+        await this.persistOperation(op);
+
+        devLog.log('[SyncQueue] Scheduling retry', {
+          id: op.id,
+          attempt: op.attempts,
+          nextAttempt: op.attempts + 1,
+          delay,
+          category: classified.category,
+        });
       }
     }
 
@@ -948,6 +1056,129 @@ class SyncQueueService {
       this.cleanupInterval = null;
       devLog.debug('[SyncQueue] Auto-cleanup stopped');
     }
+
+    // Clean up dead letter queue
+    this.deadLetterQueue.cleanup();
+  }
+
+  /**
+   * Get system health status
+   * Includes circuit breaker, retry budget, and dead letter queue status
+   */
+  getHealth() {
+    return {
+      circuitBreaker: {
+        state: this.circuitBreaker.getState(),
+        isHealthy: this.circuitBreaker.getState() !== 'open',
+      },
+      retryBudget: this.retryBudget.getStats(),
+      deadLetters: {
+        count: this.deadLetterQueue.size(),
+        items: this.deadLetterQueue.list().map((dl) => ({
+          operationId: dl.operation.id,
+          table: dl.operation.table,
+          recordId: dl.operation.recordId,
+          errorCategory: dl.finalError.category,
+          attempts: dl.attemptHistory.length,
+          deadAt: dl.deadAt,
+        })),
+      },
+      metrics: this.recoveryStats.getMetrics(this.deadLetterQueue.size()),
+      queue: this.getStats(),
+    };
+  }
+
+  /**
+   * Get error recovery metrics
+   */
+  getRecoveryMetrics() {
+    return this.recoveryStats.getMetrics(this.deadLetterQueue.size());
+  }
+
+  /**
+   * Get dead letter queue items
+   */
+  getDeadLetters() {
+    return this.deadLetterQueue.list();
+  }
+
+  /**
+   * Retry a specific dead letter operation
+   * Removes it from dead letter queue and re-enqueues
+   */
+  async retryDeadLetter(operationId: string): Promise<boolean> {
+    const deadLetter = this.deadLetterQueue.get(operationId);
+    if (!deadLetter) {
+      devLog.warn('[SyncQueue] Dead letter not found:', operationId);
+      return false;
+    }
+
+    // Remove from dead letter queue
+    this.deadLetterQueue.remove(operationId);
+
+    // Reset operation and re-enqueue
+    const op = deadLetter.operation as EnhancedSyncOperation;
+    op.status = 'pending';
+    op.attempts = 0;
+    op.error = null;
+    op.lastAttemptAt = null;
+    op.attemptHistory = []; // Clear history for fresh start
+
+    // Add back to queue
+    this.queue.set(op.id, op);
+    const dedupeKey = `${op.table}:${op.recordId}`;
+    this.deduplicationIndex.set(dedupeKey, op.id);
+
+    await this.persistOperation(op);
+
+    devLog.log('[SyncQueue] Dead letter retried:', {
+      operationId,
+      table: op.table,
+      recordId: op.recordId,
+    });
+
+    this.notifyListeners();
+
+    // Process queue if online
+    if (navigator.onLine) {
+      await this.processQueue();
+    }
+
+    return true;
+  }
+
+  /**
+   * Clear all dead letters
+   */
+  clearDeadLetters(): void {
+    this.deadLetterQueue.clear();
+    devLog.log('[SyncQueue] Dead letter queue cleared');
+  }
+
+  /**
+   * Reset circuit breaker (for manual recovery)
+   */
+  resetCircuitBreaker(): void {
+    this.circuitBreaker.reset();
+    devLog.log('[SyncQueue] Circuit breaker reset');
+  }
+
+  /**
+   * Reset retry budget (for manual recovery)
+   */
+  resetRetryBudget(): void {
+    this.retryBudget.reset();
+    devLog.log('[SyncQueue] Retry budget reset');
+  }
+
+  /**
+   * Reset all error recovery systems
+   */
+  resetErrorRecovery(): void {
+    this.circuitBreaker.reset();
+    this.retryBudget.reset();
+    this.recoveryStats.reset();
+    devLog.log('[SyncQueue] Error recovery systems reset');
   }
 }
 
