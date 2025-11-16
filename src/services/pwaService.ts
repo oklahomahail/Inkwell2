@@ -162,13 +162,19 @@ export class PWAService {
 
   // Start periodic storage quota monitoring
   private startQuotaMonitoring() {
-    // Check quota immediately
-    void this.checkStorageQuota();
+    // Check quota immediately (use setTimeout to avoid initialization issues)
+    setTimeout(() => {
+      void this.checkStorageQuota().catch((error) => {
+        devLog.error('[PWA] Failed to check storage quota on init:', error);
+      });
+    }, 0);
 
     // Check every 5 minutes
     this.quotaCheckInterval = setInterval(
       () => {
-        void this.checkStorageQuota();
+        void this.checkStorageQuota().catch((error) => {
+          devLog.error('[PWA] Failed to check storage quota:', error);
+        });
       },
       5 * 60 * 1000,
     );
@@ -218,8 +224,10 @@ export class PWAService {
   onStorageQuotaWarning(callback: (warning: StorageQuotaWarning) => void) {
     this.listeners.storageQuota.push(callback);
 
-    // Check immediately
-    void this.checkStorageQuota();
+    // Check immediately with error handling
+    void this.checkStorageQuota().catch((error) => {
+      devLog.error('[PWA] Failed to check storage quota in onStorageQuotaWarning:', error);
+    });
 
     return () => {
       const index = this.listeners.storageQuota.indexOf(callback);
