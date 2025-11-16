@@ -7,6 +7,7 @@ import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
 /* In vite.config.ts, we use process.env (Node.js) since import.meta.env is not available during build config */
@@ -77,6 +78,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    tsconfigPaths(),
     ...(process.env.VITE_ENABLE_PWA === 'false'
       ? []
       : [
