@@ -2,6 +2,7 @@
 import { X, Send, Wand2, Sparkles, MessageCircle, Settings2, StopCircle } from 'lucide-react';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
+import { AIDisclosureHint } from '@/components/AI/AIDisclosureHint';
 import claudeService from '@/services/claudeService';
 
 interface AISuggestionBoxProps {
@@ -309,20 +310,25 @@ export default function AISuggestionBox({
               {isStreaming && <StreamingCursor />}
             </div>
             {!isStreaming && (
-              <div className="flex gap-3 mt-4 pt-3 border-t border-slate-700">
-                <button
-                  onClick={() => handleInsert('insert')}
-                  className="flex-1 text-primary-400 hover:text-primary-300 text-sm font-medium py-2 px-3 rounded-md hover:bg-slate-700/50 transition-colors"
-                >
-                  Insert Below
-                </button>
-                <button
-                  onClick={() => handleInsert('replace')}
-                  className="flex-1 text-amber-400 hover:text-amber-300 text-sm font-medium py-2 px-3 rounded-md hover:bg-slate-700/50 transition-colors"
-                >
-                  Replace Selection
-                </button>
-              </div>
+              <>
+                <div className="flex gap-3 mt-4 pt-3 border-t border-slate-700">
+                  <button
+                    onClick={() => handleInsert('insert')}
+                    className="flex-1 text-primary-400 hover:text-primary-300 text-sm font-medium py-2 px-3 rounded-md hover:bg-slate-700/50 transition-colors"
+                  >
+                    Insert Below
+                  </button>
+                  <button
+                    onClick={() => handleInsert('replace')}
+                    className="flex-1 text-amber-400 hover:text-amber-300 text-sm font-medium py-2 px-3 rounded-md hover:bg-slate-700/50 transition-colors"
+                  >
+                    Replace Selection
+                  </button>
+                </div>
+
+                {/* AI Disclosure Hint */}
+                <AIDisclosureHint />
+              </>
             )}
           </div>
         )}

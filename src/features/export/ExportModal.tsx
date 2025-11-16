@@ -1,4 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+import { AIDisclosureSection } from '@/components/export/AIDisclosureSection';
+import {
+  ExportAIDisclosure,
+  loadDisclosurePreferences,
+  saveDisclosurePreferences,
+  getDisclosureText,
+} from '@/types/aiDisclosure';
 
 import { renderAnalysisSummaryHTML } from '../../export/templates/analysisSummary';
 import { renderManuscriptHTML } from '../../export/templates/manuscript';
@@ -34,6 +42,12 @@ export function ExportModal({ isOpen, onClose, projectId, bookData, analysis }: 
   const [template, setTemplate] = useState<TemplateId>('manuscript');
   const [downloading, setDownloading] = useState(false);
   const [progressMessage, setProgressMessage] = useState<string>('');
+  const [aiDisclosure, setAIDisclosure] = useState<ExportAIDisclosure>(loadDisclosurePreferences());
+
+  // Save preferences when they change
+  useEffect(() => {
+    saveDisclosurePreferences(aiDisclosure);
+  }, [aiDisclosure]);
 
   if (!isOpen) return null;
 
@@ -59,7 +73,7 @@ export function ExportModal({ isOpen, onClose, projectId, bookData, analysis }: 
       // Retrieve captured SVG charts for analysis export
       const capturedCharts = retrieveCapturedCharts(projectId);
 
-      const html =
+      let html =
         template === 'manuscript'
           ? renderManuscriptHTML(bookData)
           : renderAnalysisSummaryHTML({
@@ -70,6 +84,21 @@ export function ExportModal({ isOpen, onClose, projectId, bookData, analysis }: 
               pacingSVG: analysis?.pacingSVG || capturedCharts.pacing || undefined,
               arcsSVG: analysis?.arcsSVG || capturedCharts.arcs || undefined,
             });
+
+      // Add AI disclosure if enabled
+      if (aiDisclosure.enabled) {
+        const disclosureText = getDisclosureText(aiDisclosure.style);
+        const disclosureHTML = `<div style="border-top: 1px solid #ddd; margin-top: 3em; padding-top: 1em; font-size: 0.9em; color: #666; font-style: italic; page-break-before: auto;"><p>${disclosureText}</p></div>`;
+
+        if (aiDisclosure.placement === 'front') {
+          html = html.replace(
+            /<body([^>]*)>/,
+            `<body$1>\n${disclosureHTML.replace('border-top', 'border-bottom').replace('margin-top', 'margin-bottom').replace('padding-top', 'padding-bottom')}`,
+          );
+        } else {
+          html = html.replace('</body>', `${disclosureHTML}</body>`);
+        }
+      }
 
       const res = await fetch('/api/export/pdf', {
         method: 'POST',
@@ -154,6 +183,13 @@ export function ExportModal({ isOpen, onClose, projectId, bookData, analysis }: 
             <span>Analysis Summary (1-pager)</span>
           </label>
         </div>
+
+        {/* AI Disclosure Section */}
+        <AIDisclosureSection
+          value={aiDisclosure}
+          onChange={setAIDisclosure}
+          disabled={downloading}
+        />
 
         {/* Progress indicator */}
         {progressMessage && (

@@ -3,8 +3,9 @@
 ## Executive Summary Report
 
 **Date**: November 15, 2025
-**Auditor**: Claude Code Comprehensive Analysis
 **Scope**: End-to-end architecture validation
+
+**Latest Update**: November 16, 2025 - Added AI Disclosure Feature (see Recent Additions below)
 
 ---
 
@@ -629,6 +630,48 @@ For detailed information on any specific issue, refer to the individual audit re
 **Audit completed**: November 15, 2025
 **Total analysis time**: Comprehensive multi-agent exploration
 **Code coverage**: 8 major architectural areas
+
+---
+
+## 📝 Recent Additions
+
+### AI Disclosure Feature (November 16, 2025)
+
+**Status**: ✅ Implemented and deployed
+
+A new ethical AI transparency feature that allows authors to optionally include disclosure statements about AI assistance in their exported work.
+
+**Key Features**:
+
+- **Export-level disclosure**: Optional section in all export dialogs (scene, chapter, PDF)
+- **Inline citations**: One-click copy button in AI suggestion dialog
+- **Three style options**: Short, process-focused, and formal tones
+- **Placement control**: Front matter or back matter
+- **Preference persistence**: Settings saved to localStorage
+- **Format support**: Markdown, HTML, PDF, Plain Text, Word/RTF
+
+**Design Principles**:
+
+- Obvious: Appears where authors expect metadata
+- Unobtrusive: Never blocks workflow, always optional
+- Not restrictive: Fully editable after export
+- Additive: Zero data model changes, pure enhancement
+
+**Implementation**:
+
+- Zero database changes
+- Local state only
+- Full accessibility support
+- Comprehensive documentation
+
+**Files**:
+
+- `src/types/aiDisclosure.ts` - Core types and utilities
+- `src/components/export/AIDisclosureSection.tsx` - Export dialog UI
+- `src/components/AI/AIDisclosureHint.tsx` - Inline citation button
+- `docs/features/ai-disclosure.md` - Full documentation
+
+See [AI Disclosure Documentation](docs/features/ai-disclosure.md) for complete details.
 
 ---
 

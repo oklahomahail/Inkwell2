@@ -1,4 +1,5 @@
 // src/utils/exportUtils.ts - NEW FILE
+import { ExportAIDisclosure, getDisclosureText } from '@/types/aiDisclosure';
 import { type Scene, type Chapter } from '@/types/writing';
 import devLog from '@/utils/devLog';
 
@@ -9,6 +10,7 @@ export interface ExportOptions {
   includeMetadata: boolean;
   includeWordCounts: boolean;
   separateScenes: boolean;
+  aiDisclosure?: ExportAIDisclosure;
 }
 
 // Strip HTML tags for plain text formats
@@ -57,6 +59,45 @@ function _formatSceneMetadata(scene: Scene, includeWordCounts: boolean): string 
   return metadata.join(' • ');
 }
 
+// Add AI disclosure statement to content
+function _addAIDisclosure(
+  content: string,
+  format: ExportFormat,
+  aiDisclosure?: ExportAIDisclosure,
+  placement: 'front' | 'back' = 'back',
+): string {
+  if (!aiDisclosure || !aiDisclosure.enabled) {
+    return content;
+  }
+
+  const disclosureText = getDisclosureText(aiDisclosure.style);
+
+  switch (format) {
+    case 'markdown':
+      const mdDisclosure = `---\n\n${disclosureText}\n\n---\n\n`;
+      return placement === 'front' ? mdDisclosure + content : content + '\n\n' + mdDisclosure;
+
+    case 'html':
+      const htmlDisclosure = `<div style="border-top: 1px solid #ddd; margin-top: 3em; padding-top: 1em; font-size: 0.9em; color: #666; font-style: italic;">\n<p>${disclosureText}</p>\n</div>\n`;
+      if (placement === 'front') {
+        return content.replace(
+          /<body>/,
+          `<body>\n${htmlDisclosure.replace('border-top', 'border-bottom').replace('margin-top', 'margin-bottom').replace('padding-top', 'padding-bottom')}`,
+        );
+      } else {
+        return content.replace('</body>', `${htmlDisclosure}</body>`);
+      }
+
+    case 'txt':
+    case 'docx':
+      const txtDisclosure = `${'─'.repeat(60)}\n\n${disclosureText}\n\n${'─'.repeat(60)}\n\n`;
+      return placement === 'front' ? txtDisclosure + content : content + '\n\n' + txtDisclosure;
+
+    default:
+      return content;
+  }
+}
+
 // Export single scene
 export const exportScene = _exportScene;
 
@@ -64,7 +105,7 @@ export function _exportScene(
   scene: Scene,
   options: ExportOptions,
 ): { content: string; filename: string } {
-  const { format, includeMetadata, includeWordCounts } = options;
+  const { format, includeMetadata, includeWordCounts, aiDisclosure } = options;
   let content = '';
   let filename = `${scene.title || 'Untitled Scene'}`;
 
@@ -126,6 +167,11 @@ export function _exportScene(
       break;
   }
 
+  // Add AI disclosure if enabled
+  if (aiDisclosure?.enabled) {
+    content = _addAIDisclosure(content, format, aiDisclosure, aiDisclosure.placement);
+  }
+
   return { content, filename };
 }
 
@@ -136,7 +182,7 @@ export function _exportChapter(
   chapter: Chapter,
   options: ExportOptions,
 ): { content: string; filename: string } {
-  const { format, includeMetadata, includeWordCounts, separateScenes } = options;
+  const { format, includeMetadata, includeWordCounts, separateScenes, aiDisclosure } = options;
   let content = '';
   let filename = `${chapter.title || 'Untitled Chapter'}`;
 
@@ -240,6 +286,11 @@ export function _exportChapter(
   // Close HTML
   if (format === 'html') {
     content += '</body>\n</html>';
+  }
+
+  // Add AI disclosure if enabled
+  if (aiDisclosure?.enabled) {
+    content = _addAIDisclosure(content, format, aiDisclosure, aiDisclosure.placement);
   }
 
   // Set filename extension

@@ -1,8 +1,14 @@
 // src/components/Writing/ExportDialog.tsx - NEW FILE
 import { X, Download, FileText, Globe, FileDown, File } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
+import { AIDisclosureSection } from '@/components/export/AIDisclosureSection';
 import { useToast } from '@/context/toast';
+import {
+  ExportAIDisclosure,
+  loadDisclosurePreferences,
+  saveDisclosurePreferences,
+} from '@/types/aiDisclosure';
 import type { Scene, Chapter } from '@/types/writing';
 // Use utils version
 import { ExportFormat, ExportOptions, performExport } from '@/utils/exportUtils';
@@ -21,8 +27,14 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, type, data
   const [includeWordCounts, setIncludeWordCounts] = useState(true);
   const [separateScenes, setSeparateScenes] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
+  const [aiDisclosure, setAIDisclosure] = useState<ExportAIDisclosure>(loadDisclosurePreferences());
 
   const { showToast } = useToast();
+
+  // Save preferences when they change
+  useEffect(() => {
+    saveDisclosurePreferences(aiDisclosure);
+  }, [aiDisclosure]);
 
   const formatOptions = [
     {
@@ -59,6 +71,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, type, data
         includeMetadata,
         includeWordCounts,
         separateScenes: separateScenes && type === 'chapter',
+        aiDisclosure,
       };
 
       performExport(type, data, options);
@@ -188,6 +201,13 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, type, data
               )}
             </div>
           </div>
+
+          {/* AI Disclosure Section */}
+          <AIDisclosureSection
+            value={aiDisclosure}
+            onChange={setAIDisclosure}
+            disabled={isExporting}
+          />
         </div>
 
         {/* Footer */}
