@@ -37,8 +37,10 @@ export function SyncStatusDashboard() {
   const loadHealth = () => {
     const healthData = syncQueue.getHealth();
     setHealth(healthData);
-    setQueueStats(healthData.queue);
-    setMetrics(healthData.metrics);
+    if (healthData) {
+      setQueueStats(healthData.queue);
+      setMetrics(healthData.metrics);
+    }
   };
 
   useEffect(() => {
@@ -177,6 +179,11 @@ export function SyncStatusDashboard() {
           </p>
           <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
             <div
+              role="progressbar"
+              aria-valuenow={health.retryBudget.percentUsed}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Retry budget usage"
               className={`h-2 rounded-full transition-all ${getBudgetColor(health.retryBudget.percentUsed)}`}
               style={{ width: `${health.retryBudget.percentUsed}%` }}
             />
