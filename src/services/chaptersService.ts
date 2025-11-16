@@ -200,12 +200,14 @@ class ChaptersService {
       updatedAt: now,
     };
 
-    // Save metadata
+    // Save metadata (use put for upsert if ID provided, add for new)
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readwrite');
       this.trackTransaction(tx);
-      this.trackTransaction(tx);
-      const request = tx.objectStore(META_STORE).add(meta);
+      const store = tx.objectStore(META_STORE);
+      // Use put() for upsert when ID is provided (sync scenarios)
+      // Use add() only for truly new chapters (prevents accidental overwrites)
+      const request = input.id ? store.put(meta) : store.add(meta);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
@@ -245,7 +247,6 @@ class ChaptersService {
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readwrite');
       this.trackTransaction(tx);
-      this.trackTransaction(tx);
       const request = tx.objectStore(META_STORE).put(updated);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
@@ -271,7 +272,6 @@ class ChaptersService {
 
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readwrite');
-      this.trackTransaction(tx);
       this.trackTransaction(tx);
       const request = tx.objectStore(META_STORE).put(meta);
       request.onsuccess = () => resolve();
@@ -401,7 +401,6 @@ class ChaptersService {
     // Delete metadata
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(META_STORE, 'readwrite');
-      this.trackTransaction(tx);
       this.trackTransaction(tx);
       const request = tx.objectStore(META_STORE).delete(id);
       request.onsuccess = () => resolve();

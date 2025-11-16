@@ -502,6 +502,8 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
     } catch (error) {
       console.error('[EnhancedWritingPanel] Failed to create section:', error);
       showToast('Failed to create section', 'error');
+      // Reset the rate limit timer on error so user can retry immediately
+      lastCreateTime.current = 0;
     } finally {
       setIsCreatingSection(false);
     }
