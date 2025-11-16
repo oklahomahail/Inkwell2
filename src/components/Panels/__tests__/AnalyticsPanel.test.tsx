@@ -51,6 +51,12 @@ vi.mock('@/services/chaptersService', () => ({
   },
 }));
 
+vi.mock('@/services/chaptersServiceWithEvents', () => ({
+  ChaptersWithEvents: {
+    onChapterChange: vi.fn(() => vi.fn()),
+  },
+}));
+
 // Import after mocks
 const { default: AnalyticsPanel } = await import('../AnalyticsPanel');
 

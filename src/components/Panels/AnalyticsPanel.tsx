@@ -21,36 +21,55 @@ const AnalyticsPanel: React.FC = () => {
   useEffect(() => {
     if (!projectId || isDemo) return;
 
+    let isMounted = true;
+    let unsubscribe: (() => void) | undefined;
+
     const loadChapters = async () => {
       try {
         const chapters = await Chapters.list(projectId);
-        dispatch({
-          type: 'LOAD_FOR_PROJECT',
-          payload: { projectId, chapters },
-        });
+        // Only dispatch if component is still mounted
+        if (isMounted) {
+          dispatch({
+            type: 'LOAD_FOR_PROJECT',
+            payload: { projectId, chapters },
+          });
+        }
       } catch (error) {
-        console.error('[AnalyticsPanel] Failed to load chapters:', error);
+        if (isMounted) {
+          console.error('[AnalyticsPanel] Failed to load chapters:', error);
+        }
       }
     };
 
     // Load immediately
-    loadChapters();
+    void loadChapters();
 
     // SPRINT 3: Replace polling with real-time event-driven updates
     // Subscribe to chapter change events from ChaptersServiceWithEvents
     // This provides <100ms cross-panel sync vs 3-6.6s polling delay
-    const unsubscribe = (async () => {
-      const { ChaptersWithEvents } = await import('@/services/chaptersServiceWithEvents');
-      return ChaptersWithEvents.onChapterChange((event) => {
-        // Only reload if this event is for our current project
-        if (event.projectId === projectId) {
-          void loadChapters();
+    (async () => {
+      try {
+        const { ChaptersWithEvents } = await import('@/services/chaptersServiceWithEvents');
+        if (isMounted) {
+          unsubscribe = ChaptersWithEvents.onChapterChange((event) => {
+            // Only reload if this event is for our current project
+            if (event.projectId === projectId) {
+              void loadChapters();
+            }
+          });
         }
-      });
+      } catch (error) {
+        if (isMounted) {
+          console.error('[AnalyticsPanel] Failed to subscribe to chapter changes:', error);
+        }
+      }
     })();
 
     return () => {
-      unsubscribe.then((unsub) => unsub());
+      isMounted = false;
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
   }, [projectId, dispatch, isDemo]);
 
