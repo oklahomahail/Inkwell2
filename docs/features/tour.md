@@ -344,4 +344,4 @@ The tour service handles route transitions automatically.
 - [Architecture: Spotlight Tour](../architecture/spotlight-tour-architecture.md)
 - [Operations: Telemetry](../ops/telemetry.md)
 - [Product: First-Run Experience](../product/first-run-experience.md)
-- [User Guide](../../USER_GUIDE.md)
+- [E2EE User Guide](../E2EE_USER_GUIDE.md)

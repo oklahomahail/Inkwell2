@@ -231,7 +231,7 @@ The story continues...
 5. Test in Calibre or e-reader app
 
 **Troubleshooting EPUB**:
-See [EPUB Foundation Checklist](../.implementations/EPUB_FOUNDATION_CHECKLIST.md#troubleshooting)
+See the EPUB Export Issues section below for common problems and solutions.
 
 ---
 
@@ -366,7 +366,7 @@ Restart dev server after changing `.env` files.
 **Fix**: Set `VITE_ENABLE_EPUB_EXPORT=true` in `.env.local` and restart dev server
 
 **Problem**: EPUB won't open in reader
-**Fix**: Run `epubcheck your-file.epub --mode basic` to identify errors. See [EPUB Troubleshooting](../.implementations/EPUB_FOUNDATION_CHECKLIST.md#troubleshooting)
+**Fix**: Run `epubcheck your-file.epub --mode basic` to identify errors. Verify that all chapter titles are non-empty and the file structure is valid.
 
 **Problem**: Chapter links don't work
 **Fix**: Verify chapter titles are non-empty and don't contain special XML characters
@@ -423,7 +423,6 @@ interface ExportOptions {
 
 ## Related Documentation
 
-- [EPUB Foundation Checklist](../.implementations/EPUB_FOUNDATION_CHECKLIST.md) - Implementation details
 - [Privacy & Telemetry](./privacy.md) - Export telemetry events
 - [Backup System](./backup.md) - Export as backup vs. distribution
 

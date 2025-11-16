@@ -361,4 +361,4 @@ export function FirstActionPrompt() {
 - [Feature Guide: Tour](../features/tour.md)
 - [Architecture: Spotlight Tour](../architecture/spotlight-tour-architecture.md)
 - [Operations: Telemetry](../ops/telemetry.md)
-- [User Guide](../../USER_GUIDE.md)
+- [E2EE User Guide](../E2EE_USER_GUIDE.md)
