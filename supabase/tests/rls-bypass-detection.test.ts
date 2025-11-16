@@ -514,26 +514,28 @@ describe('RLS Bypass Detection: Project Members', () => {
       })
       .select();
 
-    // INSERT policy requires user_id = auth.uid(), which is satisfied
-    // But this doesn't escalate privileges because project access is still controlled by can_access_project()
-    // The real issue would be if they could INSERT with a different user_id
-    expect(data).not.toBeNull(); // This is actually allowed by current policy!
-
-    // However, they still shouldn't be able to read the project
-    const { data: projectData, error: projectError } = await userB.client
-      .from('projects')
-      .select('*')
-      .eq('id', projectA.id)
-      .single();
-
-    // This test reveals a potential issue: Users can add themselves to any project!
-    // The INSERT policy should check if the user is already a member or owner
-    expect(projectData).toBeNull();
-    expect(projectError).not.toBeNull();
+    // INSERT policy now requires is_project_owner() check
+    // Only project owners can add members, so User B cannot add themselves
+    expect(data).toBeNull();
+    expect(error).not.toBeNull();
+    expect(error?.message).toContain('violates row-level security policy');
   });
 
   it('should prevent non-owners from removing members', async () => {
-    // User B tries to remove themselves (added in previous test)
+    // First, User A (the owner) adds User B as a member
+    const { data: insertData, error: insertError } = await userA.client
+      .from('project_members')
+      .insert({
+        project_id: projectA.id,
+        user_id: userB.id,
+        role: 'viewer',
+      })
+      .select();
+
+    expect(insertData).not.toBeNull();
+    expect(insertError).toBeNull();
+
+    // Now User B tries to remove themselves
     const { data, error } = await userB.client
       .from('project_members')
       .delete()
@@ -541,7 +543,9 @@ describe('RLS Bypass Detection: Project Members', () => {
       .eq('user_id', userB.id)
       .select();
 
+    // DELETE policy requires is_project_owner(), so members cannot remove themselves
     expect(data).toBeNull();
     expect(error).not.toBeNull();
+    expect(error?.message).toContain('violates row-level security policy');
   });
 });
