@@ -282,21 +282,27 @@ function AppProviderInner({ children }: { children: ReactNode }) {
 
   // Load state on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(PROJECTS_KEY);
-      if (stored) {
-        let projects = JSON.parse(stored) as Project[];
+    async function loadProjects() {
+      try {
+        const stored = localStorage.getItem(PROJECTS_KEY);
+        if (stored) {
+          let projects = JSON.parse(stored) as Project[];
 
-        // Run story template migration (v1.4.0+)
-        // This adds template fields to existing projects
-        const { runStoryTemplateMigration } = require('@/utils/migrations/storyTemplateMigration');
-        projects = runStoryTemplateMigration(projects);
+          // Run story template migration (v1.4.0+)
+          // This adds template fields to existing projects
+          const { runStoryTemplateMigration } = await import(
+            '@/utils/migrations/storyTemplateMigration'
+          );
+          projects = runStoryTemplateMigration(projects);
 
-        dispatch({ type: 'SET_PROJECTS', payload: projects });
+          dispatch({ type: 'SET_PROJECTS', payload: projects });
+        }
+      } catch (error) {
+        devLog.warn('Failed to parse projects from localStorage:', error);
       }
-    } catch (error) {
-      devLog.warn('Failed to parse projects from localStorage:', error);
     }
+
+    loadProjects();
 
     // Load current project ID with validation
     try {
