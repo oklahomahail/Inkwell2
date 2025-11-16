@@ -4,6 +4,36 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Fixed - Chapter Duplication & Error Recovery (2025-11-15)
+
+#### Critical Fixes
+
+- **Chapter Duplication Bug** - Fixed IndexedDB sync creating duplicate chapters
+  - Changed `Chapters.create()` to use `.put()` (upsert) when ID is provided (sync scenarios)
+  - Prevents sync operations from creating duplicate entries in IndexedDB
+  - Resolves chapters appearing multiple times when navigating to analytics panel
+  - Particularly fixes Safari/PWA edge cases with rapid sync operations
+  - File: `src/services/chaptersService.ts:210`
+
+- **Section Creation Error Recovery** - Improved UI resilience after errors
+  - Reset rate limiter when `createSection()` fails, allowing immediate retry
+  - Users can now retry section creation immediately after errors instead of being blocked
+  - Fixed test: "should not break UI if createSection throws"
+  - File: `src/components/Writing/EnhancedWritingPanel.tsx:506`
+
+#### Code Quality
+
+- **Transaction Tracking Cleanup** - Removed duplicate `trackTransaction()` calls
+  - Fixed copy-paste bugs in `chaptersService.ts` (lines 247, 275, 404)
+  - Improves transaction tracking accuracy and prevents double-counting
+
+#### Impact
+
+- ✅ Chapters no longer duplicate when navigating between panels
+- ✅ Section creation errors are user-recoverable without page refresh
+- ✅ Improved reliability on Safari and mobile browsers
+- ✅ Better sync behavior for PWA installations
+
 ### Fixed - Production Stability & Legacy Support (2025-11-13)
 
 #### Critical Fixes

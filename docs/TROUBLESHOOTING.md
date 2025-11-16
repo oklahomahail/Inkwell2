@@ -9,10 +9,11 @@ Common issues and solutions for Inkwell.
 1. [Authentication Issues](#authentication-issues)
 2. [Settings Panel Problems](#settings-panel-problems)
 3. [Storage & Data Issues](#storage--data-issues)
-4. [Focus Mode Issues](#focus-mode-issues)
-5. [Performance Problems](#performance-problems)
-6. [Browser Compatibility](#browser-compatibility)
-7. [Development Environment](#development-environment)
+4. [Writing & Editing Issues](#writing--editing-issues)
+5. [Focus Mode Issues](#focus-mode-issues)
+6. [Performance Problems](#performance-problems)
+7. [Browser Compatibility](#browser-compatibility)
+8. [Development Environment](#development-environment)
 
 ---
 
@@ -125,6 +126,76 @@ Common issues and solutions for Inkwell.
 ---
 
 ## Storage & Data Issues
+
+### Duplicate Chapters Appearing
+
+**Symptoms**:
+
+- Chapters appear twice in the sidebar
+- Analytics shows inflated chapter counts
+- Occurs after navigating to analytics panel or syncing
+- More common on Safari and mobile browsers
+
+**Solutions**:
+
+1. **Update to Latest Version** (Fixed in 2025-11-15 release):
+   - Chapter duplication bug was fixed in recent update
+   - Clear browser cache and hard reload (`Cmd+Shift+R` or `Ctrl+Shift+R`)
+   - If using PWA, uninstall and reinstall the app
+
+2. **Temporary Workaround** (if not updated):
+   - Avoid rapid navigation between writing and analytics panels
+   - Refresh the page to deduplicate display
+   - Wait a few seconds between panel switches
+
+3. **Clean Existing Duplicates**:
+
+   The fix prevents new duplicates but doesn't remove existing ones. To clean up:
+
+   **Option A - Manual Cleanup (DevTools)**:
+
+   ```
+   1. Open DevTools (F12)
+   2. Application → IndexedDB → inkwell_chapters → chapter_meta
+   3. Look for duplicate entries (same title/content, different timestamps)
+   4. Right-click duplicate → Delete
+   ```
+
+   **Option B - Console Cleanup Script**:
+
+   ```javascript
+   // Open DevTools Console and paste:
+   const db = await indexedDB.databases();
+   const request = indexedDB.open('inkwell_chapters');
+   request.onsuccess = async (e) => {
+     const db = e.target.result;
+     const tx = db.transaction('chapter_meta', 'readwrite');
+     const store = tx.objectStore('chapter_meta');
+     const all = await store.getAll();
+
+     // Group by ID and keep most recent
+     const seen = new Map();
+     for (const chapter of all.result) {
+       const existing = seen.get(chapter.id);
+       if (!existing || new Date(chapter.updatedAt) > new Date(existing.updatedAt)) {
+         if (existing) await store.delete(chapter.id);
+         seen.set(chapter.id, chapter);
+       } else {
+         await store.delete(chapter.id);
+       }
+     }
+     console.log('Cleanup complete!');
+   };
+   ```
+
+4. **If Problem Persists**:
+   - Export your project data (Settings → Export)
+   - Clear all site data (DevTools → Application → Clear storage)
+   - Sign back in and re-import project
+
+**Technical Details**:
+
+The bug was caused by sync operations using `.add()` instead of `.put()` in IndexedDB, which created duplicate entries instead of updating existing chapters. Fixed in `chaptersService.ts:210`.
 
 ### MutationObserver Errors
 
@@ -254,6 +325,47 @@ Common issues and solutions for Inkwell.
 7. **Sign In Again**
 
 8. **Import Projects** from exports
+
+---
+
+## Writing & Editing Issues
+
+### Can't Create New Sections/Chapters
+
+**Symptoms**:
+
+- "New Section" button doesn't work after an error
+- Button appears disabled or unresponsive
+- Error message appears but can't retry
+- Must refresh page to create sections again
+
+**Solutions**:
+
+1. **Update to Latest Version** (Fixed in 2025-11-15 release):
+   - Section creation error recovery was improved
+   - Rate limiter now resets on errors, allowing immediate retry
+   - No longer need to refresh page after errors
+
+2. **Immediate Workaround**:
+   - Wait 1-2 seconds and try clicking again
+   - If still blocked, refresh the page (`F5` or `Cmd+R`)
+
+3. **Check Browser Console** for specific errors:
+   - Open DevTools (`F12`) → Console tab
+   - Look for errors related to IndexedDB or chapter creation
+   - Common issues:
+     - "Chapter not found" - Refresh and try again
+     - "Storage quota exceeded" - See [Quota Exceeded Errors](#quota-exceeded-errors)
+     - "Network error" - Check internet connection
+
+4. **If Problem Persists**:
+   - Save your work first (content auto-saves)
+   - Hard reload: `Cmd+Shift+R` (Mac) or `Ctrl+Shift+R` (Windows)
+   - Check that you have space available (see storage solutions above)
+
+**Technical Details**:
+
+Previously, the rate limiter prevented retry for 1000ms even after errors. Now it resets immediately on failure, allowing users to retry section creation without waiting. Fixed in `EnhancedWritingPanel.tsx:506`.
 
 ---
 
