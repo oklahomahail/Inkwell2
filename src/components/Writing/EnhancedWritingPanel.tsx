@@ -42,6 +42,7 @@ import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 import { useSections } from '@/hooks/useSections';
 import { Chapters } from '@/services/chaptersService';
 import { SECTION_TYPE_META } from '@/types/section';
+import devLog from '@/utils/devLog';
 
 interface EnhancedWritingPanelProps {
   className?: string;
@@ -216,8 +217,16 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
   const isInitializingNewSection = useRef(false);
 
   // Auto-create initial section when panel mounts with no sections
+  // StrictMode guard: use ref to prevent double-creation in React StrictMode
+  const initialSectionCreated = useRef(false);
   useEffect(() => {
-    if (sections.length === 0 && !activeId && !isCreatingSection) {
+    if (
+      sections.length === 0 &&
+      !activeId &&
+      !isCreatingSection &&
+      !initialSectionCreated.current
+    ) {
+      initialSectionCreated.current = true; // Set immediately to prevent double-creation
       (async () => {
         try {
           isInitializingNewSection.current = true;
@@ -230,6 +239,14 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
         }
       })();
     }
+
+    // Cleanup function for StrictMode: reset flag if component unmounts
+    return () => {
+      // Only reset if we're still in initial state (no sections created yet)
+      if (sections.length === 0) {
+        initialSectionCreated.current = false;
+      }
+    };
   }, [sections.length, activeId, isCreatingSection, createSection]);
 
   // Load active section content
@@ -435,13 +452,19 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
   const dailyGoal = (currentProject as any)?.dailyGoal ?? getDefaultDailyGoal();
   const dailyGoalProgress = Math.min((todayWordsWritten / dailyGoal) * 100, 100);
 
+  // Track last creation time to prevent rapid double-creation
+  const lastCreateTime = useRef<number>(0);
+
   const handleCreateSection = async () => {
-    // Guard against double-clicks
-    if (isCreatingSection) {
+    // Guard against double-clicks and rapid successive calls (e.g., from StrictMode)
+    const now = Date.now();
+    if (isCreatingSection || now - lastCreateTime.current < 1000) {
+      devLog.debug('[EnhancedWritingPanel] Ignoring duplicate create section call');
       return;
     }
 
     try {
+      lastCreateTime.current = now;
       setIsCreatingSection(true);
 
       // CRITICAL: Save current section content before creating new one

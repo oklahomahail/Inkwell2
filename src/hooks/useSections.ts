@@ -322,40 +322,58 @@ export function useSections(projectId: string) {
 
   /**
    * Create section
+   * StrictMode-safe: prevents duplicate creation from double-mounting
    */
+  const creatingSection = useRef(false);
   const createSection = useCallback(
     async (title = 'Untitled Section', type: SectionType = 'chapter') => {
-      // Get current sections to determine order
-      const currentSections = await Chapters.list(projectId);
-      const order = currentSections.length;
+      // Guard against concurrent creation (e.g., from StrictMode double-mount)
+      if (creatingSection.current) {
+        // eslint-disable-next-line no-console
+        console.debug('[useSections] Ignoring duplicate createSection call');
+        return null;
+      }
 
-      const newSection: Section = {
-        id: uuidv4(), // Use UUID for Supabase compatibility
-        title,
-        type,
-        order,
-        content: '',
-        createdAt: new Date().toISOString(),
-      };
+      try {
+        creatingSection.current = true;
 
-      // Mark as local change to prevent realtime loop
-      isLocalChange.current = true;
+        // Get current sections to determine order
+        const currentSections = await Chapters.list(projectId);
+        const order = currentSections.length;
 
-      // Convert to chapter format for storage
-      const chapterData = sectionToChapter(newSection);
-      await Chapters.create(chapterData);
+        const newSection: Section = {
+          id: uuidv4(), // Use UUID for Supabase compatibility
+          title,
+          type,
+          order,
+          content: '',
+          createdAt: new Date().toISOString(),
+        };
 
-      const refreshed = await Chapters.list(projectId);
-      const mappedSections = refreshed
-        .map(chapterToSection)
-        .filter((s): s is Section => s !== null);
-      setSections(deduplicateSections(mappedSections));
-      setActiveId(newSection.id);
+        // Mark as local change to prevent realtime loop
+        isLocalChange.current = true;
 
-      // Persist active section
-      localStorage.setItem(`lastSection-${projectId}`, newSection.id);
+        // Convert to chapter format for storage
+        const chapterData = sectionToChapter(newSection);
+        await Chapters.create(chapterData);
 
-      return newSection;
+        const refreshed = await Chapters.list(projectId);
+        const mappedSections = refreshed
+          .map(chapterToSection)
+          .filter((s): s is Section => s !== null);
+        setSections(deduplicateSections(mappedSections));
+        setActiveId(newSection.id);
+
+        // Persist active section
+        localStorage.setItem(`lastSection-${projectId}`, newSection.id);
+
+        return newSection;
+      } finally {
+        // Reset flag after a short delay to allow for any pending operations
+        setTimeout(() => {
+          creatingSection.current = false;
+        }, 500);
+      }
     },
     [projectId, sectionToChapter, chapterToSection, deduplicateSections],
   );

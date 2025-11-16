@@ -811,6 +811,20 @@ export default function App() {
       document.documentElement.classList.remove('loading');
       devLog.log('[App] Loading class removed - transitions enabled');
     });
+
+    // StrictMode diagnostic badge (development only)
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.info(
+        '%c⚛️ React StrictMode Active',
+        'color:#61dafb;font-weight:bold;font-size:12px;padding:4px 8px;background:#282c34;border-radius:4px',
+      );
+      // eslint-disable-next-line no-console
+      console.info(
+        '%cComponents will intentionally double-mount to detect side effects. Use StrictMode guards for async operations.',
+        'color:#888;font-size:11px',
+      );
+    }
   }, []);
 
   return (
