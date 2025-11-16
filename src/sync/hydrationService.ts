@@ -389,9 +389,10 @@ class HydrationService {
 
   /**
    * Get all sync tables
+   * IMPORTANT: 'projects' must be first to ensure parent project exists before child entities
    */
   private getAllTables(): SyncTable[] {
-    return ['chapters', 'sections', 'characters', 'notes', 'project_settings'];
+    return ['projects', 'project_settings', 'chapters', 'sections', 'characters', 'notes'];
   }
 }
 

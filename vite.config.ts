@@ -77,14 +77,18 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    ...(typeof import.meta.env !== 'undefined' && import.meta.env.VITE_ENABLE_PWA === 'false'
+    ...(process.env.VITE_ENABLE_PWA === 'false'
       ? []
       : [
           VitePWA({
             registerType: 'autoUpdate',
             manifestFilename: 'site.webmanifest', // Output to site.webmanifest, not manifest.webmanifest
+            // Force immediate updates and bypass HTTP cache
+            injectRegister: 'inline',
             workbox: {
               globDirectory: 'dist',
+              // Force cache bypass for service worker updates
+              cleanupOutdatedCaches: true,
               globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2}'],
               globIgnores: [
                 '**/node_modules/**/*',

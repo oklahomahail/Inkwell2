@@ -291,6 +291,26 @@ class AnalyticsService {
     if (!this.db) return;
 
     try {
+      // Check if database is still available (important for incognito mode and page unload)
+      // In incognito mode or during page unload, the database connection may be closing
+      // which causes "The database connection is closing" errors
+      try {
+        // Try to access the database - this will throw if connection is closing
+        const testTx = this.db.transaction(STORE_EVENTS, 'readonly');
+        testTx.done.catch(() => {
+          // Connection is closing, clear queues and return
+          this.eventQueue = [];
+          this.metricQueue = [];
+          this.aggregateQueue = [];
+        });
+      } catch {
+        // Connection not available, clear queues and return
+        this.eventQueue = [];
+        this.metricQueue = [];
+        this.aggregateQueue = [];
+        return;
+      }
+
       // Flush events
       if (this.eventQueue.length > 0) {
         const tx = this.db.transaction(STORE_EVENTS, 'readwrite');
@@ -315,7 +335,19 @@ class AnalyticsService {
         this.aggregateQueue = [];
       }
     } catch (error) {
-      console.error('[Analytics] Failed to flush data:', error);
+      // Silently fail in incognito mode or during page transitions
+      // Only log if it's not the common "database connection is closing" error
+      if (
+        error instanceof Error &&
+        !error.message.includes('database connection is closing') &&
+        !error.message.includes('InvalidStateError')
+      ) {
+        console.error('[Analytics] Failed to flush data:', error);
+      }
+      // Clear queues on error to prevent memory leaks
+      this.eventQueue = [];
+      this.metricQueue = [];
+      this.aggregateQueue = [];
     }
   }
 
