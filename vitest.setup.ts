@@ -100,6 +100,7 @@ const EXPECTED_ERROR_PATTERNS = [
   /\[SyncQueue\] Operation failed/,
   /\[SyncQueue\] Failed to/,
   /\[Hydration\] Bootstrap failed:/,
+  /\[DeadLetterQueue\] Operation failed permanently/,
 ];
 
 function isExpectedError(message: string): boolean {
