@@ -1,4 +1,4 @@
-import devLog from "@/utils/devLog";
+import devLog from '@/utils/devLog';
 // PWA Service for managing offline functionality and app updates
 
 // Type for the PWA register hook from vite-plugin-pwa
@@ -29,18 +29,28 @@ export interface PWAInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
+export interface StorageQuotaWarning {
+  level: 'info' | 'warning' | 'critical';
+  quota: number;
+  usage: number;
+  percentUsed: number;
+}
+
 // Service for managing PWA functionality
 export class PWAService {
   private deferredPrompt: PWAInstallPromptEvent | null = null;
   private isOffline = false;
+  private quotaCheckInterval: ReturnType<typeof setInterval> | null = null;
   private listeners = {
     installPrompt: [] as Array<(_event: PWAInstallPromptEvent) => void>,
     offline: [] as Array<(_isOffline: boolean) => void>,
     update: [] as Array<() => void>,
+    storageQuota: [] as Array<(_warning: StorageQuotaWarning) => void>,
   };
 
   constructor() {
     this.setupEventListeners();
+    this.startQuotaMonitoring();
   }
 
   private setupEventListeners() {
@@ -148,6 +158,75 @@ export class PWAService {
   // Trigger update listeners (called by SW registration hook)
   triggerUpdateAvailable() {
     this.listeners.update.forEach((listener) => listener());
+  }
+
+  // Start periodic storage quota monitoring
+  private startQuotaMonitoring() {
+    // Check quota immediately
+    void this.checkStorageQuota();
+
+    // Check every 5 minutes
+    this.quotaCheckInterval = setInterval(
+      () => {
+        void this.checkStorageQuota();
+      },
+      5 * 60 * 1000,
+    );
+  }
+
+  // Stop quota monitoring (cleanup)
+  stopQuotaMonitoring() {
+    if (this.quotaCheckInterval) {
+      clearInterval(this.quotaCheckInterval);
+      this.quotaCheckInterval = null;
+    }
+  }
+
+  // Check storage quota and notify listeners if warning thresholds are met
+  async checkStorageQuota(): Promise<void> {
+    const info = await OfflineStorageManager.getStorageInfo();
+
+    let level: 'info' | 'warning' | 'critical' | null = null;
+
+    if (info.percentUsed > 90) {
+      level = 'critical';
+    } else if (info.percentUsed > 70) {
+      level = 'warning';
+    } else if (info.percentUsed > 60) {
+      level = 'info';
+    }
+
+    if (level) {
+      const warning: StorageQuotaWarning = {
+        level,
+        quota: info.quota,
+        usage: info.usage,
+        percentUsed: info.percentUsed,
+      };
+
+      devLog.log(`[PWA] Storage quota ${level}:`, {
+        percentUsed: info.percentUsed.toFixed(1) + '%',
+        usage: (info.usage / (1024 * 1024)).toFixed(2) + 'MB',
+        quota: (info.quota / (1024 * 1024)).toFixed(2) + 'MB',
+      });
+
+      this.listeners.storageQuota.forEach((listener) => listener(warning));
+    }
+  }
+
+  // Listen for storage quota warnings
+  onStorageQuotaWarning(callback: (warning: StorageQuotaWarning) => void) {
+    this.listeners.storageQuota.push(callback);
+
+    // Check immediately
+    void this.checkStorageQuota();
+
+    return () => {
+      const index = this.listeners.storageQuota.indexOf(callback);
+      if (index > -1) {
+        this.listeners.storageQuota.splice(index, 1);
+      }
+    };
   }
 }
 

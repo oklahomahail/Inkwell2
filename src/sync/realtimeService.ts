@@ -65,6 +65,11 @@ class RealtimeService {
   // Track which project is currently active
   private activeProjectId: string | null = null;
 
+  // Track recent local changes to avoid sync loops
+  // Map: table:recordId -> timestamp of local change
+  private recentLocalChanges: Map<string, number> = new Map();
+  private readonly LOCAL_CHANGE_WINDOW = 3000; // 3 seconds
+
   private constructor() {
     // Private constructor for singleton
   }
@@ -182,8 +187,10 @@ class RealtimeService {
       recordId: record?.id,
     });
 
-    // Skip changes we made ourselves (client_hash matches)
-    if (this.isOwnChange(record)) {
+    // Skip changes we made ourselves (using timestamp-based detection)
+    // Add table information to the record for isOwnChange check
+    const recordWithTable = { ...record, table };
+    if (this.isOwnChange(recordWithTable)) {
       devLog.debug(`[Realtime] Skipping own change for ${record.id}`);
       return;
     }
@@ -258,11 +265,47 @@ class RealtimeService {
 
   /**
    * Check if this change was made by us (to avoid sync loops)
+   * Uses timestamp-based tracking of recent local changes
    */
   private isOwnChange(record: any): boolean {
-    // TODO: Implement client fingerprinting to detect own changes
-    // For now, assume all changes are from other devices
+    if (!record?.id) return false;
+
+    const key = `${record.table || 'unknown'}:${record.id}`;
+    const localChangeTime = this.recentLocalChanges.get(key);
+
+    if (!localChangeTime) return false;
+
+    const timeSinceLocalChange = Date.now() - localChangeTime;
+
+    // If we made a local change within the last 3 seconds, consider this our change
+    if (timeSinceLocalChange < this.LOCAL_CHANGE_WINDOW) {
+      devLog.debug(`[Realtime] Detected own change (${timeSinceLocalChange}ms ago):`, {
+        table: record.table,
+        recordId: record.id,
+      });
+      return true;
+    }
+
+    // Clean up old entries
+    this.recentLocalChanges.delete(key);
     return false;
+  }
+
+  /**
+   * Mark a record as locally changed
+   * Call this before making a local change to prevent realtime echo
+   */
+  markLocalChange(table: SyncTable, recordId: string): void {
+    const key = `${table}:${recordId}`;
+    this.recentLocalChanges.set(key, Date.now());
+
+    // Auto-cleanup after the window expires
+    setTimeout(() => {
+      const entry = this.recentLocalChanges.get(key);
+      if (entry && Date.now() - entry >= this.LOCAL_CHANGE_WINDOW) {
+        this.recentLocalChanges.delete(key);
+      }
+    }, this.LOCAL_CHANGE_WINDOW + 100);
   }
 
   /**
@@ -341,6 +384,9 @@ class RealtimeService {
     this.debounceTimers.clear();
 
     devLog.debug(`[Realtime] Cleared ${timerCount} debounce timers`);
+
+    // Clear local change tracking
+    this.recentLocalChanges.clear();
 
     this.channels.clear();
     this.subscriptions.clear();

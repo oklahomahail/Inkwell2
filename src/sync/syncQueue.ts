@@ -60,8 +60,16 @@ class SyncQueueService {
   // Listeners for queue changes
   private stateListeners: Set<(stats: SyncQueueStats) => void> = new Set();
 
+  // Multi-tab coordination via BroadcastChannel
+  private broadcastChannel: BroadcastChannel | null = null;
+
+  // Auto-cleanup interval for orphaned operations
+  private cleanupInterval: ReturnType<typeof setInterval> | null = null;
+
   private constructor() {
     this.setupOnlineListener();
+    this.setupCrossTabCoordination();
+    this.startAutoCleanup();
   }
 
   /**
@@ -295,6 +303,9 @@ class SyncQueueService {
     // Notify listeners
     this.notifyListeners();
 
+    // Broadcast to other tabs
+    this.broadcastOperation('operation-enqueued', operation);
+
     // Trigger processing if not already running
     if (!this.isProcessing && navigator.onLine) {
       void this.processQueue();
@@ -449,6 +460,9 @@ class SyncQueueService {
             id: op.id,
           });
 
+          // Broadcast completion to other tabs
+          this.broadcastOperation('operation-completed', op);
+
           // Remove from queue after successful sync
           this.queue.delete(op.id);
           await this.removeOperation(op.id);
@@ -485,6 +499,9 @@ class SyncQueueService {
           op.status = 'failed';
           op.error = `[Non-retryable] ${errorMessage}`;
           await this.persistOperation(op);
+
+          // Broadcast failure to other tabs
+          this.broadcastOperation('operation-failed', op, op.error);
 
           // If it's an orphaned operation, also log cleanup instructions
           if (isOrphanedOperationError(error)) {
@@ -673,6 +690,156 @@ class SyncQueueService {
   }
 
   /**
+   * Setup cross-tab coordination via BroadcastChannel
+   * Prevents duplicate operations across multiple tabs
+   */
+  private setupCrossTabCoordination(): void {
+    // Check BroadcastChannel support (not available in all browsers)
+    if (typeof BroadcastChannel === 'undefined') {
+      devLog.debug('[SyncQueue] BroadcastChannel not supported - cross-tab coordination disabled');
+      return;
+    }
+
+    try {
+      this.broadcastChannel = new BroadcastChannel('inkwell-sync-queue');
+
+      this.broadcastChannel.onmessage = (event: MessageEvent) => {
+        const { type, operationId, recordId, table, timestamp } = event.data;
+
+        if (type === 'operation-enqueued') {
+          // Another tab enqueued this operation - check for duplicates
+          const dedupeKey = `${table}:${recordId}`;
+          const existingOpId = this.deduplicationIndex.get(dedupeKey);
+
+          if (existingOpId && existingOpId !== operationId) {
+            const existing = this.queue.get(existingOpId);
+
+            // Remove our duplicate if it was created after the broadcast operation
+            if (existing && existing.createdAt > timestamp) {
+              devLog.log('[SyncQueue] Removing duplicate operation (other tab has it)', {
+                ourOpId: existingOpId,
+                theirOpId: operationId,
+                table,
+                recordId,
+              });
+              void this.removeOperation(existingOpId);
+            }
+          }
+        } else if (type === 'operation-completed') {
+          // Another tab completed this operation - remove it from our queue
+          const dedupeKey = `${table}:${recordId}`;
+          const existingOpId = this.deduplicationIndex.get(dedupeKey);
+
+          if (existingOpId === operationId) {
+            devLog.log('[SyncQueue] Removing operation (completed in other tab)', {
+              operationId,
+              table,
+              recordId,
+            });
+            void this.removeOperation(operationId);
+          }
+        } else if (type === 'operation-failed') {
+          // Another tab marked operation as failed - sync the status
+          const op = this.queue.get(operationId);
+          if (op && op.status !== 'failed') {
+            devLog.log('[SyncQueue] Marking operation as failed (failed in other tab)', {
+              operationId,
+            });
+            op.status = 'failed';
+            op.error = event.data.error || 'Failed in another tab';
+            void this.persistOperation(op);
+            this.notifyListeners();
+          }
+        }
+      };
+
+      devLog.debug('[SyncQueue] Cross-tab coordination enabled via BroadcastChannel');
+    } catch (error) {
+      devLog.error('[SyncQueue] Failed to setup BroadcastChannel:', error);
+    }
+  }
+
+  /**
+   * Broadcast operation event to other tabs
+   */
+  private broadcastOperation(
+    type: 'operation-enqueued' | 'operation-completed' | 'operation-failed',
+    operation: SyncOperation,
+    error?: string,
+  ): void {
+    if (!this.broadcastChannel) return;
+
+    try {
+      this.broadcastChannel.postMessage({
+        type,
+        operationId: operation.id,
+        recordId: operation.recordId,
+        table: operation.table,
+        timestamp: operation.createdAt,
+        error,
+      });
+    } catch (err) {
+      devLog.error('[SyncQueue] Failed to broadcast operation:', err);
+    }
+  }
+
+  /**
+   * Start background cleanup of orphaned operations
+   * Runs every hour to remove old failed operations
+   */
+  private startAutoCleanup(): void {
+    // Clean up immediately on start
+    void this.autoCleanupOrphanedOperations();
+
+    // Then clean up every hour
+    this.cleanupInterval = setInterval(
+      () => {
+        void this.autoCleanupOrphanedOperations();
+      },
+      60 * 60 * 1000,
+    ); // 1 hour
+
+    devLog.debug('[SyncQueue] Auto-cleanup enabled (runs every hour)');
+  }
+
+  /**
+   * Auto-cleanup orphaned operations
+   * Removes failed operations older than 24 hours
+   */
+  private async autoCleanupOrphanedOperations(): Promise<void> {
+    const orphanedOps: SyncOperation[] = [];
+    const now = Date.now();
+    const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+
+    for (const op of this.queue.values()) {
+      if (op.status === 'failed' && op.error?.includes('[Non-retryable]')) {
+        // Failed with non-retryable error
+
+        // Only remove if older than 24 hours (give user time to see error)
+        if (now - op.createdAt > TWENTY_FOUR_HOURS) {
+          orphanedOps.push(op);
+        }
+      }
+    }
+
+    // Remove old orphaned operations
+    for (const op of orphanedOps) {
+      await this.removeOperation(op.id);
+    }
+
+    if (orphanedOps.length > 0) {
+      devLog.log(`[SyncQueue] Auto-cleaned ${orphanedOps.length} orphaned operations`, {
+        operations: orphanedOps.map((op) => ({
+          id: op.id,
+          table: op.table,
+          recordId: op.recordId,
+          ageHours: Math.round((now - op.createdAt) / (60 * 60 * 1000)),
+        })),
+      });
+    }
+  }
+
+  /**
    * Generate unique operation ID
    */
   private generateOperationId(): string {
@@ -767,6 +934,20 @@ class SyncQueueService {
     this.db.close();
     this.db = null;
     this.initPromise = null;
+
+    // Close BroadcastChannel
+    if (this.broadcastChannel) {
+      this.broadcastChannel.close();
+      this.broadcastChannel = null;
+      devLog.debug('[SyncQueue] BroadcastChannel closed');
+    }
+
+    // Stop auto-cleanup
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+      devLog.debug('[SyncQueue] Auto-cleanup stopped');
+    }
   }
 }
 

@@ -22,6 +22,7 @@ import { InkDotFlourish } from '@/components/Brand/InkDotFlourish';
 import Logo from '@/components/Logo';
 import NewProjectDialog from '@/components/Projects/NewProjectDialog';
 import { StorageStatusIndicator } from '@/components/Storage/StorageStatusIndicator';
+import { StorageQuotaWarning } from '@/components/ui/StorageQuotaWarning';
 import { BRAND_NAME, ORGANIZATION_NAME } from '@/constants/brand';
 import { ALT_TAGLINE } from '@/constants/branding';
 import { useAppContext, View } from '@/context/AppContext';
@@ -880,6 +881,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         open={newProjectDialogOpen}
         onOpenChange={(open) => !open && closeNewProjectDialog()}
       />
+
+      {/* Storage Quota Warning */}
+      <StorageQuotaWarning />
     </div>
   );
 };
