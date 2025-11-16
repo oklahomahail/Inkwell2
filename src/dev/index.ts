@@ -4,6 +4,7 @@
  *
  * Import this in main.tsx or App.tsx during development
  */
+import { syncQueue } from '@/sync/syncQueue';
 import { cleanupOrphanedSyncOperations, clearAllSyncOperations } from '@/sync/syncQueueCleanup';
 import devLog from '@/utils/devLog';
 
@@ -43,7 +44,9 @@ export function initTourDevTools(): void {
   // Expose sync queue cleanup helpers
   (window as any).syncCleanup = {
     cleanupOrphaned: cleanupOrphanedSyncOperations,
+    removeOrphaned: () => syncQueue.removeOrphanedOperations(),
     clearAll: clearAllSyncOperations,
+    getStats: () => syncQueue.getStats(),
   };
 
   // Print welcome message
@@ -71,7 +74,9 @@ export function initTourDevTools(): void {
   devLog.debug('  %cwindow.tourAnalytics.downloadCSV()', 'color: #ec4899');
   devLog.debug('  %cwindow.tourAnalytics.downloadSummary()', 'color: #ec4899');
   devLog.debug('\n%c🔄 Sync Cleanup:', 'color: #06b6d4; font-weight: bold;');
+  devLog.debug('  %cwindow.syncCleanup.getStats()', 'color: #06b6d4');
   devLog.debug('  %cwindow.syncCleanup.cleanupOrphaned()', 'color: #06b6d4');
+  devLog.debug('  %cwindow.syncCleanup.removeOrphaned()', 'color: #06b6d4');
   devLog.debug('  %cwindow.syncCleanup.clearAll()', 'color: #06b6d4');
   devLog.debug(
     '\n%cFor full documentation, see: docs/TOUR_POST_DEPLOY_GUARDRAILS.md',

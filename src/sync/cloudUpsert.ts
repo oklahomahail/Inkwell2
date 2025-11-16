@@ -18,6 +18,7 @@ import type { EncryptResult } from '@/types/crypto';
 import devLog from '@/utils/devLog';
 import { isValidUUID } from '@/utils/idUtils';
 
+import { OrphanedOperationError, RLSError } from './errors';
 import { DEFAULT_BATCH_CONFIG } from './types';
 
 import type { SyncTable, BatchConfig } from './types';
@@ -120,9 +121,6 @@ class CloudUpsertService {
     records: any[],
     userId: string,
   ): Promise<UpsertResult> {
-    const errors: string[] = [];
-    let recordsProcessed = 0;
-
     try {
       // Table-specific processing
       switch (table) {
@@ -151,7 +149,7 @@ class CloudUpsertService {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return {
         success: false,
-        recordsProcessed,
+        recordsProcessed: 0,
         errors: [errorMessage],
         duration: 0,
       };
@@ -232,10 +230,14 @@ class CloudUpsertService {
         }
 
         // Ensure parent project exists in cloud before syncing chapter
+        // If project doesn't exist locally, this will throw OrphanedOperationError (non-retryable)
         const projectExists = await this.ensureProjectExists(projectId, userId);
         if (!projectExists) {
-          errors.push(`Chapter ${record.id}: parent project ${projectId} does not exist in cloud`);
-          continue;
+          // If ensureProjectExists returned false (not an orphaned op, but other error),
+          // throw a retryable error
+          throw new Error(
+            `Parent project ${projectId} does not exist in cloud and could not be created`,
+          );
         }
 
         // Check if E2EE is enabled and unlocked
@@ -480,30 +482,48 @@ class CloudUpsertService {
         .eq('id', projectId)
         .maybeSingle();
 
-      // If SELECT fails with 500 error, try INSERT anyway (it will fail with 409 if exists)
+      // Handle SELECT errors
       if (selectError) {
-        devLog.warn(
-          `[CloudUpsert] Failed to check if project ${projectId} exists (${selectError.code}). Will attempt insert.`,
-        );
-        // Don't return false - continue to INSERT attempt below
+        // RLS errors (PGRST) typically indicate permission issues
+        // 500 errors often mean RLS policies failed (e.g., project doesn't exist)
+        if (selectError.code === 'PGRST301' || selectError.message?.includes('500')) {
+          devLog.warn(
+            `[CloudUpsert] RLS/500 error checking project ${projectId} (${selectError.code}). Project may not exist. Will check local storage.`,
+          );
+          // Don't return - continue to check local storage below
+        } else {
+          // Other errors - throw RLS error
+          throw new RLSError(
+            `Failed to check if project ${projectId} exists: ${selectError.message}`,
+            selectError.code || 'UNKNOWN',
+            true, // Retryable for most errors
+          );
+        }
       } else if (existing) {
         return true; // Project already exists
       }
 
-      // Project doesn't exist - fetch from local IndexedDB and create in cloud
+      // Project doesn't exist in cloud - fetch from local IndexedDB and create in cloud
       devLog.log(`[CloudUpsert] Project ${projectId} not in cloud, fetching from local...`);
 
       const { ProjectsDB } = await import('@/services/projectsDB');
       const localProject = await ProjectsDB.loadProject(projectId);
 
       if (!localProject) {
+        // Project doesn't exist locally - this is an orphaned sync operation
         devLog.error(
-          `[CloudUpsert] Project ${projectId} not found in local storage. This may be an orphaned sync operation.`,
+          `[CloudUpsert] Project ${projectId} not found in local storage. This is an orphaned sync operation.`,
         );
         devLog.warn(
           `[CloudUpsert] Tip: Run cleanupOrphanedSyncOperations() from console to remove orphaned operations.`,
         );
-        return false;
+
+        // Throw non-retryable error - sync queue should permanently fail this operation
+        throw new OrphanedOperationError(
+          `Project ${projectId} not found in local storage`,
+          'project',
+          projectId,
+        );
       }
 
       // Create project in Supabase
@@ -542,6 +562,11 @@ class CloudUpsertService {
       devLog.log(`[CloudUpsert] Created project ${projectId} in cloud`);
       return true;
     } catch (error) {
+      // Re-throw OrphanedOperationError so sync queue can permanently fail the operation
+      if (error instanceof OrphanedOperationError) {
+        throw error;
+      }
+
       devLog.error(`[CloudUpsert] Error ensuring project exists:`, error);
       return false;
     }

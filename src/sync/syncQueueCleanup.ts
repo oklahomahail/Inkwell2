@@ -50,8 +50,16 @@ export async function cleanupOrphanedSyncOperations(): Promise<CleanupResult> {
     for (const operation of operations) {
       let shouldRemove = false;
 
+      // First check if operation is already marked as failed with non-retryable error
+      if (operation.status === 'failed' && operation.error?.includes('[Non-retryable]')) {
+        devLog.warn(
+          `[SyncQueueCleanup] Found failed non-retryable operation: ${operation.id} (${operation.table})`,
+        );
+        shouldRemove = true;
+      }
+
       // Check if the operation references a project
-      if (operation.table === 'projects' && operation.recordId) {
+      if (!shouldRemove && operation.table === 'projects' && operation.recordId) {
         result.projectsChecked.add(operation.recordId);
 
         const project = await ProjectsDB.loadProject(operation.recordId);
@@ -62,38 +70,45 @@ export async function cleanupOrphanedSyncOperations(): Promise<CleanupResult> {
       }
 
       // Check if the operation references a chapter
-      if (operation.table === 'chapters' && operation.recordId) {
-        result.chaptersChecked.add(operation.recordId);
+      if (!shouldRemove && operation.table === 'chapters') {
+        // Check if parent project exists
+        if (operation.projectId) {
+          result.projectsChecked.add(operation.projectId);
 
-        try {
-          const chapter = await Chapters.get(operation.recordId);
-          if (!chapter) {
+          const project = await ProjectsDB.loadProject(operation.projectId);
+          if (!project) {
             devLog.warn(
-              `[SyncQueueCleanup] Found orphaned chapter operation: ${operation.recordId}`,
+              `[SyncQueueCleanup] Found chapter operation with missing parent project: ${operation.recordId} (project: ${operation.projectId})`,
             );
             shouldRemove = true;
-          } else if (chapter.projectId) {
-            // Also check if the chapter's parent project exists
-            const project = await ProjectsDB.loadProject(chapter.projectId);
-            if (!project) {
+          }
+        }
+
+        // Also check if the chapter itself exists
+        if (!shouldRemove && operation.recordId) {
+          result.chaptersChecked.add(operation.recordId);
+
+          try {
+            const chapter = await Chapters.get(operation.recordId);
+            if (!chapter) {
               devLog.warn(
-                `[SyncQueueCleanup] Found chapter with missing parent project: ${operation.recordId} (project: ${chapter.projectId})`,
+                `[SyncQueueCleanup] Found orphaned chapter operation: ${operation.recordId}`,
               );
               shouldRemove = true;
             }
+          } catch (error) {
+            devLog.warn(`[SyncQueueCleanup] Error checking chapter ${operation.recordId}:`, error);
+            shouldRemove = true;
           }
-        } catch (error) {
-          devLog.warn(`[SyncQueueCleanup] Error checking chapter ${operation.recordId}:`, error);
-          shouldRemove = true;
         }
       }
 
       if (shouldRemove) {
         result.orphanedOperations++;
-        result.operationsRemoved.push(operation.key);
+        result.operationsRemoved.push(operation.id);
 
         // Remove the operation from the queue
-        await removeOperation(operation.key);
+        await removeOperation(operation.id);
       }
     }
 

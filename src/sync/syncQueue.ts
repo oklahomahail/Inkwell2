@@ -16,6 +16,7 @@
 
 import devLog from '@/utils/devLog';
 
+import { isNonRetryableError, isOrphanedOperationError } from './errors';
 import { DEFAULT_RETRY_CONFIG } from './types';
 
 import type {
@@ -201,7 +202,6 @@ class SyncQueueService {
     }
 
     // Check for existing operation for this record
-    const existingKey = `${table}:${recordId}`;
     let operation: SyncOperation | undefined;
 
     for (const op of this.queue.values()) {
@@ -376,15 +376,37 @@ class SyncQueueService {
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-        devLog.error('[SyncQueue] Operation failed', {
-          id: op.id,
-          error: errorMessage,
-          attempt: op.attempts,
-        });
+        // Check if this is a non-retryable error (e.g., orphaned operation)
+        if (isNonRetryableError(error)) {
+          devLog.error('[SyncQueue] Non-retryable error - permanently failing operation', {
+            id: op.id,
+            error: errorMessage,
+            attempt: op.attempts,
+          });
 
-        op.status = 'pending'; // Will retry
-        op.error = errorMessage;
-        await this.persistOperation(op);
+          // Mark as permanently failed
+          op.status = 'failed';
+          op.error = `[Non-retryable] ${errorMessage}`;
+          await this.persistOperation(op);
+
+          // If it's an orphaned operation, also log cleanup instructions
+          if (isOrphanedOperationError(error)) {
+            devLog.warn(
+              `[SyncQueue] Orphaned operation detected. Run cleanupOrphanedSyncOperations() to clean up similar operations.`,
+            );
+          }
+        } else {
+          // Retryable error - mark as pending for retry
+          devLog.error('[SyncQueue] Operation failed (will retry)', {
+            id: op.id,
+            error: errorMessage,
+            attempt: op.attempts,
+          });
+
+          op.status = 'pending'; // Will retry
+          op.error = errorMessage;
+          await this.persistOperation(op);
+        }
       }
 
       // Notify listeners after each operation
@@ -599,6 +621,31 @@ class SyncQueueService {
     if (navigator.onLine) {
       await this.processQueue();
     }
+  }
+
+  /**
+   * Remove orphaned operations (operations marked as non-retryable failures)
+   *
+   * This clears out operations that failed due to missing local data.
+   * Safe to call periodically to clean up the queue.
+   */
+  async removeOrphanedOperations(): Promise<number> {
+    const orphanedOps = Array.from(this.queue.values()).filter(
+      (op) => op.status === 'failed' && op.error?.includes('[Non-retryable]'),
+    );
+
+    for (const op of orphanedOps) {
+      this.queue.delete(op.id);
+      await this.removeOperation(op.id);
+    }
+
+    devLog.log('[SyncQueue] Removed orphaned operations', {
+      count: orphanedOps.length,
+    });
+
+    this.notifyListeners();
+
+    return orphanedOps.length;
   }
 
   /**
