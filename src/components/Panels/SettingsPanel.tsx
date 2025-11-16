@@ -9,6 +9,8 @@ import BackupControls from '@/components/Settings/BackupControls';
 import { InsightsPanel } from '@/components/Settings/InsightsPanel';
 import SnapshotHistoryDialog from '@/components/Settings/SnapshotHistoryDialog';
 import { TourReplayButton } from '@/components/Settings/TourReplayButton';
+import { DeadLetterQueuePanel } from '@/components/Sync/DeadLetterQueuePanel';
+import { SyncStatusDashboard } from '@/components/Sync/SyncStatusDashboard';
 import { Button } from '@/components/ui/Button';
 import { Logo } from '@/components/ui/Logo';
 import { useAppContext } from '@/context/AppContext';
@@ -926,6 +928,15 @@ const SettingsPanel: React.FC = () => {
               Restart Onboarding
             </button>
             <TourReplayButton />
+          </div>
+        </div>
+
+        {/* Sync Status & Health */}
+        <div className="bg-[#1A2233] rounded-xl p-6 border border-gray-700">
+          <h3 className="text-xl font-semibold text-white mb-6">Sync Status & Health</h3>
+          <div className="space-y-6">
+            <SyncStatusDashboard />
+            <DeadLetterQueuePanel />
           </div>
         </div>
 
