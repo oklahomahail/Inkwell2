@@ -240,12 +240,10 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
       })();
     }
 
-    // Cleanup function for StrictMode: reset flag if component unmounts
+    // Cleanup function: Only reset initialization flag, not creation flag
+    // CRITICAL FIX: Never reset initialSectionCreated to prevent double-creation on re-mount
     return () => {
-      // Only reset if we're still in initial state (no sections created yet)
-      if (sections.length === 0) {
-        initialSectionCreated.current = false;
-      }
+      isInitializingNewSection.current = false;
     };
   }, [sections.length, activeId, isCreatingSection, createSection]);
 
@@ -254,9 +252,38 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
     if (!activeId) return;
 
     (async () => {
-      // Save content from previous section before switching
+      // CRITICAL FIX: Force synchronous save of previous section before switching
+      // This prevents content loss from the 600ms debounce race condition
       if (prevActiveIdRef.current && prevActiveIdRef.current !== activeId && content) {
-        updateSectionContent(prevActiveIdRef.current, content);
+        try {
+          // Direct save bypassing debounce to prevent data loss
+          await Chapters.saveDoc({
+            id: prevActiveIdRef.current,
+            content,
+            version: 1, // Version is managed by the service
+            scenes: [], // Preserved by service
+          });
+
+          // Also update metadata for word count
+          const words = content
+            .trim()
+            .split(/\s+/)
+            .filter((word) => word.length > 0);
+          const wordCount = words.length;
+
+          await Chapters.updateMeta({
+            id: prevActiveIdRef.current,
+            wordCount,
+          } as any);
+
+          devLog.debug('[EnhancedWritingPanel] Saved previous section before switching', {
+            prevId: prevActiveIdRef.current,
+            wordCount,
+          });
+        } catch (error) {
+          devLog.error('[EnhancedWritingPanel] Failed to save previous section:', error);
+          // Still attempt to load new section even if save fails
+        }
       }
 
       // Load new section content

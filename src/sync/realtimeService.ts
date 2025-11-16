@@ -289,6 +289,26 @@ class RealtimeService {
       }
     }
 
+    // CRITICAL FIX: Clear all debounce timers for this project
+    // This prevents memory leaks from pending timers
+    const timersToDelete: string[] = [];
+    for (const [key, timer] of this.debounceTimers.entries()) {
+      // Check if this timer belongs to this project's tables
+      const [table] = key.split(':');
+      if (tables.has(table as SyncTable)) {
+        clearTimeout(timer);
+        timersToDelete.push(key);
+      }
+    }
+
+    for (const key of timersToDelete) {
+      this.debounceTimers.delete(key);
+    }
+
+    devLog.debug(
+      `[Realtime] Cleared ${timersToDelete.length} debounce timers for project ${projectId}`,
+    );
+
     this.subscriptions.delete(projectId);
 
     // Update status
@@ -311,6 +331,16 @@ class RealtimeService {
     for (const channel of this.channels.values()) {
       await supabase.removeChannel(channel);
     }
+
+    // CRITICAL FIX: Clear all debounce timers
+    // This prevents memory leaks from pending timers
+    const timerCount = this.debounceTimers.size;
+    for (const timer of this.debounceTimers.values()) {
+      clearTimeout(timer);
+    }
+    this.debounceTimers.clear();
+
+    devLog.debug(`[Realtime] Cleared ${timerCount} debounce timers`);
 
     this.channels.clear();
     this.subscriptions.clear();
