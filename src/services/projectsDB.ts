@@ -123,6 +123,46 @@ class ProjectsDBService {
   }
 
   /**
+   * Wait for a project to be fully initialized in local storage
+   *
+   * This prevents race conditions where child entities (chapters, sections)
+   * try to sync before their parent project has been persisted to IndexedDB.
+   *
+   * @param projectId - The project ID to wait for
+   * @param maxAttempts - Maximum number of attempts (default: 20)
+   * @param delayMs - Delay between attempts in milliseconds (default: 50)
+   * @returns The loaded project
+   * @throws Error if project is not found after max attempts
+   */
+  async waitForProject(
+    projectId: string,
+    maxAttempts = 20,
+    delayMs = 50,
+  ): Promise<EnhancedProject> {
+    let attempt = 0;
+
+    while (attempt < maxAttempts) {
+      const project = await this.loadProject(projectId);
+
+      if (project) {
+        devLog.debug(`[ProjectsDB] Project ${projectId} found after ${attempt + 1} attempt(s)`);
+        return project;
+      }
+
+      // Wait before next attempt
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      attempt++;
+    }
+
+    // Project not found after max attempts
+    const totalWaitMs = maxAttempts * delayMs;
+    throw new Error(
+      `Project ${projectId} not found in local storage after ${totalWaitMs}ms (${maxAttempts} attempts). ` +
+        `This likely indicates a race condition where child entities are being created before the parent project is persisted.`,
+    );
+  }
+
+  /**
    * Load all projects
    */
   async loadAllProjects(): Promise<EnhancedProject[]> {

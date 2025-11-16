@@ -327,6 +327,19 @@ class ChaptersService {
     const meta = await this.getMeta(chapterId);
     if (!meta) return;
 
+    // CRITICAL FIX: Wait for parent project to be fully initialized before syncing chapter
+    // This prevents "Project not found in local storage" race condition errors
+    const { ProjectsDB } = await import('@/services/projectsDB');
+    try {
+      await ProjectsDB.waitForProject(projectId);
+    } catch (error) {
+      console.warn(
+        `[Chapters] Skipping sync for chapter ${chapterId} - parent project ${projectId} not initialized:`,
+        error,
+      );
+      return;
+    }
+
     // Construct payload for cloud upsert
     const payload = {
       id: chapterId,
