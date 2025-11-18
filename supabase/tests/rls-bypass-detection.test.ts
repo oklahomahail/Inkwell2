@@ -343,8 +343,7 @@ describe('RLS Bypass Detection: SECURITY DEFINER Functions', () => {
       _id: projectA.id,
     });
 
-    // This WILL FAIL until soft_delete() is fixed with authorization checks
-    // TODO: Update this test once soft_delete is fixed
+    // Fixed by migration 20251113000001_fix_soft_delete_authorization.sql
     expect(error).not.toBeNull();
   });
 
@@ -354,7 +353,7 @@ describe('RLS Bypass Detection: SECURITY DEFINER Functions', () => {
       _id: chapterA.id,
     });
 
-    // This WILL FAIL until soft_delete() is fixed
+    // Fixed by migration 20251113000001_fix_soft_delete_authorization.sql
     expect(error).not.toBeNull();
   });
 
@@ -374,7 +373,7 @@ describe('RLS Bypass Detection: SECURITY DEFINER Functions', () => {
       ],
     });
 
-    // This WILL FAIL until bulk_upsert_chapters() is fixed
+    // Fixed by migration 20251113000002_fix_bulk_upsert_authorization.sql
     expect(error).not.toBeNull();
   });
 });
