@@ -145,9 +145,12 @@ export const OnboardingPreferencesModal: React.FC<OnboardingPreferencesModalProp
                         Privacy First
                       </span>
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
                       All your work stays on this device. Perfect for privacy-conscious writers who
                       don't need cloud sync.
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 italic">
+                      Your work never leaves this device. Fully encrypted at rest.
                     </p>
                     <div className="space-y-1 text-xs text-slate-500 dark:text-slate-400">
                       <div className="flex items-center gap-2">
@@ -189,9 +192,13 @@ export const OnboardingPreferencesModal: React.FC<OnboardingPreferencesModalProp
                         Recommended
                       </span>
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
                       Best of both worlds: local-first with optional cloud backup. Access your work
                       across devices.
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 italic">
+                      Local-first with end-to-end encryption. Only you can read your work, not even
+                      our servers.
                     </p>
                     <div className="space-y-1 text-xs text-slate-500 dark:text-slate-400">
                       <div className="flex items-center gap-2">
