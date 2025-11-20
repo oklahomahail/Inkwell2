@@ -58,7 +58,7 @@ jobs:
 
       - name: Run database migrations
         run: |
-          supabase db reset --db-url postgresql://postgres:postgres@localhost:54322/postgres --yes
+          supabase db reset --db-url postgresql://postgres:postgres@localhost:54322/postgres?sslmode=disable --yes
           echo "Migrations applied successfully"
 
       - name: Get Supabase credentials
