@@ -346,6 +346,20 @@ class ChaptersService {
   ): Promise<void> {
     // Lazy import to avoid circular dependencies
     const { syncQueue } = await import('@/sync/syncQueue');
+    const { supabase } = await import('@/lib/supabaseClient');
+
+    // Guard: Check authentication status before attempting sync
+    // This prevents noisy errors when user is not logged in
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      devLog.debug(
+        `[Chapters] Skipping sync for chapter ${chapterId} - user not authenticated. Cloud sync requires authentication.`,
+      );
+      return;
+    }
 
     // Get full chapter data for cloud sync
     const meta = await this.getMeta(chapterId);
@@ -357,7 +371,7 @@ class ChaptersService {
     try {
       await ProjectsDB.waitForProject(projectId);
     } catch (error) {
-      console.warn(
+      devLog.warn(
         `[Chapters] Skipping sync for chapter ${chapterId} - parent project ${projectId} not initialized:`,
         error,
       );

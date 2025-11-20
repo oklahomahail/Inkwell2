@@ -32,6 +32,13 @@ if (import.meta.env.DEV) {
   import('./dev/index');
   import('./utils/cacheDebug'); // Cache inspection utilities
   import('./utils/recoveryDebug'); // Recovery inspection utilities
+
+  // Run boot integrity checks in development
+  import('./qa/bootIntegrity').then(({ logBootIntegrityReport }) => {
+    logBootIntegrityReport().catch((error) => {
+      devLog.error('[BootIntegrity] Failed to run checks:', error);
+    });
+  });
 }
 
 // Initialize global error handlers first
