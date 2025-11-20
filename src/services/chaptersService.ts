@@ -18,6 +18,8 @@ import type {
   CreateChapterInput,
   UpdateChapterInput,
 } from '@/types/writing';
+import devLog from '@/utils/devLog';
+import { isMissingStoreError } from '@/utils/idbUtils';
 
 import { chapterCache, CacheKeys } from './chapterCache';
 
@@ -50,17 +52,25 @@ class ChaptersService {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
+        const oldVersion = event.oldVersion || 0;
+
+        devLog.log(`[ChaptersService] Upgrading ${DB_NAME} from v${oldVersion} to v${DB_VERSION}`);
+
+        // Defensive pattern: always check existence by name, not just version
+        // This ensures the store exists no matter what version the user is upgrading from
 
         // Chapter metadata store
         if (!db.objectStoreNames.contains(META_STORE)) {
           const metaStore = db.createObjectStore(META_STORE, { keyPath: 'id' });
           metaStore.createIndex('projectId', 'projectId', { unique: false });
           metaStore.createIndex('projectId_index', ['projectId', 'index'], { unique: false });
+          devLog.log(`[ChaptersService] Created ${META_STORE} store`);
         }
 
         // Chapter document store
         if (!db.objectStoreNames.contains(DOC_STORE)) {
           db.createObjectStore(DOC_STORE, { keyPath: 'id' });
+          devLog.log(`[ChaptersService] Created ${DOC_STORE} store`);
         }
       };
     });
@@ -95,33 +105,47 @@ class ChaptersService {
    * Deduplicates by ID to prevent duplicate chapter display
    */
   async list(projectId: string): Promise<ChapterMeta[]> {
-    const db = await this.getDB();
+    try {
+      const db = await this.getDB();
 
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(META_STORE, 'readonly');
-      this.trackTransaction(tx);
-      const store = tx.objectStore(META_STORE);
-      const index = store.index('projectId');
-      const request = index.getAll(projectId);
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(META_STORE, 'readonly');
+        this.trackTransaction(tx);
+        const store = tx.objectStore(META_STORE);
+        const index = store.index('projectId');
+        const request = index.getAll(projectId);
 
-      request.onsuccess = () => {
-        const allChapters = request.result as ChapterMeta[];
+        request.onsuccess = () => {
+          const allChapters = request.result as ChapterMeta[];
 
-        // Deduplicate by ID - keep only the most recent version of each chapter
-        const deduped = new Map<string, ChapterMeta>();
-        for (const chapter of allChapters) {
-          const existing = deduped.get(chapter.id);
-          if (!existing || new Date(chapter.updatedAt) > new Date(existing.updatedAt)) {
-            deduped.set(chapter.id, chapter);
+          // Deduplicate by ID - keep only the most recent version of each chapter
+          const deduped = new Map<string, ChapterMeta>();
+          for (const chapter of allChapters) {
+            const existing = deduped.get(chapter.id);
+            if (!existing || new Date(chapter.updatedAt) > new Date(existing.updatedAt)) {
+              deduped.set(chapter.id, chapter);
+            }
           }
-        }
 
-        // Sort by index
-        const chapters = Array.from(deduped.values()).sort((a, b) => a.index - b.index);
-        resolve(chapters);
-      };
-      request.onerror = () => reject(request.error);
-    });
+          // Sort by index
+          const chapters = Array.from(deduped.values()).sort((a, b) => a.index - b.index);
+          resolve(chapters);
+        };
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      if (isMissingStoreError(error, META_STORE)) {
+        devLog.warn('[ChaptersService] chapter_meta store missing, returning empty list', {
+          projectId,
+          error,
+        });
+        // Fallback: return empty list rather than throwing
+        return [];
+      }
+
+      // Unknown error: rethrow
+      throw error;
+    }
   }
 
   /**
@@ -632,8 +656,22 @@ class ChaptersService {
    * Get total word count for a project
    */
   async getTotalWordCount(projectId: string): Promise<number> {
-    const chapters = await this.list(projectId);
-    return chapters.reduce((sum, chapter) => sum + chapter.wordCount, 0);
+    try {
+      const chapters = await this.list(projectId);
+      return chapters.reduce((sum, chapter) => sum + chapter.wordCount, 0);
+    } catch (error) {
+      if (isMissingStoreError(error, META_STORE)) {
+        devLog.warn('[ChaptersService] chapter_meta store missing, returning 0 word count', {
+          projectId,
+          error,
+        });
+        // Fallback: treat as 0 word count rather than crashing the dashboard
+        return 0;
+      }
+
+      // Unknown error: rethrow so we see it during dev
+      throw error;
+    }
   }
 
   /**

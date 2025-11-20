@@ -8,6 +8,7 @@
 
 import { Chapters } from '@/services/chaptersService';
 import devLog from '@/utils/devLog';
+import { isMissingStoreError } from '@/utils/idbUtils';
 
 const MIGRATION_KEY_PREFIX = 'inkwell_section_migration_';
 
@@ -94,6 +95,18 @@ export async function migrateChaptersToSections(projectId: string): Promise<{
 
     return { success: true, migratedCount };
   } catch (error: any) {
+    // Special handling for missing store errors - don't fail the app
+    if (isMissingStoreError(error, 'chapter_meta')) {
+      devLog.warn('[SectionMigration] chapter_meta store missing, skipping migration', {
+        projectId,
+        error,
+      });
+      // Mark as migrated to prevent retry loops - when the store is created later,
+      // chapters will have their type set to 'chapter' by default anyway
+      markAsMigrated(projectId);
+      return { success: true, migratedCount: 0 };
+    }
+
     devLog.error(`[SectionMigration] Failed to migrate project ${projectId}:`, error);
     return {
       success: false,

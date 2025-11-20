@@ -25,6 +25,7 @@ import {
 } from '@/services/chaptersSyncService';
 import { autoMigrate } from '@/services/sectionMigration';
 import type { Section, SectionType } from '@/types/section';
+import { isMissingStoreError } from '@/utils/idbUtils';
 
 /**
  * Extended chapter interface to include section type
@@ -368,6 +369,20 @@ export function useSections(projectId: string) {
         localStorage.setItem(`lastSection-${projectId}`, newSection.id);
 
         return newSection;
+      } catch (error) {
+        if (isMissingStoreError(error, 'chapter_meta')) {
+          console.warn('[useSections] chapter_meta store missing, skipping section creation', {
+            projectId,
+            title,
+            type,
+            error,
+          });
+          // Return null to indicate failure, but don't crash the app
+          return null;
+        }
+
+        // Rethrow other errors
+        throw error;
       } finally {
         // Reset flag after a short delay to allow for any pending operations
         setTimeout(() => {
