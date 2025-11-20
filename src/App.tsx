@@ -68,6 +68,11 @@ const SupabaseHealth = lazy(() => import('./routes/Health'));
 const AnalyticsDashboard = lazy(() =>
   import('./components/Dev/AnalyticsDashboard').then((m) => ({ default: m.AnalyticsDashboard })),
 );
+const IndexedDbDevToolsPanel = lazy(() =>
+  import('./components/DevTools/IndexedDbDevToolsPanel').then((m) => ({
+    default: m.IndexedDbDevToolsPanel,
+  })),
+);
 
 // Loading fallback component
 const PageLoader = () => (
@@ -516,6 +521,24 @@ function ProfileAppShell() {
     // optional: persist snooze preference
   };
 
+  // IndexedDB DevTools (dev only)
+  const [showIdbDevTools, setShowIdbDevTools] = useState(false);
+
+  // Keyboard shortcut for IndexedDB DevTools (Ctrl+Alt+D in dev mode)
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        setShowIdbDevTools((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
   return (
     <>
       {/* Stable tour anchor - always present for tour steps */}
@@ -625,6 +648,13 @@ function ProfileAppShell() {
           </Suspense>
         )}
         {import.meta.env.DEV && <StorageDebugPanel />}
+
+        {/* IndexedDB DevTools Panel (Ctrl+Alt+D) */}
+        {import.meta.env.DEV && showIdbDevTools && (
+          <Suspense fallback={null}>
+            <IndexedDbDevToolsPanel onClose={() => setShowIdbDevTools(false)} />
+          </Suspense>
+        )}
       </MainLayout>
     </>
   );
