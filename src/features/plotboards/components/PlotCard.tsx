@@ -3,11 +3,16 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+import { getStoredSceneMetadata } from '@/services/ai/sceneClassificationService';
+import type { SceneMetadata } from '@/types/ai';
 
 import { useChaptersStore } from '../../../stores/useChaptersStore';
 import { usePlotBoardStore } from '../store';
 import { PlotCard as PlotCardType, PlotCardStatus, PlotCardPriority } from '../types';
+
+import { SceneTypeBadge } from './SceneTypeBadge';
 
 export interface PlotCardProps {
   // Card data
@@ -40,8 +45,28 @@ export const PlotCard: React.FC<PlotCardProps> = ({
   onKeyboardDragStart,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [sceneMetadata, setSceneMetadata] = useState<SceneMetadata | null>(null);
   const { updateCard } = usePlotBoardStore();
   const { chapters } = useChaptersStore();
+
+  // Load scene metadata when the card has a linked chapter
+  useEffect(() => {
+    const loadSceneMetadata = async () => {
+      if (card.chapterId) {
+        try {
+          const metadata = await getStoredSceneMetadata(card.chapterId);
+          setSceneMetadata(metadata);
+        } catch (error) {
+          console.error('Failed to load scene metadata for card:', error);
+          setSceneMetadata(null);
+        }
+      } else {
+        setSceneMetadata(null);
+      }
+    };
+
+    loadSceneMetadata();
+  }, [card.chapterId]);
 
   // Drag and drop setup
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -148,7 +173,18 @@ export const PlotCard: React.FC<PlotCardProps> = ({
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-2">
-        <h4 className="font-medium text-gray-900 text-sm leading-tight flex-1">{card.title}</h4>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <h4 className="font-medium text-gray-900 dark:text-white text-sm leading-tight">
+            {card.title}
+          </h4>
+          {sceneMetadata && sceneMetadata.sceneType && (
+            <SceneTypeBadge
+              type={sceneMetadata.sceneType}
+              confidence={sceneMetadata.confidence}
+              size="sm"
+            />
+          )}
+        </div>
         <div className="flex items-center space-x-1 ml-2">
           {/* Status Badge */}
           <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(card.status)}`}>
