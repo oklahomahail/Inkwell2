@@ -14,7 +14,10 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+
+import { getStoredSceneMetadata } from '@/services/ai/sceneClassificationService';
+import type { SceneType, SceneMetadata } from '@/types/ai';
 
 import { useKeyboardNavigation, useAriaLiveRegion } from '../hooks/useKeyboardNavigation';
 import { useUndoRedo, createOperationDescription } from '../hooks/useUndoRedo';
@@ -40,6 +43,7 @@ interface PlotBoardProps extends CardEventHandlers {
   board: PlotBoardType;
   className?: string;
   onEditBoard?: (board: PlotBoardType) => void;
+  sceneTypeFilter?: SceneType | 'all';
 }
 
 export const PlotBoard: React.FC<PlotBoardProps> = ({
@@ -48,6 +52,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
   onEditColumn,
   onEditBoard,
   className = '',
+  sceneTypeFilter = 'all',
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onBeforeCardCreate,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -55,6 +60,9 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
 }) => {
   // Store actions
   const { moveCard, reorderColumns, deleteColumn, createColumn, updateBoard } = usePlotBoardStore();
+
+  // Scene metadata for filtering
+  const [sceneMetadata, setSceneMetadata] = useState<Record<string, SceneMetadata | null>>({});
 
   // Drag state
   const [activeCard, setActiveCard] = useState<PlotCardType | null>(null);
@@ -91,6 +99,57 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
     keyboardNav.announce(`Restored board state: ${restoredBoard.title}`);
   });
 
+  // Load scene metadata for all cards with chapterIds
+  useEffect(() => {
+    const loadAllSceneMetadata = async () => {
+      const metadataMap: Record<string, SceneMetadata | null> = {};
+
+      // Collect all cards with chapterIds
+      const cardsWithChapters = board.columns.flatMap((column) =>
+        column.cards.filter((card) => card.chapterId),
+      );
+
+      // Load metadata for each card
+      await Promise.all(
+        cardsWithChapters.map(async (card) => {
+          if (card.chapterId) {
+            try {
+              const metadata = await getStoredSceneMetadata(card.chapterId);
+              metadataMap[card.id] = metadata;
+            } catch (error) {
+              metadataMap[card.id] = null;
+            }
+          }
+        }),
+      );
+
+      setSceneMetadata(metadataMap);
+    };
+
+    loadAllSceneMetadata();
+  }, [board.columns]);
+
+  // Filter columns based on scene type
+  const filteredBoard = useMemo(() => {
+    if (sceneTypeFilter === 'all') {
+      return board;
+    }
+
+    // Filter cards in each column
+    const filteredColumns = board.columns.map((column) => ({
+      ...column,
+      cards: column.cards.filter((card) => {
+        const metadata = sceneMetadata[card.id];
+        return metadata && metadata.sceneType === sceneTypeFilter;
+      }),
+    }));
+
+    return {
+      ...board,
+      columns: filteredColumns,
+    };
+  }, [board, sceneTypeFilter, sceneMetadata]);
+
   // Drag and drop sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -101,8 +160,8 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
     useSensor(KeyboardSensor),
   );
 
-  // Sort columns by order
-  const sortedColumns = [...board.columns].sort((a, b) => a.order - b.order);
+  // Sort columns by order (using filtered board for display)
+  const sortedColumns = [...filteredBoard.columns].sort((a, b) => a.order - b.order);
   const columnIds = sortedColumns.map((col) => col.id);
 
   // Helper to find card and its column

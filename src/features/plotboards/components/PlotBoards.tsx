@@ -3,6 +3,8 @@
 
 import React, { useState, useEffect } from 'react';
 
+import type { SceneType } from '@/types/ai';
+
 import { useChaptersStore } from '../../../stores/useChaptersStore';
 import { useSettingsStore } from '../../../stores/useSettingsStore';
 import { useFeatureFlag, featureFlags } from '../../../utils/flags';
@@ -59,6 +61,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
   const [_selectedColumn, setSelectedColumn] = useState<PlotColumnType | null>(null);
   const [_selectedBoard, setSelectedBoard] = useState<PlotBoardType | null>(null);
   const [activeTab, setActiveTab] = useState<'board' | 'insights'>('board');
+  const [sceneTypeFilter, setSceneTypeFilter] = useState<SceneType | 'all'>('all');
 
   // Initialize store
   useEffect(() => {
@@ -638,6 +641,7 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
           onEditCard={setSelectedCard}
           onEditColumn={setSelectedColumn}
           onEditBoard={setSelectedBoard}
+          sceneTypeFilter={sceneTypeFilter}
         />
       ),
     },
@@ -702,6 +706,24 @@ export const PlotBoards: React.FC<PlotBoardsProps> = ({ projectId }) => {
             >
               + New Board
             </button>
+
+            {/* Scene Type Filter */}
+            <div className="relative">
+              <select
+                value={sceneTypeFilter}
+                onChange={(e) => setSceneTypeFilter(e.target.value as SceneType | 'all')}
+                className="px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300"
+              >
+                <option value="all">All Scene Types</option>
+                <option value="conflict">⚔️ Conflict</option>
+                <option value="reveal">💡 Reveal</option>
+                <option value="transition">🔀 Transition</option>
+                <option value="action">⚡ Action</option>
+                <option value="emotional">❤️ Emotional</option>
+                <option value="setup">🎬 Setup</option>
+                <option value="resolution">✅ Resolution</option>
+              </select>
+            </div>
           </div>
         </div>
 
