@@ -87,6 +87,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             result={result}
             isSelected={selectedIndex === index}
             onClick={() => onResultClick(result, index)}
+            query={query}
           />
         ))}
       </div>
@@ -100,7 +101,35 @@ interface SearchResultItemProps {
   onClick: () => void;
 }
 
-const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, isSelected, onClick }) => {
+const SearchResultItem: React.FC<SearchResultItemProps & { query: string }> = ({
+  result,
+  isSelected,
+  onClick,
+  query,
+}) => {
+  // Helper function to highlight matching text
+  const highlightText = (text: string, query: string) => {
+    if (!query.trim()) return text;
+
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return (
+      <>
+        {parts.map((part, index) =>
+          part.toLowerCase() === query.toLowerCase() ? (
+            <mark
+              key={index}
+              className="bg-inkwell-gold/30 dark:bg-inkwell-gold-light/30 text-inkwell-ink dark:text-inkwell-dark-text font-medium rounded px-0.5"
+            >
+              {part}
+            </mark>
+          ) : (
+            <span key={index}>{part}</span>
+          ),
+        )}
+      </>
+    );
+  };
+
   const getMatchTypeLabel = (type: SearchResult['matchType']) => {
     switch (type) {
       case 'name':
@@ -186,7 +215,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, isSelected,
 
       {result.snippet && (
         <p className="text-body-sm text-inkwell-ink/70 dark:text-inkwell-dark-muted line-clamp-2">
-          {result.snippet}
+          {highlightText(result.snippet, query)}
         </p>
       )}
     </button>
