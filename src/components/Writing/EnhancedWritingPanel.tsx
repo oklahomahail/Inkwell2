@@ -40,10 +40,13 @@ import { InlineFormattingToolbar } from '@/components/Writing/InlineFormattingTo
 import { useAppContext, View } from '@/context/AppContext';
 import { FormattingProvider, useFormatting } from '@/context/FormattingContext';
 import { useToast } from '@/context/toast';
+import { SceneTypeBadge } from '@/features/plotboards/components/SceneTypeBadge';
 import { useProjectAnalytics } from '@/hooks/useProjectAnalytics';
 import { useSections } from '@/hooks/useSections';
+import { getStoredSceneMetadata } from '@/services/ai/sceneClassificationService';
 import { Chapters } from '@/services/chaptersService';
 import { ChaptersWithEvents } from '@/services/chaptersServiceWithEvents';
+import type { SceneMetadata } from '@/types/ai';
 import { SECTION_TYPE_META } from '@/types/section';
 import devLog from '@/utils/devLog';
 
@@ -68,6 +71,7 @@ interface SortableSectionItemProps {
   onKeyDown: (e: React.KeyboardEvent) => void;
   onDelete: () => void;
   sectionTypeMeta: { label: string };
+  sceneMetadata?: SceneMetadata | null;
 }
 
 const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
@@ -82,6 +86,7 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
   onKeyDown,
   onDelete,
   sectionTypeMeta,
+  sceneMetadata,
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: section.id,
@@ -138,7 +143,16 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
                 }}
                 className="flex-1 text-left min-w-0"
               >
-                <span className="font-medium text-sm truncate block">{section.title}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-sm truncate">{section.title}</span>
+                  {sceneMetadata && sceneMetadata.sceneType && (
+                    <SceneTypeBadge
+                      type={sceneMetadata.sceneType}
+                      confidence={sceneMetadata.confidence}
+                      size="sm"
+                    />
+                  )}
+                </div>
               </button>
             )}
             <div className="flex items-center gap-1">
@@ -187,6 +201,9 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
     section: any;
     index: number;
   } | null>(null);
+  const [sceneMetadataMap, setSceneMetadataMap] = useState<Record<string, SceneMetadata | null>>(
+    {},
+  );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Session tracking refs
@@ -250,6 +267,29 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
       isInitializingNewSection.current = false;
     };
   }, [sections.length, activeId, isCreatingSection, createSection]);
+
+  // Load scene metadata for all sections
+  useEffect(() => {
+    if (sections.length === 0) return;
+
+    const loadSceneMetadata = async () => {
+      const metadataMap: Record<string, SceneMetadata | null> = {};
+
+      for (const section of sections) {
+        try {
+          const metadata = await getStoredSceneMetadata(section.id);
+          metadataMap[section.id] = metadata;
+        } catch (error) {
+          devLog.debug(`[EnhancedWritingPanel] No scene metadata for section ${section.id}`);
+          metadataMap[section.id] = null;
+        }
+      }
+
+      setSceneMetadataMap(metadataMap);
+    };
+
+    loadSceneMetadata();
+  }, [sections]);
 
   // Load active section content
   useEffect(() => {
@@ -1046,6 +1086,7 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
                           onKeyDown={(e) => handleTitleKeyDown(e, section.id)}
                           onDelete={() => handleRequestDelete(section.id)}
                           sectionTypeMeta={SECTION_TYPE_META[section.type]}
+                          sceneMetadata={sceneMetadataMap[section.id] || null}
                         />
                       ))}
 
