@@ -138,6 +138,36 @@ const SYNC_QUEUE_DATABASE: DatabaseDefinition = {
 };
 
 /**
+ * AI features database (inkwell-ai)
+ * Stores AI-generated suggestions, analysis, and metadata for Wave 1-8 features
+ */
+const AI_DATABASE: DatabaseDefinition = {
+  name: 'inkwell-ai',
+  version: 1,
+  stores: [
+    {
+      name: 'ai_suggestions',
+      options: { keyPath: 'id' },
+      indexes: [
+        { name: 'projectId', keyPath: 'projectId' },
+        { name: 'chapterId', keyPath: 'chapterId' },
+        { name: 'type', keyPath: 'type' },
+        { name: 'timestamp', keyPath: 'timestamp' },
+        { name: 'project_type', keyPath: ['projectId', 'type'] },
+      ],
+    },
+    {
+      name: 'scene_metadata',
+      options: { keyPath: 'chapterId' },
+      indexes: [
+        { name: 'sceneType', keyPath: 'sceneType' },
+        { name: 'analyzedAt', keyPath: 'analyzedAt' },
+      ],
+    },
+  ],
+};
+
+/**
  * Central schema registry
  * Add new databases here to include them in self-healing initialization
  */
@@ -146,6 +176,7 @@ export const DATABASE_SCHEMAS: DatabaseDefinition[] = [
   CHAPTERS_DATABASE,
   PROJECTS_DATABASE,
   SYNC_QUEUE_DATABASE,
+  AI_DATABASE,
 ];
 
 // ============================================================================
