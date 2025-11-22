@@ -75,6 +75,7 @@ export const Sidebar: React.FC = () => {
     { key: 'timeline', label: 'Timeline', icon: 'timeline' },
     { key: 'analytics', label: 'Analytics', icon: 'analytics' },
     { key: 'formatting', label: 'Formatting', icon: 'type' }, // v0.10.0 - Document Formatting
+    { key: 'publishing', label: 'Publishing', icon: 'rocket' }, // v1.6.0 - Publishing Tools (Wave 1 AI)
     { key: 'settings', label: 'Settings', icon: 'settings' },
   ];
 

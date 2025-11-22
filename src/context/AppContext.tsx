@@ -29,6 +29,7 @@ export enum View {
   Export = 'export', // v0.7.0 - Export Dashboard
   Onboarding = 'onboarding', // v1.3.0 - Onboarding Panel
   Formatting = 'formatting', // v0.10.0 - Document Formatting
+  Publishing = 'publishing', // v1.6.0 - Publishing Tools (Wave 1 AI)
 }
 
 // Re-export Project type for backward compatibility

@@ -35,6 +35,13 @@ const ExportDashboard = lazy(() => import('@/components/Dashboard/ExportDashboar
 // Lazy-load Formatting Panel (v0.10.0)
 const FormattingPanel = lazy(() => import('@/components/Panels/FormattingPanel'));
 
+// Lazy-load Publishing Tools Panel (v1.6.0 - Wave 1 AI)
+const PublishingToolsPanel = lazy(() =>
+  import('@/components/Publishing/PublishingToolsPanel').then((m) => ({
+    default: m.PublishingToolsPanel,
+  })),
+);
+
 const ViewSwitcher: React.FC = () => {
   const { state, currentProject, updateProject } = useAppContext();
   const { recordFeatureUse } = useFeatureDiscovery();
@@ -230,6 +237,20 @@ const ViewSwitcher: React.FC = () => {
           <div className="flex items-center justify-center h-full">
             <p className="text-gray-500">Please select a project to configure formatting</p>
           </div>
+        );
+      case View.Publishing:
+        return (
+          <FeatureErrorBoundary featureName="Publishing Tools">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">Loading Publishing Tools...</p>
+                </div>
+              }
+            >
+              <PublishingToolsPanel />
+            </Suspense>
+          </FeatureErrorBoundary>
         );
       default:
         return (

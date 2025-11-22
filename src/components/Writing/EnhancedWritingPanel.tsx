@@ -31,6 +31,7 @@ import {
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 import AISuggestionBox from '@/components/AI/AISuggestionBox';
+import ChapterSynopsisModal from '@/components/AI/ChapterSynopsisModal';
 import { RealtimeStatus } from '@/components/Chapters/RealtimeStatus';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Logo } from '@/components/ui/Logo';
@@ -176,6 +177,7 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
   const [showStats, setShowStats] = useState(true);
   const [focusMode, setFocusMode] = useState(false);
   const [showAISuggestion, setShowAISuggestion] = useState(false);
+  const [showSynopsisModal, setShowSynopsisModal] = useState(false);
   const [isCreatingSection, setIsCreatingSection] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
@@ -884,6 +886,16 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
                 </button>
 
                 <button
+                  onClick={() => setShowSynopsisModal(true)}
+                  disabled={!activeSection}
+                  className="btn btn-sm flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white border-none disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  title="Generate Chapter Synopsis"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Synopsis</span>
+                </button>
+
+                <button
                   onClick={() => setShowStats(!showStats)}
                   className="btn btn-ghost btn-sm"
                   title={showStats ? 'Hide stats' : 'Show stats'}
@@ -1138,6 +1150,16 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
           context={getContextText()}
           onInsert={handleAIInsert}
         />
+
+        {/* Chapter Synopsis Modal */}
+        {activeSection && currentProject && (
+          <ChapterSynopsisModal
+            isOpen={showSynopsisModal}
+            onClose={() => setShowSynopsisModal(false)}
+            chapter={activeSection as any}
+            projectId={currentProject.id}
+          />
+        )}
 
         {/* Delete Confirmation Modal */}
         <ConfirmModal
