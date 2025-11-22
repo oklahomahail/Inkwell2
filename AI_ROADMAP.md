@@ -11,8 +11,10 @@
 This roadmap outlines the strategic integration of advanced AI capabilities into Inkwell, sequenced by technical dependencies and implementation complexity. The plan leverages Inkwell's existing AI infrastructure (Anthropic, OpenAI, Google providers) and rich manuscript data models to deliver intelligent writing assistance while maintaining author autonomy and privacy.
 
 **Total Timeline**: 2026 Q1 → 2028+
-**Total Features**: 28 features across 8 waves
+**Total Features**: 28 features across 8 waves (approximate - scope may be refined based on validation)
 **Guiding Principles**: Privacy-first, author control, voice preservation, progressive enhancement
+
+**Note on Stretch Goals**: Waves 7–8 represent ambitious long-term capabilities and can be deferred or reduced depending on market fit, resources, and technology maturity. Waves 1–6 deliver the core value proposition.
 
 ---
 
@@ -39,9 +41,31 @@ This roadmap outlines the strategic integration of advanced AI capabilities into
 
 ## Implementation Waves
 
+### Waves at a Glance
+
+| Wave       | Timeline            | Focus                  | Features                                                                               |
+| ---------- | ------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
+| **Wave 1** | 2026 Q1 (2-3 mo)    | Quick Wins             | Synopsis Generator, Scene Classification, Publishing Tools, Outline Comparison         |
+| **Wave 2** | 2026 Q2 (3-4 mo)    | Core Intelligence      | Revision Coach, Semantic Analysis, Scene Purpose, Emotion/Tension Tracking             |
+| **Wave 3** | 2026 Q3 (3-4 mo)    | Character & World      | Voice Modeling, Voice-Preserving Rewrites, Worldbuilding Extraction, Relationship Maps |
+| **Wave 4** | 2026 Q4 (4-5 mo)    | Advanced Reasoning     | Timeline Check, Beat Sheet 2.0, Project Advisor, Plot Navigator, Narrative Sandbox     |
+| **Wave 5** | 2027 Q1 (3-4 mo)    | Series & World Systems | Series Bible, Multi-Book Consistency, Encyclopedia Mode                                |
+| **Wave 6** | 2027 Q2-Q3 (4-5 mo) | Real-Time + Market     | Consistency Guardian 2.0, Draft Analyst, Cover Concepts, Market Positioning            |
+| **Wave 7** | 2027 Q4 (3-4 mo)    | Creative Reasoning     | What-If Scenario Engine                                                                |
+| **Wave 8** | 2028+ (12+ mo)      | Private On-Device AI   | Local Mini-LM, Encrypted Indexing, Offline Revision                                    |
+
+---
+
 ## Wave 1: Quick Wins (2026 Q1) - 2-3 months
 
 **Goal**: Build momentum, validate AI integration patterns, deliver immediate value
+
+**Priority Breakdown**:
+
+- **Must-Have (MVP)**: Chapter Synopsis Generator (#1), Scene Classification (#2)
+- **Nice-to-Have**: Publishing Tools (#3), Outline Comparison (#4)
+
+**Note**: Outline Comparison (#4) is marked Medium complexity and is the most technically involved feature in Wave 1. It may be deferred to Wave 2 if timeline constraints emerge.
 
 ### Features
 
@@ -462,6 +486,8 @@ This roadmap outlines the strategic integration of advanced AI capabilities into
 #### 17. Narrative Sandbox 🔧 Medium Complexity
 
 **What**: Experiment with alternate outlines, endings, structures without affecting main manuscript
+
+**Note**: This is primarily a product feature (versioning/branching) rather than a pure AI feature. It leverages the same data models as AI features and provides a safe experimentation space for AI-powered what-if scenarios, but its core implementation is project forking and comparison.
 
 **Features**:
 
