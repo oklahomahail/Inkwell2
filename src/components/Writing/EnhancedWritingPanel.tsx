@@ -34,6 +34,7 @@ import AISuggestionBox from '@/components/AI/AISuggestionBox';
 import { RealtimeStatus } from '@/components/Chapters/RealtimeStatus';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Logo } from '@/components/ui/Logo';
+import { AdvancedFocusMode } from '@/components/Writing/AdvancedFocusMode';
 import { InlineFormattingToolbar } from '@/components/Writing/InlineFormattingToolbar';
 import { useAppContext, View } from '@/context/AppContext';
 import { FormattingProvider, useFormatting } from '@/context/FormattingContext';
@@ -798,290 +799,293 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
   }
 
   return (
-    <div
-      className={`enhanced-writing-panel ${isFullscreen ? 'fullscreen' : ''} ${focusMode ? 'focus-mode' : ''} ${className || ''}`}
-    >
-      {/* Header */}
-      {!focusMode && (
-        <div className="writing-header sticky top-0 z-20 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
-          <div className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={goToDashboard}
-                className="btn btn-ghost btn-sm"
-                title="Back to Dashboard"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              {/* Inkwell Logo */}
-              <Logo size={32} className="flex-shrink-0" />
-              <div>
-                <h1 className="text-heading-md text-slate-900 dark:text-white">
-                  {currentProject.name}
-                </h1>
-                <p className="text-caption text-slate-500">{currentProject.description}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {/* Section Navigation */}
-              <div
-                className="flex items-center gap-1 border-r border-slate-200 dark:border-slate-700 pr-3 mr-1"
-                data-tour="section-nav"
-              >
-                <button
-                  onClick={goToPrevSection}
-                  disabled={!hasPrev}
-                  className="btn btn-ghost btn-sm"
-                  title="Previous section"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <div className="px-2 text-caption text-slate-600 dark:text-slate-400 min-w-[160px] text-center">
-                  {activeSection ? (
-                    <>
-                      <span className="font-medium">{activeSection.title}</span>
-                      <span className="text-slate-400 dark:text-slate-500 text-xs ml-1">
-                        ({SECTION_TYPE_META[activeSection.type].label})
-                      </span>
-                      <div className="text-xs text-slate-400 dark:text-slate-500">
-                        {currentIndex + 1}/{sortedSections.length}
-                      </div>
-                    </>
-                  ) : (
-                    'No section'
-                  )}
-                </div>
-                <button
-                  onClick={goToNextSection}
-                  disabled={!hasNext}
-                  className="btn btn-ghost btn-sm"
-                  title="Next section"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={handleCreateSection}
-                  disabled={isCreatingSection}
-                  className="btn btn-primary btn-sm flex items-center gap-2"
-                  title={isCreatingSection ? 'Creating section...' : 'New section'}
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>{isCreatingSection ? 'Creating...' : 'New Section'}</span>
-                </button>
-              </div>
-
-              {/* Actions */}
-              <button
-                onClick={() => setShowAISuggestion(true)}
-                className="btn btn-sm flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white border-none"
-                title="Get AI Suggestion (⌘⇧G)"
-              >
-                <Lightbulb className="w-4 h-4" />
-                <span>AI Suggestion</span>
-              </button>
-
-              <button
-                onClick={() => setShowStats(!showStats)}
-                className="btn btn-ghost btn-sm"
-                title={showStats ? 'Hide stats' : 'Show stats'}
-              >
-                {showStats ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-
-              <button
-                onClick={toggleFocusMode}
-                className="btn btn-ghost btn-sm"
-                title="Toggle focus mode"
-              >
-                <Zap className="w-4 h-4" />
-              </button>
-
-              <button
-                onClick={toggleFullscreen}
-                className="btn btn-ghost btn-sm"
-                title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-              >
-                {isFullscreen ? (
-                  <Minimize2 className="w-4 h-4" />
-                ) : (
-                  <Maximize2 className="w-4 h-4" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Realtime Status Bar */}
-          <RealtimeStatus
-            connected={realtimeConnected}
-            liveUpdate={liveUpdateReceived}
-            syncing={syncing}
-            lastSynced={lastSynced}
-            onSync={syncNow}
-          />
-        </div>
-      )}
-
-      {/* Stats Bar */}
-      {showStats && !focusMode && (
-        <div className="stats-bar bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <Type className="w-4 h-4 text-slate-500" />
-                <span className="text-body-sm font-medium text-slate-900 dark:text-white">
-                  {wordCount.toLocaleString()}
-                </span>
-                <span className="text-caption text-slate-500">words</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-slate-500" />
-                <span className="text-body-sm font-medium text-slate-900 dark:text-white">
-                  {getCharCount().toLocaleString()}
-                </span>
-                <span className="text-caption text-slate-500">characters</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-slate-500" />
-                <span className="text-body-sm font-medium text-slate-900 dark:text-white">
-                  {getReadingTime()}
-                </span>
-                <span className="text-caption text-slate-500">min read</span>
-              </div>
-            </div>
-
-            {/* Daily Goal Progress */}
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-caption text-slate-500">Daily Goal</div>
-                <div className="text-body-sm font-medium text-slate-900 dark:text-white">
-                  {todayWordsWritten.toLocaleString()} / {dailyGoal.toLocaleString()}
-                </div>
-              </div>
-              <div className="w-24 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary-500 transition-all duration-300"
-                  style={{ width: `${dailyGoalProgress}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main Content Area with Sidebar */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Collapsible Chapter Sidebar */}
+    <AdvancedFocusMode isActive={focusMode} onToggle={toggleFocusMode} currentWordCount={wordCount}>
+      <div
+        className={`enhanced-writing-panel ${isFullscreen ? 'fullscreen' : ''} ${focusMode ? 'focus-mode' : ''} ${className || ''}`}
+      >
+        {/* Header */}
         {!focusMode && (
-          <div
-            className={`border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 overflow-y-auto transition-all duration-200 flex-shrink-0 ${
-              showSidebar ? 'w-64' : 'w-14'
-            }`}
-          >
-            <div className="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between min-h-[52px]">
-              {showSidebar ? (
-                <>
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-slate-600 dark:text-slate-400 shrink-0" />
-                    <h3 className="font-semibold text-sm text-slate-900 dark:text-white">
-                      Chapters
-                    </h3>
+          <div className="writing-header sticky top-0 z-20 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={goToDashboard}
+                  className="btn btn-ghost btn-sm"
+                  title="Back to Dashboard"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+                {/* Inkwell Logo */}
+                <Logo size={32} className="flex-shrink-0" />
+                <div>
+                  <h1 className="text-heading-md text-slate-900 dark:text-white">
+                    {currentProject.name}
+                  </h1>
+                  <p className="text-caption text-slate-500">{currentProject.description}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* Section Navigation */}
+                <div
+                  className="flex items-center gap-1 border-r border-slate-200 dark:border-slate-700 pr-3 mr-1"
+                  data-tour="section-nav"
+                >
+                  <button
+                    onClick={goToPrevSection}
+                    disabled={!hasPrev}
+                    className="btn btn-ghost btn-sm"
+                    title="Previous section"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <div className="px-2 text-caption text-slate-600 dark:text-slate-400 min-w-[160px] text-center">
+                    {activeSection ? (
+                      <>
+                        <span className="font-medium">{activeSection.title}</span>
+                        <span className="text-slate-400 dark:text-slate-500 text-xs ml-1">
+                          ({SECTION_TYPE_META[activeSection.type].label})
+                        </span>
+                        <div className="text-xs text-slate-400 dark:text-slate-500">
+                          {currentIndex + 1}/{sortedSections.length}
+                        </div>
+                      </>
+                    ) : (
+                      'No section'
+                    )}
                   </div>
                   <button
-                    onClick={() => setShowSidebar(false)}
-                    className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors shrink-0"
-                    title="Hide chapter list"
+                    onClick={goToNextSection}
+                    disabled={!hasNext}
+                    className="btn btn-ghost btn-sm"
+                    title="Next section"
                   >
-                    <ChevronLeft className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                    <ChevronRight className="w-4 h-4" />
                   </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setShowSidebar(true)}
-                  className="w-full p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors flex items-center justify-center"
-                  title="Show chapter list"
-                >
-                  <Menu className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-                </button>
-              )}
-            </div>
-            {showSidebar && (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={sortedSections.map((s) => s.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="p-2 space-y-1">
-                    {sortedSections.map((section) => (
-                      <SortableSectionItem
-                        key={section.id}
-                        section={section}
-                        isActive={section.id === activeId}
-                        isEditing={editingTitleId === section.id}
-                        editingValue={editingTitleValue}
-                        onSetActive={() => setActive(section.id)}
-                        onStartEditing={() => handleStartEditingTitle(section.id, section.title)}
-                        onEditingChange={setEditingTitleValue}
-                        onSaveTitle={() => handleSaveTitle(section.id)}
-                        onKeyDown={(e) => handleTitleKeyDown(e, section.id)}
-                        onDelete={() => handleRequestDelete(section.id)}
-                        sectionTypeMeta={SECTION_TYPE_META[section.type]}
-                      />
-                    ))}
+                  <button
+                    onClick={handleCreateSection}
+                    disabled={isCreatingSection}
+                    className="btn btn-primary btn-sm flex items-center gap-2"
+                    title={isCreatingSection ? 'Creating section...' : 'New section'}
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>{isCreatingSection ? 'Creating...' : 'New Section'}</span>
+                  </button>
+                </div>
 
-                    {/* Add New Section Button */}
-                    <button
-                      onClick={handleCreateSection}
-                      disabled={isCreatingSection}
-                      className="w-full text-left px-3 py-2 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2 text-slate-600 dark:text-slate-400"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span className="text-sm">
-                        {isCreatingSection ? 'Creating...' : 'New Section'}
-                      </span>
-                    </button>
-                  </div>
-                </SortableContext>
-              </DndContext>
-            )}
+                {/* Actions */}
+                <button
+                  onClick={() => setShowAISuggestion(true)}
+                  className="btn btn-sm flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white border-none"
+                  title="Get AI Suggestion (⌘⇧G)"
+                >
+                  <Lightbulb className="w-4 h-4" />
+                  <span>AI Suggestion</span>
+                </button>
+
+                <button
+                  onClick={() => setShowStats(!showStats)}
+                  className="btn btn-ghost btn-sm"
+                  title={showStats ? 'Hide stats' : 'Show stats'}
+                >
+                  {showStats ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+
+                <button
+                  onClick={toggleFocusMode}
+                  className="btn btn-ghost btn-sm"
+                  title="Toggle focus mode"
+                >
+                  <Zap className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={toggleFullscreen}
+                  className="btn btn-ghost btn-sm"
+                  title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                >
+                  {isFullscreen ? (
+                    <Minimize2 className="w-4 h-4" />
+                  ) : (
+                    <Maximize2 className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Realtime Status Bar */}
+            <RealtimeStatus
+              connected={realtimeConnected}
+              liveUpdate={liveUpdateReceived}
+              syncing={syncing}
+              lastSynced={lastSynced}
+              onSync={syncNow}
+            />
           </div>
         )}
 
-        {/* Writing Area */}
-        <div className={`writing-area flex-1 flex flex-col overflow-hidden`}>
-          {/* Inline Formatting Toolbar */}
+        {/* Stats Bar */}
+        {showStats && !focusMode && (
+          <div className="stats-bar bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <Type className="w-4 h-4 text-slate-500" />
+                  <span className="text-body-sm font-medium text-slate-900 dark:text-white">
+                    {wordCount.toLocaleString()}
+                  </span>
+                  <span className="text-caption text-slate-500">words</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-slate-500" />
+                  <span className="text-body-sm font-medium text-slate-900 dark:text-white">
+                    {getCharCount().toLocaleString()}
+                  </span>
+                  <span className="text-caption text-slate-500">characters</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-slate-500" />
+                  <span className="text-body-sm font-medium text-slate-900 dark:text-white">
+                    {getReadingTime()}
+                  </span>
+                  <span className="text-caption text-slate-500">min read</span>
+                </div>
+              </div>
+
+              {/* Daily Goal Progress */}
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <div className="text-caption text-slate-500">Daily Goal</div>
+                  <div className="text-body-sm font-medium text-slate-900 dark:text-white">
+                    {todayWordsWritten.toLocaleString()} / {dailyGoal.toLocaleString()}
+                  </div>
+                </div>
+                <div className="w-24 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary-500 transition-all duration-300"
+                    style={{ width: `${dailyGoalProgress}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content Area with Sidebar */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Collapsible Chapter Sidebar */}
           {!focusMode && (
-            <InlineFormattingToolbar onInsertSceneSeparator={handleInsertSceneSeparator} />
+            <div
+              className={`border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 overflow-y-auto transition-all duration-200 flex-shrink-0 ${
+                showSidebar ? 'w-64' : 'w-14'
+              }`}
+            >
+              <div className="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between min-h-[52px]">
+                {showSidebar ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-slate-600 dark:text-slate-400 shrink-0" />
+                      <h3 className="font-semibold text-sm text-slate-900 dark:text-white">
+                        Chapters
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => setShowSidebar(false)}
+                      className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors shrink-0"
+                      title="Hide chapter list"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setShowSidebar(true)}
+                    className="w-full p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors flex items-center justify-center"
+                    title="Show chapter list"
+                  >
+                    <Menu className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                  </button>
+                )}
+              </div>
+              {showSidebar && (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={sortedSections.map((s) => s.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="p-2 space-y-1">
+                      {sortedSections.map((section) => (
+                        <SortableSectionItem
+                          key={section.id}
+                          section={section}
+                          isActive={section.id === activeId}
+                          isEditing={editingTitleId === section.id}
+                          editingValue={editingTitleValue}
+                          onSetActive={() => setActive(section.id)}
+                          onStartEditing={() => handleStartEditingTitle(section.id, section.title)}
+                          onEditingChange={setEditingTitleValue}
+                          onSaveTitle={() => handleSaveTitle(section.id)}
+                          onKeyDown={(e) => handleTitleKeyDown(e, section.id)}
+                          onDelete={() => handleRequestDelete(section.id)}
+                          sectionTypeMeta={SECTION_TYPE_META[section.type]}
+                        />
+                      ))}
+
+                      {/* Add New Section Button */}
+                      <button
+                        onClick={handleCreateSection}
+                        disabled={isCreatingSection}
+                        className="w-full text-left px-3 py-2 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2 text-slate-600 dark:text-slate-400"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span className="text-sm">
+                          {isCreatingSection ? 'Creating...' : 'New Section'}
+                        </span>
+                      </button>
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              )}
+            </div>
           )}
 
-          <div className={`flex-1 ${focusMode ? 'p-8 max-w-4xl mx-auto' : 'p-6'} overflow-auto`}>
-            <div className="relative">
-              <textarea
-                ref={textareaRef}
-                value={content}
-                onChange={handleContentChange}
-                placeholder={
-                  focusMode
-                    ? 'Begin your story...'
-                    : `Start writing "${currentProject.name}"...\n\nTip: Press Ctrl+S to save manually, or just keep writing - we'll save automatically.`
-                }
-                data-tour="editor"
-                style={{
-                  fontFamily: formatting.fontFamily,
-                  fontSize: `${formatting.fontSize}rem`,
-                  lineHeight: formatting.lineHeight,
-                  textIndent: formatting.firstLineIndent ? `${formatting.firstLineIndent}rem` : '0',
-                  paddingLeft: formatting.firstLineIndent
-                    ? `${formatting.firstLineIndent}rem`
-                    : undefined,
-                }}
-                className={`
+          {/* Writing Area */}
+          <div className={`writing-area flex-1 flex flex-col overflow-hidden`}>
+            {/* Inline Formatting Toolbar */}
+            {!focusMode && (
+              <InlineFormattingToolbar onInsertSceneSeparator={handleInsertSceneSeparator} />
+            )}
+
+            <div className={`flex-1 ${focusMode ? 'p-8 max-w-4xl mx-auto' : 'p-6'} overflow-auto`}>
+              <div className="relative">
+                <textarea
+                  ref={textareaRef}
+                  value={content}
+                  onChange={handleContentChange}
+                  placeholder={
+                    focusMode
+                      ? 'Begin your story...'
+                      : `Start writing "${currentProject.name}"...\n\nTip: Press Ctrl+S to save manually, or just keep writing - we'll save automatically.`
+                  }
+                  data-tour="editor"
+                  style={{
+                    fontFamily: formatting.fontFamily,
+                    fontSize: `${formatting.fontSize}rem`,
+                    lineHeight: formatting.lineHeight,
+                    textIndent: formatting.firstLineIndent
+                      ? `${formatting.firstLineIndent}rem`
+                      : '0',
+                    paddingLeft: formatting.firstLineIndent
+                      ? `${formatting.firstLineIndent}rem`
+                      : undefined,
+                  }}
+                  className={`
                   writing-editor w-full resize-none border-none outline-none
                   ${
                     focusMode
@@ -1095,57 +1099,58 @@ const EnhancedWritingPanelInner: React.FC<EnhancedWritingPanelProps> = ({ classN
                   focus:ring-0 focus:border-primary-300 dark:focus:border-primary-600
                   ${formatting.firstLineIndent && formatting.firstLineIndent > 0 ? 'indent-enabled' : ''}
                 `}
-                autoFocus
-              />
+                  autoFocus
+                />
 
-              {/* Focus Mode Overlay Stats */}
-              {focusMode && showStats && (
-                <div className="absolute bottom-4 right-4 bg-slate-900/80 dark:bg-slate-100/80 text-white dark:text-slate-900 px-3 py-2 rounded-lg backdrop-blur-sm">
-                  <div className="flex items-center gap-4 text-sm">
-                    <span>{wordCount} words</span>
-                    <span>•</span>
-                    <span>{getReadingTime()}m read</span>
+                {/* Focus Mode Overlay Stats */}
+                {focusMode && showStats && (
+                  <div className="absolute bottom-4 right-4 bg-slate-900/80 dark:bg-slate-100/80 text-white dark:text-slate-900 px-3 py-2 rounded-lg backdrop-blur-sm">
+                    <div className="flex items-center gap-4 text-sm">
+                      <span>{wordCount} words</span>
+                      <span>•</span>
+                      <span>{getReadingTime()}m read</span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Focus Mode Toggle */}
+        {focusMode && (
+          <div className="fixed bottom-6 left-6 z-30">
+            <button
+              onClick={toggleFocusMode}
+              className="btn btn-secondary shadow-lg"
+              title="Exit focus mode"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Exit Focus
+            </button>
+          </div>
+        )}
+
+        {/* AI Suggestion Modal */}
+        <AISuggestionBox
+          isOpen={showAISuggestion}
+          onClose={() => setShowAISuggestion(false)}
+          context={getContextText()}
+          onInsert={handleAIInsert}
+        />
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmModal
+          open={!!pendingDelete}
+          title="Delete this section?"
+          description="This action cannot be undone. The section and all its content will be permanently removed."
+          confirmLabel="Delete"
+          confirmColor="red"
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
       </div>
-
-      {/* Focus Mode Toggle */}
-      {focusMode && (
-        <div className="fixed bottom-6 left-6 z-30">
-          <button
-            onClick={toggleFocusMode}
-            className="btn btn-secondary shadow-lg"
-            title="Exit focus mode"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Exit Focus
-          </button>
-        </div>
-      )}
-
-      {/* AI Suggestion Modal */}
-      <AISuggestionBox
-        isOpen={showAISuggestion}
-        onClose={() => setShowAISuggestion(false)}
-        context={getContextText()}
-        onInsert={handleAIInsert}
-      />
-
-      {/* Delete Confirmation Modal */}
-      <ConfirmModal
-        open={!!pendingDelete}
-        title="Delete this section?"
-        description="This action cannot be undone. The section and all its content will be permanently removed."
-        confirmLabel="Delete"
-        confirmColor="red"
-        onConfirm={handleConfirmDelete}
-        onCancel={handleCancelDelete}
-      />
-    </div>
+    </AdvancedFocusMode>
   );
 };
 

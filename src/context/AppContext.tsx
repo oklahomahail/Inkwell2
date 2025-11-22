@@ -8,6 +8,7 @@ import React, {
   type ReactNode,
 } from 'react';
 
+import { SearchService } from '@/services/searchService';
 import type { Project, Chapter } from '@/types/project';
 import devLog from '@/utils/devLog';
 
@@ -274,6 +275,31 @@ const THEME_KEY = 'inkwell-theme';
 const PROJECTS_KEY = 'inkwell_projects';
 const PROJECT_ID_KEY = 'inkwell_current_project_id';
 
+/**
+ * Helper: Index a project for full-text search
+ */
+async function indexProjectForSearch(project: Project): Promise<void> {
+  try {
+    // Combine all chapter content for search
+    const chaptersContent = project.chapters
+      ?.map((ch: any) => ch.content || ch.text || '')
+      .filter(Boolean)
+      .join('\n\n');
+
+    await SearchService.updateProject({
+      id: project.id,
+      name: project.name || 'Untitled Project',
+      description: project.description || '',
+      genre: project.genre,
+      content: chaptersContent || '',
+    });
+
+    devLog.debug(`[AppContext] Indexed project for search: ${project.id}`);
+  } catch (error) {
+    devLog.warn('[AppContext] Failed to index project for search:', error);
+  }
+}
+
 // ===== PROVIDER (INNER) =====
 function AppProviderInner({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
@@ -296,6 +322,11 @@ function AppProviderInner({ children }: { children: ReactNode }) {
           projects = runStoryTemplateMigration(projects);
 
           dispatch({ type: 'SET_PROJECTS', payload: projects });
+
+          // Index all projects for search
+          devLog.debug('[AppContext] Indexing projects for search...');
+          await Promise.all(projects.map((project) => indexProjectForSearch(project)));
+          devLog.debug('[AppContext] Search indexing complete');
         }
       } catch (error) {
         devLog.warn('Failed to parse projects from localStorage:', error);

@@ -21,6 +21,7 @@ import { useLocation } from 'react-router-dom';
 import { InkDotFlourish } from '@/components/Brand/InkDotFlourish';
 import Logo from '@/components/Logo';
 import NewProjectDialog from '@/components/Projects/NewProjectDialog';
+import { SearchModal } from '@/components/Search/SearchModal';
 import { StorageStatusIndicator } from '@/components/Storage/StorageStatusIndicator';
 import { StorageQuotaWarning } from '@/components/ui/StorageQuotaWarning';
 import { BRAND_NAME, ORGANIZATION_NAME } from '@/constants/brand';
@@ -722,39 +723,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       {/* Command Palette is handled by CommandPaletteProvider (Cmd+K) */}
 
       {/* Search Modal */}
-      {isSearchModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Search</h2>
-                <button
-                  onClick={() => setIsSearchModalOpen(false)}
-                  className="btn btn-ghost btn-sm p-2"
-                  aria-label="Close search"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              <input
-                type="text"
-                placeholder="Search your projects and content..."
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                autoFocus
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      <SearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
 
       {/* Notifications Modal */}
       {isNotificationsOpen && (

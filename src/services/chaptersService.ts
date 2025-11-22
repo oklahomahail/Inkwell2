@@ -22,6 +22,7 @@ import devLog from '@/utils/devLog';
 import { isMissingStoreError } from '@/utils/idbUtils';
 
 import { chapterCache, CacheKeys } from './chapterCache';
+import { SearchService } from './searchService';
 
 // IndexedDB configuration
 const DB_NAME = 'inkwell_chapters';
@@ -332,6 +333,45 @@ class ChaptersService {
       this.enqueueSyncOperation(doc.id, meta.projectId, doc).catch((error) => {
         console.error('[Chapters] Failed to enqueue cloud sync:', error);
       });
+
+      // Update search index (async, don't block save)
+      this.updateSearchIndex(meta.projectId).catch((error) => {
+        devLog.warn('[Chapters] Failed to update search index:', error);
+      });
+    }
+  }
+
+  /**
+   * Update search index for a project (called after chapter content changes)
+   */
+  private async updateSearchIndex(projectId: string): Promise<void> {
+    try {
+      // Get all chapters for this project
+      const chapters = await this.list(projectId);
+
+      // Get all chapter content
+      const chapterContents = await Promise.all(
+        chapters.map(async (meta) => {
+          const fullChapter = await this.get(meta.id);
+          return fullChapter?.content || '';
+        }),
+      );
+
+      // Combine all content
+      const combinedContent = chapterContents.join('\n\n');
+
+      // Get project metadata (we need to get it from somewhere)
+      // For now, we'll update with just the content we have
+      await SearchService.updateProject({
+        id: projectId,
+        name: '', // TODO: Get actual project name
+        description: '',
+        content: combinedContent,
+      });
+
+      devLog.debug(`[ChaptersService] Updated search index for project: ${projectId}`);
+    } catch (error) {
+      devLog.warn('[ChaptersService] Failed to update search index:', error);
     }
   }
 

@@ -139,6 +139,34 @@ export function useAdvancedFocusMode() {
     localStorage.setItem('inkwell_sprint_settings', JSON.stringify(sprintSettings));
   }, [sprintSettings]);
 
+  // Save active sprint progress to localStorage
+  useEffect(() => {
+    if (sprint.isActive) {
+      localStorage.setItem('inkwell_sprint_progress', JSON.stringify(sprint));
+    } else {
+      localStorage.removeItem('inkwell_sprint_progress');
+    }
+  }, [sprint]);
+
+  // Restore sprint progress on mount
+  useEffect(() => {
+    const savedSprint = localStorage.getItem('inkwell_sprint_progress');
+    if (savedSprint) {
+      try {
+        const parsedSprint = JSON.parse(savedSprint);
+        // Only restore if the sprint was active in the last hour
+        const hourAgo = Date.now() - 60 * 60 * 1000;
+        if (parsedSprint.startTime > hourAgo) {
+          setSprint(parsedSprint);
+        } else {
+          localStorage.removeItem('inkwell_sprint_progress');
+        }
+      } catch (error) {
+        console.warn('Failed to restore sprint progress:', error);
+      }
+    }
+  }, []);
+
   // Ambient sound management
   useEffect(() => {
     if (settings.ambientSound && settings.ambientSound !== 'none') {
