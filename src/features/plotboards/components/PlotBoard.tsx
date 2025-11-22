@@ -31,6 +31,7 @@ import {
 import { AccessibilityRegion } from './AccessibilityAnnouncer';
 import { PlotCard } from './PlotCard';
 import { PlotColumn } from './PlotColumn';
+import { SceneStatsPanel, type SceneStats } from './SceneStatsPanel';
 import { UndoRedoControls } from './UndoRedoControls';
 import { VirtualizedColumn } from './VirtualizedColumn';
 
@@ -116,7 +117,7 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
             try {
               const metadata = await getStoredSceneMetadata(card.chapterId);
               metadataMap[card.id] = metadata;
-            } catch (error) {
+            } catch (_error) {
               metadataMap[card.id] = null;
             }
           }
@@ -149,6 +150,57 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
       columns: filteredColumns,
     };
   }, [board, sceneTypeFilter, sceneMetadata]);
+
+  // Calculate scene stats for the current board
+  const sceneStats = useMemo((): SceneStats | null => {
+    // Get all cards with scene metadata
+    const cardsWithMetadata = board.columns
+      .flatMap((column) => column.cards)
+      .filter((card) => {
+        const metadata = sceneMetadata[card.id];
+        return metadata && metadata.sceneType;
+      });
+
+    if (cardsWithMetadata.length === 0) {
+      return null;
+    }
+
+    // Count by type
+    const byType: Record<SceneType, number> = {
+      conflict: 0,
+      reveal: 0,
+      transition: 0,
+      action: 0,
+      emotional: 0,
+      setup: 0,
+      resolution: 0,
+    };
+
+    cardsWithMetadata.forEach((card) => {
+      const metadata = sceneMetadata[card.id];
+      if (metadata && metadata.sceneType) {
+        byType[metadata.sceneType]++;
+      }
+    });
+
+    // Calculate percentages
+    const total = cardsWithMetadata.length;
+    const percentages: Record<SceneType, number> = {
+      conflict: (byType.conflict / total) * 100,
+      reveal: (byType.reveal / total) * 100,
+      transition: (byType.transition / total) * 100,
+      action: (byType.action / total) * 100,
+      emotional: (byType.emotional / total) * 100,
+      setup: (byType.setup / total) * 100,
+      resolution: (byType.resolution / total) * 100,
+    };
+
+    return {
+      total,
+      byType,
+      percentages,
+    };
+  }, [board, sceneMetadata]);
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -358,266 +410,290 @@ export const PlotBoard: React.FC<PlotBoardProps> = ({
 
       {/* ARIA Live Region for announcements */}
       <AccessibilityRegion assertiveAnnouncement={currentAnnouncement} />
-      {/* Board Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-white">
-        <div className="flex items-center space-x-4">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">{board.title}</h2>
-            {board.description && <p className="text-sm text-gray-600 mt-1">{board.description}</p>}
-          </div>
 
-          {/* Board Stats */}
-          <div className="flex items-center space-x-4 text-sm text-gray-500">
-            <span>{board.columns.length} columns</span>
-            <span>{board.columns.reduce((sum, col) => sum + col.cards.length, 0)} cards</span>
-            {settings.showWordCounts && (
-              <span>
-                {board.columns
-                  .flatMap((col) => col.cards)
-                  .reduce((sum, card) => sum + (card.wordCount || 0), 0)
-                  .toLocaleString()}{' '}
-                words
-              </span>
-            )}
-          </div>
-        </div>
+      {/* Main content area with sidebar */}
+      <div className="flex-1 flex flex-row overflow-hidden">
+        {/* Board content */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Board Header */}
+          <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-slate-900">
+            <div className="flex items-center space-x-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">{board.title}</h2>
+                {board.description && (
+                  <p className="text-sm text-gray-600 mt-1">{board.description}</p>
+                )}
+              </div>
 
-        {/* Board Actions */}
-        <div className="flex items-center space-x-2">
-          {/* Undo/Redo Controls */}
-          <UndoRedoControls
-            canUndo={undoRedo.canUndo}
-            canRedo={undoRedo.canRedo}
-            undoDescription={undoRedo.getUndoDescription() ?? ''}
-            redoDescription={undoRedo.getRedoDescription() ?? ''}
-            onUndo={undoRedo.undo}
-            onRedo={undoRedo.redo}
-            isUndoing={undoRedo.isUndoing}
-            isRedoing={undoRedo.isRedoing}
-          />
+              {/* Board Stats */}
+              <div className="flex items-center space-x-4 text-sm text-gray-500">
+                <span>{board.columns.length} columns</span>
+                <span>{board.columns.reduce((sum, col) => sum + col.cards.length, 0)} cards</span>
+                {settings.showWordCounts && (
+                  <span>
+                    {board.columns
+                      .flatMap((col) => col.cards)
+                      .reduce((sum, card) => sum + (card.wordCount || 0), 0)
+                      .toLocaleString()}{' '}
+                    words
+                  </span>
+                )}
+              </div>
+            </div>
 
-          <div className="border-r border-gray-300 h-6 mx-2" />
+            {/* Board Actions */}
+            <div className="flex items-center space-x-2">
+              {/* Undo/Redo Controls */}
+              <UndoRedoControls
+                canUndo={undoRedo.canUndo}
+                canRedo={undoRedo.canRedo}
+                undoDescription={undoRedo.getUndoDescription() ?? ''}
+                redoDescription={undoRedo.getRedoDescription() ?? ''}
+                onUndo={undoRedo.undo}
+                onRedo={undoRedo.redo}
+                isUndoing={undoRedo.isUndoing}
+                isRedoing={undoRedo.isRedoing}
+              />
 
-          <button
-            onClick={handleAddColumn}
-            className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            + Add Column
-          </button>
+              <div className="border-r border-gray-300 h-6 mx-2" />
 
-          {onEditBoard && (
-            <button
-              onClick={() => onEditBoard(board)}
-              className="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-            >
-              Settings
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Board Content */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-      >
-        {/* Columns Container */}
-        <div className="flex-1 overflow-x-auto">
-          <div className="flex space-x-4 p-4 min-w-max">
-            <SortableContext items={columnIds} strategy={horizontalListSortingStrategy}>
-              {sortedColumns.map((column) => {
-                const shouldUseVirtualization = column.cards.length > 50;
-
-                return (
-                  <div key={column.id} className="w-80 flex-shrink-0">
-                    {shouldUseVirtualization ? (
-                      <VirtualizedColumn
-                        column={column}
-                        cards={column.cards}
-                        {...(onEditCard ? { onEditCard } : {})}
-                        {...(onEditColumn ? { onEditColumn } : {})}
-                        onDeleteColumn={handleDeleteColumn}
-                        showSceneLinks={settings.showCharacters}
-                        showTimeline={settings.showTimeline}
-                        isCompact={settings.compactView}
-                        focusedCardId={keyboardNav.focusedCardId}
-                        draggedCardId={keyboardNav.draggedCardId}
-                        onCardFocus={(cardId) => keyboardNav.setFocus(cardId, column.id)}
-                        onKeyboardDragStart={keyboardNav.startDrag}
-                        onBeforeCardDelete={async (cardId: string, cardTitle: string) => {
-                          await undoRedo.pushEntry(
-                            'deleteCard',
-                            board,
-                            createOperationDescription.deleteCard(cardTitle, column.title),
-                            { cardId, cardData: column.cards.find((c) => c.id === cardId) },
-                          );
-                        }}
-                        onBeforeCardCreate={async (columnTitle: string, cardTitle: string) => {
-                          await undoRedo.pushEntry(
-                            'createCard',
-                            board,
-                            createOperationDescription.createCard(cardTitle, columnTitle),
-                            { columnId: column.id, cardTitle },
-                          );
-                        }}
-                        itemHeight={144} // Adjusted for typical card height with margins
-                        maxHeight={600} // Maximum column height before virtualizing
-                        overscanCount={3} // Cards to render outside visible area
-                      />
-                    ) : (
-                      <PlotColumn
-                        column={column}
-                        cards={column.cards}
-                        {...(onEditCard ? { onEditCard } : {})}
-                        {...(onEditColumn ? { onEditColumn } : {})}
-                        onDeleteColumn={handleDeleteColumn}
-                        showSceneLinks={settings.showCharacters}
-                        showTimeline={settings.showTimeline}
-                        isCompact={settings.compactView}
-                        focusedCardId={keyboardNav.focusedCardId}
-                        draggedCardId={keyboardNav.draggedCardId}
-                        onCardFocus={(cardId) => keyboardNav.setFocus(cardId, column.id)}
-                        onKeyboardDragStart={keyboardNav.startDrag}
-                        onBeforeCardDelete={async (cardId: string, cardTitle: string) => {
-                          await undoRedo.pushEntry(
-                            'deleteCard',
-                            board,
-                            createOperationDescription.deleteCard(cardTitle, column.title),
-                            { cardId, cardData: column.cards.find((c) => c.id === cardId) },
-                          );
-                        }}
-                        onBeforeCardCreate={async (columnTitle: string, cardTitle: string) => {
-                          await undoRedo.pushEntry(
-                            'createCard',
-                            board,
-                            createOperationDescription.createCard(cardTitle, columnTitle),
-                            { columnId: column.id, cardTitle },
-                          );
-                        }}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </SortableContext>
-
-            {/* Add Column Placeholder */}
-            <div className="w-80 flex-shrink-0">
               <button
                 onClick={handleAddColumn}
-                className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors"
+                className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
               >
-                <div className="flex flex-col items-center">
-                  <svg
-                    className="w-6 h-6 mb-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  <span className="text-sm font-medium">Add Column</span>
-                </div>
+                + Add Column
               </button>
-            </div>
-          </div>
-        </div>
 
-        {/* Drag Overlays */}
-        <DragOverlay>
-          {activeCard && (
-            <PlotCard
-              card={activeCard}
-              isDragOverlay={true}
-              showSceneLink={settings.showCharacters}
-              showTimeline={settings.showTimeline}
-            />
-          )}
-          {activeColumn && (
-            <div className="w-80 opacity-75">
-              {activeColumn.cards.length > 50 ? (
-                <VirtualizedColumn
-                  column={activeColumn}
-                  cards={activeColumn.cards}
-                  showSceneLinks={settings.showCharacters}
-                  showTimeline={settings.showTimeline}
-                  isCompact={settings.compactView}
-                  focusedCardId={keyboardNav.focusedCardId}
-                  draggedCardId={keyboardNav.draggedCardId}
-                  onCardFocus={(cardId) => keyboardNav.setFocus(cardId, activeColumn.id)}
-                  onKeyboardDragStart={keyboardNav.startDrag}
-                  onBeforeCardDelete={async (_cardId, _cardTitle) => {
-                    // This is for the drag overlay, operations are handled in the main board
-                  }}
-                  onBeforeCardCreate={async (_columnTitle, _cardTitle) => {
-                    // This is for the drag overlay, operations are handled in the main board
-                  }}
-                  itemHeight={144}
-                  maxHeight={600}
-                  overscanCount={3}
-                />
-              ) : (
-                <PlotColumn
-                  column={activeColumn}
-                  cards={activeColumn.cards}
-                  showSceneLinks={settings.showCharacters}
-                  showTimeline={settings.showTimeline}
-                  isCompact={settings.compactView}
-                  focusedCardId={keyboardNav.focusedCardId}
-                  draggedCardId={keyboardNav.draggedCardId}
-                  onCardFocus={(cardId) => keyboardNav.setFocus(cardId, activeColumn.id)}
-                  onKeyboardDragStart={keyboardNav.startDrag}
-                  onBeforeCardDelete={async (_cardId, _cardTitle) => {
-                    // This is for the drag overlay, operations are handled in the main board
-                  }}
-                  onBeforeCardCreate={async (_columnTitle, _cardTitle) => {
-                    // This is for the drag overlay, operations are handled in the main board
-                  }}
-                />
+              {onEditBoard && (
+                <button
+                  onClick={() => onEditBoard(board)}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                >
+                  Settings
+                </button>
               )}
             </div>
-          )}
-        </DragOverlay>
-      </DndContext>
-
-      {/* Empty State */}
-      {board.columns.length === 0 && (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <svg
-              className="w-16 h-16 mx-auto text-gray-400 mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1}
-                d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2z"
-              />
-            </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No columns yet</h3>
-            <p className="text-gray-600 mb-4">
-              Create your first column to start organizing your story structure.
-            </p>
-            <button
-              onClick={handleAddColumn}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-            >
-              Create First Column
-            </button>
           </div>
+
+          {/* Board Content */}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+          >
+            {/* Columns Container */}
+            <div className="flex-1 overflow-x-auto">
+              <div className="flex space-x-4 p-4 min-w-max">
+                <SortableContext items={columnIds} strategy={horizontalListSortingStrategy}>
+                  {sortedColumns.map((column) => {
+                    const shouldUseVirtualization = column.cards.length > 50;
+
+                    return (
+                      <div key={column.id} className="w-80 flex-shrink-0">
+                        {shouldUseVirtualization ? (
+                          <VirtualizedColumn
+                            column={column}
+                            cards={column.cards}
+                            {...(onEditCard ? { onEditCard } : {})}
+                            {...(onEditColumn ? { onEditColumn } : {})}
+                            onDeleteColumn={handleDeleteColumn}
+                            showSceneLinks={settings.showCharacters}
+                            showTimeline={settings.showTimeline}
+                            isCompact={settings.compactView}
+                            focusedCardId={keyboardNav.focusedCardId}
+                            draggedCardId={keyboardNav.draggedCardId}
+                            onCardFocus={(cardId) => keyboardNav.setFocus(cardId, column.id)}
+                            onKeyboardDragStart={keyboardNav.startDrag}
+                            onBeforeCardDelete={async (cardId: string, cardTitle: string) => {
+                              await undoRedo.pushEntry(
+                                'deleteCard',
+                                board,
+                                createOperationDescription.deleteCard(cardTitle, column.title),
+                                { cardId, cardData: column.cards.find((c) => c.id === cardId) },
+                              );
+                            }}
+                            onBeforeCardCreate={async (columnTitle: string, cardTitle: string) => {
+                              await undoRedo.pushEntry(
+                                'createCard',
+                                board,
+                                createOperationDescription.createCard(cardTitle, columnTitle),
+                                { columnId: column.id, cardTitle },
+                              );
+                            }}
+                            itemHeight={144} // Adjusted for typical card height with margins
+                            maxHeight={600} // Maximum column height before virtualizing
+                            overscanCount={3} // Cards to render outside visible area
+                          />
+                        ) : (
+                          <PlotColumn
+                            column={column}
+                            cards={column.cards}
+                            {...(onEditCard ? { onEditCard } : {})}
+                            {...(onEditColumn ? { onEditColumn } : {})}
+                            onDeleteColumn={handleDeleteColumn}
+                            showSceneLinks={settings.showCharacters}
+                            showTimeline={settings.showTimeline}
+                            isCompact={settings.compactView}
+                            focusedCardId={keyboardNav.focusedCardId}
+                            draggedCardId={keyboardNav.draggedCardId}
+                            onCardFocus={(cardId) => keyboardNav.setFocus(cardId, column.id)}
+                            onKeyboardDragStart={keyboardNav.startDrag}
+                            onBeforeCardDelete={async (cardId: string, cardTitle: string) => {
+                              await undoRedo.pushEntry(
+                                'deleteCard',
+                                board,
+                                createOperationDescription.deleteCard(cardTitle, column.title),
+                                { cardId, cardData: column.cards.find((c) => c.id === cardId) },
+                              );
+                            }}
+                            onBeforeCardCreate={async (columnTitle: string, cardTitle: string) => {
+                              await undoRedo.pushEntry(
+                                'createCard',
+                                board,
+                                createOperationDescription.createCard(cardTitle, columnTitle),
+                                { columnId: column.id, cardTitle },
+                              );
+                            }}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </SortableContext>
+
+                {/* Add Column Placeholder */}
+                <div className="w-80 flex-shrink-0">
+                  <button
+                    onClick={handleAddColumn}
+                    className="w-full h-32 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-slate-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  >
+                    <div className="flex flex-col items-center">
+                      <svg
+                        className="w-6 h-6 mb-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                      <span className="text-sm font-medium">Add Column</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Drag Overlays */}
+            <DragOverlay>
+              {activeCard && (
+                <PlotCard
+                  card={activeCard}
+                  isDragOverlay={true}
+                  showSceneLink={settings.showCharacters}
+                  showTimeline={settings.showTimeline}
+                />
+              )}
+              {activeColumn && (
+                <div className="w-80 opacity-75">
+                  {activeColumn.cards.length > 50 ? (
+                    <VirtualizedColumn
+                      column={activeColumn}
+                      cards={activeColumn.cards}
+                      showSceneLinks={settings.showCharacters}
+                      showTimeline={settings.showTimeline}
+                      isCompact={settings.compactView}
+                      focusedCardId={keyboardNav.focusedCardId}
+                      draggedCardId={keyboardNav.draggedCardId}
+                      onCardFocus={(cardId) => keyboardNav.setFocus(cardId, activeColumn.id)}
+                      onKeyboardDragStart={keyboardNav.startDrag}
+                      onBeforeCardDelete={async (_cardId, _cardTitle) => {
+                        // This is for the drag overlay, operations are handled in the main board
+                      }}
+                      onBeforeCardCreate={async (_columnTitle, _cardTitle) => {
+                        // This is for the drag overlay, operations are handled in the main board
+                      }}
+                      itemHeight={144}
+                      maxHeight={600}
+                      overscanCount={3}
+                    />
+                  ) : (
+                    <PlotColumn
+                      column={activeColumn}
+                      cards={activeColumn.cards}
+                      showSceneLinks={settings.showCharacters}
+                      showTimeline={settings.showTimeline}
+                      isCompact={settings.compactView}
+                      focusedCardId={keyboardNav.focusedCardId}
+                      draggedCardId={keyboardNav.draggedCardId}
+                      onCardFocus={(cardId) => keyboardNav.setFocus(cardId, activeColumn.id)}
+                      onKeyboardDragStart={keyboardNav.startDrag}
+                      onBeforeCardDelete={async (_cardId, _cardTitle) => {
+                        // This is for the drag overlay, operations are handled in the main board
+                      }}
+                      onBeforeCardCreate={async (_columnTitle, _cardTitle) => {
+                        // This is for the drag overlay, operations are handled in the main board
+                      }}
+                    />
+                  )}
+                </div>
+              )}
+            </DragOverlay>
+          </DndContext>
+
+          {/* Empty State */}
+          {board.columns.length === 0 && (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <svg
+                  className="w-16 h-16 mx-auto text-gray-400 mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2z"
+                  />
+                </svg>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  No columns yet
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Create your first column to start organizing your story structure.
+                </p>
+                <button
+                  onClick={handleAddColumn}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  Create First Column
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Sidebar with Scene Stats */}
+        <div className="w-80 border-l border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-4 overflow-y-auto">
+          <SceneStatsPanel
+            stats={sceneStats}
+            isLoading={false}
+            onTypeClick={(_type) => {
+              // When clicking a scene type in the stats, update the filter in PlotBoards
+              // This would require passing a callback from PlotBoards to PlotBoard
+              // For now, this is a placeholder
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };
