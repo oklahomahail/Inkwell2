@@ -106,6 +106,8 @@ export interface SceneMetadata {
   narrativeFunction?: 'setup' | 'development' | 'payoff';
   confidence?: number; // 0 to 1
   analyzedAt?: number;
+  updatedAt?: number; // Timestamp of last metadata update
+  isStale?: boolean; // True if content has changed since last classification
 }
 
 /**

@@ -89,13 +89,16 @@ export async function classifyScene(
       },
     });
 
-    // Store in database
-    await storeSceneMetadata(sceneMetadata, {
-      model: result.model,
-      provider: result.provider,
-      tokensUsed: result.usage?.totalTokens,
-      latency: performance.now() - startTime,
-    });
+    // Store in database (with updatedAt and clear stale flag)
+    await storeSceneMetadata(
+      { ...sceneMetadata, updatedAt: Date.now(), isStale: false },
+      {
+        model: result.model,
+        provider: result.provider,
+        tokensUsed: result.usage?.totalTokens,
+        latency: performance.now() - startTime,
+      },
+    );
 
     devLog.log(
       `[SceneClassification] Classified scene for chapter ${chapterId}: ${validated.sceneType} (confidence: ${validated.confidence})`,
@@ -329,4 +332,82 @@ export async function classifyScenes(
 
   devLog.log(`[SceneClassification] Classified ${completed}/${total} scenes`);
   return results;
+}
+
+/**
+ * Mark scene metadata as stale (content has changed)
+ * This signals that the metadata should be refreshed on next view
+ */
+export async function markSceneMetadataStale(chapterId: string): Promise<void> {
+  try {
+    const db = await openDB(DB_NAME, 1);
+    const existing = await db.get(METADATA_STORE, chapterId);
+
+    if (existing) {
+      // Update existing record to mark as stale
+      await db.put(METADATA_STORE, {
+        ...existing,
+        isStale: true,
+        updatedAt: Date.now(),
+      });
+      devLog.debug(`[SceneClassification] Marked metadata as stale for chapter ${chapterId}`);
+    }
+  } catch (error) {
+    devLog.error('[SceneClassification] Failed to mark metadata as stale:', error);
+    // Don't throw - this is a non-critical operation
+  }
+}
+
+/**
+ * Refresh scene metadata if it's stale or missing
+ * Includes rate limiting to avoid hammering the AI API
+ */
+export async function refreshSceneMetadataIfStale(
+  chapterId: string,
+  content: string,
+  options?: {
+    forceRefresh?: boolean; // Bypass all checks and refresh anyway
+    signal?: AbortSignal;
+  },
+): Promise<AIProcessingResult<SceneMetadata> | null> {
+  try {
+    const db = await openDB(DB_NAME, 1);
+    const existing = await db.get(METADATA_STORE, chapterId);
+
+    // Check if refresh is needed
+    const needsRefresh =
+      options?.forceRefresh || !existing || existing.isStale || !existing.sceneType;
+
+    if (!needsRefresh) {
+      devLog.debug(
+        `[SceneClassification] Skipping refresh for chapter ${chapterId} - metadata is fresh`,
+      );
+      return null;
+    }
+
+    // Rate limiting: don't refresh if last update was within cooldown period (2 minutes)
+    const COOLDOWN_MS = 2 * 60 * 1000; // 2 minutes
+    if (
+      !options?.forceRefresh &&
+      existing?.updatedAt &&
+      Date.now() - existing.updatedAt < COOLDOWN_MS
+    ) {
+      devLog.debug(
+        `[SceneClassification] Skipping refresh for chapter ${chapterId} - within cooldown period`,
+      );
+      return null;
+    }
+
+    // Perform classification
+    devLog.log(`[SceneClassification] Refreshing metadata for chapter ${chapterId}...`);
+    const result = await classifyScene(chapterId, content, {
+      bypassCache: options?.forceRefresh, // Only bypass cache if forced
+      signal: options?.signal,
+    });
+
+    return result;
+  } catch (error) {
+    devLog.error('[SceneClassification] Failed to refresh metadata:', error);
+    return null;
+  }
 }

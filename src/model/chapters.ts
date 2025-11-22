@@ -17,6 +17,7 @@ import {
   canonicalToLegacyChapter,
   isLegacyChapterFormat,
 } from '@/adapters';
+import { markSceneMetadataStale } from '@/services/ai/sceneClassificationService';
 import { chapterCache, CacheKeys, withChapterListCache } from '@/services/chapterCache';
 import type { Chapter } from '@/types/project';
 import { FEATURE_FLAGS } from '@/utils/featureFlags.config';
@@ -256,6 +257,12 @@ export async function updateChapterContent(
 
     // Invalidate cache
     chapterCache.invalidate([CacheKeys.chapterList(projectId), CacheKeys.chapterMeta(chapterId)]);
+
+    // Mark scene metadata as stale (Phase 4: Auto-sync)
+    // This is fire-and-forget - don't await to avoid slowing down saves
+    markSceneMetadataStale(chapterId).catch(() => {
+      // Silently fail - non-critical operation
+    });
   } else {
     // Legacy model: Load, modify, save
     const chapter = await getChapter(chapterId);
@@ -264,6 +271,11 @@ export async function updateChapterContent(
       chapter.wordCount = wordCount ?? countWords(content);
       chapter.updatedAt = Date.now();
       await saveChapter(projectId, chapter);
+
+      // Mark scene metadata as stale (Phase 4: Auto-sync)
+      markSceneMetadataStale(chapterId).catch(() => {
+        // Silently fail - non-critical operation
+      });
     }
   }
 }

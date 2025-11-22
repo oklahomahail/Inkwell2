@@ -5,7 +5,10 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import React, { useState, useEffect } from 'react';
 
-import { getStoredSceneMetadata } from '@/services/ai/sceneClassificationService';
+import {
+  getStoredSceneMetadata,
+  refreshSceneMetadataIfStale,
+} from '@/services/ai/sceneClassificationService';
 import type { SceneMetadata } from '@/types/ai';
 
 import { useChaptersStore } from '../../../stores/useChaptersStore';
@@ -46,19 +49,40 @@ export const PlotCard: React.FC<PlotCardProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [sceneMetadata, setSceneMetadata] = useState<SceneMetadata | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { updateCard } = usePlotBoardStore();
   const { chapters } = useChaptersStore();
 
   // Load scene metadata when the card has a linked chapter
+  // Also refresh if stale (Phase 4: Auto-sync)
   useEffect(() => {
     const loadSceneMetadata = async () => {
       if (card.chapterId) {
         try {
+          // Load existing metadata first
           const metadata = await getStoredSceneMetadata(card.chapterId);
           setSceneMetadata(metadata);
-        } catch (error) {
-          console.error('Failed to load scene metadata for card:', error);
+
+          // If metadata is stale or missing, refresh in background
+          if (metadata?.isStale || !metadata || !metadata.sceneType) {
+            setIsRefreshing(true);
+
+            // Get chapter content for refresh
+            const chapter = (chapters as any)[card.chapterId];
+            if (chapter?.content) {
+              const result = await refreshSceneMetadataIfStale(card.chapterId, chapter.content);
+
+              // Update metadata if refresh succeeded
+              if (result?.success && result.data) {
+                setSceneMetadata(result.data);
+              }
+            }
+
+            setIsRefreshing(false);
+          }
+        } catch (_error) {
           setSceneMetadata(null);
+          setIsRefreshing(false);
         }
       } else {
         setSceneMetadata(null);
@@ -66,7 +90,7 @@ export const PlotCard: React.FC<PlotCardProps> = ({
     };
 
     loadSceneMetadata();
-  }, [card.chapterId]);
+  }, [card.chapterId, chapters]);
 
   // Drag and drop setup
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -178,11 +202,16 @@ export const PlotCard: React.FC<PlotCardProps> = ({
             {card.title}
           </h4>
           {sceneMetadata && sceneMetadata.sceneType && (
-            <SceneTypeBadge
-              type={sceneMetadata.sceneType}
-              confidence={sceneMetadata.confidence}
-              size="sm"
-            />
+            <div className={`transition-opacity ${isRefreshing ? 'opacity-50' : 'opacity-100'}`}>
+              <SceneTypeBadge
+                type={sceneMetadata.sceneType}
+                confidence={sceneMetadata.confidence}
+                size="sm"
+              />
+            </div>
+          )}
+          {isRefreshing && !sceneMetadata?.sceneType && (
+            <span className="text-xs text-gray-400 dark:text-gray-500 italic">Classifying...</span>
           )}
         </div>
         <div className="flex items-center space-x-1 ml-2">
