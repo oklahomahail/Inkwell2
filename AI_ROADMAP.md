@@ -60,7 +60,7 @@ This roadmap outlines the strategic integration of advanced AI capabilities into
 
 **Goal**: Build momentum, validate AI integration patterns, deliver immediate value
 
-**Status**: ✅ **PHASE 1 COMPLETE** | 🚧 **PHASE 2 IN PROGRESS**
+**Status**: ✅ **ALL PHASES COMPLETE** | Ready for Merge
 
 **Branch**: `feature/ai-wave-1-foundation`
 
@@ -116,6 +116,96 @@ This roadmap outlines the strategic integration of advanced AI capabilities into
 - Scene type badges in chapter sidebar ([EnhancedWritingPanel.tsx](src/components/Writing/EnhancedWritingPanel.tsx:148-154))
 - Publishing Tools in main navigation ([Sidebar.tsx](src/components/Sidebar.tsx:78), [ViewSwitcher.tsx](src/components/ViewSwitcher.tsx:234-247))
 - Publishing view added to AppContext enum
+
+**All Tests Passing**: 609 tests ✅
+
+---
+
+#### Phase 3: Plotboards Integration ✅ COMPLETE
+
+**Completed**: 2025-11-21
+**Commits**:
+
+- `b0e4b16` - "feat(ai): add scene type badges to PlotCards (Phase 1)"
+- `c5dafe8` - "feat(ai): add scene type filter to PlotBoards (Phase 2)"
+- `2fe44e7` - "feat(ai): add SceneStatsPanel sidebar to PlotBoards (Phase 3)"
+
+**Implementation** (~150 lines of modifications):
+
+**Phase 1 - Scene Badges on Plot Cards**:
+
+- Auto-loads scene metadata when PlotCard has linked chapterId
+- Displays SceneTypeBadge next to card title
+- Graceful handling when metadata missing
+
+**Phase 2 - Scene Type Filter**:
+
+- Added dropdown filter in PlotBoards header
+- Filters cards by scene type across all columns
+- "All Scene Types" option to show everything
+
+**Phase 3 - SceneStatsPanel Sidebar**:
+
+- Restructured PlotBoard layout to flex-row with sidebar
+- 320px sidebar showing scene distribution analytics
+- Imbalance warnings when one type >40%
+- Real-time stats calculation from all cards
+
+**Integration Points**:
+
+- [PlotCard.tsx](src/features/plotboards/components/PlotCard.tsx:204-210) - Badge display
+- [PlotBoards.tsx](src/features/plotboards/components/PlotBoards.tsx:85-108) - Filter dropdown
+- [PlotBoard.tsx](src/features/plotboards/components/PlotBoard.tsx:104-180) - Stats sidebar
+
+**All Tests Passing**: 609 tests ✅
+
+---
+
+#### Phase 4: Auto-sync Scene Metadata ✅ COMPLETE
+
+**Completed**: 2025-11-21
+**Commit**: `cf0fb8b` - "feat(ai): implement Phase 4 auto-sync scene metadata"
+
+**What**: Makes scene metadata feel "alive and self-updating"
+
+**Implementation** (~140 lines):
+
+**Stale Metadata Tracking**:
+
+- Added `updatedAt` and `isStale` fields to SceneMetadata type ([src/types/ai.ts:109-110](src/types/ai.ts#L109-L110))
+- Tracks when content has changed since last classification
+
+**Helper Functions** ([src/services/ai/sceneClassificationService.ts:337-413](src/services/ai/sceneClassificationService.ts#L337-L413)):
+
+- `markSceneMetadataStale()`: Marks metadata when chapter content changes
+- `refreshSceneMetadataIfStale()`: Refreshes stale metadata with 2-minute cooldown
+
+**Chapter Save Integration** ([src/model/chapters.ts:260-277](src/model/chapters.ts#L260-L277)):
+
+- Automatically marks metadata as stale on every chapter save
+- Fire-and-forget pattern (doesn't slow down saves)
+- Works for both new and legacy chapter models
+
+**Background Refresh UX** ([src/features/plotboards/components/PlotCard.tsx:52-93](src/features/plotboards/components/PlotCard.tsx#L52-L93)):
+
+- Auto-refreshes stale metadata when PlotCards load
+- Shows "Classifying..." for missing metadata
+- Fades badge opacity during refresh
+- Completely non-blocking
+
+**Key Features**:
+
+- 2-minute cooldown between refreshes per chapter
+- Respects cache unless forced refresh
+- Graceful failure handling (non-critical operations)
+- No blocking operations or UI freezing
+
+**Flow**:
+
+```
+User edits chapter → Save → Mark stale → View PlotBoard
+→ Detect stale → Refresh in background → Update badge & stats
+```
 
 **All Tests Passing**: 609 tests ✅
 
@@ -226,20 +316,27 @@ This roadmap outlines the strategic integration of advanced AI capabilities into
 
 ### Wave 1 Outcome
 
-**Phase 1-2 Status**: ✅ **3 of 4 Features Complete** (75%)
+**Status**: ✅ **ALL PHASES COMPLETE** (100%)
 
 **Shipped** (2025-11-21):
 
+- ✅ **Phase 1**: Backend Services & Infrastructure
+- ✅ **Phase 2**: UI Integration (4 components)
+- ✅ **Phase 3**: Plotboards Integration (3 sub-phases)
+- ✅ **Phase 4**: Auto-sync Scene Metadata
+
+**Features**:
+
 - ✅ Chapter Synopsis Generator (Backend + UI)
-- ✅ Scene Classification (Backend + UI)
+- ✅ Scene Classification (Backend + UI + Auto-sync)
 - ✅ Publishing Tools (Backend + UI)
 - ⬜ Outline Comparison (Deferred to Wave 2)
 
 **Code Stats**:
 
-- **Backend**: ~3,241 lines (services + tests)
-- **UI**: ~710 lines (4 components)
-- **Total**: ~3,951 lines
+- **Backend**: ~3,381 lines (services + tests + auto-sync)
+- **UI**: ~1,000 lines (components + plotboards integration)
+- **Total**: ~4,381 lines
 - **Tests**: 29 AI-specific tests + all integration tests passing (609 total)
 
 **Key Achievements**:
@@ -249,14 +346,27 @@ This roadmap outlines the strategic integration of advanced AI capabilities into
 3. ✅ Caching strategy validated (TTL-based with content hashing)
 4. ✅ Type-safe Zod validation for all AI responses
 5. ✅ UI patterns established (modals, panels, badges, analytics)
-6. ✅ All features fully tested and deployed to feature branch
+6. ✅ Plotboards deeply integrated with scene classification
+7. ✅ Auto-sync metadata system with stale tracking and rate limiting
+8. ✅ All features fully tested and deployed to feature branch
+
+**Branch**: `feature/ai-wave-1-foundation` (ready for merge)
+
+**Commits**: 8 total
+
+- `fde213f` - Phase 1: Backend infrastructure
+- `ef9d845`, `40fa06e`, `27e5370` - Individual feature implementations
+- `48e544f`, `cf544c4` - Phase 2: UI integration
+- `b0e4b16`, `c5dafe8`, `2fe44e7` - Phase 3: Plotboards integration
+- `cf0fb8b` - Phase 4: Auto-sync metadata
 
 **Next Steps**:
 
 1. User testing and feedback collection
 2. Merge `feature/ai-wave-1-foundation` to `main` after validation
 3. Monitor usage metrics and AI costs
-4. Begin Wave 2 planning (Revision Coach, Semantic Analysis)
+4. Document user-facing features in help/guide
+5. Begin Wave 2 planning (Revision Coach, Semantic Analysis)
 
 ---
 
