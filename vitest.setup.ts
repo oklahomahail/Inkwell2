@@ -103,6 +103,7 @@ const EXPECTED_ERROR_PATTERNS = [
   /\[DeadLetterQueue\] Operation failed permanently/,
   /\[ChapterSynopsis\] Generation failed:/,
   /\[SceneClassification\] Classification failed:/,
+  /\[PublishingTools\] Generation failed:/,
 ];
 
 function isExpectedError(message: string): boolean {
